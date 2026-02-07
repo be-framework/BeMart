@@ -1,0 +1,1539 @@
+{
+  "$schema": "https://alps-io.github.io/schemas/alps.json",
+  "alps": {
+    "version": "1.0",
+    "title": "EC-CUBE 4.3 アプリケーションプロファイル",
+    "doc": {"value": "EC-CUBE 4.3 — Symfony 6.4 ベースの日本語ECオープンプラットフォーム。顧客向けフロントと管理画面の両方の操作を統一データモデル上で定義する。"},
+    "descriptor": [
+
+      {"id": "name01", "title": "姓","def": "https://schema.org/familyName", "tag": "src-entity", "doc": {"value": "顧客・受注・配送先・お問い合わせで共通使用される姓"}},
+      {"id": "name02", "title": "名","def": "https://schema.org/givenName", "tag": "src-entity", "doc": {"value": "顧客・受注・配送先・お問い合わせで共通使用される名"}},
+      {"id": "kana01", "title": "セイ","tag": "src-entity", "doc": {"value": "姓のカタカナ読み。日本の氏名入力に特有の読み仮名"}},
+      {"id": "kana02", "title": "メイ","tag": "src-entity", "doc": {"value": "名のカタカナ読み。日本の氏名入力に特有の読み仮名"}},
+      {"id": "companyName", "title": "会社名","def": "https://schema.org/name", "tag": "src-entity", "doc": {"value": "法人顧客の社名。B2B取引やインボイスで使用"}},
+      {"id": "postalCode", "title": "郵便番号","def": "https://schema.org/postalCode", "tag": "src-entity", "doc": {"value": "日本の郵便番号。ハイフンなし7桁またはハイフン付き8桁"}},
+      {"id": "pref", "title": "都道府県","tag": "src-entity", "doc": {"value": "1=北海道〜47=沖縄県。送料計算の地域区分に使用"}},
+      {"id": "addr01", "title": "市区町村","def": "https://schema.org/addressLocality", "tag": "src-entity", "doc": {"value": "都道府県より下位の市区町村名"}},
+      {"id": "addr02", "title": "番地・建物名","def": "https://schema.org/streetAddress", "tag": "src-entity", "doc": {"value": "番地・ビル名・部屋番号等の詳細住所"}},
+      {"id": "email", "title": "メールアドレス","def": "https://schema.org/email", "tag": "src-entity", "doc": {"value": "会員のログインIDを兼ねる。有効会員間で一意"}},
+      {"id": "phoneNumber", "title": "電話番号","def": "https://schema.org/telephone", "tag": "src-entity", "doc": {"value": "日本の電話番号形式（ハイフン区切り）"}},
+
+      {"id": "productName", "title": "商品名","def": "https://schema.org/name", "tag": "src-entity", "doc": {"value": "商品の表示名"}},
+      {"id": "descriptionList", "title": "一覧用説明文","def": "https://schema.org/description", "tag": "src-entity", "doc": {"value": "商品一覧・検索結果に表示する短い説明文"}},
+      {"id": "descriptionDetail", "title": "詳細説明文","def": "https://schema.org/description", "tag": "src-entity", "doc": {"value": "商品詳細ページに表示する説明文"}},
+      {"id": "searchWord", "title": "検索ワード","tag": "src-entity", "doc": {"value": "フロント検索でヒットさせるためのキーワード。画面には表示されない検索補助データ"}},
+      {"id": "freeArea", "title": "フリーエリア","tag": "src-entity", "doc": {"value": "商品詳細ページ下部に表示される自由入力エリア。HTML入力可能"}},
+      {"id": "productNote", "title": "商品備考","tag": "src-entity", "doc": {"value": "管理者のみが参照する内部メモ。フロントには表示されない"}},
+      {"id": "productStatus", "title": "商品ステータス","tag": "src-entity", "doc": {"value": "1=公開（フロント表示）, 2=非公開（フロント非表示）, 3=廃止（論理削除、管理画面でもデフォルト非表示）"}},
+      {"id": "productCode", "title": "商品コード","def": "https://schema.org/sku", "tag": "src-entity", "doc": {"value": "SKU/品番。在庫管理や受注明細での識別に使用"}},
+      {"id": "stock", "title": "在庫数","tag": "src-entity", "doc": {"value": "物理在庫数。stockUnlimited=trueの場合は無視される。注文確定時に引き当てが行われる"}},
+      {"id": "stockUnlimited", "title": "在庫無制限","tag": "src-entity", "doc": {"value": "trueの場合、在庫数に関係なく在庫チェックをスキップ"}},
+      {"id": "saleLimit", "title": "購入制限数","tag": "src-entity", "doc": {"value": "1回の注文で購入できる最大数量。未設定時は制限なし"}},
+      {"id": "price01", "title": "通常価格","tag": "src-entity", "doc": {"value": "メーカー希望小売価格や参考価格。表示専用で計算には使用されない"}},
+      {"id": "price02", "title": "販売価格","def": "https://schema.org/price", "tag": "src-entity", "doc": {"value": "実際の販売価格（税抜）。税計算・小計計算のベース"}},
+      {"id": "deliveryFee", "title": "商品別送料","tag": "src-entity", "doc": {"value": "この商品規格固有の追加送料。optionProductDeliveryFee有効時のみ機能"}},
+      {"id": "productClassVisible", "title": "規格表示","tag": "src-entity", "doc": {"value": "この商品規格をフロントに表示するか。productStatusとは独立して制御"}},
+      {"id": "currencyCode", "title": "通貨コード","def": "https://schema.org/priceCurrency", "tag": "src-entity", "doc": {"value": "ISO 4217通貨コード（例: JPY）。多通貨対応用"}},
+      {"id": "pointRate", "title": "ポイント付与率","tag": "src-entity", "doc": {"value": "この商品規格固有のポイント付与率（%）。未設定時はbasicPointRateが適用"}},
+      {"id": "fileName", "title": "ファイル名","tag": "src-entity", "doc": {"value": "商品画像のファイル名"}},
+      {"id": "sortNo", "title": "表示順","tag": "src-entity", "doc": {"value": "一覧における並び順"}},
+
+      {"id": "categoryName", "title": "カテゴリ名","tag": "src-entity", "doc": {"value": "カテゴリの表示名"}},
+      {"id": "hierarchy", "title": "階層レベル","tag": "src-entity", "doc": {"value": "カテゴリツリーにおける深さ。ルートが1、子が2と増加"}},
+
+      {"id": "tagName", "title": "タグ名","tag": "src-entity", "doc": {"value": "商品に付与するタグの表示名"}},
+
+      {"id": "classNameLabel", "title": "規格名","tag": "src-entity", "doc": {"value": "規格の軸名。例: 色、サイズ"}},
+      {"id": "classNameBackendName", "title": "規格管理名","tag": "src-entity", "doc": {"value": "管理画面でのみ使用する規格の内部名。classNameLabelとは別に管理用の名称を持てる"}},
+      {"id": "classCategoryName", "title": "規格分類名","tag": "src-entity", "doc": {"value": "規格の具体的な値。例: 赤、Lサイズ"}},
+      {"id": "classCategoryBackendName", "title": "規格分類管理名","tag": "src-entity", "doc": {"value": "管理画面でのみ使用する規格分類の内部名"}},
+      {"id": "classCategoryVisible", "title": "規格分類表示","tag": "src-entity", "doc": {"value": "この規格分類値を商品選択肢として表示するか"}},
+
+      {"id": "cartKey", "title": "カートキー","tag": "src-entity", "doc": {"value": "販売種別ごとにカートを分離するための識別キー。異なる販売種別の商品は別カートになる"}},
+      {"id": "preOrderId", "title": "仮注文ID","tag": "src-entity", "doc": {"value": "チェックアウト開始時に生成され、カートと受注を紐づけるキー。決済完了後にクリア"}},
+      {"id": "totalPrice", "title": "合計金額","tag": "src-entity", "doc": {"value": "カート内の税込合計金額"}},
+      {"id": "deliveryFeeTotal", "title": "送料合計","tag": "src-entity", "doc": {"value": "全配送先の送料合計。カートと受注の両方で使用"}},
+      {"id": "cartItemPrice", "title": "カート商品価格","def": "https://schema.org/price", "tag": "src-entity", "doc": {"value": "カート内の税込単価"}},
+      {"id": "quantity", "title": "数量","tag": "src-entity", "doc": {"value": "購入数量。カート明細と受注明細で共通使用"}},
+
+      {"id": "orderNo", "title": "注文番号","def": "https://schema.org/orderNumber", "tag": "src-entity", "doc": {"value": "顧客向けの注文番号。フォーマットはカスタマイズ可能"}},
+      {"id": "message", "title": "注文メッセージ","tag": "src-entity", "doc": {"value": "顧客が注文時に入力する備考・配送希望メモ"}},
+      {"id": "subtotal", "title": "小計","tag": "src-entity", "doc": {"value": "商品合計金額（税込）。送料・手数料・値引き適用前の商品のみの合計"}},
+      {"id": "discount", "title": "値引き額","tag": "src-entity", "doc": {"value": "受注全体の値引き合計額。クーポン等による値引き"}},
+      {"id": "charge", "title": "手数料","tag": "src-entity", "doc": {"value": "決済手数料。支払方法選択時に設定"}},
+      {"id": "tax", "title": "税額","tag": "src-entity", "doc": {"value": "税額合計"}},
+      {"id": "total", "title": "合計","tag": "src-entity", "doc": {"value": "受注合計金額。計算式: 小計＋送料＋手数料−値引き"}},
+      {"id": "paymentTotal", "title": "支払合計","tag": "src-entity", "doc": {"value": "実際の支払金額。ポイント使用時はtotalからポイント分を差し引いた額"}},
+      {"id": "paymentMethod", "title": "支払方法","def": "https://schema.org/paymentMethod", "tag": "src-entity", "doc": {"value": "注文時点の支払方法名称（スナップショット）"}},
+      {"id": "orderNote", "title": "受注備考","tag": "src-entity", "doc": {"value": "管理者用の内部メモ。顧客には表示されない"}},
+      {"id": "orderDate", "title": "注文日","def": "https://schema.org/orderDate", "tag": "src-entity", "doc": {"value": "注文確定日時"}},
+      {"id": "paymentDate", "title": "入金日","tag": "src-entity", "doc": {"value": "入金確認日時。入金済みステータスへの変更時に記録"}},
+      {"id": "orderStatus", "title": "受注ステータス","tag": "src-entity", "doc": {"value": "1=新規受付, 3=注文取消, 4=対応中, 5=発送済み, 6=入金済み, 7=決済処理中, 8=購入処理中, 9=返品。ステートマシンで遷移を制御"}},
+
+      {"id": "orderItemProductName", "title": "受注商品名","tag": "src-entity", "doc": {"value": "注文時点の商品名スナップショット。商品マスタの変更に影響されない"}},
+      {"id": "orderItemProductCode", "title": "受注商品コード","tag": "src-entity", "doc": {"value": "注文時点の商品コードスナップショット"}},
+      {"id": "orderItemClassName1", "title": "受注規格名1","tag": "src-entity", "doc": {"value": "注文時点の規格名1スナップショット（例: 色）"}},
+      {"id": "orderItemClassName2", "title": "受注規格名2","tag": "src-entity", "doc": {"value": "注文時点の規格名2スナップショット（例: サイズ）"}},
+      {"id": "orderItemClassCategoryName1", "title": "受注規格分類名1","tag": "src-entity", "doc": {"value": "注文時点の規格分類値1スナップショット（例: 赤）"}},
+      {"id": "orderItemClassCategoryName2", "title": "受注規格分類名2","tag": "src-entity", "doc": {"value": "注文時点の規格分類値2スナップショット（例: L）"}},
+      {"id": "orderItemPrice", "title": "受注商品単価","tag": "src-entity", "doc": {"value": "明細行の単価。税表示方式により税込/税抜が異なる"}},
+      {"id": "orderItemQuantity", "title": "受注数量","tag": "src-entity", "doc": {"value": "明細行の数量"}},
+      {"id": "orderItemTax", "title": "受注商品税額","tag": "src-entity", "doc": {"value": "明細行の税額"}},
+      {"id": "taxRate", "title": "税率","tag": "src-entity", "doc": {"value": "注文時点の適用税率（%）。軽減税率（8%）と標準税率（10%）が混在可能"}},
+      {"id": "taxAdjust", "title": "税調整額","tag": "src-entity", "doc": {"value": "端数処理による税額調整値。複数明細の端数差分を吸収"}},
+      {"id": "orderItemType", "title": "受注明細区分","tag": "src-entity", "doc": {"value": "1=商品, 2=送料, 3=手数料, 4=値引き, 5=税, 6=ポイント。受注明細の行種別"}},
+
+      {"id": "deliveryName", "title": "配送業者名","tag": "src-entity", "doc": {"value": "注文時点の配送業者名スナップショット"}},
+      {"id": "deliveryTime", "title": "配送時間帯","tag": "src-entity", "doc": {"value": "顧客が選択した配送希望時間帯（例: 午前中、14-16時）"}},
+      {"id": "deliveryDate", "title": "配送希望日","def": "https://schema.org/deliveryDate", "tag": "src-entity", "doc": {"value": "顧客が指定した配送希望日"}},
+      {"id": "shippingDate", "title": "出荷日","tag": "src-entity", "doc": {"value": "実際の出荷日。管理者が出荷処理時に記録"}},
+      {"id": "trackingNumber", "title": "追跡番号","tag": "src-entity", "doc": {"value": "配送業者の荷物追跡番号。confirmUrlと組み合わせて追跡URLを構成"}},
+      {"id": "shippingNote", "title": "配送備考","tag": "src-entity", "doc": {"value": "配送に関する管理者メモ"}},
+      {"id": "mailSendDate", "title": "メール送信日","tag": "src-entity", "doc": {"value": "出荷通知メールの送信日時。送信済み判定にも使用"}},
+
+      {"id": "password", "title": "パスワード","tag": "src-entity", "doc": {"value": "書き込み専用（ハッシュ化して保存）"}},
+      {"id": "birth", "title": "生年月日","def": "https://schema.org/birthDate", "tag": "src-entity", "doc": {"value": "会員の生年月日"}},
+      {"id": "sex", "title": "性別","def": "https://schema.org/gender", "tag": "src-entity", "doc": {"value": "1=男性, 2=女性, 3=その他, 4=回答しない"}},
+      {"id": "job", "title": "職業","tag": "src-entity", "doc": {"value": "1=公務員〜18=その他の18区分"}},
+      {"id": "customerStatus", "title": "会員ステータス","tag": "src-entity", "doc": {"value": "1=仮会員（メール未認証）, 2=本会員（認証済み）, 3=退会。退会時はメールアドレスが無効化される"}},
+      {"id": "firstBuyDate", "title": "初回購入日","tag": "src-entity", "doc": {"value": "最初の購入日時。注文確定時に自動設定"}},
+      {"id": "lastBuyDate", "title": "最終購入日","tag": "src-entity", "doc": {"value": "最後の購入日時。注文確定時に自動更新"}},
+      {"id": "buyTimes", "title": "購入回数","tag": "src-entity", "doc": {"value": "累計購入回数。注文確定時に加算"}},
+      {"id": "buyTotal", "title": "購入累計額","tag": "src-entity", "doc": {"value": "累計購入金額。注文確定時に加算"}},
+      {"id": "customerNote", "title": "会員備考","tag": "src-entity", "doc": {"value": "管理者用の内部メモ。顧客には表示されない"}},
+      {"id": "point", "title": "ポイント","tag": "src-entity", "doc": {"value": "会員の現在のポイント残高。注文時にポイント使用で減算、付与で加算"}},
+      {"id": "secretKey", "title": "認証キー","tag": "src-entity", "doc": {"value": "会員メール認証用のワンタイムトークン。会員登録時に生成"}},
+      {"id": "resetKey", "title": "リセットキー","tag": "src-entity", "doc": {"value": "パスワードリセット用のワンタイムトークン。リセット要求時に生成、使用後にクリア"}},
+      {"id": "resetExpire", "title": "リセット期限","tag": "src-entity", "doc": {"value": "パスワードリセットキーの有効期限"}},
+
+      {"id": "shopName", "title": "ショップ名","def": "https://schema.org/name", "tag": "src-entity", "doc": {"value": "ショップの表示名。フロント画面のヘッダやメールに表示"}},
+      {"id": "shopKana", "title": "ショップ名フリガナ","tag": "src-entity", "doc": {"value": "ショップ名のカタカナ読み"}},
+      {"id": "shopNameEng", "title": "ショップ名英語","tag": "src-entity", "doc": {"value": "ショップの英語名。多言語対応やメール署名等で使用"}},
+      {"id": "companyKana", "title": "会社名フリガナ","tag": "src-entity", "doc": {"value": "会社名のカタカナ読み"}},
+      {"id": "businessHour", "title": "営業時間","tag": "src-entity", "doc": {"value": "ショップの営業時間。フリーフォーマット"}},
+      {"id": "shopEmail01", "title": "送信元メールアドレス","tag": "src-entity", "doc": {"value": "注文確認メール等の送信元（From）アドレス"}},
+      {"id": "shopEmail02", "title": "メールアドレス2","tag": "src-entity", "doc": {"value": "注文通知等のBCC先アドレス（2番目）"}},
+      {"id": "shopEmail03", "title": "メールアドレス3","tag": "src-entity", "doc": {"value": "注文通知等のBCC先アドレス（3番目）"}},
+      {"id": "shopEmail04", "title": "メールアドレス4","tag": "src-entity", "doc": {"value": "注文通知等のBCC先アドレス（4番目）"}},
+      {"id": "goodTraded", "title": "取扱商品","tag": "src-entity", "doc": {"value": "取扱商品の説明文。特定商取引法の表記で使用"}},
+      {"id": "shopMessage", "title": "ショップメッセージ","tag": "src-entity", "doc": {"value": "トップページ等に表示するショップからのメッセージ"}},
+      {"id": "deliveryFreeAmount", "title": "送料無料条件(金額)","tag": "src-entity", "doc": {"value": "この金額以上の注文で送料無料。未設定時は条件なし"}},
+      {"id": "deliveryFreeQuantity", "title": "送料無料条件(数量)","tag": "src-entity", "doc": {"value": "この数量以上の注文で送料無料。未設定時は条件なし"}},
+      {"id": "optionMypageOrderStatusDisplay", "title": "マイページ受注状態表示","tag": "src-entity", "doc": {"value": "マイページに受注ステータスを表示するか"}},
+      {"id": "optionNostockHidden", "title": "品切れ非表示","tag": "src-entity", "doc": {"value": "在庫切れ商品をフロントで非表示にするか"}},
+      {"id": "optionFavoriteProduct", "title": "お気に入り機能","tag": "src-entity", "doc": {"value": "お気に入り商品機能を有効にするか"}},
+      {"id": "optionProductDeliveryFee", "title": "商品別送料機能","tag": "src-entity", "doc": {"value": "商品ごとに個別送料を設定する機能を有効にするか。有効時はdeliveryFeeが送料計算に加算される"}},
+      {"id": "optionProductTaxRule", "title": "商品別税率機能","tag": "src-entity", "doc": {"value": "商品ごとに個別の税率を設定する機能を有効にするか"}},
+      {"id": "optionCustomerActivate", "title": "会員メール認証","tag": "src-entity", "doc": {"value": "会員登録時にメール認証を要求するか。有効時は登録後が仮会員となり、認証メールで本会員に移行"}},
+      {"id": "optionRememberMe", "title": "ログイン記憶","tag": "src-entity", "doc": {"value": "ログイン画面に「次回から自動ログイン」を表示するか"}},
+      {"id": "optionPoint", "title": "ポイント機能","tag": "src-entity", "doc": {"value": "ポイント付与・使用機能を有効にするか"}},
+      {"id": "basicPointRate", "title": "基本ポイント付与率","tag": "src-entity", "doc": {"value": "商品購入時の基本ポイント付与率（%）。商品個別のpointRate未設定時に適用"}},
+      {"id": "pointConversionRate", "title": "ポイント換算レート","tag": "src-entity", "doc": {"value": "1ポイントあたりの通貨換算額（円）。ポイント使用時の値引き額計算に使用"}},
+      {"id": "invoiceRegistrationNumber", "title": "インボイス登録番号","tag": "src-entity", "doc": {"value": "適格請求書発行事業者の登録番号（Tから始まる13桁）。インボイス制度対応"}},
+
+      {"id": "paymentMethodName", "title": "支払方法名","tag": "src-entity", "doc": {"value": "支払方法の表示名"}},
+      {"id": "paymentCharge", "title": "決済手数料","tag": "src-entity", "doc": {"value": "この支払方法を利用した場合に加算される手数料"}},
+      {"id": "paymentRuleMin", "title": "利用条件(下限)","tag": "src-entity", "doc": {"value": "この支払方法を選択できる最低注文金額。未設定時は下限なし"}},
+      {"id": "paymentRuleMax", "title": "利用条件(上限)","tag": "src-entity", "doc": {"value": "この支払方法を選択できる最大注文金額。未設定時は上限なし"}},
+      {"id": "paymentImage", "title": "支払方法アイコン","tag": "src-entity", "doc": {"value": "支払方法のアイコン画像ファイル名"}},
+      {"id": "paymentVisible", "title": "支払方法表示","tag": "src-entity", "doc": {"value": "この支払方法をフロントに表示するか"}},
+
+      {"id": "deliveryMethodName", "title": "配送方法名","tag": "src-entity", "doc": {"value": "配送方法の表示名"}},
+      {"id": "serviceName", "title": "サービス名","tag": "src-entity", "doc": {"value": "配送業者のサービス名。例: ゆうパック、宅急便。配送方法名とは別に業者サービスを識別"}},
+      {"id": "deliveryDescription", "title": "配送方法説明","tag": "src-entity", "doc": {"value": "配送方法の説明文。顧客への案内に使用"}},
+      {"id": "confirmUrl", "title": "追跡URL","tag": "src-entity", "doc": {"value": "配送追跡確認用のURLテンプレート。trackingNumberと組み合わせて追跡リンクを構成"}},
+      {"id": "deliveryVisible", "title": "配送方法表示","tag": "src-entity", "doc": {"value": "この配送方法をフロントに表示するか"}},
+
+      {"id": "taxRuleRate", "title": "税率","tag": "src-entity", "doc": {"value": "適用税率（%）"}},
+      {"id": "taxRuleAdjust", "title": "税調整額","tag": "src-entity", "doc": {"value": "端数処理による税額調整値"}},
+      {"id": "applyDate", "title": "適用日","tag": "src-entity", "doc": {"value": "この税率ルールが有効になる日時。適用日以降の注文にこの税率が適用される"}},
+      {"id": "roundingType", "title": "端数処理","tag": "src-entity", "doc": {"value": "1=四捨五入, 2=切り捨て, 3=切り上げ"}},
+
+      {"id": "newsTitle", "title": "ニュースタイトル","def": "https://schema.org/headline", "tag": "src-entity", "doc": {"value": "ニュース記事の見出し"}},
+      {"id": "newsDescription", "title": "ニュース本文","def": "https://schema.org/articleBody", "tag": "src-entity", "doc": {"value": "ニュース記事の本文"}},
+      {"id": "newsUrl", "title": "外部URL","def": "https://schema.org/url", "tag": "src-entity", "doc": {"value": "外部リンクURL。設定時はニュース本文の代わりにこのURLへ遷移"}},
+      {"id": "publishDate", "title": "公開日","def": "https://schema.org/datePublished", "tag": "src-entity", "doc": {"value": "ニュースの公開日時。フロントの表示順を制御"}},
+      {"id": "linkMethod", "title": "リンク方式","tag": "src-entity", "doc": {"value": "外部URLのリンク開き方。false=同一ウィンドウ, true=新規ウィンドウ"}},
+      {"id": "newsVisible", "title": "ニュース表示","tag": "src-entity", "doc": {"value": "ニュースをフロントに表示するか"}},
+
+      {"id": "pageUrl", "title": "ページURL","tag": "src-entity", "doc": {"value": "ページのURLパス"}},
+      {"id": "pageFileName", "title": "テンプレートファイル名","tag": "src-entity", "doc": {"value": "ページのテンプレートファイル名"}},
+      {"id": "pageName", "title": "ページ名","tag": "src-entity", "doc": {"value": "管理画面でのページ表示名"}},
+      {"id": "pageEditType", "title": "ページ編集区分","tag": "src-entity", "doc": {"value": "0=ユーザー作成（編集可）, 1=プレビュー, 2=システムページ（編集不可）, 3=確認用システムページ"}},
+
+      {"id": "memberName", "title": "管理者名","tag": "src-entity", "doc": {"value": "管理者メンバーの表示名"}},
+      {"id": "department", "title": "所属","tag": "src-entity", "doc": {"value": "管理者の所属部署名"}},
+      {"id": "loginId", "title": "ログインID","tag": "src-entity", "doc": {"value": "管理画面ログイン用のID。一意"}},
+      {"id": "authority", "title": "権限","tag": "src-entity", "doc": {"value": "0=システム管理者（全機能アクセス可能）, 1=店舗オーナー（denyUrlで制限されたURLにアクセス不可）"}},
+      {"id": "work", "title": "稼働状態","tag": "src-entity", "doc": {"value": "0=非稼働（ログイン不可）, 1=稼働（ログイン可能）"}},
+      {"id": "twoFactorAuthEnabled", "title": "二要素認証","tag": "src-entity", "doc": {"value": "二要素認証（TOTP）を有効にするか。有効時はログイン時にワンタイムパスワードを要求"}},
+      {"id": "loginDate", "title": "最終ログイン日時","tag": "src-entity", "doc": {"value": "管理者の最終ログイン日時"}},
+
+      {"id": "denyUrl", "title": "拒否URL","tag": "src-entity", "doc": {"value": "アクセスを拒否する管理画面URLパターン。authority=1（店舗オーナー）に対して適用"}},
+
+      {"id": "mailTemplateName", "title": "テンプレート名","tag": "src-entity", "doc": {"value": "メールテンプレートの表示名"}},
+      {"id": "mailTemplateFileName", "title": "テンプレートファイル名","tag": "src-entity", "doc": {"value": "メールテンプレートのファイル名"}},
+      {"id": "mailSubject", "title": "メール件名","tag": "src-entity", "doc": {"value": "メールの件名。テンプレート変数を含む場合あり"}},
+
+      {"id": "sendDate", "title": "送信日時","tag": "src-entity", "doc": {"value": "メールの送信日時"}},
+      {"id": "mailBody", "title": "メール本文","tag": "src-entity", "doc": {"value": "送信済みメールのプレーンテキスト本文"}},
+      {"id": "mailHtmlBody", "title": "HTMLメール本文","tag": "src-entity", "doc": {"value": "送信済みメールのHTML本文"}},
+
+      {"id": "userName", "title": "ユーザー名","tag": "src-entity", "doc": {"value": "ログイン試行時のユーザー名（メールアドレスまたはログインID）"}},
+      {"id": "clientIp", "title": "クライアントIP","tag": "src-entity", "doc": {"value": "ログイン試行元のIPアドレス。セキュリティ監査用"}},
+      {"id": "loginHistoryStatus", "title": "ログイン結果","tag": "src-entity", "doc": {"value": "0=失敗, 1=成功"}},
+
+      {"id": "csvEntityName", "title": "CSVエンティティ名","tag": "src-entity", "doc": {"value": "CSV出力対象のデータ種別（例: 商品、受注、会員）"}},
+      {"id": "csvFieldName", "title": "CSVフィールド名","tag": "src-entity", "doc": {"value": "CSV出力対象のフィールド名"}},
+      {"id": "csvDispName", "title": "CSV表示名","tag": "src-entity", "doc": {"value": "CSVヘッダ行に表示する列名"}},
+      {"id": "csvEnabled", "title": "CSV列有効","tag": "src-entity", "doc": {"value": "このCSV列を出力に含めるか"}},
+
+      {"id": "pluginName", "title": "プラグイン名","tag": "src-entity", "doc": {"value": "プラグインの表示名"}},
+      {"id": "pluginCode", "title": "プラグインコード","tag": "src-entity", "doc": {"value": "プラグインの一意識別子"}},
+      {"id": "pluginVersion", "title": "プラグインバージョン","def": "https://schema.org/softwareVersion", "tag": "src-entity", "doc": {"value": "プラグインのバージョン文字列"}},
+      {"id": "pluginEnabled", "title": "プラグイン有効","tag": "src-entity", "doc": {"value": "プラグインが有効か。インストール直後は無効"}},
+
+      {"id": "templateCode", "title": "テンプレートコード","tag": "src-entity", "doc": {"value": "テンプレートの一意識別コード。標準テンプレートは'default'"}},
+      {"id": "templateName", "title": "テンプレート名","tag": "src-entity", "doc": {"value": "テンプレートの表示名"}},
+      {"id": "deviceType", "title": "デバイス種別","tag": "src-entity", "doc": {"value": "10=PC, 2=モバイル。テンプレートやレイアウトのデバイス別切り替えに使用"}},
+
+      {"id": "layoutName", "title": "レイアウト名","tag": "src-entity", "doc": {"value": "レイアウトの表示名"}},
+
+      {"id": "blockName", "title": "ブロック名","tag": "src-entity", "doc": {"value": "ブロックの表示名"}},
+      {"id": "blockFileName", "title": "ブロックファイル名","tag": "src-entity", "doc": {"value": "ブロックのテンプレートファイル名"}},
+      {"id": "blockDeletable", "title": "ブロック削除可否","tag": "src-entity", "doc": {"value": "このブロックを管理画面から削除できるか。システム標準ブロックは削除不可"}},
+
+      {"id": "tradeLawName", "title": "項目名","tag": "src-entity", "doc": {"value": "特定商取引法に基づく表記の項目名"}},
+      {"id": "tradeLawDescription", "title": "項目説明","tag": "src-entity", "doc": {"value": "特定商取引法に基づく表記の項目内容"}},
+      {"id": "displayOrderScreen", "title": "注文画面表示","tag": "src-entity", "doc": {"value": "注文確認画面にこの項目を表示するか"}},
+
+      {"id": "contactName01", "title": "お問い合わせ姓","tag": "src-entity", "doc": {"value": "お問い合わせフォームの姓"}},
+      {"id": "contactName02", "title": "お問い合わせ名","tag": "src-entity", "doc": {"value": "お問い合わせフォームの名"}},
+      {"id": "contactKana01", "title": "お問い合わせセイ","tag": "src-entity", "doc": {"value": "お問い合わせフォームの姓カナ"}},
+      {"id": "contactKana02", "title": "お問い合わせメイ","tag": "src-entity", "doc": {"value": "お問い合わせフォームの名カナ"}},
+      {"id": "contactEmail", "title": "お問い合わせメール","def": "https://schema.org/email", "tag": "src-entity", "doc": {"value": "お問い合わせフォームのメールアドレス"}},
+      {"id": "contactContents", "title": "お問い合わせ内容","tag": "src-entity", "doc": {"value": "お問い合わせフォームの本文"}},
+
+      {"id": "createDate", "title": "作成日時","def": "https://schema.org/dateCreated", "tag": "src-entity", "doc": {"value": "作成日時"}},
+      {"id": "updateDate", "title": "更新日時","def": "https://schema.org/dateModified", "tag": "src-entity", "doc": {"value": "最終更新日時"}},
+
+
+      {"id": "Top", "title": "トップページ","tag": "front src-router src-template",
+        "doc": {"value": "ショップのトップページ。ニュース一覧、新着商品、カテゴリナビゲーション等を表示"},
+        "descriptor": [
+          {"href": "#shopMessage"},
+          {"href": "#goProductList"},
+          {"href": "#goProduct"},
+          {"href": "#goCart"},
+          {"href": "#goContactForm"},
+          {"href": "#goCustomerRegistration"},
+          {"href": "#goLogin"},
+          {"href": "#goMypage"},
+          {"href": "#goHelpAbout"},
+          {"href": "#goHelpGuide"},
+          {"href": "#goHelpAgreement"},
+          {"href": "#goHelpPrivacy"},
+          {"href": "#goHelpTradeLaw"}
+        ]
+      },
+
+      {"id": "Product", "title": "商品","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#productName"},
+          {"href": "#descriptionList"},
+          {"href": "#descriptionDetail"},
+          {"href": "#searchWord"},
+          {"href": "#freeArea"},
+          {"href": "#productNote"},
+          {"href": "#productStatus"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"id": "ProductClass", "title": "商品規格", 
+            "descriptor": [
+              {"href": "#productCode"},
+              {"href": "#stock"},
+              {"href": "#stockUnlimited"},
+              {"href": "#saleLimit"},
+              {"href": "#price01"},
+              {"href": "#price02"},
+              {"href": "#deliveryFee"},
+              {"href": "#productClassVisible"},
+              {"href": "#currencyCode"},
+              {"href": "#pointRate"},
+              {"href": "#classCategoryName"},
+              {"href": "#classCategoryBackendName"}
+            ]
+          },
+          {"id": "ProductImage", "title": "商品画像", 
+            "descriptor": [
+              {"href": "#fileName"},
+              {"href": "#sortNo"}
+            ]
+          },
+          {"id": "ProductCategory", "title": "商品カテゴリ", 
+            "descriptor": [
+              {"href": "#categoryName"},
+              {"href": "#hierarchy"}
+            ]
+          },
+          {"id": "ProductTag", "title": "商品タグ", 
+            "descriptor": [
+              {"href": "#tagName"}
+            ]
+          },
+          {"href": "#goProduct"},
+          {"href": "#goProductList"},
+          {"href": "#doAddCartItem"},
+          {"href": "#doAddFavorite"},
+          {"href": "#goCategory"},
+          {"href": "#doCreateProduct"},
+          {"href": "#doUpdateProduct"},
+          {"href": "#doDeleteProduct"}
+        ]
+      },
+      {"id": "ProductList", "title": "商品一覧","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#Product"},
+          {"href": "#goProduct"},
+          {"href": "#goProductList"},
+          {"href": "#goCategoryList"},
+          {"href": "#doCreateProduct"}
+        ]
+      },
+
+      {"id": "Category", "title": "カテゴリ","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#categoryName"},
+          {"href": "#hierarchy"},
+          {"href": "#sortNo"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#goCategory"},
+          {"href": "#goCategoryList"},
+          {"href": "#goProductList"},
+          {"href": "#doUpdateCategory"},
+          {"href": "#doDeleteCategory"}
+        ]
+      },
+      {"id": "CategoryList", "title": "カテゴリ一覧","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#Category"},
+          {"href": "#goCategory"},
+          {"href": "#doCreateCategory"}
+        ]
+      },
+
+      {"id": "Tag", "title": "タグ","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#tagName"},
+          {"href": "#sortNo"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doDeleteTag"}
+        ]
+      },
+      {"id": "TagList", "title": "タグ一覧","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#Tag"},
+          {"href": "#goTagList"},
+          {"href": "#doCreateTag"}
+        ]
+      },
+
+      {"id": "ClassName", "title": "規格名","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#classNameLabel"},
+          {"href": "#classNameBackendName"},
+          {"href": "#sortNo"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdateClassName"},
+          {"href": "#doDeleteClassName"}
+        ]
+      },
+      {"id": "ClassNameList", "title": "規格名一覧","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#ClassName"},
+          {"href": "#goClassNameList"},
+          {"href": "#doCreateClassName"}
+        ]
+      },
+
+      {"id": "ClassCategory", "title": "規格分類","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#classCategoryName"},
+          {"href": "#classCategoryBackendName"},
+          {"href": "#classCategoryVisible"},
+          {"href": "#sortNo"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdateClassCategory"},
+          {"href": "#doDeleteClassCategory"}
+        ]
+      },
+      {"id": "ClassCategoryList", "title": "規格分類一覧","tag": "catalog src-template",
+        "descriptor": [
+          {"href": "#ClassCategory"},
+          {"href": "#goClassCategoryList"},
+          {"href": "#doCreateClassCategory"}
+        ]
+      },
+
+      {"id": "Cart", "title": "カート","tag": "cart src-template",
+        "descriptor": [
+          {"href": "#cartKey"},
+          {"href": "#preOrderId"},
+          {"href": "#totalPrice"},
+          {"href": "#deliveryFeeTotal"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"id": "CartItem", "title": "カート明細", 
+            "descriptor": [
+              {"href": "#cartItemPrice"},
+              {"href": "#quantity"},
+              {"href": "#productName"},
+              {"href": "#productCode"}
+            ]
+          },
+          {"href": "#goCart"},
+          {"href": "#doAddCartItem"},
+          {"href": "#doUpdateCartItemQuantity"},
+          {"href": "#doRemoveCartItem"},
+          {"href": "#goShopping"}
+        ]
+      },
+
+      {"id": "ShoppingLogin", "title": "購入ログイン","tag": "checkout src-router src-template",
+        "doc": {"value": "購入手続き時のログイン画面。会員ログインまたはゲスト購入を選択"},
+        "descriptor": [
+          {"href": "#email"},
+          {"href": "#password"},
+          {"href": "#doLogin"},
+          {"href": "#goShoppingNonMember"},
+          {"href": "#goCustomerRegistration"}
+        ]
+      },
+      {"id": "ShoppingNonMember", "title": "非会員購入情報入力","tag": "checkout src-router src-template",
+        "doc": {"value": "非会員（ゲスト）が注文者情報を入力する画面"},
+        "descriptor": [
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#kana01"},
+          {"href": "#kana02"},
+          {"href": "#companyName"},
+          {"href": "#email"},
+          {"href": "#phoneNumber"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#doSubmitNonMember"}
+        ]
+      },
+      {"id": "Shopping", "title": "注文手続き","tag": "checkout src-router src-template",
+        "doc": {"value": "配送先・支払方法・配送時間帯を選択し注文内容を確定する画面"},
+        "descriptor": [
+          {"href": "#paymentMethod"},
+          {"href": "#deliveryName"},
+          {"href": "#deliveryTime"},
+          {"href": "#deliveryDate"},
+          {"href": "#message"},
+          {"href": "#point"},
+          {"href": "#goShoppingShipping"},
+          {"href": "#goShoppingShippingEdit"},
+          {"href": "#goShoppingShippingMultiple"},
+          {"href": "#doConfirmOrder"},
+          {"href": "#goShoppingError"}
+        ]
+      },
+      {"id": "ShoppingShipping", "title": "お届け先選択","tag": "checkout src-router src-template",
+        "doc": {"value": "会員の登録済みお届け先から配送先を選択する画面"},
+        "descriptor": [
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#phoneNumber"},
+          {"href": "#doSelectShippingAddress"}
+        ]
+      },
+      {"id": "ShoppingShippingEdit", "title": "お届け先変更","tag": "checkout src-router src-template",
+        "doc": {"value": "新しいお届け先を入力する、または非会員のお届け先を編集する画面"},
+        "descriptor": [
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#kana01"},
+          {"href": "#kana02"},
+          {"href": "#companyName"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#phoneNumber"},
+          {"href": "#doUpdateShippingAddress"}
+        ]
+      },
+      {"id": "ShoppingConfirm", "title": "注文確認","tag": "checkout src-router src-template",
+        "doc": {"value": "注文内容の最終確認画面。特定商取引法の表示を含む"},
+        "descriptor": [
+          {"href": "#paymentMethod"},
+          {"href": "#subtotal"},
+          {"href": "#deliveryFeeTotal"},
+          {"href": "#charge"},
+          {"href": "#discount"},
+          {"href": "#tax"},
+          {"href": "#total"},
+          {"href": "#paymentTotal"},
+          {"href": "#doCheckout"},
+          {"href": "#goShoppingError"}
+        ]
+      },
+      {"id": "ShoppingComplete", "title": "注文完了","tag": "checkout src-router src-template",
+        "doc": {"value": "注文完了画面。注文番号を表示し、別カートがあればカートへの遷移を促す"},
+        "descriptor": [
+          {"href": "#orderNo"},
+          {"href": "#goTop"},
+          {"href": "#goCart"}
+        ]
+      },
+      {"id": "ShoppingError", "title": "購入エラー","tag": "checkout src-router src-template",
+        "doc": {"value": "購入処理中のエラー表示画面"},
+        "descriptor": [
+          {"href": "#goCart"}
+        ]
+      },
+
+      {"id": "Order", "title": "受注","tag": "order src-template",
+        "descriptor": [
+          {"href": "#orderNo"},
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#kana01"},
+          {"href": "#kana02"},
+          {"href": "#companyName"},
+          {"href": "#email"},
+          {"href": "#phoneNumber"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#message"},
+          {"href": "#subtotal"},
+          {"href": "#discount"},
+          {"href": "#deliveryFeeTotal"},
+          {"href": "#charge"},
+          {"href": "#tax"},
+          {"href": "#total"},
+          {"href": "#paymentTotal"},
+          {"href": "#paymentMethod"},
+          {"href": "#orderNote"},
+          {"href": "#orderDate"},
+          {"href": "#paymentDate"},
+          {"href": "#orderStatus"},
+          {"href": "#currencyCode"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"id": "OrderItem", "title": "受注明細", 
+            "descriptor": [
+              {"href": "#orderItemProductName"},
+              {"href": "#orderItemProductCode"},
+              {"href": "#orderItemClassName1"},
+              {"href": "#orderItemClassName2"},
+              {"href": "#orderItemClassCategoryName1"},
+              {"href": "#orderItemClassCategoryName2"},
+              {"href": "#orderItemPrice"},
+              {"href": "#orderItemQuantity"},
+              {"href": "#orderItemTax"},
+              {"href": "#taxRate"},
+              {"href": "#taxAdjust"},
+              {"href": "#orderItemType"}
+            ]
+          },
+          {"id": "Shipping", "title": "配送", 
+            "descriptor": [
+              {"href": "#name01"},
+              {"href": "#name02"},
+              {"href": "#kana01"},
+              {"href": "#kana02"},
+              {"href": "#companyName"},
+              {"href": "#phoneNumber"},
+              {"href": "#postalCode"},
+              {"href": "#pref"},
+              {"href": "#addr01"},
+              {"href": "#addr02"},
+              {"href": "#deliveryName"},
+              {"href": "#deliveryTime"},
+              {"href": "#deliveryDate"},
+              {"href": "#shippingDate"},
+              {"href": "#trackingNumber"},
+              {"href": "#shippingNote"},
+              {"href": "#mailSendDate"}
+            ]
+          },
+          {"href": "#goOrder"},
+          {"href": "#goOrderList"},
+          {"href": "#doUpdateOrder"},
+          {"href": "#doUpdateOrderStatus"},
+          {"href": "#doSendOrderMail"},
+          {"href": "#doReorder"}
+        ]
+      },
+      {"id": "OrderList", "title": "受注一覧","tag": "order src-template",
+        "descriptor": [
+          {"href": "#Order"},
+          {"href": "#goOrder"},
+          {"href": "#goOrderList"},
+          {"href": "#doCreateOrder"}
+        ]
+      },
+
+      {"id": "Customer", "title": "会員","tag": "account src-template",
+        "descriptor": [
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#kana01"},
+          {"href": "#kana02"},
+          {"href": "#companyName"},
+          {"href": "#email"},
+          {"href": "#phoneNumber"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#birth"},
+          {"href": "#sex"},
+          {"href": "#job"},
+          {"href": "#password"},
+          {"href": "#customerStatus"},
+          {"href": "#firstBuyDate"},
+          {"href": "#lastBuyDate"},
+          {"href": "#buyTimes"},
+          {"href": "#buyTotal"},
+          {"href": "#customerNote"},
+          {"href": "#point"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#goCustomer"},
+          {"href": "#doUpdateCustomer"},
+          {"href": "#doWithdrawCustomer"},
+          {"href": "#goCustomerAddressList"},
+          {"href": "#goFavoriteList"},
+          {"href": "#goOrderHistory"}
+        ]
+      },
+      {"id": "CustomerList", "title": "会員一覧","tag": "account src-template",
+        "descriptor": [
+          {"href": "#Customer"},
+          {"href": "#goCustomer"},
+          {"href": "#goCustomerList"},
+          {"href": "#doCreateCustomer"}
+        ]
+      },
+
+      {"id": "CustomerAddress", "title": "配送先住所","tag": "account src-template",
+        "descriptor": [
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#kana01"},
+          {"href": "#kana02"},
+          {"href": "#companyName"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#phoneNumber"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdateCustomerAddress"},
+          {"href": "#doDeleteCustomerAddress"}
+        ]
+      },
+      {"id": "CustomerAddressList", "title": "配送先住所一覧","tag": "account src-template",
+        "descriptor": [
+          {"href": "#CustomerAddress"},
+          {"href": "#doCreateCustomerAddress"}
+        ]
+      },
+
+      {"id": "CustomerFavoriteProduct", "title": "お気に入り商品","tag": "favorite src-template",
+        "descriptor": [
+          {"href": "#productName"},
+          {"href": "#price02"},
+          {"href": "#createDate"},
+          {"href": "#goProduct"},
+          {"href": "#doRemoveFavorite"}
+        ]
+      },
+      {"id": "CustomerFavoriteProductList", "title": "お気に入り商品一覧","tag": "favorite src-template",
+        "descriptor": [
+          {"href": "#CustomerFavoriteProduct"},
+          {"href": "#goFavoriteList"}
+        ]
+      },
+
+      {"id": "Login", "title": "ログイン","tag": "account src-template",
+        "descriptor": [
+          {"href": "#email"},
+          {"href": "#password"},
+          {"href": "#doLogin"}
+        ]
+      },
+      {"id": "PasswordReset", "title": "パスワードリセット","tag": "account src-template",
+        "descriptor": [
+          {"href": "#email"},
+          {"href": "#resetKey"},
+          {"href": "#password"},
+          {"href": "#doResetPassword"}
+        ]
+      },
+      {"id": "CustomerRegistration", "title": "会員登録","tag": "account src-template",
+        "descriptor": [
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#kana01"},
+          {"href": "#kana02"},
+          {"href": "#companyName"},
+          {"href": "#email"},
+          {"href": "#phoneNumber"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#password"},
+          {"href": "#birth"},
+          {"href": "#sex"},
+          {"href": "#job"},
+          {"href": "#goCustomerRegistration"},
+          {"href": "#doRegisterCustomer"}
+        ]
+      },
+      {"id": "CustomerRegistrationComplete", "title": "会員登録完了","tag": "account src-router src-template",
+        "doc": {"value": "会員登録完了画面。メール認証有効時は仮登録完了の案内を表示"},
+        "descriptor": [
+          {"href": "#goTop"}
+        ]
+      },
+
+      {"id": "Mypage", "title": "マイページ（注文履歴一覧）","tag": "account src-router src-template",
+        "doc": {"value": "マイページトップ。注文履歴一覧を表示"},
+        "descriptor": [
+          {"href": "#Order"},
+          {"href": "#goMypageHistory"},
+          {"href": "#goMypageChange"},
+          {"href": "#goFavoriteList"},
+          {"href": "#goCustomerAddressList"},
+          {"href": "#goMypageWithdraw"}
+        ]
+      },
+      {"id": "MypageHistory", "title": "注文履歴詳細","tag": "account src-router src-template",
+        "doc": {"value": "個別の注文履歴詳細画面"},
+        "descriptor": [
+          {"href": "#orderNo"},
+          {"href": "#orderDate"},
+          {"href": "#orderStatus"},
+          {"href": "#paymentMethod"},
+          {"href": "#subtotal"},
+          {"href": "#deliveryFeeTotal"},
+          {"href": "#charge"},
+          {"href": "#discount"},
+          {"href": "#total"},
+          {"href": "#paymentTotal"},
+          {"href": "#goMypage"},
+          {"href": "#doReorder"}
+        ]
+      },
+      {"id": "MypageChange", "title": "会員情報変更","tag": "account src-router src-template",
+        "doc": {"value": "会員情報の変更画面"},
+        "descriptor": [
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#kana01"},
+          {"href": "#kana02"},
+          {"href": "#companyName"},
+          {"href": "#email"},
+          {"href": "#phoneNumber"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#password"},
+          {"href": "#birth"},
+          {"href": "#sex"},
+          {"href": "#job"},
+          {"href": "#doUpdateCustomer"}
+        ]
+      },
+      {"id": "MypageWithdraw", "title": "退会","tag": "account src-router src-template",
+        "doc": {"value": "退会確認・退会処理画面"},
+        "descriptor": [
+          {"href": "#doWithdrawCustomer"}
+        ]
+      },
+
+      {"id": "HelpAbout", "title": "当サイトについて","tag": "help src-router src-template",
+        "doc": {"value": "当サイトについてのページ"},
+        "descriptor": [
+          {"href": "#goTop"}
+        ]
+      },
+      {"id": "HelpGuide", "title": "ご利用ガイド","tag": "help src-router src-template",
+        "doc": {"value": "ご利用ガイドページ"},
+        "descriptor": [
+          {"href": "#goTop"}
+        ]
+      },
+      {"id": "HelpAgreement", "title": "ご利用規約","tag": "help src-router src-template",
+        "doc": {"value": "利用規約ページ"},
+        "descriptor": [
+          {"href": "#goTop"}
+        ]
+      },
+      {"id": "HelpPrivacy", "title": "プライバシーポリシー","tag": "help src-router src-template",
+        "doc": {"value": "プライバシーポリシーページ"},
+        "descriptor": [
+          {"href": "#goTop"}
+        ]
+      },
+      {"id": "HelpTradeLaw", "title": "特定商取引法（フロント）","tag": "help src-router src-template",
+        "doc": {"value": "特定商取引法に基づく表記のフロント表示ページ"},
+        "descriptor": [
+          {"href": "#tradeLawName"},
+          {"href": "#tradeLawDescription"},
+          {"href": "#goTop"}
+        ]
+      },
+
+      {"id": "BaseInfo", "title": "基本情報","tag": "shop src-template",
+        "descriptor": [
+          {"href": "#shopName"},
+          {"href": "#shopKana"},
+          {"href": "#shopNameEng"},
+          {"href": "#companyName"},
+          {"href": "#companyKana"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#phoneNumber"},
+          {"href": "#businessHour"},
+          {"href": "#shopEmail01"},
+          {"href": "#shopEmail02"},
+          {"href": "#shopEmail03"},
+          {"href": "#shopEmail04"},
+          {"href": "#goodTraded"},
+          {"href": "#shopMessage"},
+          {"href": "#deliveryFreeAmount"},
+          {"href": "#deliveryFreeQuantity"},
+          {"href": "#optionMypageOrderStatusDisplay"},
+          {"href": "#optionNostockHidden"},
+          {"href": "#optionFavoriteProduct"},
+          {"href": "#optionProductDeliveryFee"},
+          {"href": "#optionProductTaxRule"},
+          {"href": "#optionCustomerActivate"},
+          {"href": "#optionRememberMe"},
+          {"href": "#optionPoint"},
+          {"href": "#basicPointRate"},
+          {"href": "#pointConversionRate"},
+          {"href": "#invoiceRegistrationNumber"},
+          {"href": "#updateDate"},
+          {"href": "#goBaseInfo"},
+          {"href": "#doUpdateBaseInfo"}
+        ]
+      },
+
+      {"id": "Payment", "title": "支払方法","tag": "shop src-template",
+        "descriptor": [
+          {"href": "#paymentMethodName"},
+          {"href": "#paymentCharge"},
+          {"href": "#paymentRuleMin"},
+          {"href": "#paymentRuleMax"},
+          {"href": "#paymentImage"},
+          {"href": "#paymentVisible"},
+          {"href": "#sortNo"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdatePayment"},
+          {"href": "#doDeletePayment"}
+        ]
+      },
+      {"id": "PaymentList", "title": "支払方法一覧","tag": "shop src-template",
+        "descriptor": [
+          {"href": "#Payment"},
+          {"href": "#goPaymentList"},
+          {"href": "#doCreatePayment"}
+        ]
+      },
+
+      {"id": "Delivery", "title": "配送方法","tag": "shop src-template",
+        "descriptor": [
+          {"href": "#deliveryMethodName"},
+          {"href": "#serviceName"},
+          {"href": "#deliveryDescription"},
+          {"href": "#confirmUrl"},
+          {"href": "#deliveryVisible"},
+          {"href": "#sortNo"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdateDelivery"},
+          {"href": "#doDeleteDelivery"}
+        ]
+      },
+      {"id": "DeliveryList", "title": "配送方法一覧","tag": "shop src-template",
+        "descriptor": [
+          {"href": "#Delivery"},
+          {"href": "#goDeliveryList"},
+          {"href": "#doCreateDelivery"}
+        ]
+      },
+
+      {"id": "TaxRule", "title": "税率ルール","tag": "shop src-template",
+        "descriptor": [
+          {"href": "#taxRuleRate"},
+          {"href": "#taxRuleAdjust"},
+          {"href": "#applyDate"},
+          {"href": "#roundingType"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doDeleteTaxRule"}
+        ]
+      },
+      {"id": "TaxRuleList", "title": "税率ルール一覧","tag": "shop src-template",
+        "descriptor": [
+          {"href": "#TaxRule"},
+          {"href": "#goTaxRuleList"},
+          {"href": "#doCreateTaxRule"}
+        ]
+      },
+
+      {"id": "News", "title": "ニュース","tag": "content src-template",
+        "descriptor": [
+          {"href": "#newsTitle"},
+          {"href": "#newsDescription"},
+          {"href": "#newsUrl"},
+          {"href": "#publishDate"},
+          {"href": "#linkMethod"},
+          {"href": "#newsVisible"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#goNews"},
+          {"href": "#doUpdateNews"},
+          {"href": "#doDeleteNews"}
+        ]
+      },
+      {"id": "NewsList", "title": "ニュース一覧","tag": "content src-template",
+        "descriptor": [
+          {"href": "#News"},
+          {"href": "#goNewsList"},
+          {"href": "#goNews"},
+          {"href": "#doCreateNews"}
+        ]
+      },
+
+      {"id": "Page", "title": "ページ","tag": "content src-template",
+        "descriptor": [
+          {"href": "#pageName"},
+          {"href": "#pageUrl"},
+          {"href": "#pageFileName"},
+          {"href": "#pageEditType"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#goPage"},
+          {"href": "#doUpdatePage"},
+          {"href": "#doDeletePage"}
+        ]
+      },
+      {"id": "PageList", "title": "ページ一覧","tag": "content src-template",
+        "descriptor": [
+          {"href": "#Page"},
+          {"href": "#goPageList"},
+          {"href": "#goPage"},
+          {"href": "#doCreatePage"}
+        ]
+      },
+
+      {"id": "ContactForm", "title": "お問い合わせフォーム","tag": "contact src-template",
+        "descriptor": [
+          {"href": "#contactName01"},
+          {"href": "#contactName02"},
+          {"href": "#contactKana01"},
+          {"href": "#contactKana02"},
+          {"href": "#contactEmail"},
+          {"href": "#phoneNumber"},
+          {"href": "#contactContents"},
+          {"href": "#goContactForm"},
+          {"href": "#doSubmitContact"}
+        ]
+      },
+      {"id": "ContactComplete", "title": "お問い合わせ完了","tag": "contact src-template",
+        "descriptor": [
+          {"href": "#goProductList"}
+        ]
+      },
+
+      {"id": "Member", "title": "管理者メンバー","tag": "admin-system src-template",
+        "descriptor": [
+          {"href": "#memberName"},
+          {"href": "#department"},
+          {"href": "#loginId"},
+          {"href": "#password"},
+          {"href": "#authority"},
+          {"href": "#work"},
+          {"href": "#twoFactorAuthEnabled"},
+          {"href": "#loginDate"},
+          {"href": "#sortNo"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#goMember"},
+          {"href": "#doUpdateMember"},
+          {"href": "#doDeleteMember"}
+        ]
+      },
+      {"id": "MemberList", "title": "管理者メンバー一覧","tag": "admin-system src-template",
+        "descriptor": [
+          {"href": "#Member"},
+          {"href": "#goMemberList"},
+          {"href": "#goMember"},
+          {"href": "#doCreateMember"}
+        ]
+      },
+
+      {"id": "AuthorityRole", "title": "権限ルール","tag": "admin-system src-template",
+        "descriptor": [
+          {"href": "#denyUrl"},
+          {"href": "#authority"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdateAuthorityRole"}
+        ]
+      },
+
+      {"id": "MailTemplate", "title": "メールテンプレート","tag": "mail src-template",
+        "descriptor": [
+          {"href": "#mailTemplateName"},
+          {"href": "#mailTemplateFileName"},
+          {"href": "#mailSubject"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdateMailTemplate"}
+        ]
+      },
+      {"id": "MailTemplateList", "title": "メールテンプレート一覧","tag": "mail src-template",
+        "descriptor": [
+          {"href": "#MailTemplate"},
+          {"href": "#goMailTemplateList"}
+        ]
+      },
+
+      {"id": "MailHistory", "title": "メール送信履歴","tag": "mail src-template",
+        "descriptor": [
+          {"href": "#mailSubject"},
+          {"href": "#mailBody"},
+          {"href": "#mailHtmlBody"},
+          {"href": "#sendDate"}
+        ]
+      },
+
+      {"id": "LoginHistory", "title": "ログイン履歴","tag": "admin-system src-template",
+        "descriptor": [
+          {"href": "#userName"},
+          {"href": "#clientIp"},
+          {"href": "#loginHistoryStatus"},
+          {"href": "#createDate"}
+        ]
+      },
+      {"id": "LoginHistoryList", "title": "ログイン履歴一覧","tag": "admin-system src-template",
+        "descriptor": [
+          {"href": "#LoginHistory"},
+          {"href": "#goLoginHistoryList"}
+        ]
+      },
+
+      {"id": "Csv", "title": "CSV出力設定","tag": "admin-system src-template",
+        "descriptor": [
+          {"href": "#csvEntityName"},
+          {"href": "#csvFieldName"},
+          {"href": "#csvDispName"},
+          {"href": "#csvEnabled"},
+          {"href": "#sortNo"},
+          {"href": "#doUpdateCsv"}
+        ]
+      },
+
+      {"id": "Plugin", "title": "プラグイン","tag": "plugin src-template",
+        "descriptor": [
+          {"href": "#pluginName"},
+          {"href": "#pluginCode"},
+          {"href": "#pluginVersion"},
+          {"href": "#pluginEnabled"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doEnablePlugin"},
+          {"href": "#doDisablePlugin"},
+          {"href": "#doUninstallPlugin"}
+        ]
+      },
+      {"id": "PluginList", "title": "プラグイン一覧","tag": "plugin src-template",
+        "descriptor": [
+          {"href": "#Plugin"},
+          {"href": "#goPluginList"},
+          {"href": "#doInstallPlugin"}
+        ]
+      },
+
+      {"id": "Template", "title": "デザインテンプレート","tag": "plugin src-template",
+        "descriptor": [
+          {"href": "#templateCode"},
+          {"href": "#templateName"},
+          {"href": "#deviceType"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"}
+        ]
+      },
+      {"id": "TemplateList", "title": "デザインテンプレート一覧","tag": "plugin src-template",
+        "descriptor": [
+          {"href": "#Template"},
+          {"href": "#goTemplateList"}
+        ]
+      },
+
+      {"id": "Layout", "title": "レイアウト","tag": "cms src-template",
+        "descriptor": [
+          {"href": "#layoutName"},
+          {"href": "#deviceType"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdateLayout"}
+        ]
+      },
+      {"id": "LayoutList", "title": "レイアウト一覧","tag": "cms src-template",
+        "descriptor": [
+          {"href": "#Layout"},
+          {"href": "#goLayoutList"}
+        ]
+      },
+
+      {"id": "Block", "title": "ブロック","tag": "cms src-template",
+        "descriptor": [
+          {"href": "#blockName"},
+          {"href": "#blockFileName"},
+          {"href": "#blockDeletable"},
+          {"href": "#deviceType"},
+          {"href": "#createDate"},
+          {"href": "#updateDate"},
+          {"href": "#doUpdateBlock"},
+          {"href": "#doDeleteBlock"}
+        ]
+      },
+      {"id": "BlockList", "title": "ブロック一覧","tag": "cms src-template",
+        "descriptor": [
+          {"href": "#Block"},
+          {"href": "#goBlockList"},
+          {"href": "#doCreateBlock"}
+        ]
+      },
+
+      {"id": "TradeLaw", "title": "特定商取引法","tag": "cms src-template",
+        "descriptor": [
+          {"href": "#tradeLawName"},
+          {"href": "#tradeLawDescription"},
+          {"href": "#sortNo"},
+          {"href": "#displayOrderScreen"}
+        ]
+      },
+      {"id": "TradeLawList", "title": "特定商取引法一覧","tag": "cms src-template",
+        "descriptor": [
+          {"href": "#TradeLaw"},
+          {"href": "#goTradeLawList"},
+          {"href": "#doUpdateTradeLaw"}
+        ]
+      },
+
+
+      {"id": "goTop", "title": "トップページを見る", "type": "safe", "rt": "#Top",
+        "tag": "front flow-browse src-router src-template customer"},
+      {"id": "goLogin", "title": "ログイン画面を見る", "type": "safe", "rt": "#Login",
+        "tag": "account flow-account src-router src-template customer"},
+
+      {"id": "goProductList", "title": "商品一覧を見る", "type": "safe", "rt": "#ProductList",
+        "tag": "catalog flow-browse src-router"},
+      {"id": "goProduct", "title": "商品詳細を見る", "type": "safe", "rt": "#Product",
+        "tag": "catalog flow-browse flow-manage-product src-router",
+        "descriptor": [{"href": "#productName"}]},
+      {"id": "doCreateProduct", "title": "商品を作成する", "type": "unsafe", "rt": "#Product",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#productName"}, {"href": "#productStatus"}]},
+      {"id": "doUpdateProduct", "title": "商品を更新する", "type": "idempotent", "rt": "#Product",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#productName"}]},
+      {"id": "doDeleteProduct", "title": "商品を削除する", "type": "idempotent", "rt": "#ProductList",
+        "tag": "catalog flow-manage-product admin src-router",
+        "doc": {"value": "ステータス変更による論理削除"},
+        "descriptor": [{"href": "#productName"}]},
+      {"id": "doCopyProduct", "title": "商品をコピーする", "type": "unsafe", "rt": "#Product",
+        "tag": "catalog flow-manage-product admin src-router",
+        "doc": {"value": "商品と規格を複製。画像も複製される"},
+        "descriptor": [{"href": "#productName"}]},
+      {"id": "doBulkUpdateProductStatus", "title": "商品ステータスを一括変更する", "type": "unsafe", "rt": "#ProductList",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#productStatus"}]},
+      {"id": "goExportProduct", "title": "商品CSVをエクスポートする", "type": "safe", "rt": "#ProductList",
+        "tag": "catalog flow-manage-product admin src-router"},
+      {"id": "doImportProductCsv", "title": "商品CSVをインポートする", "type": "unsafe", "rt": "#ProductList",
+        "tag": "catalog flow-manage-product admin src-router"},
+      {"id": "doImportCategoryCsv", "title": "カテゴリCSVをインポートする", "type": "unsafe", "rt": "#CategoryList",
+        "tag": "catalog flow-manage-product admin src-router"},
+
+      {"id": "goCategoryList", "title": "カテゴリ一覧を見る", "type": "safe", "rt": "#CategoryList",
+        "tag": "catalog flow-browse src-router"},
+      {"id": "goCategory", "title": "カテゴリ詳細を見る", "type": "safe", "rt": "#Category",
+        "tag": "catalog flow-browse src-router",
+        "descriptor": [{"href": "#categoryName"}]},
+      {"id": "doCreateCategory", "title": "カテゴリを作成する", "type": "unsafe", "rt": "#Category",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#categoryName"}]},
+      {"id": "doUpdateCategory", "title": "カテゴリを更新する", "type": "idempotent", "rt": "#Category",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#categoryName"}]},
+      {"id": "doDeleteCategory", "title": "カテゴリを削除する", "type": "idempotent", "rt": "#CategoryList",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#categoryName"}]},
+      {"id": "goExportCategory", "title": "カテゴリCSVをエクスポートする", "type": "safe", "rt": "#CategoryList",
+        "tag": "catalog flow-manage-product admin src-router"},
+
+      {"id": "goCart", "title": "カートを見る", "type": "safe", "rt": "#Cart",
+        "tag": "cart flow-purchase customer src-router"},
+      {"id": "doAddCartItem", "title": "カートに追加する", "type": "unsafe", "rt": "#Cart",
+        "tag": "cart flow-purchase customer src-router",
+        "doc": {"value": "在庫・販売制限・配送設定をチェックし、制限超過時は数量を自動調整"},
+        "descriptor": [{"href": "#productCode"}, {"href": "#quantity"}]},
+      {"id": "doUpdateCartItemQuantity", "title": "カート数量を変更する", "type": "idempotent", "rt": "#Cart",
+        "tag": "cart flow-purchase customer src-router",
+        "descriptor": [{"href": "#productCode"}, {"href": "#quantity"}]},
+      {"id": "doRemoveCartItem", "title": "カートから削除する", "type": "idempotent", "rt": "#Cart",
+        "tag": "cart flow-purchase customer src-router",
+        "descriptor": [{"href": "#productCode"}]},
+
+      {"id": "goShopping", "title": "注文手続きへ進む", "type": "safe", "rt": "#Shopping",
+        "tag": "checkout flow-purchase customer src-router src-controller",
+        "doc": {"value": "カートから注文手続きへ遷移。未ログイン時はShoppingLoginへリダイレクト"}},
+      {"id": "goShoppingLogin", "title": "購入ログインを見る", "type": "safe", "rt": "#ShoppingLogin",
+        "tag": "checkout flow-purchase customer src-router src-template"},
+      {"id": "goShoppingNonMember", "title": "非会員購入情報入力へ進む", "type": "safe", "rt": "#ShoppingNonMember",
+        "tag": "checkout flow-purchase customer src-router src-template"},
+      {"id": "doSubmitNonMember", "title": "非会員情報を送信する", "type": "unsafe", "rt": "#Shopping",
+        "tag": "checkout flow-purchase customer src-router src-controller",
+        "descriptor": [{"href": "#name01"}, {"href": "#name02"}, {"href": "#email"}]},
+      {"id": "goShoppingShipping", "title": "お届け先を選択する画面を見る", "type": "safe", "rt": "#ShoppingShipping",
+        "tag": "checkout flow-purchase customer src-router src-template"},
+      {"id": "goShoppingShippingEdit", "title": "お届け先変更画面を見る", "type": "safe", "rt": "#ShoppingShippingEdit",
+        "tag": "checkout flow-purchase customer src-router src-template"},
+      {"id": "goShoppingShippingMultiple", "title": "複数配送先設定画面を見る", "type": "safe", "rt": "#Shopping",
+        "tag": "checkout flow-purchase customer src-router src-template",
+        "doc": {"value": "複数のお届け先に商品を振り分ける画面"}},
+      {"id": "doSelectShippingAddress", "title": "お届け先を選択する", "type": "unsafe", "rt": "#Shopping",
+        "tag": "checkout flow-purchase customer src-router src-controller"},
+      {"id": "doUpdateShippingAddress", "title": "お届け先を更新する", "type": "unsafe", "rt": "#Shopping",
+        "tag": "checkout flow-purchase customer src-router src-controller"},
+      {"id": "doConfirmOrder", "title": "注文内容を確認する", "type": "unsafe", "rt": "#ShoppingConfirm",
+        "tag": "checkout flow-purchase customer src-router src-controller",
+        "doc": {"value": "PaymentMethod::verifyによる決済検証を実行"},
+        "descriptor": [{"href": "#paymentMethod"}]},
+      {"id": "doCheckout", "title": "注文を確定する", "type": "unsafe", "rt": "#ShoppingComplete",
+        "tag": "checkout flow-purchase customer src-router src-controller",
+        "doc": {"value": "税計算、送料計算、在庫引当、ポイント減算を実行。決済処理後に注文確認メールを送信しカートをクリア"},
+        "descriptor": [{"href": "#paymentMethod"}]},
+      {"id": "goShoppingError", "title": "購入エラー画面を表示する", "type": "safe", "rt": "#ShoppingError",
+        "tag": "checkout flow-purchase customer src-router src-controller",
+        "doc": {"value": "在庫不足、決済失敗、セッション切れなどのエラー発生時にリダイレクトされる"}},
+
+      {"id": "goOrderList", "title": "受注一覧を見る", "type": "safe", "rt": "#OrderList",
+        "tag": "order flow-manage-order src-router"},
+      {"id": "goOrder", "title": "受注詳細を見る", "type": "safe", "rt": "#Order",
+        "tag": "order flow-manage-order src-router",
+        "descriptor": [{"href": "#orderNo"}]},
+      {"id": "goOrderHistory", "title": "注文履歴を見る", "type": "safe", "rt": "#OrderList",
+        "tag": "order flow-account customer src-router",
+        "descriptor": [{"href": "#email"}]},
+      {"id": "doCreateOrder", "title": "受注を作成する", "type": "unsafe", "rt": "#Order",
+        "tag": "order flow-manage-order admin src-router"},
+      {"id": "doUpdateOrder", "title": "受注を更新する", "type": "idempotent", "rt": "#Order",
+        "tag": "order flow-manage-order admin src-router",
+        "descriptor": [{"href": "#orderNo"}]},
+      {"id": "doUpdateOrderStatus", "title": "受注ステータスを変更する", "type": "idempotent", "rt": "#Order",
+        "tag": "order flow-manage-order admin src-router",
+        "doc": {"value": "ステータス遷移に応じて在庫やポイントを調整。許可された遷移のみ実行可能"},
+        "descriptor": [{"href": "#orderNo"}, {"href": "#orderStatus"}]},
+      {"id": "doBulkDeleteOrder", "title": "受注を一括削除する", "type": "unsafe", "rt": "#OrderList",
+        "tag": "order flow-manage-order admin src-router"},
+      {"id": "goExportOrder", "title": "受注CSVをエクスポートする", "type": "safe", "rt": "#OrderList",
+        "tag": "order flow-manage-order admin src-router"},
+      {"id": "goExportShipping", "title": "配送CSVをエクスポートする", "type": "safe", "rt": "#OrderList",
+        "tag": "order flow-manage-order admin src-router"},
+      {"id": "doImportShippingCsv", "title": "配送CSVをインポートする", "type": "unsafe", "rt": "#OrderList",
+        "tag": "order flow-manage-order admin src-router"},
+      {"id": "goExportOrderPdf", "title": "帳票PDFをエクスポートする", "type": "safe", "rt": "#OrderList",
+        "tag": "order flow-manage-order admin src-router"},
+      {"id": "doReorder", "title": "再注文する", "type": "unsafe", "rt": "#Cart",
+        "tag": "order flow-purchase customer src-router",
+        "descriptor": [{"href": "#orderNo"}]},
+
+      {"id": "goCustomerRegistration", "title": "会員登録フォームを見る", "type": "safe", "rt": "#CustomerRegistration",
+        "tag": "account flow-register customer src-router"},
+      {"id": "doRegisterCustomer", "title": "会員登録する", "type": "unsafe", "rt": "#CustomerRegistrationComplete",
+        "tag": "account flow-register customer src-router src-controller",
+        "doc": {"value": "会員メール認証オプション有効時は仮会員として登録し認証メールを送信。無効時は即座に本会員"},
+        "descriptor": [{"href": "#email"}, {"href": "#password"}, {"href": "#name01"}, {"href": "#name02"}]},
+      {"id": "doActivateCustomer", "title": "会員を有効化する", "type": "idempotent", "rt": "#Customer",
+        "tag": "account flow-register customer src-router src-controller",
+        "doc": {"value": "メール認証リンクのsecretKeyを検証し仮会員から本会員に変更"},
+        "descriptor": [{"href": "#secretKey"}]},
+      {"id": "doLogin", "title": "ログインする", "type": "unsafe", "rt": "#Mypage",
+        "tag": "account customer src-router",
+        "descriptor": [{"href": "#email"}, {"href": "#password"}]},
+      {"id": "doLogout", "title": "ログアウトする", "type": "idempotent", "rt": "#Top",
+        "tag": "account src-router"},
+      {"id": "doRequestPasswordReset", "title": "パスワードリセットを依頼する", "type": "unsafe", "rt": "#PasswordReset",
+        "tag": "account flow-account customer src-router",
+        "descriptor": [{"href": "#email"}]},
+      {"id": "doResetPassword", "title": "パスワードをリセットする", "type": "idempotent", "rt": "#Login",
+        "tag": "account flow-account customer src-router",
+        "descriptor": [{"href": "#resetKey"}, {"href": "#password"}]},
+      {"id": "goMypage", "title": "マイページを見る", "type": "safe", "rt": "#Mypage",
+        "tag": "account flow-account customer src-router"},
+      {"id": "goMypageHistory", "title": "注文履歴詳細を見る", "type": "safe", "rt": "#MypageHistory",
+        "tag": "account flow-account customer src-router",
+        "descriptor": [{"href": "#orderNo"}]},
+      {"id": "goMypageChange", "title": "会員情報変更画面を見る", "type": "safe", "rt": "#MypageChange",
+        "tag": "account flow-account customer src-router"},
+      {"id": "goMypageWithdraw", "title": "退会画面を見る", "type": "safe", "rt": "#MypageWithdraw",
+        "tag": "account flow-account customer src-router"},
+      {"id": "doUpdateCustomer", "title": "会員情報を更新する", "type": "idempotent", "rt": "#MypageChange",
+        "tag": "account flow-account customer src-router",
+        "descriptor": [{"href": "#email"}]},
+      {"id": "doWithdrawCustomer", "title": "退会する", "type": "idempotent", "rt": "#Top",
+        "tag": "account flow-account customer src-router src-controller",
+        "doc": {"value": "メールアドレスをダミー値に置換しカートとセッションをクリア。退会確認メール送信後にログアウト"}},
+      {"id": "goCustomerList", "title": "会員一覧を見る", "type": "safe", "rt": "#CustomerList",
+        "tag": "account flow-manage-customer admin src-router"},
+      {"id": "goCustomer", "title": "会員詳細を見る", "type": "safe", "rt": "#Customer",
+        "tag": "account flow-manage-customer src-router",
+        "descriptor": [{"href": "#email"}]},
+      {"id": "doCreateCustomer", "title": "会員を作成する", "type": "unsafe", "rt": "#Customer",
+        "tag": "account flow-manage-customer admin src-router",
+        "descriptor": [{"href": "#email"}, {"href": "#password"}, {"href": "#name01"}, {"href": "#name02"}]},
+      {"id": "doDeleteCustomer", "title": "会員を削除する", "type": "idempotent", "rt": "#CustomerList",
+        "tag": "account flow-manage-customer admin src-router",
+        "descriptor": [{"href": "#email"}]},
+      {"id": "goExportCustomer", "title": "会員CSVをエクスポートする", "type": "safe", "rt": "#CustomerList",
+        "tag": "account flow-manage-customer admin src-router"},
+
+      {"id": "goCustomerAddressList", "title": "配送先一覧を見る", "type": "safe", "rt": "#CustomerAddressList",
+        "tag": "account flow-account customer src-router"},
+      {"id": "doCreateCustomerAddress", "title": "配送先を追加する", "type": "unsafe", "rt": "#CustomerAddress",
+        "tag": "account flow-account customer src-router",
+        "doc": {"value": "最大20件まで登録可能"},
+        "descriptor": [{"href": "#name01"}, {"href": "#name02"}, {"href": "#postalCode"}, {"href": "#pref"}, {"href": "#addr01"}, {"href": "#addr02"}, {"href": "#phoneNumber"}]},
+      {"id": "doUpdateCustomerAddress", "title": "配送先を更新する", "type": "idempotent", "rt": "#CustomerAddress",
+        "tag": "account flow-account customer src-router"},
+      {"id": "doDeleteCustomerAddress", "title": "配送先を削除する", "type": "idempotent", "rt": "#CustomerAddressList",
+        "tag": "account flow-account customer src-router"},
+
+      {"id": "goFavoriteList", "title": "お気に入り一覧を見る", "type": "safe", "rt": "#CustomerFavoriteProductList",
+        "tag": "favorite flow-favorite customer src-router"},
+      {"id": "doAddFavorite", "title": "お気に入りに追加する", "type": "unsafe", "rt": "#CustomerFavoriteProduct",
+        "tag": "favorite flow-favorite customer src-router",
+        "descriptor": [{"href": "#productName"}]},
+      {"id": "doRemoveFavorite", "title": "お気に入りから削除する", "type": "idempotent", "rt": "#CustomerFavoriteProductList",
+        "tag": "favorite flow-favorite customer src-router",
+        "descriptor": [{"href": "#productName"}]},
+
+      {"id": "goContactForm", "title": "お問い合わせフォームを見る", "type": "safe", "rt": "#ContactForm",
+        "tag": "contact flow-inquiry customer src-router"},
+      {"id": "doSubmitContact", "title": "お問い合わせを送信する", "type": "unsafe", "rt": "#ContactComplete",
+        "tag": "contact flow-inquiry customer src-router",
+        "descriptor": [{"href": "#contactName01"}, {"href": "#contactName02"}, {"href": "#contactEmail"}, {"href": "#contactContents"}]},
+
+      {"id": "goHelpAbout", "title": "当サイトについてを見る", "type": "safe", "rt": "#HelpAbout",
+        "tag": "help src-router customer"},
+      {"id": "goHelpGuide", "title": "ご利用ガイドを見る", "type": "safe", "rt": "#HelpGuide",
+        "tag": "help src-router customer"},
+      {"id": "goHelpAgreement", "title": "ご利用規約を見る", "type": "safe", "rt": "#HelpAgreement",
+        "tag": "help src-router customer"},
+      {"id": "goHelpPrivacy", "title": "プライバシーポリシーを見る", "type": "safe", "rt": "#HelpPrivacy",
+        "tag": "help src-router customer"},
+      {"id": "goHelpTradeLaw", "title": "特定商取引法を見る", "type": "safe", "rt": "#HelpTradeLaw",
+        "tag": "help src-router customer"},
+
+      {"id": "goBaseInfo", "title": "基本情報を見る", "type": "safe", "rt": "#BaseInfo",
+        "tag": "shop flow-manage-shop admin src-router"},
+      {"id": "doUpdateBaseInfo", "title": "基本情報を更新する", "type": "idempotent", "rt": "#BaseInfo",
+        "tag": "shop flow-manage-shop admin src-router"},
+      {"id": "goPaymentList", "title": "支払方法一覧を見る", "type": "safe", "rt": "#PaymentList",
+        "tag": "shop flow-manage-shop admin src-router"},
+      {"id": "doCreatePayment", "title": "支払方法を作成する", "type": "unsafe", "rt": "#Payment",
+        "tag": "shop flow-manage-shop admin src-router",
+        "descriptor": [{"href": "#paymentMethodName"}, {"href": "#paymentCharge"}]},
+      {"id": "doUpdatePayment", "title": "支払方法を更新する", "type": "idempotent", "rt": "#Payment",
+        "tag": "shop flow-manage-shop admin src-router",
+        "descriptor": [{"href": "#paymentMethodName"}]},
+      {"id": "doDeletePayment", "title": "支払方法を削除する", "type": "idempotent", "rt": "#PaymentList",
+        "tag": "shop flow-manage-shop admin src-router",
+        "descriptor": [{"href": "#paymentMethodName"}]},
+      {"id": "goDeliveryList", "title": "配送方法一覧を見る", "type": "safe", "rt": "#DeliveryList",
+        "tag": "shop flow-manage-shop admin src-router"},
+      {"id": "doCreateDelivery", "title": "配送方法を作成する", "type": "unsafe", "rt": "#Delivery",
+        "tag": "shop flow-manage-shop admin src-router",
+        "descriptor": [{"href": "#deliveryMethodName"}, {"href": "#serviceName"}]},
+      {"id": "doUpdateDelivery", "title": "配送方法を更新する", "type": "idempotent", "rt": "#Delivery",
+        "tag": "shop flow-manage-shop admin src-router",
+        "descriptor": [{"href": "#deliveryMethodName"}]},
+      {"id": "doDeleteDelivery", "title": "配送方法を削除する", "type": "idempotent", "rt": "#DeliveryList",
+        "tag": "shop flow-manage-shop admin src-router",
+        "descriptor": [{"href": "#deliveryMethodName"}]},
+      {"id": "goTaxRuleList", "title": "税率ルール一覧を見る", "type": "safe", "rt": "#TaxRuleList",
+        "tag": "shop flow-manage-shop admin src-router"},
+      {"id": "doCreateTaxRule", "title": "税率ルールを作成する", "type": "unsafe", "rt": "#TaxRule",
+        "tag": "shop flow-manage-shop admin src-router",
+        "descriptor": [{"href": "#taxRuleRate"}, {"href": "#applyDate"}, {"href": "#roundingType"}]},
+      {"id": "doDeleteTaxRule", "title": "税率ルールを削除する", "type": "idempotent", "rt": "#TaxRuleList",
+        "tag": "shop flow-manage-shop admin src-router"},
+
+      {"id": "goNewsList", "title": "ニュース一覧を見る", "type": "safe", "rt": "#NewsList",
+        "tag": "content flow-manage-content src-router"},
+      {"id": "goNews", "title": "ニュース詳細を見る", "type": "safe", "rt": "#News",
+        "tag": "content src-router",
+        "descriptor": [{"href": "#newsTitle"}]},
+      {"id": "doCreateNews", "title": "ニュースを作成する", "type": "unsafe", "rt": "#News",
+        "tag": "content flow-manage-content admin src-router",
+        "descriptor": [{"href": "#newsTitle"}, {"href": "#publishDate"}]},
+      {"id": "doUpdateNews", "title": "ニュースを更新する", "type": "idempotent", "rt": "#News",
+        "tag": "content flow-manage-content admin src-router",
+        "descriptor": [{"href": "#newsTitle"}]},
+      {"id": "doDeleteNews", "title": "ニュースを削除する", "type": "idempotent", "rt": "#NewsList",
+        "tag": "content flow-manage-content admin src-router",
+        "descriptor": [{"href": "#newsTitle"}]},
+
+      {"id": "goMemberList", "title": "管理者一覧を見る", "type": "safe", "rt": "#MemberList",
+        "tag": "admin-system flow-manage-system admin src-router"},
+      {"id": "goMember", "title": "管理者詳細を見る", "type": "safe", "rt": "#Member",
+        "tag": "admin-system flow-manage-system admin src-router",
+        "descriptor": [{"href": "#loginId"}]},
+      {"id": "doCreateMember", "title": "管理者を作成する", "type": "unsafe", "rt": "#Member",
+        "tag": "admin-system flow-manage-system admin src-router",
+        "descriptor": [{"href": "#memberName"}, {"href": "#loginId"}, {"href": "#password"}, {"href": "#authority"}, {"href": "#work"}]},
+      {"id": "doUpdateMember", "title": "管理者を更新する", "type": "idempotent", "rt": "#Member",
+        "tag": "admin-system flow-manage-system admin src-router",
+        "descriptor": [{"href": "#loginId"}]},
+      {"id": "doDeleteMember", "title": "管理者を削除する", "type": "idempotent", "rt": "#MemberList",
+        "tag": "admin-system flow-manage-system admin src-router",
+        "descriptor": [{"href": "#loginId"}]},
+      {"id": "goLoginHistoryList", "title": "ログイン履歴を見る", "type": "safe", "rt": "#LoginHistoryList",
+        "tag": "admin-system flow-manage-system admin src-router"},
+      {"id": "doUpdateAuthorityRole", "title": "権限ルールを更新する", "type": "idempotent", "rt": "#AuthorityRole",
+        "tag": "admin-system flow-manage-system admin src-router",
+        "descriptor": [{"href": "#denyUrl"}, {"href": "#authority"}]},
+
+      {"id": "goMailTemplateList", "title": "メールテンプレート一覧を見る", "type": "safe", "rt": "#MailTemplateList",
+        "tag": "mail flow-manage-mail admin src-router"},
+      {"id": "doUpdateMailTemplate", "title": "メールテンプレートを更新する", "type": "idempotent", "rt": "#MailTemplate",
+        "tag": "mail flow-manage-mail admin src-router",
+        "descriptor": [{"href": "#mailSubject"}]},
+      {"id": "doSendOrderMail", "title": "受注メールを送信する", "type": "unsafe", "rt": "#MailHistory",
+        "tag": "mail flow-manage-order admin src-router",
+        "descriptor": [{"href": "#orderNo"}, {"href": "#mailSubject"}, {"href": "#mailBody"}]},
+
+      {"id": "goPluginList", "title": "プラグイン一覧を見る", "type": "safe", "rt": "#PluginList",
+        "tag": "plugin flow-manage-plugin admin src-router"},
+      {"id": "doInstallPlugin", "title": "プラグインをインストールする", "type": "unsafe", "rt": "#Plugin",
+        "tag": "plugin flow-manage-plugin admin src-router",
+        "descriptor": [{"href": "#pluginCode"}]},
+      {"id": "doEnablePlugin", "title": "プラグインを有効化する", "type": "idempotent", "rt": "#Plugin",
+        "tag": "plugin flow-manage-plugin admin src-router",
+        "descriptor": [{"href": "#pluginCode"}]},
+      {"id": "doDisablePlugin", "title": "プラグインを無効化する", "type": "idempotent", "rt": "#Plugin",
+        "tag": "plugin flow-manage-plugin admin src-router",
+        "descriptor": [{"href": "#pluginCode"}]},
+      {"id": "doUninstallPlugin", "title": "プラグインをアンインストールする", "type": "idempotent", "rt": "#PluginList",
+        "tag": "plugin flow-manage-plugin admin src-router",
+        "descriptor": [{"href": "#pluginCode"}]},
+
+      {"id": "goLayoutList", "title": "レイアウト一覧を見る", "type": "safe", "rt": "#LayoutList",
+        "tag": "cms flow-manage-cms admin src-router"},
+      {"id": "doUpdateLayout", "title": "レイアウトを更新する", "type": "idempotent", "rt": "#Layout",
+        "tag": "cms flow-manage-cms admin src-router",
+        "descriptor": [{"href": "#layoutName"}]},
+      {"id": "goBlockList", "title": "ブロック一覧を見る", "type": "safe", "rt": "#BlockList",
+        "tag": "cms flow-manage-cms admin src-router"},
+      {"id": "doCreateBlock", "title": "ブロックを作成する", "type": "unsafe", "rt": "#Block",
+        "tag": "cms flow-manage-cms admin src-router",
+        "descriptor": [{"href": "#blockName"}, {"href": "#blockFileName"}]},
+      {"id": "doUpdateBlock", "title": "ブロックを更新する", "type": "idempotent", "rt": "#Block",
+        "tag": "cms flow-manage-cms admin src-router",
+        "descriptor": [{"href": "#blockName"}]},
+      {"id": "doDeleteBlock", "title": "ブロックを削除する", "type": "idempotent", "rt": "#BlockList",
+        "tag": "cms flow-manage-cms admin src-router",
+        "descriptor": [{"href": "#blockName"}]},
+      {"id": "goTradeLawList", "title": "特定商取引法一覧を見る", "type": "safe", "rt": "#TradeLawList",
+        "tag": "cms flow-manage-cms admin src-router"},
+      {"id": "doUpdateTradeLaw", "title": "特定商取引法を更新する", "type": "idempotent", "rt": "#TradeLawList",
+        "tag": "cms flow-manage-cms admin src-router"},
+
+      {"id": "goPageList", "title": "ページ一覧を見る", "type": "safe", "rt": "#PageList",
+        "tag": "content flow-manage-content admin src-router"},
+      {"id": "goPage", "title": "ページ詳細を見る", "type": "safe", "rt": "#Page",
+        "tag": "content flow-manage-content admin src-router",
+        "descriptor": [{"href": "#pageName"}]},
+      {"id": "doCreatePage", "title": "ページを作成する", "type": "unsafe", "rt": "#Page",
+        "tag": "content flow-manage-content admin src-router",
+        "descriptor": [{"href": "#pageName"}, {"href": "#pageUrl"}, {"href": "#pageFileName"}]},
+      {"id": "doUpdatePage", "title": "ページを更新する", "type": "idempotent", "rt": "#Page",
+        "tag": "content flow-manage-content admin src-router",
+        "descriptor": [{"href": "#pageName"}]},
+      {"id": "doDeletePage", "title": "ページを削除する", "type": "idempotent", "rt": "#PageList",
+        "tag": "content flow-manage-content admin src-router",
+        "doc": {"value": "ユーザー作成ページのみ削除可能。システムページは削除不可"},
+        "descriptor": [{"href": "#pageName"}]},
+
+      {"id": "goTagList", "title": "タグ一覧を見る", "type": "safe", "rt": "#TagList",
+        "tag": "catalog flow-manage-product admin src-router"},
+      {"id": "doCreateTag", "title": "タグを作成する", "type": "unsafe", "rt": "#Tag",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#tagName"}]},
+      {"id": "doDeleteTag", "title": "タグを削除する", "type": "idempotent", "rt": "#TagList",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#tagName"}]},
+
+      {"id": "goClassNameList", "title": "規格名一覧を見る", "type": "safe", "rt": "#ClassNameList",
+        "tag": "catalog flow-manage-product admin src-router"},
+      {"id": "doCreateClassName", "title": "規格名を作成する", "type": "unsafe", "rt": "#ClassName",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#classNameLabel"}]},
+      {"id": "doUpdateClassName", "title": "規格名を更新する", "type": "idempotent", "rt": "#ClassName",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#classNameLabel"}]},
+      {"id": "doDeleteClassName", "title": "規格名を削除する", "type": "idempotent", "rt": "#ClassNameList",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#classNameLabel"}]},
+
+      {"id": "goClassCategoryList", "title": "規格分類一覧を見る", "type": "safe", "rt": "#ClassCategoryList",
+        "tag": "catalog flow-manage-product admin src-router"},
+      {"id": "doCreateClassCategory", "title": "規格分類を作成する", "type": "unsafe", "rt": "#ClassCategory",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#classCategoryName"}]},
+      {"id": "doUpdateClassCategory", "title": "規格分類を更新する", "type": "idempotent", "rt": "#ClassCategory",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#classCategoryName"}]},
+      {"id": "doDeleteClassCategory", "title": "規格分類を削除する", "type": "idempotent", "rt": "#ClassCategoryList",
+        "tag": "catalog flow-manage-product admin src-router",
+        "descriptor": [{"href": "#classCategoryName"}]},
+
+      {"id": "goTemplateList", "title": "テンプレート一覧を見る", "type": "safe", "rt": "#TemplateList",
+        "tag": "plugin flow-manage-plugin admin src-router"},
+
+      {"id": "doUpdateCsv", "title": "CSV出力設定を更新する", "type": "idempotent", "rt": "#Csv",
+        "tag": "admin-system flow-manage-system admin src-router"}
+    ]
+  }
+}
