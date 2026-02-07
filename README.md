@@ -76,6 +76,7 @@ stateDiagram-v2
 | `alps.json` | ALPS プロファイル本体（機械可読） |
 | `alps.json.html` | [app-state-diagram](https://github.com/alps-asd/app-state-diagram) で生成した HTML ドキュメント |
 | `openapi.yaml` | ALPS から変換した OpenAPI 3.1 仕様（フロントエンドのみ・参考実装） |
+| `openapi.html` | OpenAPI の HTML ドキュメント（Redoc で生成・参考実装） |
 | `handover.json` | 構築プロセスの記録（カバレッジ、情報源、戦略の説明） |
 
 ## 使い方
