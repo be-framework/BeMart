@@ -6,7 +6,7 @@
 
 ## ALPS とは
 
-[ALPS](http://alps.io/spec/) はアプリケーションのセマンティクス（データ語彙と状態遷移）を記述するための仕様。APIフォーマット（HTML, HAL, Collection+JSON 等）から独立してアプリケーションの意味を定義する。
+[ALPS](https://www.app-state-diagram.com/manuals/1.0/ja/index.html) はアプリケーションのセマンティクス（データ語彙と状態遷移）を記述するための仕様。APIフォーマット（HTML, HAL, Collection+JSON 等）から独立してアプリケーションの意味を定義する。
 
 このプロファイルを作成した目的:
 
@@ -94,6 +94,6 @@ asd -s alps.json
 
 ## 参考
 
-- [ALPS 仕様](http://alps.io/spec/)
+- [ALPS 仕様](https://www.app-state-diagram.com/manuals/1.0/ja/index.html)
 - [app-state-diagram](https://github.com/alps-asd/app-state-diagram) — ALPS プロファイルの可視化ツール
 - [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) — 対象アプリケーション
