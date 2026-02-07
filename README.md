@@ -2,6 +2,8 @@
 
 [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) の ALPS（Application-Level Profile Semantics）プロファイル。
 
+[HTML ドキュメントを見る](https://koriym.github.io/ec-cube-alps/alps.json.html)
+
 ## ALPS とは
 
 [ALPS](http://alps.io/spec/) はアプリケーションのセマンティクス（データ語彙と状態遷移）を記述するための仕様。APIフォーマット（HTML, HAL, Collection+JSON 等）から独立してアプリケーションの意味を定義する。
@@ -73,7 +75,7 @@ stateDiagram-v2
 
 ### HTML ドキュメントの閲覧
 
-`alps.json.html` をブラウザで開く。状態遷移図・ディスクリプタ一覧・タグフィルタが利用できる。
+[https://koriym.github.io/ec-cube-alps/alps.json.html](https://koriym.github.io/ec-cube-alps/alps.json.html) で閲覧できる。状態遷移図・ディスクリプタ一覧・タグフィルタが利用できる。
 
 ### asd コマンドでの操作
 
