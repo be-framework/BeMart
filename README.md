@@ -2,7 +2,7 @@
 
 [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) の ALPS（Application-Level Profile Semantics）プロファイル。
 
-[HTML ドキュメントを見る](https://koriym.github.io/ec-cube-alps/alps.json.html)
+[HTML ドキュメントを見る](https://koriym.github.io/ec-cube-alps/alps.json.html) | [OpenAPI サンプル](https://koriym.github.io/ec-cube-alps/openapi.html)
 
 ## ALPS とは
 
@@ -75,6 +75,7 @@ stateDiagram-v2
 |---|---|
 | `alps.json` | ALPS プロファイル本体（機械可読） |
 | `alps.json.html` | [app-state-diagram](https://github.com/alps-asd/app-state-diagram) で生成した HTML ドキュメント |
+| `openapi.yaml` | ALPS から変換した OpenAPI 3.1 仕様（フロントエンドのみ・参考実装） |
 | `handover.json` | 構築プロセスの記録（カバレッジ、情報源、戦略の説明） |
 
 ## 使い方
