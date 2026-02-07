@@ -1,0 +1,2725 @@
+openapi: 3.1.0
+info:
+  title: EC-CUBE 4.3 フロントAPI
+  version: 4.3.0
+  description: >
+    EC-CUBE 4.3 顧客向けフロントエンドAPI。
+    Symfony 6.4 ベースの日本語ECオープンプラットフォームのフロント操作を定義する。
+    本仕様は ALPS アプリケーションプロファイル (alps.json) から生成された。
+  contact:
+    name: EC-CUBE
+    url: https://www.ec-cube.net
+  license:
+    name: GPL-2.0-only
+    url: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+
+servers:
+  - url: https://example.com
+    description: EC-CUBE フロント
+
+tags:
+  - name: top
+    description: トップページ
+  - name: catalog
+    description: 商品カタログ（商品一覧・詳細・カテゴリ）
+  - name: cart
+    description: カート操作
+  - name: checkout
+    description: 購入手続き（注文確定まで）
+  - name: account
+    description: 会員アカウント（登録・ログイン・マイページ）
+  - name: favorite
+    description: お気に入り商品
+  - name: contact
+    description: お問い合わせ
+  - name: help
+    description: ヘルプ・利用規約・特定商取引法
+
+paths:
+  # ===== Top =====
+  /:
+    get:
+      operationId: goTop
+      tags: [top]
+      summary: トップページを見る
+      description: ショップのトップページ。ニュース一覧、新着商品、カテゴリナビゲーション等を表示
+      responses:
+        "200":
+          description: トップページ
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Top"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ===== Catalog =====
+  /products:
+    get:
+      operationId: goProductList
+      tags: [catalog]
+      summary: 商品一覧を見る
+      description: 商品一覧ページ。検索条件やカテゴリで絞り込み可能
+      parameters:
+        - name: categoryId
+          in: query
+          description: カテゴリIDで絞り込み
+          schema:
+            type: integer
+        - name: name
+          in: query
+          description: 商品名で検索
+          schema:
+            type: string
+        - name: pageno
+          in: query
+          description: ページ番号
+          schema:
+            type: integer
+        - name: disp_number
+          in: query
+          description: 1ページあたりの表示件数
+          schema:
+            type: integer
+        - name: orderby
+          in: query
+          description: ソート順
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 商品一覧
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductList"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{productId}:
+    get:
+      operationId: goProduct
+      tags: [catalog]
+      summary: 商品詳細を見る
+      description: 商品詳細ページ。規格・画像・カテゴリ・タグ情報を含む
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: 商品ID
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 商品詳細
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "404":
+          description: 商品が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /categories:
+    get:
+      operationId: goCategoryList
+      tags: [catalog]
+      summary: カテゴリ一覧を見る
+      description: カテゴリ一覧。階層構造を持つカテゴリツリーを返す
+      responses:
+        "200":
+          description: カテゴリ一覧
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CategoryList"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /categories/{categoryId}:
+    get:
+      operationId: goCategory
+      tags: [catalog]
+      summary: カテゴリ詳細を見る
+      description: 指定カテゴリの詳細情報
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          description: カテゴリID
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: カテゴリ詳細
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Category"
+        "404":
+          description: カテゴリが見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ===== Cart =====
+  /cart:
+    get:
+      operationId: goCart
+      tags: [cart]
+      summary: カートを見る
+      description: カート内容の表示。販売種別ごとに分離されたカートを返す
+      responses:
+        "200":
+          description: カート情報
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /cart/items:
+    post:
+      operationId: doAddCartItem
+      tags: [cart]
+      summary: カートに追加する
+      description: 在庫・販売制限・配送設定をチェックし、制限超過時は数量を自動調整
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - productCode
+                - quantity
+              properties:
+                productCode:
+                  type: string
+                  description: 商品コード（SKU/品番）
+                quantity:
+                  type: integer
+                  description: 数量
+      responses:
+        "201":
+          description: カートに追加された
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /cart/items/{productCode}:
+    put:
+      operationId: doUpdateCartItemQuantity
+      tags: [cart]
+      summary: カート数量を変更する
+      description: カート内の指定商品の数量を更新
+      parameters:
+        - name: productCode
+          in: path
+          required: true
+          description: 商品コード
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - quantity
+              properties:
+                quantity:
+                  type: integer
+                  description: 変更後の数量
+      responses:
+        "200":
+          description: カート更新後
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: カート内に該当商品がない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      operationId: doRemoveCartItem
+      tags: [cart]
+      summary: カートから削除する
+      description: カート内の指定商品を削除
+      parameters:
+        - name: productCode
+          in: path
+          required: true
+          description: 商品コード
+          schema:
+            type: string
+      responses:
+        "200":
+          description: カート削除後
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        "404":
+          description: カート内に該当商品がない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ===== Checkout =====
+  /shopping:
+    get:
+      operationId: goShopping
+      tags: [checkout]
+      summary: 注文手続きへ進む
+      description: カートから注文手続きへ遷移。未ログイン時はShoppingLoginへリダイレクト
+      responses:
+        "200":
+          description: 注文手続き画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shopping"
+        "302":
+          description: 未ログインのためログイン画面へリダイレクト
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shopping/login:
+    get:
+      operationId: goShoppingLogin
+      tags: [checkout]
+      summary: 購入ログインを見る
+      description: 購入手続き時のログイン画面。会員ログインまたはゲスト購入を選択
+      responses:
+        "200":
+          description: 購入ログイン画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingLogin"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shopping/nonmember:
+    get:
+      operationId: goShoppingNonMember
+      tags: [checkout]
+      summary: 非会員購入情報入力へ進む
+      description: 非会員（ゲスト）が注文者情報を入力する画面
+      responses:
+        "200":
+          description: 非会員購入情報入力画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingNonMember"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: doSubmitNonMember
+      tags: [checkout]
+      summary: 非会員情報を送信する
+      description: ゲスト購入用の注文者情報を送信
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name01
+                - name02
+                - email
+                - postalCode
+                - pref
+                - addr01
+                - addr02
+                - phoneNumber
+              properties:
+                name01:
+                  type: string
+                  description: 姓
+                name02:
+                  type: string
+                  description: 名
+                kana01:
+                  type: string
+                  description: セイ
+                kana02:
+                  type: string
+                  description: メイ
+                companyName:
+                  type: string
+                  description: 会社名
+                email:
+                  type: string
+                  format: email
+                  description: メールアドレス
+                phoneNumber:
+                  type: string
+                  description: 電話番号
+                postalCode:
+                  type: string
+                  description: 郵便番号
+                pref:
+                  type: integer
+                  description: 都道府県（1〜47）
+                addr01:
+                  type: string
+                  description: 市区町村
+                addr02:
+                  type: string
+                  description: 番地・建物名
+      responses:
+        "200":
+          description: 注文手続き画面へ遷移
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shopping"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shopping/shipping:
+    get:
+      operationId: goShoppingShipping
+      tags: [checkout]
+      summary: お届け先を選択する画面を見る
+      description: 会員の登録済みお届け先から配送先を選択する画面
+      responses:
+        "200":
+          description: お届け先選択画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingShipping"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: doSelectShippingAddress
+      tags: [checkout]
+      summary: お届け先を選択する
+      description: 登録済みのお届け先を選択して配送先に設定
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                customerAddressId:
+                  type: integer
+                  description: 配送先住所ID
+      responses:
+        "200":
+          description: 注文手続き画面へ遷移
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shopping"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shopping/shipping/edit:
+    get:
+      operationId: goShoppingShippingEdit
+      tags: [checkout]
+      summary: お届け先変更画面を見る
+      description: 新しいお届け先を入力する、または非会員のお届け先を編集する画面
+      responses:
+        "200":
+          description: お届け先変更画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingShippingEdit"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: doUpdateShippingAddress
+      tags: [checkout]
+      summary: お届け先を更新する
+      description: 新しいお届け先の登録または既存お届け先の更新
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name01
+                - name02
+                - postalCode
+                - pref
+                - addr01
+                - addr02
+                - phoneNumber
+              properties:
+                name01:
+                  type: string
+                  description: 姓
+                name02:
+                  type: string
+                  description: 名
+                kana01:
+                  type: string
+                  description: セイ
+                kana02:
+                  type: string
+                  description: メイ
+                companyName:
+                  type: string
+                  description: 会社名
+                postalCode:
+                  type: string
+                  description: 郵便番号
+                pref:
+                  type: integer
+                  description: 都道府県（1〜47）
+                addr01:
+                  type: string
+                  description: 市区町村
+                addr02:
+                  type: string
+                  description: 番地・建物名
+                phoneNumber:
+                  type: string
+                  description: 電話番号
+      responses:
+        "200":
+          description: 注文手続き画面へ遷移
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shopping"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shopping/shipping/multiple:
+    get:
+      operationId: goShoppingShippingMultiple
+      tags: [checkout]
+      summary: 複数配送先設定画面を見る
+      description: 複数のお届け先に商品を振り分ける画面
+      responses:
+        "200":
+          description: 複数配送先設定画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Shopping"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shopping/confirm:
+    post:
+      operationId: doConfirmOrder
+      tags: [checkout]
+      summary: 注文内容を確認する
+      description: PaymentMethod::verifyによる決済検証を実行
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paymentMethod:
+                  type: string
+                  description: 支払方法
+                message:
+                  type: string
+                  description: 注文メッセージ
+                point:
+                  type: integer
+                  description: 使用ポイント
+                deliveryTime:
+                  type: string
+                  description: 配送時間帯
+                deliveryDate:
+                  type: string
+                  format: date
+                  description: 配送希望日
+      responses:
+        "200":
+          description: 注文確認画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingConfirm"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shopping/checkout:
+    post:
+      operationId: doCheckout
+      tags: [checkout]
+      summary: 注文を確定する
+      description: >
+        税計算、送料計算、在庫引当、ポイント減算を実行。
+        決済処理後に注文確認メールを送信しカートをクリア
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                paymentMethod:
+                  type: string
+                  description: 支払方法
+      responses:
+        "200":
+          description: 注文完了
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingComplete"
+        "400":
+          description: バリデーションエラー（在庫不足等）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /shopping/error:
+    get:
+      operationId: goShoppingError
+      tags: [checkout]
+      summary: 購入エラー画面を表示する
+      description: 在庫不足、決済失敗、セッション切れなどのエラー発生時にリダイレクトされる
+      responses:
+        "200":
+          description: 購入エラー画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingError"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ===== Account =====
+  /login:
+    get:
+      operationId: goLogin
+      tags: [account]
+      summary: ログイン画面を見る
+      description: 顧客用ログイン画面
+      responses:
+        "200":
+          description: ログイン画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Login"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: doLogin
+      tags: [account]
+      summary: ログインする
+      description: メールアドレスとパスワードで認証
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+                - password
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: メールアドレス
+                password:
+                  type: string
+                  format: password
+                  description: パスワード
+      responses:
+        "200":
+          description: ログイン成功、マイページへ遷移
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mypage"
+        "401":
+          description: 認証失敗
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /logout:
+    delete:
+      operationId: doLogout
+      tags: [account]
+      summary: ログアウトする
+      description: セッションを破棄してログアウト
+      responses:
+        "200":
+          description: ログアウト成功、トップページへ遷移
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Top"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /entry:
+    get:
+      operationId: goCustomerRegistration
+      tags: [account]
+      summary: 会員登録フォームを見る
+      description: 会員登録フォーム画面
+      responses:
+        "200":
+          description: 会員登録フォーム
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerRegistration"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: doRegisterCustomer
+      tags: [account]
+      summary: 会員登録する
+      description: >
+        会員メール認証オプション有効時は仮会員として登録し認証メールを送信。
+        無効時は即座に本会員
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name01
+                - name02
+                - email
+                - password
+              properties:
+                name01:
+                  type: string
+                  description: 姓
+                name02:
+                  type: string
+                  description: 名
+                kana01:
+                  type: string
+                  description: セイ
+                kana02:
+                  type: string
+                  description: メイ
+                companyName:
+                  type: string
+                  description: 会社名
+                email:
+                  type: string
+                  format: email
+                  description: メールアドレス
+                phoneNumber:
+                  type: string
+                  description: 電話番号
+                postalCode:
+                  type: string
+                  description: 郵便番号
+                pref:
+                  type: integer
+                  description: 都道府県（1〜47）
+                addr01:
+                  type: string
+                  description: 市区町村
+                addr02:
+                  type: string
+                  description: 番地・建物名
+                password:
+                  type: string
+                  format: password
+                  description: パスワード
+                birth:
+                  type: string
+                  format: date
+                  description: 生年月日
+                sex:
+                  type: integer
+                  description: 性別（1=男性, 2=女性, 3=その他, 4=回答しない）
+                job:
+                  type: integer
+                  description: 職業（1〜18）
+      responses:
+        "201":
+          description: 会員登録完了
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerRegistrationComplete"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /entry/activate/{secretKey}:
+    put:
+      operationId: doActivateCustomer
+      tags: [account]
+      summary: 会員を有効化する
+      description: メール認証リンクのsecretKeyを検証し仮会員から本会員に変更
+      parameters:
+        - name: secretKey
+          in: path
+          required: true
+          description: 認証キー
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 会員有効化成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Customer"
+        "400":
+          description: 無効な認証キー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /forgot:
+    post:
+      operationId: doRequestPasswordReset
+      tags: [account]
+      summary: パスワードリセットを依頼する
+      description: パスワードリセット用のメールを送信
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  description: メールアドレス
+      responses:
+        "200":
+          description: リセットメール送信完了
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /forgot/reset/{resetKey}:
+    put:
+      operationId: doResetPassword
+      tags: [account]
+      summary: パスワードをリセットする
+      description: リセットキーを検証し新しいパスワードを設定
+      parameters:
+        - name: resetKey
+          in: path
+          required: true
+          description: リセットキー
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - password
+              properties:
+                password:
+                  type: string
+                  format: password
+                  description: 新しいパスワード
+      responses:
+        "200":
+          description: パスワードリセット成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Login"
+        "400":
+          description: 無効なリセットキーまたはバリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /mypage:
+    get:
+      operationId: goMypage
+      tags: [account]
+      summary: マイページを見る
+      description: マイページトップ。注文履歴一覧を表示
+      responses:
+        "200":
+          description: マイページ（注文履歴一覧）
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Mypage"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /mypage/history/{orderNo}:
+    get:
+      operationId: goMypageHistory
+      tags: [account]
+      summary: 注文履歴詳細を見る
+      description: 個別の注文履歴詳細画面
+      parameters:
+        - name: orderNo
+          in: path
+          required: true
+          description: 注文番号
+          schema:
+            type: string
+      responses:
+        "200":
+          description: 注文履歴詳細
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MypageHistory"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: 注文が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /mypage/change:
+    get:
+      operationId: goMypageChange
+      tags: [account]
+      summary: 会員情報変更画面を見る
+      description: 会員情報の変更画面
+      responses:
+        "200":
+          description: 会員情報変更画面
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MypageChange"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    put:
+      operationId: doUpdateCustomer
+      tags: [account]
+      summary: 会員情報を更新する
+      description: 会員情報を変更・保存
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                name01:
+                  type: string
+                  description: 姓
+                name02:
+                  type: string
+                  description: 名
+                kana01:
+                  type: string
+                  description: セイ
+                kana02:
+                  type: string
+                  description: メイ
+                companyName:
+                  type: string
+                  description: 会社名
+                email:
+                  type: string
+                  format: email
+                  description: メールアドレス
+                phoneNumber:
+                  type: string
+                  description: 電話番号
+                postalCode:
+                  type: string
+                  description: 郵便番号
+                pref:
+                  type: integer
+                  description: 都道府県（1〜47）
+                addr01:
+                  type: string
+                  description: 市区町村
+                addr02:
+                  type: string
+                  description: 番地・建物名
+                password:
+                  type: string
+                  format: password
+                  description: パスワード
+                birth:
+                  type: string
+                  format: date
+                  description: 生年月日
+                sex:
+                  type: integer
+                  description: 性別（1=男性, 2=女性, 3=その他, 4=回答しない）
+                job:
+                  type: integer
+                  description: 職業（1〜18）
+      responses:
+        "200":
+          description: 会員情報更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MypageChange"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /mypage/withdraw:
+    get:
+      operationId: goMypageWithdraw
+      tags: [account]
+      summary: 退会画面を見る
+      description: 退会確認・退会処理画面
+      responses:
+        "200":
+          description: 退会確認画面
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      operationId: doWithdrawCustomer
+      tags: [account]
+      summary: 退会する
+      description: >
+        メールアドレスをダミー値に置換しカートとセッションをクリア。
+        退会確認メール送信後にログアウト
+      responses:
+        "200":
+          description: 退会完了、トップページへ遷移
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Top"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /mypage/delivery:
+    get:
+      operationId: goCustomerAddressList
+      tags: [account]
+      summary: 配送先一覧を見る
+      description: 会員の登録済み配送先住所一覧
+      responses:
+        "200":
+          description: 配送先一覧
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerAddressList"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: doCreateCustomerAddress
+      tags: [account]
+      summary: 配送先を追加する
+      description: 最大20件まで登録可能
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name01
+                - name02
+                - postalCode
+                - pref
+                - addr01
+                - addr02
+                - phoneNumber
+              properties:
+                name01:
+                  type: string
+                  description: 姓
+                name02:
+                  type: string
+                  description: 名
+                kana01:
+                  type: string
+                  description: セイ
+                kana02:
+                  type: string
+                  description: メイ
+                companyName:
+                  type: string
+                  description: 会社名
+                postalCode:
+                  type: string
+                  description: 郵便番号
+                pref:
+                  type: integer
+                  description: 都道府県（1〜47）
+                addr01:
+                  type: string
+                  description: 市区町村
+                addr02:
+                  type: string
+                  description: 番地・建物名
+                phoneNumber:
+                  type: string
+                  description: 電話番号
+      responses:
+        "201":
+          description: 配送先追加成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerAddress"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /mypage/delivery/{addressId}:
+    put:
+      operationId: doUpdateCustomerAddress
+      tags: [account]
+      summary: 配送先を更新する
+      description: 配送先住所情報を更新
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          description: 配送先住所ID
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name01:
+                  type: string
+                  description: 姓
+                name02:
+                  type: string
+                  description: 名
+                kana01:
+                  type: string
+                  description: セイ
+                kana02:
+                  type: string
+                  description: メイ
+                companyName:
+                  type: string
+                  description: 会社名
+                postalCode:
+                  type: string
+                  description: 郵便番号
+                pref:
+                  type: integer
+                  description: 都道府県（1〜47）
+                addr01:
+                  type: string
+                  description: 市区町村
+                addr02:
+                  type: string
+                  description: 番地・建物名
+                phoneNumber:
+                  type: string
+                  description: 電話番号
+      responses:
+        "200":
+          description: 配送先更新成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerAddress"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: 配送先が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      operationId: doDeleteCustomerAddress
+      tags: [account]
+      summary: 配送先を削除する
+      description: 登録済み配送先住所を削除
+      parameters:
+        - name: addressId
+          in: path
+          required: true
+          description: 配送先住所ID
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: 配送先削除成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerAddressList"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: 配送先が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /mypage/history/{orderNo}/reorder:
+    post:
+      operationId: doReorder
+      tags: [account]
+      summary: 再注文する
+      description: 過去の注文内容をカートに再投入
+      parameters:
+        - name: orderNo
+          in: path
+          required: true
+          description: 注文番号
+          schema:
+            type: string
+      responses:
+        "200":
+          description: カートに再投入完了
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Cart"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: 注文が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ===== Favorite =====
+  /mypage/favorite:
+    get:
+      operationId: goFavoriteList
+      tags: [favorite]
+      summary: お気に入り一覧を見る
+      description: お気に入り商品の一覧を表示
+      responses:
+        "200":
+          description: お気に入り一覧
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerFavoriteProductList"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /products/{productId}/favorite:
+    post:
+      operationId: doAddFavorite
+      tags: [favorite]
+      summary: お気に入りに追加する
+      description: 指定商品をお気に入りに追加
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: 商品ID
+          schema:
+            type: integer
+      responses:
+        "201":
+          description: お気に入りに追加完了
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerFavoriteProduct"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: 商品が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    delete:
+      operationId: doRemoveFavorite
+      tags: [favorite]
+      summary: お気に入りから削除する
+      description: 指定商品をお気に入りから削除
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: 商品ID
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: お気に入りから削除完了
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomerFavoriteProductList"
+        "401":
+          description: 未認証
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "404":
+          description: 商品が見つからない
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ===== Contact =====
+  /contact:
+    get:
+      operationId: goContactForm
+      tags: [contact]
+      summary: お問い合わせフォームを見る
+      description: お問い合わせフォーム画面
+      responses:
+        "200":
+          description: お問い合わせフォーム
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactForm"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+    post:
+      operationId: doSubmitContact
+      tags: [contact]
+      summary: お問い合わせを送信する
+      description: お問い合わせ内容を送信
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - contactName01
+                - contactName02
+                - contactEmail
+                - contactContents
+              properties:
+                contactName01:
+                  type: string
+                  description: お問い合わせ姓
+                contactName02:
+                  type: string
+                  description: お問い合わせ名
+                contactKana01:
+                  type: string
+                  description: お問い合わせセイ
+                contactKana02:
+                  type: string
+                  description: お問い合わせメイ
+                contactEmail:
+                  type: string
+                  format: email
+                  description: お問い合わせメールアドレス
+                phoneNumber:
+                  type: string
+                  description: 電話番号
+                contactContents:
+                  type: string
+                  description: お問い合わせ内容
+      responses:
+        "200":
+          description: お問い合わせ送信完了
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ContactComplete"
+        "400":
+          description: バリデーションエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  # ===== Help =====
+  /help/about:
+    get:
+      operationId: goHelpAbout
+      tags: [help]
+      summary: 当サイトについてを見る
+      description: 当サイトについてのページ
+      responses:
+        "200":
+          description: 当サイトについて
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /help/guide:
+    get:
+      operationId: goHelpGuide
+      tags: [help]
+      summary: ご利用ガイドを見る
+      description: ご利用ガイドページ
+      responses:
+        "200":
+          description: ご利用ガイド
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /help/agreement:
+    get:
+      operationId: goHelpAgreement
+      tags: [help]
+      summary: ご利用規約を見る
+      description: 利用規約ページ
+      responses:
+        "200":
+          description: ご利用規約
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /help/privacy:
+    get:
+      operationId: goHelpPrivacy
+      tags: [help]
+      summary: プライバシーポリシーを見る
+      description: プライバシーポリシーページ
+      responses:
+        "200":
+          description: プライバシーポリシー
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+  /help/tradelaw:
+    get:
+      operationId: goHelpTradeLaw
+      tags: [help]
+      summary: 特定商取引法を見る
+      description: 特定商取引法に基づく表記のフロント表示ページ
+      responses:
+        "200":
+          description: 特定商取引法に基づく表記
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HelpTradeLaw"
+        "500":
+          description: サーバーエラー
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+
+components:
+  schemas:
+    # ===== Top =====
+    Top:
+      type: object
+      description: トップページ
+      properties:
+        shopMessage:
+          type: string
+          description: ショップメッセージ
+
+    # ===== Catalog Schemas =====
+    Product:
+      type: object
+      description: 商品
+      properties:
+        productName:
+          type: string
+          description: 商品名
+        descriptionList:
+          type: string
+          description: 一覧用説明文
+        descriptionDetail:
+          type: string
+          description: 詳細説明文
+        searchWord:
+          type: string
+          description: 検索ワード
+        freeArea:
+          type: string
+          description: フリーエリア（HTML入力可能）
+        productStatus:
+          type: integer
+          description: 商品ステータス（1=公開, 2=非公開, 3=廃止）
+        createDate:
+          type: string
+          format: date-time
+          description: 作成日時
+        updateDate:
+          type: string
+          format: date-time
+          description: 更新日時
+        productClasses:
+          type: array
+          description: 商品規格一覧
+          items:
+            $ref: "#/components/schemas/ProductClass"
+        productImages:
+          type: array
+          description: 商品画像一覧
+          items:
+            $ref: "#/components/schemas/ProductImage"
+        productCategories:
+          type: array
+          description: 商品カテゴリ一覧
+          items:
+            $ref: "#/components/schemas/ProductCategory"
+        productTags:
+          type: array
+          description: 商品タグ一覧
+          items:
+            $ref: "#/components/schemas/ProductTag"
+
+    ProductClass:
+      type: object
+      description: 商品規格
+      properties:
+        productCode:
+          type: string
+          description: 商品コード（SKU/品番）
+        stock:
+          type: integer
+          description: 在庫数
+        stockUnlimited:
+          type: boolean
+          description: 在庫無制限フラグ
+        saleLimit:
+          type: integer
+          description: 購入制限数
+        price01:
+          type: number
+          description: 通常価格（税抜）
+        price02:
+          type: number
+          description: 販売価格（税抜）
+        deliveryFee:
+          type: number
+          description: 商品別送料
+        productClassVisible:
+          type: boolean
+          description: 規格表示フラグ
+        currencyCode:
+          type: string
+          description: 通貨コード（ISO 4217）
+        pointRate:
+          type: number
+          description: ポイント付与率（%）
+        classCategoryName:
+          type: string
+          description: 規格分類名（例：赤、Lサイズ）
+        classCategoryBackendName:
+          type: string
+          description: 規格分類管理名
+
+    ProductImage:
+      type: object
+      description: 商品画像
+      properties:
+        fileName:
+          type: string
+          description: ファイル名
+        sortNo:
+          type: integer
+          description: 表示順
+
+    ProductCategory:
+      type: object
+      description: 商品カテゴリ
+      properties:
+        categoryName:
+          type: string
+          description: カテゴリ名
+        hierarchy:
+          type: integer
+          description: 階層レベル
+
+    ProductTag:
+      type: object
+      description: 商品タグ
+      properties:
+        tagName:
+          type: string
+          description: タグ名
+
+    ProductList:
+      type: object
+      description: 商品一覧
+      properties:
+        products:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+
+    Category:
+      type: object
+      description: カテゴリ
+      properties:
+        categoryName:
+          type: string
+          description: カテゴリ名
+        hierarchy:
+          type: integer
+          description: 階層レベル
+        sortNo:
+          type: integer
+          description: 表示順
+        createDate:
+          type: string
+          format: date-time
+          description: 作成日時
+        updateDate:
+          type: string
+          format: date-time
+          description: 更新日時
+
+    CategoryList:
+      type: object
+      description: カテゴリ一覧
+      properties:
+        categories:
+          type: array
+          items:
+            $ref: "#/components/schemas/Category"
+
+    # ===== Cart Schemas =====
+    Cart:
+      type: object
+      description: カート
+      properties:
+        cartKey:
+          type: string
+          description: カートキー（販売種別ごとの識別キー）
+        preOrderId:
+          type: string
+          description: 仮注文ID
+        totalPrice:
+          type: number
+          description: 合計金額（税込）
+        deliveryFeeTotal:
+          type: number
+          description: 送料合計
+        createDate:
+          type: string
+          format: date-time
+          description: 作成日時
+        updateDate:
+          type: string
+          format: date-time
+          description: 更新日時
+        cartItems:
+          type: array
+          description: カート明細
+          items:
+            $ref: "#/components/schemas/CartItem"
+
+    CartItem:
+      type: object
+      description: カート明細
+      properties:
+        cartItemPrice:
+          type: number
+          description: カート商品価格（税込単価）
+        quantity:
+          type: integer
+          description: 数量
+        productName:
+          type: string
+          description: 商品名
+        productCode:
+          type: string
+          description: 商品コード
+
+    # ===== Checkout Schemas =====
+    ShoppingLogin:
+      type: object
+      description: 購入ログイン画面
+      properties:
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+
+    ShoppingNonMember:
+      type: object
+      description: 非会員購入情報入力
+      properties:
+        name01:
+          type: string
+          description: 姓
+        name02:
+          type: string
+          description: 名
+        kana01:
+          type: string
+          description: セイ
+        kana02:
+          type: string
+          description: メイ
+        companyName:
+          type: string
+          description: 会社名
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+        phoneNumber:
+          type: string
+          description: 電話番号
+        postalCode:
+          type: string
+          description: 郵便番号
+        pref:
+          type: integer
+          description: 都道府県（1〜47）
+        addr01:
+          type: string
+          description: 市区町村
+        addr02:
+          type: string
+          description: 番地・建物名
+
+    Shopping:
+      type: object
+      description: 注文手続き
+      properties:
+        paymentMethod:
+          type: string
+          description: 支払方法
+        deliveryName:
+          type: string
+          description: 配送業者名
+        deliveryTime:
+          type: string
+          description: 配送時間帯
+        deliveryDate:
+          type: string
+          format: date
+          description: 配送希望日
+        message:
+          type: string
+          description: 注文メッセージ
+        point:
+          type: integer
+          description: 使用ポイント
+
+    ShoppingShipping:
+      type: object
+      description: お届け先選択
+      properties:
+        addresses:
+          type: array
+          description: 登録済みお届け先一覧
+          items:
+            $ref: "#/components/schemas/ShippingAddress"
+
+    ShippingAddress:
+      type: object
+      description: お届け先住所
+      properties:
+        name01:
+          type: string
+          description: 姓
+        name02:
+          type: string
+          description: 名
+        postalCode:
+          type: string
+          description: 郵便番号
+        pref:
+          type: integer
+          description: 都道府県（1〜47）
+        addr01:
+          type: string
+          description: 市区町村
+        addr02:
+          type: string
+          description: 番地・建物名
+        phoneNumber:
+          type: string
+          description: 電話番号
+
+    ShoppingShippingEdit:
+      type: object
+      description: お届け先変更
+      properties:
+        name01:
+          type: string
+          description: 姓
+        name02:
+          type: string
+          description: 名
+        kana01:
+          type: string
+          description: セイ
+        kana02:
+          type: string
+          description: メイ
+        companyName:
+          type: string
+          description: 会社名
+        postalCode:
+          type: string
+          description: 郵便番号
+        pref:
+          type: integer
+          description: 都道府県（1〜47）
+        addr01:
+          type: string
+          description: 市区町村
+        addr02:
+          type: string
+          description: 番地・建物名
+        phoneNumber:
+          type: string
+          description: 電話番号
+
+    ShoppingConfirm:
+      type: object
+      description: 注文確認
+      properties:
+        paymentMethod:
+          type: string
+          description: 支払方法
+        subtotal:
+          type: number
+          description: 小計（商品合計、税込）
+        deliveryFeeTotal:
+          type: number
+          description: 送料合計
+        charge:
+          type: number
+          description: 手数料
+        discount:
+          type: number
+          description: 値引き額
+        tax:
+          type: number
+          description: 税額
+        total:
+          type: number
+          description: 合計（小計＋送料＋手数料−値引き）
+        paymentTotal:
+          type: number
+          description: 支払合計（ポイント使用後の実際の支払金額）
+
+    ShoppingComplete:
+      type: object
+      description: 注文完了
+      properties:
+        orderNo:
+          type: string
+          description: 注文番号
+
+    ShoppingError:
+      type: object
+      description: 購入エラー
+      properties:
+        message:
+          type: string
+          description: エラーメッセージ
+
+    # ===== Account Schemas =====
+    Login:
+      type: object
+      description: ログイン画面
+      properties:
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+
+    CustomerRegistration:
+      type: object
+      description: 会員登録フォーム
+      properties:
+        name01:
+          type: string
+          description: 姓
+        name02:
+          type: string
+          description: 名
+        kana01:
+          type: string
+          description: セイ
+        kana02:
+          type: string
+          description: メイ
+        companyName:
+          type: string
+          description: 会社名
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+        phoneNumber:
+          type: string
+          description: 電話番号
+        postalCode:
+          type: string
+          description: 郵便番号
+        pref:
+          type: integer
+          description: 都道府県（1〜47）
+        addr01:
+          type: string
+          description: 市区町村
+        addr02:
+          type: string
+          description: 番地・建物名
+        birth:
+          type: string
+          format: date
+          description: 生年月日
+        sex:
+          type: integer
+          description: 性別（1=男性, 2=女性, 3=その他, 4=回答しない）
+        job:
+          type: integer
+          description: 職業（1〜18）
+
+    CustomerRegistrationComplete:
+      type: object
+      description: 会員登録完了（メール認証有効時は仮登録完了の案内を表示）
+
+    Customer:
+      type: object
+      description: 会員
+      properties:
+        name01:
+          type: string
+          description: 姓
+        name02:
+          type: string
+          description: 名
+        kana01:
+          type: string
+          description: セイ
+        kana02:
+          type: string
+          description: メイ
+        companyName:
+          type: string
+          description: 会社名
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+        phoneNumber:
+          type: string
+          description: 電話番号
+        postalCode:
+          type: string
+          description: 郵便番号
+        pref:
+          type: integer
+          description: 都道府県（1〜47）
+        addr01:
+          type: string
+          description: 市区町村
+        addr02:
+          type: string
+          description: 番地・建物名
+        birth:
+          type: string
+          format: date
+          description: 生年月日
+        sex:
+          type: integer
+          description: 性別（1=男性, 2=女性, 3=その他, 4=回答しない）
+        job:
+          type: integer
+          description: 職業（1〜18）
+        customerStatus:
+          type: integer
+          description: 会員ステータス（1=仮会員, 2=本会員, 3=退会）
+        point:
+          type: integer
+          description: ポイント残高
+        createDate:
+          type: string
+          format: date-time
+          description: 作成日時
+        updateDate:
+          type: string
+          format: date-time
+          description: 更新日時
+
+    Mypage:
+      type: object
+      description: マイページ（注文履歴一覧）
+      properties:
+        orders:
+          type: array
+          description: 注文履歴
+          items:
+            $ref: "#/components/schemas/OrderSummary"
+
+    OrderSummary:
+      type: object
+      description: 注文概要（マイページ用）
+      properties:
+        orderNo:
+          type: string
+          description: 注文番号
+        orderDate:
+          type: string
+          format: date-time
+          description: 注文日
+        orderStatus:
+          type: integer
+          description: >
+            受注ステータス
+            （1=新規受付, 3=注文取消, 4=対応中, 5=発送済み,
+            6=入金済み, 7=決済処理中, 8=購入処理中, 9=返品）
+        paymentMethod:
+          type: string
+          description: 支払方法
+        total:
+          type: number
+          description: 合計金額
+
+    MypageHistory:
+      type: object
+      description: 注文履歴詳細
+      properties:
+        orderNo:
+          type: string
+          description: 注文番号
+        orderDate:
+          type: string
+          format: date-time
+          description: 注文日
+        orderStatus:
+          type: integer
+          description: 受注ステータス
+        paymentMethod:
+          type: string
+          description: 支払方法
+        subtotal:
+          type: number
+          description: 小計
+        deliveryFeeTotal:
+          type: number
+          description: 送料合計
+        charge:
+          type: number
+          description: 手数料
+        discount:
+          type: number
+          description: 値引き額
+        total:
+          type: number
+          description: 合計
+        paymentTotal:
+          type: number
+          description: 支払合計
+        orderItems:
+          type: array
+          description: 受注明細
+          items:
+            $ref: "#/components/schemas/OrderItem"
+        shippings:
+          type: array
+          description: 配送情報
+          items:
+            $ref: "#/components/schemas/Shipping"
+
+    MypageChange:
+      type: object
+      description: 会員情報変更
+      properties:
+        name01:
+          type: string
+          description: 姓
+        name02:
+          type: string
+          description: 名
+        kana01:
+          type: string
+          description: セイ
+        kana02:
+          type: string
+          description: メイ
+        companyName:
+          type: string
+          description: 会社名
+        email:
+          type: string
+          format: email
+          description: メールアドレス
+        phoneNumber:
+          type: string
+          description: 電話番号
+        postalCode:
+          type: string
+          description: 郵便番号
+        pref:
+          type: integer
+          description: 都道府県（1〜47）
+        addr01:
+          type: string
+          description: 市区町村
+        addr02:
+          type: string
+          description: 番地・建物名
+        birth:
+          type: string
+          format: date
+          description: 生年月日
+        sex:
+          type: integer
+          description: 性別（1=男性, 2=女性, 3=その他, 4=回答しない）
+        job:
+          type: integer
+          description: 職業（1〜18）
+
+    CustomerAddress:
+      type: object
+      description: 配送先住所
+      properties:
+        name01:
+          type: string
+          description: 姓
+        name02:
+          type: string
+          description: 名
+        kana01:
+          type: string
+          description: セイ
+        kana02:
+          type: string
+          description: メイ
+        companyName:
+          type: string
+          description: 会社名
+        postalCode:
+          type: string
+          description: 郵便番号
+        pref:
+          type: integer
+          description: 都道府県（1〜47）
+        addr01:
+          type: string
+          description: 市区町村
+        addr02:
+          type: string
+          description: 番地・建物名
+        phoneNumber:
+          type: string
+          description: 電話番号
+        createDate:
+          type: string
+          format: date-time
+          description: 作成日時
+        updateDate:
+          type: string
+          format: date-time
+          description: 更新日時
+
+    CustomerAddressList:
+      type: object
+      description: 配送先住所一覧
+      properties:
+        addresses:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomerAddress"
+
+    OrderItem:
+      type: object
+      description: 受注明細
+      properties:
+        orderItemProductName:
+          type: string
+          description: 受注商品名（スナップショット）
+        orderItemProductCode:
+          type: string
+          description: 受注商品コード（スナップショット）
+        orderItemClassName1:
+          type: string
+          description: 受注規格名1（例：色）
+        orderItemClassName2:
+          type: string
+          description: 受注規格名2（例：サイズ）
+        orderItemClassCategoryName1:
+          type: string
+          description: 受注規格分類名1（例：赤）
+        orderItemClassCategoryName2:
+          type: string
+          description: 受注規格分類名2（例：L）
+        orderItemPrice:
+          type: number
+          description: 受注商品単価
+        orderItemQuantity:
+          type: integer
+          description: 受注数量
+        orderItemTax:
+          type: number
+          description: 受注商品税額
+        taxRate:
+          type: number
+          description: 税率（%）
+        taxAdjust:
+          type: number
+          description: 税調整額
+        orderItemType:
+          type: integer
+          description: 受注明細区分（1=商品, 2=送料, 3=手数料, 4=値引き, 5=税, 6=ポイント）
+
+    Shipping:
+      type: object
+      description: 配送
+      properties:
+        name01:
+          type: string
+          description: 姓
+        name02:
+          type: string
+          description: 名
+        kana01:
+          type: string
+          description: セイ
+        kana02:
+          type: string
+          description: メイ
+        companyName:
+          type: string
+          description: 会社名
+        phoneNumber:
+          type: string
+          description: 電話番号
+        postalCode:
+          type: string
+          description: 郵便番号
+        pref:
+          type: integer
+          description: 都道府県（1〜47）
+        addr01:
+          type: string
+          description: 市区町村
+        addr02:
+          type: string
+          description: 番地・建物名
+        deliveryName:
+          type: string
+          description: 配送業者名
+        deliveryTime:
+          type: string
+          description: 配送時間帯
+        deliveryDate:
+          type: string
+          format: date
+          description: 配送希望日
+        shippingDate:
+          type: string
+          format: date-time
+          description: 出荷日
+        trackingNumber:
+          type: string
+          description: 追跡番号
+        mailSendDate:
+          type: string
+          format: date-time
+          description: メール送信日
+
+    # ===== Favorite Schemas =====
+    CustomerFavoriteProduct:
+      type: object
+      description: お気に入り商品
+      properties:
+        productName:
+          type: string
+          description: 商品名
+        price02:
+          type: number
+          description: 販売価格（税抜）
+        createDate:
+          type: string
+          format: date-time
+          description: 追加日時
+
+    CustomerFavoriteProductList:
+      type: object
+      description: お気に入り商品一覧
+      properties:
+        favoriteProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/CustomerFavoriteProduct"
+
+    # ===== Contact Schemas =====
+    ContactForm:
+      type: object
+      description: お問い合わせフォーム
+      properties:
+        contactName01:
+          type: string
+          description: お問い合わせ姓
+        contactName02:
+          type: string
+          description: お問い合わせ名
+        contactKana01:
+          type: string
+          description: お問い合わせセイ
+        contactKana02:
+          type: string
+          description: お問い合わせメイ
+        contactEmail:
+          type: string
+          format: email
+          description: お問い合わせメールアドレス
+        phoneNumber:
+          type: string
+          description: 電話番号
+        contactContents:
+          type: string
+          description: お問い合わせ内容
+
+    ContactComplete:
+      type: object
+      description: お問い合わせ完了
+
+    # ===== Help Schemas =====
+    HelpTradeLaw:
+      type: object
+      description: 特定商取引法に基づく表記
+      properties:
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              tradeLawName:
+                type: string
+                description: 項目名
+              tradeLawDescription:
+                type: string
+                description: 項目説明
+
+    # ===== Error =====
+    Error:
+      type: object
+      description: エラーレスポンス
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: エラーメッセージ
+        code:
+          type: integer
+          description: エラーコード
+        errors:
+          type: array
+          description: フィールド単位のバリデーションエラー
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                description: エラーが発生したフィールド名
+              message:
+                type: string
+                description: フィールドのエラーメッセージ
