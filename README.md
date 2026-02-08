@@ -77,6 +77,7 @@ stateDiagram-v2
 | `alps.json.html` | [app-state-diagram](https://github.com/alps-asd/app-state-diagram) で生成した HTML ドキュメント |
 | `openapi.yaml` | ALPS から変換した OpenAPI 3.1 仕様（フロントエンドのみ・参考実装） |
 | `openapi.html` | OpenAPI の HTML ドキュメント（Redoc で生成・参考実装） |
+| `tag.md` | タグ分類体系（ワークフロー・ドメイン・アクター・情報源の命名規則） |
 | `handover.json` | 構築プロセスの記録（カバレッジ、情報源、戦略の説明） |
 
 ## 使い方
