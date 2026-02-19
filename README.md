@@ -2,7 +2,7 @@
 
 [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) の ALPS（Application-Level Profile Semantics）プロファイル。
 
-[HTML ドキュメントを見る](https://koriym.github.io/ec-cube-alps/alps.json.html) | [OpenAPI サンプル](https://koriym.github.io/ec-cube-alps/openapi.html)
+[HTML ドキュメントを見る](https://koriym.github.io/ec-cube-alps/alps.json.html) | [OpenAPI サンプル](https://koriym.github.io/ec-cube-alps/openapi.html) | [ブログ記事](https://koriym.github.io/ec-cube-alps/)
 
 ## ALPS とは
 
@@ -31,17 +31,17 @@
 
 | 層 | 説明 | 数 |
 |---|---|---|
-| セマンティック | データ語彙（商品名、価格、数量など） | 255 |
+| セマンティック | データ語彙（商品名、価格、数量など） | 276 |
 | safe (GET) | 情報取得の状態遷移 | 58 |
 | unsafe (POST) | 状態変更の操作 | 35 |
 | idempotent (PUT/DELETE) | 冪等な状態変更 | 44 |
-| **合計** | | **392** |
+| **合計** | | **413** |
 
 情報源タグの内訳:
 
 | タグ | 説明 | 数 |
 |---|---|---|
-| `src-entity` | Doctrine Entity 由来 | 182 |
+| `src-entity` | Doctrine Entity 由来 | 193 |
 | `src-router` | ルート定義由来 | 156 |
 | `src-template` | Twig テンプレート由来 | 80 |
 | `src-controller` | Controller ロジック由来 | 10 |
