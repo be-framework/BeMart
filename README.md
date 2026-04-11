@@ -80,6 +80,26 @@ stateDiagram-v2
 | `tag.md` | タグ分類体系（ワークフロー・ドメイン・アクター・情報源の命名規則） |
 | `handover.json` | 構築プロセスの記録（カバレッジ、情報源、戦略の説明） |
 
+## 移植検討用の補助資料
+
+このリポジトリの主目的は `alps.json` と公開ドキュメントの保守だが、EC-CUBE を Be / BEAR.Sunday へ移植するための補助資料と実験的ツールも同居している。
+
+| ファイル / ディレクトリ | 説明 |
+|---|---|
+| `ec-cube-bear-be-migration-plan.md` | 移植全体の段階計画 |
+| `be-first-migration-method.md` | 最初は Be-only で進める方針の共有用要約 |
+| `autonomous-execution-runbook.md` | 長時間作業の再開手順と停止条件 |
+| `day0-workflow.md` | 実移植 repo を立ち上げる初日手順 |
+| `skills-matrix.md` | 利用する skill の一覧と位置づけ |
+| `task_plan.md` / `findings.md` / `progress.md` | file-based planning 用の作業メモ |
+| `orchestrator-v1.md` | JSON-first orchestrator の概要 |
+| `.migrate/` | workflow, task, schema, run artifact の置き場 |
+| `bin/orchestrator` | task / run / worker を扱う CLI |
+| `bin/catalog-product-list-packet`, `bin/catalog-product-packet` | `ProductList` / `Product` packet の試験実装 |
+| `tests/OrchestratorTest.php` | orchestrator と packet の PHPUnit |
+
+これらは ALPS 本体の公開成果物ではなく、移植検討と検証のための補助資料として扱う。
+
 ## 使い方
 
 ### HTML ドキュメントの閲覧
@@ -106,3 +126,5 @@ asd -s alps.json
 - [ALPS 仕様](https://www.app-state-diagram.com/manuals/1.0/ja/index.html)
 - [app-state-diagram](https://github.com/alps-asd/app-state-diagram) — ALPS プロファイルの可視化ツール
 - [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) — 対象アプリケーション
+- [Be Framework](https://be-framework.github.io/llms-full.txt) — 移植先候補のドメイン変換フレームワーク
+- [BEAR.Sunday](https://bearsunday.github.io/llms-full.txt) — 移植先候補の resource 指向フレームワーク
