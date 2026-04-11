@@ -1,0 +1,18 @@
+{
+  "id": "001-catalog-product-list",
+  "title": "Catalog ProductList packet",
+  "goal": "Establish the first storefront work packet for ProductList.",
+  "packet_type": "catalog/ProductList",
+  "workflow": "storefront-packet",
+  "inputs": {
+    "alps_profile": "alps.json",
+    "bounded_context": "catalog",
+    "resource": "ProductList"
+  },
+  "success_criteria": [
+    "ProductList resource test passes.",
+    "At least one hypermedia test exists for ProductList."
+  ],
+  "priority": 100
+}
+

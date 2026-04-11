@@ -1,0 +1,10 @@
+[Unit]
+Description=EC-CUBE migration orchestrator worker poll timer
+
+[Timer]
+OnBootSec=30s
+OnUnitActiveSec=1m
+Unit=orchestrator-worker-once.service
+
+[Install]
+WantedBy=timers.target

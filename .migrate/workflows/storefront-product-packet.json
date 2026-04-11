@@ -1,0 +1,77 @@
+{
+  "name": "storefront-product-packet",
+  "version": "1.0.0",
+  "initial_step": "semantic",
+  "steps": [
+    {
+      "name": "semantic",
+      "adapter": {
+        "type": "command",
+        "command": ["php", "bin/catalog-product-packet", "semantic"],
+        "cwd": "."
+      },
+      "on_success": "generate",
+      "on_failure": "FAIL",
+      "timeout_sec": 30,
+      "retry_policy": {
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "generate",
+      "adapter": {
+        "type": "command",
+        "command": ["php", "bin/catalog-product-packet", "generate"],
+        "cwd": "."
+      },
+      "on_success": "implement",
+      "on_failure": "FAIL",
+      "timeout_sec": 30,
+      "retry_policy": {
+        "max_attempts": 1
+      }
+    },
+    {
+      "name": "implement",
+      "adapter": {
+        "type": "command",
+        "command": ["php", "bin/catalog-product-packet", "implement"],
+        "cwd": "."
+      },
+      "on_success": "review",
+      "on_failure": "FAIL",
+      "timeout_sec": 30,
+      "retry_policy": {
+        "max_attempts": 2
+      }
+    },
+    {
+      "name": "review",
+      "adapter": {
+        "type": "command",
+        "command": ["php", "bin/catalog-product-packet", "review"],
+        "cwd": "."
+      },
+      "on_success": "COMPLETE",
+      "on_failure": "fix",
+      "timeout_sec": 30,
+      "retry_policy": {
+        "max_attempts": 3
+      }
+    },
+    {
+      "name": "fix",
+      "adapter": {
+        "type": "command",
+        "command": ["php", "bin/catalog-product-packet", "fix"],
+        "cwd": "."
+      },
+      "on_success": "review",
+      "on_failure": "FAIL",
+      "timeout_sec": 30,
+      "retry_policy": {
+        "max_attempts": 2
+      }
+    }
+  ]
+}
