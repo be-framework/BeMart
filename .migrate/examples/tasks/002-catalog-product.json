@@ -2,13 +2,8 @@
   "id": "002-catalog-product",
   "title": "Catalog Product packet",
   "goal": "Establish the storefront work packet for Product detail.",
-  "packet_type": "catalog/Product",
-  "workflow": "storefront-product-packet",
-  "inputs": {
-    "alps_profile": "alps.json",
-    "bounded_context": "catalog",
-    "resource": "Product"
-  },
+  "packet": "catalog-product",
+  "workflow": "packet-lifecycle",
   "success_criteria": [
     "Product resource test passes.",
     "At least one hypermedia test exists for Product.",

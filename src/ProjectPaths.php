@@ -30,6 +30,11 @@ final class ProjectPaths
         return $this->migrateDir() . '/workflows';
     }
 
+    public function packetDir(): string
+    {
+        return $this->migrateDir() . '/packets';
+    }
+
     public function exampleTaskDir(): string
     {
         return $this->migrateDir() . '/examples/tasks';
@@ -70,6 +75,7 @@ final class ProjectPaths
             $this->migrateDir(),
             $this->schemaDir(),
             $this->workflowDir(),
+            $this->packetDir(),
             $this->exampleTaskDir(),
             $this->taskQueueDir(),
             $this->runDir(),
@@ -83,4 +89,3 @@ final class ProjectPaths
         }
     }
 }
-

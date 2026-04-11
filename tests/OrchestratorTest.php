@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use MigrationOrchestrator\PlanningGuard;
+use MigrationOrchestrator\PacketRepository;
 use MigrationOrchestrator\ProjectPaths;
 use MigrationOrchestrator\QueueWorker;
 use MigrationOrchestrator\RunEngine;
@@ -27,12 +28,13 @@ final class OrchestratorTest extends TestCase
         $root = $this->createProjectRoot();
         [$paths, $validator] = $this->buildServices($root);
 
-        $workflowPath = $paths->workflowDir() . '/storefront-packet.json';
+        $workflowPath = $paths->workflowDir() . '/packet-lifecycle.json';
         $this->writeJson($workflowPath, $this->successWorkflow());
         $this->writeJson($paths->exampleTaskDir() . '/catalog-product-list.json', $this->baseTask());
 
         $this->assertSame([], $validator->validateFile($workflowPath, 'workflow'));
         $this->assertSame([], $validator->validateFile($paths->exampleTaskDir() . '/catalog-product-list.json', 'task'));
+        $this->assertSame([], $validator->validateFile($paths->packetDir() . '/catalog-product-list.json', 'packet'));
 
         $invalidWorkflow = $this->successWorkflow();
         $invalidWorkflow['extra'] = 'not-allowed';
@@ -47,7 +49,7 @@ final class OrchestratorTest extends TestCase
         $root = $this->createProjectRoot();
         [$paths, , $tasks] = $this->buildServices($root);
 
-        $this->writeJson($paths->workflowDir() . '/storefront-packet.json', $this->successWorkflow());
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $this->successWorkflow());
         $sourceTask = $paths->exampleTaskDir() . '/catalog-product-list.json';
         $this->writeJson($sourceTask, $this->baseTask());
 
@@ -65,7 +67,7 @@ final class OrchestratorTest extends TestCase
         $root = $this->createProjectRoot();
         [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
 
-        $this->writeJson($paths->workflowDir() . '/storefront-packet.json', $this->successWorkflow());
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $this->successWorkflow());
         $sourceTask = $paths->exampleTaskDir() . '/catalog-product-list.json';
         $this->writeJson($sourceTask, $this->baseTask());
         $tasks->queueTask($sourceTask);
@@ -93,7 +95,7 @@ final class OrchestratorTest extends TestCase
         $root = $this->createProjectRoot();
         [$paths, , $tasks, , $engine] = $this->buildServices($root);
 
-        $this->writeJson($paths->workflowDir() . '/storefront-packet.json', $this->successWorkflow());
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $this->successWorkflow());
         $sourceTask = $paths->exampleTaskDir() . '/catalog-product-list.json';
         $this->writeJson($sourceTask, $this->baseTask());
         $tasks->queueTask($sourceTask);
@@ -123,7 +125,7 @@ final class OrchestratorTest extends TestCase
         }
         unset($step);
 
-        $this->writeJson($paths->workflowDir() . '/storefront-packet.json', $workflow);
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
         $sourceTask = $paths->exampleTaskDir() . '/catalog-product-list.json';
         $this->writeJson($sourceTask, $this->baseTask());
         $tasks->queueTask($sourceTask);
@@ -147,7 +149,7 @@ final class OrchestratorTest extends TestCase
                 }
             }
             unset($step);
-            $this->writeJson($paths->workflowDir() . '/storefront-packet.json', $workflow);
+            $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
             $this->touchPlanningFiles($root, $failureThreshold + 5);
 
             $completedState = $engine->resumeRun($failedState['run_id']);
@@ -169,14 +171,12 @@ final class OrchestratorTest extends TestCase
         [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
 
         copy(__DIR__ . '/../alps.json', $root . '/alps.json');
-        $workflow = $this->trackedWorkflowUsingRealAdapter('storefront-packet.json', 'catalog-product-list-packet');
+        $workflow = $this->trackedWorkflowUsingRealExecutor();
         $task = $this->trackedTask(
             '001-catalog-product-list',
             'Catalog ProductList packet',
             'Establish the first storefront work packet for ProductList.',
-            'catalog/ProductList',
-            'storefront-packet',
-            'ProductList',
+            'catalog-product-list',
             [
                 'ProductList resource test passes.',
                 'At least one hypermedia test exists for ProductList.',
@@ -184,7 +184,7 @@ final class OrchestratorTest extends TestCase
             100
         );
 
-        $this->writeJson($paths->workflowDir() . '/storefront-packet.json', $workflow);
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
         $sourceTask = $paths->exampleTaskDir() . '/001-catalog-product-list.json';
         $this->writeJson($sourceTask, $task);
         $tasks->queueTask($sourceTask);
@@ -220,14 +220,12 @@ final class OrchestratorTest extends TestCase
         [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
 
         copy(__DIR__ . '/../alps.json', $root . '/alps.json');
-        $workflow = $this->trackedWorkflowUsingRealAdapter('storefront-product-packet.json', 'catalog-product-packet');
+        $workflow = $this->trackedWorkflowUsingRealExecutor();
         $task = $this->trackedTask(
             '002-catalog-product',
             'Catalog Product packet',
             'Establish the storefront work packet for Product detail.',
-            'catalog/Product',
-            'storefront-product-packet',
-            'Product',
+            'catalog-product',
             [
                 'Product resource test passes.',
                 'At least one hypermedia test exists for Product.',
@@ -236,7 +234,7 @@ final class OrchestratorTest extends TestCase
             95
         );
 
-        $this->writeJson($paths->workflowDir() . '/storefront-product-packet.json', $workflow);
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
         $sourceTask = $paths->exampleTaskDir() . '/002-catalog-product.json';
         $this->writeJson($sourceTask, $task);
         $tasks->queueTask($sourceTask);
@@ -266,6 +264,165 @@ final class OrchestratorTest extends TestCase
         $this->assertSame('completed', $reloaded['status']);
     }
 
+    public function testTrackedCategoryWorkflowProducesPacketArtifacts(): void
+    {
+        $root = $this->createProjectRoot();
+        [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
+
+        copy(__DIR__ . '/../alps.json', $root . '/alps.json');
+        $workflow = $this->trackedWorkflowUsingRealExecutor();
+        $task = $this->trackedTask(
+            '003-catalog-category',
+            'Catalog Category packet',
+            'Establish the storefront work packet for Category detail.',
+            'catalog-category',
+            [
+                'Category resource test passes.',
+                'At least one hypermedia test exists for Category.',
+                'The Category packet preserves the product-list transition contract.',
+            ],
+            90
+        );
+
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
+        $sourceTask = $paths->exampleTaskDir() . '/003-catalog-category.json';
+        $this->writeJson($sourceTask, $task);
+        $tasks->queueTask($sourceTask);
+        $this->touchPlanningFiles($root, time() + 2);
+
+        $state = $engine->runNext();
+        $this->assertSame('completed', $state['status']);
+
+        $runPath = $paths->runPath($state['run_id']) . '/packet';
+        $this->assertFileExists($runPath . '/semantic.json');
+        $this->assertFileExists($runPath . '/generate.json');
+        $this->assertFileExists($runPath . '/implement.json');
+        $this->assertFileExists($runPath . '/review.json');
+
+        $semantic = json_decode((string) file_get_contents($runPath . '/semantic.json'), true, 512, JSON_THROW_ON_ERROR);
+        $generate = json_decode((string) file_get_contents($runPath . '/generate.json'), true, 512, JSON_THROW_ON_ERROR);
+        $implement = json_decode((string) file_get_contents($runPath . '/implement.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('Category', $semantic['resource']);
+        $this->assertTrue($generate['implementation_brief']['exposes_product_list_link']);
+        $this->assertContains('goProductList', $implement['contract']['transition_ids']);
+        $this->assertContains('doUpdateCategory', $implement['contract']['transition_ids']);
+
+        $status = $engine->status($state['run_id']);
+        $this->assertSame('completed', $status['summary']['status']);
+
+        $reloaded = $runs->loadState($state['run_id']);
+        $this->assertSame('completed', $reloaded['status']);
+    }
+
+    public function testTrackedCartWorkflowProducesPacketArtifacts(): void
+    {
+        $root = $this->createProjectRoot();
+        [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
+
+        copy(__DIR__ . '/../alps.json', $root . '/alps.json');
+        $workflow = $this->trackedWorkflowUsingRealExecutor();
+        $task = [
+            'id' => '004-cart-cart',
+            'title' => 'Cart packet',
+            'goal' => 'Establish the storefront work packet for Cart.',
+            'packet' => 'cart',
+            'workflow' => 'packet-lifecycle',
+            'success_criteria' => [
+                'Cart resource test passes.',
+                'At least one workflow test exists for Cart.',
+                'The Cart packet preserves add/update/remove item transitions.',
+                'The Cart packet preserves the goShopping transition contract.',
+            ],
+            'priority' => 88,
+        ];
+
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
+        $sourceTask = $paths->exampleTaskDir() . '/004-cart-cart.json';
+        $this->writeJson($sourceTask, $task);
+        $tasks->queueTask($sourceTask);
+        $this->touchPlanningFiles($root, time() + 2);
+
+        $state = $engine->runNext();
+        $this->assertSame('completed', $state['status']);
+
+        $runPath = $paths->runPath($state['run_id']) . '/packet';
+        $this->assertFileExists($runPath . '/semantic.json');
+        $this->assertFileExists($runPath . '/generate.json');
+        $this->assertFileExists($runPath . '/implement.json');
+        $this->assertFileExists($runPath . '/review.json');
+
+        $semantic = json_decode((string) file_get_contents($runPath . '/semantic.json'), true, 512, JSON_THROW_ON_ERROR);
+        $generate = json_decode((string) file_get_contents($runPath . '/generate.json'), true, 512, JSON_THROW_ON_ERROR);
+        $implement = json_decode((string) file_get_contents($runPath . '/implement.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('Cart', $semantic['resource']);
+        $this->assertNotSame('', $semantic['purchase_flow_note']);
+        $this->assertTrue($generate['implementation_brief']['requires_purchase_flow']);
+        $this->assertContains('doUpdateCartItemQuantity', $implement['contract']['transition_ids']);
+        $this->assertContains('goShopping', $implement['contract']['transition_ids']);
+
+        $status = $engine->status($state['run_id']);
+        $this->assertSame('completed', $status['summary']['status']);
+
+        $reloaded = $runs->loadState($state['run_id']);
+        $this->assertSame('completed', $reloaded['status']);
+    }
+
+    public function testTrackedShoppingWorkflowProducesPacketArtifacts(): void
+    {
+        $root = $this->createProjectRoot();
+        [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
+
+        copy(__DIR__ . '/../alps.json', $root . '/alps.json');
+        $workflow = $this->trackedWorkflowUsingRealExecutor();
+        $task = [
+            'id' => '005-checkout-shopping',
+            'title' => 'Checkout Shopping packet',
+            'goal' => 'Establish the storefront work packet for Shopping.',
+            'packet' => 'checkout-shopping',
+            'workflow' => 'packet-lifecycle',
+            'success_criteria' => [
+                'Shopping resource test passes.',
+                'At least one workflow test exists for Shopping.',
+                'The Shopping packet preserves shipping selection transitions.',
+                'The Shopping packet preserves the doConfirmOrder transition contract.',
+            ],
+            'priority' => 87,
+        ];
+
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
+        $sourceTask = $paths->exampleTaskDir() . '/005-checkout-shopping.json';
+        $this->writeJson($sourceTask, $task);
+        $tasks->queueTask($sourceTask);
+        $this->touchPlanningFiles($root, time() + 2);
+
+        $state = $engine->runNext();
+        $this->assertSame('completed', $state['status']);
+
+        $runPath = $paths->runPath($state['run_id']) . '/packet';
+        $this->assertFileExists($runPath . '/semantic.json');
+        $this->assertFileExists($runPath . '/generate.json');
+        $this->assertFileExists($runPath . '/implement.json');
+        $this->assertFileExists($runPath . '/review.json');
+
+        $semantic = json_decode((string) file_get_contents($runPath . '/semantic.json'), true, 512, JSON_THROW_ON_ERROR);
+        $generate = json_decode((string) file_get_contents($runPath . '/generate.json'), true, 512, JSON_THROW_ON_ERROR);
+        $implement = json_decode((string) file_get_contents($runPath . '/implement.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('Shopping', $semantic['resource']);
+        $this->assertNotSame('', $semantic['checkout_flow_note']);
+        $this->assertTrue($generate['implementation_brief']['requires_checkout_flow']);
+        $this->assertContains('doConfirmOrder', $implement['contract']['transition_ids']);
+        $this->assertContains('goShoppingShipping', $implement['contract']['transition_ids']);
+
+        $status = $engine->status($state['run_id']);
+        $this->assertSame('completed', $status['summary']['status']);
+
+        $reloaded = $runs->loadState($state['run_id']);
+        $this->assertSame('completed', $reloaded['status']);
+    }
+
     public function testReviewFailureTransitionLoopsThroughFixAndCompletes(): void
     {
         $root = $this->createProjectRoot();
@@ -283,7 +440,7 @@ final class OrchestratorTest extends TestCase
         }
         unset($step);
 
-        $this->writeJson($paths->workflowDir() . '/storefront-packet.json', $workflow);
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
         $sourceTask = $paths->exampleTaskDir() . '/catalog-product-list.json';
         $this->writeJson($sourceTask, $this->baseTask());
         $tasks->queueTask($sourceTask);
@@ -314,7 +471,7 @@ final class OrchestratorTest extends TestCase
         $root = $this->createProjectRoot();
         [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
 
-        $this->writeJson($paths->workflowDir() . '/storefront-packet.json', $this->successWorkflow());
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $this->successWorkflow());
         $sourceTask = $paths->exampleTaskDir() . '/catalog-product-list.json';
         $this->writeJson($sourceTask, $this->baseTask());
         $tasks->queueTask($sourceTask);
@@ -342,6 +499,7 @@ final class OrchestratorTest extends TestCase
         foreach ([
             '/.migrate/schemas',
             '/.migrate/workflows',
+            '/.migrate/packets',
             '/.migrate/examples/tasks',
             '/.migrate/tasks',
             '/.migrate/runs',
@@ -351,6 +509,7 @@ final class OrchestratorTest extends TestCase
         }
 
         $this->copyDirectory(__DIR__ . '/../.migrate/schemas', $root . '/.migrate/schemas');
+        $this->copyDirectory(__DIR__ . '/../.migrate/packets', $root . '/.migrate/packets');
 
         file_put_contents($root . '/task_plan.md', "task plan\n");
         file_put_contents($root . '/findings.md', "findings\n");
@@ -365,9 +524,10 @@ final class OrchestratorTest extends TestCase
         $paths->ensureDirectories();
         $validator = new SchemaValidator($paths);
         $guard = new PlanningGuard($paths);
-        $tasks = new TaskRepository($paths, $validator);
+        $packets = new PacketRepository($paths, $validator);
+        $tasks = new TaskRepository($paths, $validator, $packets);
         $runs = new RunRepository($paths, $validator);
-        $engine = new RunEngine($paths, $validator, $guard, $tasks, $runs);
+        $engine = new RunEngine($paths, $validator, $guard, $tasks, $runs, $packets);
 
         return [$paths, $validator, $tasks, $runs, $engine];
     }
@@ -377,7 +537,7 @@ final class OrchestratorTest extends TestCase
         $ok = ['php', '-r', 'fwrite(STDOUT, "ok\n");'];
 
         return [
-            'name' => 'storefront-packet',
+            'name' => 'packet-lifecycle',
             'version' => '1.0.0',
             'initial_step' => 'semantic',
             'steps' => [
@@ -390,16 +550,16 @@ final class OrchestratorTest extends TestCase
         ];
     }
 
-    private function trackedWorkflowUsingRealAdapter(string $workflowFile, string $scriptFile): array
+    private function trackedWorkflowUsingRealExecutor(): array
     {
-        $workflow = json_decode((string) file_get_contents(__DIR__ . '/../.migrate/workflows/' . $workflowFile), true, 512, JSON_THROW_ON_ERROR);
-        $script = realpath(__DIR__ . '/../bin/' . $scriptFile);
-        if ($script === false) {
-            throw new RuntimeException(sprintf('Failed to resolve %s script path.', $scriptFile));
+        $workflow = json_decode((string) file_get_contents(__DIR__ . '/../.migrate/workflows/packet-lifecycle.json'), true, 512, JSON_THROW_ON_ERROR);
+        $orchestrator = realpath(__DIR__ . '/../bin/orchestrator');
+        if ($orchestrator === false) {
+            throw new RuntimeException('Failed to resolve orchestrator path.');
         }
 
         foreach ($workflow['steps'] as &$step) {
-            $step['adapter']['command'] = ['php', $script, $step['name']];
+            $step['adapter']['command'] = ['php', $orchestrator, 'packet', 'run', $step['name']];
         }
         unset($step);
 
@@ -412,12 +572,8 @@ final class OrchestratorTest extends TestCase
             'id' => 'catalog-product-list',
             'title' => 'Catalog ProductList packet',
             'goal' => 'Implement the first ProductList packet.',
-            'packet_type' => 'catalog/ProductList',
-            'workflow' => 'storefront-packet',
-            'inputs' => [
-                'resource' => 'ProductList',
-                'bounded_context' => 'catalog',
-            ],
+            'packet' => 'catalog-product-list',
+            'workflow' => 'packet-lifecycle',
             'success_criteria' => [
                 'ProductList resource test passes.',
             ],
@@ -429,9 +585,7 @@ final class OrchestratorTest extends TestCase
         string $id,
         string $title,
         string $goal,
-        string $packetType,
-        string $workflow,
-        string $resource,
+        string $packetId,
         array $successCriteria,
         int $priority
     ): array {
@@ -439,13 +593,8 @@ final class OrchestratorTest extends TestCase
             'id' => $id,
             'title' => $title,
             'goal' => $goal,
-            'packet_type' => $packetType,
-            'workflow' => $workflow,
-            'inputs' => [
-                'alps_profile' => 'alps.json',
-                'bounded_context' => 'catalog',
-                'resource' => $resource,
-            ],
+            'packet' => $packetId,
+            'workflow' => 'packet-lifecycle',
             'success_criteria' => $successCriteria,
             'priority' => $priority,
         ];

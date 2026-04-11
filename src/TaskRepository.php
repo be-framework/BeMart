@@ -8,7 +8,8 @@ final class TaskRepository
 {
     public function __construct(
         private readonly ProjectPaths $paths,
-        private readonly SchemaValidator $validator
+        private readonly SchemaValidator $validator,
+        private readonly PacketRepository $packets
     ) {
     }
 
@@ -16,6 +17,7 @@ final class TaskRepository
     {
         $task = JsonFile::decodeFile($sourcePath);
         $this->validator->assertValid('task', $task);
+        $this->assertPacketExists($task);
 
         $task['queued_at'] = $this->now();
         $task['queue_status'] = 'queued';
@@ -59,12 +61,14 @@ final class TaskRepository
         $path = $this->taskPathInternal($taskId);
         $task = JsonFile::decodeFile($path);
         $this->validator->assertValid('task', $task);
+        $this->assertPacketExists($task);
         return $task;
     }
 
     public function saveTask(array $task): void
     {
         $this->validator->assertValid('task', $task);
+        $this->assertPacketExists($task);
         JsonFile::encodeFile($this->taskPathInternal((string) $task['id']), $task);
     }
 
@@ -78,6 +82,11 @@ final class TaskRepository
         return $this->taskPathInternal($taskId);
     }
 
+    public function packetPathForTask(array $task): string
+    {
+        return $this->packets->packetPath((string) $task['packet']);
+    }
+
     private function allTasks(): array
     {
         $tasks = [];
@@ -85,6 +94,7 @@ final class TaskRepository
         foreach (glob($pattern) ?: [] as $path) {
             $task = JsonFile::decodeFile($path);
             $this->validator->assertValid('task', $task);
+            $this->assertPacketExists($task);
             $tasks[] = $task;
         }
 
@@ -94,6 +104,11 @@ final class TaskRepository
     private function taskPathInternal(string $taskId): string
     {
         return $this->paths->taskQueueDir() . '/' . $taskId . '.json';
+    }
+
+    private function assertPacketExists(array $task): void
+    {
+        $this->packets->loadPacket((string) $task['packet']);
     }
 
     private function now(): string

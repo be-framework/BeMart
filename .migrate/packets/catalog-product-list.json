@@ -1,0 +1,33 @@
+{
+  "id": "catalog-product-list",
+  "kind": "resource-contract-packet",
+  "type": "catalog/ProductList",
+  "bounded_context": "catalog",
+  "resource": "ProductList",
+  "source_profile": "alps.json",
+  "state_descriptor": "ProductList",
+  "transition_descriptors": ["goProductList", "goProduct"],
+  "semantic_notes": {},
+  "generate": {
+    "flags": {
+      "read_only": true
+    }
+  },
+  "implement": {
+    "proposed_targets": {
+      "page_resource": "src/Resource/Page/ProductList.php",
+      "app_resource": "src/Resource/App/ProductList.php"
+    },
+    "test_targets": [
+      "tests/Resource/Page/ProductListTest.php",
+      "tests/Hypermedia/ProductListHypermediaTest.php"
+    ]
+  },
+  "review": {
+    "required_keys": ["proposed_targets", "test_targets", "contract"]
+  },
+  "fix": {
+    "message": "Regenerated ProductList packet defaults from ALPS contract."
+  }
+}
+

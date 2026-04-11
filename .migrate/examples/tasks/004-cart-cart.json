@@ -1,0 +1,15 @@
+{
+  "id": "004-cart-cart",
+  "title": "Cart packet",
+  "goal": "Establish the storefront work packet for Cart.",
+  "packet": "cart",
+  "workflow": "packet-lifecycle",
+  "success_criteria": [
+    "Cart resource test passes.",
+    "At least one workflow test exists for Cart.",
+    "The Cart packet preserves add/update/remove item transitions.",
+    "The Cart packet preserves the goShopping transition contract."
+  ],
+  "priority": 88
+}
+

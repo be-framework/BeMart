@@ -28,6 +28,7 @@ final class RunRepository
             'schema_version' => '1.0.0',
             'run_id' => $runId,
             'task_id' => $task['id'],
+            'packet' => $task['packet'] ?? '',
             'workflow' => $workflow['name'],
             'status' => 'running',
             'current_step' => $workflow['initial_step'],
@@ -142,4 +143,3 @@ final class RunRepository
         return (new \DateTimeImmutable())->format(DATE_ATOM);
     }
 }
-

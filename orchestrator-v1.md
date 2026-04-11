@@ -19,8 +19,9 @@ EC-CUBE 移植用の `work packet` を、`resume` 可能な最小単位で回す
 
 ```text
 .migrate/
-  schemas/      # workflow/task/run-state/step-result の JSON Schema
+  schemas/      # workflow/packet/task/run-state/step-result の JSON Schema
   workflows/    # JSON workflow 定義
+  packets/      # packet DSL 定義
   examples/tasks/
   tasks/        # 実行キュー
   runs/         # state.json, events.ndjson, artifacts, packet outputs
@@ -28,13 +29,19 @@ EC-CUBE 移植用の `work packet` を、`resume` 可能な最小単位で回す
 
 ## 現在の workflow
 
-標準 workflow は [`storefront-packet.json`](/Users/akihito/git/ec-cube-alps/.migrate/workflows/storefront-packet.json) です。`semantic -> generate -> implement -> review` を通し、`review` が exit code `10` を返した場合だけ `fix -> review` へ遷移します。
+標準 workflow は [`packet-lifecycle.json`](/Users/akihito/git/ec-cube-alps/.migrate/workflows/packet-lifecycle.json) です。`semantic -> generate -> implement -> review` を通し、`review` が exit code `10` を返した場合だけ `fix -> review` へ遷移します。
 
-## 実装済み packet
+`workflow` は resource ごとに分けず、すべて [`php bin/orchestrator packet run <step>`](/Users/akihito/git/ec-cube-alps/bin/orchestrator) の generic executor を呼びます。
 
-[`bin/catalog-product-list-packet`](/Users/akihito/git/ec-cube-alps/bin/catalog-product-list-packet) は `catalog/ProductList` 用の packet adapter です。`alps.json` を読んで、run ごとの `packet/*.json` 成果物を生成します。
+## 実装済み packet DSL
 
-[`bin/catalog-product-packet`](/Users/akihito/git/ec-cube-alps/bin/catalog-product-packet) は `catalog/Product` 用の packet adapter です。`goProduct`, `goProductList`, `goCategory`, `doAddCartItem` を含む契約を packet artifact に落とします。
+packet は実行ファイルではなく、`.migrate/packets/*.json` にある宣言的な定義です。task は packet id を参照し、executor がその定義を読んで `packet/*.json` 成果物を生成します。
+
+- [`catalog-product-list.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/catalog-product-list.json)
+- [`catalog-product.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/catalog-product.json)
+- [`catalog-category.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/catalog-category.json)
+- [`cart.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/cart.json)
+- [`checkout-shopping.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/checkout-shopping.json)
 
 ## 止まらない運用の位置づけ
 

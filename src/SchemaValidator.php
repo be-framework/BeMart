@@ -8,6 +8,7 @@ final class SchemaValidator
 {
     private const SCHEMA_MAP = [
         'workflow' => 'workflow.schema.json',
+        'packet' => 'packet.schema.json',
         'task' => 'task.schema.json',
         'run-state' => 'run-state.schema.json',
         'step-result' => 'step-result.schema.json',
@@ -69,6 +70,10 @@ final class SchemaValidator
 
         if (str_contains($normalized, '/.migrate/workflows/')) {
             return 'workflow';
+        }
+
+        if (str_contains($normalized, '/.migrate/packets/')) {
+            return 'packet';
         }
 
         if (str_contains($normalized, '/.migrate/tasks/') || str_contains($normalized, '/.migrate/examples/tasks/')) {

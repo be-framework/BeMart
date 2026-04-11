@@ -75,9 +75,10 @@
 - 入口: `php bin/orchestrator`
 - テスト: `composer test`
 - workflow 定義: `.migrate/workflows/*.json`
+- packet 定義: `.migrate/packets/*.json`
 - schema: `.migrate/schemas/*.json`
 - 実行状態: `.migrate/tasks/`, `.migrate/runs/`
-- 実装済み adapter: `bin/catalog-product-list-packet`
+- packet 実行: `php bin/orchestrator packet run <step>`
 
 現在は `catalog/ProductList` packet を end-to-end で回せる。
 

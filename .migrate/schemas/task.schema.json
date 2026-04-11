@@ -1,17 +1,13 @@
 {
   "type": "object",
-  "required": ["id", "title", "goal", "packet_type", "workflow", "inputs", "success_criteria", "priority"],
+  "required": ["id", "title", "goal", "packet", "workflow", "success_criteria", "priority"],
   "additionalProperties": false,
   "properties": {
     "id": { "type": "string" },
     "title": { "type": "string" },
     "goal": { "type": "string" },
-    "packet_type": { "type": "string" },
+    "packet": { "type": "string" },
     "workflow": { "type": "string" },
-    "inputs": {
-      "type": "object",
-      "additionalProperties": true
-    },
     "success_criteria": {
       "type": "array",
       "minItems": 1,
@@ -27,4 +23,3 @@
     "last_run_id": { "type": "string" }
   }
 }
-

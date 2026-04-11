@@ -40,17 +40,21 @@ Phase 6
 - **Status:** complete
 
 ### Phase 6: Orchestrator V1
-- [x] JSON-first workflow/task/state schema を定義する
+- [x] JSON-first workflow/packet/task/state schema を定義する
 - [x] PHP + Composer + PHPUnit ベースで CLI を実装する
 - [x] `task add`, `run next`, `run resume`, `run status`, `run fail`, `validate` を実装する
-- [x] `catalog/ProductList` packet adapter を実装する
-- [x] `catalog/Product` packet adapter を実装する
+- [x] packet DSL と generic executor を実装する
+- [x] `catalog/ProductList` packet definition を実装する
+- [x] `catalog/Product` packet definition を実装する
+- [x] `catalog/Category` packet definition を実装する
+- [x] `cart/Cart` packet definition を実装する
+- [x] `checkout/Shopping` packet definition を実装する
 - [x] 実タスクで `task add -> run next -> run status` を確認する
 - **Status:** complete
 
 ## Key Questions
-1. 次の packet を `Category` と `CategoryList` のどちらに置くか
-2. packet adapter をどこまで汎用化してから移植先 repo へ持ち出すか
+1. 次の packet を `CategoryList` と `ShoppingConfirm` のどちらに置くか
+2. packet DSL を移植先 repo へどう持ち出すか
 3. 実移植 repo 側で `phpstan` / `phpcs` まで Day 0 に含めるか
 4. storefront inventory を JSON task 群へどう分解するか
 
@@ -79,5 +83,9 @@ Phase 6
 - ALPS の欠落がある admin 領域は、移植前に補完タスクを挟む
 - 長時間運用の手順は `autonomous-execution-runbook.md` に集約した
 - 実行基盤の入口は `php bin/orchestrator` と `composer test`
+- packet は `.migrate/packets/*.json` の DSL として管理する
 - `catalog/ProductList` packet は `.migrate/examples/tasks/001-catalog-product-list.json` で再実行できる
 - `catalog/Product` packet は `.migrate/examples/tasks/002-catalog-product.json` で再実行できる
+- `catalog/Category` packet は `.migrate/examples/tasks/003-catalog-category.json` で再実行できる
+- `cart/Cart` packet は `.migrate/examples/tasks/004-cart-cart.json` で再実行できる
+- `checkout/Shopping` packet は `.migrate/examples/tasks/005-checkout-shopping.json` で再実行できる

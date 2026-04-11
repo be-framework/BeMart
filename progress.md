@@ -63,28 +63,31 @@
   - PHP で `bin/orchestrator` CLI を実装し、local `composer.json` と `phpunit.xml` を追加
   - `validate`, `task add`, `run next`, `run resume`, `run status`, `run fail` を実装
   - `worker once` / `worker loop` を追加し、外側 supervisor を置ける形にした
-  - `catalog/ProductList` 用の [`bin/catalog-product-list-packet`](/Users/akihito/git/ec-cube-alps/bin/catalog-product-list-packet) を追加
-  - `catalog/Product` 用の [`bin/catalog-product-packet`](/Users/akihito/git/ec-cube-alps/bin/catalog-product-packet) と専用 task/workflow を追加
+  - packet DSL と generic executor を導入し、`bin/orchestrator packet run <step>` に統一した
+  - `catalog/ProductList` / `Product` / `Category` / `Cart` / `Shopping` の packet definition を `.migrate/packets/` に追加した
   - `catalog/ProductList` と `catalog/Product` の両方で `task add -> worker once -> run status` を実行し、`.migrate/runs/<run-id>/packet/*.json` 出力を確認
   - shell loop, `systemd`, `cron` の supervisor 実例を `orchestrator/` に追加
   - 必要 skill を `skills-matrix.md` に整理
   - `homebrew-malt` を installable skill として扱い、macOS 向け任意環境 skill に整理
   - `Be-first` の進め方を共有用に `be-first-migration-method.md` に整理
+  - 振り返りを運用知識として圧縮し、今後は `Be-first`, `source/ALPS first`, `packet 優先` を固定する方針にした
+  - `packet` は executable ではなく DSL だと整理し、per-resource script を廃止した
 - Files created/modified:
   - `composer.json` (created)
   - `composer.lock` (created)
   - `phpunit.xml` (created)
   - `.gitignore` (created)
   - `bin/orchestrator` (created)
-  - `bin/catalog-product-list-packet` (created)
-  - `bin/catalog-product-packet` (created)
   - `src/` (created)
   - `tests/OrchestratorTest.php` (created)
   - `.migrate/schemas/*.json` (created)
-  - `.migrate/workflows/storefront-packet.json` (created)
-  - `.migrate/workflows/storefront-product-packet.json` (created)
+  - `.migrate/workflows/packet-lifecycle.json` (created)
+  - `.migrate/packets/*.json` (created)
   - `.migrate/examples/tasks/001-catalog-product-list.json` (created)
   - `.migrate/examples/tasks/002-catalog-product.json` (created)
+  - `.migrate/examples/tasks/003-catalog-category.json` (created)
+  - `.migrate/examples/tasks/004-cart-cart.json` (created)
+  - `.migrate/examples/tasks/005-checkout-shopping.json` (created)
   - `orchestrator-v1.md` (created)
   - `orchestrator/README.md` (created)
   - `orchestrator/run-worker-loop.sh` (created)
@@ -106,9 +109,12 @@
 | Source alignment | README / handover / official docs | 計画が既存資料と矛盾しない | 整合あり | ✓ |
 | Runbook created | `autonomous-execution-runbook.md` | 再開手順と停止条件が定義される | 作成済み | ✓ |
 | Day 0 workflow created | `day0-workflow.md` | 初日運用手順が定義される | 作成済み | ✓ |
-| PHPUnit suite | `composer test` | CLI / schema / resume / workflow / worker / Product packet が通る | `OK (9 tests, 59 assertions)` | ✓ |
+| PHPUnit suite | `composer test` | CLI / schema / resume / workflow / worker / Shopping packet が通る | `OK (12 tests, 94 assertions)` | ✓ |
 | ProductList packet smoke run | `task add -> worker once -> run status` | `catalog/ProductList` packet が完走し packet artifact を残す | 完了 | ✓ |
 | Product packet smoke run | `task add -> worker once -> run status` | `catalog/Product` packet が完走し packet artifact を残す | 完了 | ✓ |
+| Category packet smoke run | `task add -> worker once -> run status` | `catalog/Category` packet が完走し packet artifact を残す | 完了 | ✓ |
+| Cart packet smoke run | `task add -> worker once -> run status` | `cart/Cart` packet が完走し packet artifact を残す | 完了 | ✓ |
+| Shopping packet smoke run | `task add -> worker once -> run status` | `checkout/Shopping` packet が完走し packet artifact を残す | 完了 | ✓ |
 
 ## Error Log
 | Timestamp | Error | Attempt | Resolution |
@@ -119,10 +125,17 @@
 | Question | Answer |
 |----------|--------|
 | Where am I? | Phase 6 |
-| Where am I going? | 次の storefront packet として `Category` 系を task 化する |
+| Where am I going? | 次の storefront packet として `CategoryList` か `ShoppingConfirm` を task 化する |
 | What's the goal? | EC-CUBE 移植計画と、その計画を継続実行できる基盤を揃える |
-| What have I learned? | JSON schema + PHP CLI + file-based state で、resume 可能な packet 実行基盤を小さく作れる |
-| What have I done? | 計画書群に加えて、local composer / phpunit ベースの orchestrator v1 と `ProductList` / `Product` packet を実装した |
+| What have I learned? | JSON schema + packet DSL + PHP CLI + file-based state で、resume 可能な packet 実行基盤を小さく作れる |
+| What have I done? | 計画書群に加えて、local composer / phpunit ベースの orchestrator v1 と `ProductList` / `Product` / `Category` / `Cart` / `Shopping` packet DSL を実装した |
+
+## Retrospective Notes
+- `BEAR.Sunday + Be` を同時に進めるより、最初は `Be-first` に固定した方が判断が速い
+- `semantic-ex` は主工程ではなく補助に留め、制約抽出は移植元 PHP と ALPS を優先する
+- orchestrator の追加抽象化より、新しい packet と Be 実装を先に進める
+- packet は executable ではなく DSL にしておく方が、task / workflow / executor の責務が明確になる
+- task を queue した直後に実行する場合は、planning guard 対策として planning files をもう一度更新してから `worker once` を回す
 
 ---
 *Update after completing each phase or encountering errors*
