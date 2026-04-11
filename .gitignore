@@ -1,0 +1,10 @@
+.migrate/tasks/*
+!.migrate/tasks/.gitkeep
+.migrate/runs/*
+!.migrate/runs/.gitkeep
+.migrate/locks/*
+!.migrate/locks/.gitkeep
+.migrate/logs/*
+!.migrate/logs/.gitkeep
+vendor/
+.phpunit.cache/

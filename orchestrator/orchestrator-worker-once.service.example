@@ -1,0 +1,8 @@
+[Unit]
+Description=EC-CUBE migration orchestrator single worker run
+After=default.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=~/git/ec-cube-alps
+ExecStart=/usr/bin/env php ~/git/ec-cube-alps/bin/orchestrator worker once

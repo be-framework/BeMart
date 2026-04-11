@@ -1,0 +1,30 @@
+{
+  "type": "object",
+  "required": ["id", "title", "goal", "packet_type", "workflow", "inputs", "success_criteria", "priority"],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "title": { "type": "string" },
+    "goal": { "type": "string" },
+    "packet_type": { "type": "string" },
+    "workflow": { "type": "string" },
+    "inputs": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "success_criteria": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "priority": { "type": "integer", "minimum": 0 },
+    "queued_at": { "type": "string" },
+    "source_path": { "type": "string" },
+    "queue_status": {
+      "type": "string",
+      "enum": ["queued", "running", "completed", "failed"]
+    },
+    "last_run_id": { "type": "string" }
+  }
+}
+

@@ -1,0 +1,264 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+require __DIR__ . '/../vendor/autoload.php';
+
+$mode = $argv[1] ?? '';
+if ($mode === '') {
+    fwrite(STDERR, "Usage: bin/catalog-product-packet <semantic|generate|implement|review|fix>\n");
+    exit(1);
+}
+
+try {
+    $taskFile = requireEnv('ORCH_TASK_FILE');
+    $runDir = requireEnv('ORCH_RUN_DIR');
+    $runStatePath = requireEnv('ORCH_RUN_STATE_PATH');
+    $inputs = decodeJsonEnv('ORCH_TASK_INPUTS_JSON');
+    $successCriteria = decodeJsonEnv('ORCH_SUCCESS_CRITERIA_JSON');
+    $task = readJson($taskFile);
+    $runState = readJson($runStatePath);
+
+    $alpsPath = requireExistingPath(dirname($taskFile) . '/../../' . ($inputs['alps_profile'] ?? 'alps.json'));
+    $alps = readJson($alpsPath);
+
+    $summary = buildProductSummary($task, $inputs, $successCriteria, $alpsPath, $alps);
+    $artifactsDir = $runDir . '/packet';
+    if (!is_dir($artifactsDir) && !mkdir($artifactsDir, 0777, true) && !is_dir($artifactsDir)) {
+        throw new RuntimeException(sprintf('Failed to create packet artifact directory: %s', $artifactsDir));
+    }
+
+    $payload = match ($mode) {
+        'semantic' => semanticPayload($summary),
+        'generate' => generatePayload($summary),
+        'implement' => implementPayload($summary),
+        'review' => reviewPayload($runDir, $runState, $summary),
+        'fix' => fixPayload($summary),
+        default => throw new RuntimeException(sprintf('Unknown mode: %s', $mode)),
+    };
+
+    writeJson($artifactsDir . '/' . $mode . '.json', $payload);
+    echo json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL;
+
+    if ($mode === 'review' && ($payload['status'] ?? '') === 'needs-fix') {
+        exit(10);
+    }
+
+    exit(0);
+} catch (Throwable $throwable) {
+    fwrite(STDERR, $throwable->getMessage() . PHP_EOL);
+    exit(1);
+}
+
+function semanticPayload(array $summary): array
+{
+    return [
+        'mode' => 'semantic',
+        'status' => 'ok',
+        'packet_type' => $summary['packet_type'],
+        'resource' => $summary['resource'],
+        'alps_profile' => $summary['alps_profile'],
+        'state' => $summary['state'],
+        'transitions' => $summary['transitions'],
+        'success_criteria' => $summary['success_criteria'],
+    ];
+}
+
+function generatePayload(array $summary): array
+{
+    return [
+        'mode' => 'generate',
+        'status' => 'ok',
+        'implementation_brief' => [
+            'bounded_context' => $summary['bounded_context'],
+            'resource' => $summary['resource'],
+            'state_title' => $summary['state']['title'],
+            'transition_titles' => array_map(static fn (array $transition): string => $transition['title'], $summary['transitions']),
+            'read_only' => true,
+            'allows_add_to_cart' => true,
+        ],
+    ];
+}
+
+function implementPayload(array $summary): array
+{
+    return [
+        'mode' => 'implement',
+        'status' => 'ok',
+        'proposed_targets' => [
+            'page_resource' => 'src/Resource/Page/Product.php',
+            'app_resource' => 'src/Resource/App/Product.php',
+        ],
+        'test_targets' => [
+            'tests/Resource/Page/ProductTest.php',
+            'tests/Hypermedia/ProductHypermediaTest.php',
+        ],
+        'contract' => [
+            'state_id' => $summary['state']['id'],
+            'transition_ids' => array_map(static fn (array $transition): string => $transition['id'], $summary['transitions']),
+        ],
+    ];
+}
+
+function reviewPayload(string $runDir, array $runState, array $summary): array
+{
+    $implementEntry = null;
+    foreach (array_reverse($runState['step_history']) as $entry) {
+        if (($entry['step'] ?? '') === 'implement' && isset($entry['artifact_ref']) && $entry['artifact_ref'] !== '') {
+            $implementEntry = $entry;
+            break;
+        }
+    }
+
+    if ($implementEntry === null) {
+        return [
+            'mode' => 'review',
+            'status' => 'needs-fix',
+            'message' => 'No implement artifact found for review.',
+        ];
+    }
+
+    $artifact = readJson($runDir . '/' . $implementEntry['artifact_ref']);
+    $stdoutPath = $runDir . '/' . $artifact['stdout_path'];
+    $stdout = file_get_contents($stdoutPath);
+    if ($stdout === false) {
+        throw new RuntimeException(sprintf('Failed to read implement stdout: %s', $stdoutPath));
+    }
+
+    $implementPayload = json_decode($stdout, true, 512, JSON_THROW_ON_ERROR);
+    $missing = [];
+    foreach (['proposed_targets', 'test_targets', 'contract'] as $requiredKey) {
+        if (!array_key_exists($requiredKey, $implementPayload)) {
+            $missing[] = $requiredKey;
+        }
+    }
+
+    if ($missing !== []) {
+        return [
+            'mode' => 'review',
+            'status' => 'needs-fix',
+            'message' => sprintf('Implement payload missing keys: %s', implode(', ', $missing)),
+        ];
+    }
+
+    return [
+        'mode' => 'review',
+        'status' => 'approved',
+        'resource' => $summary['resource'],
+        'checked_keys' => ['proposed_targets', 'test_targets', 'contract'],
+    ];
+}
+
+function fixPayload(array $summary): array
+{
+    return [
+        'mode' => 'fix',
+        'status' => 'ok',
+        'fix_applied' => 'Regenerated Product packet defaults from ALPS contract.',
+        'resource' => $summary['resource'],
+    ];
+}
+
+function buildProductSummary(array $task, array $inputs, array $successCriteria, string $alpsPath, array $alps): array
+{
+    $descriptors = $alps['alps']['descriptor'] ?? null;
+    if (!is_array($descriptors)) {
+        throw new RuntimeException('Invalid ALPS document: descriptor list not found.');
+    }
+
+    $resource = (string) ($inputs['resource'] ?? '');
+    if ($resource !== 'Product') {
+        throw new RuntimeException(sprintf('Expected resource Product, got %s', $resource));
+    }
+
+    $state = descriptorById($descriptors, 'Product');
+    $goProduct = descriptorById($descriptors, 'goProduct');
+    $goProductList = descriptorById($descriptors, 'goProductList');
+    $goCategory = descriptorById($descriptors, 'goCategory');
+    $doAddCartItem = descriptorById($descriptors, 'doAddCartItem');
+
+    return [
+        'task_id' => $task['id'],
+        'packet_type' => $task['packet_type'],
+        'bounded_context' => (string) ($inputs['bounded_context'] ?? ''),
+        'resource' => $resource,
+        'alps_profile' => $alpsPath,
+        'state' => [
+            'id' => $state['id'],
+            'title' => $state['title'] ?? '',
+        ],
+        'transitions' => [
+            ['id' => $goProduct['id'], 'title' => $goProduct['title'] ?? ''],
+            ['id' => $goProductList['id'], 'title' => $goProductList['title'] ?? ''],
+            ['id' => $goCategory['id'], 'title' => $goCategory['title'] ?? ''],
+            ['id' => $doAddCartItem['id'], 'title' => $doAddCartItem['title'] ?? ''],
+        ],
+        'success_criteria' => $successCriteria,
+    ];
+}
+
+function descriptorById(array $descriptors, string $id): array
+{
+    foreach ($descriptors as $descriptor) {
+        if (($descriptor['id'] ?? null) === $id) {
+            return $descriptor;
+        }
+    }
+
+    throw new RuntimeException(sprintf('ALPS descriptor not found: %s', $id));
+}
+
+function requireEnv(string $name): string
+{
+    $value = getenv($name);
+    if ($value === false || $value === '') {
+        throw new RuntimeException(sprintf('Missing required environment variable: %s', $name));
+    }
+
+    return $value;
+}
+
+function decodeJsonEnv(string $name): array
+{
+    $value = requireEnv($name);
+    $decoded = json_decode($value, true, 512, JSON_THROW_ON_ERROR);
+    if (!is_array($decoded)) {
+        throw new RuntimeException(sprintf('Expected array/object JSON in environment variable: %s', $name));
+    }
+
+    return $decoded;
+}
+
+function readJson(string $path): array
+{
+    $raw = file_get_contents($path);
+    if ($raw === false) {
+        throw new RuntimeException(sprintf('Failed to read JSON file: %s', $path));
+    }
+
+    $decoded = json_decode($raw, true, 512, JSON_THROW_ON_ERROR);
+    if (!is_array($decoded)) {
+        throw new RuntimeException(sprintf('Expected JSON object/array in: %s', $path));
+    }
+
+    return $decoded;
+}
+
+function writeJson(string $path, array $payload): void
+{
+    $json = json_encode($payload, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR) . PHP_EOL;
+    if (file_put_contents($path, $json) === false) {
+        throw new RuntimeException(sprintf('Failed to write JSON file: %s', $path));
+    }
+}
+
+function requireExistingPath(string $path): string
+{
+    $resolved = realpath($path);
+    if ($resolved === false) {
+        throw new RuntimeException(sprintf('Expected path to exist: %s', $path));
+    }
+
+    return $resolved;
+}

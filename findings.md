@@ -1,0 +1,92 @@
+# Findings & Decisions
+
+## Requirements
+- EC-CUBE を BEAR.Sunday + Be Framework へ移植する計画を作る
+- 現実的な段階移行にする
+- 公式資料として BEAR.Sunday / Be Framework の LLM 向けリファレンスを前提にする
+- このリポジトリの ALPS 成果物を移植の基礎資料として使う
+
+## Research Findings
+- このリポジトリは実装コードではなく、EC-CUBE 4.3 の ALPS / OpenAPI / GitHub Pages 成果物の保管庫である
+- ALPS には 413 ディスクリプタがあり、front の主要フローはかなり強く記述されている
+- front はほぼ 100% カバーだが、admin は 30 ルート未カバーで、そのまま全面移植の契約には使いにくい
+- BEAR.Sunday では `ResourceObject` の `onGet/onPost/onPut/onPatch/onDelete` が HTTP メソッドに対応し、`page://` と `app://` の URI でリソースを分ける
+- BEAR.Sunday は resource client と hypermedia test を前提にできるため、ALPS の状態遷移検証と相性が良い
+- Be Framework では `#[Be]`, `#[Input]`, `#[Inject]`, `#[Validate]` を使い、入力から存在への変換を型で表現する
+- Be Framework は immutable / `final readonly` / constructor 完結の副作用を前提にしており、業務ルールを service 手続きではなく変換として設計する
+- Be の Reason Layer は外部依存を意味ごとに束ねるので、決済、配送、税計算、在庫、通知のような EC-CUBE の副作用群を隔離しやすい
+- 長時間作業では、コンテキスト消失対策として plan/findings/progress の 3 ファイルだけでは足りず、再開手順と停止条件を固定した runbook も必要
+- この実行環境では、ネットワーク、GUI、sandbox 外書き込み、未承認コマンドが将来の自動継続を止める主因になる
+- `be-framework/be-skills` は Be 向けに `be`, `be-semantic`, `semantic-ex` を提供し、Story → ALPS → Schema → Be code の流れを前提にしている
+- `bearsunday/BEAR.Skills` は `bear-from-alps`, `bear-to-alps`, `bear-review`, `bear-hypermedia`, `bear-smoke-test` などを提供し、ALPS から resource 生成と BEAR 規約レビューに使える
+- この移行用の最小 orchestrator は Python より PHP の方が適合する。移植先と同じ言語圏で、`composer` と `phpunit` に閉じた local toolchain を作れるため
+- workflow 定義は YAML より JSON の方が扱いやすい。`JSON Schema` で `workflow`, `task`, `run-state`, `step-result` を厳密に検証できる
+- 実装した `catalog/ProductList` packet は、実際に `task add -> run next -> run status` で完走し、`.migrate/runs/<run-id>/packet/*.json` を残せる
+- `catalog/Product` packet も同じ形で切り出せる。read-only 表現に加えて `doAddCartItem` の契約を packet artifact に残せる
+- `catalog/Product` packet は実際に `task add -> worker once -> run status` で完走した
+- `review` が exit code `10` を返したときだけ `fix -> review` に遷移する設計で、review/fix loop を単純に保てる
+- planning file の mtime を guard に使う方式で、`resume` 前の再読と更新を強制できる
+- 「止まらない」は inner loop だけでは実現できない。内側は queue/state machine、外側は `worker loop` / `while true` / scheduler に分ける設計が自然
+- supervisor 実例は repo 内にも置ける。shell loop, `systemd`, `cron` の3種類があれば、Codex 固有機能なしでも長時間運用の足場になる
+- skill は増やしすぎない方が良い。現時点の最小セットは `planning-with-files`, `be-semantic`, `bear-from-alps`, `bear-review`, `bear-smoke-test`
+- `koriym/homebrew-malt` は upstream README で `Claude Code Skill` として案内されている。plugin marketplace 経由で導入でき、macOS + Homebrew なら Docker なしで PHP / MySQL / Nginx / Redis を project-local port で立ち上げる用途に向く
+- 今回の移植では `semantic-ex` を主工程に置かない。まず移植元 PHP と ALPS から制約を抽出し、source だけで不足する箇所に限定して補助的に使う
+- 最初の実装中心は `semantic variables` で、最初の deliverable は画面ではなく `semantic catalog` である
+
+## Technical Decisions
+| Decision | Rationale |
+|----------|-----------|
+| `alps.json` を機能契約の一次資料にする | safe / unsafe / idempotent、状態、語彙が既に整理されているため |
+| bounded context 単位で移行する | catalog / cart / checkout / order / account / admin で責務を分けやすいため |
+| UI 入口は `page://`、内部業務 API は `app://` に寄せる | BEAR.Sunday の責務分離にそのまま乗るため |
+| ドメインの不変条件は Be の Semantic / Input / Final に寄せる | EC-CUBE の複雑なバリデーションや状態遷移を型で閉じ込めたいから |
+| DB / 外部 API / メール / 決済は Reason または adapter に押し込む | 移植初期は既存スキーマと外部依存を温存したいから |
+| 長時間運用では `work packet` 単位で進める | コンテキスト 0% でも再開点を狭く保てるため |
+| 再開前に `git status --short` と planning files を必ず読む | 中断中の変更や前回の意図を取り違えないため |
+| 可能なら Be / BEAR の skill を標準ワークフローに組み込む | ALPS からの生成、review、smoke test を半自動化できるため |
+| orchestrator は PHP で実装する | BEAR.Sunday / Be と同じ言語圏で保守し、global runner 依存を避けるため |
+| 依存管理は local `composer.json` に閉じる | repo ごとに PHPUnit バージョンと autoload を固定したいため |
+| `src/bootstrap.php` は置かない | Composer autoload だけで十分で、余計な初期化ポイントを増やさないため |
+| workflow/task/state は JSON を canonical にする | schema 化と差分追跡を簡単にするため |
+| step adapter には `ORCH_*` 環境変数を渡す | packet script を state file 直読より緩く結合できるため |
+| outer runner は orchestrator 本体と分離する | inner state machine を単純に保ちつつ、cron/systemd/loop へ差し替え可能にするため |
+| skill は `必須 / 推奨 / 任意 / 不要` に分けて固定する | 毎回 skill 選定で迷わず、packet ごとの手順を揃えるため |
+| 初期移行は `Be-first` で進める | 最初に検証したいのは HTTP 層ではなく業務意味の再定義だから |
+
+## Issues Encountered
+| Issue | Resolution |
+|-------|------------|
+| admin 領域は ALPS 契約が未完成 | storefront 先行の段階移行に変更 |
+| この repo に EC-CUBE 実装コードはない | まず計画レベルに留め、実装段階で別途本体 repo を読む前提にした |
+
+## Resources
+- BEAR.Sunday LLM reference: https://bearsunday.github.io/llms-full.txt
+- Be Framework LLM reference: https://be-framework.github.io/llms-full.txt
+- Be Skills: https://github.com/be-framework/be-skills
+- BEAR.Skills: https://github.com/bearsunday/BEAR.Skills
+- Day 0 workflow: `~/git/ec-cube-alps/day0-workflow.md`
+- Project summary: `~/git/ec-cube-alps/README.md`
+- Coverage / next-ai notes: `~/git/ec-cube-alps/handover.json`
+- Domain tags: `~/git/ec-cube-alps/tag.md`
+- Migration plan draft: `~/git/ec-cube-alps/ec-cube-bear-be-migration-plan.md`
+- Autonomous execution runbook: `~/git/ec-cube-alps/autonomous-execution-runbook.md`
+- Orchestrator v1 note: `~/git/ec-cube-alps/orchestrator-v1.md`
+- Supervisor examples: `~/git/ec-cube-alps/orchestrator/README.md`
+- Product packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/002-catalog-product.json`
+- Skills matrix: `~/git/ec-cube-alps/skills-matrix.md`
+- Be-first method: `~/git/ec-cube-alps/be-first-migration-method.md`
+
+## Visual/Browser Findings
+- BEAR.Sunday 公式資料では、`page://` が外部リクエスト向け、`app://` が内部 API 的 resource として説明されている
+- BEAR.Sunday 公式資料では、resource client による resource 呼び出しと hypermedia test が明示されている
+- Be 公式資料では、オブジェクトは「何をするか」ではなく「何になるか」を表し、変換先は `#[Be]` で宣言する
+- Be 公式資料では、Reason Layer が外部依存をひとまとまりに保持し、constructor 内で変換を完結させる設計になっている
+- 今回の移植では、resource/hypermedia/semantic テストを先に置けば、途中で文脈が切れても「何が未達か」をテストが教えてくれる
+- Be Skills README では、`be-semantic` が Story → ALPS → Fake → Agreement → Schema → Be の流れを明示している
+- BEAR.Skills README では、`bear-from-alps` と `bear-smoke-test` が ALPS 生成と TDD 運用に直結する
+- Day 0 では、最初の packet を `catalog/ProductList` に固定すると scope explosion を避けやすい
+- 現在の v1 では `catalog/ProductList` packet を `php bin/orchestrator run next` で最後まで回せる
+
+---
+*Update this file after every 2 view/browser/search operations*
+*This prevents visual information from being lost*

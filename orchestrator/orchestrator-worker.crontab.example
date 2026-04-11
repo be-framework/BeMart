@@ -1,0 +1,1 @@
+* * * * * cd ~/git/ec-cube-alps && /usr/bin/env php bin/orchestrator worker once >> .migrate/logs/worker-cron.log 2>&1
