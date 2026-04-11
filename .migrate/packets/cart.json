@@ -1,0 +1,39 @@
+{
+  "id": "cart",
+  "kind": "resource-contract-packet",
+  "type": "cart/Cart",
+  "bounded_context": "cart",
+  "resource": "Cart",
+  "source_profile": "alps.json",
+  "state_descriptor": "Cart",
+  "transition_descriptors": ["goCart", "doAddCartItem", "doUpdateCartItemQuantity", "doRemoveCartItem", "goShopping"],
+  "semantic_notes": {
+    "purchase_flow_note": {
+      "source": "descriptor_doc",
+      "descriptor": "doAddCartItem"
+    }
+  },
+  "generate": {
+    "flags": {
+      "read_only": false,
+      "requires_purchase_flow": true
+    }
+  },
+  "implement": {
+    "proposed_targets": {
+      "page_resource": "src/Resource/Page/Cart.php",
+      "app_resource": "src/Resource/App/Cart.php"
+    },
+    "test_targets": [
+      "tests/Resource/Page/CartTest.php",
+      "tests/Workflow/CartFlowTest.php"
+    ]
+  },
+  "review": {
+    "required_keys": ["proposed_targets", "test_targets", "contract"]
+  },
+  "fix": {
+    "message": "Regenerated Cart packet defaults from ALPS contract."
+  }
+}
+

@@ -1,0 +1,93 @@
+{
+  "type": "object",
+  "required": [
+    "id",
+    "kind",
+    "type",
+    "bounded_context",
+    "resource",
+    "source_profile",
+    "state_descriptor",
+    "transition_descriptors",
+    "generate",
+    "implement",
+    "review",
+    "fix"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "id": { "type": "string" },
+    "kind": { "type": "string", "enum": ["resource-contract-packet"] },
+    "type": { "type": "string" },
+    "bounded_context": { "type": "string" },
+    "resource": { "type": "string" },
+    "source_profile": { "type": "string" },
+    "state_descriptor": { "type": "string" },
+    "transition_descriptors": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "type": "string" }
+    },
+    "semantic_notes": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["source"],
+        "additionalProperties": false,
+        "properties": {
+          "source": { "type": "string", "enum": ["descriptor_doc", "literal"] },
+          "descriptor": { "type": "string" },
+          "value": { "type": "string" }
+        }
+      }
+    },
+    "generate": {
+      "type": "object",
+      "required": ["flags"],
+      "additionalProperties": false,
+      "properties": {
+        "flags": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "implement": {
+      "type": "object",
+      "required": ["proposed_targets", "test_targets"],
+      "additionalProperties": false,
+      "properties": {
+        "proposed_targets": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        },
+        "test_targets": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "review": {
+      "type": "object",
+      "required": ["required_keys"],
+      "additionalProperties": false,
+      "properties": {
+        "required_keys": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "fix": {
+      "type": "object",
+      "required": ["message"],
+      "additionalProperties": false,
+      "properties": {
+        "message": { "type": "string" }
+      }
+    }
+  }
+}
+

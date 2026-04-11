@@ -11,7 +11,8 @@ final class RunEngine
         private readonly SchemaValidator $validator,
         private readonly PlanningGuard $planningGuard,
         private readonly TaskRepository $tasks,
-        private readonly RunRepository $runs
+        private readonly RunRepository $runs,
+        private readonly PacketRepository $packets
     ) {
     }
 
@@ -529,6 +530,8 @@ final class RunEngine
             $environment = [];
         }
 
+        $packet = $this->packets->loadPacket((string) $task['packet']);
+
         return array_merge($environment, [
             'ORCH_PROJECT_ROOT' => $this->paths->root(),
             'ORCH_CWD' => $cwd,
@@ -540,8 +543,11 @@ final class RunEngine
             'ORCH_WORKFLOW' => (string) $workflow['name'],
             'ORCH_CURRENT_STEP' => (string) $state['current_step'],
             'ORCH_STEP_ATTEMPT' => (string) (($state['active_step']['attempt'] ?? null) ?: $this->currentAttempt($state, (string) $state['current_step'])),
-            'ORCH_PACKET_TYPE' => (string) ($task['packet_type'] ?? ''),
-            'ORCH_TASK_INPUTS_JSON' => json_encode($task['inputs'] ?? [], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            'ORCH_PACKET_ID' => (string) $task['packet'],
+            'ORCH_PACKET_FILE' => $this->tasks->packetPathForTask($task),
+            'ORCH_PACKET_TYPE' => (string) ($packet['type'] ?? ''),
+            'ORCH_PACKET_RESOURCE' => (string) ($packet['resource'] ?? ''),
+            'ORCH_PACKET_BOUNDED_CONTEXT' => (string) ($packet['bounded_context'] ?? ''),
             'ORCH_SUCCESS_CRITERIA_JSON' => json_encode($task['success_criteria'] ?? [], JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
         ]);
     }
@@ -553,6 +559,7 @@ final class RunEngine
         return [
             'run_id' => $state['run_id'],
             'task_id' => $state['task_id'],
+            'packet' => $state['packet'] ?? '',
             'workflow' => $state['workflow'],
             'status' => $state['status'],
             'current_step' => $state['current_step'],

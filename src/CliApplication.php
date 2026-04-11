@@ -13,15 +13,18 @@ final class CliApplication
 
         $validator = new SchemaValidator($paths);
         $planningGuard = new PlanningGuard($paths);
-        $tasks = new TaskRepository($paths, $validator);
+        $packets = new PacketRepository($paths, $validator);
+        $tasks = new TaskRepository($paths, $validator, $packets);
         $runs = new RunRepository($paths, $validator);
-        $engine = new RunEngine($paths, $validator, $planningGuard, $tasks, $runs);
+        $engine = new RunEngine($paths, $validator, $planningGuard, $tasks, $runs, $packets);
         $worker = new QueueWorker($engine);
+        $packetExecutor = new PacketExecutor($paths, $validator, $packets);
 
         try {
             $command = $argv[1] ?? '';
             return match ($command) {
                 'validate' => $this->validate($validator, $argv),
+                'packet' => $this->packetCommand($packetExecutor, $argv),
                 'task' => $this->task($tasks, $argv),
                 'run' => $this->runCommand($engine, $argv),
                 'worker' => $this->workerCommand($worker, $argv),
@@ -80,6 +83,21 @@ final class CliApplication
             'queued_at' => $queued['queued_at'],
         ]);
         return 0;
+    }
+
+    private function packetCommand(PacketExecutor $packetExecutor, array $argv): int
+    {
+        $subcommand = $argv[2] ?? '';
+        if ($subcommand !== 'run') {
+            return $this->usage();
+        }
+
+        $step = (string) ($argv[3] ?? '');
+        if ($step === '') {
+            return $this->usage();
+        }
+
+        return $packetExecutor->run($step);
     }
 
     private function runCommand(RunEngine $engine, array $argv): int
@@ -142,6 +160,7 @@ final class CliApplication
     {
         fwrite(STDERR, "Usage:\n");
         fwrite(STDERR, "  bin/orchestrator validate <file> [kind]\n");
+        fwrite(STDERR, "  bin/orchestrator packet run <semantic|generate|implement|review|fix>\n");
         fwrite(STDERR, "  bin/orchestrator task add <task.json>\n");
         fwrite(STDERR, "  bin/orchestrator run next\n");
         fwrite(STDERR, "  bin/orchestrator run resume <run-id>\n");

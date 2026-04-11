@@ -93,9 +93,9 @@ stateDiagram-v2
 | `skills-matrix.md` | 利用する skill の一覧と位置づけ |
 | `task_plan.md` / `findings.md` / `progress.md` | file-based planning 用の作業メモ |
 | `orchestrator-v1.md` | JSON-first orchestrator の概要 |
-| `.migrate/` | workflow, task, schema, run artifact の置き場 |
-| `bin/orchestrator` | task / run / worker を扱う CLI |
-| `bin/catalog-product-list-packet`, `bin/catalog-product-packet` | `ProductList` / `Product` packet の試験実装 |
+| `.migrate/` | workflow, packet DSL, task queue, schema, run artifact の置き場 |
+| `.migrate/packets/*.json` | `ProductList` / `Product` / `Category` / `Cart` / `Shopping` の packet 定義 |
+| `bin/orchestrator` | task / run / worker / generic packet executor を扱う CLI |
 | `tests/OrchestratorTest.php` | orchestrator と packet の PHPUnit |
 
 これらは ALPS 本体の公開成果物ではなく、移植検討と検証のための補助資料として扱う。

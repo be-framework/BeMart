@@ -24,6 +24,15 @@
 - 実装した `catalog/ProductList` packet は、実際に `task add -> run next -> run status` で完走し、`.migrate/runs/<run-id>/packet/*.json` を残せる
 - `catalog/Product` packet も同じ形で切り出せる。read-only 表現に加えて `doAddCartItem` の契約を packet artifact に残せる
 - `catalog/Product` packet は実際に `task add -> worker once -> run status` で完走した
+- `catalog/Category` packet も同じ形で切り出せる。`goProductList`, `doUpdateCategory`, `doDeleteCategory` を packet artifact に残せる
+- `catalog/Category` packet は実際に `task add -> worker once -> run status` で完走した
+- `cart/Cart` packet も同じ形で切り出せる。`doAddCartItem`, `doUpdateCartItemQuantity`, `doRemoveCartItem`, `goShopping` と PurchaseFlow の注意点を packet artifact に残せる
+- `cart/Cart` packet は実際に `task add -> worker once -> run status` で完走した
+- planning guard は `queued_at` より後の planning file 更新を要求する。task 追加と実行を同秒に行うと guard に引っかかるので、queue 後に planning files を更新してから `worker once` を回すのが安全
+- `checkout/Shopping` packet も同じ形で切り出せる。配送先選択系の遷移と `doConfirmOrder` の checkout flow note を packet artifact に残せる
+- `checkout/Shopping` packet は実際に `task add -> worker once -> run status` で完走した
+- `packet` は executable script ではなく DSL / 設定ファイルとして持つ方がよい。task は queue 単位、packet は契約定義、workflow は step 遷移、executor は generic command に責務分離できる
+- per-resource script を増やすより、`.migrate/packets/*.json` + `php bin/orchestrator packet run <step>` の方が構造が明確
 - `review` が exit code `10` を返したときだけ `fix -> review` に遷移する設計で、review/fix loop を単純に保てる
 - planning file の mtime を guard に使う方式で、`resume` 前の再読と更新を強制できる
 - 「止まらない」は inner loop だけでは実現できない。内側は queue/state machine、外側は `worker loop` / `while true` / scheduler に分ける設計が自然
@@ -32,6 +41,8 @@
 - `koriym/homebrew-malt` は upstream README で `Claude Code Skill` として案内されている。plugin marketplace 経由で導入でき、macOS + Homebrew なら Docker なしで PHP / MySQL / Nginx / Redis を project-local port で立ち上げる用途に向く
 - 今回の移植では `semantic-ex` を主工程に置かない。まず移植元 PHP と ALPS から制約を抽出し、source だけで不足する箇所に限定して補助的に使う
 - 最初の実装中心は `semantic variables` で、最初の deliverable は画面ではなく `semantic catalog` である
+- 振り返りとして、初期に `BEAR.Sunday + Be` を一体で考えすぎた。今後は `Be-first` を固定し、HTTP/resource 層は後段で薄く載せる
+- orchestrator は v1 として十分なので、次からは基盤抽象化より packet 追加と Be 実装の方を優先する
 
 ## Technical Decisions
 | Decision | Rationale |
@@ -48,10 +59,11 @@
 | 依存管理は local `composer.json` に閉じる | repo ごとに PHPUnit バージョンと autoload を固定したいため |
 | `src/bootstrap.php` は置かない | Composer autoload だけで十分で、余計な初期化ポイントを増やさないため |
 | workflow/task/state は JSON を canonical にする | schema 化と差分追跡を簡単にするため |
-| step adapter には `ORCH_*` 環境変数を渡す | packet script を state file 直読より緩く結合できるため |
+| generic executor には `ORCH_*` 環境変数を渡す | task / run state / packet file を疎結合に保てるため |
 | outer runner は orchestrator 本体と分離する | inner state machine を単純に保ちつつ、cron/systemd/loop へ差し替え可能にするため |
 | skill は `必須 / 推奨 / 任意 / 不要` に分けて固定する | 毎回 skill 選定で迷わず、packet ごとの手順を揃えるため |
 | 初期移行は `Be-first` で進める | 最初に検証したいのは HTTP 層ではなく業務意味の再定義だから |
+| 振り返りは感想ではなく運用知識として残す | 次回の判断速度を上げ、同じ迷いを減らすため |
 
 ## Issues Encountered
 | Issue | Resolution |
@@ -73,6 +85,9 @@
 - Orchestrator v1 note: `~/git/ec-cube-alps/orchestrator-v1.md`
 - Supervisor examples: `~/git/ec-cube-alps/orchestrator/README.md`
 - Product packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/002-catalog-product.json`
+- Category packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/003-catalog-category.json`
+- Cart packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/004-cart-cart.json`
+- Shopping packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/005-checkout-shopping.json`
 - Skills matrix: `~/git/ec-cube-alps/skills-matrix.md`
 - Be-first method: `~/git/ec-cube-alps/be-first-migration-method.md`
 
@@ -86,6 +101,7 @@
 - BEAR.Skills README では、`bear-from-alps` と `bear-smoke-test` が ALPS 生成と TDD 運用に直結する
 - Day 0 では、最初の packet を `catalog/ProductList` に固定すると scope explosion を避けやすい
 - 現在の v1 では `catalog/ProductList` packet を `php bin/orchestrator run next` で最後まで回せる
+- 現在の v1 では packet DSL を generic executor で最後まで回せる
 
 ---
 *Update this file after every 2 view/browser/search operations*

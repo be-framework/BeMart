@@ -17,6 +17,7 @@
     "schema_version": { "type": "string" },
     "run_id": { "type": "string" },
     "task_id": { "type": "string" },
+    "packet": { "type": "string" },
     "workflow": { "type": "string" },
     "status": {
       "type": "string",
@@ -72,4 +73,3 @@
     }
   }
 }
-
