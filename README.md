@@ -94,9 +94,11 @@ stateDiagram-v2
 | `task_plan.md` / `findings.md` / `progress.md` | file-based planning 用の作業メモ |
 | `orchestrator-v1.md` | JSON-first orchestrator の概要 |
 | `.migrate/` | workflow, packet DSL, task queue, schema, run artifact の置き場 |
-| `.migrate/packets/*.json` | `ProductList` / `Product` / `Category` / `Cart` / `Shopping` の packet 定義 |
+| `.migrate/packets/*.json` | `resource-contract` packet と `be-semantic` packet の定義 |
 | `bin/orchestrator` | task / run / worker / generic packet executor を扱う CLI |
 | `tests/OrchestratorTest.php` | orchestrator と packet の PHPUnit |
+
+現時点では、`catalog/ProductList` などの `resource-contract` packet に加えて、[`cart-quantity.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/cart-quantity.json) のような最小 `Be-first` packet と、[`cart-add-cart-item-input.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/cart-add-cart-item-input.json) のようなその上位 packet も置いている。
 
 これらは ALPS 本体の公開成果物ではなく、移植検討と検証のための補助資料として扱う。
 

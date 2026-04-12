@@ -33,6 +33,11 @@
 - `checkout/Shopping` packet は実際に `task add -> worker once -> run status` で完走した
 - `packet` は executable script ではなく DSL / 設定ファイルとして持つ方がよい。task は queue 単位、packet は契約定義、workflow は step 遷移、executor は generic command に責務分離できる
 - per-resource script を増やすより、`.migrate/packets/*.json` + `php bin/orchestrator packet run <step>` の方が構造が明確
+- `resource-contract` packet だけでは Be-first にならない。Be-first には `semantic_variables`, `source_constraints`, `input`, `final`, `reason_dependencies`, `be_targets`, `be_test_targets` を持つ別 kind が必要
+- 最小の `be-semantic` packet は `Quantity` にする方がよい。`Quantity` は ALPS の `quantity`, `saleLimit`, `stock`, `stockUnlimited` と直接つながるため、source/ALPS first の検証対象として素直
+- `AddCartItemInput` は最初の packet ではなく、`Quantity` を参照する上位 packet として置く方が責務が明確
+- `AddCartItemInput` の `be-semantic` packet は実際に `task add -> worker once -> run status <run-id>` で完走した
+- `Quantity` の `be-semantic` packet も実際に `task add -> worker once -> run status <run-id>` で完走した
 - `review` が exit code `10` を返したときだけ `fix -> review` に遷移する設計で、review/fix loop を単純に保てる
 - planning file の mtime を guard に使う方式で、`resume` 前の再読と更新を強制できる
 - 「止まらない」は inner loop だけでは実現できない。内側は queue/state machine、外側は `worker loop` / `while true` / scheduler に分ける設計が自然
@@ -88,6 +93,8 @@
 - Category packet task: `/Users/akihito/git/ec-cube-alps/.migrate/examples/tasks/003-catalog-category.json`
 - Cart packet task: `/Users/akihito/git/ec-cube-alps/.migrate/examples/tasks/004-cart-cart.json`
 - Shopping packet task: `/Users/akihito/git/ec-cube-alps/.migrate/examples/tasks/005-checkout-shopping.json`
+- AddCartItemInput Be packet task: `/Users/akihito/git/ec-cube-alps/.migrate/examples/tasks/101-cart-add-cart-item-input.json`
+- Quantity Be packet task: `/Users/akihito/git/ec-cube-alps/.migrate/examples/tasks/102-cart-quantity.json`
 - Skills matrix: `/Users/akihito/git/ec-cube-alps/skills-matrix.md`
 - Be-first method: `/Users/akihito/git/ec-cube-alps/be-first-migration-method.md`
 
@@ -102,6 +109,7 @@
 - Day 0 では、最初の packet を `catalog/ProductList` に固定すると scope explosion を避けやすい
 - 現在の v1 では `catalog/ProductList` packet を `php bin/orchestrator run next` で最後まで回せる
 - 現在の v1 では packet DSL を generic executor で最後まで回せる
+- 現在の v1 では `AddCartItemInput` の `be-semantic` packet も generic executor で最後まで回せる
 
 ---
 *Update this file after every 2 view/browser/search operations*

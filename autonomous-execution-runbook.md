@@ -75,12 +75,12 @@
 - 入口: `php bin/orchestrator`
 - テスト: `composer test`
 - workflow 定義: `.migrate/workflows/*.json`
-- packet 定義: `.migrate/packets/*.json`
+- packet 定義: `.migrate/packets/*.json` (`resource-contract` / `be-semantic`)
 - schema: `.migrate/schemas/*.json`
 - 実行状態: `.migrate/tasks/`, `.migrate/runs/`
 - packet 実行: `php bin/orchestrator packet run <step>`
 
-現在は `catalog/ProductList` packet を end-to-end で回せる。
+現在は `catalog/ProductList` の `resource-contract` packet と、`Quantity` / `AddCartItemInput` の `be-semantic` packet を end-to-end で回せる。
 
 ## 外側 supervisor の考え方
 
