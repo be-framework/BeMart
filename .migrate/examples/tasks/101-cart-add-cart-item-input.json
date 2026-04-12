@@ -1,0 +1,14 @@
+{
+  "id": "101-cart-add-cart-item-input",
+  "title": "Cart AddCartItemInput semantic packet",
+  "goal": "Establish the first Be-first semantic packet for AddCartItemInput.",
+  "packet": "cart-add-cart-item-input",
+  "workflow": "packet-lifecycle",
+  "success_criteria": [
+    "Semantic variables are extracted for AddCartItemInput.",
+    "Input and Final targets are defined for Be.",
+    "Reason dependencies are listed before HTTP resource work starts."
+  ],
+  "priority": 110
+}
+
