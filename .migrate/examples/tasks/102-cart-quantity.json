@@ -1,0 +1,14 @@
+{
+  "id": "102-cart-quantity",
+  "title": "Cart Quantity semantic packet",
+  "goal": "Establish the smallest Be-first semantic packet for Quantity.",
+  "packet": "cart-quantity",
+  "workflow": "packet-lifecycle",
+  "success_criteria": [
+    "Semantic variables are extracted for Quantity.",
+    "Input and Final targets are defined for the smallest Be packet.",
+    "No Reason dependency is required at this stage."
+  ],
+  "priority": 120
+}
+

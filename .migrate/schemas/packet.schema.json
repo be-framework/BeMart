@@ -7,17 +7,14 @@
     "bounded_context",
     "resource",
     "source_profile",
-    "state_descriptor",
-    "transition_descriptors",
     "generate",
-    "implement",
     "review",
     "fix"
   ],
   "additionalProperties": false,
   "properties": {
     "id": { "type": "string" },
-    "kind": { "type": "string", "enum": ["resource-contract-packet"] },
+    "kind": { "type": "string", "enum": ["resource-contract-packet", "be-semantic-packet"] },
     "type": { "type": "string" },
     "bounded_context": { "type": "string" },
     "resource": { "type": "string" },
@@ -40,6 +37,73 @@
           "value": { "type": "string" }
         }
       }
+    },
+    "semantic_variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type", "meaning", "constraints", "sources"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "type": { "type": "string" },
+          "meaning": { "type": "string" },
+          "constraints": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" }
+          },
+          "sources": {
+            "type": "array",
+            "minItems": 1,
+            "items": { "type": "string" }
+          }
+        }
+      }
+    },
+    "source_constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["label", "source"],
+        "additionalProperties": false,
+        "properties": {
+          "label": { "type": "string" },
+          "source": { "type": "string", "enum": ["descriptor_doc", "descriptor_title", "literal"] },
+          "descriptor": { "type": "string" },
+          "value": { "type": "string" }
+        }
+      }
+    },
+    "input": {
+      "type": "object",
+      "required": ["name", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "final": {
+      "type": "object",
+      "required": ["name", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "description": { "type": "string" }
+      }
+    },
+    "reason_dependencies": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "be_targets": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "be_test_targets": {
+      "type": "array",
+      "items": { "type": "string" }
     },
     "generate": {
       "type": "object",
@@ -90,4 +154,3 @@
     }
   }
 }
-

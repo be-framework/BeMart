@@ -35,6 +35,8 @@ final class OrchestratorTest extends TestCase
         $this->assertSame([], $validator->validateFile($workflowPath, 'workflow'));
         $this->assertSame([], $validator->validateFile($paths->exampleTaskDir() . '/catalog-product-list.json', 'task'));
         $this->assertSame([], $validator->validateFile($paths->packetDir() . '/catalog-product-list.json', 'packet'));
+        $this->assertSame([], $validator->validateFile($paths->packetDir() . '/cart-quantity.json', 'packet'));
+        $this->assertSame([], $validator->validateFile($paths->packetDir() . '/cart-add-cart-item-input.json', 'packet'));
 
         $invalidWorkflow = $this->successWorkflow();
         $invalidWorkflow['extra'] = 'not-allowed';
@@ -415,6 +417,106 @@ final class OrchestratorTest extends TestCase
         $this->assertTrue($generate['implementation_brief']['requires_checkout_flow']);
         $this->assertContains('doConfirmOrder', $implement['contract']['transition_ids']);
         $this->assertContains('goShoppingShipping', $implement['contract']['transition_ids']);
+
+        $status = $engine->status($state['run_id']);
+        $this->assertSame('completed', $status['summary']['status']);
+
+        $reloaded = $runs->loadState($state['run_id']);
+        $this->assertSame('completed', $reloaded['status']);
+    }
+
+    public function testTrackedBeSemanticWorkflowProducesBeArtifacts(): void
+    {
+        $root = $this->createProjectRoot();
+        [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
+
+        copy(__DIR__ . '/../alps.json', $root . '/alps.json');
+        $workflow = $this->trackedWorkflowUsingRealExecutor();
+        $task = [
+            'id' => '101-cart-add-cart-item-input',
+            'title' => 'Cart AddCartItemInput semantic packet',
+            'goal' => 'Establish the first Be-first semantic packet for AddCartItemInput.',
+            'packet' => 'cart-add-cart-item-input',
+            'workflow' => 'packet-lifecycle',
+            'success_criteria' => [
+                'Semantic variables are extracted for AddCartItemInput.',
+                'Input and Final targets are defined for Be.',
+                'Reason dependencies are listed before HTTP resource work starts.',
+            ],
+            'priority' => 110,
+        ];
+
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
+        $sourceTask = $paths->exampleTaskDir() . '/101-cart-add-cart-item-input.json';
+        $this->writeJson($sourceTask, $task);
+        $tasks->queueTask($sourceTask);
+        $this->touchPlanningFiles($root, time() + 2);
+
+        $state = $engine->runNext();
+        $this->assertSame('completed', $state['status']);
+
+        $runPath = $paths->runPath($state['run_id']) . '/packet';
+        $semantic = json_decode((string) file_get_contents($runPath . '/semantic.json'), true, 512, JSON_THROW_ON_ERROR);
+        $generate = json_decode((string) file_get_contents($runPath . '/generate.json'), true, 512, JSON_THROW_ON_ERROR);
+        $implement = json_decode((string) file_get_contents($runPath . '/implement.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('AddCartItemInput', $semantic['subject']);
+        $this->assertSame('AddCartItemInput', $generate['be_plan']['subject']);
+        $this->assertSame(['cart-quantity'], $generate['be_plan']['depends_on_packets']);
+        $this->assertSame('AddCartItemInput', $implement['input']['name']);
+        $this->assertSame('CartUpdated', $implement['final']['name']);
+        $this->assertSame(['ProductClassId'], array_column($implement['semantic_variables'], 'name'));
+        $this->assertContains('PurchaseFlow', $implement['reason_dependencies']);
+
+        $status = $engine->status($state['run_id']);
+        $this->assertSame('completed', $status['summary']['status']);
+
+        $reloaded = $runs->loadState($state['run_id']);
+        $this->assertSame('completed', $reloaded['status']);
+    }
+
+    public function testTrackedQuantityBeSemanticWorkflowProducesMinimalBeArtifacts(): void
+    {
+        $root = $this->createProjectRoot();
+        [$paths, , $tasks, $runs, $engine] = $this->buildServices($root);
+
+        copy(__DIR__ . '/../alps.json', $root . '/alps.json');
+        $workflow = $this->trackedWorkflowUsingRealExecutor();
+        $task = [
+            'id' => '102-cart-quantity',
+            'title' => 'Cart Quantity semantic packet',
+            'goal' => 'Establish the smallest Be-first semantic packet for Quantity.',
+            'packet' => 'cart-quantity',
+            'workflow' => 'packet-lifecycle',
+            'success_criteria' => [
+                'Semantic variables are extracted for Quantity.',
+                'Input and Final targets are defined for the smallest Be packet.',
+                'No Reason dependency is required at this stage.',
+            ],
+            'priority' => 120,
+        ];
+
+        $this->writeJson($paths->workflowDir() . '/packet-lifecycle.json', $workflow);
+        $sourceTask = $paths->exampleTaskDir() . '/102-cart-quantity.json';
+        $this->writeJson($sourceTask, $task);
+        $tasks->queueTask($sourceTask);
+        $this->touchPlanningFiles($root, time() + 2);
+
+        $state = $engine->runNext();
+        $this->assertSame('completed', $state['status']);
+
+        $runPath = $paths->runPath($state['run_id']) . '/packet';
+        $semantic = json_decode((string) file_get_contents($runPath . '/semantic.json'), true, 512, JSON_THROW_ON_ERROR);
+        $generate = json_decode((string) file_get_contents($runPath . '/generate.json'), true, 512, JSON_THROW_ON_ERROR);
+        $implement = json_decode((string) file_get_contents($runPath . '/implement.json'), true, 512, JSON_THROW_ON_ERROR);
+
+        $this->assertSame('Quantity', $semantic['subject']);
+        $this->assertSame('Quantity', $generate['be_plan']['subject']);
+        $this->assertSame([], $generate['be_plan']['reason_dependencies']);
+        $this->assertSame(['Quantity'], array_column($implement['semantic_variables'], 'name'));
+        $this->assertSame('QuantityInput', $implement['input']['name']);
+        $this->assertSame('ValidatedQuantity', $implement['final']['name']);
+        $this->assertSame([], $implement['reason_dependencies']);
 
         $status = $engine->status($state['run_id']);
         $this->assertSame('completed', $status['summary']['status']);
