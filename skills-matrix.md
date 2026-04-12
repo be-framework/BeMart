@@ -56,13 +56,13 @@ EC-CUBE を BEAR.Sunday + Be Framework へ移植する際に、Codex 上で何�
 1. packet 設計
    - `planning-with-files`
    - `be-semantic`
-2. resource 叩き台生成
+2. Be semantic 固定
+   - `be`
+   - 必要なら `semantic-ex`
+3. resource 叩き台生成
    - `bear-from-alps`
    - 必要なら `bear-hypermedia`
    - ローカル実行環境が未整備なら必要に応じて `malt`
-3. Be 実装整理
-   - `be`
-   - 必要なら `semantic-ex`
 4. review
    - `bear-review`
 5. packet close
@@ -70,7 +70,7 @@ EC-CUBE を BEAR.Sunday + Be Framework へ移植する際に、Codex 上で何�
 
 ## 現在の最小セット
 
-今の `catalog/ProductList` と `catalog/Product` packet を回すだけなら、実質的な最小セットは次の5つ。
+今の `resource-contract` packet と `Quantity` / `AddCartItemInput` の `be-semantic` packet を回すだけなら、実質的な最小セットは次の5つ。
 
 - `planning-with-files`
 - `be-semantic`

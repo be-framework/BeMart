@@ -44,17 +44,20 @@ Phase 6
 - [x] PHP + Composer + PHPUnit ベースで CLI を実装する
 - [x] `task add`, `run next`, `run resume`, `run status`, `run fail`, `validate` を実装する
 - [x] packet DSL と generic executor を実装する
+- [x] `resource-contract` packet と `be-semantic` packet を区別する
 - [x] `catalog/ProductList` packet definition を実装する
 - [x] `catalog/Product` packet definition を実装する
 - [x] `catalog/Category` packet definition を実装する
 - [x] `cart/Cart` packet definition を実装する
 - [x] `checkout/Shopping` packet definition を実装する
+- [x] `Quantity` の最小 `be-semantic` packet を実装する
+- [x] `AddCartItemInput` の `be-semantic` packet を `Quantity` 依存に縮約する
 - [x] 実タスクで `task add -> run next -> run status` を確認する
 - **Status:** complete
 
 ## Key Questions
 1. 次の packet を `CategoryList` と `ShoppingConfirm` のどちらに置くか
-2. packet DSL を移植先 repo へどう持ち出すか
+2. 次の `be-semantic` packet を `ProductClassId` と `CheckoutPrepared` のどちらに置くか
 3. 実移植 repo 側で `phpstan` / `phpcs` まで Day 0 に含めるか
 4. storefront inventory を JSON task 群へどう分解するか
 
@@ -84,8 +87,12 @@ Phase 6
 - 長時間運用の手順は `autonomous-execution-runbook.md` に集約した
 - 実行基盤の入口は `php bin/orchestrator` と `composer test`
 - packet は `.migrate/packets/*.json` の DSL として管理する
+- packet kind は `resource-contract` と `be-semantic` を分ける
+- 最小の `be-semantic` packet は `Quantity`
 - `catalog/ProductList` packet は `.migrate/examples/tasks/001-catalog-product-list.json` で再実行できる
 - `catalog/Product` packet は `.migrate/examples/tasks/002-catalog-product.json` で再実行できる
 - `catalog/Category` packet は `.migrate/examples/tasks/003-catalog-category.json` で再実行できる
 - `cart/Cart` packet は `.migrate/examples/tasks/004-cart-cart.json` で再実行できる
 - `checkout/Shopping` packet は `.migrate/examples/tasks/005-checkout-shopping.json` で再実行できる
+- `Quantity` の Be packet は `.migrate/examples/tasks/102-cart-quantity.json` で再実行できる
+- `AddCartItemInput` の Be packet は `.migrate/examples/tasks/101-cart-add-cart-item-input.json` で再実行できる

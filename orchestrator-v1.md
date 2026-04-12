@@ -21,7 +21,7 @@ EC-CUBE 移植用の `work packet` を、`resume` 可能な最小単位で回す
 .migrate/
   schemas/      # workflow/packet/task/run-state/step-result の JSON Schema
   workflows/    # JSON workflow 定義
-  packets/      # packet DSL 定義
+  packets/      # packet DSL 定義 (resource-contract / be-semantic)
   examples/tasks/
   tasks/        # 実行キュー
   runs/         # state.json, events.ndjson, artifacts, packet outputs
@@ -37,11 +37,18 @@ EC-CUBE 移植用の `work packet` を、`resume` 可能な最小単位で回す
 
 packet は実行ファイルではなく、`.migrate/packets/*.json` にある宣言的な定義です。task は packet id を参照し、executor がその定義を読んで `packet/*.json` 成果物を生成します。
 
+### resource-contract
 - [`catalog-product-list.json`](~/git/ec-cube-alps/.migrate/packets/catalog-product-list.json)
 - [`catalog-product.json`](~/git/ec-cube-alps/.migrate/packets/catalog-product.json)
 - [`catalog-category.json`](~/git/ec-cube-alps/.migrate/packets/catalog-category.json)
 - [`cart.json`](~/git/ec-cube-alps/.migrate/packets/cart.json)
 - [`checkout-shopping.json`](~/git/ec-cube-alps/.migrate/packets/checkout-shopping.json)
+
+### be-semantic
+- [`cart-quantity.json`](~/git/ec-cube-alps/.migrate/packets/cart-quantity.json)
+- [`cart-add-cart-item-input.json`](~/git/ec-cube-alps/.migrate/packets/cart-add-cart-item-input.json)
+
+`be-semantic` packet は `Semantic / Input / Final / Reason` の下書きを先に固定するための DSL で、`BEAR.Sunday` の `page://` / `app://` はまだ出てきません。現在の最小 packet は `Quantity` で、`AddCartItemInput` はその semantic を参照する上位 packet として扱います。
 
 ## 止まらない運用の位置づけ
 
