@@ -1,0 +1,53 @@
+{
+  "$schema": "./workflow.schema.json",
+  "workflow": "migrate",
+  "description": "ALPSディスクリプタを起点に Be ドメイン層 → BEAR.Sunday アプリケーション層を順に実装する",
+  "arguments": [
+    {
+      "name": "descriptor",
+      "hint": "<descriptor-id>",
+      "required": true,
+      "description": "alps.json 内のディスクリプタ ID (例: Product, Cart, AddCartItemInput)"
+    }
+  ],
+  "steps": [
+    {
+      "name": "alps-analyze",
+      "prompt_file": ".claude/prompts/alps-analyze.md",
+      "description": "ALPS から対象ディスクリプタを読み取り Be / BEAR マッピング案を作成する"
+    },
+    {
+      "name": "domain",
+      "prompt_file": ".claude/prompts/domain-implement.md",
+      "description": "Be Framework でドメイン層 (Input / Semantic / Final / Reason) を実装する"
+    },
+    {
+      "name": "domain-review",
+      "prompt_file": ".claude/prompts/be-review.md",
+      "agent": true,
+      "on_fail": "domain",
+      "max_retries": 3,
+      "description": "サブエージェントが Be Framework の原則違反をチェックする"
+    },
+    {
+      "name": "application",
+      "prompt_file": ".claude/prompts/application-implement.md",
+      "description": "BEAR.Sunday でアプリケーション層 (Resource) を実装する"
+    },
+    {
+      "name": "application-review",
+      "prompt_file": ".claude/prompts/integration-review.md",
+      "agent": true,
+      "on_fail": "application",
+      "max_retries": 3,
+      "description": "サブエージェントが2層の境界違反をチェックする"
+    },
+    {
+      "name": "security",
+      "prompt_file": ".claude/prompts/security-review.md",
+      "agent": true,
+      "condition": "(Auth|Payment|Checkout|Order|Customer)",
+      "description": "認証・決済・注文・顧客関連の変更時のみ発火するセキュリティレビュー"
+    }
+  ]
+}
