@@ -57,7 +57,7 @@
   - `ec-cube-bear-be-migration-plan.md` (updated)
 
 ### Phase 6: Orchestrator V1
-- **Status:** complete
+- **Status:** superseded by Phase 7（成果物は git rm 済み。以下は履歴記録）
 - Actions taken:
   - JSON-first の `.migrate/schemas` と `.migrate/workflows` を整備
   - PHP で `bin/orchestrator` CLI を実装し、local `composer.json` と `phpunit.xml` を追加
@@ -109,6 +109,38 @@
   - `findings.md` (updated)
   - `progress.md` (updated)
 
+### Phase 7: Claude Code native workflow への pivot
+- **Status:** in progress
+- Actions taken:
+  - PHP orchestrator（`bin/orchestrator`, `src/`, `tests/OrchestratorTest.php`, `composer.json`, `phpunit.xml`, `.migrate/`, `orchestrator/`, `orchestrator-v1.md`, `vendor/`, `.phpunit.cache/`, `.gitignore`）を `git rm -rf` で削除した
+  - Claude Code native の `/run <workflow> <args>` を `.claude/commands/run.md` に定義した
+  - `.claude/workflows/workflow.schema.json` を JSON Schema として定義した
+  - `.claude/workflows/migrate.json` に 2 層移植 workflow（alps-analyze → domain → domain-review → application → application-review → security-review）を定義した
+  - `.claude/prompts/alps-analyze.md` を ALPS 起点で書いた（Symfony コード解析ではなく alps.json が source of truth）
+  - `.claude/prompts/domain-implement.md` / `be-review.md` を書いた（Be Framework 2 層実装とレビュー）
+  - `.claude/prompts/application-implement.md` / `integration-review.md` を書いた（BEAR.Sunday リソース実装と境界レビュー）
+  - `.claude/prompts/security-review.md` を条件付き step として書いた（Auth|Payment|Checkout|Order|Customer 命名のみ発火）
+  - `CLAUDE.md` / `README.md` / `task_plan.md` / `findings.md` / `progress.md` / `autonomous-execution-runbook.md` / `be-first-migration-method.md` / `ec-cube-bear-be-migration-plan.md` を pivot 後の記述に揃えた
+- Files created/modified:
+  - `.claude/commands/run.md` (created)
+  - `.claude/workflows/workflow.schema.json` (created)
+  - `.claude/workflows/migrate.json` (created)
+  - `.claude/prompts/alps-analyze.md` (created)
+  - `.claude/prompts/domain-implement.md` (created)
+  - `.claude/prompts/be-review.md` (created)
+  - `.claude/prompts/application-implement.md` (created)
+  - `.claude/prompts/integration-review.md` (created)
+  - `.claude/prompts/security-review.md` (created)
+  - `CLAUDE.md` (rewritten)
+  - `README.md` (updated)
+  - `task_plan.md` (updated)
+  - `progress.md` (updated)
+  - `findings.md` (updated)
+  - `autonomous-execution-runbook.md` (updated)
+  - `be-first-migration-method.md` (updated)
+  - `ec-cube-bear-be-migration-plan.md` (updated)
+  - Phase 6 の全成果物は `git rm`（履歴で参照可能）
+
 ## Test Results
 | Test | Input | Expected | Actual | Status |
 |------|-------|----------|--------|--------|
@@ -134,11 +166,11 @@
 ## 5-Question Reboot Check
 | Question | Answer |
 |----------|--------|
-| Where am I? | Phase 6 |
-| Where am I going? | 次の `be-semantic` packet として `ProductClassId` か `CheckoutPrepared` を task 化し、その後に storefront resource へ戻る |
-| What's the goal? | EC-CUBE 移植計画と、その計画を継続実行できる基盤を揃える |
-| What have I learned? | JSON schema + packet DSL + PHP CLI + file-based state で、resume 可能な packet 実行基盤を小さく作れる |
-| What have I done? | 計画書群に加えて、local composer / phpunit ベースの orchestrator v1 と `resource-contract` / `be-semantic` packet DSL を実装した |
+| Where am I? | Phase 7（Claude Code native workflow への pivot 中） |
+| Where am I going? | `/run migrate Quantity` で workflow を dry-run し、`.claude/` の step 列が実動することを確認する。その後に storefront resource（`Product`, `Cart`, `Shopping`）へ広げる |
+| What's the goal? | EC-CUBE 移植計画と、実移植 code を生む Claude Code native workflow を揃える |
+| What have I learned? | PHP orchestrator は Claude Code が既に持つ機能（skill / subagent / custom command）の薄い再実装で、実移植 code を 1 行も生まなかった。Claude Code の subagent を review 専用に使うと context 汚染なく実装と独立した視点を得られる |
+| What have I done? | Phase 6 の PHP orchestrator 成果物を `git rm` し、`.claude/commands/run.md`・`.claude/workflows/migrate.json`・`.claude/prompts/*.md` で 2 層移植の native workflow を定義した |
 
 ## Retrospective Notes
 - `BEAR.Sunday + Be` を同時に進めるより、最初は `Be-first` に固定した方が判断が速い
@@ -148,6 +180,8 @@
 - `resource-contract` packet だけだと Be-first にならないので、`be-semantic` packet を先に置く
 - 最初の `be-semantic` packet は `AddCartItemInput` より `Quantity` の方が小さくて検証しやすい
 - task を queue した直後に実行する場合は、planning guard 対策として planning files をもう一度更新してから `worker once` を回す
+- Phase 7: 移植基盤は「自前で作る」より「Claude Code 自体の機能を並べる」方が、ほぼ確実に短く、実移植 code を早く生む。PHP orchestrator を削除して `/run migrate <descriptor>` 一本に揃えた
+- review は必ず subagent（独立 context）で走らせる。同じ context で「書いて → 見直す」と、実装者バイアスが抜けない
 
 ---
 *Update after completing each phase or encountering errors*

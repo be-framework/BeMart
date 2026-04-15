@@ -4,7 +4,7 @@
 EC-CUBE 4.3 の主要機能を、既存 ALPS プロファイルを契約として用いながら、BEAR.Sunday + Be Framework ベースへ段階的に移植するための実行可能な計画と、その計画を止まりにくく進める最小実行基盤を作る。
 
 ## Current Phase
-Phase 6
+Phase 7
 
 ## Phases
 
@@ -53,13 +53,26 @@ Phase 6
 - [x] `Quantity` の最小 `be-semantic` packet を実装する
 - [x] `AddCartItemInput` の `be-semantic` packet を `Quantity` 依存に縮約する
 - [x] 実タスクで `task add -> run next -> run status` を確認する
-- **Status:** complete
+- **Status:** superseded by Phase 7（PHP orchestrator は削除）
+
+### Phase 7: Claude Code native workflow への pivot
+- [x] PHP orchestrator（`bin/orchestrator`, `src/`, `.migrate/`）を削除する
+- [x] `.claude/commands/run.md` に `/run <workflow> <args>` を定義する
+- [x] `.claude/workflows/workflow.schema.json` を定義する
+- [x] `.claude/workflows/migrate.json` に 2 層移植 workflow を定義する
+- [x] `.claude/prompts/alps-analyze.md` を ALPS 起点で書き直す
+- [x] `.claude/prompts/domain-implement.md` / `be-review.md` を書く
+- [x] `.claude/prompts/application-implement.md` / `integration-review.md` を書く
+- [x] `.claude/prompts/security-review.md` を条件付き step として書く
+- [x] 計画ドキュメント群を pivot 後の構造に揃える
+- [ ] `/run migrate Quantity` の dry-run で workflow を検証する
+- **Status:** in progress
 
 ## Key Questions
-1. 次の packet を `CategoryList` と `ShoppingConfirm` のどちらに置くか
-2. 次の `be-semantic` packet を `ProductClassId` と `CheckoutPrepared` のどちらに置くか
+1. 移植対象の新規 repo は `ec-cube-alps` と同じ repo に置くか、別 repo にするか
+2. `/run migrate` の最初の descriptor は `Quantity`（Be-only）か `ProductList`（2 層）か
 3. 実移植 repo 側で `phpstan` / `phpcs` まで Day 0 に含めるか
-4. storefront inventory を JSON task 群へどう分解するか
+4. storefront inventory を `/run migrate <descriptor>` 群へどう分解するか
 
 ## Decisions Made
 | Decision | Rationale |
@@ -71,9 +84,9 @@ Phase 6
 | storefront から始め、admin は後ろに送る | front はほぼ 100% カバー、admin は 30 ルート未表現で探索コストが高いため |
 | 長時間作業は file-based memory 前提で進める | コンテキスト切れやセッション断絶が起きても再開可能にするため |
 | 1 work packet = 1 bounded context / 1明確な完了条件に制限する | 中断時の被害と曖昧さを減らすため |
-| 実行基盤は PHP + Composer + PHPUnit で作る | 移植先の BEAR.Sunday/Be と同じ言語圏に揃え、ローカル依存を閉じ込めるため |
-| workflow 定義は YAML ではなく JSON に固定する | schema validation と resume state の厳密性を優先するため |
-| `src/bootstrap.php` は置かず Composer autoload に統一する | PHP の標準的な依存解決に寄せ、余計な初期化層を増やさないため |
+| ~~実行基盤は PHP + Composer + PHPUnit で作る~~ → Phase 7 で撤回 | PHP orchestrator は Claude Code 自体が既に持つ機能（skill, subagent, custom command）の薄い再実装になり、実移植コードを 1 行も生まなかったため |
+| workflow 定義は YAML ではなく JSON + JSON Schema に固定する | schema validation と resume state の厳密性を優先し、repo 既存の `.claude/workflows/workflow.schema.json` と揃えるため |
+| 実行基盤は Claude Code native（custom command + subagent + prompt file）で駆動する | 実装と review の context を subagent で分離でき、`/run migrate <descriptor>` 一行で 2 層移植 step 列が走るため |
 
 ## Errors Encountered
 | Error | Attempt | Resolution |
@@ -85,14 +98,9 @@ Phase 6
 - storefront / admin / plugin を分けてスコープ管理する
 - ALPS の欠落がある admin 領域は、移植前に補完タスクを挟む
 - 長時間運用の手順は `autonomous-execution-runbook.md` に集約した
-- 実行基盤の入口は `php bin/orchestrator` と `composer test`
-- packet は `.migrate/packets/*.json` の DSL として管理する
-- packet kind は `resource-contract` と `be-semantic` を分ける
-- 最小の `be-semantic` packet は `Quantity`
-- `catalog/ProductList` packet は `.migrate/examples/tasks/001-catalog-product-list.json` で再実行できる
-- `catalog/Product` packet は `.migrate/examples/tasks/002-catalog-product.json` で再実行できる
-- `catalog/Category` packet は `.migrate/examples/tasks/003-catalog-category.json` で再実行できる
-- `cart/Cart` packet は `.migrate/examples/tasks/004-cart-cart.json` で再実行できる
-- `checkout/Shopping` packet は `.migrate/examples/tasks/005-checkout-shopping.json` で再実行できる
-- `Quantity` の Be packet は `.migrate/examples/tasks/102-cart-quantity.json` で再実行できる
-- `AddCartItemInput` の Be packet は `.migrate/examples/tasks/101-cart-add-cart-item-input.json` で再実行できる
+- 実行基盤の入口は Claude Code の `/run migrate <descriptor-id>` コマンド
+- workflow 定義は `.claude/workflows/migrate.json`（schema: `.claude/workflows/workflow.schema.json`）
+- 各 step の prompt は `.claude/prompts/*.md`（`alps-analyze`, `domain-implement`, `be-review`, `application-implement`, `integration-review`, `security-review`）
+- review は subagent（独立 context）で走り、`{verdict, findings, blocking}` の JSON を返す
+- 最小の `be-semantic` 実装は `Quantity`（`/run migrate Quantity`）
+- 2 層移植の最小例は `Product`（`/run migrate Product`）

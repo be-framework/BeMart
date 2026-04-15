@@ -271,7 +271,7 @@ Be-first の共有用要約は `be-first-migration-method.md` に切り出す。
 
 詳細な再開手順は `autonomous-execution-runbook.md` に切り出す。
 初日の立ち上げ手順は `day0-workflow.md` に切り出す。
-JSON-first の実行基盤メモは `orchestrator-v1.md` に切り出す。
+実行基盤は Claude Code native workflow（`.claude/commands/run.md`, `.claude/workflows/migrate.json`, `.claude/prompts/*.md`）で駆動する。
 
 ## リスク
 

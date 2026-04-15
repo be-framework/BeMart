@@ -4,10 +4,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-EC-CUBE 4.3 の ALPS プロファイル (`alps.json`, 413 descriptors) と、EC-CUBE → Be/BEAR.Sunday 移植ワークフローを駆動する JSON-first orchestrator の2つで構成される。
+EC-CUBE 4.3 の ALPS プロファイル (`alps.json`, 413 descriptors) と、EC-CUBE → BEAR.Sunday + Be Framework への移植を駆動する Claude Code ネイティブワークフローの 2 つで構成される。
 
 - **主成果物**: `alps.json` — EC-CUBE 4.3 のセマンティクス（データ語彙 276 + 状態遷移 137）を機械可読に定義
-- **補助ツール**: `.migrate/` 以下の packet DSL と `src/` の PHP orchestrator
+- **移植ワークフロー**: `.claude/` 以下の `/run` コマンド + JSON workflow + prompts
 
 ## Commands
 
@@ -21,71 +21,87 @@ asd -s alps.json            # SVG 状態遷移図生成
 
 HTML 再生成時は `docs/` 配下のコピーも同期すること。
 
-### PHP Orchestrator
+### 移植ワークフロー
 
-```bash
-composer test                               # 全テスト実行
-./vendor/bin/phpunit --colors=always        # 同上
-./vendor/bin/phpunit --filter=testMethodName # 単一テスト実行
+```text
+/run migrate <descriptor-id>
 ```
 
-### CLI (bin/orchestrator)
-
-```bash
-bin/orchestrator validate <file> [kind]              # JSON スキーマ検証
-bin/orchestrator task add <task.json>                 # タスクキューイング
-bin/orchestrator run next                             # 次タスク実行
-bin/orchestrator run resume <run-id>                  # 中断再開
-bin/orchestrator run status [run-id]                  # ステータス確認
-bin/orchestrator worker once                          # 単発ワーカー
-bin/orchestrator worker loop [--sleep=5] [--max-idle] # ポーリングワーカー
-```
+例:
+- `/run migrate Product` — catalog の Product リソースを移植
+- `/run migrate Cart` — cart リソースを移植
+- `/run migrate AddCartItemInput` — 個別の Be Input を移植
 
 ## Architecture
 
-### 2層構造
+### 2 層構造
 
-1. **ALPS 層** — `alps.json` が正。`openapi.yaml`, HTML は生成物。`tag.md` がタグ分類体系、`handover.json` が構築プロセス記録
-2. **Orchestrator 層** — `.migrate/` 配下の JSON DSL でワークフローを宣言的に定義し、`src/` の PHP で実行
+1. **ALPS 層** — `alps.json` が正（source of truth）。`openapi.yaml`, HTML は生成物。`tag.md` がタグ分類体系、`handover.json` が構築プロセス記録
+2. **ワークフロー層** — `.claude/` 配下に、Claude Code のネイティブ機能（custom command + subagent + prompts）でワークフローを定義
 
-### Orchestrator のクラス構成 (`MigrationOrchestrator\` namespace)
+### `.claude/` の構成
 
+```text
+.claude/
+├── commands/
+│   └── run.md                      # /run <workflow> <args> コマンド
+├── workflows/
+│   ├── workflow.schema.json        # JSON Schema（構造検証）
+│   └── migrate.json                # 移植ワークフロー定義
+└── prompts/
+    ├── alps-analyze.md              # ALPS 読み取り → Be/BEAR マッピング案
+    ├── domain-implement.md          # Be Framework ドメイン層実装
+    ├── be-review.md                 # Be 原則レビュー（subagent）
+    ├── application-implement.md     # BEAR.Sunday リソース層実装
+    ├── integration-review.md        # 2層境界レビュー（subagent）
+    └── security-review.md           # 条件付きセキュリティレビュー（subagent）
 ```
-CliApplication          CLI ディスパッチャ
-  ├─ RunEngine          ワークフロー実行（リトライ・状態遷移）
-  │   ├─ TaskRepository   タスクキュー管理
-  │   ├─ RunRepository    実行状態永続化（state.json, events.ndjson）
-  │   ├─ PacketRepository パケット読み込み・検証
-  │   └─ PlanningGuard    resume 時の planning file 更新チェック
-  ├─ PacketExecutor     パケット処理ペイロード構築
-  ├─ QueueWorker        バックグラウンドポーリング
-  └─ SchemaValidator    JSON Schema 検証
-```
 
-ユーティリティ: `ProjectPaths`（ディレクトリ抽象化）, `JsonFile`（アトミック JSON/NDJSON I/O）, `FileLock`（排他ロック）
+### ワークフローステップ
 
-### Packet Types
+`.claude/workflows/migrate.json` が定義するステップ:
 
-- **resource-contract-packet**: ALPS ディスクリプタから BEAR.Sunday リソースを生成
-- **be-semantic-packet**: Be Framework のセマンティックバリデータを生成
+1. **alps-analyze** — ALPS から対象ディスクリプタを読み取り、Be / BEAR マッピング案を作成
+2. **domain** — Be Framework でドメイン層（Input / Semantic / Final / Reason）を実装
+3. **domain-review** — subagent が Be 原則違反をチェック（不合格 → domain に差し戻し、最大 3 回）
+4. **application** — BEAR.Sunday でアプリケーション層（Resource）を実装
+5. **application-review** — subagent が 2 層境界違反をチェック（不合格 → application に差し戻し）
+6. **security** — 変更ファイルに `(Auth|Payment|Checkout|Order|Customer)` がマッチした場合のみ発火
 
-### ワークフロー
+レビューの subagent は `{ "verdict": "pass"|"fail", "findings": [...], "blocking": [...] }` の JSON を返す。`blocking` が空なら pass、1 件以上で fail。
 
-`.migrate/workflows/packet-lifecycle.json` が定義。ステップ: `semantic` → `generate` → `implement` → `review` → `fix`(retry) → `COMPLETE`
+### 前提とする外部スキル
 
-### 状態永続化 (.migrate/runs/)
+`.claude/prompts/` は以下のスキルを名指しで呼ぶ:
 
-- `state.json` — 現在のステップ・ステータス
-- `events.ndjson` — 追記のみのイベントログ
-- `artifacts/` — ステップごとの成果物
+- `be-framework-skills:be` — Be 実装ルールとプロジェクト構造
+- `be-framework-skills:be-semantic` — Story → ALPS → Schema → Be の流れ
+- `be-framework-skills:semantic-ex` — Fake データから制約発見
+- `alps-skills:alps-to-bear` — ALPS → BEAR.Sunday
+- `alps-skills:alps-to-jsonschema` — ALPS → JSON Schema
+- `bear-skills:bear-resource-generator` — リソース一式生成
+- `bear-skills:bear-hypermedia` — `#[Link]` とハイパーメディアテスト
+- `bear-skills:bear-cleancode-review` / `bear-skills:php-cleancode-review` — コード品質レビュー
+- `bear-skills:bear-security-setup` — Psalm taint 設定
 
-### RunEngine が設定する環境変数
+### 参照パターン
 
-`ORCH_PROJECT_ROOT`, `ORCH_RUN_ID`, `ORCH_RUN_DIR`, `ORCH_TASK_ID`, `ORCH_TASK_FILE`, `ORCH_PACKET_ID`, `ORCH_PACKET_TYPE`, `ORCH_PACKET_BOUNDED_CONTEXT`, `ORCH_SUCCESS_CRITERIA_JSON`
+Be Framework の実装は `~/git/be-patterns/demos/` の 8 種を正解パターンとして踏襲する:
+
+| パターン | 用途 |
+|---|---|
+| hello-world | Minimal: Input → Final |
+| contact-form | Linear: Input → Being → Final |
+| user-registration | Sequential Chain |
+| order-processing | Diamond（Moment 注入） |
+| blog-publishing | Multi-Reason Being |
+| medical-triage | Branching |
+| loan-application | Cascade Diamond |
+| insurance-claim | Complex Convergence |
 
 ## Conventions
 
-- JSON/YAML: 2スペースインデント
+- JSON: 2 スペースインデント
 - ALPS descriptor ID: lowerCamelCase (`productName`)
 - ノートファイル: kebab-case (`verify-similar-names.md`)
 - Markdown: ATX 見出し。ユーザー向け散文は日本語
@@ -94,9 +110,4 @@ CliApplication          CLI ディスパッチャ
 
 ## JSON Schema
 
-`.migrate/schemas/` に各種スキーマ定義:
-- `packet.schema.json` — パケット構造
-- `task.schema.json` — タスク構造
-- `workflow.schema.json` — ワークフロー定義
-- `run-state.schema.json` — 実行状態
-- `step-result.schema.json` — ステップ結果
+- `.claude/workflows/workflow.schema.json` — `/run` が解釈するワークフロー定義のスキーマ

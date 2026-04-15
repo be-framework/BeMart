@@ -82,7 +82,7 @@ stateDiagram-v2
 
 ## 移植検討用の補助資料
 
-このリポジトリの主目的は `alps.json` と公開ドキュメントの保守だが、EC-CUBE を Be / BEAR.Sunday へ移植するための補助資料と実験的ツールも同居している。
+このリポジトリの主目的は `alps.json` と公開ドキュメントの保守だが、EC-CUBE を Be / BEAR.Sunday へ移植するための補助資料と Claude Code ネイティブワークフローも同居している。
 
 | ファイル / ディレクトリ | 説明 |
 |---|---|
@@ -92,13 +92,12 @@ stateDiagram-v2
 | `day0-workflow.md` | 実移植 repo を立ち上げる初日手順 |
 | `skills-matrix.md` | 利用する skill の一覧と位置づけ |
 | `task_plan.md` / `findings.md` / `progress.md` | file-based planning 用の作業メモ |
-| `orchestrator-v1.md` | JSON-first orchestrator の概要 |
-| `.migrate/` | workflow, packet DSL, task queue, schema, run artifact の置き場 |
-| `.migrate/packets/*.json` | `resource-contract` packet と `be-semantic` packet の定義 |
-| `bin/orchestrator` | task / run / worker / generic packet executor を扱う CLI |
-| `tests/OrchestratorTest.php` | orchestrator と packet の PHPUnit |
+| `.claude/commands/run.md` | `/run <workflow> <args>` を解釈するコマンド |
+| `.claude/workflows/migrate.json` | ALPS 起点の 2 層移植ワークフロー定義 |
+| `.claude/workflows/workflow.schema.json` | ワークフロー定義の JSON Schema |
+| `.claude/prompts/*.md` | 各ステップのプロンプト（analyze / domain / review / application / security） |
 
-現時点では、`catalog/ProductList` などの `resource-contract` packet に加えて、[`cart-quantity.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/cart-quantity.json) のような最小 `Be-first` packet と、[`cart-add-cart-item-input.json`](/Users/akihito/git/ec-cube-alps/.migrate/packets/cart-add-cart-item-input.json) のようなその上位 packet も置いている。
+`/run migrate <descriptor-id>` を実行すると、`alps-analyze → domain → domain-review → application → application-review → (security)` のステップが実行される。レビューステップはサブエージェント（独立コンテキスト）で走る。
 
 これらは ALPS 本体の公開成果物ではなく、移植検討と検証のための補助資料として扱う。
 
