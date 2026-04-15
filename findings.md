@@ -49,6 +49,16 @@
 - 振り返りとして、初期に `BEAR.Sunday + Be` を一体で考えすぎた。今後は `Be-first` を固定し、HTTP/resource 層は後段で薄く載せる
 - orchestrator は v1 として十分なので、次からは基盤抽象化より packet 追加と Be 実装の方を優先する
 
+### Phase 7: Claude Code native workflow への pivot（上記 Phase 6 の結論を撤回）
+- Phase 6 の PHP orchestrator は、Claude Code が既に持つ機能（custom command / skill / subagent / prompt file）の薄い再実装で、実移植 code を 1 行も生まなかった
+- 「停止しない自律実行基盤を自前で作る」より「Claude Code の subagent + custom command を並べる」方が、ほぼ確実に短く、実移植 code を早く生む
+- review は必ず subagent（独立 context）で走らせる。同じ context で「書いて → 見直す」と、実装者バイアスが抜けない
+- workflow 定義は YAML ではなく JSON Schema 付き JSON に固定する（`.claude/workflows/workflow.schema.json` → `migrate.json`）
+- `analyze` step は Symfony コードではなく `alps.json` を source of truth として読む。ALPS モデリングは既に完了しているため
+- review subagent は `{verdict: "pass"|"fail", findings: [], blocking: []}` の JSON を返し、`fail` で実装 step に差し戻す（max_retries: 3）
+- `security-review` は命名条件（`Auth|Payment|Checkout|Order|Customer`）で発火する条件付き step にしておくと、無害な descriptor でレビュー時間を浪費しない
+- Phase 6 の全成果物（`bin/orchestrator`, `src/`, `tests/OrchestratorTest.php`, `composer.json`, `phpunit.xml`, `.migrate/`, `orchestrator/`, `orchestrator-v1.md`, `vendor/`, `.phpunit.cache/`, `.gitignore`）は git rm で削除した。履歴は `git log` で参照可能
+
 ## Technical Decisions
 | Decision | Rationale |
 |----------|-----------|
@@ -87,14 +97,10 @@
 - Domain tags: `~/git/ec-cube-alps/tag.md`
 - Migration plan draft: `~/git/ec-cube-alps/ec-cube-bear-be-migration-plan.md`
 - Autonomous execution runbook: `~/git/ec-cube-alps/autonomous-execution-runbook.md`
-- Orchestrator v1 note: `~/git/ec-cube-alps/orchestrator-v1.md`
-- Supervisor examples: `~/git/ec-cube-alps/orchestrator/README.md`
-- Product packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/002-catalog-product.json`
-- Category packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/003-catalog-category.json`
-- Cart packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/004-cart-cart.json`
-- Shopping packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/005-checkout-shopping.json`
-- AddCartItemInput Be packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/101-cart-add-cart-item-input.json`
-- Quantity Be packet task: `~/git/ec-cube-alps/.migrate/examples/tasks/102-cart-quantity.json`
+- Claude Code native workflow: `~/git/ec-cube-alps/.claude/commands/run.md`
+- Migration workflow definition: `~/git/ec-cube-alps/.claude/workflows/migrate.json`
+- Workflow JSON Schema: `~/git/ec-cube-alps/.claude/workflows/workflow.schema.json`
+- Step prompts: `~/git/ec-cube-alps/.claude/prompts/`
 - Skills matrix: `~/git/ec-cube-alps/skills-matrix.md`
 - Be-first method: `~/git/ec-cube-alps/be-first-migration-method.md`
 
@@ -106,10 +112,9 @@
 - 今回の移植では、resource/hypermedia/semantic テストを先に置けば、途中で文脈が切れても「何が未達か」をテストが教えてくれる
 - Be Skills README では、`be-semantic` が Story → ALPS → Fake → Agreement → Schema → Be の流れを明示している
 - BEAR.Skills README では、`bear-from-alps` と `bear-smoke-test` が ALPS 生成と TDD 運用に直結する
-- Day 0 では、最初の packet を `catalog/ProductList` に固定すると scope explosion を避けやすい
-- 現在の v1 では `catalog/ProductList` packet を `php bin/orchestrator run next` で最後まで回せる
-- 現在の v1 では packet DSL を generic executor で最後まで回せる
-- 現在の v1 では `AddCartItemInput` の `be-semantic` packet も generic executor で最後まで回せる
+- Day 0 では、最初の work packet を `catalog/ProductList` に固定すると scope explosion を避けやすい
+- Phase 7 の現在は、`/run migrate <descriptor-id>` で `alps-analyze → domain → domain-review → application → application-review → (security-review)` の step 列が走る
+- review step は subagent（独立 context）で走り、`fail` 時は実装 step に差し戻す（max_retries: 3）
 
 ---
 *Update this file after every 2 view/browser/search operations*

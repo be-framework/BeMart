@@ -70,7 +70,7 @@ EC-CUBE を移植するとき、最初から HTTP や画面を作らず、まず
 - `AddCartItemInput`
 - `CartInput -> CartUpdated`
 
-この repo では、最小の具体例として [`cart-quantity.json`](~/git/ec-cube-alps/.migrate/packets/cart-quantity.json) を置いている。さらに、その上位 packet として [`cart-add-cart-item-input.json`](~/git/ec-cube-alps/.migrate/packets/cart-add-cart-item-input.json) を置き、`AddCartItemInput` が `Quantity` semantic に依存する形にしている。
+具体例は `/run migrate Quantity` → `/run migrate AddCartItemInput` の順で走らせる（`.claude/workflows/migrate.json`）。`AddCartItemInput` が `Quantity` semantic に依存する形にしている。
 
 ## skills の使い分け
 

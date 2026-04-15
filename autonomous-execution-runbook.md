@@ -68,37 +68,21 @@
 - `ec-cube-bear-be-migration-plan.md`
 - packet 固有の設計メモ
 
-## 実装済み v1
+## 実行基盤: Claude Code native workflow
 
-この repo には、JSON-first の最小 orchestrator が入っている。
+この repo では Claude Code の native 機能（custom command + subagent + prompt file）で移植ワークフローを駆動する。
 
-- 入口: `php bin/orchestrator`
-- テスト: `composer test`
-- workflow 定義: `.migrate/workflows/*.json`
-- packet 定義: `.migrate/packets/*.json` (`resource-contract` / `be-semantic`)
-- schema: `.migrate/schemas/*.json`
-- 実行状態: `.migrate/tasks/`, `.migrate/runs/`
-- packet 実行: `php bin/orchestrator packet run <step>`
+- 入口: `/run migrate <descriptor-id>`
+- コマンド定義: `.claude/commands/run.md`
+- workflow 定義: `.claude/workflows/migrate.json`
+- schema: `.claude/workflows/workflow.schema.json`
+- ステップ prompt: `.claude/prompts/*.md`
+- レビューは subagent（独立 context）で走り、`{verdict, findings, blocking}` の JSON を返す
 
-現在は `catalog/ProductList` の `resource-contract` packet と、`Quantity` / `AddCartItemInput` の `be-semantic` packet を end-to-end で回せる。
+ステップ列: `alps-analyze → domain → domain-review → application → application-review → (security-review)`。
+`domain-review` / `application-review` / `security-review` は fail 時に実装ステップへ差し戻す（max_retries: 3）。
 
-## 外側 supervisor の考え方
-
-この repo の orchestrator は「内側の state machine」であり、無限に動き続ける公式 runner そのものではない。長時間運用では外側 supervisor を分ける。
-
-- 最小: `while true` で `php bin/orchestrator worker once`
-- 常駐: `php bin/orchestrator worker loop --sleep=5`
-- より堅牢: `systemd`, `cron`, CI, queue worker
-- 将来的な選択肢: Codex App Automations
-
-repo 内の実例:
-
-- [`orchestrator/run-worker-loop.sh`](~/git/ec-cube-alps/orchestrator/run-worker-loop.sh)
-- [`orchestrator/orchestrator-worker.service.example`](~/git/ec-cube-alps/orchestrator/orchestrator-worker.service.example)
-- [`orchestrator/orchestrator-worker.timer.example`](~/git/ec-cube-alps/orchestrator/orchestrator-worker.timer.example)
-- [`orchestrator/orchestrator-worker.crontab.example`](~/git/ec-cube-alps/orchestrator/orchestrator-worker.crontab.example)
-
-重要なのは、止まらないことそのものではなく、止まっても `.migrate/runs/<run-id>/state.json` と planning files から復帰できること。
+重要なのは、止まらないことそのものではなく、止まっても planning files（`task_plan.md` / `findings.md` / `progress.md`）と git 履歴から復帰できること。
 
 ## 停止条件
 
@@ -187,8 +171,7 @@ rule:
 sed -n '1,220p' task_plan.md
 sed -n '1,260p' findings.md
 sed -n '1,260p' progress.md
-composer test
-php bin/orchestrator run status
+git log --oneline -10
 git status --short
 git diff --stat
 ```

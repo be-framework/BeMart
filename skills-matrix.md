@@ -70,7 +70,7 @@ EC-CUBE を BEAR.Sunday + Be Framework へ移植する際に、Codex 上で何�
 
 ## 現在の最小セット
 
-今の `resource-contract` packet と `Quantity` / `AddCartItemInput` の `be-semantic` packet を回すだけなら、実質的な最小セットは次の5つ。
+`/run migrate <descriptor>` の 2 層移植ワークフロー（`Quantity` / `AddCartItemInput` / `Product` など）を回すだけなら、実質的な最小セットは次の5つ。
 
 - `planning-with-files`
 - `be-semantic`
