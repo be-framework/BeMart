@@ -4,6 +4,22 @@
 
 前ステップまでで、Be ドメイン層の Input / Final / Semantic / Reason が実装済みである。このステップでは BEAR.Sunday 側のアプリケーション層（リソース）を実装する。
 
+## 早期スキップ判定
+
+`alps-analyze` ステップの出力で **BEAR 層マッピング案が全項目 `N/A`**（= 純粋 Semantic で単独 URI を持たない）とマークされていた場合、このステップは実装対象を持たない。
+
+その場合は以下だけを出力して終了する:
+
+```markdown
+## 作成ファイル
+(なし — 純粋 Semantic のため BEAR リソースは生成しない)
+
+## テスト結果
+skipped: pure semantic, handled by upper descriptor
+```
+
+後続の `application-review` ステップも実質 no-op となり、上位 descriptor（例: `AddCartItemInput`, `Cart`）の `/run migrate` 実行時にこの Semantic が引数として参照される。
+
 ## 前提と参照
 
 - `alps-skills:alps-to-bear` スキル — ALPS から BEAR.Sunday プロジェクト生成

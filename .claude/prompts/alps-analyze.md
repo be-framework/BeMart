@@ -16,6 +16,14 @@
 
 Read ツールで `alps.json` を読み、`{descriptor}` を id とするエントリを抽出する。
 
+**ID マッチング規則（重要）**:
+
+- ALPS の id は lowerCamel（例: `quantity`, `productName`）、Be Framework のクラス名は UpperCamel（例: `Quantity`, `ProductName`）で、この workflow の引数は Be クラス名に寄せている
+- マッチングは **大小無視**で行う。Grep で `"id":\s*"(?i){descriptor}"` 相当の検索をするか、`{descriptor}` の先頭を小文字化したものを `alps.json` で検索する
+- 例: `/run migrate Quantity` → alps.json 内の `"id": "quantity"` にマッチ
+- 複数候補がヒットした場合は lowerCamel / UpperCamel 優先で 1 件に絞る
+- **ALPS に存在しない場合**: エラーで停止せず、`## 概要` セクションに `⚠️ ALPS 未登録` と明記した上で、Be 側の新規クラスとして扱う。`src-*` タグは付かず、制約は後続ステップで移植元コードや仕様書から補完する方針を明記する
+
 以下の情報を整理する:
 
 - **id / title / def** — 識別子と意味
@@ -48,10 +56,17 @@ Read ツールで `alps.json` を読み、`{descriptor}` を id とするエン�
 
 **Be のマッピング原則**:
 
+- `semantic`（単体の値語彙、`type` が `go*` / `do*` でない） → `src/Semantic/<UpperCamel>.php` の純粋な Semantic クラスとして扱う。`#[Be]` を持たず、`Input → Final` の起点・終点にはならない。他の Input クラスのコンストラクタ引数としてのみ参照される（例: `Quantity`, `ProductCode`, `Email`）
 - `safe` (`go*`) → `Input → Final` の Direct 変換（読み取り）
 - `unsafe` / `idempotent` (`do*`) → `Input → Final` の Direct 変換（書き込み、Final で副作用）
 - 分岐が必要なら `Input → Being → Final A | Final B`（[`medical-triage`](https://github.com/be-framework/be-patterns/tree/1.x/demos/medical-triage) パターン）
 - 独立した外部副作用が複数あるなら Moment を複数注入する Diamond パターン（[`order-processing`](https://github.com/be-framework/be-patterns/tree/1.x/demos/order-processing)）
+
+**制約の置き場所**:
+
+- **静的制約**（値単体で判定できるもの。型・範囲・フォーマット・文字数）→ Semantic クラスの `#[Validate]` メソッドに書く
+- **動的制約**（外部 lookup が必要。在庫・販売制限・一意性・権限）→ Semantic には書かず、その値を内包する **Final クラスの constructor 内**で `#[Inject]` した Reason を使って検証する
+- 例: `Quantity` の `>= 1` は Semantic だが、`<= stock` / `<= saleLimit` は `CartItemAdded` Final の constructor で検証
 
 ### 4. BEAR.Sunday 層へのマッピング案
 
@@ -71,6 +86,7 @@ Read ツールで `alps.json` を読み、`{descriptor}` を id とするエン�
 - `app://self/...` — 他リソースから呼ばれる内部 API
 - Resource は `Becoming` を呼ぶだけ。ビジネスロジックを書かない
 - `@link phpdoc` → `#[Link]` 属性に変換される（Be 側の Final に `@link` を書く）
+- **純粋 Semantic（type=semantic かつ単独で state transition を持たない）の場合、BEAR リソースは生成しない**。テーブルは全項目 `N/A` と記入し、根拠に「純粋 Semantic のため単独 URI なし。上位 descriptor の Input 引数として参照される」と書く。後続の `application` ステップは skip 扱いとする
 
 ### 5. Reason 候補の洗い出し
 
