@@ -161,7 +161,6 @@ final class Product extends ResourceObject
 
 - リソースクラス内で DB アクセス
 - リソースクラス内でビジネスロジック（`if` による条件分岐、計算など）
-- リソースクラス内で例外をキャッチして変換（Be の例外はそのまま伝播させる）
 - リソースクラス内で `new` で Final クラスを直接生成
 
 **許容される処理**:
@@ -170,10 +169,52 @@ final class Product extends ResourceObject
 - Final クラスのプロパティを `$this->body` に詰める
 - HTTP ステータス・ヘッダの設定（`$this->code`, `$this->headers`）
 - `#[Link]` 属性による遷移先の宣言
+- **DomainException を catch して `BEAR\Resource\Code` 定数にマップする**（Be Final 閉鎖原則と HTTP プロトコルの折衷点。Pilot 1 で確立）
+
+#### DomainException → HTTP Code マッピング（Pilot 1 で確立）
+
+Be の Final は「副作用を Final 内で閉じる」原則だが、HTTP プロトコル上は適切な Code を返す必要がある。**Resource 層でのみ** ドメイン例外を catch してマップする:
+
+```php
+use BEAR\Resource\Code;
+
+public function onGet(string $productCode): static
+{
+    try {
+        $final = ($this->becoming)(new GetProductInput($productCode));
+    } catch (ProductNotFoundException $e) {
+        $this->code = Code::NOT_FOUND;
+        $this->body = ['productCode' => $productCode];
+        return $this;
+    }
+
+    $this->code = Code::OK;
+    $this->body = [/* Final のプロパティを詰める */];
+    return $this;
+}
+```
+
+マッピング規約:
+
+| Exception 系統 | Code 定数 | HTTP |
+|---|---|---|
+| `*NotFoundException` | `Code::NOT_FOUND` | 404 |
+| `*FormatException` / `*ValidationException` | `Code::BAD_REQUEST` | 400 |
+| `*ConflictException` / `OutOfStockException` | `Code::CONFLICT` | 409 |
+| `*UnauthorizedException` | `Code::UNAUTHORIZED` | 401 |
+| `*ForbiddenException` | `Code::FORBIDDEN` | 403 |
+
+`SemanticVariableException`（Semantic validator が投げる）は通常 catch しない。フレームワーク層で 400 にマップされる経路がある場合はそちらに任せる。
 
 #### 戻り値は `static`
 
 BEAR.Sunday のモダン記法。`ResourceObject` ではなく `static` を返す。
+
+#### client-input 検証は Be Semantic 任せ。Resource 層は受け流すだけ
+
+`alps-analyze` の出力で `input_kind: "client"` とマークされたフィールドは Phase 3 で `var/schema/request/<descriptor-id>.json` に JSON Schema が生成されている。**Resource 層では schema 検証を再実装しない**。Semantic クラスが Be Becoming 内で同じ制約を `#[Validate]` で持つため、二重バリデーションになる。
+
+Resource 層は HTTP パラメータを受け取って Input のコンストラクタに渡すだけ。Semantic 違反は `SemanticVariableException` として Be 層から伝播する。
 
 #### `#[Link]` の生成元
 
@@ -215,7 +256,7 @@ $map->route('/product/{productId}', '/product');
 
 ### 6. スモークテストの作成
 
-`bear-resource-test` スキルを参考に、全リソースの HTTP メソッドに対してスモークテストを作成する:
+`bear-resource-test` スキルを参考に、全リソースの HTTP メソッドに対してスモークテストを作成する。**setUp の雛形は Pilot 1 で確立した形を踏襲する**:
 
 ```php
 final class ProductTest extends TestCase
@@ -224,15 +265,24 @@ final class ProductTest extends TestCase
 
     protected function setUp(): void
     {
-        $injector = new Injector(new AppModule());
+        $injector = new Injector(
+            new AppModule(new Meta('<Vendor>\\<Package>', 'test')),
+            dirname(__DIR__, 2) . '/var/tmp/test',
+        );
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
     public function testOnGet(): void
     {
-        $ro = $this->resource->get('page://self/product', ['productId' => '01HXYZ...']);
-        $this->assertSame(200, $ro->code);
+        $ro = $this->resource->get('page://self/product', ['productCode' => 'sample-001']);
+        $this->assertSame(Code::OK, $ro->code);
         $this->assertArrayHasKey('productName', $ro->body);
+    }
+
+    public function testNotFoundReturns404(): void
+    {
+        $ro = $this->resource->get('page://self/product', ['productCode' => 'missing-xyz']);
+        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnPost(): void
@@ -241,10 +291,14 @@ final class ProductTest extends TestCase
             'productName' => 'サンプル商品',
             'price02' => 1000,
         ]);
-        $this->assertSame(201, $ro->code);
+        $this->assertSame(Code::CREATED, $ro->code);
     }
 }
 ```
+
+- `AppModule(new Meta(...))` — `AbstractAppModule` は `Meta` 引数を取る
+- 第 2 引数の cache dir (`var/tmp/test`) が無いと Ray.Di が cache 書き込みエラー
+- HTTP コードは `BEAR\Resource\Code::*` 定数で比較（マジックナンバー禁止）
 
 ### 7. ハイパーメディアテスト（Link の遷移）
 
