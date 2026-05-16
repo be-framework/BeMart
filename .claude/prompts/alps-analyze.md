@@ -7,7 +7,8 @@
 ## 前提
 
 - `alps.json` が**正（source of truth）**である。Symfony コードは見ない
-- ALPS は既に 413 ディスクリプタ（semantic 276 + transition 137）で EC-CUBE 4.3 を記述済み
+- ALPS は 403 ディスクリプタ（container 266 + safe 58 + unsafe 35 + idempotent 44 = transition 計 137）で EC-CUBE 4.3 を記述済み
+- 全 transition は doc 付き。container も主要ドメインは doc 付き
 - このリポジトリの ALPS 構造とタグ体系は `tag.md` を参照
 
 ## 手順
@@ -16,21 +17,28 @@
 
 Read ツールで `alps.json` を読み、`{descriptor}` を id とするエントリを抽出する。
 
-**ID マッチング規則（重要）**:
+**ID マッチング規則（決定的順序）**:
 
-- ALPS の id は lowerCamel（例: `quantity`, `productName`）、Be Framework のクラス名は UpperCamel（例: `Quantity`, `ProductName`）で、この workflow の引数は Be クラス名に寄せている
-- マッチングは **大小無視**で行う。Grep で `"id":\s*"(?i){descriptor}"` 相当の検索をするか、`{descriptor}` の先頭を小文字化したものを `alps.json` で検索する
-- 例: `/run migrate Quantity` → alps.json 内の `"id": "quantity"` にマッチ
-- 複数候補がヒットした場合は lowerCamel / UpperCamel 優先で 1 件に絞る
-- **ALPS に存在しない場合**: エラーで停止せず、`## 概要` セクションに `⚠️ ALPS 未登録` と明記した上で、Be 側の新規クラスとして扱う。`src-*` タグは付かず、制約は後続ステップで移植元コードや仕様書から補完する方針を明記する
+ALPS の id は lowerCamel（例: `quantity`, `productName`、container は `Cart` のような UpperCamel もあり）、Be Framework のクラス名は UpperCamel（例: `Quantity`, `ProductName`）で、この workflow の引数は Be クラス名に寄せている。**以下の順序で試行し、最初にヒットした 1 件を採用する**:
+
+1. **完全一致**: 引数文字列をそのまま id として `"id": "<arg>"` を検索
+2. **lowerCamel 化**: 引数の先頭 1 文字を小文字化して `"id": "<lowerCamel>"` を検索（例: `Quantity` → `quantity`）
+3. **UpperCamel 化**: 引数の先頭 1 文字を大文字化して `"id": "<UpperCamel>"` を検索（例: `cart` → `Cart`）
+4. **大小無視 LIKE**: `(?i)"id":\s*"<arg>"` 相当のケースインセンシティブ検索
+5. **snake_case → camelCase 変換**: 引数が `_` を含む場合のみ camelCase 化して再検索（例: `cart_item` → `cartItem` → 1〜4 を再試行）
+
+複数マッチした場合は **1 → 2 → 3 → 4 → 5 の順で先に出たもの**を優先。ヒット順序は決定的なのでユーザーに確認しない。
+
+**ALPS に存在しない場合**: エラーで停止せず、`## 概要` セクションに `⚠️ ALPS 未登録` と明記した上で、Be 側の新規クラスとして扱う。`src-*` タグは付かず、制約は後続ステップで移植元コードや仕様書から補完する方針を明記する。出力 JSON では `"alps_found": false` をセットする。
 
 以下の情報を整理する:
 
 - **id / title / def** — 識別子と意味
-- **type** — `semantic` / `safe` / `unsafe` / `idempotent` のどれか
+- **type** — `safe` / `unsafe` / `idempotent` のどれか。container には type 属性が無い（取り扱いは「3. Be 層へのマッピング案」を参照）
 - **tag** — ドメインタグ（`catalog`, `cart`, `checkout`, `order`, `customer`, `admin` 等）とソースタグ（`src-entity`, `src-template`, `src-router`, `src-controller`）
 - **rt (return type)** — 遷移先のリソース id
 - **descriptor[]** — 子ディスクリプタ（ネストされたプロパティまたは関連操作）
+- **doc.value** — 操作の意味・副作用・主要パラメータの 1 文記述（後続ステップで Final 説明・リソース PHPDoc にそのまま使える）
 
 ### 2. 関連ディスクリプタの収集
 
@@ -54,9 +62,21 @@ Read ツールで `alps.json` を読み、`{descriptor}` を id とするエン�
 | 外部依存 | Reason | Reason/Media/Command · Query · Entity | DB / 決済 / 配送 / メール等 |
 | 派生値 | Final プロパティ | Final コンストラクタ内で計算 | 集約・状態遷移先 |
 
+**type → Be 分類の写像（決定的）**:
+
+| ALPS の type | id 命名のヒント | Be 層での扱い | 例 |
+|---|---|---|---|
+| なし（container） | UpperCamel `Cart` / `Product` / `Order` | リソース集約。Final から `body` に詰める対象。単独 Input/Final にはしない | `Cart`, `Order`, `Product` |
+| `safe` | `go*` (`goProductList`, `goCart`) | `Input → Final` の Direct 変換（読み取り）。Final で Query 実行 | `goProduct` → `GetProductInput → ProductFetched` |
+| `unsafe` | `do*Add` / `do*Create` / `do*Submit` | `Input → Final` の Direct 変換（書き込み）。Final コンストラクタで副作用 | `doCreateProduct` → `CreateProductInput → ProductCreated` |
+| `idempotent` | `do*Update` / `do*Delete` / `do*Replace` | `Input → Final`、副作用は冪等な書き込み | `doUpdateProduct` → `UpdateProductInput → ProductUpdated` |
+
+`type` 属性が無い container は **純粋 Semantic スキップ判定**（後述）と区別すること。container は **複数 transition から rt として参照されるリソース集約**であり、リソース化はするが単独で Input/Final を持たない。
+
 **Be のマッピング原則**:
 
-- `semantic`（単体の値語彙、`type` が `go*` / `do*` でない） → `src/Semantic/<UpperCamel>.php` の純粋な Semantic クラスとして扱う。`#[Be]` を持たず、`Input → Final` の起点・終点にはならない。他の Input クラスのコンストラクタ引数としてのみ参照される（例: `Quantity`, `ProductCode`, `Email`）
+- container（type 属性なし、UpperCamel id） → リソースの shape 定義として `descriptor[]` を読み、Final が body に詰める形を決める材料にする。`src/Semantic/` には出さない
+- 純粋 Semantic（type 属性なし、lowerCamel id、単独で state transition を持たない、例: `quantity`, `productName`） → `src/Semantic/<UpperCamel>.php` の Semantic クラスとして扱う。`#[Be]` を持たず、`Input → Final` の起点・終点にはならない。他の Input クラスのコンストラクタ引数としてのみ参照される
 - `safe` (`go*`) → `Input → Final` の Direct 変換（読み取り）
 - `unsafe` / `idempotent` (`do*`) → `Input → Final` の Direct 変換（書き込み、Final で副作用）
 - 分岐が必要なら `Input → Being → Final A | Final B`（[`medical-triage`](https://github.com/be-framework/be-patterns/tree/1.x/demos/medical-triage) パターン）
@@ -103,13 +123,15 @@ EC-CUBE の副作用を Reason 層に押し込むため、以下を列挙する:
 
 ### 6. 出力フォーマット
 
-結果を以下の構造で出力する:
+結果を以下の **2 ブロック構造**で出力する。前半は人間レビュー用の Markdown レポート、末尾の fenced JSON ブロックは後続ステップ（`domain`, `application`）が機械的に読む引き渡し情報。**両方を必ず出力すること**。
+
+#### 6-1. Markdown レポート
 
 ```markdown
 # ALPS Analyze: {descriptor}
 
 ## 概要
-(1-2行で目的と型)
+(1-2行で目的と型。ALPS 未登録の場合は冒頭に `⚠️ ALPS 未登録` を明記)
 
 ## セマンティックプロパティ
 (テーブル: id / 型 / nullable / 情報源タグ)
@@ -118,10 +140,10 @@ EC-CUBE の副作用を Reason 層に押し込むため、以下を列挙する:
 (テーブル: ALPS要素 → Be層)
 
 ## BEAR 層マッピング案
-(テーブル: 項目 → 決定)
+(テーブル: 項目 → 決定。純粋 Semantic は全項目 N/A)
 
 ## Reason 候補
-(箇条書き)
+(箇条書き。Phase 1 (FakeQuery) 方針で Command は no-op、Query は var/fake/<id>.json)
 
 ## 変換パターン判定
 Direct / Multi-stage / Diamond / Branching のどれか、および根拠
@@ -130,4 +152,65 @@ Direct / Multi-stage / Diamond / Branching のどれか、および根拠
 domain ステップで使う情報を箇条書き
 ```
 
-この出力は次の `domain` ステップへそのまま渡される。**曖昧さを残さない**こと。判断できない箇所はユーザーに質問せず、「暫定で X を採用。根拠: ...」と明記する。
+#### 6-2. 引き渡し JSON ブロック
+
+レポートの末尾に **必ず** 以下の fenced ブロックを置く（`json handover` のラベル付き）。後続ステップはこのブロックを正規表現 ```` ```json handover\n([\s\S]+?)\n``` ```` で抽出して読む:
+
+````markdown
+```json handover
+{
+  "descriptor_id": "<引数として与えられた文字列>",
+  "alps_id_resolved": "<実際にヒットした id（未ヒットなら null）>",
+  "alps_found": true,
+  "descriptor_type": "container | semantic | safe | unsafe | idempotent",
+  "be_pattern": "Direct | Multi-stage | Diamond | Branching",
+  "be_reference_demo": "hello-world | contact-form | user-registration | order-processing | blog-publishing | medical-triage | loan-application | insurance-claim",
+  "be_classes": {
+    "input": "<例: GetProductInput / null（純粋 Semantic の場合）>",
+    "being": "<分岐がある場合のみ。なければ null>",
+    "final": ["<例: ProductFetched>"]
+  },
+  "semantic_classes": [
+    {
+      "name": "<UpperCamel、例: Quantity>",
+      "alps_id": "<lowerCamel、例: quantity>",
+      "php_type": "int | string | float | bool | DateTimeImmutable",
+      "nullable": false,
+      "static_constraints": ["<例: >= 1, <= 9999>"],
+      "dynamic_constraints": ["<Final 側で検証する制約。例: <= stock>"],
+      "source_tag": "src-entity | src-template | src-router | src-controller | none"
+    }
+  ],
+  "reasons": [
+    {
+      "type": "DB-Query | DB-Command | Payment | Delivery | Tax | Inventory | Mailer | Other",
+      "interface_name": "<例: ProductQueryInterface>",
+      "phase": "Phase 1 (FakeQuery)",
+      "fake_fixture": "<例: var/fake/product.json / null>"
+    }
+  ],
+  "bear": {
+    "skip": false,
+    "uri_scheme": "page | app | null",
+    "http_method": "onGet | onPost | onPut | onPatch | onDelete | null",
+    "base_uri": "<例: /product/{id} / null>",
+    "links": [
+      {"rel": "<例: cart>", "href": "<例: /cart>"}
+    ]
+  },
+  "notes": [
+    "<曖昧さを残した暫定判断、別 PR への切り出し提案、ユーザー確認が望ましい論点など>"
+  ]
+}
+```
+````
+
+**JSON ブロックの厳格ルール**:
+
+- **必ずトップレベル 11 キーすべてを出力**（不明な値は `null` または空配列を使い、キー自体は省略しない）
+- `alps_found: false` の場合: `descriptor_type` は `null`、`semantic_classes` と `reasons` は空配列でも可、`be_pattern` は推測値、`notes` に「ALPS 未登録、移植元コードまたは仕様書から補完が必要」と明記
+- `bear.skip: true` の場合（純粋 Semantic）: `bear.uri_scheme` 以下の他フィールドはすべて `null` または空配列。`application` ステップはこのフラグを見て早期 skip する
+- `descriptor_type: "container"` の場合: `be_classes.input` / `be_classes.final` は空または `null`。container は単独で Input/Final を持たないため、`bear.skip: true` 相当として扱い、`notes` に「container 集約。Final の body shape 定義として参照される」と明記
+- 各文字列値の `<例: ...>` プレースホルダーはあくまで参考。実際には決定値だけを書く
+
+この出力は次の `domain` ステップへそのまま渡される。**曖昧さを残さない**こと。判断できない箇所はユーザーに質問せず、「暫定で X を採用。根拠: ...」と Markdown 側に明記し、JSON 側は決定値を入れて `notes` に補足を残す。

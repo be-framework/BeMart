@@ -6,19 +6,60 @@
 
 ## 早期スキップ判定
 
-`alps-analyze` ステップの出力で **BEAR 層マッピング案が全項目 `N/A`**（= 純粋 Semantic で単独 URI を持たない）とマークされていた場合、このステップは実装対象を持たない。
+`alps-analyze` ステップ末尾の **`json handover` ブロック** を最初に読み、以下のいずれかに該当する場合はこのステップは実装対象を持たない:
 
-その場合は以下だけを出力して終了する:
+1. `"bear": { "skip": true, ... }` が明示されている
+2. `"descriptor_type": "container"` である（container 集約は単独 URI を持たず、Final の body shape 定義としてのみ参照される）
+3. JSON が無い（古い alps-analyze 出力）または破損している場合のフォールバックとして、Markdown レポートの「BEAR 層マッピング案」テーブルが全項目 `N/A` となっている
+
+抽出は決定的に行うこと:
+
+- 正規表現 ```` ```json handover\n([\s\S]+?)\n``` ```` で fenced ブロックを取り、`JSON.parse` 相当で解釈
+- 失敗したら上記フォールバック（テーブル全項目 N/A 判定）に進む。**ユーザーには質問しない**
+
+該当する場合は以下だけを出力して終了する:
 
 ```markdown
 ## 作成ファイル
-(なし — 純粋 Semantic のため BEAR リソースは生成しない)
+(なし — 純粋 Semantic / container のため BEAR リソースは生成しない)
+
+## スキップ理由
+<handover JSON の bear.skip / descriptor_type=container / フォールバックのいずれを根拠としたか 1 行>
 
 ## テスト結果
-skipped: pure semantic, handled by upper descriptor
+skipped: pure semantic or container aggregate, handled by upper descriptor
 ```
 
 後続の `application-review` ステップも実質 no-op となり、上位 descriptor（例: `AddCartItemInput`, `Cart`）の `/run migrate` 実行時にこの Semantic が引数として参照される。
+
+## 入力契約
+
+このステップへの入力は **2 種類**ある:
+
+### 初回実行時
+
+前段 `alps-analyze` ステップ末尾の `json handover` fenced ブロックと、`domain` ステップの「作成ファイル」一覧。**handover JSON を最初に読み**、上記「早期スキップ判定」を通過した上で以下を使う:
+
+- `bear.uri_scheme` — `page` なら `src/Resource/Page/`、`app` なら `src/Resource/App/` へ配置
+- `bear.http_method` — `onGet` / `onPost` / `onPut` / `onPatch` / `onDelete` のいずれか 1 つを実装
+- `bear.base_uri` — リソース URL のパスパターン。`{id}` 形式のパラメータは AuraRouter で受ける
+- `bear.links[]` — `#[Link(rel, href)]` 属性として転記
+- `be_classes.input` — リソースメソッド内で `($this->becoming)(new <Input>(...))` の形で呼び出す
+- `be_classes.final` — Final のプロパティ名を `$this->body` への詰め替えに使う
+- `notes[]` — 暫定判断や別 PR 切り出し提案。リソース側の実装にも影響する場合だけ参照
+
+JSON ブロックが**存在しない / 破損している場合**は、Markdown レポートの「BEAR 層マッピング案」テーブルを読んで人手相当の解釈を行う。ユーザーに確認しない。
+
+### 差し戻し時（application-review からの再実行）
+
+直前の `application-review` ステップが `{ "verdict": "fail", "blocking": [ ... ] }` を返した場合、このステップは再実行される。**`blocking[]` 配列の各要素を必ず潰す**こと:
+
+- `blocking[].file` / `blocking[].line` — 修正対象の位置
+- `blocking[].rule` — 2 層境界違反のタイプ（例: `resource-has-business-logic`, `resource-touches-db`, `link-missing`, `static-return-violation`）
+- `blocking[].message` — 修正の指示
+- `blocking[].suggestion`（任意）— reviewer が提案する書き換え案
+
+再実行時は**新規ファイル追加よりも既存ファイルの修正を優先**。`blocking[]` の指摘が Be ドメイン側に起因していると判明した場合のみ、Markdown 出力の「補足」にその旨を書いて完了とし、上位 `/run` 側で domain への手戻りを判断させる（このステップで勝手にドメインコードを編集しない）。
 
 ## 前提と参照
 
