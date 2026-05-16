@@ -79,6 +79,33 @@
       "apiAjaxUtility": 78,
       "missingUserVisible": 30,
       "effectiveCoverage": "82.6%"
+    },
+    "pilot": {
+      "description": "Be Framework + BEAR.Sunday の初参照実装。`goProduct` 1 件のみで Be+BEAR 統合パターンを確立",
+      "repository": "~/git/MyVendor.EcCube",
+      "scope": "Product container を ProductClass 平坦化形まで縮小（#[Embed] による子リソース合成は Phase 2）。URL param は productCode（schema.org/sku 由来、ユニーク性）",
+      "tests": "8 passed (Domain 5 + Resource 3), 20 assertions",
+      "metrics": {
+        "semanticClasses": {"target": 5, "actual": 4, "note": "ProductCode, ProductName, Price02, Stock。5 件目（StockUnlimited 等）は Pilot スコープ外"},
+        "selfProvingOmissions": {"target": 5, "actual": 4, "note": "Semantic 型保証分の単体テストを 4 件省略（Semantic クラスごとに 1）。Final 存在 = 検証済みを ProductResourceTest が間接確認"},
+        "semanticLogCoverage": {"target": "100%", "actual": "100%", "note": "DevBecoming が Becoming chain 全体（Input prop / Final inject / close prop）を var/log/ec-cube.json に自動記録"},
+        "loc": {"actual": 576, "note": "BEAR-only 比較は推定値とせず実測のみ記録。BEAR-only 版は未実装"},
+        "i18nExceptionCoverage": {"target": "100%", "actual": "100%", "note": "6/6 例外に #[Message(['en'=>..., 'ja'=>...])] 付与"},
+        "selfProvingAsserts": {"target": "≥1", "actual": 1, "note": "Resource/Page/Product.php:44 で assert($final instanceof ProductFetched)"}
+      },
+      "keyDecisions": [
+        "BecomingInterface→DevBecoming を本番でも常時 bind（意味ログ常時取得）",
+        "AppModule に AppMetaModule を override で install（テストで BEAR\\Package\\Module factory を経由せず new Injector() で動作可能）",
+        "ProductNotFoundException は Resource 層で catch して Code::NOT_FOUND にマップ（Be の Final 閉鎖原則と HTTP プロトコルの折衷点）",
+        "Be 流 FakeQueryModule の代わりに ProductQueryInterface を JSON fixture 読み込みの FakeProductQuery で実装"
+      ],
+      "workflowPromptGaps": [
+        "alps-analyze.md: bear_url_template 不足（/product/{productCode} 解決方法）",
+        "domain-implement.md: BecomingInterface の DI 経路と AppModule 例の不足",
+        "application-implement.md: BEAR\\Resource\\Code 定数の参照、#[Embed] の扱い不足",
+        "integration-review.md: Final 閉鎖原則 vs HTTP プロトコル例外マッピングの判断基準"
+      ],
+      "status": "complete"
     }
   },
   "orphanedStates": {
@@ -100,6 +127,7 @@
     "Phase E completed: alps-analyze.md now emits a deterministic `json handover` fenced block (descriptor_id, alps_id_resolved, alps_found, descriptor_type, be_pattern, be_reference_demo, be_classes, semantic_classes, reasons, bear, notes). ID matching is a 5-step deterministic order (exact → lowerCamel → UpperCamel → case-insensitive LIKE → snake_case→camelCase). type → Be classification table added. domain-implement.md and application-implement.md each gained a 入力契約 section that reads the handover JSON on initial run and consumes reviewer.blocking[] on rework. Pure-Semantic / container skip judgment now keys off `bear.skip` and `descriptor_type` instead of a fragile \"all N/A\" string match.",
     "LoginHistory, Template, TradeLaw are intentional data composition elements (no detail page exists in EC-CUBE 4.3).",
     "Front-end customer routes are 100% covered.",
-    "Memo cleanup done: verify-misleading / verify-similar-names / verify-suffix-abbrev / verify-agent1-product / verify-agent2-order / verify-agent3-payment-delivery / verify-agent4-customer-shop / verify-agent5-admin-cms / improvements-doc4 / improvements-erd / improvements-graphql (11 files, ~3500 lines) were moved from repo root to docs/quality/. All except improvements-graphql.md are fully reflected in alps.json; improvements-graphql.md is still untouched (GraphQL-API alignment, out of scope for the BEAR.Sunday/Be migration target). The agent-1..5 files are the original split verification reports kept for audit trail."
+    "Memo cleanup done: verify-misleading / verify-similar-names / verify-suffix-abbrev / verify-agent1-product / verify-agent2-order / verify-agent3-payment-delivery / verify-agent4-customer-shop / verify-agent5-admin-cms / improvements-doc4 / improvements-erd / improvements-graphql (11 files, ~3500 lines) were moved from repo root to docs/quality/. All except improvements-graphql.md are fully reflected in alps.json; improvements-graphql.md is still untouched (GraphQL-API alignment, out of scope for the BEAR.Sunday/Be migration target). The agent-1..5 files are the original split verification reports kept for audit trail.",
+    "Pilot 完了 (MyVendor.EcCube, goProduct 1 件): Be + BEAR.Sunday 統合の初参照実装が動作確認済み。意味ログ自動記録 100%、i18n 例外 100%、composer test 8/8 pass。次は (1) workflow prompt 改修 PR で Pilot で発見した穴を埋める、(2) Pilot 2 として doAddCartItem (Diamond パターン) を別タスクで実装、(3) 残り 135 transition を `/run migrate <id>` で自走移植。詳細指標は completedWork.pilot を参照。"
   ]
 }
