@@ -1,14 +1,14 @@
 {
   "project": "EC-CUBE 4.3 ALPS Profile",
-  "lastUpdated": "2026-02-07",
-  "session": "alps-taxonomy-choreography-rebuild",
+  "lastUpdated": "2026-05-16",
+  "session": "alps-quality-refinement-opus-4.7",
   "completedWork": {
     "ontology": {
-      "description": "182 semantic fields with src-entity tags",
+      "description": "276 semantic descriptors (182 src-entity + container types) with src-entity / src-template / src-router / src-controller tags",
       "status": "complete"
     },
     "taxonomy": {
-      "description": "73 states (40 existing + 17 new front-end + 16 existing admin)",
+      "description": "73 states (40 existing + 17 new front-end + 16 admin)",
       "newStates": [
         "Top", "ShoppingLogin", "ShoppingNonMember", "Shopping",
         "ShoppingShipping", "ShoppingShippingEdit", "ShoppingConfirm",
@@ -19,7 +19,7 @@
       "status": "complete"
     },
     "choreography": {
-      "description": "137 transitions (safe:58, unsafe:35, idempotent:44) with src-router tags",
+      "description": "137 transitions (safe:58, unsafe:35, idempotent:44) with src-router tags. All transitions now carry doc.",
       "newTransitions": [
         "goTop", "goLogin", "doCopyProduct", "doBulkUpdateProductStatus",
         "goExportProduct", "doImportProductCsv", "doImportCategoryCsv",
@@ -43,8 +43,21 @@
       ],
       "status": "complete"
     },
+    "qualityRefinement": {
+      "description": "Opus 4.7 session: misleading docs, similar-name disambiguation, spec-driven doc4 enrichment, ERD-driven new descriptors, and 123 S001 suggestion resolution",
+      "appliedFromVerify": {
+        "misleadingNames": ["classNameLabel", "classCategoryName", "preOrderId", "confirmUrl", "secretKey", "linkMethod", "cartKey", "deviceType", "pageEditType", "authority"],
+        "similarNamePairs": ["charge/paymentCharge", "taxRate/taxRuleRate", "total/totalPrice/paymentTotal", "deliveryFee/deliveryFeeAmount/deliveryFeeTotal", "message/shopMessage"],
+        "fixedTypos": ["message (お問い合わせ欄)", "shopMessage (Help/about.twig)"],
+        "enrichedValidation": ["kana01", "kana02", "pref", "freeArea"]
+      },
+      "appliedFromDoc4": ["orderStatus (workflow rules)", "orderItemType (6 区分の課税/税表示)", "orderItemPrice", "orderItemTax", "taxRate", "taxAdjust", "roundingType", "subtotal", "total", "paymentTotal", "paymentCharge", "point", "applyDate"],
+      "newDescriptorsFromErd": ["addPoint", "usePoint", "deliveryFeeAmount", "saleTypeName", "taxDisplayType", "taxType"],
+      "transitionDocAdded": "123 transitions across catalog / cart / checkout / order / customer / account / help / shop / payment / delivery / tax / content / admin-system / mail / plugin / cms / catalog-admin domains, in MyVendor.Cms one-sentence style",
+      "status": "complete"
+    },
     "provenanceTags": {
-      "srcEntity": 182,
+      "srcEntity": 193,
       "srcRouter": 156,
       "srcTemplate": 80,
       "srcController": 10,
@@ -54,8 +67,9 @@
     "validation": {
       "errors": 0,
       "warnings": 0,
-      "suggestions": 123,
-      "htmlGenerated": true
+      "suggestions": 0,
+      "htmlGenerated": true,
+      "svgGenerated": true
     },
     "coverage": {
       "totalRoutes": 250,
@@ -76,11 +90,12 @@
     "note": "3 remaining are data composition patterns, not true orphans. They are referenced via href from their parent list states."
   },
   "adviceForNextAI": [
-    "30 admin routes are still not represented in ALPS transitions. Priority gaps: System Settings (8 routes), Content Management (6), Product Class Management (5), Shop Settings (5)",
-    "Consider adding admin states: AdminDashboard, SystemInfo, SecuritySettings, LogViewer, MasterData, CssEditor, JsEditor, FileManager, CacheManager, MaintenanceMode, TwoFactorAuth, CalendarSettings, OrderStatusSettings",
-    "123 S001 suggestions remain - add doc to transitions for better self-documentation",
-    "LoginHistory, Template, TradeLaw are modeled as data composition elements (href from list), not navigable states. This is intentional as no detail pages exist for these in the application",
-    "The front-end customer-facing routes are essentially 100% covered",
-    "Consider adding tags like 'flow-system-settings', 'flow-content-manage' for newly added admin states"
+    "S001 is now at 0. All 137 transitions carry doc in the MyVendor.Cms one-sentence style (purpose · scope · key side-effects/parameters).",
+    "30 admin routes still uncovered. Priority gaps: System Settings (8 routes), Content Management (6), Product Class Management (5), Shop Settings (5). Consider adding admin states: AdminDashboard, SystemInfo, SecuritySettings, LogViewer, MasterData, CssEditor, JsEditor, FileManager, CacheManager, MaintenanceMode, TwoFactorAuth, CalendarSettings, OrderStatusSettings.",
+    "deliveryFeeAmount disambiguation: id reuses ALPS existing name but doc now explicitly says \"都道府県別の送料金額（DeliveryFee.fee）\" with distinction from the 送料無料閾値 wording on the 基本情報 side. If future writers want a separate id for the threshold, prefer 'deliveryFeeFreeThreshold'.",
+    "Phase E (alps-analyze.md structuring with JSON handover block) is deferred — workflow improvement, not an ALPS data issue.",
+    "LoginHistory, Template, TradeLaw are intentional data composition elements (no detail page exists in EC-CUBE 4.3).",
+    "Front-end customer routes are 100% covered.",
+    "Consider future cleanup: improvements-graphql.md remains untouched; verify-* / improvements-* memo files can be archived now that their content is in alps.json."
   ]
 }
