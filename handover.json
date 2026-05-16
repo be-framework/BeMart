@@ -1,6 +1,6 @@
 {
   "project": "EC-CUBE 4.3 ALPS Profile",
-  "lastUpdated": "2026-05-16",
+  "lastUpdated": "2026-05-17",
   "session": "alps-quality-refinement-opus-4.7",
   "completedWork": {
     "ontology": {
@@ -97,7 +97,7 @@
     "Memo items still NOT applied to alps.json (intentionally — out of scope for this round): SEO meta on Page (pageDescription, pageKeyword, pageMetaRobots, pageMetaTags, pageAuthor); customer-facing status (customerOrderStatus, customerOrderStatusName, orderStatusColorName); country master (countryName); delivery extras (deliveryRegionalFee, deliveryTimeVisible); payment extras (paymentFixed, displayOrderCount). Reason: low priority for the BEAR.Sunday/Be migration target.",
     "30 admin routes still uncovered. Priority gaps: System Settings (8 routes), Content Management (6), Product Class Management (5), Shop Settings (5). Consider adding admin states: AdminDashboard, SystemInfo, SecuritySettings, LogViewer, MasterData, CssEditor, JsEditor, FileManager, CacheManager, MaintenanceMode, TwoFactorAuth, CalendarSettings, OrderStatusSettings.",
     "deliveryFeeAmount disambiguation: id reuses ALPS existing name but doc now explicitly says \"都道府県別の送料金額（DeliveryFee.fee）\" with distinction from the 送料無料閾値 wording on the 基本情報 side. If future writers want a separate id for the threshold, prefer 'deliveryFeeFreeThreshold'.",
-    "Phase E (alps-analyze.md structuring with JSON handover block) is deferred — workflow improvement, not an ALPS data issue.",
+    "Phase E completed: alps-analyze.md now emits a deterministic `json handover` fenced block (descriptor_id, alps_id_resolved, alps_found, descriptor_type, be_pattern, be_reference_demo, be_classes, semantic_classes, reasons, bear, notes). ID matching is a 5-step deterministic order (exact → lowerCamel → UpperCamel → case-insensitive LIKE → snake_case→camelCase). type → Be classification table added. domain-implement.md and application-implement.md each gained a 入力契約 section that reads the handover JSON on initial run and consumes reviewer.blocking[] on rework. Pure-Semantic / container skip judgment now keys off `bear.skip` and `descriptor_type` instead of a fragile \"all N/A\" string match.",
     "LoginHistory, Template, TradeLaw are intentional data composition elements (no detail page exists in EC-CUBE 4.3).",
     "Front-end customer routes are 100% covered.",
     "Consider future cleanup: improvements-graphql.md remains untouched; verify-* / improvements-* memo files can be archived now that their content is in alps.json."

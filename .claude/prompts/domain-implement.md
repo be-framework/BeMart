@@ -25,11 +25,47 @@
 - Final コンストラクタでの副作用は正当（doing for being）
 - `@link` phpdoc で次の becoming への潜在性を記述
 
+## 入力契約
+
+このステップへの入力は **2 種類**ある:
+
+### 初回実行時
+
+前ステップ `alps-analyze` の出力。**末尾の `json handover` fenced ブロックを最初に読む**:
+
+```text
+```json handover
+{ ... }
+```
+```
+
+このブロックから以下を抽出して実装に使う:
+
+- `descriptor_id` / `alps_id_resolved` — 実装対象の確定
+- `descriptor_type` — `container` または `bear.skip: true` ならドメイン層の実装も最小化（純粋 Semantic クラスのみ作成、Input/Final は作らない）
+- `be_pattern` / `be_reference_demo` — 「1. alps-analyze の結果を再確認」で使う
+- `be_classes.input` / `be_classes.final` — クラス名の確定
+- `semantic_classes[]` — `src/Semantic/*.php` の生成材料。`static_constraints` は `#[Validate]` に、`dynamic_constraints` は Final コンストラクタへ
+- `reasons[]` — `src/Reason/Media/{Command,Query}/` と `src/Reason/Entity/` の生成材料。`fake_fixture` パスに `var/fake/<id>.json` を置く
+
+JSON ブロックが**存在しない / 破損している場合**は、Markdown レポート側を読んで人手相当の解釈を行う。ユーザーに確認しない。
+
+### 差し戻し時（domain-review からの再実行）
+
+直前の `domain-review` ステップが `{ "verdict": "fail", "blocking": [ ... ] }` を返した場合、このステップは再実行される。**`blocking[]` 配列の各要素を必ず潰す**こと:
+
+- `blocking[].file` / `blocking[].line` — 修正対象の位置
+- `blocking[].rule` — Be 原則の違反タイプ（例: `no-else`, `final-readonly`, `no-domain-exception-leak`, `becoming-not-doing`）
+- `blocking[].message` — 修正の指示
+- `blocking[].suggestion`（任意）— reviewer が提案する書き換え案
+
+再実行時は**新規ファイル追加よりも既存ファイルの修正を優先**。`blocking[]` が空ならそもそも再実行されないので、空配列のチェックは不要。3 回失敗で workflow が停止する仕様は `/run` 側の責務。
+
 ## 手順
 
 ### 1. alps-analyze の結果を再確認
 
-前ステップで決定した変換パターン（Direct / Multi-stage / Diamond / Branching）と、それに対応する be-patterns のデモを特定する:
+入力契約で取り込んだ `be_pattern` に対応する be-patterns のデモを特定する:
 
 | パターン | 参照デモ |
 |---|---|
