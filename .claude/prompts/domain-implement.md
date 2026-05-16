@@ -45,7 +45,8 @@
 - `descriptor_type` — `container` または `bear.skip: true` ならドメイン層の実装も最小化（純粋 Semantic クラスのみ作成、Input/Final は作らない）
 - `be_pattern` / `be_reference_demo` — 「1. alps-analyze の結果を再確認」で使う
 - `be_classes.input` / `be_classes.final` — クラス名の確定
-- `semantic_classes[]` — `src/Semantic/*.php` の生成材料。`static_constraints` は `#[Validate]` に、`dynamic_constraints` は Final コンストラクタへ
+- `semantic_classes[]` — `src/Semantic/*.php` の生成材料。**`input_kind: "client"` のフィールドだけが Semantic クラスを必要とする**。`input_kind: "server"` のフィールドは Semantic を作らず Reason の Fake fixture (`server_fetched_fields[]`) として表現する。`static_constraints` は `#[Validate]` に、`dynamic_constraints` は Final コンストラクタへ
+- `server_fetched_fields[]` — Reason が取得するフィールド。これらは `var/fake/<noun>.json` の典型値分布として記述。**Semantic クラスを作らない**
 - `reasons[]` — `src/Reason/Media/{Command,Query}/` と `src/Reason/Entity/` の生成材料。`fake_fixture` パスに `var/fake/<id>.json` を置く
 
 JSON ブロックが**存在しない / 破損している場合**は、Markdown レポート側を読んで人手相当の解釈を行う。ユーザーに確認しない。
@@ -104,13 +105,17 @@ EC-CUBE 移植先の BEAR.Sunday + Be プロジェクトのルートディレク
 
 ### 3. Semantic 変数の実装
 
-`alps-analyze` で抽出した各プロパティについて、`src/Semantic/*.php` を作成する:
+`alps-analyze` で抽出した各プロパティのうち **`input_kind: "client"` のものだけ** について、`src/Semantic/*.php` を作成する:
 
 - クラス名は UpperCamelCase（例: `ProductName`, `ProductCode`, `StockQuantity`）
 - コンストラクタ引数名は lowerCamelCase（例: `$productName`）— ALPS の descriptor id と一致させる
 - `#[Validate]` メソッドで制約を宣言
 - nullable なら引数を `string|null` にして null 時早期 return
-- 制約値の根拠は ALPS / 既存 DB スキーマ / fake data 観察から。`semantic-ex` の原則に従い、根拠を `$comment` または phpdoc に残す
+- 制約値の根拠は **`var/fake/<descriptor-id>/client-input.json` の観察値**から。最大長や正規表現は 50 件の最大値・パターンに基づく。`semantic-ex` の原則に従い、根拠を `$comment` または phpdoc に残す
+
+**`input_kind: "server"` のフィールドは Semantic を作らない**。それらは Reason 層の Fake fixture で表現される (`server_fetched_fields[]` 参照)。
+
+**既存 Semantic の再利用**: 過去の Pilot や別 descriptor で既に作成済みのクラス（`src/Semantic/` 配下にあるもの）は再作成しない。1 変数名 1 クラスのルールに従い、同名であれば再利用する。観察値で制約を緩和する必要があれば既存クラスの制約を更新する（コミット履歴で意図が読めるように）。
 
 例:
 
@@ -251,44 +256,122 @@ final readonly class ProductCreated
 
 ### 8. AppModule の更新
 
+**Pilot 1 (goProduct) で確立した不変条件をすべて満たすこと**:
+
 ```php
-final class AppModule extends AbstractModule
+final class AppModule extends AbstractAppModule
 {
     protected function configure(): void
     {
-        $this->install(new FakeQueryModule(__DIR__ . '/../../var/fake'));
-        $this->bind(UlidGeneratorInterface::class)->to(UlidGenerator::class);
+        $this->install(new PackageModule());
+
+        // PackageModule does not bind @AppName by itself; BEAR\Package\Module factory
+        // normally overrides it. Install explicitly so tests can use
+        // `new Injector(new AppModule(...))` without the factory.
+        $this->override(new AppMetaModule($this->appMeta));
+
+        // Be Framework: BecomingInterface, SemanticLogger, semantic validator, Been provider.
+        $this->install(new BeModule('<Vendor>\\<Package>\\Semantic'));
+
+        // Always-on semantic logging: wrap Be's Becoming with DevBecoming.
+        $this->bind(Becoming::class);
+        $this->bind(BecomingInterface::class)->to(DevBecoming::class);
+        $this->bind(SemanticLoggerInterface::class)
+            ->toProvider(DevSemanticLoggerProvider::class)
+            ->in(Scope::SINGLETON);
+
+        // Reason: bind Query/Command interfaces to Fake implementations (Phase 1).
+        $this->bind(ProductQueryInterface::class)->to(FakeProductQuery::class)->in(Scope::SINGLETON);
+        // (Pilot 2 の追加分はここに append する。既存 bind を削らない)
     }
 }
 ```
 
-Phase 1 では `FakeQueryModule`、Phase 2 で `MediaQueryModule` に切り替える。
+**チェックリスト**:
+
+- [ ] `extends AbstractAppModule` (AbstractModule ではなく `$this->appMeta` が必要)
+- [ ] `PackageModule()` install の **後** に `override(new AppMetaModule($this->appMeta))` — これがないと `new Injector(AppModule(...))` 直叩きで `'\Resource\Page\<X>-'` の Unbound エラー
+- [ ] `BecomingInterface` → `DevBecoming` bind (本番でも意味ログ取得)
+- [ ] `SemanticLoggerInterface` → `DevSemanticLoggerProvider` (Singleton)
+- [ ] `BeModule` の引数 `<Vendor>\\<Package>\\Semantic` に新規 Semantic の名前空間が含まれているか
+- [ ] 新規 Reason の `QueryInterface` → `FakeQuery` bind が追加されているか
 
 ### 9. テストの作成
 
+**setUp の正しい雛形** (Pilot 1 で確立):
+
 ```php
-class ProductCreatedTest extends TestCase
+protected function setUp(): void
 {
-    private BecomingInterface $becoming;
+    $injector = new Injector(
+        new AppModule(new Meta('<Vendor>\\<Package>', 'test')),
+        dirname(__DIR__, 2) . '/var/tmp/test',
+    );
+    $this->becoming = $injector->getInstance(BecomingInterface::class);
+}
+```
 
-    protected function setUp(): void
-    {
-        $injector = new Injector(new AppModule());
-        $this->becoming = $injector->getInstance(BecomingInterface::class);
-    }
+- `new AppModule(new Meta(...))` — `AbstractAppModule` は `Meta` 引数を取る
+- 第 2 引数の cache dir (`var/tmp/test`) が無いと Ray.Di が cache 書き込みでエラー
 
-    public function testCreate(): void
-    {
-        $final = ($this->becoming)(new CreateProductInput('サンプル商品', 1000));
-        $this->assertInstanceOf(ProductCreated::class, $final);
-        $this->assertSame('サンプル商品', $final->productName);
-    }
+**テスト例**:
 
-    public function testRejectsEmptyName(): void
-    {
-        $this->expectException(SemanticVariableException::class);
+```php
+public function testCreate(): void
+{
+    $final = ($this->becoming)(new CreateProductInput('サンプル商品', 1000));
+    $this->assertInstanceOf(ProductCreated::class, $final);
+    $this->assertSame('サンプル商品', $final->productName);
+}
+
+public function testRejectsEmptyName(): void
+{
+    $this->expectException(SemanticVariableException::class);
+    ($this->becoming)(new CreateProductInput('', 1000));
+}
+
+public function testI18nException(): void
+{
+    try {
         ($this->becoming)(new CreateProductInput('', 1000));
+    } catch (SemanticVariableException $e) {
+        $messages = $e->getErrors()->getMessages('ja');
+        $this->assertSame('商品名は空にできません。', $messages[0]);
     }
+}
+
+public function testSemanticLogIsWritten(): void
+{
+    ($this->becoming)(new CreateProductInput('サンプル商品', 1000));
+    $logFile = dirname(__DIR__, 2) . '/var/log/ec-cube.json';
+    $this->assertTrue(file_exists($logFile), 'DevBecoming should write a semantic log');
+}
+```
+
+**Diamond Cascade パターン専用テスト** (Pilot 2 doAddCartItem 流):
+
+```php
+public function testStockShortageAutoAdjusts(): void
+{
+    // stock=3 で qty=5 をリクエスト → adjustedQuantity=3 になる
+    $final = ($this->becoming)(new AddCartItemInput('sample-003', 5));
+    $this->assertSame(3, $final->cartItem->quantity);
+}
+
+public function testSameSkuAddedTwiceMergesQuantity(): void
+{
+    // 同じ productCode を 2 回追加 → quantity が加算される
+    ($this->becoming)(new AddCartItemInput('test-cart-merge-001', 2));
+    $final = ($this->becoming)(new AddCartItemInput('test-cart-merge-001', 3));
+    $this->assertSame(5, $final->cartItem->quantity);
+}
+
+public function testDifferentSaleTypeIsolatesCart(): void
+{
+    // 異なる saleTypeId は別 cartKey に分離
+    $normal = ($this->becoming)(new AddCartItemInput('sample-001', 1));
+    $preorder = ($this->becoming)(new AddCartItemInput('preorder-2026-spring-bag', 1));
+    $this->assertNotSame($normal->cartKey, $preorder->cartKey);
 }
 ```
 
