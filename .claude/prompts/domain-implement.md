@@ -293,8 +293,11 @@ final class AppModule extends AbstractAppModule
 - [ ] `PackageModule()` install の **後** に `override(new AppMetaModule($this->appMeta))` — これがないと `new Injector(AppModule(...))` 直叩きで `'\Resource\Page\<X>-'` の Unbound エラー
 - [ ] `BecomingInterface` → `DevBecoming` bind (本番でも意味ログ取得)
 - [ ] `SemanticLoggerInterface` → `DevSemanticLoggerProvider` (Singleton)
-- [ ] `BeModule` の引数 `<Vendor>\\<Package>\\Semantic` に新規 Semantic の名前空間が含まれているか
+- [ ] `BeModule` の引数 `<Vendor>\\<Package>\\Semantic` に新規 Semantic の名前空間が含まれているか (新規 Semantic が同名前空間に置かれていれば既存 `BeModule` 行はそのまま再利用できる)
 - [ ] 新規 Reason の `QueryInterface` → `FakeQuery` bind が追加されているか
+- [ ] **Append-only**: 既存 Pilot の bind 行は削らない。新しい descriptor の bind 群をファイル末尾に追記する形で増やす
+
+**Phase 6 統合 smoke**: PHPUnit を書き始める前に `bin/smoke_<descriptor>.php` を作って `new Injector(new AppModule(new Meta(...)), 'var/tmp/test')` → `$injector->getInstance(BecomingInterface::class)` → `($becoming)(new XxxInput(...))` の 3 行を走らせる。これが通れば DI 配線・AppMeta override・BeModule namespace は OK で、あとは PHPUnit でロジック検証に専念できる。失敗するなら `'\Resource\…\-'` のような Unbound エラー (AppMeta 漏れ) か `class not found` (autoload 未生成) のどちらかが大半。
 
 ### 9. テストの作成
 
