@@ -355,15 +355,15 @@ public function testStockShortageAutoAdjusts(): void
 {
     // stock=3 で qty=5 をリクエスト → adjustedQuantity=3 になる
     $final = ($this->becoming)(new AddCartItemInput('sample-003', 5));
-    $this->assertSame(3, $final->cartItem->quantity);
+    $this->assertSame(3, $final->adjustedQuantity);
 }
 
 public function testSameSkuAddedTwiceMergesQuantity(): void
 {
-    // 同じ productCode を 2 回追加 → quantity が加算される
+    // 同じ productCode を 2 回追加 → totalPrice が加算される
     ($this->becoming)(new AddCartItemInput('test-cart-merge-001', 2));
     $final = ($this->becoming)(new AddCartItemInput('test-cart-merge-001', 3));
-    $this->assertSame(5, $final->cartItem->quantity);
+    $this->assertSame(5000, $final->totalPrice); // 1000 × (2+3)
 }
 
 public function testDifferentSaleTypeIsolatesCart(): void
@@ -374,6 +374,26 @@ public function testDifferentSaleTypeIsolatesCart(): void
     $this->assertNotSame($normal->cartKey, $preorder->cartKey);
 }
 ```
+
+**Cascade 段数 ≠ `#[Inject]` 数** (Pilot 2 で確認した不変条件):
+
+5 段の cascade phase (Stock → SaleLimit → SaleType → Delivery → Merge) でも、データ源が共有されるなら `#[Inject]` は 3 つで足りる (例: `ProductClassQueryInterface` が Stock/SaleLimit/Delivery/SaleType/Price の 5 phase 全部に効く)。  
+**"5 Reason" は cascade phase の数えであって、Inject ディレクティブの数ではない**。Final のコンストラクタは「データソースの数」、Final 内部のロジックは「phase の数」で別カウント。
+
+**共有状態の Reason** (Query + Command が同じ store を見る場合):
+
+```php
+// Reason/Query/FakeCartStorage.php — 単一の in-memory ストア
+final class FakeCartStorage { /* get/put */ }
+
+// Reason/Query/FakeCartQuery.php / FakeCartCommand.php — それぞれが Storage を inject
+// AppModule で必ず Storage を Singleton で bind:
+$this->bind(FakeCartStorage::class)->in(Scope::SINGLETON);
+$this->bind(CartQueryInterface::class)->to(FakeCartQuery::class);
+$this->bind(CartCommandInterface::class)->to(FakeCartCommand::class);
+```
+
+Singleton スコープを忘れると Command が書いたものを Query が読めない (Ray.Di がそれぞれ新インスタンスを作るため)。
 
 **存在の生成 = テスト完了**。DB を読み戻して確認する CRUD 的テストは書かない。
 
