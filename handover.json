@@ -69,7 +69,8 @@
       "warnings": 0,
       "suggestions": 0,
       "htmlGenerated": true,
-      "svgGenerated": true
+      "svgGenerated": true,
+      "selfReviewPassed": true
     },
     "coverage": {
       "totalRoutes": 250,
@@ -90,7 +91,10 @@
     "note": "3 remaining are data composition patterns, not true orphans. They are referenced via href from their parent list states."
   },
   "adviceForNextAI": [
-    "S001 is now at 0. All 137 transitions carry doc in the MyVendor.Cms one-sentence style (purpose · scope · key side-effects/parameters).",
+    "S001 is now at 0. All 137 transitions carry doc in the MyVendor.Cms one-sentence style (purpose · scope · key side-effects/parameters), and all transition docs end with the full-width period 。 (consistent across the file).",
+    "Top-level descriptor count is 403 (container 266 + safe 58 + unsafe 35 + idempotent 44). Earlier handover snapshots said 413 — that figure was inaccurate; 403 is the verified count.",
+    "Self-review (Opus 4.7 follow-up) hardened doc on doDeleteProduct, doCopyProduct, doUpdateCustomer, and doCreateCustomerAddress — these previously had thin docs (<20 chars or input-contract gaps). All other transitions audited and accepted.",
+    "Memo items still NOT applied to alps.json (intentionally — out of scope for this round): SEO meta on Page (pageDescription, pageKeyword, pageMetaRobots, pageMetaTags, pageAuthor); customer-facing status (customerOrderStatus, customerOrderStatusName, orderStatusColorName); country master (countryName); delivery extras (deliveryRegionalFee, deliveryTimeVisible); payment extras (paymentFixed, displayOrderCount). Reason: low priority for the BEAR.Sunday/Be migration target.",
     "30 admin routes still uncovered. Priority gaps: System Settings (8 routes), Content Management (6), Product Class Management (5), Shop Settings (5). Consider adding admin states: AdminDashboard, SystemInfo, SecuritySettings, LogViewer, MasterData, CssEditor, JsEditor, FileManager, CacheManager, MaintenanceMode, TwoFactorAuth, CalendarSettings, OrderStatusSettings.",
     "deliveryFeeAmount disambiguation: id reuses ALPS existing name but doc now explicitly says \"都道府県別の送料金額（DeliveryFee.fee）\" with distinction from the 送料無料閾値 wording on the 基本情報 side. If future writers want a separate id for the threshold, prefer 'deliveryFeeFreeThreshold'.",
     "Phase E (alps-analyze.md structuring with JSON handover block) is deferred — workflow improvement, not an ALPS data issue.",
