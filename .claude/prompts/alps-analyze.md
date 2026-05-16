@@ -82,6 +82,25 @@ ALPS の id は lowerCamel（例: `quantity`, `productName`、container は `Car
 - 分岐が必要なら `Input → Being → Final A | Final B`（[`medical-triage`](https://github.com/be-framework/be-patterns/tree/1.x/demos/medical-triage) パターン）
 - 独立した外部副作用が複数あるなら Moment を複数注入する Diamond パターン（[`order-processing`](https://github.com/be-framework/be-patterns/tree/1.x/demos/order-processing)）
 
+**Diamond サブパターン判定（3 軸）**:
+
+複数 Reason を統合する場合、以下 3 軸でサブパターンを決定し、適切な範例デモを選ぶ:
+
+| サブパターン | 特徴 | 範例（be-patterns） | 実装スタイル |
+|---|---|---|---|
+| **独立並列 Diamond** | Reason が互いに独立で並列実行可能。順序依存なし | [`blog-publishing`](https://github.com/be-framework/be-patterns/tree/1.x/demos/blog-publishing) | Final constructor で `#[Inject]` を並べる |
+| **Cascade Diamond** | Reason 間に順序依存あり（例: 在庫検査 → 数量補正 → 価格確定） | [`loan-application`](https://github.com/be-framework/be-patterns/tree/1.x/demos/loan-application) | Being を 1〜2 段挟む。Input → Being → Final |
+| **Branching Final** | Reason 結果に応じて Final クラスが分岐 | [`medical-triage`](https://github.com/be-framework/be-patterns/tree/1.x/demos/medical-triage) | `#[Be([FinalA::class, FinalB::class])]` で複数 Final を列挙 |
+
+判定手順:
+
+1. Reason を全部リストアップ（rt 先 container + 関連フィールド + 関連 transition から）
+2. Reason 間に「先に確定しないと次の判断ができない」依存があるか? → Yes なら **Cascade**
+3. Reason 結果で Final クラスが分岐するか?（成功/失敗、ケースA/ケースB など） → Yes なら **Branching**
+4. どちらも No → **独立並列**
+
+出力 JSON では `be_pattern` を `Direct | Multi-stage | Diamond-Independent | Diamond-Cascade | Diamond-Branching` のいずれかにする。
+
 **制約の置き場所**:
 
 - **静的制約**（値単体で判定できるもの。型・範囲・フォーマット・文字数）→ Semantic クラスの `#[Validate]` メソッドに書く
@@ -107,6 +126,25 @@ ALPS の id は lowerCamel（例: `quantity`, `productName`、container は `Car
 - Resource は `Becoming` を呼ぶだけ。ビジネスロジックを書かない
 - `@link phpdoc` → `#[Link]` 属性に変換される（Be 側の Final に `@link` を書く）
 - **純粋 Semantic（type=semantic かつ単独で state transition を持たない）の場合、BEAR リソースは生成しない**。テーブルは全項目 `N/A` と記入し、根拠に「純粋 Semantic のため単独 URI なし。上位 descriptor の Input 引数として参照される」と書く。後続の `application` ステップは skip 扱いとする
+
+### 4.5. client-input vs server-fetched 判定
+
+Phase 2（Fake 50 件観察）に渡す前に、対象 descriptor の各フィールドを **2 シートに分類** する。これにより Semantic クラスの作成範囲と Reason の責任範囲が決まる:
+
+| 軸 | client-input | server-fetched |
+|---|---|---|
+| 由来 | ユーザーが入力（フォーム / URL param / JSON body） | DB / 外部 API / 別リソースから取得 |
+| Semantic クラス作成 | **必要**（Smart Constructor で検証） | **不要**（Fake fixture が典型値の出処） |
+| Exception | バリデーション例外を `#[Message]` 付きで作る | DomainException（NotFound 等）のみ |
+| JSON Schema | `var/schema/request/*.json` に記述 | 不要 |
+| 50 件 Fake 観察 | minLength / maxLength / null 率 / 値域を観察 | 典型値分布を Fake fixture に反映 |
+
+**判定の質問**:
+
+- 「このフィールドは HTTP リクエストの一部として送られるか?」 → Yes なら client-input
+- 「このフィールドはサーバー側で取得・派生されるか?」 → Yes なら server-fetched / server-derived
+
+出力 JSON では `semantic_classes[].input_kind` を `client | server` のいずれかでマークする。`server` のフィールドは Semantic を作らず、対応する Reason の Fake fixture（`server_fetched_fields`）として `notes` または別キーに記録する。
 
 ### 5. Reason 候補の洗い出し
 
@@ -163,7 +201,7 @@ domain ステップで使う情報を箇条書き
   "alps_id_resolved": "<実際にヒットした id（未ヒットなら null）>",
   "alps_found": true,
   "descriptor_type": "container | semantic | safe | unsafe | idempotent",
-  "be_pattern": "Direct | Multi-stage | Diamond | Branching",
+  "be_pattern": "Direct | Multi-stage | Diamond-Independent | Diamond-Cascade | Diamond-Branching",
   "be_reference_demo": "hello-world | contact-form | user-registration | order-processing | blog-publishing | medical-triage | loan-application | insurance-claim",
   "be_classes": {
     "input": "<例: GetProductInput / null（純粋 Semantic の場合）>",
@@ -174,11 +212,20 @@ domain ステップで使う情報を箇条書き
     {
       "name": "<UpperCamel、例: Quantity>",
       "alps_id": "<lowerCamel、例: quantity>",
+      "input_kind": "client | server",
       "php_type": "int | string | float | bool | DateTimeImmutable",
       "nullable": false,
       "static_constraints": ["<例: >= 1, <= 9999>"],
       "dynamic_constraints": ["<Final 側で検証する制約。例: <= stock>"],
       "source_tag": "src-entity | src-template | src-router | src-controller | none"
+    }
+  ],
+  "server_fetched_fields": [
+    {
+      "name": "<lowerCamel、例: stock>",
+      "from": "<例: ProductClass テーブル>",
+      "purpose": "<例: Stock 検査>",
+      "fake_fixture_path": "<例: var/fake/product_classes.json>"
     }
   ],
   "reasons": [
@@ -207,7 +254,7 @@ domain ステップで使う情報を箇条書き
 
 **JSON ブロックの厳格ルール**:
 
-- **必ずトップレベル 11 キーすべてを出力**（不明な値は `null` または空配列を使い、キー自体は省略しない）
+- **必ずトップレベル 12 キーすべてを出力**（`descriptor_id`, `alps_id_resolved`, `alps_found`, `descriptor_type`, `be_pattern`, `be_reference_demo`, `be_classes`, `semantic_classes`, `server_fetched_fields`, `reasons`, `bear`, `notes`）。不明な値は `null` または空配列を使い、キー自体は省略しない
 - `alps_found: false` の場合: `descriptor_type` は `null`、`semantic_classes` と `reasons` は空配列でも可、`be_pattern` は推測値、`notes` に「ALPS 未登録、移植元コードまたは仕様書から補完が必要」と明記
 - `bear.skip: true` の場合（純粋 Semantic）: `bear.uri_scheme` 以下の他フィールドはすべて `null` または空配列。`application` ステップはこのフラグを見て早期 skip する
 - `descriptor_type: "container"` の場合: `be_classes.input` / `be_classes.final` は空または `null`。container は単独で Input/Final を持たないため、`bear.skip: true` 相当として扱い、`notes` に「container 集約。Final の body shape 定義として参照される」と明記
