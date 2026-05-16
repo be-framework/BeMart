@@ -204,11 +204,35 @@ public function onGet(string $productCode): static
 | `*UnauthorizedException` | `Code::UNAUTHORIZED` | 401 |
 | `*ForbiddenException` | `Code::FORBIDDEN` | 403 |
 
-`SemanticVariableException`（Semantic validator が投げる）は通常 catch しない。フレームワーク層で 400 にマップされる経路がある場合はそちらに任せる。
+`SemanticVariableException`（Semantic validator が投げる）はフレームワーク層に 400 マッパーがある場合のみ素通しでよい。**Pilot 段階の Be+BEAR では framework-level mapper が存在しない**ので、Resource 層で必ず catch して `Code::BAD_REQUEST` に変換する。エラー本文は `$e->getErrors()->getMessages('ja')[0]` で 1 件目の i18n メッセージを取り出す:
+
+```php
+} catch (SemanticVariableException $e) {
+    $this->code = Code::BAD_REQUEST;
+    $this->body = [
+        'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
+        // 受信パラメータをそのまま返してデバッグを助ける
+    ];
+    return $this;
+}
+```
 
 #### 戻り値は `static`
 
 BEAR.Sunday のモダン記法。`ResourceObject` ではなく `static` を返す。
+
+#### 自己証明性 (assert) は Final 取得後に 1 行
+
+Be の Final 存在 = 検証済み。catch ブロックを抜けたあと、`$final` が期待型であることを `assert()` で 1 行ガードする (Pilot 1 / Pilot 2 共通パターン):
+
+```php
+$final = ($this->becoming)(new XxxInput(...));
+// (例外 catch 群)
+assert($final instanceof XxxFinal);
+$this->body = [/* $final->prop を詰める */];
+```
+
+これにより静的解析が `$final->prop` の型を狭め、`$final` が非 Final になる経路 (Be 内部のバグ等) を assertion で早期検出できる。**Final 1 つにつき 1 件以上**が成功指標 #6。
 
 #### client-input 検証は Be Semantic 任せ。Resource 層は受け流すだけ
 
