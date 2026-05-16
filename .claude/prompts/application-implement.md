@@ -200,9 +200,11 @@ public function onGet(string $productCode): static
 |---|---|---|
 | `*NotFoundException` | `Code::NOT_FOUND` | 404 |
 | `*FormatException` / `*ValidationException` | `Code::BAD_REQUEST` | 400 |
-| `*ConflictException` / `OutOfStockException` | `Code::CONFLICT` | 409 |
+| `*ConflictException` / `OutOfStockException` | `409` (整数リテラル) | 409 |
 | `*UnauthorizedException` | `Code::UNAUTHORIZED` | 401 |
 | `*ForbiddenException` | `Code::FORBIDDEN` | 403 |
+
+**注**: `BEAR\Resource\Code` は HTTP 全コードを網羅していない (Pilot 2 で `CONFLICT` 不在を確認)。網羅されていないコードは整数リテラルを使う + 何故定数を使わなかったか 1 行コメント (`// BEAR\Resource\Code lacks CONFLICT; use integer.`)。BEAR にコード定数を追加するのは別 PR の判断。
 
 `SemanticVariableException`（Semantic validator が投げる）はフレームワーク層に 400 マッパーがある場合のみ素通しでよい。**Pilot 段階の Be+BEAR では framework-level mapper が存在しない**ので、Resource 層で必ず catch して `Code::BAD_REQUEST` に変換する。エラー本文は `$e->getErrors()->getMessages('ja')[0]` で 1 件目の i18n メッセージを取り出す:
 
