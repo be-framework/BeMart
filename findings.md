@@ -93,7 +93,7 @@
 - BEAR.Skills: https://github.com/bearsunday/BEAR.Skills
 - Day 0 workflow: `~/git/ec-cube-alps/day0-workflow.md`
 - Project summary: `~/git/ec-cube-alps/README.md`
-- Coverage / next-ai notes: `~/git/ec-cube-alps/handover.json`
+- Coverage / next-ai notes: `~/git/ec-cube-alps/HANDOVER.md`
 - Domain tags: `~/git/ec-cube-alps/tag.md`
 - Migration plan draft: `~/git/ec-cube-alps/ec-cube-bear-be-migration-plan.md`
 - Autonomous execution runbook: `~/git/ec-cube-alps/autonomous-execution-runbook.md`
