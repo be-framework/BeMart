@@ -40,7 +40,7 @@ BEAR.Sunday + Be Framework ベースの移植先リポジトリを立ち上げ�
 3. この repo の以下を参照資料として固定する
    - `alps.json`
    - `tag.md`
-   - `handover.json`
+   - `HANDOVER.md`
    - `ec-cube-bear-be-migration-plan.md`
    - `autonomous-execution-runbook.md`
 4. 可能なら Be Skills / BEAR.Skills を使える状態にする

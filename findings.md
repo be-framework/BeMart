@@ -93,7 +93,7 @@
 - BEAR.Skills: https://github.com/bearsunday/BEAR.Skills
 - Day 0 workflow: `/Users/akihito/git/ec-cube-alps/day0-workflow.md`
 - Project summary: `/Users/akihito/git/ec-cube-alps/README.md`
-- Coverage / next-ai notes: `/Users/akihito/git/ec-cube-alps/handover.json`
+- Coverage / next-ai notes: `/Users/akihito/git/ec-cube-alps/HANDOVER.md`
 - Domain tags: `/Users/akihito/git/ec-cube-alps/tag.md`
 - Migration plan draft: `/Users/akihito/git/ec-cube-alps/ec-cube-bear-be-migration-plan.md`
 - Autonomous execution runbook: `/Users/akihito/git/ec-cube-alps/autonomous-execution-runbook.md`

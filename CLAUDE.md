@@ -36,7 +36,7 @@ HTML 再生成時は `docs/` 配下のコピーも同期すること。
 
 ### 2 層構造
 
-1. **ALPS 層** — `alps.json` が正（source of truth）。`openapi.yaml`, HTML は生成物。`tag.md` がタグ分類体系、`handover.json` が構築プロセス記録
+1. **ALPS 層** — `alps.json` が正（source of truth）。`openapi.yaml`, HTML は生成物。`tag.md` がタグ分類体系、`HANDOVER.md` が構築プロセス記録（Pilot 1/2 完了報告含む）
 2. **ワークフロー層** — `.claude/` 配下に、Claude Code のネイティブ機能（custom command + subagent + prompts）でワークフローを定義
 
 ### `.claude/` の構成
