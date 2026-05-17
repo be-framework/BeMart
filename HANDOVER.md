@@ -32,7 +32,7 @@ ec-cube-alps/                            ← BEAR.Sunday アプリ (top)
 ├── bin/, public/                        ← BEAR 実行 entry
 ├── var/log/, var/tmp/                   ← BEAR runtime data
 ├── alps.json, docs/, ...                ← ALPS 公開成果物 (従来通り)
-└── vendor-be/MyVendor.BeMart.Be/        ← Be ドメインライブラリ
+└── be/                                  ← Be ドメインライブラリ
     ├── composer.json                    ← my-vendor/be-mart-be (library)
     ├── src/{Input,Final,Semantic,Exception,Becoming,Reason}/   ← MyVendor\BeMart\Be\*
     ├── tests/Domain/                    ← MyVendor\BeMart\Be\Tests\Domain
@@ -43,14 +43,14 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 ### 開発と将来の packagist 切り出し
 
-- 開発中は composer の `repositories: [{type: "path", url: "vendor-be/MyVendor.BeMart.Be", symlink: true}]` で `vendor/my-vendor/be-mart-be` に symlink。修正は即座に top から見える
-- packagist 公開時は `git subtree split --prefix=vendor-be/MyVendor.BeMart.Be -b release/be` 等で別 repo に分離し、`my-vendor/be-mart-be` を通常依存に切り替え
-- vendor-be 単体テストは現状 top の AppModule に依存 (Domain test が `new AppModule(new Meta('MyVendor\\BeMart', 'test'))`)。packagist 切り出し時は Be ライブラリ独自の test bootstrap を作る必要あり
+- 開発中は composer の `repositories: [{type: "path", url: "be", symlink: true}]` で `vendor/my-vendor/be-mart-be` に symlink。修正は即座に top から見える
+- packagist 公開時は `git subtree split --prefix=be -b release/be` で別 repo に分離し、`my-vendor/be-mart-be` を通常依存に切り替え
+- `be/` 単体テストは現状 top の AppModule に依存 (Domain test が `new AppModule(new Meta('MyVendor\\BeMart', 'test'))`)。packagist 切り出し時は Be ライブラリ独自の test bootstrap を作る必要あり
 
 ### Pilot 1/2 履歴の参照先
 
 - **旧パス:** `~/git/MyVendor.EcCube/` (削除済み)
-- **新パス:** `~/git/ec-cube-alps/` (BEAR top) + `vendor-be/MyVendor.BeMart.Be/` (Be)
+- **新パス:** `~/git/ec-cube-alps/` (BEAR top) + `be/` (Be domain)
 - 以下 Pilot 1/2 セクションの「リポジトリ」欄も新パス前提で読む
 
 ---

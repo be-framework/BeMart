@@ -6,7 +6,7 @@
     "repositories": [
         {
             "type": "path",
-            "url": "vendor-be/MyVendor.BeMart.Be",
+            "url": "be",
             "options": {
                 "symlink": true
             }
@@ -32,7 +32,7 @@
     "autoload-dev": {
         "psr-4": {
             "MyVendor\\BeMart\\Tests\\": "tests/",
-            "MyVendor\\BeMart\\Be\\Tests\\": "vendor-be/MyVendor.BeMart.Be/tests/"
+            "MyVendor\\BeMart\\Be\\Tests\\": "be/tests/"
         }
     },
     "scripts": {

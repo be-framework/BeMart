@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "edd437618edb297c1bd0bccd9047578d",
+    "content-hash": "3f59983b3fb06db8c42d779e6671cd54",
     "packages": [
         {
             "name": "aura/cli",
@@ -1138,7 +1138,7 @@
             "version": "1.x-dev",
             "dist": {
                 "type": "path",
-                "url": "vendor-be/MyVendor.BeMart.Be",
+                "url": "be",
                 "reference": "98649448bbcf331d9ba4e66a7de65a3f056afcd7"
             },
             "require": {
