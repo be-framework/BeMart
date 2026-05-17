@@ -5,8 +5,8 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 | メタ | 値 |
 |---|---|
 | Last updated | 2026-05-18 |
-| Latest session | pilot-3-doConfirmOrder-branching-plus-diamond-finding-opus-4.7 |
-| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade) + alps-to-be-bear skill dogfooding。Cascade Diamond は Pilot 3 で「apex が `#[Input]` 依存だと be-framework のメカニクス上不成立」と判明 (Linear Cascade に縮退) |
+| Latest session | pilot-4-doRegisterCustomer-multi-reason-being-opus-4.7 |
+| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being) + alps-to-be-bear skill dogfooding。Cascade Diamond は Pilot 3 で「apex が `#[Input]` 依存だと be-framework のメカニクス上不成立」と判明 (Linear Cascade に縮退)。Pilot 4 で Multi-Reason Being (be-patterns `blog-publishing` 系) を初検証 |
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
 
@@ -271,7 +271,8 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 - **Pilot 1 完了** (`BeMart` (旧 MyVendor.EcCube), `goProduct` 1 件): Be + BEAR.Sunday 統合の初参照実装が動作確認済み。意味ログ自動記録 100%、i18n 例外 100%、composer test 8/8 pass。次は (1) workflow prompt 改修 PR で Pilot で発見した穴を埋める、(2) Pilot 2 として `doAddCartItem` (Diamond パターン) を別タスクで実装、(3) 残り 135 transition を `/run migrate <id>` で自走移植。詳細指標は「Pilot 1」セクション参照
 - **Pilot 2 完了** (`BeMart`, `doAddCartItem` 1 件): **Cascade** パターンの参照実装。`AddCartItemInput → QuantityAdjusted (Being) → CartMerged (Being) → CartItemAdded (Final)` の **3 段 cascade**。Final は `CartCommand` 1 件のみ `#[Inject]` で受け取り永続化に専念、Read 系 Reason は上流 Being に分散。改訂履歴: 初版「Cascade Diamond」分類 → Linear/Minimal に訂正 → 2 段 Cascade refactor → 3 段 Cascade refactor (`CartMerged` 抽出で Final から in-memory merge / totalPrice / deliveryFeeTotal 計算を引き剥がした、2026-05-18)。composer test 21/21 pass, 51 assertions, **0 notices** (Cascade refactor で導入された 13 件の Semantic 変数を全登録: `SessionPrefix` / `RequestedQuantity` / `AdjustedQuantity` / `UnitPrice` / `SaleTypeId` / `SaleTypeName` / `DeliveryFee` / `StockUnlimited` / `SaleLimit` / `CartKey` / `TotalPrice` / `DeliveryFeeTotal` / `MergedCart`)。Linear 版 snapshot は `be/docs/variations/linear-doAddCartItem/` に保存 (educational comparison 用)。Pilot 1+2 を通じた **Be 採用評価** は `be/docs/be-adoption-evaluation.md` に詳述 (基層効力 4 軸 = Pilot 1 から効く / 上層効力 4 軸 = Pilot 2 で爆発)。Query/Command 共有時は Singleton ストア必須、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用、いずれも Cascade 実装でも有効。skill `~/.claude/skills/alps-to-be-bear/` に昇格済み (SKILL.md / decision-matrix.md は 3 段 Cascade refactor の読み替え注記が必要)。**Pilot 2 末尾の「次は Cascade Diamond を別 Pilot で」という想定は Pilot 3 で部分的に覆った — `#[Input]` 依存の Being を `#[Inject]` で apex に持つ Cascade Diamond は be-framework のメカニクス上不成立 (詳細は Pilot 3 セクション / `be/docs/be-adoption-evaluation.md §6`)。EC-CUBE の典型的な `#[Input]` 依存遷移は Linear Cascade に縮退する**
-- **Pilot 3 完了** (`BeMart`, `doConfirmOrder` 1 件): **Branching** パターンの参照実装 + **Cascade Diamond 不成立の構造的発見**。`ConfirmOrderInput → PreOrderResolved (Being) → PurchaseFlowApplied (Being) → PaymentVerified (Being) → OrderConfirming (Being, 分岐点) → OrderConfirmed | OrderConfirmFailed (Branching Final)` の **4 段 Linear Cascade + 1 段 Branching**。`OrderConfirming` の `public PaymentSuccessCase|PaymentFailureCase $being` 型 discriminator により `BecomingType::match()` が Final を選択 (be-patterns `medical-triage` デモ準拠)。composer test 27/27 pass (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 新規 6), 79 assertions, **0 notices** (Pilot 3 で 14 件の Semantic 変数を新規登録: `PreOrderId` / `PaymentMethodId` / `Subtotal` / `Tax` / `Total` / `Discount` / `Charge` / `DeliveryFee`(既存) / `AddPoint` / `UsePoint` / `PaymentTotal` / `Order` / `Totals` / `Result` / `Being`)。改訂履歴: 初版 Cascade Diamond 想定で `OrderConfirming` を apex (`#[Inject] PreOrderResolved $preOrder` 等) → Ray.Di `NoHint($preOrderId)` で全テスト失敗 → `#[Input]` 依存 Being を `#[Inject]` 経由でインスタンス化できないと判明 (Ray.Di は `#[Input]` 属性を理解しない) → 4 段 Linear Cascade に再構成。**構造的発見**: Cascade Diamond は「apex Moment が `#[Input]` を一切持たない」場合のみ成立する。EC-CUBE の典型的フロー (Input scalar から DB 引き当て → 並列に Service 呼び出し) は全て Linear Cascade に縮退する。Pilot 3 の Branching パターンは clean に動作し、be-framework の Branching 機構 (`BecomingType::match()` による型ベース選択) は実用検証済み。Skill 配置: `~/.claude/skills/alps-to-be-bear/` の `SKILL.md` / `decision-matrix.md` には「Cascade Diamond の成立条件 (apex が `#[Input]` 不要) と Linear Cascade への縮退ルール」追記が必要。**次は (1) Complex Convergence (`insurance-claim` のような多分岐 + 多経路収束)、(2) admin 系の本番移植 (10 件規模) で skill を bake、(3) `~/.claude/skills/alps-to-be-bear/` の plugin marketplace 昇格判断**
+- **Pilot 3 完了** (`BeMart`, `doConfirmOrder` 1 件): **Branching** パターンの参照実装 + **Cascade Diamond 不成立の構造的発見**。`ConfirmOrderInput → PreOrderResolved (Being) → PurchaseFlowApplied (Being) → PaymentVerified (Being) → OrderConfirming (Being, 分岐点) → OrderConfirmed | OrderConfirmFailed (Branching Final)` の **4 段 Linear Cascade + 1 段 Branching**。`OrderConfirming` の `public PaymentSuccessCase|PaymentFailureCase $being` 型 discriminator により `BecomingType::match()` が Final を選択 (be-patterns `medical-triage` デモ準拠)。composer test 27/27 pass (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 新規 6), 79 assertions, **0 notices** (Pilot 3 で 14 件の Semantic 変数を新規登録: `PreOrderId` / `PaymentMethodId` / `Subtotal` / `Tax` / `Total` / `Discount` / `Charge` / `DeliveryFee`(既存) / `AddPoint` / `UsePoint` / `PaymentTotal` / `Order` / `Totals` / `Result` / `Being`)。改訂履歴: 初版 Cascade Diamond 想定で `OrderConfirming` を apex (`#[Inject] PreOrderResolved $preOrder` 等) → Ray.Di `NoHint($preOrderId)` で全テスト失敗 → `#[Input]` 依存 Being を `#[Inject]` 経由でインスタンス化できないと判明 (Ray.Di は `#[Input]` 属性を理解しない) → 4 段 Linear Cascade に再構成。**構造的発見**: Cascade Diamond は「apex Moment が `#[Input]` を一切持たない」場合のみ成立する。EC-CUBE の典型的フロー (Input scalar から DB 引き当て → 並列に Service 呼び出し) は全て Linear Cascade に縮退する。Pilot 3 の Branching パターンは clean に動作し、be-framework の Branching 機構 (`BecomingType::match()` による型ベース選択) は実用検証済み。Skill 配置: `~/.claude/skills/alps-to-be-bear/` の `SKILL.md` / `decision-matrix.md` には「Cascade Diamond の成立条件 (apex が `#[Input]` 不要) と Linear Cascade への縮退ルール」追記が必要
+- **Pilot 4 完了** (`BeMart`, `doRegisterCustomer` 1 件): **Multi-Reason Being** パターンの参照実装。`RegisterCustomerInput → CustomerRegistering (Being: 4 つの独立 Reason `EmailUniquenessChecker` / `CustomerIdGenerator` / `PasswordHasher` / `CustomerInitialPoint` を並列 `#[Inject]`) → CustomerRegistered (Final: 永続化のみ)` の **1 段 Multi-Reason Being + Final**。Diamond と区別される構造的特徴は「各 Reason の結果が他の Reason の入力にならない (互いに独立)」こと。Pilot 4 では fail-fast query (uniqueness check) + 3 つの pure derivation (id / hash / point) が同じ Being に同居しても Diamond にはならず、blog-publishing デモのバリエーションとして成立した。composer test 39/39 pass, 111 assertions, **0 notices** (Pilot 4 で 19 件の Semantic 変数を新規登録: client-input 15 件 `Email` / `Password` / `Name01` / `Name02` / `Kana01` / `Kana02` / `CompanyName` / `PhoneNumber` / `PostalCode` / `Pref` / `Addr01` / `Addr02` / `Birth` / `Sex` / `Job` + server-derived 4 件 `CustomerId` / `PasswordHash` / `InitialPoint` / `CustomerStatus`)。スコープ決定: email 検証 OFF 経路のみ (`customerStatus = 2` 固定)。検証 ON は将来の Branching pilot に譲る (Branching 機構自体は Pilot 3 で検証済み)。security レビュー反映: plaintext password を Being の non-public parameter + `#[SensitiveParameter]` で受ける (stack trace redact + 下流 public surface 不在) / `CustomerId` は `bin2hex(random_bytes(16))` (128-bit CSPRNG)。**次は (1) Complex Convergence (`insurance-claim` のような多分岐 + 多経路収束)、(2) admin 系の本番移植 (10 件規模) で skill を bake、(3) `~/.claude/skills/alps-to-be-bear/` の plugin marketplace 昇格判断**
 
 ---
 
@@ -346,3 +347,98 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 - Be domain LoC (Pilot 1+2+3 累計): 約 1670 src + 約 514 tests (Pilot 1 = 576 + 20、Pilot 2 = 620 + 250、Pilot 3 = 469 + 132、新規 Semantic / Reason / Exception 共有部分は重複カウントなし)
 - 採用パターン: Linear/Minimal (Pilot 1), Cascade (Pilot 2), Linear Cascade + Branching (Pilot 3)
 - 未検証パターン: Multi-Reason Being, Complex Convergence (`insurance-claim` 系), 真の Cascade Diamond (apex が Input 不要なケース; EC-CUBE の通常 transition では出現しない可能性大)
+
+---
+
+## Pilot 4 — `doRegisterCustomer` (Multi-Reason Being)
+
+**目的:** Multi-Reason Being パターン (be-patterns `blog-publishing` 系) の参照実装。1 つの Being が複数の独立な `#[Inject]` Reason を持ち、互いに依存しない server-derived scalar を並列生成する構造の動作確認。
+
+| 項目 | 値 |
+|---|---|
+| リポジトリ | `/Users/akihito/git/ec-cube-alps` |
+| パターン | **Multi-Reason Being (1 段) + Final (永続化)**。`RegisterCustomerInput → CustomerRegistering (Being: 4 つの独立 Reason 並列起動) → CustomerRegistered (Final: 永続化のみ)`。Being は (1) `EmailUniquenessCheckerInterface` (uniqueness fail-fast), (2) `CustomerIdGeneratorInterface` (32-char opaque hex), (3) `PasswordHasherInterface` (bcrypt), (4) `CustomerInitialPointInterface` (welcome bonus) を `#[Inject]` で並列に呼ぶ。各 Reason の結果 (customerId / passwordHash / initialPoint / customerStatus=2 固定) は Being 自身の readonly プロパティに格納され、`#[Input]` 経由で Final に forward |
+| テスト | 39 passed (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 既存 6 + Pilot 4 新規 12), 111 assertions, **0 notices** (Pilot 4 で 19 件の Semantic 変数を新規登録: client-input 15 件 `Email` / `Password` / `Name01` / `Name02` / `Kana01` / `Kana02` / `CompanyName` / `PhoneNumber` / `PostalCode` / `Pref` / `Addr01` / `Addr02` / `Birth` / `Sex` / `Job` + server-derived 4 件 `CustomerId` / `PasswordHash` / `InitialPoint` / `CustomerStatus` を MergedCart パターン (空 `#[Validate]` body) で登録) |
+| Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (Multi-Reason Being テンプレ追加が必要) |
+| スコープ決定 | **email 検証 OFF 経路のみ実装** (`customerStatus = 2` 固定)。検証 ON (provisional → email confirm → activate) は将来の Branching pilot で実装。理由: Branching 機構自体は Pilot 3 で検証済みのため、ここで再検証しても新たな知見は得られない |
+
+**改訂履歴 (2026-05-18):**
+
+1. ALPS 分析 → `doRegisterCustomer` (4 必須フィールド) + `CustomerRegistration` container (11 オプショナル) を Input にマップ。`CustomerRegistrationComplete.descriptor` = `[#goTop]` のみ → `#[Link(rel: 'goTop', ...)]` 1 件
+2. パターン判定: 4 つの Reason が互いに独立で並列実行可能 → **Multi-Reason Being** (blog-publishing 準拠)。Diamond ではない (各 Reason の結果が他の Reason に流れない)
+3. domain-review subagent → pass (findings 7 / blocking 0)。指摘で実装に反映: (a) `InitialPoint` / `CustomerStatus` の docblock 主張をバリデータと整合させる, (b) `FakeCustomerStorage::getByEmail()` を追加してテストの Reflection を除去
+4. application-review subagent → pass (findings 0 / blocking 0)
+5. security-review subagent → pass (findings 7 / blocking 0)。指摘で実装に反映: `CustomerRegistering::__construct` の `$password` を `public` から外し `#[SensitiveParameter]` 付与。plaintext が Being の public surface に露出せず、stack trace にも redact される
+
+### Pilot 4 完了の判定基準 — 12 指標
+
+| # | 指標 | Target | Actual | Note |
+|---|---|---|---|---|
+| 1 | composer test 全 pass | 100% | 100% | 39/39 pass (Pilot 1+2+3 既存 27 + Pilot 4 Domain 7 + Resource 5) |
+| 2 | 意味ログ被覆 | 100% | 100% | DevBecoming が Input → Being → Final 全体を `var/log/bemart.json` に自動記録 |
+| 3 | i18n 例外メッセージ | 100% | 100% | 全 DomainException (`EmailAlreadyRegisteredException` + Semantic format 系 15 件) に `#[Message(['en'=>..., 'ja'=>...])]` |
+| 4 | 自己証明 assert | ≥1 | ≥1 | `Resource/Page/Entry.php:78` で `assert($final instanceof CustomerRegistered)`。Being 内では `EmailUniquenessCheckerInterface::ensureUnique()` が「重複なし」を自己証明 (例外で否定証明) |
+| 5 | Semantic クラス数 | 19 | 19 | client-input 15 (`Email` / `Password` / `Name01` / `Name02` / `Kana01` / `Kana02` / `CompanyName` / `PhoneNumber` / `PostalCode` / `Pref` / `Addr01` / `Addr02` / `Birth` / `Sex` / `Job`) + server-derived 4 (`CustomerId` / `PasswordHash` / `InitialPoint` / `CustomerStatus`)。server-derived は空 `#[Validate]` body (composite Semantic と同じ「型断定のみ。値の契約は Service」パターン) |
+| 6 | Reason 層共有ストア | Singleton 必須 | 該当 | `FakeCustomerStorage` を `Scope::SINGLETON` で bind (`AppModule:80`)。`FakeCustomerCommand` (write) と `FakeEmailUniquenessChecker` (read) が同一 storage を参照することで、Command の書き込みが同一 request 内で uniqueness check に見える |
+| 7 | client-input / server-fetched 分離 | 2 シート | 2 シート | client-input (15 フィールド: email / password / name01 / name02 / 11 オプショナル) と server-derived (customerId / passwordHash / initialPoint / customerStatus) を Being 内で分離。Being の public surface に両方並ぶが、Final に流れる際は `passwordHash` のみ (plaintext password は `#[SensitiveParameter]` で promoted から外し、Being の public プロパティから除外) |
+| 8 | LoC (Pilot 4 新規分) | 実測のみ | src 約 540 + tests 約 200 | Input 1 件 (54 LoC) + Being 1 件 (87 LoC) + Final 1 件 (97 LoC) + Resource 1 件 (112 LoC) + Semantic 19 件 (約 250 LoC 合計) + Exception 16 件 (約 200 LoC 合計) + Reason Entity 1 件 (40 LoC) + Reason Query/Service 12 件 (約 250 LoC 合計) + Test 200 LoC |
+| 9 | Multi-Reason Being テスト | pass | pass | `testHappyPathPersistsAndReturnsServerScalars` で Being の 4 つの Reason 並列実行 (uniqueness OK + id生成 + hash + point) を統合検証 |
+| 10 | 重複 email rejection | pass | pass | `testDuplicateEmailIsRejected` (Domain) / `testOnPostDuplicateEmailReturns409` (Resource) で `EmailAlreadyRegisteredException` → HTTP 409 マッピングを検証。alice@example.com は seed fixture に存在 |
+| 11 | password hash 非露出 + 永続側 round-trip | pass | pass | `testPasswordIsHashedAndNotExposed`: `property_exists(CustomerRegistered::class, 'passwordHash') === false` で Final の surface に hash 不在を確認。`password_verify($plain, $persisted->passwordHash)` で永続側の round-trip も検証 |
+| 12 | ALPS 整合性 (Rule 7) | 手動チェック合格 | 合格 | Final (`CustomerRegistered`) の public プロパティ (customerId / email / name01 / name02 / initialPoint / customerStatus) は `CustomerRegistrationComplete` container の状態と整合。Resource の `#[Link(rel: 'goTop')]` は `CustomerRegistrationComplete.descriptor = [#goTop]` に完全一致 |
+
+### Pilot 4 で発見された skill gap
+
+| ID | 内容 | 昇格先 |
+|---|---|---|
+| G-11 | **Multi-Reason Being の構造的特徴** — Diamond と区別するための判定基準: 「各 Reason の結果が他の Reason の入力にならず、互いに独立に並列実行できる」場合は Multi-Reason Being (be-patterns blog-publishing)、結果が他の Reason に流れる場合は Diamond/Cascade。Pilot 4 では (uniqueness check / id 生成 / password hash / initial point) が完全独立 | `SKILL.md` の「パターン判定フロー」に Multi-Reason Being の判定基準セクション追加 (TODO) |
+| G-12 | **Multi-Reason Being では Reason の種類が混在しても良い** — Pilot 4 では「fail-fast query」(EmailUniquenessChecker) + 「pure derivation」(Hash / IdGen / PointService) が同じ Being に同居。blog-publishing の元パターンは pure derivation のみだが、guard を 1 つ混ぜても Diamond にはならない | `SKILL.md` の Multi-Reason Being テンプレに「guard + pure derivation の混在を許容」明記 (TODO) |
+| G-13 | **plaintext password の `#[SensitiveParameter]` + 非 public 化** — 暗号化されるべき入力は Being の `__construct` パラメータで受け取り内部で hash 化、`public` promoted property にしない (`#[Input] #[SensitiveParameter] string $password` の形)。be-framework の cascade は public プロパティだけを下流に流すので、非 public にすれば自動的に Final に到達しない | `SKILL.md` の「機密データ取り扱い」セクション新規追加 (TODO) |
+
+### Pilot 4 で更新したファイル
+
+**`src/Module/AppModule.php`:**
+
+- Pilot 4 用 6 件の bind 追加 (`FakeCustomerStorage` Singleton, `EmailUniquenessCheckerInterface`, `CustomerCommandInterface`, `PasswordHasherInterface`, `CustomerIdGeneratorInterface`, `CustomerInitialPointInterface`)
+
+**Pilot 4 で新規追加した Be 層 (`be/src/`):**
+
+- `Input/`: `RegisterCustomerInput.php`
+- `Being/`: `CustomerRegistering.php`
+- `Final/`: `CustomerRegistered.php`
+- `Reason/Entity/`: `CustomerEntity.php`
+- `Reason/Query/`: `CustomerCommandInterface.php`, `EmailUniquenessCheckerInterface.php`, `FakeCustomerStorage.php` (Singleton), `FakeCustomerCommand.php`, `FakeEmailUniquenessChecker.php`
+- `Reason/Service/`: `PasswordHasherInterface.php` + `FakePasswordHasher.php`, `CustomerIdGeneratorInterface.php` + `FakeCustomerIdGenerator.php`, `CustomerInitialPointInterface.php` + `FakeCustomerInitialPoint.php`
+- `Semantic/`: 19 件 (指標 #5)
+- `Exception/`: 16 件 (15 FormatException + `EmailAlreadyRegisteredException`)
+- `var/fake/customers.json` — 3 件の seed (alice / bob / carol。passwordHash は文法上 valid だが `password_verify` を通らないダミー文字列。`$comment` でダミーである旨を明記)
+
+**Pilot 4 で新規追加した BEAR 層:**
+
+- `src/Resource/Page/Entry.php` — `page://self/entry` の `onPost` (15 引数: 4 required + 11 nullable)
+- `tests/Resource/EntryResourceTest.php` — 5 tests (happy / optional fields / 409 / 400 invalid email / 400 empty password)
+- `be/tests/Domain/CustomerRegisteredTest.php` — 7 tests (happy / optional fields / hash 非露出 + round-trip / duplicate / invalid email / empty password / empty name01)
+
+### Pilot 4 の security 観点 (security-review findings から記録)
+
+- **Pilot スコープでの既知トレードオフ:**
+  - email 検証 OFF 即 Active (`customerStatus = 2`) → アドレス squat 可能 (将来の Branching pilot で検証 ON 経路実装で解消)
+  - 重複 email 409 + body `"The email is already registered."` は user enumeration oracle。検証 ON 経路では「silent 成功 + メール通知で重複を伝える」設計に切替予定
+  - `AppModule` が `FakeCustomerStorage` を無条件 bind。本番デプロイ前に env-gated `ProdModule` 切替が必要 (Pilot 1-3 と同根の Phase B 案件)
+- **Pilot 4 で実装した security guard:**
+  - plaintext password は Being の non-public parameter + `#[SensitiveParameter]` → stack trace redact + 下流 public surface 不在
+  - `CustomerId` は `bin2hex(random_bytes(16))` (128-bit CSPRNG opaque id) で EC-CUBE の sequential bigint と違って予測不能
+  - Final (`CustomerRegistered`) の public surface は self-registration projection のみ (customerId / email / name01 / name02 / initialPoint / customerStatus)。`passwordHash` および 11 のオプショナル PII (kana / 住所 / 電話 / 生年月日 / 性別 / 職業 / 会社名) は永続側にのみ保持し、レスポンス body には含めない
+- **Phase B (Pilot 終了後) に着手すべき項目:** CSRF / rate-limit / `bear/security` + Psalm taint / env-gated `ProdModule` / 検証 ON 経路 Branching
+
+### Pilot 4 の参照ドキュメント
+
+- **`~/git/be-patterns/demos/blog-publishing/`** — Multi-Reason Being の正解パターン (Pilot 4 設計の参照元)
+- **`be/docs/be-adoption-evaluation.md`** — Pilot 1+2+3 の採用評価 (Pilot 4 で Multi-Reason Being を採用パターンに追加予定; TODO)
+
+### Pilot 1+2+3+4 を通じた集計
+
+- composer test: 39/39 pass, 111 assertions, **0 notices**
+- Be domain LoC (累計): 約 2210 src + 約 714 tests
+- 採用パターン: Linear/Minimal (Pilot 1), Cascade (Pilot 2), Linear Cascade + Branching (Pilot 3), **Multi-Reason Being (Pilot 4)**
+- 未検証パターン: Complex Convergence (`insurance-claim` 系), 真の Cascade Diamond (apex が Input 不要なケース; EC-CUBE の通常 transition では出現しない可能性大)
