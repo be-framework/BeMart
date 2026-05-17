@@ -16,10 +16,16 @@ use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductClassQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductQuery;
+use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakePaymentMethodFactory;
+use MyVendor\BeMart\Be\Reason\Service\FakePurchaseFlow;
+use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
+use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use Ray\Di\Scope;
 
 final class AppModule extends AbstractAppModule
@@ -54,5 +60,10 @@ final class AppModule extends AbstractAppModule
         $this->bind(FakeCartStorage::class)->in(Scope::SINGLETON);
         $this->bind(CartQueryInterface::class)->to(FakeCartQuery::class);
         $this->bind(CartCommandInterface::class)->to(FakeCartCommand::class);
+
+        // Reason (Pilot 3 doConfirmOrder): Order Query + PurchaseFlow + PaymentMethod factory fakes.
+        $this->bind(OrderQueryInterface::class)->to(FakeOrderQuery::class)->in(Scope::SINGLETON);
+        $this->bind(PurchaseFlowInterface::class)->to(FakePurchaseFlow::class);
+        $this->bind(PaymentMethodFactoryInterface::class)->to(FakePaymentMethodFactory::class);
     }
 }
