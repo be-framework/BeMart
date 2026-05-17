@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use MyVendor\BeMart\Be\Exception\OutOfStockException;
-use MyVendor\BeMart\Be\Exception\ProductClassNotFoundException;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
 use MyVendor\BeMart\Be\Reason\Entity\ProductClassEntity;
@@ -18,29 +16,34 @@ use Ray\InputQuery\Attribute\Input;
 use function array_map;
 use function array_sum;
 use function min;
-use function sprintf;
 
 /**
- * Cart item added — terminal state of the doAddCartItem transition.
+ * Cart item added — Stage 2 Final, terminal state of the doAddCartItem cascade.
  *
- * Pattern: Linear/Minimal (Input → Final). NOT a Cascade Diamond.
- * The five labeled blocks below are sequential procedural steps within a
- * single constructor, not separate Being classes converging via #[Reason].
- * A true Cascade Diamond reference is reserved for a future pilot whose
- * domain naturally splits into independent Reasons (e.g. doCreateOrder
- * converging Cart + Customer + Payment).
+ * Pattern: Cascade metamorphosis with Reason convergence in the Final.
  *
- * Sequential blocks:
- *   client-input (productCode, quantity)
- *     [1] StockCheck         — cap by stock when !stockUnlimited
- *     [2] SaleLimitCheck     — cap by saleLimit
- *     [3] SaleTypeResolution — cartKey = sessionPrefix_saleTypeId
- *     [4] CartItemMergePrice — same productCode → quantity sum
- *     [5] DeliveryFeeAccumulation
+ *   AddCartItemInput
+ *     → QuantityAdjusted (Being) — Stage 1: quantity caps + cartKey resolution
+ *     → CartItemAdded (Final)    — Stage 2: cart context + merge + delivery + persistence
  *
- * Existence of this object proves all five blocks passed. OutOfStock and
- * ProductClassNotFound are the only hard failures; quantity overflow is
- * silently capped (EC-CUBE convention).
+ * Stage 2 converges three independent Reasons via #[Inject]:
+ *
+ *   - CartQuery          — existing cart lookup
+ *   - CartCommand        — persistence
+ *   - ProductClassQuery  — per-cart-item delivery fee lookup across merged items
+ *
+ * Existence of this object proves Stage 1 succeeded (ProductClass found,
+ * stock checked, quantity capped) and Stage 2 completed (cart merged and
+ * saved). Quantity overflow is silently capped (EC-CUBE convention); only
+ * OutOfStock and ProductClassNotFound are hard failures, both raised in
+ * Stage 1.
+ *
+ * Note: a "true" Cascade Diamond (multiple parallel Moments converging into
+ * a Final, as in be-patterns/order-processing) is reserved for a future
+ * pilot whose domain naturally splits into independent parallel reasons
+ * (e.g., doCreateOrder converging Cart + Customer + Payment in parallel).
+ * doAddCartItem is inherently sequential — quantity must be resolved before
+ * the cart can be merged — so a Being chain is the honest shape here.
  */
 final readonly class CartItemAdded
 {
@@ -55,71 +58,54 @@ final readonly class CartItemAdded
 
     public function __construct(
         #[Input] string $productCode,
-        #[Input] int $quantity,
-        #[Input] string $sessionPrefix,
-        #[Inject] ProductClassQueryInterface $productClassQuery,
+        #[Input] int $requestedQuantity,
+        #[Input] int $adjustedQuantity,
+        #[Input] string $cartKey,
+        #[Input] int $unitPrice,
+        #[Input] int $saleTypeId,
+        #[Input] string $saleTypeName,
+        #[Input] bool $stockUnlimited,
+        #[Input] int|null $stock,
+        #[Input] int|null $saleLimit,
         #[Inject] CartQueryInterface $cartQuery,
         #[Inject] CartCommandInterface $cartCommand,
+        #[Inject] ProductClassQueryInterface $productClassQuery,
     ) {
-        $this->requestedQuantity = $quantity;
         $this->productCode = $productCode;
+        $this->requestedQuantity = $requestedQuantity;
+        $this->adjustedQuantity = $adjustedQuantity;
+        $this->cartKey = $cartKey;
+        $this->unitPrice = $unitPrice;
+        $this->saleTypeName = $saleTypeName;
 
-        // Reason 1 — StockCheck: fetch ProductClass and cap quantity.
-        $productClass = $productClassQuery->item($productCode);
-        if (! $productClass instanceof ProductClassEntity) {
-            throw new ProductClassNotFoundException();
-        }
-
-        if (! $productClass->stockUnlimited && $productClass->stock === 0) {
-            throw new OutOfStockException();
-        }
-
-        $adjusted = $quantity;
-        if (! $productClass->stockUnlimited && $productClass->stock !== null) {
-            $adjusted = min($adjusted, $productClass->stock);
-        }
-
-        // Reason 2 — SaleLimitCheck: per-customer purchase cap.
-        if ($productClass->saleLimit !== null) {
-            $adjusted = min($adjusted, $productClass->saleLimit);
-        }
-
-        $this->adjustedQuantity = $adjusted;
-        $this->unitPrice = $productClass->price02;
-        $this->saleTypeName = $productClass->saleTypeName;
-
-        // Reason 3 — SaleTypeResolution: per-saleType cart partition.
-        $this->cartKey = sprintf('%s_%d', $sessionPrefix, $productClass->saleTypeId);
-
-        $existingCart = $cartQuery->byCartKey($this->cartKey)
+        $existingCart = $cartQuery->byCartKey($cartKey)
             ?? new CartEntity(
-                cartKey: $this->cartKey,
-                saleTypeId: $productClass->saleTypeId,
-                saleTypeName: $productClass->saleTypeName,
+                cartKey: $cartKey,
+                saleTypeId: $saleTypeId,
+                saleTypeName: $saleTypeName,
                 items: [],
                 totalPrice: 0,
                 deliveryFeeTotal: 0,
                 preOrderId: '',
             );
 
-        // Reason 5 — CartItemMergePrice: same productCode → sum, capped again.
         $mergedItems = [];
         $merged = false;
         foreach ($existingCart->items as $item) {
             if ($item->productCode === $productCode) {
-                $newQty = $item->quantity + $adjusted;
-                if (! $productClass->stockUnlimited && $productClass->stock !== null) {
-                    $newQty = min($newQty, $productClass->stock);
+                $newQty = $item->quantity + $adjustedQuantity;
+                if (! $stockUnlimited && $stock !== null) {
+                    $newQty = min($newQty, $stock);
                 }
 
-                if ($productClass->saleLimit !== null) {
-                    $newQty = min($newQty, $productClass->saleLimit);
+                if ($saleLimit !== null) {
+                    $newQty = min($newQty, $saleLimit);
                 }
 
                 $mergedItems[] = new CartItemEntity(
                     productCode: $item->productCode,
                     quantity: $newQty,
-                    price: $productClass->price02,
+                    price: $unitPrice,
                 );
                 $merged = true;
                 continue;
@@ -131,17 +117,16 @@ final readonly class CartItemAdded
         if (! $merged) {
             $mergedItems[] = new CartItemEntity(
                 productCode: $productCode,
-                quantity: $adjusted,
-                price: $productClass->price02,
+                quantity: $adjustedQuantity,
+                price: $unitPrice,
             );
         }
 
-        $totalPrice = (int) array_sum(
+        $this->totalPrice = (int) array_sum(
             array_map(static fn (CartItemEntity $i): int => $i->price * $i->quantity, $mergedItems),
         );
 
-        // Reason 4 — DeliveryFeeAccumulation: per-item shipping × total quantity in cart.
-        $deliveryFeeTotal = (int) array_sum(
+        $this->deliveryFeeTotal = (int) array_sum(
             array_map(
                 static function (CartItemEntity $i) use ($productClassQuery): int {
                     $pc = $productClassQuery->item($i->productCode);
@@ -152,16 +137,13 @@ final readonly class CartItemAdded
             ),
         );
 
-        $this->totalPrice = $totalPrice;
-        $this->deliveryFeeTotal = $deliveryFeeTotal;
-
         $cartCommand->save(new CartEntity(
             cartKey: $existingCart->cartKey,
             saleTypeId: $existingCart->saleTypeId,
             saleTypeName: $existingCart->saleTypeName,
             items: $mergedItems,
-            totalPrice: $totalPrice,
-            deliveryFeeTotal: $deliveryFeeTotal,
+            totalPrice: $this->totalPrice,
+            deliveryFeeTotal: $this->deliveryFeeTotal,
             preOrderId: $existingCart->preOrderId,
         ));
 
