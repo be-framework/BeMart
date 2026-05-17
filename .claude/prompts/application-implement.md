@@ -111,12 +111,12 @@ ALPS の `src-router` タグが付いている descriptor は `page://`、それ
 **page:// リソースの例**:
 
 ```php
-namespace MyCompany\EcCube\Resource\Page;
+namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
-use MyCompany\EcCube\Input\GetProductInput;
-use MyCompany\EcCube\Input\CreateProductInput;
+use MyVendor\BeMart\Be\Input\GetProductInput;
+use MyVendor\BeMart\Be\Input\CreateProductInput;
 
 final class Product extends ResourceObject
 {

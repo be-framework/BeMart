@@ -12,6 +12,49 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 
 ---
 
+## プロジェクト名と monorepo レイアウト (2026-05-17)
+
+旧 `MyVendor.EcCube` (移植 pilot 用の作業 repo) を **BeMart** へ改称し、ALPS repo (`ec-cube-alps`) 内の monorepo に統合した。
+
+- **製品コンセプト:** BeMart = AI 駆動の EC-CUBE → BEAR.Sunday + Be Framework 全置換プロダクト。「Be (変容による存在) で生まれ変わる Mart」
+- **改称理由:** (a) 旧名は EC-CUBE 商標を連想させる、(b) Pilot 1+2 完了で「単発の参照実装」から「製品候補」へ昇格した
+
+### レイアウト
+
+```
+ec-cube-alps/                            ← BEAR.Sunday アプリ (top)
+├── composer.json                        ← my-vendor/be-mart (path repo で be-mart-be を ref)
+├── phpunit.xml                          ← bemart + bemart-be 2 testsuite
+├── src/
+│   ├── Resource/Page/...                ← MyVendor\BeMart\Resource\Page
+│   └── Module/                          ← MyVendor\BeMart\Module (AppModule + DevBecomingProvider)
+├── tests/Resource/                      ← MyVendor\BeMart\Tests\Resource
+├── bin/, public/                        ← BEAR 実行 entry
+├── var/log/, var/tmp/                   ← BEAR runtime data
+├── alps.json, docs/, ...                ← ALPS 公開成果物 (従来通り)
+└── vendor-be/MyVendor.BeMart.Be/        ← Be ドメインライブラリ
+    ├── composer.json                    ← my-vendor/be-mart-be (library)
+    ├── src/{Input,Final,Semantic,Exception,Becoming,Reason}/   ← MyVendor\BeMart\Be\*
+    ├── tests/Domain/                    ← MyVendor\BeMart\Be\Tests\Domain
+    └── var/{fake,schema,analysis}/      ← Be domain fixture
+```
+
+namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain)。BEAR は Be に片方向依存。Be は framework-agnostic を保つ (DI で path/Becoming は inject)。
+
+### 開発と将来の packagist 切り出し
+
+- 開発中は composer の `repositories: [{type: "path", url: "vendor-be/MyVendor.BeMart.Be", symlink: true}]` で `vendor/my-vendor/be-mart-be` に symlink。修正は即座に top から見える
+- packagist 公開時は `git subtree split --prefix=vendor-be/MyVendor.BeMart.Be -b release/be` 等で別 repo に分離し、`my-vendor/be-mart-be` を通常依存に切り替え
+- vendor-be 単体テストは現状 top の AppModule に依存 (Domain test が `new AppModule(new Meta('MyVendor\\BeMart', 'test'))`)。packagist 切り出し時は Be ライブラリ独自の test bootstrap を作る必要あり
+
+### Pilot 1/2 履歴の参照先
+
+- **旧パス:** `~/git/MyVendor.EcCube/` (削除済み)
+- **新パス:** `~/git/ec-cube-alps/` (BEAR top) + `vendor-be/MyVendor.BeMart.Be/` (Be)
+- 以下 Pilot 1/2 セクションの「リポジトリ」欄も新パス前提で読む
+
+---
+
 ## 完了済み作業
 
 ### Ontology (276 semantic descriptors)
@@ -97,7 +140,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 
 | 項目 | 値 |
 |---|---|
-| リポジトリ | `~/git/MyVendor.EcCube` |
+| リポジトリ | `~/git/ec-cube-alps` |
 | スコープ | Product container を ProductClass 平坦化形まで縮小 (`#[Embed]` による子リソース合成は別 Phase)。URL param は `productCode` (schema.org/sku 由来、ユニーク性) |
 | テスト | 8 passed (Domain 5 + Resource 3), 20 assertions |
 
@@ -107,7 +150,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 |---|---|---|---|---|
 | 1 | Semantic クラス数 | 5 | 4 | ProductCode, ProductName, Price02, Stock。5 件目 (StockUnlimited 等) は Pilot スコープ外 |
 | 2 | 自己証明で省略できた単体テスト | 5 | 4 | Semantic 型保証分を Semantic クラスごとに 1 件省略。Final 存在 = 検証済みを ProductResourceTest が間接確認 |
-| 3 | 意味ログ自動カバレッジ | 100% | 100% | DevBecoming が Becoming chain 全体 (Input prop / Final inject / close prop) を `var/log/ec-cube.json` に自動記録 |
+| 3 | 意味ログ自動カバレッジ | 100% | 100% | DevBecoming が Becoming chain 全体 (Input prop / Final inject / close prop) を `var/log/bemart.json` に自動記録 |
 | 4 | LoC (Be+BEAR) | 実測のみ | 576 | BEAR-only 比較は推定値とせず実測のみ記録。BEAR-only 版は未実装 |
 | 5 | i18n 例外メッセージ | 100% | 100% | 6/6 例外に `#[Message(['en'=>..., 'ja'=>...])]` 付与 |
 | 6 | 自己証明 assert | ≥1 | 1 | `Resource/Page/Product.php:44` で `assert($final instanceof ProductFetched)` |
@@ -134,7 +177,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 
 | 項目 | 値 |
 |---|---|
-| リポジトリ | `~/git/MyVendor.EcCube` |
+| リポジトリ | `~/git/ec-cube-alps` |
 | スコープ | `doAddCartItem` を Cascade Diamond として実装。Stock 検査 → SaleLimit 検査 → SaleType 判定 → Delivery 計算 → CartItem merge-Price の 5 cascade phase を 1 つの Final (`CartItemAdded`) に集約 |
 | テスト | 21 passed (Pilot 1 既存 8 + Pilot 2 新規 13), 51 assertions |
 | Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (local dogfooding。Pilot 3 + 本番移植 10 件後に `be-framework-skills` plugin marketplace へ promote 候補) |
@@ -144,7 +187,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 | # | 指標 | Target | Actual | Note |
 |---|---|---|---|---|
 | 1 | composer test 全 pass | 100% | 100% | 21/21 pass (Pilot 1 既存 8 + Pilot 2 Domain 9 + Resource 4) |
-| 2 | 意味ログ被覆 | 100% | 100% | `var/log/ec-cube.json` に Becoming chain 全体が JSON で記録 |
+| 2 | 意味ログ被覆 | 100% | 100% | `var/log/bemart.json` に Becoming chain 全体が JSON で記録 |
 | 3 | i18n 例外メッセージ | 100% | 100% | 全 DomainException (`QuantityFormatException`, `ProductClassNotFoundException`, `OutOfStockException`) に `#[Message(['en'=>..., 'ja'=>...])]` |
 | 4 | 自己証明 assert | ≥1 | ≥1 | Final 内: `assert($adjustedQuantity >= 1 && $adjustedQuantity <= $requestedQuantity)`。Resource 内: `assert($final instanceof CartItemAdded)` |
 | 5 | Semantic クラス数 | 1 | 1 | `Quantity` 1 件新規。`ProductCode` は Pilot 1 既存を再利用 |
@@ -219,5 +262,5 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 
 ### Pilot
 
-- **Pilot 1 完了** (`MyVendor.EcCube`, `goProduct` 1 件): Be + BEAR.Sunday 統合の初参照実装が動作確認済み。意味ログ自動記録 100%、i18n 例外 100%、composer test 8/8 pass。次は (1) workflow prompt 改修 PR で Pilot で発見した穴を埋める、(2) Pilot 2 として `doAddCartItem` (Diamond パターン) を別タスクで実装、(3) 残り 135 transition を `/run migrate <id>` で自走移植。詳細指標は「Pilot 1」セクション参照
-- **Pilot 2 完了** (`MyVendor.EcCube`, `doAddCartItem` 1 件): Cascade Diamond パターンの初参照実装。composer test 21/21 pass、12 指標すべて達成 (詳細: 「Pilot 2 完了の判定基準 — 12 指標」)。重要な不変条件の発見: cascade 段数 ≠ `#[Inject]` 数 (5 phase でも 3 Inject で十分)、Query/Command 共有時は Singleton ストア必須、Final = transition outcome envelope (container 状態属性 ⊆ ALPS / transition outcome は ALPS 不要)、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用。skill `~/.claude/skills/alps-to-be-bear/` に SKILL.md (Pilot 2 不変条件 #6-12 追記) + decision-matrix.md (§5 Rule 7 refine + §6 Pilot 2 専用チェック) として昇格済み。`.claude/prompts/domain-implement.md` と `application-implement.md` も Pilot 2 反映済み。**次は Pilot 3 として Branching パターン (例: `doCreateCustomer`) を別タスクで検証し、skill 完成度 70% を確認する想定**
+- **Pilot 1 完了** (`BeMart` (旧 MyVendor.EcCube), `goProduct` 1 件): Be + BEAR.Sunday 統合の初参照実装が動作確認済み。意味ログ自動記録 100%、i18n 例外 100%、composer test 8/8 pass。次は (1) workflow prompt 改修 PR で Pilot で発見した穴を埋める、(2) Pilot 2 として `doAddCartItem` (Diamond パターン) を別タスクで実装、(3) 残り 135 transition を `/run migrate <id>` で自走移植。詳細指標は「Pilot 1」セクション参照
+- **Pilot 2 完了** (`BeMart` (旧 MyVendor.EcCube), `doAddCartItem` 1 件): Cascade Diamond パターンの初参照実装。composer test 21/21 pass、12 指標すべて達成 (詳細: 「Pilot 2 完了の判定基準 — 12 指標」)。重要な不変条件の発見: cascade 段数 ≠ `#[Inject]` 数 (5 phase でも 3 Inject で十分)、Query/Command 共有時は Singleton ストア必須、Final = transition outcome envelope (container 状態属性 ⊆ ALPS / transition outcome は ALPS 不要)、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用。skill `~/.claude/skills/alps-to-be-bear/` に SKILL.md (Pilot 2 不変条件 #6-12 追記) + decision-matrix.md (§5 Rule 7 refine + §6 Pilot 2 専用チェック) として昇格済み。`.claude/prompts/domain-implement.md` と `application-implement.md` も Pilot 2 反映済み。**次は Pilot 3 として Branching パターン (例: `doCreateCustomer`) を別タスクで検証し、skill 完成度 70% を確認する想定**

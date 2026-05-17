@@ -1,0 +1,14 @@
+[
+  {
+    "productCode": "sample-001",
+    "productName": "サンプル商品 A",
+    "price02": 1200,
+    "stock": 50
+  },
+  {
+    "productCode": "sample-002",
+    "productName": "Sample Product B",
+    "price02": 9800,
+    "stock": null
+  }
+]
