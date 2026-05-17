@@ -13,17 +13,28 @@ use Be\Framework\Module\BeModule;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeCustomerCommand;
+use MyVendor\BeMart\Be\Reason\Query\FakeCustomerStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeEmailUniquenessChecker;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductClassQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductQuery;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeCustomerInitialPoint;
+use MyVendor\BeMart\Be\Reason\Service\FakePasswordHasher;
 use MyVendor\BeMart\Be\Reason\Service\FakePaymentMethodFactory;
 use MyVendor\BeMart\Be\Reason\Service\FakePurchaseFlow;
+use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use Ray\Di\Scope;
@@ -65,5 +76,16 @@ final class AppModule extends AbstractAppModule
         $this->bind(OrderQueryInterface::class)->to(FakeOrderQuery::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(FakePurchaseFlow::class);
         $this->bind(PaymentMethodFactoryInterface::class)->to(FakePaymentMethodFactory::class);
+
+        // Reason (Pilot 4 doRegisterCustomer): Customer Storage shared by
+        // EmailUniquenessChecker (read) and CustomerCommand (write). The
+        // storage MUST be a Singleton so the Command's writes are visible
+        // to the uniqueness check within the same request/test.
+        $this->bind(FakeCustomerStorage::class)->in(Scope::SINGLETON);
+        $this->bind(EmailUniquenessCheckerInterface::class)->to(FakeEmailUniquenessChecker::class);
+        $this->bind(CustomerCommandInterface::class)->to(FakeCustomerCommand::class);
+        $this->bind(PasswordHasherInterface::class)->to(FakePasswordHasher::class);
+        $this->bind(CustomerIdGeneratorInterface::class)->to(FakeCustomerIdGenerator::class);
+        $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class);
     }
 }
