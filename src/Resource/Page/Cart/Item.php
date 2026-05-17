@@ -1,0 +1,81 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Resource\Page\Cart;
+
+use BEAR\Resource\Annotation\Link;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\OutOfStockException;
+use MyVendor\BeMart\Be\Exception\ProductClassNotFoundException;
+use MyVendor\BeMart\Be\Final\CartItemAdded;
+use MyVendor\BeMart\Be\Input\AddCartItemInput;
+
+use function assert;
+use function sprintf;
+
+/**
+ * EC-CUBE doAddCartItem —カートに商品を追加。
+ *
+ * Resource is the HTTP entry point: it builds AddCartItemInput, hands it
+ * to Becoming, and projects the resulting CartItemAdded into the response
+ * body. Domain exceptions are mapped to HTTP codes per the integration
+ * contract (see application-implement.md §DomainException → Code mapping).
+ */
+class Item extends ResourceObject
+{
+    public function __construct(
+        private readonly BecomingInterface $becoming,
+    ) {
+    }
+
+    #[Link(rel: 'goCart', href: 'page://self/cart')]
+    #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
+    #[Link(rel: 'doCheckout', href: 'page://self/shopping', method: 'post')]
+    public function onPost(string $productCode, int $quantity): static
+    {
+        try {
+            $final = ($this->becoming)(new AddCartItemInput($productCode, $quantity));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = [
+                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
+                'productCode' => $productCode,
+                'quantity' => $quantity,
+            ];
+
+            return $this;
+        } catch (ProductClassNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
+
+            return $this;
+        } catch (OutOfStockException) {
+            // BEAR\Resource\Code lacks CONFLICT; use the integer literal.
+            $this->code = 409;
+            $this->body = ['message' => 'The product is out of stock.', 'productCode' => $productCode];
+
+            return $this;
+        }
+
+        assert($final instanceof CartItemAdded);
+
+        $this->code = Code::CREATED;
+        $this->headers['Location'] = sprintf('/cart?cartKey=%s', $final->cartKey);
+        $this->body = [
+            'cartKey' => $final->cartKey,
+            'productCode' => $final->productCode,
+            'requestedQuantity' => $final->requestedQuantity,
+            'adjustedQuantity' => $final->adjustedQuantity,
+            'unitPrice' => $final->unitPrice,
+            'totalPrice' => $final->totalPrice,
+            'deliveryFeeTotal' => $final->deliveryFeeTotal,
+            'saleTypeName' => $final->saleTypeName,
+        ];
+
+        return $this;
+    }
+}
