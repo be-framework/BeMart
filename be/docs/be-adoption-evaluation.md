@@ -2,9 +2,9 @@
 
 | メタ | 値 |
 |---|---|
-| 評価対象 | BeMart Pilot 1 (`goProduct`) + Pilot 2 (`doAddCartItem`) |
-| 評価時点 | 2026-05-17 |
-| 評価種別 | 中間評価 (Branching / Cascade Diamond は次 Pilot で検証) |
+| 評価対象 | BeMart Pilot 1 (`goProduct`) + Pilot 2 (`doAddCartItem`) + Pilot 3 (`doConfirmOrder`) |
+| 評価時点 | 2026-05-18 |
+| 評価種別 | 中間評価 (Branching 検証済み / Cascade Diamond は構造的に不成立と判明) |
 | 想定読者 | BEAR.Sunday + Service Object で書いている人。「なぜ Be を追加で入れるのか？」を疑問に思う立場 |
 | 関連 | [HANDOVER.md](../../HANDOVER.md) (工程ログ・指標達成記録) |
 
@@ -17,24 +17,24 @@ Be の効力は **2 層構造**:
 - **基層 (Pilot 1 から効く)** — Semantic 型保証によるテスト省略 / 意味ログ自動カバレッジ / i18n 例外標準化 / 自己証明 assert。**単純取得 transition でも採用に値する**。
 - **上層 (Pilot 2 で爆発)** — Cascade で「状態 = 型」 / `#[Input]` の by-name 連結 / Reason 層 IO 局所化 (mock 0 件) / 足し算 refactor / フレームワーク由来の anti-pattern 語彙。**状態変容 transition で本領発揮**。
 
-**中間結論**: 全 transition で Be を採用に値する。ただし上層効力は状態変容を伴うものでのみ発生し、単純取得では基層効力のみ。Branching と Cascade Diamond は次 Pilot で検証 (留保)。
+**中間結論**: 全 transition で Be を採用に値する。ただし上層効力は状態変容を伴うものでのみ発生し、単純取得では基層効力のみ。Pilot 3 で **Branching** (`#[Be([A, B])]` + 型付き discriminator) を検証済み、**Cascade Diamond** は be-framework の現行メカニクス上 apex が `#[Input]` を必要とする場合は不成立と判明 (Linear Cascade に縮退する。詳細 §6)。
 
 ---
 
 ## 1. データ点
 
-| 項目 | Pilot 1 (`goProduct`) | Pilot 2 (`doAddCartItem`) |
-|---|---|---|
-| Transition 種別 | safe (取得) | unsafe (状態変容 + 永続化) |
-| Be chain 段数 | 1 段 (Input → Final) | 3 段 (Input → Being → Being → Final) |
-| 関与 Reason 数 | 1 (`ProductQuery`) | 3 (`CartQuery` + `CartCommand` + `ProductClassQuery`) |
-| Semantic クラス数 | 4 (`ProductCode` / `ProductName` / `Price02` / `Stock`) | +1 (`Quantity`) を含めて 5 |
-| 型保証で省略できた単体テスト | 4 件 | (新規分のみ追加観察) |
-| 意味ログ自動カバレッジ | **100%** | **100%** |
-| i18n 例外メッセージ被覆 | 6/6 = **100%** | 全 DomainException で **100%** |
-| 自己証明 assert | 1 件 (`$final instanceof ProductFetched`) | 2 件 (Final 内数量範囲 + Resource 層 `instanceof CartItemAdded`) |
-| テスト | 8 pass / 20 assertions | 14 pass / 51 assertions、**mock 0 件** |
-| Refactor 履歴 | なし | Linear (1 段) → Cascade (3 段) |
+| 項目 | Pilot 1 (`goProduct`) | Pilot 2 (`doAddCartItem`) | Pilot 3 (`doConfirmOrder`) |
+|---|---|---|---|
+| Transition 種別 | safe (取得) | unsafe (状態変容 + 永続化) | unsafe (PaymentMethod::verify + Branching) |
+| Be chain 段数 | 1 段 (Input → Final) | 3 段 (Input → Being → Being → Final) | 5 段 (Input → 4 Beings → Branching Final) |
+| 関与 Reason 数 | 1 (`ProductQuery`) | 3 (`CartQuery` + `CartCommand` + `ProductClassQuery`) | 3 (`OrderQuery` + `PurchaseFlow` + `PaymentMethodFactory`) |
+| Semantic クラス数 | 4 (`ProductCode` / `ProductName` / `Price02` / `Stock`) | +1 (`Quantity`) を含めて 5 | +14 (`PreOrderId`, `PaymentMethodId`, `Subtotal`, `Tax`, `Charge`, `Discount`, `Total`, `PaymentTotal`, `AddPoint`, `UsePoint`, `Order`, `Totals`, `Result`, `Being`) |
+| 型保証で省略できた単体テスト | 4 件 | (新規分のみ追加観察) | 2 件 (`PreOrderId` / `PaymentMethodId` 形式) |
+| 意味ログ自動カバレッジ | **100%** | **100%** | **100%** |
+| i18n 例外メッセージ被覆 | 6/6 = **100%** | 全 DomainException で **100%** | 11/11 = **100%** (10 FormatException + `PreOrderNotFoundException`) |
+| 自己証明 assert | 1 件 (`$final instanceof ProductFetched`) | 2 件 (Final 内数量範囲 + Resource 層 `instanceof CartItemAdded`) | テストで `instanceof OrderConfirmed` / `instanceof OrderConfirmFailed` の Branching 判定 |
+| テスト | 8 pass / 20 assertions | 14 pass / 51 assertions、**mock 0 件** | 6 pass / 28 assertions (Pilot 3 単体)、**mock 0 件**、累計 27/27 |
+| Refactor 履歴 | なし | Linear (1 段) → Cascade (3 段) | Diamond 設計試行 → Be framework メカニクス上不成立判明 → Linear Cascade (4 段) に変更 (§6 詳細) |
 
 Pilot 2 の Cascade chain:
 
@@ -291,24 +291,89 @@ Pilot 2 でも Final 内に `assert($adjustedQuantity >= 1 && $adjustedQuantity 
 |---|---|---|
 | safe / 単純取得 | **◎ 採用** | 基層のみ (Semantic / 意味ログ / i18n / 自己証明) |
 | unsafe / idempotent で状態変容あり | **◎ 採用** | 基層 + 上層 (Cascade / by-name 連結 / Reason 局所化 / 足し算 refactor) |
-| Branching (分岐先で別 Final) | ◎ 期待大 | 基層 + 上層 + `#[Be([A, B])]` の効力 (次 Pilot で検証) |
-| Cascade Diamond (並列 Reason 収束) | ◎ 期待大 | 基層 + 上層 + 真の Diamond (次 Pilot で検証) |
+| Branching (分岐先で別 Final) | **◎ 採用** (Pilot 3 検証済み) | 基層 + 上層 + `#[Be([A, B])]` + 型付き discriminator (`PaymentSuccessCase\|PaymentFailureCase $being`) |
+| Cascade Diamond (並列 Reason 収束) | ✗ 構造的に不成立 | Linear Cascade に縮退 (§6 詳細) — apex が `#[Input]` を必要とする場合は Be framework の現行メカニクスで表現不能 |
 
 実運用での目安: **EC-CUBE 137 transition 全てで Be 採用候補**。ただし上層効力は unsafe 35 + idempotent 44 = 79 件で爆発し、safe 58 件では基層効力のみ。「採用するか」ではなく「どのレイヤーの効力を当てにするか」が transition ごとに変わる。
 
 ---
 
-## 6. 中間留保 — 次の Pilot で検証すべきこと
+## 6. Pilot 3 の知見 — Branching 検証済み・Cascade Diamond 構造的に不成立
 
-| 観察したい性質 | 候補 transition | Be パターン |
+### Branching は問題なく動く
+
+`#[Be([OrderConfirmed::class, OrderConfirmFailed::class])]` + `public PaymentSuccessCase|PaymentFailureCase $being` の典型形が想定どおりに機能した。Be framework の `BecomingType::match()` が `$being` の実型を見て、各 Final の `#[Input] PaymentSuccessCase $being` / `#[Input] PaymentFailureCase $being` のいずれにマッチするかで Final を自動選択する。
+
+Pilot 3 のテスト 6/6 で:
+
+- 支払い成功系 (CashOnDelivery / CreditCard) → `OrderConfirmed` に分岐
+- 支払い失敗系 (FakeVerifyFailing) → `OrderConfirmFailed` に分岐 (`errors: ['Card validation failed']` を Final が保持)
+- `instanceof` での Final 型判定で分岐が型レベルで証明される
+
+medical-triage demo の Case クラス委譲パターン (Final が `$being->totals` を読む) もそのまま流用でき、ALPS の `ShoppingConfirm` ↔ `ShoppingError` 状態分岐と 1:1 写像できた。
+
+### Cascade Diamond は be-framework の現行メカニクス上、apex が Input 依存だと作れない
+
+当初設計: `OrderConfirming` が `#[Inject] PreOrderResolved` / `#[Inject] PurchaseFlowApplied` / `#[Inject] PaymentVerified` で 3 つの Being を Moment として注入し、`PreOrderResolved` (apex) を 2 arm で共有する Diamond。
+
+実際: `composer test` で 6/6 失敗。エラーは `Ray\Di\Exception\NoHint: $preOrderId` at `PreOrderResolved.php:28`。
+
+#### 何が起きていたか
+
+Be framework の `BecomingArguments::be(object $current, string $becoming)` は:
+
+1. 上流 Being の `public` プロパティを `get_object_vars($current)` で取得。
+2. 次の Being のコンストラクタ引数を走査:
+   - `#[Input] $x` → 上流プロパティから `$x` を埋める
+   - `#[Inject] $service` → `$this->injector->getInstance($service::class)` を呼ぶ
+
+`#[Inject] PreOrderResolved $preOrder` を解決するため、Ray.Di が `Injector::getInstance(PreOrderResolved::class)` を実行する。**ここで Ray.Di は `BecomingArguments` を経由せず、純粋な DI 解決を試みる。** `PreOrderResolved::__construct(#[Input] string $preOrderId, ...)` の `$preOrderId` には DI bind が存在しないので `NoHint` で落ちる。
+
+すなわち: **`#[Input]` を持つ Being class は `#[Inject]` できない。** `#[Input]` は Be framework の cascade 文脈でのみ意味を持つ属性で、Ray.Di にとっては未知。
+
+#### 結論 — Diamond が成立する条件
+
+| Apex (= 並列 arm から `#[Inject]` される側) のコンストラクタ | Diamond 成立可否 |
+|---|---|
+| `#[Inject]` のみ (= 純粋 DI で構築可能) | ◯ — loan-application の `Moment/CreditApproved` 等の形 |
+| `#[Input]` を 1 つでも含む | ✗ — Ray.Di が Input を解決できず `NoHint` |
+
+これは「Be framework が Cascade Diamond をサポートしていない」のではなく、**Moment を `#[Input]` 非依存の Reason 系オブジェクト (Service / Strategy 相当) として設計すれば成立する** ことを意味する。loan-application demo の Moment はすべて `#[Inject]` 専用で、Input scalar (`applicantId` 等) は Final レベルで初めて `#[Input]` として組み合わさる構造になっており、この制約と一致している。
+
+#### EC-CUBE の `doConfirmOrder` で Diamond を作れない理由
+
+`PreOrderResolved` は `preOrderId` (Input) で `OrderQuery` を引いて初めて成立する。`preOrderId` 非依存の "純粋 DI で作れる pre-order resolver" を作ろうとすると、結局 ScopedContext / RequestScope のような暗黙の Input 受け渡しが必要になり、Be framework の「依存は明示」哲学に反する。
+
+したがって `doConfirmOrder` の cascade は Diamond ではなく Linear (4 段) として写像する以外にない。これは設計上の妥協ではなく、**Input 依存のデータが各段に流れる以上は本質的に Linear** という観察。
+
+```text
+ConfirmOrderInput (preOrderId, paymentMethodId)
+  → PreOrderResolved   (Stage 1 — order を解決, public: preOrderId / paymentMethodId / order)
+  → PurchaseFlowApplied (Stage 2 — totals を計算, public: …+ totals)
+  → PaymentVerified    (Stage 3 — verify() 結果取得, public: …+ result)
+  → OrderConfirming    (Stage 4 — Branching, $being = PaymentSuccessCase|PaymentFailureCase)
+    #[Be([OrderConfirmed, OrderConfirmFailed])]
+  → OrderConfirmed | OrderConfirmFailed
+```
+
+各段は `#[Input]` で上流 public プロパティを by-name 連結する Pilot 2 と同じ要領で繋がる。
+
+### 採用判定への反映
+
+Diamond は **「並列収束したい独立 Reason がすべて Input 非依存である」** という稀な条件下でしか成立しない。EC-CUBE の典型的な業務 transition では、ほぼ全段が Input (識別子) に依存するため Linear Cascade に収束する。**「Diamond で書きたい」という設計欲求が出たら、それは Linear Cascade の合図** と読み替えるのが移植上の規約として実用的。
+
+§5 の採用表で「Cascade Diamond ◎ 期待大」を「✗ 構造的に不成立 (Linear に縮退)」に修正済み。
+
+## 7. まだ残る留保
+
+| 観察したい性質 | 候補 transition | 備考 |
 |---|---|---|
-| 分岐先で別 Final になる場合の `#[Be([A, B])]` の効力 | `doCreateCustomer` (新規 vs リピート) / `doConfirmOrder` (在庫切れ分岐) | Branching (medical-triage 系) |
-| 複数の独立 Reason が真に並列収束する場合 | `doCreateOrder` (Cart + Customer + Payment 収束) | Cascade Diamond (loan-application 系) |
-| Be chain が長くなった時 (5 段以上) の認知負荷 | TBD | — |
-| Semantic 変数登録の運用負担 | 全 Pilot 共通 | 未登録は NOTICE 素通り。登録ポリシー検討 |
+| Be chain が長くなった時 (6 段以上) の認知負荷 | TBD | Pilot 3 で 5 段は許容範囲。10 段超で揺らぐかは未検証 |
+| Semantic 変数登録の運用負担 | 全 Pilot 共通 | Pilot 3 で `Order` / `Totals` / `Result` / `Being` の 4 件を composite-type 空 validator として追加。chain 長段化で増える傾向 |
+| Diamond と多段 chain 以外の高度パターン (Sequential Chain / Convex Convergence 等) | TBD | be-patterns の残り demo は移植不要な題材 |
 | 意味ログサイズの本番運用 | 全 Pilot 共通 | `var/log/bemart.json` の rotation / 抽出ツール |
 
-これらを観測してから「Be 全面採用」の最終結論を出す。**現時点では「全 transition で採用 (効力レイヤーは transition による)」を中間結論とする**。
+これらを観測してから「Be 全面採用」の最終結論を出す。**現時点では「全 transition で採用 (効力レイヤーは transition による、Diamond は Linear に縮退して扱う)」を中間結論とする**。
 
 ---
 

@@ -5,8 +5,8 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 | メタ | 値 |
 |---|---|
 | Last updated | 2026-05-18 |
-| Latest session | pilot-2-cascade-3stage-refactor-and-adoption-evaluation-opus-4.7 |
-| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade) + alps-to-be-bear skill dogfooding。Cascade Diamond reference (複数 Moment 並列収束) は将来 Pilot で別題材として実装予定 |
+| Latest session | pilot-3-doConfirmOrder-branching-plus-diamond-finding-opus-4.7 |
+| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade) + alps-to-be-bear skill dogfooding。Cascade Diamond は Pilot 3 で「apex が `#[Input]` 依存だと be-framework のメカニクス上不成立」と判明 (Linear Cascade に縮退) |
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
 
@@ -270,4 +270,79 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 ### Pilot
 
 - **Pilot 1 完了** (`BeMart` (旧 MyVendor.EcCube), `goProduct` 1 件): Be + BEAR.Sunday 統合の初参照実装が動作確認済み。意味ログ自動記録 100%、i18n 例外 100%、composer test 8/8 pass。次は (1) workflow prompt 改修 PR で Pilot で発見した穴を埋める、(2) Pilot 2 として `doAddCartItem` (Diamond パターン) を別タスクで実装、(3) 残り 135 transition を `/run migrate <id>` で自走移植。詳細指標は「Pilot 1」セクション参照
-- **Pilot 2 完了** (`BeMart`, `doAddCartItem` 1 件): **Cascade** パターンの参照実装。`AddCartItemInput → QuantityAdjusted (Being) → CartMerged (Being) → CartItemAdded (Final)` の **3 段 cascade**。Final は `CartCommand` 1 件のみ `#[Inject]` で受け取り永続化に専念、Read 系 Reason は上流 Being に分散。改訂履歴: 初版「Cascade Diamond」分類 → Linear/Minimal に訂正 → 2 段 Cascade refactor → 3 段 Cascade refactor (`CartMerged` 抽出で Final から in-memory merge / totalPrice / deliveryFeeTotal 計算を引き剥がした、2026-05-18)。composer test 21/21 pass, 51 assertions, **0 notices** (Cascade refactor で導入された 13 件の Semantic 変数を全登録: `SessionPrefix` / `RequestedQuantity` / `AdjustedQuantity` / `UnitPrice` / `SaleTypeId` / `SaleTypeName` / `DeliveryFee` / `StockUnlimited` / `SaleLimit` / `CartKey` / `TotalPrice` / `DeliveryFeeTotal` / `MergedCart`)。Linear 版 snapshot は `be/docs/variations/linear-doAddCartItem/` に保存 (educational comparison 用)。Pilot 1+2 を通じた **Be 採用評価** は `be/docs/be-adoption-evaluation.md` に詳述 (基層効力 4 軸 = Pilot 1 から効く / 上層効力 4 軸 = Pilot 2 で爆発)。Query/Command 共有時は Singleton ストア必須、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用、いずれも Cascade 実装でも有効。skill `~/.claude/skills/alps-to-be-bear/` に昇格済み (SKILL.md / decision-matrix.md は 3 段 Cascade refactor の読み替え注記が必要)。**次は Cascade Diamond reference として「複数の独立 Reason が並列に収束する題材」(例: `doCreateOrder` で Cart + Customer + Payment) を別 Pilot で実装する想定。Branching パターン (例: `doCreateCustomer`) はその次の候補**
+- **Pilot 2 完了** (`BeMart`, `doAddCartItem` 1 件): **Cascade** パターンの参照実装。`AddCartItemInput → QuantityAdjusted (Being) → CartMerged (Being) → CartItemAdded (Final)` の **3 段 cascade**。Final は `CartCommand` 1 件のみ `#[Inject]` で受け取り永続化に専念、Read 系 Reason は上流 Being に分散。改訂履歴: 初版「Cascade Diamond」分類 → Linear/Minimal に訂正 → 2 段 Cascade refactor → 3 段 Cascade refactor (`CartMerged` 抽出で Final から in-memory merge / totalPrice / deliveryFeeTotal 計算を引き剥がした、2026-05-18)。composer test 21/21 pass, 51 assertions, **0 notices** (Cascade refactor で導入された 13 件の Semantic 変数を全登録: `SessionPrefix` / `RequestedQuantity` / `AdjustedQuantity` / `UnitPrice` / `SaleTypeId` / `SaleTypeName` / `DeliveryFee` / `StockUnlimited` / `SaleLimit` / `CartKey` / `TotalPrice` / `DeliveryFeeTotal` / `MergedCart`)。Linear 版 snapshot は `be/docs/variations/linear-doAddCartItem/` に保存 (educational comparison 用)。Pilot 1+2 を通じた **Be 採用評価** は `be/docs/be-adoption-evaluation.md` に詳述 (基層効力 4 軸 = Pilot 1 から効く / 上層効力 4 軸 = Pilot 2 で爆発)。Query/Command 共有時は Singleton ストア必須、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用、いずれも Cascade 実装でも有効。skill `~/.claude/skills/alps-to-be-bear/` に昇格済み (SKILL.md / decision-matrix.md は 3 段 Cascade refactor の読み替え注記が必要)。**Pilot 2 末尾の「次は Cascade Diamond を別 Pilot で」という想定は Pilot 3 で部分的に覆った — `#[Input]` 依存の Being を `#[Inject]` で apex に持つ Cascade Diamond は be-framework のメカニクス上不成立 (詳細は Pilot 3 セクション / `be/docs/be-adoption-evaluation.md §6`)。EC-CUBE の典型的な `#[Input]` 依存遷移は Linear Cascade に縮退する**
+- **Pilot 3 完了** (`BeMart`, `doConfirmOrder` 1 件): **Branching** パターンの参照実装 + **Cascade Diamond 不成立の構造的発見**。`ConfirmOrderInput → PreOrderResolved (Being) → PurchaseFlowApplied (Being) → PaymentVerified (Being) → OrderConfirming (Being, 分岐点) → OrderConfirmed | OrderConfirmFailed (Branching Final)` の **4 段 Linear Cascade + 1 段 Branching**。`OrderConfirming` の `public PaymentSuccessCase|PaymentFailureCase $being` 型 discriminator により `BecomingType::match()` が Final を選択 (be-patterns `medical-triage` デモ準拠)。composer test 27/27 pass (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 新規 6), 79 assertions, **0 notices** (Pilot 3 で 14 件の Semantic 変数を新規登録: `PreOrderId` / `PaymentMethodId` / `Subtotal` / `Tax` / `Total` / `Discount` / `Charge` / `DeliveryFee`(既存) / `AddPoint` / `UsePoint` / `PaymentTotal` / `Order` / `Totals` / `Result` / `Being`)。改訂履歴: 初版 Cascade Diamond 想定で `OrderConfirming` を apex (`#[Inject] PreOrderResolved $preOrder` 等) → Ray.Di `NoHint($preOrderId)` で全テスト失敗 → `#[Input]` 依存 Being を `#[Inject]` 経由でインスタンス化できないと判明 (Ray.Di は `#[Input]` 属性を理解しない) → 4 段 Linear Cascade に再構成。**構造的発見**: Cascade Diamond は「apex Moment が `#[Input]` を一切持たない」場合のみ成立する。EC-CUBE の典型的フロー (Input scalar から DB 引き当て → 並列に Service 呼び出し) は全て Linear Cascade に縮退する。Pilot 3 の Branching パターンは clean に動作し、be-framework の Branching 機構 (`BecomingType::match()` による型ベース選択) は実用検証済み。Skill 配置: `~/.claude/skills/alps-to-be-bear/` の `SKILL.md` / `decision-matrix.md` には「Cascade Diamond の成立条件 (apex が `#[Input]` 不要) と Linear Cascade への縮退ルール」追記が必要。**次は (1) Complex Convergence (`insurance-claim` のような多分岐 + 多経路収束)、(2) admin 系の本番移植 (10 件規模) で skill を bake、(3) `~/.claude/skills/alps-to-be-bear/` の plugin marketplace 昇格判断**
+
+---
+
+## Pilot 3 — `doConfirmOrder` (Branching + Cascade Diamond 不成立の発見)
+
+**目的:** Branching パターン (Final が分岐) と Cascade Diamond (apex Moment 並列収束) の 2 つを同時に検証する設計だったが、Diamond 側は be-framework のメカニクス上不成立と判明し、Linear Cascade + Branching に縮退した。
+
+**改訂履歴 (2026-05-18):**
+
+1. 初版: `ConfirmOrderInput → OrderConfirming (Cascade Diamond apex; `#[Inject]` で PreOrderResolved + PurchaseFlowApplied + PaymentVerified を並列収束) → OrderConfirmed | OrderConfirmFailed` を想定
+2. Phase 7 で全 6 テスト失敗 — `Ray\Di\Exception\NoHint: $preOrderId at PreOrderResolved.php:28`。Ray.Di は `#[Inject] PreOrderResolved $preOrder` を解決する際に `$injector->getInstance(PreOrderResolved::class)` を呼ぶが、`PreOrderResolved::__construct(#[Input] string $preOrderId, ...)` の `#[Input]` 属性を解釈できず、コンストラクタ引数 `$preOrderId` を hint なしと判定して落ちる
+3. `vendor/be-framework/be-framework/src/BecomingArguments.php` の挙動を確認 — `#[Input]` は be-framework の cascade (`BecomingArguments::be(object $current, string $becoming)` で `get_object_vars($current)` から拾う) でのみ解決される。Ray.Di の `getInstance()` 経路は `#[Inject]` のみ理解する
+4. **構造的結論**: 「`#[Input]` を必要とする Being」は `#[Inject]` の対象になれない。Cascade Diamond の apex (`#[Inject]` で複数 Moment を並列収束) は、各 Moment が Input 依存ゼロの場合のみ成立する。EC-CUBE の `doConfirmOrder` のように Input scalar から派生して Service 呼び出しを並列する用途は不成立 → 4 段 Linear Cascade に再構成 (各 Being が `#[Input] public` プロパティで下流に scalar を forward)
+5. 4 段 Linear Cascade + Branching に書き換え後、6/6 pass, 0 notices
+
+| 項目 | 値 |
+|---|---|
+| リポジトリ | `~/git/ec-cube-alps` |
+| パターン | **Linear Cascade (4 段) + Branching (1 段)**。`ConfirmOrderInput → PreOrderResolved (Being: 注文引き当て) → PurchaseFlowApplied (Being: 金額計算) → PaymentVerified (Being: 決済検証) → OrderConfirming (Being: discriminator 計算) → OrderConfirmed \| OrderConfirmFailed (Branching Final)`。`OrderConfirming::$being` の union 型 (`PaymentSuccessCase\|PaymentFailureCase`) を `BecomingType::match()` が読み、`#[Be([OrderConfirmed::class, OrderConfirmFailed::class])]` から型一致する Final を選択 |
+| テスト | 27 passed (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 新規 6), 79 assertions, **0 notices** |
+| Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (Cascade Diamond の成立条件と Linear 縮退ルール追記が必要) |
+
+### Pilot 3 完了の判定基準 — 12 指標
+
+| # | 指標 | Target | Actual | Note |
+|---|---|---|---|---|
+| 1 | composer test 全 pass | 100% | 100% | 27/27 pass (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 Domain 6) |
+| 2 | 意味ログ被覆 | 100% | 100% | DevBecoming が 5 段 cascade 全体を `var/log/bemart.json` に自動記録 |
+| 3 | i18n 例外メッセージ | 100% | 100% | 全 DomainException (`PreOrderNotFoundException`, `PreOrderIdFormatException`, `PaymentMethodIdFormatException`, Semantic format 系 12 件) に `#[Message(['en'=>..., 'ja'=>...])]` |
+| 4 | 自己証明 assert | ≥1 | ≥1 | `OrderConfirming::__construct()` 内: `$this->being = $result->success ? new PaymentSuccessCase(...) : new PaymentFailureCase(...)` で型 discriminator を自己証明 |
+| 5 | Semantic クラス数 | 14 | 14 | `PreOrderId` / `PaymentMethodId` / `Subtotal` / `Tax` / `Total` / `Discount` / `Charge` / `AddPoint` / `UsePoint` / `PaymentTotal` を scalar 系として新規、composite 系 4 件 (`Order` for `OrderEntity`, `Totals` for `PurchaseFlowResult`, `Result` for `PaymentVerifyResult`, `Being` for union `PaymentSuccessCase\|PaymentFailureCase`) を MergedCart パターン (空 `#[Validate]` body) で登録 |
+| 6 | Reason 層共有ストア | Singleton 必須 | 該当 | `FakeOrderQuery` を `Scope::SINGLETON` で bind (`AppModule:50`)。他の `FakePurchaseFlow` / `FakePaymentMethodFactory` は state を持たないので普通 bind |
+| 7 | client-input / server-fetched 分離 | 2 シート | 2 シート | client-input (`preOrderId`, `paymentMethodId`) と server-fetched (`OrderEntity`, `PurchaseFlowResult`, `PaymentVerifyResult`, `PaymentSuccessCase\|PaymentFailureCase` discriminator) を Cascade 内で分離 |
+| 8 | LoC (Pilot 3 新規分) | 実測のみ | src 約 469 + tests 約 132 | Being 4 件 (164 LoC) + Final 2 件 (88 LoC) + Input 1 件 (42 LoC) + Reason Case 2 件 (43 LoC) + Test 132 LoC。Semantic / Exception / Reason Entity / Reason Query / Reason Service は別カウント |
+| 9 | Branching 分岐テスト | pass | pass | `testCashOnDeliverySucceeds` / `testCreditCardSucceeds` (success path → `OrderConfirmed`) と `testVerifyFailureBranchesToOrderConfirmFailed` (failure path → `OrderConfirmFailed`, errors `['Card validation failed']`) で双方向検証 |
+| 10 | Cascade chain 整合性 | pass | pass | 4 段の `#[Input]` forward (preOrderId / paymentMethodId / order / totals / result) が `BecomingArguments::be()` で正しく chain される。`testMissingPreOrderThrows` で chain 中断 (Stage 1 で例外) も検証 |
+| 11 | Branching 型 discriminator | pass | pass | `OrderConfirming::$being: PaymentSuccessCase\|PaymentFailureCase` が `BecomingType::match()` で `#[Be([OrderConfirmed::class, OrderConfirmFailed::class])]` から正しい Final を選択。`#[Input] PaymentSuccessCase $being` / `#[Input] PaymentFailureCase $being` で各 Final が型ベースに hit |
+| 12 | ALPS 整合性 (Rule 7) | 手動チェック合格 | 合格 | Final の public プロパティ (`OrderConfirmed::$subtotal` / `$tax` / `$total` / `$addPoint` 等、`OrderConfirmFailed::$errors`) は ALPS `OrderConfirmed` / `OrderConfirmFailed` container の descriptor と一致 |
+
+### Pilot 3 で発見された skill gap
+
+| ID | 内容 | 昇格先 |
+|---|---|---|
+| G-8 | **Cascade Diamond は apex が `#[Input]` 不要なときのみ成立** — Ray.Di `getInstance()` は `#[Input]` を解釈しないため、`#[Input]` 依存 Being を `#[Inject]` で apex に並列収束させると `NoHint` で fail。EC-CUBE の典型的フロー (Input scalar から派生して並列計算) は全て Linear Cascade に縮退する | `SKILL.md` / `decision-matrix.md §5` に「Diamond 成立条件と Linear 縮退ルール」セクション追加 (TODO) |
+| G-9 | **Branching pattern** は型 discriminator (`public A\|B $being`) + `#[Be([FinalA, FinalB])]` + 各 Final が `#[Input] A $being` / `#[Input] B $being` でクリーンに動作。be-patterns `medical-triage` 準拠 | `SKILL.md` / `decision-matrix.md §4.F` に Branching 実装テンプレ追加 (TODO) |
+| G-10 | **Composite 型 Semantic 登録** — `PaymentSuccessCase\|PaymentFailureCase` の union 型 Semantic は `validate(A\|B $being): void {}` で登録可。scalar に貼る Semantic と区別して「composite Semantic の登録は型断定のみ、payload contract は型自体に委ねる」と明示すべき | `SKILL.md` の「Semantic クラスの種類」セクションに composite 型項目追加 (TODO) |
+
+### Pilot 3 で更新したファイル
+
+**`be/src/Module/AppModule.php`** (実体は `src/Module/AppModule.php`):
+
+- Pilot 3 用 3 件の bind 追加 (`OrderQueryInterface` Singleton, `PurchaseFlowInterface`, `PaymentMethodFactoryInterface`)
+
+**Pilot 3 で新規追加した Reason / Semantic 群:**
+
+- `Reason/Entity/`: `OrderEntity`, `PurchaseFlowResult`, `PaymentVerifyResult`
+- `Reason/Query/`: `OrderQueryInterface`, `FakeOrderQuery`
+- `Reason/Service/`: `PaymentMethodFactoryInterface`, `FakePaymentMethodFactory`, `PaymentMethodInterface`, `FakeCashOnDelivery`, `FakeCreditCard`, `FakeVerifyFailing`, `PurchaseFlowInterface`, `FakePurchaseFlow`
+- `Reason/`: `PaymentSuccessCase`, `PaymentFailureCase` (branching discriminator)
+- `Semantic/`: 14 件 (上記指標 #5)
+- `Exception/`: 14 件 (Semantic format 系 12 + `PreOrderNotFoundException`)
+
+### Pilot 3 の参照ドキュメント
+
+- **`be/docs/be-adoption-evaluation.md` §6** — Cascade Diamond 不成立の機構詳細 (Ray.Di の `#[Input]` 非対応、`BecomingArguments::be()` の `get_object_vars()` 経路、Linear Cascade への縮退ルール)
+- **`be/docs/be-adoption-evaluation.md §5`** — パターン採用判定表 (Branching ◎採用 / Cascade Diamond ✗構造的に不成立)
+- **`~/git/be-patterns/demos/medical-triage/`** — Branching 参照実装 (Pilot 3 の typed discriminator 設計はここから流用)
+
+### Pilot 1+2+3 を通じた集計
+
+- composer test: 27/27 pass, 79 assertions, **0 notices**
+- Be domain LoC (Pilot 1+2+3 累計): 約 1670 src + 約 514 tests (Pilot 1 = 576 + 20、Pilot 2 = 620 + 250、Pilot 3 = 469 + 132、新規 Semantic / Reason / Exception 共有部分は重複カウントなし)
+- 採用パターン: Linear/Minimal (Pilot 1), Cascade (Pilot 2), Linear Cascade + Branching (Pilot 3)
+- 未検証パターン: Multi-Reason Being, Complex Convergence (`insurance-claim` 系), 真の Cascade Diamond (apex が Input 不要なケース; EC-CUBE の通常 transition では出現しない可能性大)
