@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Input;
 
 use Be\Framework\Attribute\Be;
-use MyVendor\BeMart\Be\Final\CartItemAdded;
+use MyVendor\BeMart\Be\Being\QuantityAdjusted;
 
 /**
  * Input for doAddCartItem — add a product to the active cart.
@@ -13,9 +13,12 @@ use MyVendor\BeMart\Be\Final\CartItemAdded;
  * Both fields are validated by Semantic at Becoming time
  * (productCode → Semantic\ProductCode, quantity → Semantic\Quantity).
  *
+ * The cascade is:
+ *   AddCartItemInput → QuantityAdjusted (Stage 1 Being) → CartItemAdded (Final).
+ *
  * @link https://schema.org/AddAction
  */
-#[Be([CartItemAdded::class])]
+#[Be([QuantityAdjusted::class])]
 final readonly class AddCartItemInput
 {
     public function __construct(
