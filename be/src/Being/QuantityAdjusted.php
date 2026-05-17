@@ -7,7 +7,6 @@ namespace MyVendor\BeMart\Be\Being;
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Exception\OutOfStockException;
 use MyVendor\BeMart\Be\Exception\ProductClassNotFoundException;
-use MyVendor\BeMart\Be\Final\CartItemAdded;
 use MyVendor\BeMart\Be\Reason\Entity\ProductClassEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use Ray\Di\Di\Inject;
@@ -27,11 +26,10 @@ use function sprintf;
  *   - SaleLimit cap (per-customer purchase ceiling)
  *   - SaleType resolution (cartKey = sessionPrefix_saleTypeId)
  *
- * Downstream CartItemAdded converges cart-side Reasons (existing cart lookup,
- * merge, delivery accumulation, persistence) using this Being's outputs as
- * #[Input].
+ * Downstream Stage 2 (CartMerged) composes the existing cart with the adjusted
+ * quantity to produce the merged cart state in memory.
  */
-#[Be([CartItemAdded::class])]
+#[Be([CartMerged::class])]
 final readonly class QuantityAdjusted
 {
     public string $productCode;

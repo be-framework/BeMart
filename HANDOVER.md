@@ -4,8 +4,8 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 
 | メタ | 値 |
 |---|---|
-| Last updated | 2026-05-17 |
-| Latest session | pilot-2-doaddcartitem-dogfooding-opus-4.7 |
+| Last updated | 2026-05-18 |
+| Latest session | pilot-2-cascade-3stage-refactor-and-adoption-evaluation-opus-4.7 |
 | Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade) + alps-to-be-bear skill dogfooding。Cascade Diamond reference (複数 Moment 並列収束) は将来 Pilot で別題材として実装予定 |
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
@@ -175,17 +175,18 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 **目的:** Cascade パターン (Being chain + Final での Reason 収束) の初参照実装 + `alps-to-be-bear` skill の dogfooding。
 
-**改訂履歴 (2026-05-17):**
+**改訂履歴 (2026-05-17 → 2026-05-18):**
 
 1. 初版 → Phase 8 reflection で「Cascade Diamond」と分類
 2. self review 1 で「1 つの Final 内に 5 ブロックを手続き的に並べただけで、Being 連鎖も `#[Reason]` 収束も無い」と判明し **Linear / Minimal** へ再分類 (commit 8f75c66)
-3. self review 2: 真の Cascade として refactor — `QuantityAdjusted` Being を導入し、Stage 1 (quantity 確定 + cartKey 解決) → Stage 2 (cart 文脈 + マージ + 配送 + 保存) の 2 段 cascade に。Final で 3 つの独立 Reason (`CartQuery` + `CartCommand` + `ProductClassQuery`) が `#[Inject]` で収束。これを **Cascade** と分類 (Cascade Diamond ではなく)。Cascade Diamond reference (be-patterns `order-processing` のような複数 Moment 並列収束) は doAddCartItem の domain には不適 (quantity 確定 → cart 適用 は本質的に直列) で、将来の Pilot (例: `doCreateOrder` で Cart + Customer + Payment 並列収束) に譲る
+3. self review 2: 真の Cascade として refactor — `QuantityAdjusted` Being を導入し、Stage 1 (quantity 確定 + cartKey 解決) → Stage 2 (cart 文脈 + マージ + 配送 + 保存) の **2 段 cascade** に。Final で 3 つの独立 Reason (`CartQuery` + `CartCommand` + `ProductClassQuery`) が `#[Inject]` で収束 (commit 35a0201)
+4. self review 3 (2026-05-18): 「Final が永続化以外に in-memory merge + totalPrice + deliveryFeeTotal 計算を抱えていて厚い」という違和感から、`CartMerged` Being を抽出。**3 段 cascade** に再構成 — Stage 1 (`QuantityAdjusted`: ProductClass lookup / Stock cap / SaleLimit cap / cartKey) → Stage 2 (`CartMerged`: 既存 cart 取得 / item merge / totalPrice / deliveryFeeTotal) → Stage 3 (`CartItemAdded` Final: 永続化のみ)。Final の `#[Inject]` は `CartCommand` 1 つに収束。Linear 版の snapshot は `be/docs/variations/linear-doAddCartItem/` に保存 (commit 8f75c66 時点のコード)。本評価は `be/docs/be-adoption-evaluation.md` に詳述。Cascade Diamond reference (be-patterns `order-processing` のような複数 Moment 並列収束) は doAddCartItem の domain には不適 (quantity 確定 → cart 合成 → 永続化 は本質的に直列) で、将来の Pilot (例: `doCreateOrder` で Cart + Customer + Payment 並列収束) に譲る
 
 | 項目 | 値 |
 |---|---|
 | リポジトリ | `~/git/ec-cube-alps` |
-| パターン | Cascade (2 段の Being chain + Final convergence)。`AddCartItemInput → QuantityAdjusted (Being) → CartItemAdded (Final)`。Stage 1 = ProductClass lookup + Stock cap + SaleLimit cap + SaleType 解決, Stage 2 = 既存 cart 検索 + item merge + delivery fee 集計 + 永続化 |
-| テスト | 21 passed (Pilot 1 既存 8 + Pilot 2 新規 13), 51 assertions, 9 notices (未登録 Semantic 変数 — SKILL.md 規定通り素通り) |
+| パターン | Cascade (3 段の Being chain + Final convergence)。`AddCartItemInput → QuantityAdjusted (Being) → CartMerged (Being) → CartItemAdded (Final)`。Stage 1 = ProductClass lookup + Stock cap + SaleLimit cap + SaleType 解決, Stage 2 = 既存 cart 検索 + item merge + delivery fee 集計, Stage 3 = 永続化のみ |
+| テスト | 21 passed (Pilot 1 既存 8 + Pilot 2 新規 13), 51 assertions, **0 notices** (Cascade refactor で導入された全 Semantic 変数を登録: `SessionPrefix` / `RequestedQuantity` / `AdjustedQuantity` / `UnitPrice` / `SaleTypeId` / `SaleTypeName` / `DeliveryFee` / `StockUnlimited` / `SaleLimit` / `CartKey` / `TotalPrice` / `DeliveryFeeTotal` / `MergedCart` の 13 件) |
 | Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (local dogfooding。Pilot 3 + 本番移植 10 件後に `be-framework-skills` plugin marketplace へ promote 候補) |
 
 ### Pilot 2 完了の判定基準 — 12 指標
@@ -199,7 +200,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 | 5 | Semantic クラス数 | 1 | 1 | `Quantity` 1 件新規。`ProductCode` は Pilot 1 既存を再利用 |
 | 6 | client-input / server-fetched 分離 | 2 シート | 2 シート | client-input (`productCode`, `quantity`) と server-fetched (`stock`, `stockUnlimited`, `saleLimit`, `price01/02`, `deliveryFee`, `saleTypeName`) を Phase 2 で分離観察 |
 | 7 | LoC (Be+BEAR) | 実測のみ | src 約 620 + tests 約 250 | BEAR-only 比較は推定値とせず実測のみ記録 |
-| 8 | Final の `#[Inject]` 数 | (当初は Cascade 5 phase = 5 を想定) | **3** | Cascade refactor 後の Final (`CartItemAdded`) は 3 つの独立 Reason (`CartQuery` + `CartCommand` + `ProductClassQuery`) を `#[Inject]` で収束。Stage 1 Being (`QuantityAdjusted`) は別途 `ProductClassQuery` のみ。本質的指針: **「Final の `#[Inject]` 数 = Final で収束する独立 Reason 数」** |
+| 8 | Final の `#[Inject]` 数 | (当初は Cascade 5 phase = 5 を想定) | **1** | 3 段 Cascade refactor 後の Final (`CartItemAdded`) は `CartCommand` 1 件のみ `#[Inject]` で受け取り、永続化に専念。Read 系の `CartQuery` / `ProductClassQuery` は Stage 2 (`CartMerged`) と Stage 1 (`QuantityAdjusted`) に分散。本質的指針: **「Final の `#[Inject]` 数 = Final で収束する独立 Reason 数」。Final が薄ければ Inject も少なくなる** |
 | 9 | 数量自動調整テスト | pass | pass | `testStockShortageAutoAdjusts`: sample-003 stock=3 で qty=5 → 自動補正 3, totalPrice=13500 (4500×3) |
 | 10 | CartItem merge テスト | pass | pass | `testSameSkuAddedTwiceMergesQuantity`: 同 SKU を 2+3 で追加 → totalPrice=5000 (1000×5) |
 | 11 | cartKey 分離テスト | pass | pass | `testDifferentSaleTypeIsolatesCart`: 通常販売 (`cartKey=session-prefix-1_1`) と予約販売 (`cartKey=session-prefix-1_2`) で cart が分離 |
@@ -269,4 +270,4 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 ### Pilot
 
 - **Pilot 1 完了** (`BeMart` (旧 MyVendor.EcCube), `goProduct` 1 件): Be + BEAR.Sunday 統合の初参照実装が動作確認済み。意味ログ自動記録 100%、i18n 例外 100%、composer test 8/8 pass。次は (1) workflow prompt 改修 PR で Pilot で発見した穴を埋める、(2) Pilot 2 として `doAddCartItem` (Diamond パターン) を別タスクで実装、(3) 残り 135 transition を `/run migrate <id>` で自走移植。詳細指標は「Pilot 1」セクション参照
-- **Pilot 2 完了** (`BeMart` (旧 MyVendor.EcCube), `doAddCartItem` 1 件): **Cascade** パターンの参照実装。`AddCartItemInput → QuantityAdjusted (Being) → CartItemAdded (Final)` の 2 段 cascade で、Final で 3 つの独立 Reason (`CartQuery` + `CartCommand` + `ProductClassQuery`) が `#[Inject]` で収束。改訂履歴: 初版は「Cascade Diamond」と分類 → self review で「実態は Linear/Minimal (1 つの Final 内の手続き的コード)」と判明し一旦訂正 → 真の Cascade として `QuantityAdjusted` Being を導入して refactor (本 commit)。composer test 21/21 pass, 51 assertions, 9 notices (未登録 Semantic 変数 — `RequestedQuantity`/`AdjustedQuantity`/`SessionPrefix`/`SaleTypeId` 等は SKILL.md 規定通り素通り)。Query/Command 共有時は Singleton ストア必須、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用、いずれも Cascade 実装でも有効。skill `~/.claude/skills/alps-to-be-bear/` に昇格済み (SKILL.md / decision-matrix.md は Cascade refactor の読み替え注記が必要)。**次は Cascade Diamond reference として「複数の独立 Reason が並列に収束する題材」(例: `doCreateOrder` で Cart + Customer + Payment) を別 Pilot で実装する想定。Branching パターン (例: `doCreateCustomer`) はその次の候補**
+- **Pilot 2 完了** (`BeMart`, `doAddCartItem` 1 件): **Cascade** パターンの参照実装。`AddCartItemInput → QuantityAdjusted (Being) → CartMerged (Being) → CartItemAdded (Final)` の **3 段 cascade**。Final は `CartCommand` 1 件のみ `#[Inject]` で受け取り永続化に専念、Read 系 Reason は上流 Being に分散。改訂履歴: 初版「Cascade Diamond」分類 → Linear/Minimal に訂正 → 2 段 Cascade refactor → 3 段 Cascade refactor (`CartMerged` 抽出で Final から in-memory merge / totalPrice / deliveryFeeTotal 計算を引き剥がした、2026-05-18)。composer test 21/21 pass, 51 assertions, **0 notices** (Cascade refactor で導入された 13 件の Semantic 変数を全登録: `SessionPrefix` / `RequestedQuantity` / `AdjustedQuantity` / `UnitPrice` / `SaleTypeId` / `SaleTypeName` / `DeliveryFee` / `StockUnlimited` / `SaleLimit` / `CartKey` / `TotalPrice` / `DeliveryFeeTotal` / `MergedCart`)。Linear 版 snapshot は `be/docs/variations/linear-doAddCartItem/` に保存 (educational comparison 用)。Pilot 1+2 を通じた **Be 採用評価** は `be/docs/be-adoption-evaluation.md` に詳述 (基層効力 4 軸 = Pilot 1 から効く / 上層効力 4 軸 = Pilot 2 で爆発)。Query/Command 共有時は Singleton ストア必須、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用、いずれも Cascade 実装でも有効。skill `~/.claude/skills/alps-to-be-bear/` に昇格済み (SKILL.md / decision-matrix.md は 3 段 Cascade refactor の読み替え注記が必要)。**次は Cascade Diamond reference として「複数の独立 Reason が並列に収束する題材」(例: `doCreateOrder` で Cart + Customer + Payment) を別 Pilot で実装する想定。Branching パターン (例: `doCreateCustomer`) はその次の候補**
