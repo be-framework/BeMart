@@ -6,7 +6,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 |---|---|
 | Last updated | 2026-05-17 |
 | Latest session | pilot-2-doaddcartitem-dogfooding-opus-4.7 |
-| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem) + alps-to-be-bear skill dogfooding |
+| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Linear/Minimal) + alps-to-be-bear skill dogfooding。Cascade Diamond reference は将来 Pilot で別題材として実装予定 |
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
 
@@ -171,14 +171,16 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 ---
 
-## Pilot 2 — `doAddCartItem` (Cascade Diamond)
+## Pilot 2 — `doAddCartItem` (Linear / Minimal — 当初 Cascade Diamond 想定)
 
-**目的:** Cascade Diamond パターンの初参照実装 + `alps-to-be-bear` skill の dogfooding。Phase ごとに 2 commit (実装 + skill 反映) のリズムで知見を即時定着。
+**目的:** 当初は Cascade Diamond パターンの初参照実装を狙ったが、`doAddCartItem` の本質は「直線的な変換 (在庫確認 → 上限 → マージ → 保存)」であり、独立した複数 Reason の収束を持たないため、最終分類は **Linear / Minimal (Input → Final)** とする。Cascade Diamond の reference は将来の Pilot で複数の独立 Reason が収束する題材 (例: `doCreateOrder` で Cart + Customer + Payment 収束) に譲る。`alps-to-be-bear` skill の dogfooding 目的は達成。
+
+**訂正の理由 (2026-05-17 self review):** [CartItemAdded.php](be/src/Final/CartItemAdded.php) は 1 つの Final の `__construct` 内に 5 ブロックを手続き的に並べた実装で、独立した Being の連鎖や `#[Reason]` による収束を持たない。これは Be パターンの `hello-world` (Linear/Minimal) に近く、`loan-application` の Cascade Diamond ではない。Phase 8 reflection の「cascade 段数 ≠ `#[Inject]` 数」は後付けの正当化であり、本来 Cascade Diamond は「複数 Being の連鎖 + Final での収束」を指す。下記指標 #8 と skill gap G-1 は **「`#[Inject]` 数 = 独立データソース数」という Linear 実装の指針** として読み替える。
 
 | 項目 | 値 |
 |---|---|
 | リポジトリ | `~/git/ec-cube-alps` |
-| スコープ | `doAddCartItem` を Cascade Diamond として実装。Stock 検査 → SaleLimit 検査 → SaleType 判定 → Delivery 計算 → CartItem merge-Price の 5 cascade phase を 1 つの Final (`CartItemAdded`) に集約 |
+| 実際のパターン | Linear / Minimal (Input → Final)。Stock 検査 → SaleLimit 検査 → SaleType 判定 → CartItem merge → Delivery 計算の 5 ブロックを 1 つの Final (`CartItemAdded`) の `__construct` に集約 |
 | テスト | 21 passed (Pilot 1 既存 8 + Pilot 2 新規 13), 51 assertions |
 | Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (local dogfooding。Pilot 3 + 本番移植 10 件後に `be-framework-skills` plugin marketplace へ promote 候補) |
 
@@ -193,7 +195,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 | 5 | Semantic クラス数 | 1 | 1 | `Quantity` 1 件新規。`ProductCode` は Pilot 1 既存を再利用 |
 | 6 | client-input / server-fetched 分離 | 2 シート | 2 シート | client-input (`productCode`, `quantity`) と server-fetched (`stock`, `stockUnlimited`, `saleLimit`, `price01/02`, `deliveryFee`, `saleTypeName`) を Phase 2 で分離観察 |
 | 7 | LoC (Be+BEAR) | 実測のみ | src 約 620 + tests 約 250 | BEAR-only 比較は推定値とせず実測のみ記録 |
-| 8 | Diamond `#[Inject]` 数 | (原計画 5) | **3** | 原計画は 5 だったが、Cascade 5 phase でも独立データソースは 3 (`ProductClassQuery` + `CartQuery` + `CartCommand`) で十分。Pilot 2 で「cascade 段数 ≠ `#[Inject]` 数」が判明 (SKILL.md Pilot 2 不変条件 #6 に昇格)。**新基準は「`#[Inject]` 数 = 独立データソース数」** |
+| 8 | `#[Inject]` 数 | (当初は Cascade 5 phase = 5 を想定) | **3** | 当初 Cascade Diamond として 5 を想定したが、最終分類が Linear/Minimal に訂正された結果、`#[Inject]` 数の本質的指針は **「独立データソース数」**。`doAddCartItem` の独立データソースは 3 (`ProductClassQuery` + `CartQuery` + `CartCommand`)。SKILL.md / decision-matrix.md の該当記述は Linear 実装での Inject 設計指針として読み替え |
 | 9 | 数量自動調整テスト | pass | pass | `testStockShortageAutoAdjusts`: sample-003 stock=3 で qty=5 → 自動補正 3, totalPrice=13500 (4500×3) |
 | 10 | CartItem merge テスト | pass | pass | `testSameSkuAddedTwiceMergesQuantity`: 同 SKU を 2+3 で追加 → totalPrice=5000 (1000×5) |
 | 11 | cartKey 分離テスト | pass | pass | `testDifferentSaleTypeIsolatesCart`: 通常販売 (`cartKey=session-prefix-1_1`) と予約販売 (`cartKey=session-prefix-1_2`) で cart が分離 |
@@ -203,7 +205,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 | ID | 内容 | 昇格先 |
 |---|---|---|
-| G-1 | Cascade 段数 ≠ `#[Inject]` 数 | `SKILL.md #6` / `decision-matrix.md §4.E` |
+| G-1 | `#[Inject]` 数 = 独立データソース数 (Linear 実装での Inject 設計指針。当初は「Cascade 段数 ≠ Inject 数」として記録したが、Pilot 2 を Linear/Minimal に再分類したため指針の前提を変更) | `SKILL.md #6` / `decision-matrix.md §4.E` |
 | G-2 | Reason 層の Query/Command 共有ストア (Singleton 必須) | `SKILL.md #7` / `decision-matrix.md §4.E` |
 | G-3 | Final shape は平坦が原則 | `SKILL.md #8` / `decision-matrix.md §4.E` |
 | G-4 | Pilot Input の sentinel default は本番移植で外す | `SKILL.md #12` / `decision-matrix.md §6.C` |
@@ -263,4 +265,4 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 ### Pilot
 
 - **Pilot 1 完了** (`BeMart` (旧 MyVendor.EcCube), `goProduct` 1 件): Be + BEAR.Sunday 統合の初参照実装が動作確認済み。意味ログ自動記録 100%、i18n 例外 100%、composer test 8/8 pass。次は (1) workflow prompt 改修 PR で Pilot で発見した穴を埋める、(2) Pilot 2 として `doAddCartItem` (Diamond パターン) を別タスクで実装、(3) 残り 135 transition を `/run migrate <id>` で自走移植。詳細指標は「Pilot 1」セクション参照
-- **Pilot 2 完了** (`BeMart` (旧 MyVendor.EcCube), `doAddCartItem` 1 件): Cascade Diamond パターンの初参照実装。composer test 21/21 pass、12 指標すべて達成 (詳細: 「Pilot 2 完了の判定基準 — 12 指標」)。重要な不変条件の発見: cascade 段数 ≠ `#[Inject]` 数 (5 phase でも 3 Inject で十分)、Query/Command 共有時は Singleton ストア必須、Final = transition outcome envelope (container 状態属性 ⊆ ALPS / transition outcome は ALPS 不要)、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用。skill `~/.claude/skills/alps-to-be-bear/` に SKILL.md (Pilot 2 不変条件 #6-12 追記) + decision-matrix.md (§5 Rule 7 refine + §6 Pilot 2 専用チェック) として昇格済み。`.claude/prompts/domain-implement.md` と `application-implement.md` も Pilot 2 反映済み。**次は Pilot 3 として Branching パターン (例: `doCreateCustomer`) を別タスクで検証し、skill 完成度 70% を確認する想定**
+- **Pilot 2 完了** (`BeMart` (旧 MyVendor.EcCube), `doAddCartItem` 1 件): **Linear / Minimal** パターン (Input → Final) の参照実装。当初は Cascade Diamond を狙ったが、self review で「1 つの Final の `__construct` 内に 5 ブロックを手続き的に並べた構造であり、独立 Being の連鎖や `#[Reason]` による収束を持たない」と判明したため Linear/Minimal に再分類 (2026-05-17)。composer test 21/21 pass、12 指標達成。Phase 8 reflection の「cascade 段数 ≠ `#[Inject]` 数」は Linear 実装での「`#[Inject]` 数 = 独立データソース数」指針として読み替え。Query/Command 共有時は Singleton ストア必須、Final = transition outcome envelope (container 状態属性 ⊆ ALPS / transition outcome は ALPS 不要)、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用、いずれも Linear 実装の知見として有効。skill `~/.claude/skills/alps-to-be-bear/` に昇格済み (SKILL.md / decision-matrix.md は Linear 実装での読み替え注記が必要)。**次は Cascade Diamond reference として「複数の独立 Reason が収束する題材」(例: `doCreateOrder` で Cart + Customer + Payment) を別 Pilot で実装する想定。Branching パターン (例: `doCreateCustomer`) はその次の候補**

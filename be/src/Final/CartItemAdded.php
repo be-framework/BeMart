@@ -21,17 +21,24 @@ use function min;
 use function sprintf;
 
 /**
- * Cart item added — terminal state of the doAddCartItem cascade.
+ * Cart item added — terminal state of the doAddCartItem transition.
  *
- * Cascade Diamond (Phase 1 analysis):
+ * Pattern: Linear/Minimal (Input → Final). NOT a Cascade Diamond.
+ * The five labeled blocks below are sequential procedural steps within a
+ * single constructor, not separate Being classes converging via #[Reason].
+ * A true Cascade Diamond reference is reserved for a future pilot whose
+ * domain naturally splits into independent Reasons (e.g. doCreateOrder
+ * converging Cart + Customer + Payment).
+ *
+ * Sequential blocks:
  *   client-input (productCode, quantity)
- *     ↓ [1] StockCheck    — cap by stock when !stockUnlimited
- *     ↓ [2] SaleLimitCheck — cap by saleLimit
- *     ↓ [3] SaleTypeResolution — cartKey = sessionPrefix_saleTypeId
- *     ↓ [4] DeliveryFeeAccumulation
- *     ↓ [5] CartItemMergePrice — same productCode → quantity sum
+ *     [1] StockCheck         — cap by stock when !stockUnlimited
+ *     [2] SaleLimitCheck     — cap by saleLimit
+ *     [3] SaleTypeResolution — cartKey = sessionPrefix_saleTypeId
+ *     [4] CartItemMergePrice — same productCode → quantity sum
+ *     [5] DeliveryFeeAccumulation
  *
- * Existence of this object proves all 5 phases passed. OutOfStock and
+ * Existence of this object proves all five blocks passed. OutOfStock and
  * ProductClassNotFound are the only hard failures; quantity overflow is
  * silently capped (EC-CUBE convention).
  */
