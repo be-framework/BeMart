@@ -53,7 +53,6 @@ final readonly class CheckoutSettled
 
     public function __construct(
         #[Input] public string $preOrderId,
-        #[Input] public int $paymentMethodId,
         #[Input] public OrderEntity $order,
         #[Input] public PurchaseFlowResult $totals,
         #[Inject] InventoryAllocatorInterface $inventory,
@@ -61,7 +60,9 @@ final readonly class CheckoutSettled
         #[Inject] OrderNumberGeneratorInterface $numbers,
     ) {
         $inventory->allocate($order);
-        $gateway->checkout($preOrderId, $paymentMethodId, $totals->paymentTotal);
+        // Payment method is sourced from the persisted order, not from the
+        // client request — see CheckoutInput docblock for the rationale.
+        $gateway->checkout($preOrderId, $order->paymentMethodId, $totals->paymentTotal);
 
         $this->orderNo = $numbers->generate();
         $now = (new DateTimeImmutable())->format(DateTimeInterface::ATOM);

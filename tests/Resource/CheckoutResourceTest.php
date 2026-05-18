@@ -30,7 +30,6 @@ final class CheckoutResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'paymentMethodId' => 2,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -47,7 +46,6 @@ final class CheckoutResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'eeee00000000000000000000000000000000eeee',
-            'paymentMethodId' => 2,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -58,7 +56,6 @@ final class CheckoutResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'bbbb00000000000000000000000000000000bbbb',
-            'paymentMethodId' => 1,
         ]);
 
         $this->assertSame(422, $ro->code);
@@ -69,7 +66,6 @@ final class CheckoutResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'cccc00000000000000000000000000000000cccc',
-            'paymentMethodId' => 9,
         ]);
 
         $this->assertSame(422, $ro->code);
@@ -80,10 +76,24 @@ final class CheckoutResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'not-a-hex-id',
-            'paymentMethodId' => 2,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
         $this->assertNotEmpty($ro->body['message']);
+    }
+
+    public function testClientSuppliedPaymentMethodIdIsIgnored(): void
+    {
+        // Pilot 5 F-2: even if a client tries to inject a different payment
+        // method id via the request body, the gateway must be charged against
+        // the persisted OrderEntity's paymentMethodId (2 for this preOrderId).
+        // We can't directly assert on the gateway here, but the request must
+        // still succeed — the extra key is silently ignored.
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'paymentMethodId' => 9, // would otherwise trigger PaymentDeclinedException
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
     }
 }

@@ -31,7 +31,11 @@ use function assert;
  *   - PreOrderNotFoundException    → 404 (the pre-order never existed)
  *   - InsufficientStockException   → 422 (stock cannot fulfill the order)
  *   - PaymentDeclinedException     → 422 (gateway refused the charge)
- *   - SemanticVariableException    → 400 (preOrderId / paymentMethodId malformed)
+ *   - SemanticVariableException    → 400 (preOrderId malformed)
+ *
+ * Note: paymentMethodId is intentionally NOT accepted here. It is sourced
+ * from the persisted OrderEntity inside CheckoutSettled to prevent
+ * mass-assignment tampering (Pilot 5 F-2).
  */
 class Checkout extends ResourceObject
 {
@@ -42,12 +46,11 @@ class Checkout extends ResourceObject
 
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    public function onPost(string $preOrderId, int $paymentMethodId): static
+    public function onPost(string $preOrderId): static
     {
         try {
             $final = ($this->becoming)(new CheckoutInput(
                 preOrderId: $preOrderId,
-                paymentMethodId: $paymentMethodId,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
