@@ -7,8 +7,11 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
@@ -19,10 +22,32 @@ final class CheckoutResourceTest extends TestCase
 
     protected function setUp(): void
     {
-        $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
-            dirname(__DIR__, 2) . '/var/tmp/test',
-        );
+        // Default to customer-001 (owns the `aaaa…` / `bbbb…` fixtures).
+        // Tests touching `cccc…` (customer-002) or asserting AUTHZ rejection
+        // call rebindSession() to swap the session before invoking the
+        // resource.
+        $this->rebindSession('customer-001');
+    }
+
+    /** Build a fresh resource client with the given session customerId (null = anonymous). */
+    private function rebindSession(string|null $customerId): void
+    {
+        $session = new FakeSession($customerId);
+        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(SessionInterface::class)->toInstance($this->session);
+            }
+        };
+        $base->override($override);
+
+        $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
@@ -64,12 +89,44 @@ final class CheckoutResourceTest extends TestCase
 
     public function testOnPostPaymentDeclinedReturns422(): void
     {
+        // `cccc…` belongs to customer-002 — rebind so we reach PurchaseFlow
+        // rather than tripping AUTHZ first.
+        $this->rebindSession('customer-002');
+
         $ro = $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'cccc00000000000000000000000000000000cccc',
         ]);
 
         $this->assertSame(422, $ro->code);
         $this->assertStringContainsString('declined', $ro->body['message']);
+    }
+
+    public function testOnPostForeignCustomerReturns403(): void
+    {
+        // Phase B Slice 6 (Pilot 5 F-1): a logged-in customer cannot confirm
+        // someone else's pre-order. The resource layer maps the domain
+        // exception to HTTP 403.
+        $this->rebindSession('customer-999');
+
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertSame('aaaa00000000000000000000000000000000aaaa', $ro->body['preOrderId']);
+    }
+
+    public function testOnPostAnonymousReturns403(): void
+    {
+        // Anonymous sessions are also rejected: a customer-scoped pre-order
+        // requires the matching logged-in customer.
+        $this->rebindSession(null);
+
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testOnPostMalformedPreOrderIdReturns400(): void
