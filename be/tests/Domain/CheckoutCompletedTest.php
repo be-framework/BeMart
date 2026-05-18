@@ -49,7 +49,6 @@ final class CheckoutCompletedTest extends TestCase
     {
         $final = ($this->becoming)(new CheckoutInput(
             preOrderId: 'aaaa00000000000000000000000000000000aaaa',
-            paymentMethodId: 2,
         ));
 
         $this->assertInstanceOf(CheckoutCompleted::class, $final);
@@ -68,7 +67,6 @@ final class CheckoutCompletedTest extends TestCase
     {
         $final = ($this->becoming)(new CheckoutInput(
             preOrderId: 'aaaa00000000000000000000000000000000aaaa',
-            paymentMethodId: 2,
         ));
 
         assert($final instanceof CheckoutCompleted);
@@ -84,7 +82,6 @@ final class CheckoutCompletedTest extends TestCase
         $before = count($this->mailer->sent());
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'aaaa00000000000000000000000000000000aaaa',
-            paymentMethodId: 2,
         ));
 
         $this->assertCount($before + 1, $this->mailer->sent());
@@ -95,7 +92,6 @@ final class CheckoutCompletedTest extends TestCase
         $before = count($this->gateway->captures());
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'aaaa00000000000000000000000000000000aaaa',
-            paymentMethodId: 2,
         ));
 
         $captures = $this->gateway->captures();
@@ -115,7 +111,6 @@ final class CheckoutCompletedTest extends TestCase
 
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'aaaa00000000000000000000000000000000aaaa',
-            paymentMethodId: 2,
         ));
 
         $this->assertNull(
@@ -129,7 +124,6 @@ final class CheckoutCompletedTest extends TestCase
         $this->expectException(PreOrderNotFoundException::class);
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'eeee00000000000000000000000000000000eeee',
-            paymentMethodId: 2,
         ));
     }
 
@@ -138,7 +132,6 @@ final class CheckoutCompletedTest extends TestCase
         $this->expectException(InsufficientStockException::class);
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'bbbb00000000000000000000000000000000bbbb',
-            paymentMethodId: 1,
         ));
     }
 
@@ -147,7 +140,6 @@ final class CheckoutCompletedTest extends TestCase
         $this->expectException(PaymentDeclinedException::class);
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'cccc00000000000000000000000000000000cccc',
-            paymentMethodId: 9,
         ));
     }
 }

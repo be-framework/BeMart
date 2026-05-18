@@ -5,8 +5,8 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 | メタ | 値 |
 |---|---|
 | Last updated | 2026-05-18 |
-| Latest session | phase-b-slice-3-prod-module-opus-4.7 |
-| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being / Pilot 5 doCheckout — Diamond-Cascade + Multi-side-effect Final) + alps-to-be-bear skill dogfooding + **Phase B Slice 1: Psalm setup** (taint analysis 足場 / baseline / composer scripts) |
+| Latest session | phase-b-slice-4-mass-assignment-fix-opus-4.7 |
+| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being / Pilot 5 doCheckout — Diamond-Cascade + Multi-side-effect Final) + alps-to-be-bear skill dogfooding + **Phase B Slice 1-4** (Psalm setup / ProdModule / Mass-assignment fix) |
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
 
@@ -648,9 +648,64 @@ Phase A の構造的事実:
 
 | 候補 | 性質 | 一行コメント |
 |---|---|---|
-| **Slice 4**: Mass-assignment fix (Pilot 5 F-2) | 決定的 | `CheckoutInput` から `paymentMethodId` を削除し `OrderEntity.paymentMethodId` を採用。Input 1 file + Being 1 file + test 更新 |
+| ~~**Slice 4**: Mass-assignment fix (Pilot 5 F-2)~~ | 決定的 | ✅ 完了 (下記 Slice 4 セクション参照) |
 | **Slice 5**: env-gated entry point | 決定的 | `bin/app.php` / `public/index.php` を新設して `getenv('APP_CONTEXT')` で AppModule/ProdModule 切替 |
 | Slice 6: AUTHZ check (Pilot 5 F-1) | 非決定的 | `CheckoutPrepared` に `SessionGuard` Reason 追加。session 設計と絡む |
 | Slice 7: bear-security-setup | 半決定的 | 認証 / 認可基盤の skill 適用 |
 | Slice 8: CSRF token | 非決定的 | 全 onPost endpoint に手を入れる |
 | Slice 9: Taint annotation (Slice 1 の続き) | 非決定的 | Psalm を BEAR/Be 用に annotate
+
+---
+
+## Phase B — Slice 4: Mass-assignment fix (Pilot 5 F-2)
+
+**目的:** Pilot 5 security-review F-2 (MASS-ASSIGNMENT) の構造的修正。
+
+### Problem (F-2 抜粋)
+
+> client supplied `paymentMethodId` を `OrderEntity.paymentMethodId` と照合せず gateway に forward。決済方法のすり替えが可能。
+
+`doCheckout` の前段 (`doProceedToConfirm`) で確定した決済方法を、confirm 段階で client が別の `paymentMethodId` (例: 安価 / 未認証の方式) に差し替えても通っていた。
+
+### Fix
+
+**「client から `paymentMethodId` を受け取らない」** に変更。サーバ側で永続化済みの `OrderEntity.paymentMethodId` を採用する。
+
+| 変更ファイル | 変更内容 |
+|---|---|
+| `be/src/Input/CheckoutInput.php` | コンストラクタから `public int $paymentMethodId` を削除。docblock に「client から受け取らない理由 (mass-assignment 防止)」を明記 |
+| `be/src/Being/CheckoutPrepared.php` | `#[Input] public int $paymentMethodId` 削除 |
+| `be/src/Being/CheckoutSettled.php` | `#[Input] public int $paymentMethodId` 削除。`$gateway->checkout($preOrderId, $paymentMethodId, ...)` を `$gateway->checkout($preOrderId, $order->paymentMethodId, ...)` に変更 |
+| `src/Resource/Page/Shopping/Checkout.php` | `onPost(string $preOrderId, int $paymentMethodId)` → `onPost(string $preOrderId)`。docblock に F-2 言及追加 |
+| `tests/Resource/CheckoutResourceTest.php` | 全 POST body から `'paymentMethodId' => N` を削除。**新規テスト**: `testClientSuppliedPaymentMethodIdIsIgnored` — paymentMethodId=9 (本来 decline を起こす値) を client から injection しても 201 を返すこと (ResourceObject が `paymentMethodId` を Input にバインドしないため、key は黙って捨てられる) を assert |
+| `be/tests/Domain/CheckoutCompletedTest.php` | 全 `new CheckoutInput(..., paymentMethodId: N)` から `paymentMethodId` を削除 |
+| `tests/Module/ProdModuleTest.php` | POST body から `paymentMethodId` を削除 |
+
+`be/src/Final/CheckoutCompleted.php` は元から `$order->paymentMethodId` を使っていたため変更不要。
+
+### Test Suite の偶然の幸運
+
+`be/var/fake/orders.json` の fixture が **元々 `preOrderId → paymentMethodId` を 1 対 1 に定めていた**:
+
+- `aaaa...` → `paymentMethodId: 2` (success)
+- `bbbb...` → `paymentMethodId: 1` (insufficient stock test 用)
+- `cccc...` → `paymentMethodId: 9` (gateway decline test 用)
+
+つまり以前から **「テストで指定していた `paymentMethodId` は OrderEntity と一致していた」**。Slice 4 は invariant を「契約として明文化」しただけ。テストの assertion 値 (total 2250, captures[paymentMethodId]=2 等) は一切変更不要。
+
+### 動作確認
+
+- **`composer test`**: 57/57 pass, 155 assertions, **0 notices** (Phase A 既存 52 + Slice 3 新規 4 + Slice 4 新規 1)
+- **`composer psalm`**: errors なし (`MissingOverrideAttribute` 等の info 24 件のみ; baseline 内)
+- **`composer psalm-taint`**: errors なし
+
+### Slice 4 の振り返り (決定的/非決定的)
+
+- **決定的だった**: 「client supplied PII を信頼しない」は OWASP / mass-assignment の textbook ルール。修正方針は一意 (= client field を削除して server-side source に置換)
+- **設計上の含意**: Be Framework の `#[Input]` は **「client から受け取る値の宣言」** であり、これを削るだけで攻撃面が物理的に消える。BEAR ResourceObject の `onPost` シグネチャからも引数が消えるため、ResourceObject のバインダーが余計な key を黙って捨ててくれる (= `Mass-assignment` 攻撃が **型シグネチャ違反として表現される** ことが構造的に保証される)
+- **対称的な気づき**: Slice 3 (logger 切替) が「**書く側の構造的封じ込め**」だったのに対し、Slice 4 は「**読む側の構造的封じ込め**」。両方ともコードを書き換えずに OFF にできる位置に security 境界がある (= AAA Module / Input 型)。これが Be Framework + BEAR.Sunday を「決定的要素として置ける」と言える根拠の 1 つ
+
+### 残課題 (Slice 4 由来)
+
+- **`PaymentMethodFactoryInterface` 経由の表示用 ID**: `doProceedToConfirm` 段階で client が支払い方法を **選択する** UI は別途必要。Pilot 5 fixture は scope 外なので未確認だが、その段階での paymentMethodId 取得経路 (session? form post? AJAX?) は Slice 6 (AUTHZ) と合わせて再設計する
+- **double-submit / replay 攻撃**: Slice 4 は payment method の固定化のみ。同じ preOrderId を 2 回送ると依然 2 回 gateway を呼べる (F-3 IDEMPOTENCY)。これは Slice 6+ で `dtb_order.pre_order_id` UNIQUE + `INSERT ON CONFLICT` に再設計する

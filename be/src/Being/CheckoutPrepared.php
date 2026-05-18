@@ -45,7 +45,6 @@ final readonly class CheckoutPrepared
 
     public function __construct(
         #[Input] public string $preOrderId,
-        #[Input] public int $paymentMethodId,
         #[Inject] OrderQueryInterface $orderQuery,
         #[Inject] PurchaseFlowInterface $purchaseFlow,
     ) {

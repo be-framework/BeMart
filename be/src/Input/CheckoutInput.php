@@ -35,17 +35,17 @@ use MyVendor\BeMart\Be\Being\CheckoutPrepared;
  * pattern would not exercise new Be Framework surface area, so the failure
  * path stays exception-based.
  *
- * The `paymentMethodId` is carried through every Being so that the gateway
- * step can issue the actual charge. EC-CUBE renders this id into a hidden
- * field on the ShoppingConfirm form; the Resource just forwards it
- * unchanged.
+ * The payment method is NOT accepted from the client. It is sourced from the
+ * persisted OrderEntity (which was set during the earlier doProceedToConfirm
+ * step) inside CheckoutSettled. Accepting it from the client would allow
+ * mass-assignment tampering — a client could substitute a different (cheaper
+ * or unauthenticated) payment method id at confirm-time.
  */
 #[Be(CheckoutPrepared::class)]
 final readonly class CheckoutInput
 {
     public function __construct(
         public string $preOrderId,
-        public int $paymentMethodId,
     ) {
     }
 }

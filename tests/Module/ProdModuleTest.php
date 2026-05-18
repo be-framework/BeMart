@@ -71,7 +71,6 @@ final class ProdModuleTest extends TestCase
         $resource = $injector->getInstance(ResourceInterface::class);
         $ro = $resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'paymentMethodId' => 2,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -97,7 +96,6 @@ final class ProdModuleTest extends TestCase
         $resource = $injector->getInstance(ResourceInterface::class);
         $resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'paymentMethodId' => 2,
         ]);
 
         $this->assertFileExists($this->logFile);
