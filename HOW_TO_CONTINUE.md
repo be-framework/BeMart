@@ -1,21 +1,20 @@
 # HOW_TO_CONTINUE.md
 
 別マシンでこの BeMart プロジェクトの作業を再開するための完全ガイド。
-最終更新: 2026-05-19 (Slice 7.1 完了直後)
+最終更新: 2026-05-18 (Slice 8 完了直後)
 
 ---
 
 ## 0. 現状サマリ
 
-- **ブランチ**: `be-first-migration-bootstrap`
+- **ブランチ**: `be-first-migration-bootstrap` (Slice 8 は同ブランチ上で進行)
 - **リモート**: `https://github.com/koriym/ec-cube-alps.git`
-- **最終コミット**: `0c48d8b` — Phase B Slice 7.1: rename SymfonySessionAdapter -> EccubeSharedSessionAdapter
-- **テスト**: 73 tests, 181 assertions すべて green
+- **最終 slice**: Phase B Slice 8 — CSRF token (BEAR 側のみ)
+- **テスト**: 90 tests, 205 assertions すべて green
 - **Psalm / Psalm-taint**: errors なし
-- **未 push のローカルコミット**: なし (origin と一致)
 
-進捗の正は `HANDOVER.md` (1100 行近く)。Phase A の Pilot 1-5 + Phase B の
-Slice 1-7.1 の全 decision log と積み残しが入っている。新マシン側 Claude が
+進捗の正は `HANDOVER.md` (1200 行超)。Phase A の Pilot 1-5 + Phase B の
+Slice 1-8 の全 decision log と積み残しが入っている。新マシン側 Claude が
 最初に読むべき唯一のドキュメント。
 
 ---
@@ -87,18 +86,19 @@ cs-fix スクリプトは無い。フォーマットは手動 or PHPStorm の au
 別マシンから作業を引き継ぎました。HOW_TO_CONTINUE.md と HANDOVER.md を読んで
 現状を把握してください。
 
-直近のコミット 0c48d8b (Phase B Slice 7.1) まで完了しています。次は以下の
+Phase B は Slice 8 (CSRF token, BEAR 側のみ) まで完了しています。次は以下の
 どちらかから選びたい:
 
-  A. Slice 8: CSRF token (全 onPost に CSRF guard)
-  B. EC-CUBE 側 EventListener (Slice 7 の積み残し: $_SESSION['customer_id']
-     ミラー実装。これが入って初めて本番経路で AUTHZ が実際に customerId を
-     検証できる)
+  A. Slice 9: Taint annotation 拡張 (Pilot 1-5 全体に @psalm-taint-* を
+     適用。CSRF check site は sanitizer として annotate)
+  B. EC-CUBE 側 EventListener 統合 (Slice 7.2 + 8.2: $_SESSION['customer_id']
+     + $_SESSION['_csrf_token'] の両方を 1 つの Symfony EventListener で
+     mirror する。これが入って初めて本番経路で AUTHZ + CSRF が実際に機能する)
 
 どちらを推奨するか、判断基準を出してください。
 ```
 
-判断基準は HANDOVER の Slice 7 セクション 末尾 (「次の Slice (Slice 8 以降)」
+判断基準は HANDOVER の Slice 8 セクション 末尾 (「次の Slice (Slice 9 以降)」
 表) にも書いてあるが、改めて出してもらう方が再ロード後の整合確認になる。
 
 ---
@@ -106,7 +106,7 @@ cs-fix スクリプトは無い。フォーマットは手動 or PHPStorm の au
 ## 3. 必読ファイル (Claude が最初に読む順)
 
 1. **`HANDOVER.md`** — 構築過程の全記録。Pilot 1-5 (Phase A) と
-   Slice 1-7.1 (Phase B) の decision log・積み残し・トレードオフ。
+   Slice 1-8 (Phase B) の decision log・積み残し・トレードオフ。
    読まなければ context 復元は不可能。
 2. **`CLAUDE.md`** — プロジェクト固有の規約 (ALPS が source of truth、
    `/run migrate` ワークフロー、参照パターン 8 種)。
@@ -128,7 +128,7 @@ ec-cube-alps/
 ├── CLAUDE.md                 # プロジェクト規約
 ├── docs/                     # 生成 HTML / SVG (asd output)
 ├── src/                      # BEAR.Sunday アプリ層
-│   ├── Auth/                 #   Session adapter (Slice 7)
+│   ├── Auth/                 #   Session adapter (Slice 7) + CSRF adapter (Slice 8)
 │   ├── Module/               #   Ray.Di Module (AppModule / ProdModule)
 │   ├── Resource/             #   ResourceObject (page://*, app://*)
 │   └── ...
@@ -161,38 +161,46 @@ ec-cube-alps/
 | Slice 6 | `51256d4` | AUTHZ ownership check for Pilot 5 F-1 | 完了 |
 | Slice 7 | `8847636` | production Session adapter (EC-CUBE bridge) | 完了 (BEAR 側のみ) |
 | Slice 7.1 | `0c48d8b` | rename + `@` 除去 + HANDOVER 修正 | 完了 |
-| Slice 8 | — | CSRF token | **未着手** |
+| Slice 8 | (本ブランチ) | CSRF token (BEAR 側のみ) | 完了 (BEAR 側のみ) |
 | Slice 9 | — | Taint annotation 拡張 | 未着手 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 
-### Slice 7 の重要な積み残し
+### Slice 7 / 8 の共通の積み残し
 
-**本番経路の AUTHZ はまだ実用にならない**。`EccubeSharedSessionAdapter` は
-`$_SESSION['customer_id']` を読むだけで、それを書く EC-CUBE 側 EventListener
-が無いと全 HTTP リクエストが anonymous → AUTHZ 全 403 になる。「fail-closed
-で安全側」 ではあるが「auth が動いている」 とは言えない。
+**本番経路の AUTHZ と CSRF はまだ実用にならない**。`EccubeSharedSessionAdapter`
+は `$_SESSION['customer_id']` を、`EccubeSharedCsrfTokenAdapter` は
+`$_SESSION['_csrf_token']` を読むだけで、それらを書く EC-CUBE 側 EventListener
+が無いと全 HTTP リクエストが「anonymous かつ no token」 → 全 403 になる。
+「fail-closed で安全側」 ではあるが「auth/csrf が動いている」 とは言えない。
 
-詳細は HANDOVER の "Phase B — Slice 7" セクション → "EC-CUBE 側 contract"
-を参照。実装が必要なのは以下の 5 行程度の Symfony EventListener:
+詳細は HANDOVER の "Phase B — Slice 7" / "Slice 8" セクション → "EC-CUBE 側
+contract" を参照。実装が必要なのは以下の 1 つの Symfony EventListener で、
+`customer_id` と `_csrf_token` の両方を mirror する形にまとめる:
 
 ```php
-// app/Customize/EventListener/SessionMirrorListener.php (EC-CUBE 側)
+// app/Customize/EventListener/BeMartSessionMirrorListener.php (EC-CUBE 側)
 public function onLoginSuccess(InteractiveLoginEvent $event): void
 {
     $customer = $event->getAuthenticationToken()->getUser();
+    $session = $event->getRequest()->getSession();
     if ($customer instanceof \Eccube\Entity\Customer) {
-        $event->getRequest()->getSession()->set('customer_id', (string) $customer->getId());
+        $session->set('customer_id', (string) $customer->getId());
     }
+    // Slice 8 mirror: 状態変更フォームが見る intention id を 1 つ固定して
+    // _csrf_token にコピーする。
+    $session->set('_csrf_token', $this->csrfManager->getToken('bemart_form')->getValue());
 }
 
 public function onLogout(LogoutEvent $event): void
 {
-    $event->getRequest()->getSession()->remove('customer_id');
+    $session = $event->getRequest()->getSession();
+    $session->remove('customer_id');
+    $session->remove('_csrf_token');
 }
 ```
 
-これを Slice 7.2 として BEAR リポジトリで直接書く (EC-CUBE 移植の練習) か、
-Phase 2 (EC-CUBE 移植) に送るかは判断点。
+これを Slice 7.2 / 8.2 (統合 mirror) として BEAR リポジトリで直接書く
+(EC-CUBE 移植の練習) か、Phase 2 (EC-CUBE 移植) に送るかは判断点。
 
 ---
 
@@ -225,17 +233,20 @@ composer psalm-taint
 ### bin/app.php (CLI 経由でリソース叩く)
 
 ```bash
-# dev (app context)
+# dev (app context) — FakeCsrfToken::TOKEN を csrfToken に渡す
 APP_CONTEXT=app php bin/app.php page://self/shopping/checkout \
-  '{"preOrderId":"aaaa00000000000000000000000000000000aaaa"}'
+  '{"preOrderId":"aaaa00000000000000000000000000000000aaaa","csrfToken":"fake-csrf-token-bemart-2026"}'
 
-# prod (CLI には BEMART_CLI_CUSTOMER_ID が必要 — 設定なしは anonymous → 403)
-APP_CONTEXT=prod BEMART_CLI_CUSTOMER_ID=customer-001 \
+# prod (CLI には BEMART_CLI_CUSTOMER_ID + BEMART_CLI_CSRF_TOKEN が必要)
+APP_CONTEXT=prod \
+  BEMART_CLI_CUSTOMER_ID=customer-001 \
+  BEMART_CLI_CSRF_TOKEN=cli-smoke-token \
   php bin/app.php page://self/shopping/checkout \
-  '{"preOrderId":"aaaa00000000000000000000000000000000aaaa"}'
+  '{"preOrderId":"aaaa00000000000000000000000000000000aaaa","csrfToken":"cli-smoke-token"}'
 ```
 
 注: `bin/app.php` は 4xx → exit 1、5xx → exit 2 で動く (Slice 5 で決定)。
+CSRF token 不一致 or 未指定は 403 (Slice 8 で追加)。
 
 ---
 
@@ -286,5 +297,5 @@ graph が切れる可能性。`psalm.xml` の `taintAnalysis` セクションを
 git clone https://github.com/koriym/ec-cube-alps.git && cd ec-cube-alps
 && git checkout be-first-migration-bootstrap && composer install
 && composer test && claude
-# あとは HANDOVER.md を読ませて Slice 8 / EC-CUBE listener どちらに進むか相談
+# あとは HANDOVER.md を読ませて Slice 9 / EC-CUBE listener どちらに進むか相談
 ```

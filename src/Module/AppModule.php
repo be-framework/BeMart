@@ -30,8 +30,10 @@ use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerInitialPoint;
 use MyVendor\BeMart\Be\Reason\Service\FakeInventoryAllocator;
@@ -138,5 +140,12 @@ final class AppModule extends AbstractAppModule
         // working unchanged. Tests that need a different (or absent)
         // customer override this binding with a fresh FakeSession instance.
         $this->bind(SessionInterface::class)->toInstance(new FakeSession('customer-001'));
+
+        // Reason (Phase B Slice 8): CSRF token validator for state-changing
+        // requests. Default binds FakeCsrfToken, which validates against
+        // FakeCsrfToken::TOKEN. Resource tests submit that constant as the
+        // `csrfToken` body field; tests that need to exercise rejection
+        // simply omit it or pass a mismatch.
+        $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class)->in(Scope::SINGLETON);
     }
 }

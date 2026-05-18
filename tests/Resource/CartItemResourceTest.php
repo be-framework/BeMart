@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -31,6 +32,7 @@ final class CartItemResourceTest extends TestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 2,
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -45,6 +47,7 @@ final class CartItemResourceTest extends TestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'missing-xyz',
             'quantity' => 1,
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
@@ -56,6 +59,7 @@ final class CartItemResourceTest extends TestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'out-of-stock-test-001',
             'quantity' => 1,
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -66,9 +70,35 @@ final class CartItemResourceTest extends TestCase
         $ro = $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 0,
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
         $this->assertNotEmpty($ro->body['message']);
+    }
+
+    public function testOnPostMissingCsrfReturns403(): void
+    {
+        // Phase B Slice 8: state-changing requests without a CSRF token are
+        // rejected at the resource boundary, before the Becoming chain
+        // even sees the payload.
+        $ro = $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 1,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('CSRF', $ro->body['message']);
+    }
+
+    public function testOnPostInvalidCsrfReturns403(): void
+    {
+        $ro = $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 1,
+            'csrfToken' => 'not-the-real-token',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

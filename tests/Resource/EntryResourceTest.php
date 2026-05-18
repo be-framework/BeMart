@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -33,6 +34,7 @@ final class EntryResourceTest extends TestCase
             'password' => 'first-passphrase-2026',
             'name01' => '一郎',
             'name02' => '田中',
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -56,6 +58,7 @@ final class EntryResourceTest extends TestCase
             'pref' => 13,
             'addr01' => '渋谷区',
             'addr02' => '神宮前1-2-3',
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
@@ -68,6 +71,7 @@ final class EntryResourceTest extends TestCase
             'password' => 'try-to-overwrite-2026',
             'name01' => '別人',
             'name02' => 'A',
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(409, $ro->code);
@@ -81,6 +85,7 @@ final class EntryResourceTest extends TestCase
             'password' => 'whatever-2026',
             'name01' => '佐藤',
             'name02' => '五郎',
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
@@ -94,8 +99,25 @@ final class EntryResourceTest extends TestCase
             'password' => '',
             'name01' => '佐藤',
             'name02' => '六郎',
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
+    }
+
+    public function testOnPostMissingCsrfReturns403(): void
+    {
+        // Phase B Slice 8: state-changing requests without a CSRF token are
+        // rejected at the resource boundary, before the Becoming chain
+        // even sees the payload.
+        $ro = $this->resource->post('page://self/entry', [
+            'email' => 'no-csrf@example.com',
+            'password' => 'whatever-2026',
+            'name01' => '佐藤',
+            'name02' => '七郎',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 }
