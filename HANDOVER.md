@@ -5,8 +5,8 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 | メタ | 値 |
 |---|---|
 | Last updated | 2026-05-18 |
-| Latest session | phase-b-slice-4-mass-assignment-fix-opus-4.7 |
-| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being / Pilot 5 doCheckout — Diamond-Cascade + Multi-side-effect Final) + alps-to-be-bear skill dogfooding + **Phase B Slice 1-4** (Psalm setup / ProdModule / Mass-assignment fix) |
+| Latest session | phase-b-slice-5-env-gated-entry-point-opus-4.7 |
+| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being / Pilot 5 doCheckout — Diamond-Cascade + Multi-side-effect Final) + alps-to-be-bear skill dogfooding + **Phase B Slice 1-5** (Psalm setup / ProdModule / Mass-assignment fix / env-gated entry point) |
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
 
@@ -649,7 +649,7 @@ Phase A の構造的事実:
 | 候補 | 性質 | 一行コメント |
 |---|---|---|
 | ~~**Slice 4**: Mass-assignment fix (Pilot 5 F-2)~~ | 決定的 | ✅ 完了 (下記 Slice 4 セクション参照) |
-| **Slice 5**: env-gated entry point | 決定的 | `bin/app.php` / `public/index.php` を新設して `getenv('APP_CONTEXT')` で AppModule/ProdModule 切替 |
+| ~~**Slice 5**: env-gated entry point~~ | 決定的 | ✅ 完了 (下記 Slice 5 セクション参照) |
 | Slice 6: AUTHZ check (Pilot 5 F-1) | 非決定的 | `CheckoutPrepared` に `SessionGuard` Reason 追加。session 設計と絡む |
 | Slice 7: bear-security-setup | 半決定的 | 認証 / 認可基盤の skill 適用 |
 | Slice 8: CSRF token | 非決定的 | 全 onPost endpoint に手を入れる |
@@ -709,3 +709,75 @@ Phase A の構造的事実:
 
 - **`PaymentMethodFactoryInterface` 経由の表示用 ID**: `doProceedToConfirm` 段階で client が支払い方法を **選択する** UI は別途必要。Pilot 5 fixture は scope 外なので未確認だが、その段階での paymentMethodId 取得経路 (session? form post? AJAX?) は Slice 6 (AUTHZ) と合わせて再設計する
 - **double-submit / replay 攻撃**: Slice 4 は payment method の固定化のみ。同じ preOrderId を 2 回送ると依然 2 回 gateway を呼べる (F-3 IDEMPOTENCY)。これは Slice 6+ で `dtb_order.pre_order_id` UNIQUE + `INSERT ON CONFLICT` に再設計する
+
+---
+
+## Phase B — Slice 5: env-gated entry point
+
+**目的:** Slice 3 で作った `ProdModule` を **実際に起動経路から呼ばせる**。それまでは `ProdModuleTest` が in-process で binding を検証しているだけで、CLI / HTTP の entry point は存在しなかった (Pilot 1-5 は全部 PHPUnit 経由)。
+
+### Why now (Slice 順序の判断)
+
+Slice 3 で「ProdModule は AppModule の安全な置き換え」を **証明済み**。Slice 4 で「Input 側の構造防御」も導入した。あとは **どこからどうやって `APP_CONTEXT=prod` をフリップさせるか** を実装するだけ。これが無いと「prod の binding はあるが、それを呼ぶ場所が無い」状態。Slice 6+ (AUTHZ / CSRF) も entry point 越しに振る舞いを観測したくなる場面が出るので、ここで足場を作る。
+
+### 追加ファイル (3)
+
+| ファイル | 役割 |
+|---|---|
+| [bin/app.php](bin/app.php) | CLI entry。`APP_CONTEXT` → Module class (`{name}Module`, ucfirst) を resolve し、`Injector` で `ResourceInterface` を解決。`page://self/...` URI と JSON body 引数を受け取って resource を実行、結果を JSON で stdout に出力。失敗時は exit 2 |
+| [public/index.php](public/index.php) | HTTP entry。同じ context resolution を行い、`REQUEST_METHOD` + `REQUEST_URI` + JSON body から resource 呼び出しに変換、JSON で response 返す。Slice 5 では minimum viable (router / AOP / cache 全部なし)。本番運用には不足だが「prod context が起動経路で発動する」ことの実証としては十分 |
+| [tests/EntryPoint/AppEntryPointTest.php](tests/EntryPoint/AppEntryPointTest.php) | `bin/app.php` を subprocess (`exec()`) で起動して APP_CONTEXT が **本当に効いている** ことを検証。`prod` で log 未書き出し、`app` で書き出し、未定義 context で exit 2、URI 欠落で exit 2 の 4 ケース |
+
+### Context resolution 規約
+
+```text
+APP_CONTEXT=prod  → MyVendor\BeMart\Module\ProdModule
+APP_CONTEXT=app   → MyVendor\BeMart\Module\AppModule
+APP_CONTEXT 未設定 → AppModule (dev default)
+```
+
+実装は `ucfirst($context) . 'Module'` で class 名を生成 → `class_exists` + `is_subclass_of(AbstractModule)` で安全性チェック → `new $class($meta)` で instantiate。BEAR\Package\Injector の `Module` クラス (vendor/bear/package/src/Module.php) と同じ convention を採用したが、`Injector::getInstance` 自体は使わなかった (理由: `AppInterface` binding を要求するが、Pilot 5 までの module は AppInterface を bind していない。Slice 5 の scope を逸脱するので深追いせず、`Ray\Di\Injector` を直接使う簡易版で済ませた)。
+
+### 検証
+
+```bash
+$ rm -f var/log/bemart.json
+$ APP_CONTEXT=app php bin/app.php 'page://self/shopping/checkout' '{"preOrderId":"aaaa00000000000000000000000000000000aaaa"}'
+{ "context": "app", "uri": "...", "code": 201, "body": { ... } }
+$ ls var/log/bemart.json
+-rw-r--r--  ...  bemart.json    # ← 書かれた
+
+$ rm -f var/log/bemart.json
+$ APP_CONTEXT=prod php bin/app.php 'page://self/shopping/checkout' '...'
+{ "context": "prod", ... }
+$ ls var/log/bemart.json
+ls: ... No such file or directory   # ← 書かれていない
+```
+
+- **`composer test`**: 61/61 pass, 166 assertions, **0 notices** (Slice 4 まで 57 + entry-point 新規 4)
+- **`composer psalm`**: errors なし
+- **`composer psalm-taint`**: errors なし
+
+### 設計上の判断と注釈
+
+- **HTTP server を一切設定していない**: `public/index.php` は WebRouter / Compiler / cache 一切なし。本番デプロイ前に Slice 7 (bear-security-setup) と合わせて router + 認証 middleware を埋める前提
+- **Psalm scope 外**: `bin/` / `public/` は `psalm.xml` の `projectFiles` に含めていない。理由は (a) 元々 procedural script は `$_SERVER` / `$_POST` で `mixed` が多発し noise になりがち、(b) entry point の logic 自体は 50 行程度で目視確認可能。Slice 9 (taint annotation) で `$_POST` を taint source として正しく扱うときに合わせて scope に入れる
+- **テストは subprocess fork**: `exec()` で別 PHP プロセスを起動。理由は (a) `getenv` の親プロセスとの汚染を避ける、(b) DI cache が共有されない、(c) 「本当に起動経路から呼べる」ことの証明。代償として 4 件のテストで約 1 秒余計にかかる
+- **`bin/smoke_phase6.php`**: 残置。これは Pilot 2 (`AddCartItemInput`) 用の手元 smoke runner で、`bin/app.php` の汎用版とは別物。削除はしない (Pilot 2 を再現する手っ取り早い手段として有用)
+
+### Slice 5 の振り返り (決定的/非決定的)
+
+- **決定的だった**: 「env 変数で Module を switch する」 のメカニズム自体は **完全に固定パターン**。BEAR\Package\Module の class-name convention をコピーするだけ。Slice 1 (Psalm setup) より更に意思決定が少ない
+- **判断が要ったポイント** (= 半決定的):
+  - **どこまで作るか**: 完全 router 付きの HTTP front controller か、それとも env switch + 最低限の dispatch か。Slice 5 の目的「prod がアクセス経路から発動する」 を満たすだけなら後者で十分 → 後者を選択
+  - **Injector の API 選択**: `BEAR\Package\Injector::getInstance` (Compiler 付き) か `Ray\Di\Injector` (直接) か。前者は `AppInterface` binding を要求するため、Slice 5 でやるには Pilot 全部に AppInterface を入れる必要があった → 後者で済ませた
+- **積み残しの自覚**: Slice 5 を経ても **「production-grade な entry point」 ではない**。Router (URI → Resource binding) / Compiler (eager AOP weaving) / Logger sink / Error formatter のどれも欠けている。Slice 7 (bear-security-setup) / 将来の Slice (Phase C 相当の deployment 系) で順次埋める
+
+### 次の Slice (Slice 6 以降)
+
+| 候補 | 性質 | 一行コメント |
+|---|---|---|
+| **Slice 6**: AUTHZ check (Pilot 5 F-1) | 非決定的 | `CheckoutPrepared` に `SessionGuard` Reason を追加。session の保持方法 (cookie / JWT / server-side store) は未決定なのでユーザー判断が必要 |
+| Slice 7: bear-security-setup | 半決定的 | 認証 / 認可基盤の skill 適用。Slice 6 と一部統合検討 |
+| Slice 8: CSRF token | 非決定的 | 全 `onPost` endpoint に token middleware。token 配布手段 (session vs sync) は要判断 |
+| Slice 9: Taint annotation | 非決定的 | Psalm `@psalm-taint-*` の BEAR `#[Input]` 対応。`$_POST` を taint source として正しく扱う |
