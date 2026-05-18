@@ -1,5 +1,5 @@
 {
-  "$comment": "Pre-order (orderStatus=PROCESSING(8)) fixtures keyed by preOrderId. Used by FakeOrderQuery for Pilot 3 (doConfirmOrder). preOrderId values match carts.json so end-to-end Cart → Order linkage is testable. paymentMethodId conventions: 1=代金引換 (verify always succeeds), 2=クレジットカード (verify succeeds), 9=verify-failure simulator. The 'noisy-fail' fixture deliberately points to method 9 so the branching path (PaymentVerified → PaymentFailureCase → OrderConfirmFailed) is exercised.",
+  "$comment": "Pre-order (orderStatus=PROCESSING(8)) fixtures keyed by preOrderId. Used by FakeOrderQuery for Pilot 3 (doConfirmOrder) and Pilot 5 (doCheckout). preOrderId values match carts.json so end-to-end Cart → Order linkage is testable. paymentMethodId conventions: 1=代金引換 (verify always succeeds, checkout succeeds), 2=クレジットカード (verify+checkout succeed), 9=verify+checkout failure simulator. Pilot 5 adds 'completed-pilot5' (happy-path checkout) and 'oos-pilot5' (insufficient stock; products map to inventory.json tight-stock entry).",
   "deadbeefcafe1234567890abcdef01234567890a": {
     "preOrderId": "deadbeefcafe1234567890abcdef01234567890a",
     "customerId": "customer-001",
@@ -26,5 +26,32 @@
       { "productCode": "sample-001", "quantity": 1, "price": 1200 }
     ],
     "deliveryFeeTotal": 500
+  },
+  "aaaa00000000000000000000000000000000aaaa": {
+    "preOrderId": "aaaa00000000000000000000000000000000aaaa",
+    "customerId": "customer-001",
+    "paymentMethodId": 2,
+    "items": [
+      { "productCode": "sample-001", "quantity": 1, "price": 1500 }
+    ],
+    "deliveryFeeTotal": 600
+  },
+  "bbbb00000000000000000000000000000000bbbb": {
+    "preOrderId": "bbbb00000000000000000000000000000000bbbb",
+    "customerId": "customer-001",
+    "paymentMethodId": 1,
+    "items": [
+      { "productCode": "oos-pilot5-tightstock", "quantity": 3, "price": 800 }
+    ],
+    "deliveryFeeTotal": 500
+  },
+  "cccc00000000000000000000000000000000cccc": {
+    "preOrderId": "cccc00000000000000000000000000000000cccc",
+    "customerId": "customer-002",
+    "paymentMethodId": 9,
+    "items": [
+      { "productCode": "sample-001", "quantity": 1, "price": 1000 }
+    ],
+    "deliveryFeeTotal": 700
   }
 }

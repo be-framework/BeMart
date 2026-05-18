@@ -19,4 +19,10 @@ final class FakeCartCommand implements CartCommandInterface
     {
         $this->storage->put($cart);
     }
+
+    #[Override]
+    public function clearByPreOrderId(string $preOrderId): void
+    {
+        $this->storage->removeByPreOrderId($preOrderId);
+    }
 }
