@@ -63,6 +63,13 @@ final class ProdModuleTest extends TestCase
             unlink($this->logFile);
         }
 
+        // Slice 7: ProdModule binds SessionInterface to SymfonySessionAdapter,
+        // which reads $_SESSION['customer_id']. The `aaaa…` pre-order belongs
+        // to customer-001; we mirror that into $_SESSION here to satisfy
+        // CheckoutPrepared's AUTHZ check. This is the same mirror an EC-CUBE
+        // EventListener would set after a successful login.
+        $_SESSION['customer_id'] = 'customer-001';
+
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
             dirname(__DIR__, 2) . '/var/tmp/prod',
@@ -107,5 +114,9 @@ final class ProdModuleTest extends TestCase
         if (file_exists($this->logFile)) {
             unlink($this->logFile);
         }
+
+        // Slice 7: scrub any session value we set so unrelated tests
+        // (especially anonymous-session AUTHZ tests) start clean.
+        unset($_SESSION['customer_id']);
     }
 }

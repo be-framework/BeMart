@@ -19,7 +19,10 @@ use Override;
  *
  * Future Phase B slices will:
  * - Replace Fake Reasons with real DB-backed implementations under prod
- * - Add CSRF / rate-limit / AUTHZ overrides here
+ * - Add CSRF / rate-limit overrides here
+ *
+ * Slice 7 added ProdSessionOverrideModule: SessionInterface is bound to
+ * SymfonySessionAdapter under prod (vs. FakeSession under dev/test).
  */
 final class ProdModule extends AbstractAppModule
 {
@@ -28,5 +31,6 @@ final class ProdModule extends AbstractAppModule
     {
         $this->install(new AppModule($this->appMeta));
         $this->override(new ProdLoggingOverrideModule());
+        $this->override(new ProdSessionOverrideModule());
     }
 }
