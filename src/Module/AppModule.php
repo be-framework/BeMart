@@ -41,6 +41,7 @@ use MyVendor\BeMart\Be\Reason\Service\FakePasswordHasher;
 use MyVendor\BeMart\Be\Reason\Service\FakePaymentGateway;
 use MyVendor\BeMart\Be\Reason\Service\FakePaymentMethodFactory;
 use MyVendor\BeMart\Be\Reason\Service\FakePurchaseFlow;
+use MyVendor\BeMart\Be\Reason\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Be\Reason\Service\OrderNumberGeneratorInterface;
@@ -48,6 +49,7 @@ use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use Ray\Di\Scope;
 
 final class AppModule extends AbstractAppModule
@@ -129,5 +131,12 @@ final class AppModule extends AbstractAppModule
         $this->bind(MailerInterface::class)->toInstance($mailer);
         $this->bind(OrderNumberGeneratorInterface::class)->to(FakeOrderNumberGenerator::class);
         $this->bind(OrderCommandInterface::class)->to(FakeOrderCommand::class);
+
+        // Reason (Phase B Slice 6): Session for ownership checks. Default
+        // binds a logged-in fixture customer ('customer-001') matching the
+        // `aaaa…` happy-path pre-order so existing Pilot tests continue
+        // working unchanged. Tests that need a different (or absent)
+        // customer override this binding with a fresh FakeSession instance.
+        $this->bind(SessionInterface::class)->toInstance(new FakeSession('customer-001'));
     }
 }

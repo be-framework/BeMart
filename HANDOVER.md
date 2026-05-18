@@ -781,3 +781,120 @@ ls: ... No such file or directory   # ← 書かれていない
 | Slice 7: bear-security-setup | 半決定的 | 認証 / 認可基盤の skill 適用。Slice 6 と一部統合検討 |
 | Slice 8: CSRF token | 非決定的 | 全 `onPost` endpoint に token middleware。token 配布手段 (session vs sync) は要判断 |
 | Slice 9: Taint annotation | 非決定的 | Psalm `@psalm-taint-*` の BEAR `#[Input]` 対応。`$_POST` を taint source として正しく扱う |
+
+---
+
+## Phase B — Slice 6: AUTHZ check (Pilot 5 F-1)
+
+**目的:** Pilot 5 security-review が指摘した **F-1 (AUTHZ 欠如)** を閉じる。Resource は preOrderId を受け取るだけで「その pre-order が requester のものか」を一切確認していなかった。`?preOrderId=...` を URL から拾えば誰でも他人の確定を実行できた状態。
+
+### Why now (Slice 順序の判断)
+
+Slice 5 で entry point が動いたので、Slice 6 は「session という非決定的な要素を **どこに** 持つか」だけ決めれば実装に入れる。CSRF (Slice 8) / Taint (Slice 9) より前にやる理由は: AUTHZ は **business invariant** (誰がオーナーか) で、CSRF は **transport invariant** (この request が本物か)。前者が無いと後者があっても他人の pre-order は確定できてしまう。順序として AUTHZ → CSRF が正しい。
+
+### 追加 / 変更ファイル
+
+| ファイル | 役割 | 種別 |
+|---|---|---|
+| [be/src/Reason/Service/SessionInterface.php](be/src/Reason/Service/SessionInterface.php) | `customerId(): string\|null` のみを持つ最小 contract。Be Reason として注入される | 新規 |
+| [be/src/Reason/Service/FakeSession.php](be/src/Reason/Service/FakeSession.php) | constructor で渡された customerId をそのまま返す。`null` を渡せば anonymous | 新規 |
+| [be/src/Exception/UnauthorizedPreOrderAccessException.php](be/src/Exception/UnauthorizedPreOrderAccessException.php) | `DomainException` 派生 + `#[Message]` で en/ja を持つ。Resource は HTTP 403 にマップ | 新規 |
+| [be/src/Being/CheckoutPrepared.php](be/src/Being/CheckoutPrepared.php) | `SessionInterface` を `#[Inject]` し、`$session->customerId() !== $order->customerId` で reject。**順序: 存在 → AUTHZ → PurchaseFlow**。理由は本文参照 | 変更 |
+| [src/Resource/Page/Shopping/Checkout.php](src/Resource/Page/Shopping/Checkout.php) | `UnauthorizedPreOrderAccessException` を `Code::FORBIDDEN` (403) にマップ。docblock 更新 | 変更 |
+| [src/Module/AppModule.php](src/Module/AppModule.php) | `bind(SessionInterface)->toInstance(new FakeSession('customer-001'))`。**default を logged-in customer-001 に固定** することで既存 Pilot テストを破壊しない | 変更 |
+| [be/tests/Domain/CheckoutCompletedTest.php](be/tests/Domain/CheckoutCompletedTest.php) | `rebindSession()` helper を追加。`cccc…` (customer-002) を扱う既存テスト + 2 件の AUTHZ 失敗テストを追加 | 変更 |
+| [tests/Resource/CheckoutResourceTest.php](tests/Resource/CheckoutResourceTest.php) | 同じパターン。403 を返す 2 件追加 | 変更 |
+
+### 設計上の判断
+
+#### Session の保持方法 — 「Reason として注入」 を選択
+
+候補は 3 つあった:
+
+1. **`$_SESSION` global を直接読む procedural helper** — Be / BEAR どちらの DI 哲学にも合わない。テストで session を切替えるのも難しい。却下
+2. **`SessionInterface` を `#[Inject]` する Reason** — Be Reason として扱う。Fake は memory、本番は `$_SESSION` 読みアダプタを後付け差し替え。**採用**
+3. **Resource 層で読んで Input に乗せる** — `CheckoutInput` に `customerId` を足す。クライアントが指定できる field を増やすことになり Slice 4 で潰した mass-assignment と矛盾。却下
+
+#### 順序: 存在 → AUTHZ → PurchaseFlow
+
+```text
+1. OrderQuery::byPreOrderId(...)
+   → null なら PreOrderNotFoundException (404)
+2. $session->customerId() !== $order->customerId
+   → throw UnauthorizedPreOrderAccessException (403)
+3. PurchaseFlow::apply($order)
+   → totals 計算 (失敗時 InsufficientStock 422)
+```
+
+3 つの理由:
+
+- **(存在) が先**: もし AUTHZ を先にしてしまうと、anonymous user が `?preOrderId=<random>` で総当たりした場合に「403 = 存在する」「404 = 存在しない」の **存在オラクル** ができてしまう。存在チェックを先にすれば、anonymous は常に「404 か 403 か」のどちらか (= 同じ 4xx の塊) しか観測できない。**ただし完璧ではない**: customer-001 がログイン中に他人の preOrderId を試した場合は「404 (存在しない)」 vs 「403 (存在するが他人のもの)」 で区別できる。これは F-1 の scope 外 (timing attack 系) として残置。Phase B でログイン中の存在チェックも 404 に統一する判断は要相談
+- **(AUTHZ) が PurchaseFlow より先**: PurchaseFlow は (将来) 在庫引当の前計算 / 配送料計算を含む。AUTHZ を後にすると認可されない request でも compute が走る。DoS amplification を避ける
+- **PurchaseFlow が最後**: ここまで来れば requester は本物のオーナー。失敗は純粋に business reason (在庫無し等)
+
+#### Default を customer-001 に固定した理由
+
+`AppModule` の default `SessionInterface` を `new FakeSession('customer-001')` に固定。これにより **既存 Pilot 1-5 のテスト (`aaaa…` を使う happy-path 系) は 1 行も変更不要**。AUTHZ をテストしたいテストだけが override する。
+
+代替案として「default を anonymous (`null`) にする」 もあった。これは「security by default」 として正しい設計だが、Pilot 1-5 の 50+ テストすべてに rebindSession を入れる必要があった。Slice 6 の scope を肥大化させるので却下。本番では Slice 7 (bear-security-setup) で `$_SESSION` アダプタに差し替えるので、AppModule の default 値はあくまで test fixture。
+
+#### `Code::FORBIDDEN` (403) と `Code::NOT_FOUND` (404) の差
+
+OWASP の AUTHZ guide に従い、**「リソースが存在することは知っているが、あなたには見せない」** を 403、**「リソースは存在しない (またはあなたに見せない、を兼ねる)」** を 404 とした。Pilot 5 では:
+
+- 404: `OrderQuery` が null → 物理的に存在しない
+- 403: 存在するが `customerId` が一致しない → AUTHZ 違反
+
+これは設計上の選択であり、上記の **timing attack** 注釈の通り完璧な存在隠蔽ではない。Slice 6 では「明確な区別」 を取り、Slice 7+ で「存在隠蔽の強化」 を別途検討する。
+
+#### Test 戦略: `rebindSession()` helper
+
+PHPUnit の `setUp()` で default customer-001 を bind、各テストで必要なら `rebindSession(...)` で injector を作り直す。理由:
+
+- **Pilot 5 既存テスト** (`aaaa…` / `bbbb…` = customer-001) は default で動くまま → 既存テスト 0 行変更
+- **payment-decline (`cccc…` = customer-002)** は 1 行 `rebindSession('customer-002')` を足すだけ
+- **AUTHZ 失敗テスト** は `rebindSession('customer-999')` / `rebindSession(null)` を足す
+
+新規 AUTHZ テスト 4 件:
+
+| テスト名 | session | preOrderId | 期待結果 |
+|---|---|---|---|
+| `testForeignCustomerRejectedWithAuthz` | `customer-999` | `aaaa…` (owner: customer-001) | `UnauthorizedPreOrderAccessException` + **no side-effect** (gateway captures / mailer sent が 0 件のまま) |
+| `testAnonymousSessionRejectedWithAuthz` | `null` | `aaaa…` | 同上 |
+| `testOnPostForeignCustomerReturns403` | `customer-999` | `aaaa…` | HTTP 403 |
+| `testOnPostAnonymousReturns403` | `null` | `aaaa…` | HTTP 403 |
+
+**no side-effect の検証** が重要。AUTHZ は `CheckoutPrepared` (Stage 1) で reject されるので、`CheckoutSettled` (Stage 2: payment capture + order number 採番) と `CheckoutCompleted` (Final: persist + mail + cart-clear) には到達しない。`$gateway->captures()` と `$mailer->sent()` を直接 introspect して確認。
+
+### 検証
+
+```bash
+$ composer test
+OK (65 tests, 172 assertions)   # Slice 5 から +4 (新規 AUTHZ 4 件)
+
+$ composer psalm
+No errors found!
+
+$ composer psalm-taint
+No errors found!
+```
+
+`cccc…` を使う既存テスト 2 件 (`testPaymentDeclinedRejected` / `testOnPostPaymentDeclinedReturns422`) は AUTHZ が先に走るようになったため一度 fail したが、`rebindSession('customer-002')` の追加で復旧。これは **新規 AUTHZ が想定通り効いている** 証跡でもある (orders.json で `cccc…` が customer-002 にひもづいているのは Pilot 3 時の元データ)。
+
+### Slice 6 の振り返り (決定的/非決定的)
+
+- **非決定的だった部分**: 「session の保持方法」 と 「default value」。前者は **Reason として注入** で決着、後者は **test 互換性を優先して customer-001 固定**。どちらも Slice 7 (bear-security-setup) で **本番アダプタ + 真の default は anonymous** に置き換える前提
+- **決定的だった部分**: 順序 (存在 → AUTHZ → PurchaseFlow) は OWASP / DoS 観点から論理的に **強制された**。Resource → 403 のマッピングも HTTP semantics から自明
+- **積み残し**:
+  - **本番 SessionInterface アダプタ** (`$_SESSION` 読み or JWT decode or cookie-based) は Slice 7 で実装。`SessionInterface` という contract だけ確定させて、実装は差し替え可能にしてある
+  - **存在オラクル**: ログイン中 user が他人の preOrderId を試したときの 404 vs 403 区別は残置。Slice 8+ で「ログイン中も 404 に統一」 を検討
+  - **logged-out user の HTTP 401 vs 403**: anonymous (`customerId()===null`) は技術的には「authentication が無い」ので 401 が正解。Slice 6 では「ownership 不一致」 として 403 で統一した。Slice 7 で AuthN/AuthZ を分離する時に 401 / 403 を分ける可能性あり
+
+### 次の Slice (Slice 7 以降)
+
+| 候補 | 性質 | 一行コメント |
+|---|---|---|
+| **Slice 7**: bear-security-setup + 本番 Session アダプタ | 半決定的 | `bear-security-setup` skill 適用 + `$_SESSION` (または JWT) → `SessionInterface` の本番実装。`ProdModule` 側で差し替え |
+| Slice 8: CSRF token | 非決定的 | 全 `onPost` endpoint に CSRF guard。token 配布手段 (session-bound vs sync token) は要判断 |
+| Slice 9: Taint annotation | 非決定的 | Psalm `@psalm-taint-*` を Pilot 1-5 + Slice 6 にも適用。`$_POST` / `$_SESSION` を source、`gateway::charge` 等を sink としてグラフを引く |
+| (追加検討) Slice 10: 存在オラクル軽減 | 非決定的 | 既存 user に対する 404 / 403 統一。**user-facing UX を悪化させる** ので、threat model と合わせてユーザー判断が必要 |

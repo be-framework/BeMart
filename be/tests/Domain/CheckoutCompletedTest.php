@@ -9,6 +9,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\InsufficientStockException;
 use MyVendor\BeMart\Be\Exception\PaymentDeclinedException;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Input\CheckoutInput;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
@@ -16,8 +17,11 @@ use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
 use MyVendor\BeMart\Be\Reason\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Service\FakePaymentGateway;
+use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function assert;
@@ -34,10 +38,31 @@ final class CheckoutCompletedTest extends TestCase
 
     protected function setUp(): void
     {
-        $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
-            dirname(__DIR__, 2) . '/var/tmp/test',
-        );
+        // Default session: customer-001 owns the `aaaa…` / `bbbb…` fixtures.
+        // Tests using `cccc…` (customer-002) or asserting AUTHZ rejection
+        // call rebindSession() explicitly.
+        $this->rebindSession('customer-001');
+    }
+
+    /** Build a fresh injector with the given session customerId (null = anonymous). */
+    private function rebindSession(string|null $customerId): void
+    {
+        $session = new FakeSession($customerId);
+        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(SessionInterface::class)->toInstance($this->session);
+            }
+        };
+        $base->override($override);
+
+        $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->becoming = $injector->getInstance(BecomingInterface::class);
         $this->orderStorage = $injector->getInstance(FakeFinalizedOrderStorage::class);
         $this->cartStorage = $injector->getInstance(FakeCartStorage::class);
@@ -137,9 +162,50 @@ final class CheckoutCompletedTest extends TestCase
 
     public function testPaymentDeclinedRejected(): void
     {
+        // `cccc…` belongs to customer-002 — rebind the session so we reach
+        // PurchaseFlow (which simulates the decline) rather than tripping the
+        // ownership check earlier in CheckoutPrepared.
+        $this->rebindSession('customer-002');
+
         $this->expectException(PaymentDeclinedException::class);
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'cccc00000000000000000000000000000000cccc',
+        ));
+    }
+
+    public function testForeignCustomerRejectedWithAuthz(): void
+    {
+        // Phase B Slice 6 (Pilot 5 F-1): the requester is logged in but does
+        // not own the `aaaa…` pre-order. CheckoutPrepared must reject *before*
+        // any side effect runs (no payment capture, no mail, no order persist).
+        $this->rebindSession('customer-999');
+
+        $beforeCaptures = count($this->gateway->captures());
+        $beforeMails = count($this->mailer->sent());
+
+        try {
+            ($this->becoming)(new CheckoutInput(
+                preOrderId: 'aaaa00000000000000000000000000000000aaaa',
+            ));
+            $this->fail('Expected UnauthorizedPreOrderAccessException was not thrown.');
+        } catch (UnauthorizedPreOrderAccessException) {
+            // expected
+        }
+
+        $this->assertCount($beforeCaptures, $this->gateway->captures(), 'No payment must be captured on AUTHZ failure.');
+        $this->assertCount($beforeMails, $this->mailer->sent(), 'No mail must be sent on AUTHZ failure.');
+    }
+
+    public function testAnonymousSessionRejectedWithAuthz(): void
+    {
+        // Anonymous (no logged-in customer) is also a mismatch: the pre-order
+        // belongs to a real customer, the requester does not. Same exception,
+        // same no-side-effect guarantee.
+        $this->rebindSession(null);
+
+        $this->expectException(UnauthorizedPreOrderAccessException::class);
+        ($this->becoming)(new CheckoutInput(
+            preOrderId: 'aaaa00000000000000000000000000000000aaaa',
         ));
     }
 }

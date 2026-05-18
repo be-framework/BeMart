@@ -12,6 +12,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\InsufficientStockException;
 use MyVendor\BeMart\Be\Exception\PaymentDeclinedException;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Input\CheckoutInput;
 
@@ -28,10 +29,11 @@ use function assert;
  * by Pilot 3, so we keep the failure path simple.
  *
  * Failure mapping (per `be/docs/pilot5/alps-analyze.md` §例外フロー):
- *   - PreOrderNotFoundException    → 404 (the pre-order never existed)
- *   - InsufficientStockException   → 422 (stock cannot fulfill the order)
- *   - PaymentDeclinedException     → 422 (gateway refused the charge)
- *   - SemanticVariableException    → 400 (preOrderId malformed)
+ *   - PreOrderNotFoundException           → 404 (the pre-order never existed)
+ *   - UnauthorizedPreOrderAccessException → 403 (not the owner; Pilot 5 F-1)
+ *   - InsufficientStockException          → 422 (stock cannot fulfill the order)
+ *   - PaymentDeclinedException            → 422 (gateway refused the charge)
+ *   - SemanticVariableException           → 400 (preOrderId malformed)
  *
  * Note: paymentMethodId is intentionally NOT accepted here. It is sourced
  * from the persisted OrderEntity inside CheckoutSettled to prevent
@@ -63,6 +65,11 @@ class Checkout extends ResourceObject
         } catch (PreOrderNotFoundException) {
             $this->code = Code::NOT_FOUND;
             $this->body = ['message' => 'Pre-order not found.', 'preOrderId' => $preOrderId];
+
+            return $this;
+        } catch (UnauthorizedPreOrderAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'You are not authorized to access this pre-order.', 'preOrderId' => $preOrderId];
 
             return $this;
         } catch (InsufficientStockException) {
