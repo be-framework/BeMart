@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.16.1@f1f5de594dc76faf8784e02d3dc4716c91c6f6ac">
+  <file src="be/src/Becoming/DevBecoming.php">
+    <PossiblyFalseOperand>
+      <code><![CDATA[json_encode($this->logger->flush()->toTreeArray(), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE)]]></code>
+    </PossiblyFalseOperand>
+  </file>
+  <file src="be/src/Reason/Query/FakeCartStorage.php">
+    <PossiblyNullIterator>
+      <code><![CDATA[$this->carts]]></code>
+    </PossiblyNullIterator>
+  </file>
+  <file src="be/src/Reason/Query/FakeCustomerCommand.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function register(CustomerEntity $customer): void]]></code>
+    </MissingOverrideAttribute>
+  </file>
+  <file src="be/src/Reason/Query/FakeEmailUniquenessChecker.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function ensureUnique(string $email): void]]></code>
+    </MissingOverrideAttribute>
+  </file>
+  <file src="be/src/Reason/Service/FakeCustomerIdGenerator.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function generate(): string]]></code>
+    </MissingOverrideAttribute>
+  </file>
+  <file src="be/src/Reason/Service/FakeCustomerInitialPoint.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function initial(): int]]></code>
+    </MissingOverrideAttribute>
+  </file>
+  <file src="be/src/Reason/Service/FakePasswordHasher.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function hash(string $plaintext): string]]></code>
+    </MissingOverrideAttribute>
+  </file>
+  <file src="be/src/Reason/Service/FakePurchaseFlow.php">
+    <InvalidOperand>
+      <code><![CDATA[$subtotal * self::TAX_RATE]]></code>
+      <code><![CDATA[$total * self::POINT_RATE]]></code>
+    </InvalidOperand>
+  </file>
+  <file src="src/Module/AppModule.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[protected function configure(): void]]></code>
+    </MissingOverrideAttribute>
+  </file>
+  <file src="src/Module/DevBecomingProvider.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function get(): BecomingInterface]]></code>
+    </MissingOverrideAttribute>
+  </file>
+</files>

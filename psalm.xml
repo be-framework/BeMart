@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<psalm
+    errorLevel="3"
+    resolveFromConfigFile="true"
+    findUnusedBaselineEntry="true"
+    findUnusedCode="false"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns="https://getpsalm.org/schema/config"
+    xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
+    errorBaseline="psalm-baseline.xml"
+>
+    <projectFiles>
+        <directory name="src" />
+        <directory name="be/src" />
+        <ignoreFiles>
+            <directory name="vendor" />
+            <directory name="tests" />
+            <directory name="be/tests" />
+            <directory name="var" />
+        </ignoreFiles>
+    </projectFiles>
+
+    <issueHandlers>
+        <!--
+            Pilot 1-5 のコードベースに Psalm を後から導入。errorLevel=3 でも汎用エラーが多数出るため、
+            Phase B の最初のスライスでは taint analysis に集中する。
+            汎用エラーは下で suppress し、taint 系の警告だけを浮かせる。
+        -->
+        <PropertyNotSetInConstructor errorLevel="suppress" />
+        <MissingConstructor errorLevel="suppress" />
+        <MissingReturnType errorLevel="suppress" />
+        <MissingParamType errorLevel="suppress" />
+        <UnusedClass errorLevel="suppress" />
+        <UnusedMethod errorLevel="suppress" />
+        <UnusedVariable errorLevel="suppress" />
+        <PossiblyUnusedMethod errorLevel="suppress" />
+        <PossiblyUnusedProperty errorLevel="suppress" />
+        <MixedAssignment errorLevel="suppress" />
+        <MixedArrayAccess errorLevel="suppress" />
+        <MixedReturnStatement errorLevel="suppress" />
+    </issueHandlers>
+</psalm>

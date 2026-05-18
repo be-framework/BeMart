@@ -5,8 +5,8 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 | メタ | 値 |
 |---|---|
 | Last updated | 2026-05-18 |
-| Latest session | pilot-4-doRegisterCustomer-multi-reason-being-opus-4.7 |
-| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being) + alps-to-be-bear skill dogfooding。Cascade Diamond は Pilot 3 で「apex が `#[Input]` 依存だと be-framework のメカニクス上不成立」と判明 (Linear Cascade に縮退)。Pilot 4 で Multi-Reason Being (be-patterns `blog-publishing` 系) を初検証 |
+| Latest session | phase-b-slice-1-psalm-setup-opus-4.7 |
+| Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being / Pilot 5 doCheckout — Diamond-Cascade + Multi-side-effect Final) + alps-to-be-bear skill dogfooding + **Phase B Slice 1: Psalm setup** (taint analysis 足場 / baseline / composer scripts) |
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
 
@@ -554,8 +554,64 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 ### Pilot 1+2+3+4+5 を通じた集計
 
-- composer test: 52/52 pass, 149 assertions, 3 notices (Pilot 3 起源の preOrderId / paymentMethodId / customerId Semantic 未登録 NOTICE。validator skip で gracefully 動作)
+- composer test: 52/52 pass, 149 assertions, **0 notices** (Pilot 5 follow-up commit `3ad9821` で server-derived Semantic 3 件 `OrderNo` / `OrderDate` / `PaymentDate` を MergedCart パターンで追加)
 - Be domain LoC (累計): 約 2880 src + 約 954 tests
 - 採用パターン: Linear/Minimal (Pilot 1), Cascade (Pilot 2), Linear Cascade + Branching (Pilot 3), Multi-Reason Being (Pilot 4), **Diamond-Cascade + Multi-side-effect Final (Pilot 5)**
 - 未検証パターン: 真の Cascade Diamond (apex が Input 不要なケース; EC-CUBE の通常 transition では出現しない可能性大), Complex Convergence の更に深いネスト (insurance-claim の Multi-stage Multi-Reason)
-- **Phase A 完了** (Pilot 4 + Pilot 5)。次は Phase B (CSRF / rate-limit / bear-security / Psalm taint / ProdModule) へ進む
+- **Phase A 完了** (Pilot 1-5)。Phase B は Psalm taint 設定から着手 (下記参照)
+
+---
+
+## Phase B — Security / Hardening Slice 1: Psalm Setup
+
+**目的:** 静的解析を Phase A コードに後付けで導入し、Phase B 以降の判定基盤を整える。**決定的要素側に置ける security チェック** を 1 つ確立する。
+
+### 完了した作業
+
+- **Psalm 6.16 を `composer require --dev` で導入** (`vimeo/psalm`)
+- **`psalm.xml` を errorLevel=3 + 主要な MixedX / Unused 系を suppress で起動** (Pilot 1-5 コードに後付けで適用するため)
+- **baseline 生成**: `psalm-baseline.xml` に既存 11 件をベースライン化 (`MissingOverrideAttribute` 9 件 + `InvalidOperand` 2 件 in `FakePurchaseFlow` の tax/point 計算 int/float 混合)
+- **composer scripts 追加**:
+  - `composer psalm` — 通常解析 (baseline 適用、exit 0)
+  - `composer psalm-taint` — taint 解析 (`--ignore-baseline` でモード切替時の `UnusedBaselineEntry` を抑制、exit 0)
+
+### Slice 1 の現状認識 (重要)
+
+**`composer psalm-taint` は exit 0 だが、これは「Phase A コードベースで Psalm の標準 taint mechanism が検出する flow が存在しない」ことを意味する。「PII flow が無い」ことではない。**
+
+Phase A の構造的事実:
+
+- **DB クエリ**: 全部 Fake (in-memory) → SQL sink が存在しない
+- **shell exec**: なし
+- **明示的な `log()` 呼び出し**: なし (SemanticLogger は framework 内で自動)
+- **HTML/string concat**: JSON response のみ
+- **Psalm が標準で知る source**: `$_GET` / `$_POST` / `$_REQUEST` 等の superglobal。BEAR の `#[Input]` や Be の Input クラスは未知
+
+→ Psalm 標準では BEAR/Be の **HTTP user input → SemanticLogger 平文出力** の flow を捕捉できない。security-review が指摘した PII 漏洩 (customerId / items / prices が `var/log/bemart.json` に平文出力) は taint analysis では検出されない。
+
+### Slice 2 候補 (Psalm taint を BEAR/Be に対応させる)
+
+未実施。実施候補:
+
+- **オプション A**: BEAR Resource の `onGet` / `onPost` parameters に `@psalm-taint-source` annotation を手動追加 (workflow prompt で自動化)
+- **オプション B**: `SemanticLogger::log()` 系の write API に `@psalm-taint-sink` annotation
+- **オプション C**: Psalm plugin で `#[Input]` attribute を taint source として自動認識 (be-framework 側に PR を出す筋)
+
+判断: Slice 1 では Phase B の **足場を作る** ことに集中。アノテーション戦略は Phase B Slice 2 で別途決定。
+
+### Slice 2 以降の Phase B 項目 (security-review の累積 finding から)
+
+未着手:
+
+- **CSRF token** — 全 onPost 系 Resource に適用 (Pilot 3-5 の 3 endpoint が対象)
+- **rate-limit** — `/shopping/checkout` 等の sensitive endpoint
+- **bear-security-setup skill** の適用 — 認証 / 認可基盤
+- **env-gated ProdModule** — `SemanticLogger` を prod で per-class allowlist + redacted 出力に切替
+- **AUTHZ check** — `CheckoutPrepared` の `SessionGuard` Reason (Pilot 5 security-review F-1)
+- **mass-assignment fix** — `CheckoutInput::paymentMethodId` を削除し `OrderEntity::paymentMethodId` を採用 (Pilot 5 F-2)
+- **idempotency** — `dtb_order.pre_order_id` UNIQUE 制約 + 実 DB で `SELECT FOR UPDATE` (Pilot 5 F-3)
+
+### Slice 1 の振り返り (決定的/非決定的)
+
+- **決定的側で確立できたもの**: Psalm の存在 / baseline / composer 起動口。これらは「一度作れば後続に効く」道具立て
+- **非決定的側で残ったもの**: BEAR/Be の taint source/sink 戦略 (3 案あり、業務的に何を「機密」と扱うかの判断と絡む)。Phase B Slice 2 でユーザー判断を仰ぐ
