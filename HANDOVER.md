@@ -5,7 +5,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 | メタ | 値 |
 |---|---|
 | Last updated | 2026-05-18 |
-| Latest session | phase-b-slice-1-psalm-setup-opus-4.7 |
+| Latest session | phase-b-slice-3-prod-module-opus-4.7 |
 | Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being / Pilot 5 doCheckout — Diamond-Cascade + Multi-side-effect Final) + alps-to-be-bear skill dogfooding + **Phase B Slice 1: Psalm setup** (taint analysis 足場 / baseline / composer scripts) |
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
@@ -615,3 +615,42 @@ Phase A の構造的事実:
 
 - **決定的側で確立できたもの**: Psalm の存在 / baseline / composer 起動口。これらは「一度作れば後続に効く」道具立て
 - **非決定的側で残ったもの**: BEAR/Be の taint source/sink 戦略 (3 案あり、業務的に何を「機密」と扱うかの判断と絡む)。Phase B Slice 2 でユーザー判断を仰ぐ
+
+---
+
+## Phase B — Slice 3: env-gated ProdModule (DevBecoming PII leak fix)
+
+**目的:** Pilot 5 security-review F-12 (DevSemanticLogger が `var/log/bemart.json` に customerId / 明細 / 価格 / paymentTotal を平文出力) を、prod context で **構造的に** 塞ぐ。AppModule(dev default) は触らず、ProdModule で override する形を取る。
+
+### 完了した作業
+
+- **`src/Module/ProdLoggingOverrideModule.php` 新規** — `BecomingInterface` を **DevBecoming wrapper なし** で素の `Be\Framework\Becoming` に rebind。`SemanticLoggerInterface` も `DevSemanticLogger` ではなく素の `Koriym\SemanticLogger\SemanticLogger` に rebind。In-memory の semantic trace は引き続き framework が収集するが、**ファイルには永続化されない**
+- **`src/Module/ProdModule.php` 新規** — `AbstractAppModule` を継承し、`AppModule` を install した上で `ProdLoggingOverrideModule` で override。エントリポイント (将来の `bin/app.php` / `public/index.php`) は `APP_CONTEXT=prod` で ProdModule を選ぶ想定だが、現状の Pilot は CLI smoke (`bin/smoke_phase6.php`) のみのため env switching の bin 改修は **deferred**
+- **`tests/Module/ProdModuleTest.php` 新規** — 4 ケース:
+  1. ProdModule context で `BecomingInterface` を resolve → `Becoming::class` (not `DevBecoming`)
+  2. ProdModule context で `SemanticLoggerInterface` を resolve → `SemanticLogger::class` (not `DevSemanticLogger`)
+  3. ProdModule context で実際に `/shopping/checkout` を叩いて 201 を返した後、`var/log/bemart.json` が **存在しない** ことを assert
+  4. **負の対照**: AppModule (dev) で同じリクエストを叩くと `var/log/bemart.json` が **存在する** ことを assert (この対照が壊れたら #3 が vacuous になるので必須)
+
+### 確認結果
+
+- **`composer test`**: 56/56 pass, 154 assertions, **0 notices** (Phase A 既存 52 + Phase B Slice 3 新規 4)
+- **`composer psalm`**: exit 0 (baseline 11 件のまま)
+- **`composer psalm-taint`**: exit 0
+
+### Slice 3 の振り返り (決定的/非決定的)
+
+- **決定的側**: 「prod context は `BecomingInterface` を `Becoming` に直結し `DevBecoming` を挟まない」は機械的判断。`ProdLoggingOverrideModule` の 2 行で完結
+- **半決定的**: 「prod logger は何を出力すべきか」は本来非決定 (allowlist? redaction? per-endpoint? off?)。Slice 3 では **最も保守的** な「完全 off」を選択。Slice 4 以降で需要が出たら redacted logger を追加検討
+- **未着手 (Slice 4 以降)**: env-driven entry point (`APP_CONTEXT=prod` の bin 改修)、構造化 prod logger (audit trail 用途で何かしらは要る)、Fake → 実 DB の差し替え用 `ProdReasonModule`
+
+### 今後の Phase B Slice (推奨順)
+
+| 候補 | 性質 | 一行コメント |
+|---|---|---|
+| **Slice 4**: Mass-assignment fix (Pilot 5 F-2) | 決定的 | `CheckoutInput` から `paymentMethodId` を削除し `OrderEntity.paymentMethodId` を採用。Input 1 file + Being 1 file + test 更新 |
+| **Slice 5**: env-gated entry point | 決定的 | `bin/app.php` / `public/index.php` を新設して `getenv('APP_CONTEXT')` で AppModule/ProdModule 切替 |
+| Slice 6: AUTHZ check (Pilot 5 F-1) | 非決定的 | `CheckoutPrepared` に `SessionGuard` Reason 追加。session 設計と絡む |
+| Slice 7: bear-security-setup | 半決定的 | 認証 / 認可基盤の skill 適用 |
+| Slice 8: CSRF token | 非決定的 | 全 onPost endpoint に手を入れる |
+| Slice 9: Taint annotation (Slice 1 の続き) | 非決定的 | Psalm を BEAR/Be 用に annotate
