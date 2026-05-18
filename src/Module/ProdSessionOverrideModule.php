@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
-use MyVendor\BeMart\Auth\SymfonySessionAdapter;
+use MyVendor\BeMart\Auth\EccubeSharedSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use Override;
 use Ray\Di\AbstractModule;
@@ -17,7 +17,7 @@ use Ray\Di\AbstractModule;
  * deterministic. In production we must instead derive customerId from
  * the actual HTTP session that EC-CUBE writes to.
  *
- * Slice 7 binds SessionInterface → SymfonySessionAdapter under
+ * Slice 7 binds SessionInterface → EccubeSharedSessionAdapter under
  * ProdModule. The adapter is request-scoped by default in Ray.Di
  * (no Singleton declared) — each Injector resolution starts /
  * inspects the active PHP session.
@@ -30,6 +30,6 @@ final class ProdSessionOverrideModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
-        $this->bind(SessionInterface::class)->to(SymfonySessionAdapter::class);
+        $this->bind(SessionInterface::class)->to(EccubeSharedSessionAdapter::class);
     }
 }
