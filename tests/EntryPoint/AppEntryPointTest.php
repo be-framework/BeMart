@@ -58,14 +58,25 @@ final class AppEntryPointTest extends TestCase
             unlink($this->logFile);
         }
 
-        // Slice 7: ProdModule binds SessionInterface to SymfonySessionAdapter.
+        // Slice 7: ProdModule binds SessionInterface to EccubeSharedSessionAdapter.
         // In CLI (no HTTP session) the adapter honors BEMART_CLI_CUSTOMER_ID
         // as the authenticated customerId for operator scripts. We need
         // customer-001 here to satisfy AUTHZ on the `aaaa…` pre-order.
+        //
+        // Slice 8: ProdModule also binds CsrfTokenInterface to
+        // EccubeSharedCsrfTokenAdapter, which in CLI accepts a reference
+        // token via BEMART_CLI_CSRF_TOKEN. We pass the same value as the
+        // body's `csrfToken` so the adapter's hash_equals succeeds.
         $result = $this->runBin('prod', [
             'page://self/shopping/checkout',
-            json_encode(['preOrderId' => 'aaaa00000000000000000000000000000000aaaa'], JSON_THROW_ON_ERROR),
-        ], ['BEMART_CLI_CUSTOMER_ID' => 'customer-001']);
+            json_encode([
+                'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+                'csrfToken' => 'cli-smoke-token',
+            ], JSON_THROW_ON_ERROR),
+        ], [
+            'BEMART_CLI_CUSTOMER_ID' => 'customer-001',
+            'BEMART_CLI_CSRF_TOKEN' => 'cli-smoke-token',
+        ]);
 
         $this->assertSame(0, $result['exit'], 'bin/app.php must exit 0 on success: ' . $result['stderr']);
         $this->assertSame('prod', $result['json']['context'] ?? null);
@@ -79,14 +90,33 @@ final class AppEntryPointTest extends TestCase
     public function testProdContextRejectsAnonymousCli(): void
     {
         // Slice 7: without BEMART_CLI_CUSTOMER_ID set, ProdModule's
-        // SymfonySessionAdapter must report anonymous → CheckoutPrepared
+        // EccubeSharedSessionAdapter must report anonymous → CheckoutPrepared
         // throws UnauthorizedPreOrderAccessException → resource returns 403.
-        // bin/app.php exits 1 on any 4xx by convention, so we assert exit=1
-        // *and* body.code=403 to pin down the rejection path specifically.
+        // We pass a valid CSRF token (Slice 8) so we are sure the 403 is
+        // about AUTHZ, not CSRF. bin/app.php exits 1 on any 4xx by convention,
+        // so we assert exit=1 *and* body.code=403 to pin down the rejection
+        // path specifically.
+        $result = $this->runBin('prod', [
+            'page://self/shopping/checkout',
+            json_encode([
+                'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+                'csrfToken' => 'cli-smoke-token',
+            ], JSON_THROW_ON_ERROR),
+        ], ['BEMART_CLI_CSRF_TOKEN' => 'cli-smoke-token']);
+
+        $this->assertSame(1, $result['exit'], 'bin/app.php exits 1 on 4xx: ' . $result['stderr']);
+        $this->assertSame(403, $result['json']['code'] ?? null);
+    }
+
+    public function testProdContextRejectsMissingCsrfTokenCli(): void
+    {
+        // Slice 8: a CLI request that satisfies AUTHZ but omits the CSRF
+        // token must still 403. This pins down that CSRF is checked at the
+        // boundary in CLI just as in HTTP.
         $result = $this->runBin('prod', [
             'page://self/shopping/checkout',
             json_encode(['preOrderId' => 'aaaa00000000000000000000000000000000aaaa'], JSON_THROW_ON_ERROR),
-        ]);
+        ], ['BEMART_CLI_CUSTOMER_ID' => 'customer-001']);
 
         $this->assertSame(1, $result['exit'], 'bin/app.php exits 1 on 4xx: ' . $result['stderr']);
         $this->assertSame(403, $result['json']['code'] ?? null);
@@ -98,9 +128,15 @@ final class AppEntryPointTest extends TestCase
             unlink($this->logFile);
         }
 
+        // AppModule's FakeCsrfToken accepts FakeCsrfToken::TOKEN as the
+        // reference. Pass it through the body so the resource boundary
+        // lets the Becoming chain execute (and DevBecoming writes the log).
         $result = $this->runBin('app', [
             'page://self/shopping/checkout',
-            json_encode(['preOrderId' => 'aaaa00000000000000000000000000000000aaaa'], JSON_THROW_ON_ERROR),
+            json_encode([
+                'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+                'csrfToken' => 'fake-csrf-token-bemart-2026',
+            ], JSON_THROW_ON_ERROR),
         ]);
 
         $this->assertSame(0, $result['exit'], 'bin/app.php must exit 0 on success: ' . $result['stderr']);

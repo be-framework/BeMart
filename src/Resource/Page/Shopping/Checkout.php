@@ -15,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Input\CheckoutInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -43,13 +44,21 @@ class Checkout extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    public function onPost(string $preOrderId): static
+    public function onPost(string $preOrderId, string|null $csrfToken = null): static
     {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.', 'preOrderId' => $preOrderId];
+
+            return $this;
+        }
+
         try {
             $final = ($this->becoming)(new CheckoutInput(
                 preOrderId: $preOrderId,

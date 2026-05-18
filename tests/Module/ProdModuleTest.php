@@ -11,6 +11,8 @@ use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
 use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
+use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\ProdModule;
 use PHPUnit\Framework\TestCase;
@@ -18,8 +20,6 @@ use Ray\Di\Injector;
 
 use function dirname;
 use function file_exists;
-use function filemtime;
-use function touch;
 use function unlink;
 
 final class ProdModuleTest extends TestCase
@@ -63,12 +63,42 @@ final class ProdModuleTest extends TestCase
             unlink($this->logFile);
         }
 
-        // Slice 7: ProdModule binds SessionInterface to SymfonySessionAdapter,
+        // Slice 7: ProdModule binds SessionInterface to EccubeSharedSessionAdapter,
         // which reads $_SESSION['customer_id']. The `aaaa…` pre-order belongs
         // to customer-001; we mirror that into $_SESSION here to satisfy
         // CheckoutPrepared's AUTHZ check. This is the same mirror an EC-CUBE
         // EventListener would set after a successful login.
         $_SESSION['customer_id'] = 'customer-001';
+
+        // Slice 8: ProdModule also binds CsrfTokenInterface to
+        // EccubeSharedCsrfTokenAdapter, which checks `$_SESSION['_csrf_token']`.
+        // Mirror a reference token so the prod adapter accepts our submission.
+        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'prod-csrf-mirror';
+
+        $injector = new Injector(
+            new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
+            dirname(__DIR__, 2) . '/var/tmp/prod',
+        );
+
+        $resource = $injector->getInstance(ResourceInterface::class);
+        $ro = $resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'csrfToken' => 'prod-csrf-mirror',
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+        $this->assertFileDoesNotExist(
+            $this->logFile,
+            'ProdModule must NOT write var/log/bemart.json (PII leak prevention)',
+        );
+    }
+
+    public function testProdContextRejectsMissingCsrfToken(): void
+    {
+        // Slice 8: even with a valid session customerId, a state-changing
+        // request without a CSRF token is rejected at the resource boundary.
+        $_SESSION['customer_id'] = 'customer-001';
+        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'prod-csrf-mirror';
 
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
@@ -80,11 +110,8 @@ final class ProdModuleTest extends TestCase
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
         ]);
 
-        $this->assertSame(Code::CREATED, $ro->code);
-        $this->assertFileDoesNotExist(
-            $this->logFile,
-            'ProdModule must NOT write var/log/bemart.json (PII leak prevention)',
-        );
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 
     public function testDevContextDoesWriteLogFileOnBecoming(): void
@@ -103,6 +130,7 @@ final class ProdModuleTest extends TestCase
         $resource = $injector->getInstance(ResourceInterface::class);
         $resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertFileExists($this->logFile);
@@ -115,8 +143,12 @@ final class ProdModuleTest extends TestCase
             unlink($this->logFile);
         }
 
-        // Slice 7: scrub any session value we set so unrelated tests
-        // (especially anonymous-session AUTHZ tests) start clean.
-        unset($_SESSION['customer_id']);
+        // Slice 7/8: scrub any session values we set so unrelated tests
+        // (especially anonymous-session AUTHZ and missing-CSRF tests)
+        // start clean.
+        unset(
+            $_SESSION['customer_id'],
+            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+        );
     }
 }

@@ -13,6 +13,7 @@ use MyVendor\BeMart\Be\Exception\OutOfStockException;
 use MyVendor\BeMart\Be\Exception\ProductClassNotFoundException;
 use MyVendor\BeMart\Be\Final\CartItemAdded;
 use MyVendor\BeMart\Be\Input\AddCartItemInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -29,14 +30,22 @@ class Item extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping', method: 'post')]
-    public function onPost(string $productCode, int $quantity): static
+    public function onPost(string $productCode, int $quantity, string|null $csrfToken = null): static
     {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+
+            return $this;
+        }
+
         try {
             $final = ($this->becoming)(new AddCartItemInput($productCode, $quantity));
         } catch (SemanticVariableException $e) {

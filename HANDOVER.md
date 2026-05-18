@@ -1045,9 +1045,149 @@ ProdModule (configure)
 
 ### 次の Slice (Slice 8 以降)
 
+Slice 8 は本 HANDOVER 内の "Phase B — Slice 8: CSRF token" セクションを参照。
+
 | 候補 | 性質 | 一行コメント |
 |---|---|---|
-| **Slice 8**: CSRF token | 非決定的 | 全 `onPost` に CSRF guard。Slice 7 の session 上に token を持たせる方式 (session-bound) か、stateless synchronizer token か |
-| Slice 9: Taint annotation | 半決定的 | Psalm `@psalm-taint-*` を Pilot 1-5 全体に適用。`$_POST` / `$_SESSION` source → `gateway::charge` 等 sink の graph |
+| Slice 9: Taint annotation | 半決定的 | Psalm `@psalm-taint-*` を Pilot 1-5 全体に適用。`$_POST` / `$_SESSION` source → `gateway::charge` 等 sink の graph。CSRF check site は taint sanitizer として annotate する |
+| (追加検討) Slice 10: 存在オラクル軽減 | 非決定的 | 既存 user に対する 404 / 403 統一。今や CSRF と AUTHZ の両方が 403 を返すので、404 → 403 の方向で揃えるか判断が必要 |
+| (追加検討) bear-security-setup skill 適用 | skill bake | Slice 6-7-8 で手動構築した AUTHZ + CSRF 基盤を skill 化するレビュー。`bear-skills` 側に knowledge を回す |
+
+---
+
+## Phase B — Slice 8: CSRF token (BEAR 側のみ)
+
+全 state-changing `onPost` (Cart/Item, Entry, Shopping/Checkout) で `csrfToken` を検証する Resource-boundary guard を導入。Slice 6-7 の AUTHZ 基盤に直交する layer として追加。
+
+### Why now (Slice 順序の判断)
+
+Slice 7 で確立した「BEAR 側のみ実装 + EC-CUBE 側 EventListener は Phase 2」のパターンに最も近い slice。両者ともに session-shared な flat key を読むだけの adapter で構造が一致するため、Slice 7 の review knowledge を即座に再利用できる。Slice 9 (Taint annotation) より先に着手したのは、Slice 9 の sink/source graph に CSRF check site も含めるべきだから (実装後にまとめて annotate する方が手戻りが少ない)。
+
+### 追加 / 変更ファイル
+
+新規:
+
+- `be/src/Reason/Service/CsrfTokenInterface.php` — `isValid(string|null): bool` だけを公開する domain-facing interface。token 発行は対象外。
+- `be/src/Reason/Service/FakeCsrfToken.php` — dev/test、固定 token (`FakeCsrfToken::TOKEN`) と `hash_equals` 比較。
+- `src/Auth/EccubeSharedCsrfTokenAdapter.php` — prod、`$_SESSION['_csrf_token']` を読む。CLI fallback は `BEMART_CLI_CSRF_TOKEN` env var (Slice 7 と同じ pattern)。
+- `src/Module/ProdCsrfOverrideModule.php` — prod 専用 `CsrfTokenInterface → EccubeSharedCsrfTokenAdapter` binding。
+- `tests/Auth/EccubeSharedCsrfTokenAdapterTest.php` — 11 ケースの unit test。
+
+変更:
+
+- `src/Module/AppModule.php` — `CsrfTokenInterface → FakeCsrfToken` (Singleton)。
+- `src/Module/ProdModule.php` — `ProdCsrfOverrideModule` install + Slice 7.1 で古い名前のまま残っていた "SymfonySessionAdapter" doc 参照を `EccubeSharedSessionAdapter` に修正。
+- `src/Resource/Page/Cart/Item.php` — `csrfToken` 引数を受け取り、`onPost` 先頭で `$csrf->isValid()` 検証、失敗時 403。
+- `src/Resource/Page/Entry.php` — 同上。
+- `src/Resource/Page/Shopping/Checkout.php` — 同上。
+- `tests/Resource/{CartItem,Entry,Checkout}ResourceTest.php` — 既存テストに `csrfToken` 追加 + 「missing CSRF → 403」 ケースを各 Resource に追加。
+- `tests/Module/ProdModuleTest.php` — `$_SESSION['_csrf_token']` ミラー追加 + `testProdContextRejectsMissingCsrfToken` 新規 + Slice 7.1 doc 残骸 ("SymfonySessionAdapter") を `EccubeSharedSessionAdapter` に修正。
+- `tests/EntryPoint/AppEntryPointTest.php` — subprocess test に `BEMART_CLI_CSRF_TOKEN` 環境変数追加 + `testProdContextRejectsMissingCsrfTokenCli` 新規。
+
+### EC-CUBE 側 contract (Slice 8 では実装しない)
+
+`EccubeSharedCsrfTokenAdapter` の本番動作には EC-CUBE 側で以下の協力が必要:
+
+1. **Token mirror** — Symfony Forms (`csrf_protection: true`) が生成・保管している token を、状態変更フォーム render 時に `$_SESSION['_csrf_token']` (flat string) にコピーする EventListener / Twig extension。例:
+
+   ```php
+   // app/Customize/EventListener/CsrfMirrorListener.php (EC-CUBE 側)
+   public function onKernelResponse(ResponseEvent $event): void
+   {
+       if (! $event->isMainRequest()) {
+           return;
+       }
+       $session = $event->getRequest()->getSession();
+       if (! $session->isStarted()) {
+           return;
+       }
+       // intention id を 1 つに固定して mirror する (例: 'bemart_form')
+       $token = $this->csrfManager->getToken('bemart_form')->getValue();
+       $session->set('_csrf_token', $token);
+   }
+   ```
+
+2. **Token rotation** — login / logout で必ず regenerate (`session_regenerate_id` + 新規 token mirror) する。Slice 7.2 (`SessionMirrorListener`) と統合する形で 1 つのリスナーにまとめる方が漏れにくい。
+
+Slice 7.2 同様、これらは Phase 2 (EC-CUBE 移植) で着地させる。Slice 8 単体では「production-ready な CSRF path」ではない (`$_SESSION['_csrf_token']` が空 → 全 POST 403 → fail-closed)。
+
+### CLI fallback (運用スクリプト用)
+
+Slice 7 の `BEMART_CLI_CUSTOMER_ID` と全く同じ pattern。`PHP_SAPI === 'cli'` 限定で `BEMART_CLI_CSRF_TOKEN` env var を reference token として受け入れる:
+
+```bash
+APP_CONTEXT=prod \
+  BEMART_CLI_CUSTOMER_ID=customer-001 \
+  BEMART_CLI_CSRF_TOKEN=$(openssl rand -hex 16) \
+  php bin/app.php page://self/shopping/checkout \
+  "{\"preOrderId\":\"aaaa…\",\"csrfToken\":\"$BEMART_CLI_CSRF_TOKEN\"}"
+```
+
+HTTP context (`PHP_SAPI !== 'cli'`) ではこの fallback は到達しないため、漏れたら全 POST が 403 になるだけで credential bypass にはならない。
+
+### 検証
+
+- `composer test` — 90 tests / 205 assertions green (Slice 7.1 時点から +17 tests / +24 assertions)。新規 `ProdModuleTest::testProdContextRejectsMissingCsrfToken` と `AppEntryPointTest::testProdContextRejectsMissingCsrfTokenCli` が HTTP / CLI 両方の rejection path を pin している。
+- `composer psalm` — errors なし。
+- `composer psalm-taint` — errors なし (CSRF check そのものは taint sink ではないので新規 annotation 不要)。
+
+### 設計上の判断
+
+#### Token 保管: session-bound を採用
+
+| 候補 | 採用 | 理由 |
+|---|---|---|
+| **A. session-bound** (`$_SESSION['_csrf_token']`) | **採用** | Slice 7 の session 基盤を再利用、EC-CUBE/Symfony Forms と同じモデル、HMAC secret 管理不要、per-session rotation は session_regenerate_id で自然に達成 |
+| B. stateless synchronizer (HMAC-signed cookie) | 不採用 | secret 管理 + rotation policy + Slice 7 の session-shared 方針との二重化 |
+| C. double-submit cookie | 不採用 | Slice 7 で既に session を共有しているのに重ねる意味が薄い |
+
+#### Validation site: Resource 層
+
+CSRF は HTTP boundary concern であり、Be domain は HTTP origin を知らない。Slice 6 の AUTHZ (`$session->customerId() !== $order->customerId`) を `CheckoutPrepared` (Being) に置いたのは "ownership は domain rule" だからだが、CSRF は "request の正当性" であって domain rule ではない。
+
+- AUTHZ: 「この customer がこの order を所有しているか」 ← business rule
+- CSRF: 「この POST が我々のフォーム由来か」 ← transport rule
+
+そのため CSRF check は Resource の `onPost` 先頭、Becoming 呼び出しより前に置いた。Be domain は `CsrfTokenInterface` を see できるが consult しない (Reason interface としては定義したが、actual call site は BEAR Resource 側のみ)。
+
+#### Failure response: 403 (`Code::FORBIDDEN`)
+
+候補: 400 / 403 / 422。RESTful 慣習では「認証は通ったが、この request は拒否」 が 403 に最も合致。OWASP CSRF Prevention Cheat Sheet も "Forbidden" を推奨。AUTHZ rejection も 403 を返すので、body の `message` で "CSRF" / "authorized" を区別する。
+
+#### パラメータ名: `csrfToken` (PHP camelCase)
+
+候補: `_token` (Symfony Forms 慣習) / `csrf_token` (snake_case) / `csrfToken` (camelCase)。BEAR は PHP の引数名 = body field 名なので、`$_token` を使うと PHP superglobal (`$_GET` 等) と視覚的に紛らわしい。EC-CUBE 側で legacy form (`_token`) と統合する必要が出たら、その時点で Resource 引数を rename するか、入力の renaming を 1 箇所で吸収する adapter を追加すれば良い。
+
+#### Token issuance を interface に含めない
+
+`CsrfTokenInterface::isValid()` のみ。`current()` / `generate()` は持たない。理由:
+
+- Slice 8 のスコープは「validation only」 — token 発行は form-render 時の責務であり、resource boundary では発生しない
+- EC-CUBE 側で既に Symfony Forms が token を発行しているので、BEAR 側は読むだけ
+- 将来 BEAR 単独 form を作るとしても、`CsrfTokenIssuerInterface` を別 interface に切る方が ISP に従う
+
+### Slice 8 の振り返り (決定的/非決定的)
+
+- **決定的だった**:
+  - Slice 7 の adapter pattern を CSRF に複製する構造そのもの
+  - `hash_equals` for timing-safe comparison
+  - 失敗時の 403
+  - CLI fallback の env var pattern (Slice 7 と対称)
+- **非決定的だった (= ユーザー判断要)**:
+  - Token 保管: session-bound vs stateless — A 採用
+  - Validation site: Resource vs Being — Resource 採用 (CSRF を domain rule から分離)
+  - パラメータ名: `_token` vs `csrfToken` — `csrfToken` 採用 (PHP camelCase 一貫性)
+- **積み残し**:
+  - **EC-CUBE 側 Token mirror EventListener** — Slice 7.2 と同様、本番経路では reference token が空 → 全 POST 403。Phase 2 で Slice 7.2 と統合実装。
+  - **Token rotation policy の明文化** — login / logout / form-submit-once の各タイミングで token を rotate するか、session 単位で固定するか。Phase 2 で EC-CUBE 側実装と合わせて決定。
+  - **`BEMART_CLI_CSRF_TOKEN` env var の正当性** — Slice 7 の `BEMART_CLI_CUSTOMER_ID` と同じ判断点。運用スクリプトを増やさないなら将来削除候補。
+  - **`Code::FORBIDDEN` を AUTHZ と CSRF で共有** — 両方 403 を返すため、本来は client side で区別ができない。OWASP も 403 を推奨しているのでこれで良いが、observability 上は `message` field の文字列でしか区別できない点を運用側で認識する必要あり。
+
+### 次の Slice (Slice 9 以降)
+
+| 候補 | 性質 | 一行コメント |
+|---|---|---|
+| Slice 9: Taint annotation | 半決定的 | Psalm `@psalm-taint-*` を Pilot 1-5 全体に適用。`$_POST` / `$_SESSION` source → `gateway::charge` 等 sink の graph。CSRF check site は taint sanitizer として annotate する |
 | (追加検討) Slice 10: 存在オラクル軽減 | 非決定的 | 既存 user に対する 404 / 403 統一 |
-| (追加検討) bear-security-setup skill 適用 | skill bake | Slice 6-7 で手動構築した AUTHZ 基盤を skill 化するレビュー。`bear-skills` 側に knowledge を回す |
+| (追加検討) bear-security-setup skill 適用 | skill bake | Slice 6-7-8 で手動構築した AUTHZ + CSRF 基盤を skill 化するレビュー |
+| **Slice 7.2 / 8.2 統合**: EC-CUBE 側 EventListener | Phase 2 入口 | `customer_id` mirror (Slice 7.2) + `_csrf_token` mirror (Slice 8.2) を 1 つの Symfony EventListener にまとめる。Phase 2 のキックオフ slice として扱う |
