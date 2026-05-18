@@ -15,4 +15,15 @@ interface CartCommandInterface
      * INSERT … ON DUPLICATE KEY UPDATE against dtb_cart + dtb_cart_item.
      */
     public function save(CartEntity $cart): void;
+
+    /**
+     * Remove the Cart whose preOrderId matches the finalized order.
+     *
+     * Called from CheckoutCompleted after the order has been persisted
+     * and the confirmation mail has been queued. Maps to EC-CUBE's
+     * CartService::clear() that runs at the tail of PurchaseFlow
+     * (shopping flow). A missing cart is a no-op — the checkout already
+     * succeeded and a stale fixture should not break the Final.
+     */
+    public function clearByPreOrderId(string $preOrderId): void;
 }

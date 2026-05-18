@@ -38,6 +38,27 @@ final class FakeCartStorage
         $this->carts[$cart->cartKey] = $cart;
     }
 
+    public function removeByPreOrderId(string $preOrderId): void
+    {
+        $this->load();
+        foreach ($this->carts as $cartKey => $cart) {
+            if ($cart->preOrderId === $preOrderId) {
+                unset($this->carts[$cartKey]);
+            }
+        }
+    }
+
+    public function getByPreOrderId(string $preOrderId): CartEntity|null
+    {
+        foreach ($this->load() as $cart) {
+            if ($cart->preOrderId === $preOrderId) {
+                return $cart;
+            }
+        }
+
+        return null;
+    }
+
     /** @return array<string, CartEntity> */
     private function load(): array
     {

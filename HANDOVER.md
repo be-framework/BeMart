@@ -442,3 +442,112 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 - Be domain LoC (累計): 約 2210 src + 約 714 tests
 - 採用パターン: Linear/Minimal (Pilot 1), Cascade (Pilot 2), Linear Cascade + Branching (Pilot 3), **Multi-Reason Being (Pilot 4)**
 - 未検証パターン: Complex Convergence (`insurance-claim` 系), 真の Cascade Diamond (apex が Input 不要なケース; EC-CUBE の通常 transition では出現しない可能性大)
+
+## Pilot 5 — `doCheckout` (Complex Convergence / Multi-side-effect Final)
+
+**目的:** 「Final で複数の独立 side-effect Reason を 1 constructor 内で収束させる」初回ピロット。Pilot 4 までは Final が単一 `CustomerCommand` のみ呼ぶ単純な形だったが、`doCheckout` は **OrderCommand.register + Mailer.sendOrderConfirmation + CartCommand.clearByPreOrderId** の 3 副作用を Final で並走させる。これが be-patterns `loan-application` で言う Complex Convergence の本質。
+
+| 項目 | 値 |
+|---|---|
+| リポジトリ | `/Users/akihito/git/ec-cube-alps` |
+| パターン | **Diamond-Cascade (2 段 Being + Multi-side-effect Final)**。`CheckoutInput → CheckoutPrepared (Being: pre-order 取得 + 金額確定) → CheckoutSettled (Being: 在庫引当 → 決済 → 注文番号発番、3 Reason の strict sequence) → CheckoutCompleted (Final: 注文永続化 + メール送信 + カートクリアの 3 副作用収束)`。失敗時は Branching Final を使わず Reason 内 DomainException → Resource 層 HTTP code マッピング (Pilot 3 で Branching は検証済みのため重複を避けた) |
+| テスト | 52 passed (Pilot 1-4 既存 39 + Pilot 5 新規 13), 149 assertions, 3 notices (preOrderId / paymentMethodId / customerId 等の Semantic クラス未登録 NOTICE — gracefully skip。Pilot 5 では新規 Semantic を作らず Pilot 3 の `PreOrderId` / `PaymentMethodId` を再利用) |
+| Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (Multi-side-effect Final テンプレ + Ray.Di `toInstance` 注意書きの追加が必要) |
+| スコープ決定 | **happy-path + 失敗時 422/404 のみ実装**。Branching Final (`CheckoutFailed`) と補償処理 (Refund / InventoryRelease) は Phase B の決済セキュリティピロットへ deferred。理由: Branching 機構自体は Pilot 3 で検証済み。Pilot 5 の新規性は「Multi-side-effect Final の収束」に絞る |
+
+**改訂履歴 (2026-05-18):**
+
+1. ALPS 分析 → `doCheckout` (`paymentMethod` client-input) + `preOrder` 既存 → `CheckoutInput(preOrderId, paymentMethodId)` にマップ。`ShoppingComplete.descriptor` から `#[Link(rel: 'goTop')]` + `#[Link(rel: 'goCart')]` を導出
+2. パターン判定: 3 Reason が strict sequence (inventory before payment before number-gen) → **Diamond-Cascade** (loan-application 準拠)。Pilot 4 の Multi-Reason Being (並列 Reason) と区別: Pilot 5 は順序依存 + Final で複数副作用
+3. **Ray.Di binding gotcha 発見 (G-14)**: `bind(Iface)->to(Impl)` は `bind(Impl)->in(SINGLETON)` を consult しない。Iface の linked binding は singleton scope と独立に新 Impl を生成する。test 5 件中 2 件 (mailer/gateway captures) が初期実装で fail。`toInstance($obj)` パターンで両 binding を同一 object reference に固定 → 解決
+4. domain-review subagent → pass (findings 5 / blocking 0)。指摘は全て non-blocking style nit (Final public surface が ALPS ShoppingComplete より広い / DateTimeImmutable 直生成 / FinalizedOrderEntity inline 生成 / FakeInventoryAllocator atomicity コメント / AppModule コメント評価)
+5. application-review subagent → pass (findings 6 / blocking 0)。指摘は全て non-blocking (Code::UNPROCESSABLE_ENTITY 欠如の literal 422 / Location ヘッダ test 強化 / locale 'ja' ハードコード / paymentMethodId 不正系 400 test / 4xx で orderNo 漏れていない assert / `@var` PHPDoc 追加)
+6. security-review subagent → pass (findings 13 / blocking 0)。**重要な Phase B 課題を多数発見** (詳細は下記)
+
+### Pilot 5 完了の判定基準 — 13 指標
+
+| # | 指標 | Target | Actual | Note |
+|---|---|---|---|---|
+| 1 | composer test 全 pass | 100% | 100% | 52/52 pass (Pilot 1-4 既存 39 + Pilot 5 Domain 8 + Resource 5) |
+| 2 | 意味ログ被覆 | 100% | 100% | DevBecoming が CheckoutInput → CheckoutPrepared → CheckoutSettled → CheckoutCompleted 全体を `var/log/bemart.json` に自動記録 |
+| 3 | i18n 例外メッセージ | 100% | 100% | 全 DomainException (`InsufficientStockException` / `PaymentDeclinedException` 新規 + `PreOrderNotFoundException` Pilot 3 既存) に `#[Message(['en'=>..., 'ja'=>...])]` |
+| 4 | 自己証明 assert | ≥1 | ≥1 | `Resource/Page/Shopping/Checkout.php` で `assert($final instanceof CheckoutCompleted)`。CheckoutSettled の existence proof は「stock allocated AND payment captured AND order number issued」、CheckoutCompleted の existence proof は「persisted AND mail sent AND cart cleared」 |
+| 5 | Semantic クラス数 | 0 (新規) | 0 | Pilot 3 の `PreOrderId` / `PaymentMethodId` を共有。重複作成を避けた |
+| 6 | Reason 層共有ストア | toInstance 必須 | 該当 | `FakeInventoryAllocator` / `FakePaymentGateway` / `FakeMailer` を `toInstance($obj)` で Iface + Impl の両 binding に固定 (`AppModule:121-129`)。`FakeFinalizedOrderStorage` は Becoming chain から直接見られないため通常の `in(SINGLETON)` で十分 (Pilot 4 の FakeCustomerStorage と同パターン) |
+| 7 | client-input / server-fetched / side-effect 分離 | 3 シート | 3 シート | client-input (preOrderId / paymentMethodId), server-fetched (OrderEntity from OrderQuery, PurchaseFlowResult totals from PurchaseFlow), side-effect (InventoryAllocator / PaymentGateway / OrderNumberGenerator / OrderCommand / Mailer / CartCommand) を 3 段階に明確分離 |
+| 8 | LoC (Pilot 5 新規分) | 実測のみ | src 約 670 + tests 約 240 | Input 1 件 (29 LoC) + Being 2 件 (71 + 71 LoC) + Final 1 件 (98 LoC) + Resource 1 件 (95 LoC) + Exception 2 件 (約 40 LoC) + Reason Entity 1 件 (61 LoC) + Reason Service Iface 4 + Fake 4 (約 260 LoC) + Reason Query Iface 1 + Fake 2 (約 110 LoC) + Test Domain 154 LoC + Resource 87 LoC |
+| 9 | Multi-side-effect Final テスト | pass | pass | `testPersistsFinalizedOrder` + `testSendsExactlyOneConfirmationMail` + `testCapturesPaymentExactlyOnceWithCorrectAmount` + `testClearsSourceCart` で 4 副作用 (persist / mail / payment capture / cart clear) を独立検証。Final の 3 Reason すべてが期待回数だけ呼ばれたことを保証 |
+| 10 | DomainException → HTTP 422/404 マッピング | pass | pass | `testUnknownPreOrderRejected` (Domain `PreOrderNotFoundException`) + `testOnPostUnknownPreOrderReturns404` (Resource 404), `testInsufficientStockRejected` (Domain) + `testOnPostInsufficientStockReturns422` (Resource 422), `testPaymentDeclinedRejected` (Domain) + `testOnPostPaymentDeclinedReturns422` (Resource 422) で 3 失敗経路を Domain + Resource 両層で検証 |
+| 11 | side-effect strict sequence | pass | pass | CheckoutSettled で inventory.allocate → gateway.checkout → numbers.generate の順 (在庫を確保してから決済、無駄な番号発番をしない)。CheckoutCompleted で orderCommand.register → mailer.send → cartCommand.clear の順 (record of truth が先、cart cleanup は最後)。`testInsufficientStockRejected` は stock 不足時に gateway が呼ばれないことを captures count で検証可能 |
+| 12 | ALPS 整合性 (Rule 7) | 手動チェック合格 | 概ね合格 (1 件 non-blocking finding) | Final (`CheckoutCompleted`) の public プロパティ (orderNo / completeMessage / customerId / total / paymentTotal / addPoint / orderStatus / orderDate / paymentDate) は `ShoppingComplete` 表示状態 + audit info として整合。domain-review で「ShoppingComplete descriptor は orderNo / completeMessage のみ。残り 7 件は EC-CUBE Order 表示に必要な audit info — Resource 層で projection 縮小を検討」の finding を non-blocking 扱い |
+| 13 | Ray.Di binding correctness | pass | pass | 上記指標 #6。Pilot 5 で発見した toInstance パターンを AppModule のコメント (lines 102-119) に詳述。今後の Pilot は Iface + Impl 両参照を要する Fake で同パターンを踏襲 |
+
+### Pilot 5 で発見された skill gap
+
+| ID | 内容 | 昇格先 |
+|---|---|---|
+| G-14 | **Ray.Di `bind(Iface)->to(Impl)` は `bind(Impl)->in(SINGLETON)` を consult しない** — Iface 経由の resolution と Impl 経由の resolution が独立した instance を作る。Pilot 5 の `FakeMailer` / `FakePaymentGateway` (state を hold する Fake) は Becoming chain が `MailerInterface` で resolve、test introspection が `FakeMailer` で resolve するため、両 binding が同一 instance を返す必要がある。Solution: `$obj = new Fake(); $this->bind(Iface)->toInstance($obj); $this->bind(Impl)->toInstance($obj);` (Storage 経由で state を分離するパターンも可だが、refactor 量が大きい) | `SKILL.md` の「Ray.Di binding patterns for Fakes」セクション新規追加 (TODO)。Pilot 1-4 で使ってきた `bind(Iface)->to(Impl); bind(Impl)->in(SINGLETON)` パターンは「Impl が state-less で test が直接参照しない」場合に限る旨を明記 |
+| G-15 | **Multi-side-effect Final (Complex Convergence) の判定基準** — Pilot 4 までの Final は単一 Command のみ呼んだが、Pilot 5 の Final は OrderCommand + Mailer + CartCommand の 3 副作用を 1 constructor で並走させる。判定基準: 「副作用同士に順序依存があり (record of truth が先 / cleanup が後)、互いの結果に依存しない」場合は Multi-side-effect Final として 1 つの Final で収束させて良い。3 副作用以上で各副作用が他の副作用の結果を要する場合は Cascade Final (中間 Final を挟む) を検討 | `SKILL.md` の「パターン判定フロー」に Multi-side-effect Final の項目追加 (TODO) |
+| G-16 | **Failure mode: side-effect ordering と partial-commit window** — Pilot 5 で `gateway.checkout()` が成功した後に `numbers.generate()` が throw (現状の Fake では起きないが Phase 2 で起きうる) すると、顧客は課金されたが orderNo 未発番 → FinalizedOrder 未永続化 → カートも残る状態に陥る。同様に Final で `orderCommand.register()` が成功して `mailer.send()` が throw すると永続化 + 課金完了 + メール無し + カート残存。Solution (Phase B): (a) Final の Mailer は契約上 non-throwing (失敗時は internal log + swallow)、(b) CartCommand 失敗も swallow (注文は durable なので stale cart は許容)、(c) CheckoutSettled は Phase 2 で DB transaction + register_shutdown_function gateway hook に書き換え | `SKILL.md` の「side-effect ordering と例外契約」セクション (TODO) |
+
+### Pilot 5 で更新したファイル
+
+**`src/Module/AppModule.php`:**
+
+- Pilot 5 用 9 件の bind 追加: `FakeFinalizedOrderStorage` Singleton, `FakeInventoryAllocator` / `FakePaymentGateway` / `FakeMailer` の **toInstance による Iface + Impl 両 binding**, `OrderNumberGeneratorInterface` / `OrderCommandInterface` の通常 link binding
+- 11-19 行のコメントブロックで Ray.Di toInstance パターンを文書化 (将来 pilot 用の breadcrumb)
+
+**Pilot 5 で新規追加した Be 層 (`be/src/`):**
+
+- `Input/`: `CheckoutInput.php`
+- `Being/`: `CheckoutPrepared.php`, `CheckoutSettled.php`
+- `Final/`: `CheckoutCompleted.php`
+- `Exception/`: `InsufficientStockException.php`, `PaymentDeclinedException.php` (`PreOrderNotFoundException` は Pilot 3 既存)
+- `Reason/Entity/`: `FinalizedOrderEntity.php` (16 fields + STATUS_NEW=1 constant)
+- `Reason/Service/`: `InventoryAllocatorInterface.php` + `FakeInventoryAllocator.php` (inventory.json 読み + atomic 引当), `PaymentGatewayInterface.php` + `FakePaymentGateway.php` (paymentMethodId===9 で決済失敗シミュレーション), `OrderNumberGeneratorInterface.php` + `FakeOrderNumberGenerator.php` (`bin2hex(random_bytes(16))` で 32-hex), `MailerInterface.php` + `FakeMailer.php` (sent 配列で送信記録 / non-throwing 契約)
+- `Reason/Query/`: `OrderCommandInterface.php` + `FakeOrderCommand.php` (FakeFinalizedOrderStorage delegate), `FakeFinalizedOrderStorage.php` (Singleton, orderNo + preOrderId 両ルックアップ)
+- `Reason/Query/CartCommandInterface.php` — **既存に `clearByPreOrderId(string $preOrderId): void` 追加**
+- `Reason/Query/FakeCartCommand.php` — 同上 implementation
+- `Reason/Query/FakeCartStorage.php` — `removeByPreOrderId()` / `getByPreOrderId()` 追加
+- `var/fake/orders.json` — Pilot 5 用 3 件 pre-order 追加: `aaaa…aaaa` (happy, paymentMethodId=2, sample-001×1@1500, delivery=600 → total 2250), `bbbb…bbbb` (OOS, oos-pilot5-tightstock×3 だが inventory=1), `cccc…cccc` (declined, paymentMethodId=9)
+- `var/fake/carts.json` — Pilot 5 happy-path 用 `session-checkout-pilot5` cart 追加 (clearByPreOrderId テストのため)
+- `var/fake/inventory.json` — 新規。`{sample-001: 10, preorder-2026-spring-bag: 5, oos-pilot5-tightstock: 1}`
+- `docs/pilot5/alps-analyze.md` — 新規 (Pilot 5 設計の handover ドキュメント)
+
+**Pilot 5 で新規追加した BEAR 層:**
+
+- `src/Resource/Page/Shopping/Checkout.php` — `page://self/shopping/checkout` の `onPost(string $preOrderId, int $paymentMethodId)` (4 例外を 400/404/422/422 にマップ + success 9 fields projection)
+- `tests/Resource/CheckoutResourceTest.php` — 5 tests (happy 201 / 404 unknown / 422 OOS / 422 declined / 400 malformed)
+- `be/tests/Domain/CheckoutCompletedTest.php` — 8 tests (happy / persist / mail送信 1 回 / payment capture 1 回 + amount=2250 / cart clear / 404 unknown / 422 OOS / 422 declined)
+
+### Pilot 5 の security 観点 (security-review findings から記録)
+
+**Phase B / Phase 2 に着手すべき項目 (security-review 13 finding の要約):**
+
+- **AUTHZ 欠如**: Resource は preOrderId 所有者 (customerId) を session と照合していない。誰でも他人の pre-order を確定できる。Phase B: `CheckoutPrepared` に `SessionGuard` Reason 追加 → `OrderEntity.customerId !== session.customerId` で `UnauthorizedPreOrderAccessException` throw
+- **MASS-ASSIGNMENT**: client supplied `paymentMethodId` を `OrderEntity.paymentMethodId` と照合せず gateway に forward。決済方法のすり替えが可能。Phase B fix: `CheckoutInput` から `paymentMethodId` を削除し、`CheckoutPrepared` が `$order->paymentMethodId` を採用する形に変更
+- **IDEMPOTENCY**: pre-order row を「消費済み」状態に遷移させていない。同じ preOrderId の double-submit で **二重課金 + 二重 FinalizedOrder + 在庫二重引当** が発生しうる。現状唯一の緩和策は最後の `clearByPreOrderId` だが redirect を follow しない並列 / replay 攻撃には無力。Phase B fix: 実 DB では `OrderCommand.register()` を `SELECT FOR UPDATE` または `dtb_order.pre_order_id` UNIQUE 制約 + `INSERT ON CONFLICT` で atomic にする
+- **PARTIAL-COMMIT WINDOW**: gateway.checkout 成功後の throw / orderCommand.register 後の mailer throw / cartCommand throw で各種の partial state が発生しうる。Phase B fix: Mailer / CartCommand を契約上 non-throwing にして Final 側で try/catch + log + swallow。CheckoutSettled は Phase 2 で DB transaction + `register_shutdown_function` 化
+- **PAYMENT-FIRST ORDERING 正しい**: inventory.allocate → gateway.checkout の順を守っているため OOS 時に課金しない設計は OK (no action required)
+- **PRE-ORDER ID ENTROPY (cross-pilot)**: Pilot 5 では mint しないが、将来の `doShopping` pilot で実装する `PreOrderIdGenerator` は **必ず `bin2hex(random_bytes(20))` CSPRNG** にすること (上記 AUTHZ 欠如と組み合わさると enumeration 攻撃が成立する)
+- **EXCEPTION MESSAGE 漏洩**: `InsufficientStockException` (productCode + counts), `PaymentDeclinedException` (preOrderId + paymentMethodId + amount) が SemanticLogger 経由でログに残る。Resource は固定文字列を返すので HTTP body には漏れない。Phase B fix: preOrderId はログでは前 8 桁に redact、または sensitive channel に分離
+- **RESPONSE BODY 漏洩**: success body に `customerId` (32-hex opaque) が含まれる。session で既知のため client 側で必要ない。Phase B fix: response body から `customerId` を drop
+- **INPUT VALIDATION 完全**: `onPost(string $preOrderId, int $paymentMethodId)` 以外の body フィールドは BEAR が signature reject。over-posting 不可
+- **CSRF / REPLAY**: Pilot 5 は CSRF guard 無し。Phase B で標準 CSRF middleware を投入予定。Pilot 5 は CSRF retrofit を阻害しない設計 (no GET fallback / no JSONP)
+- **AppModule toInstance パターン (Phase 2)**: 本番 PaymentGateway / Mailer は stateless (delegate to external) のため `bind(Iface)->to(Impl)->in(SINGLETON)` で十分。ただし state を hold する production wrapper (例: idempotency cache, connection pool, metrics counter) を追加する場合は Pilot 5 の toInstance パターンに準じる必要あり
+- **SemanticLogger 機密漏洩 (Phase B)**: DevSemanticLogger が CheckoutInput / OrderEntity (customerId + items + prices) / PurchaseFlowResult / FinalizedOrderEntity を平文で `var/log/bemart.json` に書く。Phase B fix: ProdModule で per-class allowlist + redacted logger に切替。**Card PAN / CVV は Be 層に到達しない設計** (PaymentGatewayInterface は paymentMethodId のみ受け取る) なので PCI 対象は order metadata に限定される
+- **FakePaymentGateway 規約**: paymentMethodId===9 を「決済失敗」マジックナンバーに使用。fixture コメントに記録済み。Phase 2 ProdModule は同マジックナンバーを継承しないこと
+
+### Pilot 5 の参照ドキュメント
+
+- **`~/git/be-patterns/demos/loan-application/`** — Diamond-Cascade パターンの正解 (Pilot 5 設計の参照元)
+- **`be/docs/pilot5/alps-analyze.md`** — Pilot 5 の設計 handover (descriptor → pattern → reasons → BEAR mapping)
+- **`HANDOVER.md` Pilot 4 の skill gap G-11/G-12/G-13** — Multi-Reason Being との混同を避けるための参考
+
+### Pilot 1+2+3+4+5 を通じた集計
+
+- composer test: 52/52 pass, 149 assertions, 3 notices (Pilot 3 起源の preOrderId / paymentMethodId / customerId Semantic 未登録 NOTICE。validator skip で gracefully 動作)
+- Be domain LoC (累計): 約 2880 src + 約 954 tests
+- 採用パターン: Linear/Minimal (Pilot 1), Cascade (Pilot 2), Linear Cascade + Branching (Pilot 3), Multi-Reason Being (Pilot 4), **Diamond-Cascade + Multi-side-effect Final (Pilot 5)**
+- 未検証パターン: 真の Cascade Diamond (apex が Input 不要なケース; EC-CUBE の通常 transition では出現しない可能性大), Complex Convergence の更に深いネスト (insurance-claim の Multi-stage Multi-Reason)
+- **Phase A 完了** (Pilot 4 + Pilot 5)。次は Phase B (CSRF / rate-limit / bear-security / Psalm taint / ProdModule) へ進む

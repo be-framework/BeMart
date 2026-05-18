@@ -1,5 +1,5 @@
 {
-  "$comment": "Cart の初期状態。FakeCartQuery / FakeCartCommand が参照。cartKey をキーとして lookup。Pilot 2 の Diamond テスト (merge, 分離) のために最初は空 → テストで追加 → 状態を観察、という流れ。",
+  "$comment": "Cart の初期状態。FakeCartQuery / FakeCartCommand が参照。cartKey をキーとして lookup。Pilot 2 の Diamond テスト (merge, 分離) のために最初は空 → テストで追加 → 状態を観察、という流れ。Pilot 5 の clearByPreOrderId テスト用に preOrderId='completed-pilot5-...' を持つカートを 1 件追加。",
   "session-prefix-1_1": {
     "cartKey": "session-prefix-1_1",
     "saleTypeId": 1,
@@ -21,5 +21,16 @@
     "addPoint": 0,
     "usePoint": 0,
     "preOrderId": "deadbeefcafe1234567890abcdef01234567890b"
+  },
+  "session-checkout-pilot5": {
+    "cartKey": "session-checkout-pilot5",
+    "saleTypeId": 1,
+    "saleTypeName": "通常販売",
+    "items": [],
+    "totalPrice": 1500,
+    "deliveryFeeTotal": 600,
+    "addPoint": 0,
+    "usePoint": 0,
+    "preOrderId": "aaaa00000000000000000000000000000000aaaa"
   }
 }
