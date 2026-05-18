@@ -58,10 +58,14 @@ final class AppEntryPointTest extends TestCase
             unlink($this->logFile);
         }
 
+        // Slice 7: ProdModule binds SessionInterface to SymfonySessionAdapter.
+        // In CLI (no HTTP session) the adapter honors BEMART_CLI_CUSTOMER_ID
+        // as the authenticated customerId for operator scripts. We need
+        // customer-001 here to satisfy AUTHZ on the `aaaa…` pre-order.
         $result = $this->runBin('prod', [
             'page://self/shopping/checkout',
             json_encode(['preOrderId' => 'aaaa00000000000000000000000000000000aaaa'], JSON_THROW_ON_ERROR),
-        ]);
+        ], ['BEMART_CLI_CUSTOMER_ID' => 'customer-001']);
 
         $this->assertSame(0, $result['exit'], 'bin/app.php must exit 0 on success: ' . $result['stderr']);
         $this->assertSame('prod', $result['json']['context'] ?? null);
@@ -70,6 +74,22 @@ final class AppEntryPointTest extends TestCase
             $this->logFile,
             'APP_CONTEXT=prod must NOT write var/log/bemart.json (PII leak prevention)',
         );
+    }
+
+    public function testProdContextRejectsAnonymousCli(): void
+    {
+        // Slice 7: without BEMART_CLI_CUSTOMER_ID set, ProdModule's
+        // SymfonySessionAdapter must report anonymous → CheckoutPrepared
+        // throws UnauthorizedPreOrderAccessException → resource returns 403.
+        // bin/app.php exits 1 on any 4xx by convention, so we assert exit=1
+        // *and* body.code=403 to pin down the rejection path specifically.
+        $result = $this->runBin('prod', [
+            'page://self/shopping/checkout',
+            json_encode(['preOrderId' => 'aaaa00000000000000000000000000000000aaaa'], JSON_THROW_ON_ERROR),
+        ]);
+
+        $this->assertSame(1, $result['exit'], 'bin/app.php exits 1 on 4xx: ' . $result['stderr']);
+        $this->assertSame(403, $result['json']['code'] ?? null);
     }
 
     public function testAppContextDoesWriteLogFile(): void
@@ -105,18 +125,24 @@ final class AppEntryPointTest extends TestCase
     }
 
     /**
-     * @param list<string> $args
+     * @param list<string>         $args
+     * @param array<string, string> $env  Extra env vars to set for the subprocess.
      *
      * @return array{exit: int, stdout: string, stderr: string, json: array<string, mixed>|null}
      */
-    private function runBin(string $context, array $args): array
+    private function runBin(string $context, array $args, array $env = []): array
     {
         $escapedArgs = '';
         foreach ($args as $a) {
             $escapedArgs .= ' ' . escapeshellarg($a);
         }
 
-        $cmd = 'APP_CONTEXT=' . escapeshellarg($context)
+        $envPrefix = 'APP_CONTEXT=' . escapeshellarg($context);
+        foreach ($env as $name => $value) {
+            $envPrefix .= ' ' . $name . '=' . escapeshellarg($value);
+        }
+
+        $cmd = $envPrefix
             . ' php ' . escapeshellarg($this->bin)
             . $escapedArgs
             . ' 2>' . escapeshellarg($this->stderrFile);

@@ -898,3 +898,151 @@ No errors found!
 | Slice 8: CSRF token | 非決定的 | 全 `onPost` endpoint に CSRF guard。token 配布手段 (session-bound vs sync token) は要判断 |
 | Slice 9: Taint annotation | 非決定的 | Psalm `@psalm-taint-*` を Pilot 1-5 + Slice 6 にも適用。`$_POST` / `$_SESSION` を source、`gateway::charge` 等を sink としてグラフを引く |
 | (追加検討) Slice 10: 存在オラクル軽減 | 非決定的 | 既存 user に対する 404 / 403 統一。**user-facing UX を悪化させる** ので、threat model と合わせてユーザー判断が必要 |
+
+---
+
+## Phase B — Slice 7: 本番 Session アダプタ (EC-CUBE bridge)
+
+**目的:** Slice 6 で導入した `SessionInterface` の **本番実装** を `ProdModule` 配下に与える。Slice 6 までは `FakeSession('customer-001')` が全 context で動いており、本番でも全員 customer-001 扱い = AUTHZ 素通り状態だった。Slice 7 で `SymfonySessionAdapter` を `ProdModule` の override として bind し、本番経路では **実 session が空なら anonymous** になる。
+
+### Why now (Slice 順序の判断)
+
+Slice 6 (AUTHZ) は test 上だけで完全に機能していた。本番では `ProdModule` が `AppModule` を install し、`AppModule` 内の `bind(SessionInterface)->toInstance(new FakeSession('customer-001'))` が活きてしまうため AUTHZ は無効化される。**Slice 7 が無いと Slice 6 は飾り**。それより前に CSRF (Slice 8) を入れても、AUTHZ が無効なら他人の pre-order を確定できる事実は変わらない。順序は AUTHZ binding 本物化 → CSRF → 残り、で確定。
+
+### ユーザー判断 (Slice 7 着手前に必要だった)
+
+「Session の保持方法」 3 択を提示:
+
+| option | dep | EC-CUBE 側変更 |
+|---|---|---|
+| A. Cookie (BEAR 独自) | symfony/http-foundation 必要 | 不要 (BEAR 側で完結) |
+| B. JWT | firebase/php-jwt 等 | 不要 (BEAR 側で完結) |
+| **C. 既存 EC-CUBE の Symfony Session 継承** ← 採用 | BEAR 側 dep ゼロ | 5 行の EventListener 追加 |
+
+C を選択した理由 (ユーザー判断): 移行期は EC-CUBE と BEAR が並存する。「BEAR 側に独自 session を建てる」 = 二重ログイン or 二重 session sync が必要 = 移行コスト大。EC-CUBE が既に管理している session を共有し、BEAR は**読むだけ**にする方が現実的。
+
+C の内部にもう 1 サブ判断: 「customerId をどこから読むか」:
+
+- **A1. Flat key `$_SESSION['customer_id']` を読む** ← 採用
+- A2. Symfony Security の serialized Token (`$_SESSION['_security_main']`) を unserialize → symfony/security-core 依存追加
+- A3. Sidecar HTTP `/api/me` → 1 RTT 追加
+
+A1 (Recommended) を選択: **BEAR 側に Symfony Security 依存をゼロにする** ことを優先。EC-CUBE 側に 5 行の EventListener (login 時に flat key へ mirror、logout 時に unset) を入れれば完結。`Symfony Security` の internal class signature 変更にも引きずられない (これは Symfony 5 → 6 → 7 で実際に起きてる) 。
+
+### 追加 / 変更ファイル
+
+| ファイル | 役割 | 種別 |
+|---|---|---|
+| [src/Auth/SymfonySessionAdapter.php](src/Auth/SymfonySessionAdapter.php) | `SessionInterface` の本番実装。$_SESSION → flat key 読み + CLI fallback (env var) + headers-sent 防御 | 新規 |
+| [src/Module/ProdSessionOverrideModule.php](src/Module/ProdSessionOverrideModule.php) | `bind(SessionInterface)->to(SymfonySessionAdapter)`。ProdModule から override として install | 新規 |
+| [src/Module/ProdModule.php](src/Module/ProdModule.php) | `$this->override(new ProdSessionOverrideModule())` を 1 行追加 | 変更 |
+| [tests/Auth/SymfonySessionAdapterTest.php](tests/Auth/SymfonySessionAdapterTest.php) | adapter 単体: 7 ケース (session 読み / anonymous / CLI env fallback / session 優先 / 空文字 / 非 string / custom key) | 新規 |
+| [tests/Module/ProdModuleTest.php](tests/Module/ProdModuleTest.php) | 既存 happy-path テストに `$_SESSION['customer_id']='customer-001'` 注入 + tearDown でクリア | 変更 |
+| [tests/EntryPoint/AppEntryPointTest.php](tests/EntryPoint/AppEntryPointTest.php) | prod CLI に `BEMART_CLI_CUSTOMER_ID` env 注入 + anonymous CLI が 403 になることの negative test 追加 | 変更 |
+
+### EC-CUBE 側 contract (Slice 7 では実装しない)
+
+BEAR 側は **読むだけ**。EC-CUBE 側に以下のミラーを入れることでブリッジが完成する:
+
+```php
+// EC-CUBE 側 EventListener (例: app/Customize/EventListener/SessionMirrorListener.php)
+public function onLoginSuccess(InteractiveLoginEvent $event): void
+{
+    $customer = $event->getAuthenticationToken()->getUser();
+    if ($customer instanceof \Eccube\Entity\Customer) {
+        // BEAR 側 SymfonySessionAdapter::CUSTOMER_ID_KEY と一致させる
+        $event->getRequest()->getSession()->set('customer_id', (string) $customer->getId());
+    }
+}
+
+public function onLogout(LogoutEvent $event): void
+{
+    $event->getRequest()->getSession()->remove('customer_id');
+}
+```
+
+- Cookie 名: EC-CUBE 4.x のデフォルト `ECCUBE` (= `SymfonySessionAdapter::COOKIE_NAME`)
+- Flat key: `customer_id` (= `SymfonySessionAdapter::CUSTOMER_ID_KEY`)
+- BEAR が同じドメイン / path で動作することが前提 (= cookie 共有可能なデプロイ構成)
+
+この EC-CUBE 側ハーネスは EC-CUBE 移植 (Phase 2 以降) で実装される。Slice 7 は contract だけ確定させる。
+
+### CLI fallback (運用スクリプト用)
+
+`bin/app.php` から ProdModule を呼ぶ場合、SAPI=cli で HTTP session が無い。`BEMART_CLI_CUSTOMER_ID` env var を設定すれば、adapter はそれを authenticated customerId として返す。env が無ければ anonymous = AUTHZ で 403。subprocess test の `testProdContextRejectsAnonymousCli` がこの contract を pin している。
+
+⚠️ **この env var は authentication をバイパスする**。HTTP context で絶対に設定してはいけない (adapter 側で `PHP_SAPI === 'cli'` をガードしているが、`php-fpm` 内で誤って setenv される可能性を残さないこと)。
+
+### 検証
+
+```bash
+$ composer test
+OK (73 tests, 181 assertions)   # Slice 6 から +8 (adapter unit 7 + entry-point anon 1)
+
+$ composer psalm
+No errors found!
+
+$ composer psalm-taint
+No errors found!
+```
+
+### 設計上の判断
+
+#### 「Symfony Session 継承」 の正確な意味
+
+このリポジトリには EC-CUBE 本体も `symfony/http-foundation` も入っていない (= 入っているのは `symfony/cache`, `symfony/console` の transitive dep のみ)。 そのため Slice 7 で言う 「継承」 は **「実 EC-CUBE のセッション形式を物理的に共有する契約」** であって 「Symfony コンポーネントを依存に入れる」 ことではない。Adapter は **PHP 標準 `$_SESSION`** だけを使う。
+
+これにより:
+
+- BEAR 側 dep ゼロ (Slice 7 は composer.json を 1 行も触らない)
+- EC-CUBE の Symfony version を BEAR が知らなくていい
+- 単体テストが Symfony 依存を持たない (`$_SESSION` を poke するだけ)
+
+#### `Override` を 2 段重ねる構造
+
+```text
+ProdModule (configure)
+  ├── install(AppModule)                          ← 既存 dev binding 一式
+  ├── override(ProdLoggingOverrideModule)         ← Slice 3: PII log fix
+  └── override(ProdSessionOverrideModule)         ← Slice 7: Session binding 切替
+```
+
+`ProdLoggingOverrideModule` (Slice 3) のパターンをそのまま踏襲。**1 つの override module = 1 つの責務** にすることで、Slice 4-9 で増えていく差し替え bindings (CSRF / rate-limit / 本番 DB / 本番 Mailer / …) を独立にレビューできる。`ProdModule.configure()` は将来 5-6 行の `override` 呼び出しが並ぶことを許容する設計。
+
+#### Adapter の resolution 優先順位 (session 優先 → CLI env fallback)
+
+```php
+1. $_SESSION['customer_id'] が string で空でない → return
+2. PHP_SAPI === 'cli' && BEMART_CLI_CUSTOMER_ID env が空でない → return
+3. else null (anonymous)
+```
+
+`$_SESSION` を **CLI でも優先** する。理由は PHPUnit 内 `ProdModuleTest` が `$_SESSION` を poke する pattern を取るため。CLI 環境でも session 値を honor することで、test harness と運用スクリプトで同じ adapter を使い続けられる。本番 HTTP context では env var は無視されるので「session が無いのに env で詐称できる」 攻撃ベクタは生まれない (= prerequisite: `PHP_SAPI === 'cli'` で `$_SESSION` が空、という二重条件)。
+
+#### `bin/app.php` の exit code
+
+`bin/app.php` は `4xx → exit 1` で動く (Slice 5 時に決定)。Slice 7 で追加した `testProdContextRejectsAnonymousCli` も exit=1 を期待する。これで「subprocess が走った (exit 2 = script error ではない)」 かつ 「resource が 403 で reject した」 を別々に assert できる。
+
+### Slice 7 の振り返り (決定的/非決定的)
+
+- **決定的だった**: 
+  - 「Slice 6 binding の本番化が必要」 という議論の余地ゼロ
+  - `ProdLoggingOverrideModule` のパターンを踏襲する (1 module = 1 責務)
+  - PHP `$_SESSION` を使う (Symfony dep を入れない)
+- **非決定的だった (= ユーザー判断要)**:
+  - 「Symfony Session 継承」 の正確な意味 (A. cookie / B. JWT / C. EC-CUBE 共有) — C 採用
+  - 「customerId をどこから読むか」 (Flat key / Symfony Token / Sidecar API) — Flat key 採用
+- **積み残し**:
+  - EC-CUBE 側の EventListener 実装 (Phase 2 で EC-CUBE 移植時に対応)
+  - **本番 HTTP server** — Slice 5 の `public/index.php` はまだ router 無しの最小実装。real-world deploy 前に WebRouter + Compiler + error formatter が必要
+  - **Logout 動線** — adapter は read-only。BEAR 側に明示 logout endpoint は無い。Phase 2 で EC-CUBE の /mypage/logout を経由するルートを確認
+  - **Session security 強化** — adapter は `use_strict_mode` / `cookie_httponly` / `cookie_samesite=Lax` を session_start に渡しているが、`cookie_secure` (HTTPS only) は php.ini 任せ。本番デプロイ時に `cookie_secure=1` を必ず設定すること
+
+### 次の Slice (Slice 8 以降)
+
+| 候補 | 性質 | 一行コメント |
+|---|---|---|
+| **Slice 8**: CSRF token | 非決定的 | 全 `onPost` に CSRF guard。Slice 7 の session 上に token を持たせる方式 (session-bound) か、stateless synchronizer token か |
+| Slice 9: Taint annotation | 半決定的 | Psalm `@psalm-taint-*` を Pilot 1-5 全体に適用。`$_POST` / `$_SESSION` source → `gateway::charge` 等 sink の graph |
+| (追加検討) Slice 10: 存在オラクル軽減 | 非決定的 | 既存 user に対する 404 / 403 統一 |
+| (追加検討) bear-security-setup skill 適用 | skill bake | Slice 6-7 で手動構築した AUTHZ 基盤を skill 化するレビュー。`bear-skills` 側に knowledge を回す |
