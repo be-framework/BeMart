@@ -901,13 +901,17 @@ No errors found!
 
 ---
 
-## Phase B — Slice 7: 本番 Session アダプタ (EC-CUBE bridge)
+## Phase B — Slice 7: 本番 Session アダプタ (EC-CUBE bridge, BEAR 側のみ)
 
-**目的:** Slice 6 で導入した `SessionInterface` の **本番実装** を `ProdModule` 配下に与える。Slice 6 までは `FakeSession('customer-001')` が全 context で動いており、本番でも全員 customer-001 扱い = AUTHZ 素通り状態だった。Slice 7 で `SymfonySessionAdapter` を `ProdModule` の override として bind し、本番経路では **実 session が空なら anonymous** になる。
+**目的:** Slice 6 で導入した `SessionInterface` の **本番実装の BEAR 側半分** を `ProdModule` 配下に与える。Slice 6 までは `FakeSession('customer-001')` が全 context で動いており、本番でも全員 customer-001 扱い = AUTHZ 素通り状態だった。Slice 7 で `EccubeSharedSessionAdapter` を `ProdModule` の override として bind し、本番経路では **実 session が空なら anonymous** になる。
+
+> ⚠️ **実運用にはまだ届いていない**: ブリッジ契約のうち BEAR 側 (`$_SESSION` を読む) のみが実装済み。EC-CUBE 側 (login 時に authenticated customerId を flat key へミラーする EventListener) は **未実装**。それが入るまで、本番 HTTP リクエストは全て anonymous → AUTHZ が全部 403 を返す状態。Slice 7 は「BEAR 側の半分」と「契約の確定」 までを担う。残りは Phase 2 (EC-CUBE 移植) で着地する。
 
 ### Why now (Slice 順序の判断)
 
 Slice 6 (AUTHZ) は test 上だけで完全に機能していた。本番では `ProdModule` が `AppModule` を install し、`AppModule` 内の `bind(SessionInterface)->toInstance(new FakeSession('customer-001'))` が活きてしまうため AUTHZ は無効化される。**Slice 7 が無いと Slice 6 は飾り**。それより前に CSRF (Slice 8) を入れても、AUTHZ が無効なら他人の pre-order を確定できる事実は変わらない。順序は AUTHZ binding 本物化 → CSRF → 残り、で確定。
+
+ただし Slice 7 の BEAR 側だけでは Slice 6 の AUTHZ は **まだ実用にならない**。Slice 7 が片付けたのは「`FakeSession('customer-001')` が本番に漏れて全員素通りになる」というクリティカルな failure mode。残課題は「実 customerId を実際に検証する経路」 で、これは EC-CUBE 側ハーネス (後述) が入った時点で完成する。それまでは「fail closed (全部 403)」 = 安全側に倒した状態。
 
 ### ユーザー判断 (Slice 7 着手前に必要だった)
 
@@ -933,10 +937,10 @@ A1 (Recommended) を選択: **BEAR 側に Symfony Security 依存をゼロにす
 
 | ファイル | 役割 | 種別 |
 |---|---|---|
-| [src/Auth/SymfonySessionAdapter.php](src/Auth/SymfonySessionAdapter.php) | `SessionInterface` の本番実装。$_SESSION → flat key 読み + CLI fallback (env var) + headers-sent 防御 | 新規 |
-| [src/Module/ProdSessionOverrideModule.php](src/Module/ProdSessionOverrideModule.php) | `bind(SessionInterface)->to(SymfonySessionAdapter)`。ProdModule から override として install | 新規 |
+| [src/Auth/EccubeSharedSessionAdapter.php](src/Auth/EccubeSharedSessionAdapter.php) | `SessionInterface` の本番実装。$_SESSION → flat key 読み + CLI fallback (env var) + headers-sent 防御 | 新規 |
+| [src/Module/ProdSessionOverrideModule.php](src/Module/ProdSessionOverrideModule.php) | `bind(SessionInterface)->to(EccubeSharedSessionAdapter)`。ProdModule から override として install | 新規 |
 | [src/Module/ProdModule.php](src/Module/ProdModule.php) | `$this->override(new ProdSessionOverrideModule())` を 1 行追加 | 変更 |
-| [tests/Auth/SymfonySessionAdapterTest.php](tests/Auth/SymfonySessionAdapterTest.php) | adapter 単体: 7 ケース (session 読み / anonymous / CLI env fallback / session 優先 / 空文字 / 非 string / custom key) | 新規 |
+| [tests/Auth/EccubeSharedSessionAdapterTest.php](tests/Auth/EccubeSharedSessionAdapterTest.php) | adapter 単体: 7 ケース (session 読み / anonymous / CLI env fallback / session 優先 / 空文字 / 非 string / custom key) | 新規 |
 | [tests/Module/ProdModuleTest.php](tests/Module/ProdModuleTest.php) | 既存 happy-path テストに `$_SESSION['customer_id']='customer-001'` 注入 + tearDown でクリア | 変更 |
 | [tests/EntryPoint/AppEntryPointTest.php](tests/EntryPoint/AppEntryPointTest.php) | prod CLI に `BEMART_CLI_CUSTOMER_ID` env 注入 + anonymous CLI が 403 になることの negative test 追加 | 変更 |
 
@@ -950,7 +954,7 @@ public function onLoginSuccess(InteractiveLoginEvent $event): void
 {
     $customer = $event->getAuthenticationToken()->getUser();
     if ($customer instanceof \Eccube\Entity\Customer) {
-        // BEAR 側 SymfonySessionAdapter::CUSTOMER_ID_KEY と一致させる
+        // BEAR 側 EccubeSharedSessionAdapter::CUSTOMER_ID_KEY と一致させる
         $event->getRequest()->getSession()->set('customer_id', (string) $customer->getId());
     }
 }
@@ -961,8 +965,8 @@ public function onLogout(LogoutEvent $event): void
 }
 ```
 
-- Cookie 名: EC-CUBE 4.x のデフォルト `ECCUBE` (= `SymfonySessionAdapter::COOKIE_NAME`)
-- Flat key: `customer_id` (= `SymfonySessionAdapter::CUSTOMER_ID_KEY`)
+- Cookie 名: EC-CUBE 4.x のデフォルト `ECCUBE` (= `EccubeSharedSessionAdapter::COOKIE_NAME`)
+- Flat key: `customer_id` (= `EccubeSharedSessionAdapter::CUSTOMER_ID_KEY`)
 - BEAR が同じドメイン / path で動作することが前提 (= cookie 共有可能なデプロイ構成)
 
 この EC-CUBE 側ハーネスは EC-CUBE 移植 (Phase 2 以降) で実装される。Slice 7 は contract だけ確定させる。
@@ -1033,10 +1037,11 @@ ProdModule (configure)
   - 「Symfony Session 継承」 の正確な意味 (A. cookie / B. JWT / C. EC-CUBE 共有) — C 採用
   - 「customerId をどこから読むか」 (Flat key / Symfony Token / Sidecar API) — Flat key 採用
 - **積み残し**:
-  - EC-CUBE 側の EventListener 実装 (Phase 2 で EC-CUBE 移植時に対応)
+  - **EC-CUBE 側 EventListener の実装** — これが入るまでは本番経路 = 全 anonymous = AUTHZ 全 403。Slice 7 単体では「production-ready な auth path」 ではない。Phase 2 (EC-CUBE 移植 slice) で着地させる
   - **本番 HTTP server** — Slice 5 の `public/index.php` はまだ router 無しの最小実装。real-world deploy 前に WebRouter + Compiler + error formatter が必要
   - **Logout 動線** — adapter は read-only。BEAR 側に明示 logout endpoint は無い。Phase 2 で EC-CUBE の /mypage/logout を経由するルートを確認
   - **Session security 強化** — adapter は `use_strict_mode` / `cookie_httponly` / `cookie_samesite=Lax` を session_start に渡しているが、`cookie_secure` (HTTPS only) は php.ini 任せ。本番デプロイ時に `cookie_secure=1` を必ず設定すること
+  - **`BEMART_CLI_CUSTOMER_ID` env var の正当性** — Slice 7 内の subprocess test (`testProdContextRejectsAnonymousCli` の対) を成立させるために導入された CLI 専用バイパス。`PHP_SAPI === 'cli'` でガードしているが、運用スクリプトを増やさないなら将来削除候補
 
 ### 次の Slice (Slice 8 以降)
 
