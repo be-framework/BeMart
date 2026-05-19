@@ -1412,3 +1412,89 @@ Pilot 10 は本来 Pilot 2 の `QuantityAdjusted` Being を再利用したかっ
 - **積み残し**:
   - 1 つの productCode が複数 cart (異なる saleType) に存在する場合の挙動 — Pilot 11 は最初に見つけた 1 件だけ削除する。EC-CUBE では同 productCode は 1 cart にしか入らないので実用上問題ないが、Phase 2 で全 cart スキャンに変える余地
   - PurchaseFlow の本物の再評価 (送料・手数料・割引) は Phase 2
+
+## Pilot 13-15 — favorite / contact / password-reset 3 件 (量産 Batch 3)
+
+| 項目 | 内容 |
+|---|---|
+| 対象 transition | `doAddFavorite` (Pilot 13) / `doSubmitContact` (Pilot 15) / `doRequestPasswordReset` (Pilot 14) |
+| パターン | 3 件とも Direct |
+| テスト | 141 passed (Batch 2 末 128 + Batch 3 新規 13: favorite 5 + contact 4 + forgot-password 4), 323 assertions |
+| Psalm / psalm-taint | 全 green |
+
+### Pilot 13 — `doAddFavorite`
+
+- Be flow: `AddFavoriteInput → FavoriteAdded`
+- AUTHZ via Session (Pilot 8 と同形)
+- 重複追加 idempotent — first add = 201, re-add = 200 with `alreadyExisted=true`
+- 新規: `FavoriteStorageInterface` (unified Query+Command for v1) + `FakeFavoriteStorage` + `FavoriteEntity`
+- **設計判断**: CQRS split は load が demand したときに deferred (Phase 2)
+
+### Pilot 15 — `doSubmitContact`
+
+- Be flow: `SubmitContactInput → ContactSubmitted`
+- Anonymous accessible — AUTHN / AUTHZ なし、CSRF のみ
+- `MailerInterface::sendContactInquiry` を追加 (shop + sender 両宛先は impl 内部で fan-out)
+- 新規 Semantic 4 件: `ContactName01` / `ContactName02` / `ContactEmail` / `ContactContents`
+  - 既存 Name01/Name02/Email Semantic と同一ロジックだが、ALPS descriptor 名 (contactName01 等) で参照されるため、Be Framework の per-param-name wiring に合わせて別 class を作成
+- **設計判断**: 既存 Semantic を再利用するか別 class を作るか → ALPS 名規約 (`contact*`) を保つ別 class を採用
+
+### Pilot 14 — `doRequestPasswordReset`
+
+- Be flow: `RequestPasswordResetInput → PasswordResetRequested`
+- **Anti-enumeration**: 登録済み email / 未登録 email の双方で identical 200 + identical body shape を返す。`issued` flag は Final 内部にのみ存在 (mail 送信を制御)、resource は client に echo しない
+- Token: 32-char hex (`CustomerIdGenerator` を re-purpose)、TTL 1 hour (EC-CUBE デフォルト準拠)、latest-wins
+- 新規: `PasswordResetTokenEntity` + `PasswordResetTokenStorageInterface` + `FakePasswordResetTokenStorage`
+- `MailerInterface::sendPasswordReset(email, resetKey)` を追加 (email が html sink)
+- **設計判断**: token を `CustomerEntity` に持たせず別 storage に分離 — expiry 管理が cleaner
+
+### Pilot 12 — `doReorder` (本 Batch では deferred)
+
+ALPS doc: 「過去の受注内容をカートに再投入する。在庫切れ商品はスキップ、現在価格を適用」
+
+**Deferred の理由**:
+1. `FinalizedOrderEntity` に items が含まれていない (Pilot 5 で order item は別 table と decided)
+2. `OrderQueryInterface` に `itemsByOrderNo` が無い
+3. Fake fixture `var/fake/orders.json` に items column が無い
+4. これらすべての追加は 2-unit 規模 (Pilot 1 件分 + infrastructure)
+
+次の Batch (Pilot 12 含む) で着手するべき先行作業:
+- `OrderItemEntity` 新規
+- `FinalizedOrderEntity` 拡張 (items: list<OrderItemEntity>)
+- `OrderQueryInterface::itemsByOrderNo` 追加
+- `orders.json` fixture に items 追加 (alice's history で 2-3 件)
+- Cart 側との merge ロジック (existing cart があれば追加 / 無ければ新規)
+- 在庫切れ skip / 廃番 skip の policy
+
+### Batch 3 振り返り (決定的 / 非決定的)
+
+- **決定的だった**:
+  - Anti-enumeration の uniform 200 response (Pilot 14)
+  - Anonymous-accessible / AUTHN required の区分 (Pilot 15 vs Pilot 13)
+  - Token を別 storage に分離 (Pilot 14)
+- **非決定的だった**:
+  - Pilot 13: idempotent re-add を 200 (alreadyExisted) で返すか silent 201 にするか → 200 を採用 (UI 区別性)
+  - Pilot 15: Semantic class を新規作成するか既存を再利用するか → 新規作成 (per-param-name wiring 規約)
+  - Pilot 14: token を `CustomerEntity` に持たせるか別 storage にするか → 別 storage (expiry handling cleaner)
+- **積み残し**:
+  - **Pilot 12 全体** — 上記 deferred 理由参照
+  - `doResetPassword` (Pilot 14 の対) — token 消費側、別 Pilot で
+  - `doRemoveFavorite` — Pilot 13 の対、`FavoriteStorageInterface::remove` は既に実装済みなので軽量
+  - Resource Page で `/favorite/list` (お気に入り一覧) — Pilot 13 の query 側を Public にする
+
+### Batch 1-3 累計の進捗
+
+| 指標 | Pilot 1-5 末 | Batch 3 末 | 差分 |
+|---|---|---|---|
+| 移植済み transition 数 | 5 / 137 | 13 / 137 | +8 (Pilot 6, 7, 8, 9, 10, 11, 13, 14, 15 ※ 9 件) |
+| Transition 量産率 | 3.6% | 9.5% | +5.9 pt |
+| テスト数 | 90 | 141 | +51 |
+| パターン実証 | 5 種 | 5 種 (Direct 多発生 + Linear 1 新) | (新規パターンなし、Direct の量産技法を確立) |
+
+実証された pattern instance:
+- Direct: Pilot 1, 6, 7, 8, 9, 11, 13, 14, 15 (9 件) — 量産可能、AUTHZ via Session / anti-enumeration / idempotent re-do などの規約が定着
+- Linear: contact-form (元) + Pilot 10 (新) — `Input-per-intent + Being-per-shape` の規約を Pilot 10 で確立 (G-17)
+- Multi-Reason Being: Pilot 4 (CustomerRegistering)
+- Diamond-Cascade: Pilot 2 / Pilot 5 (CheckoutPrepared)
+- Branching Final: Pilot 3
+

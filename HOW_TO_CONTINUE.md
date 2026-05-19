@@ -172,6 +172,10 @@ ec-cube-alps/
 | Pilot 9 | `111000b` | goCart — Direct (safe read, multi-cart aggregation) | 完了 |
 | Pilot 10 | `a9f45ee` | doUpdateCartItemQuantity — Linear (G-17 chain-class-fixed) | 完了 |
 | Pilot 11 | `a9f45ee` | doRemoveCartItem — Direct | 完了 |
+| Pilot 12 | — | doReorder — Diamond-Cascade (OrderItem 拡張要、deferred) | 未着手 |
+| Pilot 13 | `26a1591` | doAddFavorite — Direct (idempotent + AUTHZ) | 完了 |
+| Pilot 14 | `8709bbe` | doRequestPasswordReset — Direct (anti-enumeration) | 完了 |
+| Pilot 15 | `3e821e0` | doSubmitContact — Direct (anonymous + dual mail) | 完了 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 | Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 
