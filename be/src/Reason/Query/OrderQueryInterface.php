@@ -27,10 +27,12 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
  * Pilot 12 (doReorder) is the first consumer.
  *
  * `listByCustomer` returns the customer's finalized orders sorted by
- * `orderDate` descending (newest first), capped by `$limit`. Used by the
- * Mypage dashboard (goMypage) to render the "最近のご注文" summary panel
- * without fetching the full order history. Returns an empty list when the
- * customer has no past orders.
+ * `orderDate` descending (newest first), capped by `$limit` and offset by
+ * `$offset` rows. The Mypage dashboard (goMypage) uses the head of the
+ * list to render the "最近のご注文" summary panel; goOrderHistory uses
+ * the `$offset` argument to walk past the first page when rendering the
+ * customer's full order history. Returns an empty list when the customer
+ * has no past orders (or `$offset` walks past the end).
  */
 interface OrderQueryInterface
 {
@@ -42,5 +44,5 @@ interface OrderQueryInterface
     public function itemsByOrderNo(string $orderNo): array;
 
     /** @return list<FinalizedOrderEntity> */
-    public function listByCustomer(string $customerId, int $limit = 10): array;
+    public function listByCustomer(string $customerId, int $limit = 10, int $offset = 0): array;
 }
