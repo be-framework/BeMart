@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Service;
 
+use MyVendor\BeMart\Be\Reason\Entity\ContactEntity;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 
 /**
@@ -27,4 +28,14 @@ interface MailerInterface
      * @psalm-taint-sink html $order
      */
     public function sendOrderConfirmation(FinalizedOrderEntity $order): void;
+
+    /**
+     * Pilot 15 doSubmitContact: send the inquiry to the shop and an
+     * auto-reply to the submitter. EC-CUBE's MailService::sendContactMail
+     * also targets two recipients. The contact body is highly user-
+     * controlled (free-text), so it's an html taint sink.
+     *
+     * @psalm-taint-sink html $contact
+     */
+    public function sendContactInquiry(ContactEntity $contact): void;
 }

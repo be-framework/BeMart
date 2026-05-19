@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Service;
 
+use MyVendor\BeMart\Be\Reason\Entity\ContactEntity;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use Override;
 
@@ -19,6 +20,9 @@ final class FakeMailer implements MailerInterface
     /** @var list<FinalizedOrderEntity> */
     private array $sent = [];
 
+    /** @var list<ContactEntity> */
+    private array $contactInquiries = [];
+
     #[Override]
     public function sendOrderConfirmation(FinalizedOrderEntity $order): void
     {
@@ -29,5 +33,17 @@ final class FakeMailer implements MailerInterface
     public function sent(): array
     {
         return $this->sent;
+    }
+
+    #[Override]
+    public function sendContactInquiry(ContactEntity $contact): void
+    {
+        $this->contactInquiries[] = $contact;
+    }
+
+    /** @return list<ContactEntity> */
+    public function contactInquiries(): array
+    {
+        return $this->contactInquiries;
     }
 }
