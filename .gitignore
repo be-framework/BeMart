@@ -3,3 +3,4 @@
 /var/log/*.json
 /var/tmp/
 .DS_Store
+/.claude/worktrees/
