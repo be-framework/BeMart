@@ -1498,3 +1498,78 @@ ALPS doc: 「過去の受注内容をカートに再投入する。在庫切れ�
 - Diamond-Cascade: Pilot 2 / Pilot 5 (CheckoutPrepared)
 - Branching Final: Pilot 3
 
+
+## Wave 1 + Wave 2 — Orchestrated parallel agents (Pilot 12 + 5 新 transition)
+
+**指揮スタイル**: 単一 agent の直列実行から、worktree-isolated 並列 subagent への切替。1 user turn で 3-4 agent を kick → 完了通知ごとに本ブランチへ cherry-pick → push のループ。
+
+### Wave 1 (3 agent 並列、worktree isolation)
+
+| Agent | 対象 | 結果 | テスト追加 |
+|---|---|---|---|
+| A | Pilot 12 prep (`OrderItemEntity` infrastructure) | `5fbe6d6` cherry-picked as `3028041` | +3 (domain) |
+| B | `doRemoveFavorite` (Pilot 13 idempotent inverse) | `4521c6f` cherry-picked as `c366723` | +4 (resource) |
+| C | `doResetPassword` (Pilot 14 single-use consumer) | `951038c` cherry-picked as `87e0319` | +11 (4 domain + 7 resource) |
+
+Wave 1 net: +18 tests (141 → 159)、新 transition 2 件 (`doRemoveFavorite` / `doResetPassword`) + 1 infra prep。
+
+### Wave 2 (4 agent 並列、worktree isolation)
+
+| Agent | 対象 | パターン | 結果 | テスト追加 |
+|---|---|---|---|---|
+| D | Pilot 12 `doReorder` | Diamond-Cascade (loan-application) | `7366c90` cherry-picked as `263c525` | +11 |
+| E | `doLogout` | Direct (session-clear by EventListener) | `7f18d89` cherry-picked as `351dcd1` | +5 |
+| F | `goMypage` | Direct safe-read (dashboard aggregation) | `e7cb6dd` cherry-picked as `cef5447` | +4 |
+| G | `doWithdrawCustomer` | Direct + multi-side-effect | `a235ad9` cherry-picked as `ab2e674` | +9 |
+
+Wave 2 net: +29 tests (159 → 188)、新 transition 4 件。
+
+### Wave 2 で発見された設計事項
+
+#### Pilot 12 (Agent D)
+- **Stage 1 Being `ReorderResolving`** が AUTHN/AUTHZ + past-items load + per-item current ProductClass 解決 + cap 適用を 1 段で吸収 (Pilot 5 `CheckoutPrepared` の方針踏襲)
+- **`Included` / `Skipped` Semantic** — Being → Final 間で list payload を運ぶ pattern。`MergedCart` / `Result` 既存パターンの踏襲 (composite-type validate body 空)
+- **Skip-rather-than-fail** — 廃番 (ProductClass null) / 在庫切れ (stock=0 & !stockUnlimited) は skip; 数量 over は cap で adjust。EC-CUBE doc の「在庫切れ商品はスキップ、現在価格を適用」 を踏襲
+- **prep 不足の発見**: Wave 1A の Pilot 12 prep は `itemsByOrderNo` のみ追加していて `byOrderNo` (header lookup) が無かった。Agent D が in-flight で interface 拡張 (storage 側にすでに `getByOrderNo` が存在したため最小追加)
+
+#### Pilot doLogout (Agent E)
+- **0-arg Input** が Be Framework で動く確認 — `BecomingArguments` の `getParameters()` 空 loop は no-op。dummy field fallback は不要だった
+- Session-clear は EC-CUBE EventListener 側 (Slice 7.2 contract)、Be 層は LoggedOut Final で「処理した」 という proof を返すのみ — Pilot 6 doLogin と同形
+
+#### goMypage (Agent F)
+- **dashboard aggregation pattern** — 1 Final で複数 Reason (CustomerQuery + OrderQuery + FavoriteStorage) を converge し、shallow projection を組む
+- `recentOrders` は flat projection (`{orderNo, total, orderDate, orderStatus}`)、`favoriteCount` のみ (full list は出さない)。dashboard scope の規約
+- `OrderLimit` Semantic 新規 (1-50 cap) — `SessionPrefix` 等の int-typed semantic 規約踏襲
+
+#### doWithdrawCustomer (Agent G)
+- **Multi-side-effect Final** (Pilot 5 convention): capture-original-email → replace-record → clear-carts → send-mail の strict order
+- **Dummy email**: `withdrawn-{customerId}@example.invalid` (RFC 2606 reserved `.invalid` TLD)
+- **`customerStatus=3` = withdrawn** を const として publish — `FinalizedOrderEntity::STATUS_NEW` パターン踏襲
+- Idempotency short-circuit: 既に status=3 なら mail 再送なし。`cleared=true` は idempotent replay 時も維持 (UI 区別なし)
+
+### Cherry-pick 衝突対応
+
+Agent D (Pilot 12) と Agent F (goMypage) は両者 `OrderQueryInterface` / `FakeOrderQuery` を拡張 (D: `byOrderNo`、F: `listByCustomer`)。git auto-merge が成功 — 異なる method を追加していたため。Wave 設計時の disjoint-files 原則が機能した。
+
+### Orchestration の振り返り
+
+- **walltime 短縮**: Wave 1 (3 agent) は wall ~5min、Wave 2 (4 agent) は wall ~12min。直列なら 7 unit ≒ 1.5-2 倍時間
+- **briefing の粒度**: prep 工程 (Wave 1A) と本実装 (Wave 2 D) を別 wave にしたのは正解。1 agent が両方やると context が膨らみすぎ判断が雑になる
+- **prep 漏れの発見** (Pilot 12 の `byOrderNo`): briefing で「依存している interface methods をすべて列挙する」 工程が抜けていた。Wave 3 以降は briefing 設計時に dependency 表を作成
+- **既存 file への複数 agent 書込み**: G (CartCommand 拡張) と D (CartCommand 読込) は read/write split で OK、F (OrderQuery 拡張) と D (OrderQuery 拡張) は git auto-merge 任せで OK。**3 agent 以上が同 file を write する場合は事前に分担を明示するべき**
+
+### 累計進捗 (Wave 2 末)
+
+| 指標 | Pilot 1-5 末 | Batch 3 末 | Wave 2 末 |
+|---|---|---|---|
+| 移植 transition | 5 / 137 (3.6%) | 14 / 137 (10.2%) | 20 / 137 (14.6%) |
+| Tests | 90 | 141 | **188** |
+| Assertions | 205 | 323 | **477** |
+
+実証された pattern instance:
+- Direct: 13 件 (Pilot 1, 6, 7, 8, 9, 11, 13, 14, 15, doLogout, goMypage, doWithdrawCustomer, doResetPassword, doRemoveFavorite)
+- Linear: 1 件 (Pilot 10)
+- Multi-Reason Being: 1 件 (Pilot 4)
+- Diamond-Cascade: 3 件 (Pilot 2, 5, 12)
+- Branching Final: 1 件 (Pilot 3)
+
