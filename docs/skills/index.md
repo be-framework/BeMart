@@ -19,6 +19,7 @@ Every entry follows the same shape: **Context -> Problem -> Solution -> Code exa
 | [G-20](G-20-cross-session-singleton-rebind.md) | Cross-session rebind requires explicit singleton storage sharing via `toInstance` on both Iface + Impl | AUTHZ tests + Ray.Di |
 | [G-21](G-21-idempotent-delete-styles.md) | Idempotent DELETE has two styles — silent (200 + `alreadyAbsent`) vs 404-on-miss, route by caller expectation | REST API convention |
 | [G-22](G-22-context-specific-pagination-semantic.md) | Pagination Semantic is context-specific — `Limit` (admin) vs `OrderLimit` (dashboard) vs `HistoryLimit` (full history) | Semantic naming |
+| [G-23](G-23-hypermedia-test-is-migration-contract.md) | Hypermedia (Resource) tests are the storage-migration contract — never write Final-direct integration tests; ALPS gap-fill precedes SQL impl | Storage migration + test strategy |
 
 ## Contribution candidates
 
@@ -36,6 +37,7 @@ These are intended for upstream contribution to:
 - **Either** (Be Framework + ALPS both relevant):
   - G-20 (cross-session test wiring; touches DI + AAA)
   - G-21 (idempotent DELETE; touches REST + ALPS unsafe/idempotent typing)
+  - G-23 (hypermedia-as-contract + ALPS gap-fill; touches DI + Resource testing + ALPS descriptor structure)
 
 ## How these were discovered
 
