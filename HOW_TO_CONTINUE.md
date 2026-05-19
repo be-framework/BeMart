@@ -183,6 +183,13 @@ ec-cube-alps/
 | Wave 2E | `351dcd1` | doLogout — Direct | 完了 |
 | Wave 2F | `cef5447` | goMypage — Direct safe-read aggregation | 完了 |
 | Wave 2G | `ab2e674` | doWithdrawCustomer — Direct + multi-side-effect | 完了 |
+| Wave 3H | `6dba995` | 4 go* form renderers (Login/Entry/Contact/MypageWithdraw) — pure BEAR | 完了 |
+| Wave 3I | `e6ac521` | goMypageHistory + goMypageChange — Direct authenticated | 完了 |
+| Wave 3J | `ac1ce6f` | goShopping — Direct aggregation | 完了 |
+| Wave 4K | `b925397` | admin AAA infra + doAdminLogin + doAdminLogout | 完了 (※ ALPS 後追記済) |
+| Wave 5M | `31e1d93` | goCustomerList — Direct + admin AUTHZ + filter | 完了 |
+| Wave 5N | `1e22b42` | goCustomer — Direct + admin AUTHZ + aggregation | 完了 |
+| Wave 5O | `0bb3ea0` | doCreateCustomer — Multi-Reason Being + admin AUTHZ | 完了 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 | Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 
