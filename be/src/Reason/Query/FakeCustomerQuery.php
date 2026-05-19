@@ -25,4 +25,10 @@ final class FakeCustomerQuery implements CustomerQueryInterface
     {
         return $this->storage->getBySecretKey($secretKey);
     }
+
+    #[Override]
+    public function findById(string $customerId): CustomerEntity|null
+    {
+        return $this->storage->getById($customerId);
+    }
 }

@@ -24,4 +24,10 @@ final class FakeCustomerCommand implements CustomerCommandInterface
     {
         $this->storage->activate($customerId);
     }
+
+    #[Override]
+    public function update(CustomerEntity $customer): void
+    {
+        $this->storage->replace($customer);
+    }
 }
