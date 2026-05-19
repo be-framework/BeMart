@@ -16,6 +16,12 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * id + login-key + hashed password + display fields — but the field
  * names follow the EC-CUBE Member shape (loginId, authority, name).
  *
+ * Wave 8 adds `work` (EC-CUBE mtb_work: 0=NON_ACTIVE / 1=ACTIVE) so the
+ * member-management surface can soft-delete admins without losing the
+ * audit row. The login flow already implicitly assumed all admins were
+ * active; Wave 8 keeps the default at WORK_ACTIVE so existing fixtures
+ * stay backward-compatible.
+ *
  * Note: this Be project's source-of-truth ALPS profile does not yet
  * carry `doAdminLogin` / `doAdminLogout` transition ids (only customer
  * `doLogin` / `doLogout` are present). The admin actor exists in the
@@ -26,6 +32,12 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  */
 final readonly class AdminEntity
 {
+    /** Active admin — can log in. Mirrors EC-CUBE mtb_work=1. */
+    public const int WORK_ACTIVE = 1;
+
+    /** Inactive admin — soft-deleted, cannot log in. mtb_work=0. */
+    public const int WORK_INACTIVE = 0;
+
     public function __construct(
         public string $adminId,
         public string $loginId,
@@ -33,6 +45,7 @@ final readonly class AdminEntity
         public string $name,
         public string $mailAddress,
         public int $authority,
+        public int $work = self::WORK_ACTIVE,
     ) {
     }
 }
