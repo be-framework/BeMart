@@ -1354,3 +1354,61 @@ Slice 8 の `CsrfTokenInterface::isValid($token)` は `$token` を比較する�
   - email-link UX のままにする path (Pilot 7 `onGet` バージョン) — 必要なら別 Slice
   - password change — Pilot 14 で扱う
   - `findById` が O(n) scan (storage map indexes by email) — Phase 2 で DB impl にすれば解消
+
+## Pilot 9-11 — cart manipulation 3 件 (量産 Batch 2)
+
+| 項目 | 内容 |
+|---|---|
+| 対象 transition | `goCart` (Pilot 9) / `doUpdateCartItemQuantity` (Pilot 10) / `doRemoveCartItem` (Pilot 11) |
+| パターン | Direct (Pilot 9, 11) / Linear (Pilot 10) |
+| テスト | 128 passed (Batch 1 末 119 + Batch 2 新規 9: cart 3 + cart/item PUT 3 + cart/item DELETE 3), 297 assertions |
+| Psalm / psalm-taint | 全 green |
+
+### Pilot 9 — `goCart`
+
+- Be flow: `GetCartsInput → CartsFetched`
+- Multi-cart semantics — EC-CUBE は 1 shopping session を saleType 単位で N cart に partition する (`cartKey = {sessionPrefix}_{saleTypeId}`)。Final は prefix で scan して per-session totals を集計
+- 新規: `CartQueryInterface::bySessionPrefix` + `FakeCartStorage::getBySessionPrefix`
+- **safe read** のため CSRF / AUTHZ なし。ownership は sessionPrefix cookie で implicit
+
+### Pilot 10 — `doUpdateCartItemQuantity`
+
+- Be flow: `UpdateCartItemQuantityInput → CartItemQuantityReplacing → CartItemQuantityUpdated`
+- Linear pattern (contact-form demo)
+- HTTP: **PUT** /cart/item (idempotent matches PUT)
+- Quantity は **置換** (Pilot 2 doAddCartItem は加算)
+- Cap 再適用: stock + saleLimit (PurchaseFlow 相当の最小実装)
+- 既存 item 必須 — 無ければ `CartItemNotInCartException` → 404
+
+#### 設計上の発見 (G-17): Be Framework chain は class-level fixed
+
+Pilot 10 は本来 Pilot 2 の `QuantityAdjusted` Being を再利用したかったが、Be Framework の `#[Be(NextClass::class)]` attribute は **Being class** 上に置かれるため、下流の宛先が class level で固定される。`QuantityAdjusted` は `#[Be(CartMerged::class)]` を持ち、必ず加算 merge へ流れる。
+
+選択肢:
+- (A) `QuantityAdjusted` に Branching: 動的な宛先選択 → Be Framework は構造的型付けの哲学から外れる
+- (B) 同形 Being を別名で複製 (`QuantityCapped` 等): DRY 違反だが構造的に正しい
+- (C) **Input 段で意図を区別し、Being も分ける**: 採用 — `CartItemQuantityReplacing` を新規作成
+
+これは **G-15 (Multi-side-effect Final 判定基準)** と同列の重要発見として `SKILL.md` 候補に記載すべき。Be Framework での「同じ前処理を異なる下流に向ける」 ケースの規約として `Input-per-intent + Being-per-shape` を踏襲する。
+
+### Pilot 11 — `doRemoveCartItem`
+
+- Be flow: `RemoveCartItemInput → CartItemRemoved`
+- Direct pattern
+- HTTP: **DELETE** /cart/item (idempotent matches DELETE)
+- Final が session prefix 配下の全 cart を scan して該当 productCode を含む cart を見つけ、その中の item を除去 → totals 再計算 → 永続化
+- 既存 item 必須 — 無ければ `CartItemNotInCartException` → 404 (再削除は idempotent ではなく明示的 404)
+
+### Batch 2 振り返り (決定的 / 非決定的)
+
+- **決定的だった**:
+  - HTTP method の REST 規約 (POST → create, PUT → update, DELETE → remove)
+  - safe read に CSRF/AUTHZ を付けない (Pilot 1 goProduct の踏襲)
+  - quantity=0 を Quantity Semantic 側で reject、削除は別 endpoint
+- **非決定的だった**:
+  - Pilot 9 で空 carts を 200 で返すか 404 にするか → 200 を採用 (「cart 一覧」 が空であることは正常状態)
+  - Pilot 10 で QuantityAdjusted を再利用するか別 Being を作るか → 別 Being を採用 (G-17)
+  - Pilot 11 で 再削除を idempotent (200) として swallow するか 404 にするか → 404 を採用 (UI が「カートが空」と「2 度押し」 を区別できる)
+- **積み残し**:
+  - 1 つの productCode が複数 cart (異なる saleType) に存在する場合の挙動 — Pilot 11 は最初に見つけた 1 件だけ削除する。EC-CUBE では同 productCode は 1 cart にしか入らないので実用上問題ないが、Phase 2 で全 cart スキャンに変える余地
+  - PurchaseFlow の本物の再評価 (送料・手数料・割引) は Phase 2
