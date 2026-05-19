@@ -49,6 +49,34 @@ final class ChangeResourceTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    public function testOnGetReturnsFormPrePopulated(): void
+    {
+        $ro = $this->resource->get('page://self/mypage/change');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertSame('alice@example.com', $ro->body['email']);
+        $this->assertSame('山田', $ro->body['name01']);
+        $this->assertSame('アリス', $ro->body['name02']);
+        $this->assertSame('ヤマダ', $ro->body['kana01']);
+        $this->assertSame('0312345678', $ro->body['phoneNumber']);
+        $this->assertSame('1500001', $ro->body['postalCode']);
+        $this->assertSame(13, $ro->body['pref']);
+        $this->assertSame('渋谷区', $ro->body['addr01']);
+        $this->assertSame('POST', $ro->body['submitTo']['method']);
+        $this->assertSame('page://self/mypage/change', $ro->body['submitTo']['href']);
+    }
+
+    public function testOnGetUnauthenticatedReturns401(): void
+    {
+        $this->rebindSession(null);
+
+        $ro = $this->resource->get('page://self/mypage/change');
+
+        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+        $this->assertStringContainsString('ログイン', $ro->body['message']);
+    }
+
     public function testOnPostPatchesAndReturns200(): void
     {
         $ro = $this->resource->post('page://self/mypage/change', [

@@ -12,6 +12,8 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerUpdated;
+use MyVendor\BeMart\Be\Final\MypageChangeFormFetched;
+use MyVendor\BeMart\Be\Input\GetMypageChangeInput;
 use MyVendor\BeMart\Be\Input\UpdateCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
@@ -36,6 +38,52 @@ class Change extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
     ) {
+    }
+
+    /**
+     * goMypageChange — show the change-customer-info form pre-populated
+     * with the logged-in customer's current values.
+     *
+     * Safe read. No CSRF (read-only). AUTHN in the Be layer maps null
+     * session → 401.
+     */
+    #[Link(rel: 'goMypage', href: 'page://self/mypage')]
+    public function onGet(): static
+    {
+        try {
+            $final = ($this->becoming)(new GetMypageChangeInput());
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
+
+            return $this;
+        } catch (UnauthenticatedException) {
+            $this->code = Code::UNAUTHORIZED;
+            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof MypageChangeFormFetched);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'customerId' => $final->customerId,
+            'email' => $final->email,
+            'name01' => $final->name01,
+            'name02' => $final->name02,
+            'kana01' => $final->kana01,
+            'kana02' => $final->kana02,
+            'companyName' => $final->companyName,
+            'phoneNumber' => $final->phoneNumber,
+            'postalCode' => $final->postalCode,
+            'pref' => $final->pref,
+            'addr01' => $final->addr01,
+            'addr02' => $final->addr02,
+            'submitTo' => $final->submitTo,
+        ];
+
+        return $this;
     }
 
     /**
