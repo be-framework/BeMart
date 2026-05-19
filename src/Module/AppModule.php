@@ -45,10 +45,13 @@ use MyVendor\BeMart\Be\Reason\Query\FakeOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakePasswordResetTokenStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakePluginStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductClassQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeProductCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeProductStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeTradeLawStorage;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
@@ -220,6 +223,11 @@ final class AppModule extends AbstractAppModule
         $this->bind(FakeAdminStorage::class)->in(Scope::SINGLETON);
         $this->bind(AdminQueryInterface::class)->to(FakeAdminQuery::class);
         $this->bind(AdminSessionInterface::class)->toInstance(new FakeAdminSession(null));
+
+        // Wave 8α: admin product CRUD — split Query from the Pilot 1 fixture
+        // binding so the new FakeProductCommand shares one corpus.
+        $this->bind(FakeProductStorage::class)->in(Scope::SINGLETON);
+        $this->bind(ProductCommandInterface::class)->to(FakeProductCommand::class);
 
         // Wave 8β: admin catalog hierarchy (Category / ClassName / ClassCategory).
         $this->bind(CategoryStorageInterface::class)->to(FakeCategoryStorage::class)->in(Scope::SINGLETON);
