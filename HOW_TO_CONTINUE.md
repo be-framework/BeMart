@@ -164,8 +164,11 @@ ec-cube-alps/
 | Slice 6 | `51256d4` | AUTHZ ownership check for Pilot 5 F-1 | 完了 |
 | Slice 7 | `8847636` | production Session adapter (EC-CUBE bridge) | 完了 (BEAR 側のみ) |
 | Slice 7.1 | `0c48d8b` | rename + `@` 除去 + HANDOVER 修正 | 完了 |
-| Slice 8 | (本ブランチ) | CSRF token (BEAR 側のみ) | 完了 (BEAR 側のみ) |
-| Slice 9 | (本ブランチ) | Taint annotation (Pilot 1-5 全体) | 完了 (※ opacity 課題あり) |
+| Slice 8 | `91198e6` | CSRF token (BEAR 側のみ) | 完了 (BEAR 側のみ) |
+| Slice 9 | `ed0e9b1` | Taint annotation (Pilot 1-5 全体) | 完了 (※ opacity 課題あり) |
+| Pilot 6 | `f34bd78` | doLogin — Direct (credentials verification) | 完了 |
+| Pilot 7 | `27e8ee9` | doActivateCustomer — Direct (idempotent activation) | 完了 |
+| Pilot 8 | `2039e43` | doUpdateCustomer — Direct (AUTHZ + partial merge) | 完了 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 | Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 

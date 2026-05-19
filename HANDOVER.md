@@ -1296,3 +1296,61 @@ Slice 8 の `CsrfTokenInterface::isValid($token)` は `$token` を比較する�
 | **Slice 11**: Be Framework Psalm plugin | 非決定的 | Slice 9 で発見した opacity 問題への対策。plugin が `#[Be]` の chain を辿って flow propagation を行う |
 | (追加検討) bear-security-setup skill 適用 | skill bake | Slice 6-7-8 で手動構築した AUTHZ + CSRF + Slice 9 の taint contract を skill 化するレビュー |
 | **Slice 7.2 / 8.2 統合**: EC-CUBE 側 EventListener | Phase 2 入口 | `customer_id` + `_csrf_token` の両 mirror を 1 つの Symfony EventListener にまとめる。Phase 2 キックオフ |
+
+
+## Pilot 6-8 — account 系 3 件 (Direct パターン量産 Batch 1)
+
+| 項目 | 内容 |
+|---|---|
+| 対象 transition | `doLogin` (Pilot 6) / `doActivateCustomer` (Pilot 7) / `doUpdateCustomer` (Pilot 8) |
+| パターン | 3 件とも **Direct** (Input → Final、Being なし) |
+| 採用理由 | account 系 transition は単一副作用 (DB 1 write or 0 write) で完結し、Multi-Reason Being や Diamond の必要が無い |
+| テスト | 119 passed (Pilot 1-5 既存 90 + Pilot 6-8 新規 29: domain 14 + resource 15), 273 assertions |
+| Psalm / psalm-taint | 全 green |
+
+### Pilot 6 — `doLogin`
+
+- Be flow: `LoginInput → CustomerAuthenticated`
+- 既存 `FakeCustomerStorage` を read-side で利用するため **CQRS split** を導入: `CustomerQueryInterface` (`findByEmail` / `findBySecretKey` / `findById`) + `FakeCustomerQuery`。Order 系の Command/Query split と同じ規約
+- `PasswordHasherInterface::verify()` を追加 (`password_verify`)。Pilot 4 で hash 側だけ実装されていたものを補完
+- **設計判断**: Session-write は **Be 層スコープ外**。Slice 7.2 contract で「EC-CUBE EventListener が session に customerId を書く」と決めた通り。Be 層は credentials check の proof (= Final) を返すだけ。BEAR resource もそれを body にして返すのみ
+- **設計判断**: 「unknown email」 と 「wrong password」 は同一 `LoginFailedException` に集約。user-enumeration を防ぐため
+- fixture: `customers.json` に `login-test@example.com` を本物の bcrypt hash 付きで追加 (alice/bob/carol は dummy hash のまま)
+
+### Pilot 7 — `doActivateCustomer`
+
+- Be flow: `ActivateCustomerInput → CustomerActivated`
+- **新規 Semantic**: `SecretKey` (URL-safe printable, 16-128 chars)
+- **新規 Exception**: `SecretKeyFormatException` / `SecretKeyNotFoundException`
+- `CustomerEntity` に nullable `secretKey` プロパティ追加 (default null、既存呼び出し不変)
+- `FakeCustomerStorage::getBySecretKey` + `activate(customerId)` (idempotent)
+- **設計判断**: 「wrong key」 / 「expired」 / 「already used」 を `SecretKeyNotFoundException` に集約 (enumeration 防止と同じ思想)
+- **設計判断**: HTTP は `onPost` + CSRF — email link UX (`GET ?secretKey=...`) ではなく、確認画面のフォーム submit を経由する。secretKey が CSRF 代替になる議論もあるが、Slice 8 の境界 contract (全 state-changing endpoint で CSRF) を統一的に保つ方を優先
+
+### Pilot 8 — `doUpdateCustomer`
+
+- Be flow: `UpdateCustomerInput → CustomerUpdated`
+- **AUTHZ via Session** — Pilot 5 F-2 の mass-assignment 教訓を踏襲: `customerId` は **Input に含めない**。`SessionInterface::customerId()` を Final が pull
+- **新規 Exception**: `UnauthenticatedException` (Pilot 5 の `UnauthorizedPreOrderAccessException` は「ログイン済みだが他人のもの」、こちらは「未ログイン」と区別)
+- `CustomerQueryInterface::findById` + `CustomerCommandInterface::update` 追加
+- `FakeCustomerStorage::replace` — email-rekey (email 変更時に古い key を unset) 対応
+- **設計判断**: パスワード更新は Pilot 8 スコープ外 → Pilot 14 `doRequestPasswordReset` で扱う
+- **設計判断**: 部分 update — email は required (uniqueness 再 check は変更時のみ)、他は nullable で「null = この field は触らない」
+- **Semantic への波及**: `Name01` / `Name02` を nullable 受容に変更 (early-return on null)。Pilot 4 の register は `string` 宣言 (non-null) なので影響なし
+
+### Batch 1 振り返り (決定的 / 非決定的)
+
+- **決定的だった**:
+  - Direct パターン採用 (3 件とも単一副作用)
+  - CQRS split の追加 (既存 Order pattern 踏襲)
+  - AUTHZ via Session の踏襲 (Pilot 5 / Slice 6 と同形)
+  - CSRF 強制の継承 (Slice 8 contract uniform)
+  - user-enumeration 回避の例外集約 (login / activate)
+- **非決定的だった**:
+  - Pilot 7 で `onPost` を選択 (`onGet` で email link UX を直接踏襲する選択肢を退ける根拠は Slice 8 contract の uniformity)
+  - Pilot 8 で email change を allow するかどうか → ALPS doc に明記されているため include
+  - `Name01` / `Name02` を nullable に変えるか、UpdateCustomerInput で別 Semantic を作るか → 「nullable 受容で early-return」 を採用 (validator 数を増やさず Pilot 4 を破壊しない)
+- **積み残し**:
+  - email-link UX のままにする path (Pilot 7 `onGet` バージョン) — 必要なら別 Slice
+  - password change — Pilot 14 で扱う
+  - `findById` が O(n) scan (storage map indexes by email) — Phase 2 で DB impl にすれば解消
