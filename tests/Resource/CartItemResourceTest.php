@@ -54,6 +54,88 @@ final class CartItemResourceTest extends TestCase
         $this->assertSame('missing-xyz', $ro->body['productCode']);
     }
 
+    public function testOnPutUpdatesQuantityAndReturns200(): void
+    {
+        // First add 2, then update to 5.
+        $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 2,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $ro = $this->resource->put('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 5,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(5, $ro->body['adjustedQuantity']);
+        // sample-001 unitPrice is 1200; 5 * 1200 = 6000.
+        $this->assertSame(6000, $ro->body['totalPrice']);
+    }
+
+    public function testOnPutMissingItemReturns404(): void
+    {
+        $ro = $this->resource->put('page://self/cart/item', [
+            'productCode' => 'sample-002',
+            'quantity' => 3,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->assertSame('sample-002', $ro->body['productCode']);
+    }
+
+    public function testOnPutMissingCsrfReturns403(): void
+    {
+        $ro = $this->resource->put('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 3,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+
+    public function testOnDeleteRemovesItemAndReturns200(): void
+    {
+        // Add 2 items, then delete one.
+        $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 2,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+        $ro = $this->resource->delete('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(0, $ro->body['totalPrice']);
+    }
+
+    public function testOnDeleteMissingItemReturns404(): void
+    {
+        $ro = $this->resource->delete('page://self/cart/item', [
+            'productCode' => 'sample-002',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->assertSame('sample-002', $ro->body['productCode']);
+    }
+
+    public function testOnDeleteMissingCsrfReturns403(): void
+    {
+        $ro = $this->resource->delete('page://self/cart/item', [
+            'productCode' => 'sample-001',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+
     public function testOnPostOutOfStockReturns409(): void
     {
         $ro = $this->resource->post('page://self/cart/item', [
