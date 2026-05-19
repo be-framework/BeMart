@@ -51,6 +51,8 @@
       {"id": "classCategoryName", "title": "規格分類名","tag": "src-entity", "doc": {"value": "商品バリエーション軸の具体的な値（例: 赤、Lサイズ）。EC-CUBEの\"classCategory\"はOOPのカテゴリではなく規格値を意味する"}},
       {"id": "classCategoryBackendName", "title": "規格分類管理名","tag": "src-entity", "doc": {"value": "管理画面でのみ使用する規格分類の内部名"}},
       {"id": "classCategoryVisible", "title": "規格分類表示","tag": "src-entity", "doc": {"value": "この規格分類値を商品選択肢として表示するか"}},
+      {"id": "classCategory1", "title": "規格分類1","tag": "src-entity", "doc": {"value": "商品規格1軸目（dtb_product_class.class_category_id1）。dtb_class_category への FK。バリエーション無し商品の \"デフォルト規格\" 行は NULL（class_category_id2 と AND で判定）。Favorite / Cart の productCode 解決は IS NULL 条件で default class を選ぶ"}},
+      {"id": "classCategory2", "title": "規格分類2","tag": "src-entity", "doc": {"value": "商品規格2軸目（dtb_product_class.class_category_id2）。dtb_class_category への独立した FK。1軸目（classCategory1）と組み合わせて [軸1, 軸2] のペアでバリエーションを表現。NULL は default class の判定条件"}},
 
       {"id": "cartKey", "title": "カートキー","tag": "src-entity", "doc": {"value": "カート分離キー。形式: {セッションプレフィックス}_{販売種別ID}。EC-CUBEは販売種別ごとにカートを分離するため、異なる販売種別の商品は別カートになる"}},
       {"id": "preOrderId", "title": "仮注文ID","tag": "src-entity", "doc": {"value": "購入フローの一時セッショントークン（SHA1ハッシュ）。カートと受注を紐づける。予約注文（pre-order）IDではない。チェックアウト開始時に生成、注文確定またはカート破棄で消去"}},
@@ -58,6 +60,7 @@
       {"id": "deliveryFeeTotal", "title": "送料合計","tag": "src-entity", "doc": {"value": "全配送先の送料合計（スナップショット）。deliveryFeeAmount（地域別送料）+ deliveryFee（商品別送料）×数量 の合計。DeliveryFeePreprocessorで計算。カートと受注の両方で使用"}},
       {"id": "cartItemPrice", "title": "カート商品価格","def": "https://schema.org/price", "tag": "src-entity", "doc": {"value": "カート内の税込単価"}},
       {"id": "quantity", "title": "数量","tag": "src-entity", "doc": {"value": "購入数量。カート明細と受注明細で共通使用"}},
+      {"id": "unitPrice", "title": "単価","def": "https://schema.org/price", "tag": "src-entity", "doc": {"value": "明細1件あたりの単価。受注/カート明細・お気に入りスナップショットでは追加時点の price02 をスナップショットして保持する（後の値引きやマスタ改定に影響されない）。BeMart 側では `int` 円整数"}},
 
       {"id": "orderNo", "title": "注文番号","def": "https://schema.org/orderNumber", "tag": "src-entity", "doc": {"value": "顧客向けの注文番号。フォーマットはカスタマイズ可能"}},
       {"id": "message", "title": "注文メッセージ","tag": "src-entity", "doc": {"value": "顧客が注文時に入力するお問い合わせ欄。EC-CUBEのラベルは「お問い合わせ」で、備考欄ではない。最大3000文字"}},
@@ -106,6 +109,7 @@
       {"id": "customerNote", "title": "会員備考","tag": "src-entity", "doc": {"value": "管理者用の内部メモ。顧客には表示されない"}},
       {"id": "point", "title": "ポイント","tag": "src-entity", "doc": {"value": "会員の現在のポイント残高。注文時にポイント使用で減算、付与は発送済み(DELIVERED)ステータスへの遷移時に加算。付与計算: 商品単価(税抜) x pointRate x 数量 - 利用ポイント分控除"}},
       {"id": "secretKey", "title": "認証キー","tag": "src-entity", "doc": {"value": "会員アカウントのメール認証トークン。/entry/activate/{secret_key}形式のURLに使用。暗号鍵やAPIシークレットではない。会員登録時にランダム生成"}},
+      {"id": "customerId", "title": "会員ID","tag": "src-entity", "doc": {"value": "dtb_customer.id の不透明な文字列ハンドル。BeMart の Entity 層は数値ではなく文字列として保持する（マスアサインメント防止のため、Session/AuthZ 経由で読み出し、リクエスト本文からは受け取らない）。Favorite / Cart / Order の所有者キーとして横断使用"}},
       {"id": "resetKey", "title": "リセットキー","tag": "src-entity", "doc": {"value": "パスワードリセット用のワンタイムトークン。リセット要求時に生成、使用後にクリア"}},
       {"id": "resetExpire", "title": "リセット期限","tag": "src-entity", "doc": {"value": "パスワードリセットキーの有効期限"}},
 
@@ -252,6 +256,27 @@
         ]
       },
 
+      {"id": "ProductClass", "title": "商品規格","tag": "catalog src-entity",
+        "doc": {"value": "dtb_product_class 1行 — 1商品の規格バリエーション。重要な発見（Phase 2a Step 3 Favorite/Cart 実装由来）: dtb_product_class.class_category_id1 と class_category_id2 は dtb_class_category への2つの独立 FK で、それぞれ「軸1」「軸2」を表す（OOP の継承構造ではなく、バリエーション軸の2次元マトリクス）。バリエーション無し商品は両方 NULL の \"default class\" 行を1件持ち、Favorite / Cart の productCode 解決はこの IS NULL 条件で行う。price02（販売価格）と product_code は class 行に乗り、商品ヘッダ（dtb_product）には乗らない"},
+        "descriptor": [
+          {"href": "#productCode"},
+          {"href": "#stock"},
+          {"href": "#stockUnlimited"},
+          {"href": "#saleLimit"},
+          {"href": "#price01"},
+          {"href": "#price02"},
+          {"href": "#deliveryFee"},
+          {"href": "#productClassVisible"},
+          {"href": "#currencyCode"},
+          {"href": "#pointRate"},
+          {"href": "#saleTypeName"},
+          {"href": "#classCategory1"},
+          {"href": "#classCategory2"},
+          {"href": "#classCategoryName"},
+          {"href": "#classCategoryBackendName"}
+        ]
+      },
+
       {"id": "Product", "title": "商品","tag": "catalog src-template",
         "descriptor": [
           {"href": "#productName"},
@@ -263,24 +288,8 @@
           {"href": "#productStatus"},
           {"href": "#createDate"},
           {"href": "#updateDate"},
-          {"id": "ProductClass", "title": "商品規格",
-            "descriptor": [
-              {"href": "#productCode"},
-              {"href": "#stock"},
-              {"href": "#stockUnlimited"},
-              {"href": "#saleLimit"},
-              {"href": "#price01"},
-              {"href": "#price02"},
-              {"href": "#deliveryFee"},
-              {"href": "#productClassVisible"},
-              {"href": "#currencyCode"},
-              {"href": "#pointRate"},
-              {"href": "#saleTypeName"},
-              {"href": "#classCategoryName"},
-              {"href": "#classCategoryBackendName"}
-            ]
-          },
-          {"id": "ProductImage", "title": "商品画像", 
+          {"href": "#ProductClass"},
+          {"id": "ProductImage", "title": "商品画像",
             "descriptor": [
               {"href": "#fileName"},
               {"href": "#sortNo"}
@@ -395,6 +404,15 @@
         ]
       },
 
+      {"id": "CartItem", "title": "カート明細","tag": "cart src-entity",
+        "doc": {"value": "dtb_cart_item 由来の明細1件。BeMart の CartItemEntity と1:1 (productCode / quantity / unitPrice の3項目)。unitPrice はカート追加時点での price02 のスナップショット — マスタ改定の影響を受けない。dtb_cart_item.product_class_id（FK to dtb_product_class）は BeMart 側では surface に出さず、productCode で正規化"},
+        "descriptor": [
+          {"href": "#productCode"},
+          {"href": "#quantity"},
+          {"href": "#unitPrice"}
+        ]
+      },
+
       {"id": "Cart", "title": "カート","tag": "cart src-template",
         "descriptor": [
           {"href": "#cartKey"},
@@ -405,14 +423,7 @@
           {"href": "#usePoint"},
           {"href": "#createDate"},
           {"href": "#updateDate"},
-          {"id": "CartItem", "title": "カート明細", 
-            "descriptor": [
-              {"href": "#cartItemPrice"},
-              {"href": "#quantity"},
-              {"href": "#productName"},
-              {"href": "#productCode"}
-            ]
-          },
+          {"href": "#CartItem"},
           {"href": "#goCart"},
           {"href": "#doAddCartItem"},
           {"href": "#doUpdateCartItemQuantity"},
@@ -618,6 +629,7 @@
 
       {"id": "Customer", "title": "会員","tag": "account src-template",
         "descriptor": [
+          {"href": "#customerId"},
           {"href": "#name01"},
           {"href": "#name02"},
           {"href": "#kana01"},
@@ -642,6 +654,7 @@
           {"href": "#point"},
           {"href": "#createDate"},
           {"href": "#updateDate"},
+          {"href": "#Favorite"},
           {"href": "#goCustomer"},
           {"href": "#doUpdateCustomer"},
           {"href": "#doWithdrawCustomer"},
@@ -684,10 +697,19 @@
         ]
       },
 
+      {"id": "Favorite", "title": "お気に入り","tag": "favorite src-entity",
+        "doc": {"value": "dtb_customer_favorite_product 1行を平坦化した投影。BeMart の FavoriteEntity と1:1 (customerId / productCode / productName / unitPrice の4項目)。productName と unitPrice は表示用スナップショットで、dtb_product / dtb_product_class への JOIN で取得（default class 規約: class_category_id1 IS NULL AND class_category_id2 IS NULL）。所有者キーは customerId のみで、productCode が同じでも customerId が異なれば別行。EC-CUBE 4.3 には (customer_id, product_id) UNIQUE が無く、SqlFavoriteStorage は ON DUPLICATE KEY UPDATE id=id でベストエフォート冪等にしている"},
+        "descriptor": [
+          {"href": "#customerId"},
+          {"href": "#productCode"},
+          {"href": "#productName"},
+          {"href": "#unitPrice"}
+        ]
+      },
+
       {"id": "CustomerFavoriteProduct", "title": "お気に入り商品","tag": "favorite src-template",
         "descriptor": [
-          {"href": "#productName"},
-          {"href": "#price02"},
+          {"href": "#Favorite"},
           {"href": "#createDate"},
           {"href": "#goProduct"},
           {"href": "#doRemoveFavorite"}
