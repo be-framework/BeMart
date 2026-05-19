@@ -28,6 +28,15 @@ class Product extends ResourceObject
     ) {
     }
 
+    /**
+     * Phase B Slice 9: `$productCode` is user input (URI / query param);
+     * declared explicitly so Psalm taint analysis can trace it through
+     * Becoming into any downstream sink. The Be Semantic\ProductCode
+     * constructor format-validates but does not escape — sinks downstream
+     * still need to defend (e.g. bound parameters for SQL).
+     *
+     * @psalm-taint-source input $productCode
+     */
     #[Link(rel: 'goProductList', href: 'page://self/products')]
     #[Link(rel: 'doAddCartItem', href: 'page://self/cart/item', method: 'post')]
     public function onGet(string $productCode): static

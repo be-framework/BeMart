@@ -44,6 +44,16 @@ use MyVendor\BeMart\Be\Being\CheckoutPrepared;
 #[Be(CheckoutPrepared::class)]
 final readonly class CheckoutInput
 {
+    /**
+     * Phase B Slice 9: `preOrderId` originates from the HTTP request body
+     * (see Shopping/Checkout::onPost). Even though Psalm cannot trace
+     * through Be Framework's `#[Be]` cascade, marking the property here
+     * documents the trust boundary at the Input level. Direct
+     * (non-Becoming) reads of this property would surface in taint
+     * analysis.
+     *
+     * @psalm-taint-source input $preOrderId
+     */
     public function __construct(
         public string $preOrderId,
     ) {

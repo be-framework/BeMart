@@ -34,6 +34,12 @@ use MyVendor\BeMart\Be\Being\PreOrderResolved;
 #[Be(PreOrderResolved::class)]
 final readonly class ConfirmOrderInput
 {
+    /**
+     * Phase B Slice 9: both fields come from the HTTP confirm form.
+     *
+     * @psalm-taint-source input $preOrderId
+     * @psalm-taint-source input $paymentMethodId
+     */
     public function __construct(
         public string $preOrderId,
         public int $paymentMethodId,

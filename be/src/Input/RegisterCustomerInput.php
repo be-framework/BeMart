@@ -35,6 +35,27 @@ use MyVendor\BeMart\Be\Being\CustomerRegistering;
 #[Be(CustomerRegistering::class)]
 final readonly class RegisterCustomerInput
 {
+    /**
+     * Phase B Slice 9: all 15 properties come from the HTTP registration
+     * form. Marked as input sources for the boundary contract; format
+     * validation happens via Be Semantic at metamorphosis time.
+     *
+     * @psalm-taint-source input $email
+     * @psalm-taint-source input $password
+     * @psalm-taint-source input $name01
+     * @psalm-taint-source input $name02
+     * @psalm-taint-source input $kana01
+     * @psalm-taint-source input $kana02
+     * @psalm-taint-source input $companyName
+     * @psalm-taint-source input $phoneNumber
+     * @psalm-taint-source input $postalCode
+     * @psalm-taint-source input $pref
+     * @psalm-taint-source input $addr01
+     * @psalm-taint-source input $addr02
+     * @psalm-taint-source input $birth
+     * @psalm-taint-source input $sex
+     * @psalm-taint-source input $job
+     */
     public function __construct(
         public string $email,
         public string $password,

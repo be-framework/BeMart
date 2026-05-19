@@ -1,20 +1,20 @@
 # HOW_TO_CONTINUE.md
 
 別マシンでこの BeMart プロジェクトの作業を再開するための完全ガイド。
-最終更新: 2026-05-18 (Slice 8 完了直後)
+最終更新: 2026-05-18 (Slice 9 完了直後)
 
 ---
 
 ## 0. 現状サマリ
 
-- **ブランチ**: `be-first-migration-bootstrap` (Slice 8 は同ブランチ上で進行)
+- **ブランチ**: `be-first-migration-bootstrap` (Slice 8 / 9 は同ブランチ上で進行)
 - **リモート**: `https://github.com/koriym/ec-cube-alps.git`
-- **最終 slice**: Phase B Slice 8 — CSRF token (BEAR 側のみ)
+- **最終 slice**: Phase B Slice 9 — Taint annotation (Pilot 1-5 全体)
 - **テスト**: 90 tests, 205 assertions すべて green
-- **Psalm / Psalm-taint**: errors なし
+- **Psalm / Psalm-taint**: errors なし (※ Slice 9 の honest finding 参照)
 
-進捗の正は `HANDOVER.md` (1200 行超)。Phase A の Pilot 1-5 + Phase B の
-Slice 1-8 の全 decision log と積み残しが入っている。新マシン側 Claude が
+進捗の正は `HANDOVER.md` (1400 行超)。Phase A の Pilot 1-5 + Phase B の
+Slice 1-9 の全 decision log と積み残しが入っている。新マシン側 Claude が
 最初に読むべき唯一のドキュメント。
 
 ---
@@ -86,19 +86,22 @@ cs-fix スクリプトは無い。フォーマットは手動 or PHPStorm の au
 別マシンから作業を引き継ぎました。HOW_TO_CONTINUE.md と HANDOVER.md を読んで
 現状を把握してください。
 
-Phase B は Slice 8 (CSRF token, BEAR 側のみ) まで完了しています。次は以下の
-どちらかから選びたい:
+Phase B は Slice 9 (Taint annotation, BEAR 側のみ) まで完了しています。
+重要: Slice 9 で「Be Framework の #[Be] chain が Psalm に opaque」 という
+honest finding がありました (HANDOVER 内 "Slice 9 の現状認識" 参照)。
+次は以下のいずれかから選びたい:
 
-  A. Slice 9: Taint annotation 拡張 (Pilot 1-5 全体に @psalm-taint-* を
-     適用。CSRF check site は sanitizer として annotate)
-  B. EC-CUBE 側 EventListener 統合 (Slice 7.2 + 8.2: $_SESSION['customer_id']
-     + $_SESSION['_csrf_token'] の両方を 1 つの Symfony EventListener で
-     mirror する。これが入って初めて本番経路で AUTHZ + CSRF が実際に機能する)
+  A. Slice 10: 存在オラクル軽減 (404 と 403 の統一)
+  B. Slice 11: Be Framework Psalm plugin (Slice 9 の opacity 問題への対策。
+     plugin で `#[Be]` chain を辿る、または per-class manual propagation)
+  C. Slice 7.2 / 8.2 統合 EC-CUBE 側 EventListener (customer_id + _csrf_token
+     を 1 つの Symfony EventListener で mirror。本番 AUTHZ + CSRF が初めて
+     機能する。Phase 2 キックオフ)
 
-どちらを推奨するか、判断基準を出してください。
+どれを推奨するか、判断基準を出してください。
 ```
 
-判断基準は HANDOVER の Slice 8 セクション 末尾 (「次の Slice (Slice 9 以降)」
+判断基準は HANDOVER の Slice 9 セクション 末尾 (「次の Slice (Slice 10 以降)」
 表) にも書いてあるが、改めて出してもらう方が再ロード後の整合確認になる。
 
 ---
@@ -106,7 +109,7 @@ Phase B は Slice 8 (CSRF token, BEAR 側のみ) まで完了しています。�
 ## 3. 必読ファイル (Claude が最初に読む順)
 
 1. **`HANDOVER.md`** — 構築過程の全記録。Pilot 1-5 (Phase A) と
-   Slice 1-8 (Phase B) の decision log・積み残し・トレードオフ。
+   Slice 1-9 (Phase B) の decision log・積み残し・トレードオフ。
    読まなければ context 復元は不可能。
 2. **`CLAUDE.md`** — プロジェクト固有の規約 (ALPS が source of truth、
    `/run migrate` ワークフロー、参照パターン 8 種)。
@@ -162,8 +165,9 @@ ec-cube-alps/
 | Slice 7 | `8847636` | production Session adapter (EC-CUBE bridge) | 完了 (BEAR 側のみ) |
 | Slice 7.1 | `0c48d8b` | rename + `@` 除去 + HANDOVER 修正 | 完了 |
 | Slice 8 | (本ブランチ) | CSRF token (BEAR 側のみ) | 完了 (BEAR 側のみ) |
-| Slice 9 | — | Taint annotation 拡張 | 未着手 |
+| Slice 9 | (本ブランチ) | Taint annotation (Pilot 1-5 全体) | 完了 (※ opacity 課題あり) |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
+| Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 
 ### Slice 7 / 8 の共通の積み残し
 
@@ -297,5 +301,5 @@ graph が切れる可能性。`psalm.xml` の `taintAnalysis` セクションを
 git clone https://github.com/koriym/ec-cube-alps.git && cd ec-cube-alps
 && git checkout be-first-migration-bootstrap && composer install
 && composer test && claude
-# あとは HANDOVER.md を読ませて Slice 9 / EC-CUBE listener どちらに進むか相談
+# あとは HANDOVER.md を読ませて Slice 10 / 11 / EC-CUBE listener どれに進むか相談
 ```

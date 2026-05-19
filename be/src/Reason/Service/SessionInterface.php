@@ -25,7 +25,18 @@ namespace MyVendor\BeMart\Be\Reason\Service;
 interface SessionInterface
 {
     /**
+     * Phase B Slice 9: the returned customerId originates from the HTTP
+     * session, which in turn was set by an upstream login flow that the
+     * BEAR layer does not control (production: EC-CUBE-side EventListener,
+     * Slice 7.2 contract). Treat the value as user-controlled-but-bounded:
+     * a logged-in customer cannot directly choose their id, but the
+     * session store is part of the AAA trust boundary. Marked as a
+     * `session` taint source so flows that reach sensitive sinks
+     * (DB / mailer / gateway) surface explicitly.
+     *
      * @return non-empty-string|null  customerId, or null if unauthenticated
+     *
+     * @psalm-taint-source session
      */
     public function customerId(): string|null;
 }

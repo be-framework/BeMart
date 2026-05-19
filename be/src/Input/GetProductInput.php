@@ -18,6 +18,11 @@ use MyVendor\BeMart\Be\Final\ProductFetched;
 #[Be([ProductFetched::class])]
 final readonly class GetProductInput
 {
+    /**
+     * Phase B Slice 9: `productCode` comes from the URL (Product::onGet).
+     *
+     * @psalm-taint-source input $productCode
+     */
     public function __construct(
         public string $productCode,
     ) {

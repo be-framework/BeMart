@@ -17,5 +17,14 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
  */
 interface MailerInterface
 {
+    /**
+     * Phase B Slice 9: the order entity gets rendered into the mail body
+     * (subject line, greeting, line items). All string fields end up in
+     * HTML / plain-text output and must be escaped at render time. Marked
+     * as an html taint sink so any unsanitized user-controlled string
+     * reaching this method surfaces in `composer psalm-taint`.
+     *
+     * @psalm-taint-sink html $order
+     */
     public function sendOrderConfirmation(FinalizedOrderEntity $order): void;
 }
