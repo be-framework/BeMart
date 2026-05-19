@@ -28,9 +28,11 @@ use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakePasswordResetTokenStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductClassQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductQuery;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
@@ -158,5 +160,11 @@ final class AppModule extends AbstractAppModule
         // customer favorites list. Singleton so adds within a request
         // are visible to subsequent reads.
         $this->bind(FavoriteStorageInterface::class)->to(FakeFavoriteStorage::class)->in(Scope::SINGLETON);
+
+        // Reason (Pilot 14 doRequestPasswordReset): reset-token store +
+        // mailer for the password-reset link. Singleton so a test can
+        // inspect what was issued.
+        $this->bind(PasswordResetTokenStorageInterface::class)
+            ->to(FakePasswordResetTokenStorage::class)->in(Scope::SINGLETON);
     }
 }
