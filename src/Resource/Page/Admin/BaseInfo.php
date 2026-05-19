@@ -10,21 +10,26 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\BaseInfoFetched;
 use MyVendor\BeMart\Be\Final\BaseInfoUpdated;
+use MyVendor\BeMart\Be\Input\GetBaseInfoInput;
 use MyVendor\BeMart\Be\Input\UpdateBaseInfoInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
 /**
- * EC-CUBE doUpdateBaseInfo — 基本情報を更新する (Wave 8).
+ * EC-CUBE doUpdateBaseInfo + goBaseInfo — 基本情報 (Wave 8 + Wave 9).
  *
- * POST. dtb_base_info is a single-row table; the request replaces
- * the row wholesale (no per-field PATCH semantic in EC-CUBE). Only
- * the shopName is required — null in other fields means "clear it".
+ *   - GET  → goBaseInfo (safe read, admin AUTHZ, Wave 9ι)
+ *   - POST → doUpdateBaseInfo (idempotent, admin AUTHZ + CSRF, Wave 8ε)
+ *
+ * dtb_base_info is a single-row table; POST replaces the row wholesale
+ * (no per-field PATCH semantic in EC-CUBE). Only the shopName is
+ * required — null in other fields means "clear it".
  *
  * Failure mapping:
- *   - Invalid CSRF                          → 403
+ *   - Invalid CSRF                          → 403 (POST only)
  *   - SemanticVariableException             → 400 (shopName / address /
  *                                                phoneNumber / … format)
  *   - UnauthorizedAdminAccessException      → 403 (no admin session)
@@ -41,6 +46,42 @@ class BaseInfo extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
     ) {
+    }
+
+    /**
+     * Wave 9ι: goBaseInfo — admin views the shop base info form data.
+     */
+    #[Link(rel: 'doUpdateBaseInfo', href: 'page://self/admin/base-info', method: 'post')]
+    public function onGet(): static
+    {
+        try {
+            $final = ($this->becoming)(new GetBaseInfoInput());
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof BaseInfoFetched);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'shopName' => $final->shopName,
+            'shopKana' => $final->shopKana,
+            'shopNameEng' => $final->shopNameEng,
+            'companyName' => $final->companyName,
+            'postalCode' => $final->postalCode,
+            'pref' => $final->pref,
+            'addr01' => $final->addr01,
+            'addr02' => $final->addr02,
+            'phoneNumber' => $final->phoneNumber,
+            'businessHour' => $final->businessHour,
+            'shopEmail01' => $final->shopEmail01,
+            'shopMessage' => $final->shopMessage,
+        ];
+
+        return $this;
     }
 
     /**
