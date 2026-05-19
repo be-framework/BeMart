@@ -8,10 +8,8 @@ use Be\Framework\Attribute\Validate;
 use MyVendor\BeMart\Be\Exception\SortNoFormatException;
 
 /**
- * Display order — EC-CUBE dtb_category.sort_no, dtb_class_name.sort_no
- * and friends. Smaller value = earlier position in the admin UI. We
- * bound it to 0..9999 so a tampered form cannot stuff in arbitrary
- * integers; values outside the range raise.
+ * Display order — EC-CUBE sort_no across dtb_category, dtb_class_name,
+ * dtb_product etc. Smaller value = earlier position. Bound 0..9999.
  */
 final class SortNo
 {
