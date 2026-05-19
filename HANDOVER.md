@@ -1794,3 +1794,86 @@ Wave 7 net: 306 → 350 (+44 tests)、新 transition 6 件、新 docs 10 件。
 
 **Phase A の transition 量産という当初目標 (Pilot 1-5 = 5/137 = 3.6%) に対し、1 セッションで 32.8% まで到達**。残り 92 transition は大半が admin tooling (product CRUD / category / plugin / layout / CSV export-import 等) + customer の細部 (point / address detail / shipping date 等) で、新規 pattern 発見の余地は限定的。Phase 2 (Fake → real DB / Mailer / 本物の AUTHZ 統合) への移行 readiness が今 session で大幅に向上。
 
+
+## Wave 8 + Wave 9 — 100% transition coverage
+
+**45 → 139 transitions (32.8% → 100%)** in two big parallel waves.
+
+### Wave 8 (5 agents): 49 transitions
+
+| Agent | 対象 | 結果 | テスト |
+|---|---|---|---|
+| α | admin product CRUD (8) | `c4452b1` | +67 |
+| β | category + className + classCategory (15) | `c2fdef2` | +81 |
+| γ | admin member + login history (7 + skip 1) | `7047f93` | +52 |
+| δ | help + top + shopping renderers (11) | `4196f37` | +11 |
+| ε | plugin + base info + mail template + trade law (8) | `c4c831f` | +40 |
+
+Wave 8 net: 350 → 601 (+251 tests), 45 → 94 transitions.
+
+#### Wave 8 で発見された運用課題
+
+**G-23: 並列 agent で複数 file 同時編集の cherry-pick 衝突**
+- 5 agent が `AppModule.php` を編集 → 4 件で textual conflict (auto-merge fail)
+- 各 agent が自分専用の anchor comment (`// Wave 8α:` 等) を持っても、imports が他 agent の imports と隣接して衝突
+- **規約**: AppModule 編集を要する複数 agent を並列起動する場合、orchestrator が cherry-pick 時に conflict resolution を都度実施 (今回 4 件解決済)
+- 代替案: AppModule を分割 (CustomerModule / AdminModule / CmsModule) → Phase 2 検討
+
+**G-24: 同名 Semantic class の意図せぬ重複作成**
+- Wave 8α と Wave 8β が両方 `SortNo` Semantic を作成 (前者 0+、後者 0-9999)
+- Cherry-pick 時に file-level conflict (`<add/add>`)、SortNoFormatException も同様
+- Orchestrator が手動 merge — 0-9999 range を採用 (より制約的)
+
+**Stale autoload cache の罠**
+- Cherry-pick 直後の `composer test` が AppModule の最新 class を見つけられず `Unbound` error 多発 (59 件) → `composer dump-autoload` で解消
+- Wave 9 以降は cherry-pick 後に常に `dump-autoload` を実行
+
+### Wave 9 (4 agents): 45 transitions
+
+| Agent | 対象 | 結果 | テスト |
+|---|---|---|---|
+| ζ | CMS Page+News+Block+Layout+Tag+Template (20) | `50fb50f` | +39 |
+| η | Order admin extras (9) | `c3414c3` | +31 |
+| θ | Payment+Delivery+TaxRule (11) | `c3414c3` | +26 |
+| ι | misc + goodTraded skip (5 + 1 not-a-transition) | `60633b8` | +12 |
+
+Wave 9 net: 601 → 709 (+108 tests), 94 → 139 transitions。
+
+#### Wave 9 で確定した最終事項
+
+- **`goodTraded`** は ALPS data descriptor (BaseInfo entity field "取扱商品")、transition でないと Agent ι が確認 → 139/139 全 transition 移植が完了とみなす
+- **`doUpdateTaxRule`** は ALPS に存在せず (TaxRule は create / list / delete のみ) → Agent θ が delete+create のみ実装
+- 全 Wave 8-9 で stub / 部分実装になった件 (Phase 2 deferral): doImportProductCsv / doImportCategoryCsv / doImportShippingCsv / doInstallPlugin / goExportOrderPdf / doCreateOrder / doUpdateCsv
+
+### 累計進捗 (Wave 9 末 = セッション最終最終)
+
+| 指標 | 開始時 | Wave 5 末 | Wave 7 末 | Wave 9 末 (最終) |
+|---|---|---|---|---|
+| 移植 transition | 5 / 140 (3.6%) | 30 (21.4%) | 45 (32.1%) | **139 / 139 (100%)** |
+| Tests | 90 | 256 | 350 | **709** |
+| Assertions | 205 | 798 | 1120 | **2012** |
+| Skill gap 発見 | 3 | 7 | 9 | **11 (G-14 〜 G-24)** |
+| Skill docs externalized | 0 | 0 | 10 | **10** |
+| Wave (parallel orchestration) | 0 | 5 | 7 | **9** |
+
+実証された pattern instance (累計):
+- Direct: 70+ 件 (admin CRUD 系で多発生)
+- Linear: 1 件 (Pilot 10)
+- Multi-Reason Being: 3 件 (Pilot 4, Wave 5O, Wave 8α `doCreateProduct`)
+- Diamond-Cascade: 3 件 (Pilot 2, 5, 12)
+- Branching Final: 1 件 (Pilot 3)
+
+### 構築のフェーズ移行
+
+**Phase A (transition 量産)** はこのセッションで完了。次の Phase 2 の主作業:
+
+1. **Fake → real persistence**: 全 `Fake*Storage` を Doctrine / Ray.MediaQuery 等に置換
+2. **Fake → real services**: `FakeMailer` → EC-CUBE MailService, `FakePaymentGateway` → 本物 PSP, `FakePurchaseFlow` → EC-CUBE Service
+3. **Slice 7.2 / 8.2**: EC-CUBE 側 EventListener で session / CSRF mirror
+4. **stub 解消**: 上記 Wave 8-9 で stub になった 7 件の本物実装
+5. **Slice 11**: Be Framework Psalm plugin (chain opacity 解消)
+
+### Session 総括
+
+**1 session で** 134 transition 移植 + 9 + 2 (G-23/24) skill gap 発見 + 10 docs externalized + 9 wave parallel orchestration を達成。orchestrator + worktree-isolated parallel subagent pattern が大量並列実装の standard workflow として定着した。
+
