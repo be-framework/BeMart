@@ -11,11 +11,14 @@ use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Module\BeModule;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\FakeAdminQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeAdminStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
@@ -36,9 +39,11 @@ use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerInitialPoint;
@@ -166,5 +171,23 @@ final class AppModule extends AbstractAppModule
         // inspect what was issued.
         $this->bind(PasswordResetTokenStorageInterface::class)
             ->to(FakePasswordResetTokenStorage::class)->in(Scope::SINGLETON);
+
+        // Reason (Wave 4 doAdminLogin / doAdminLogout): admin role AAA
+        // infrastructure — parallel firewall to the customer-side
+        // SessionInterface. Mirrors EC-CUBE / Symfony's two-firewall
+        // model (`admin` + `customer`): admins and customers are
+        // distinct AAA principal classes, so the admin id lives behind
+        // its own interface rather than overloading SessionInterface.
+        //
+        // Storage is Singleton so a future AdminCommand (Wave 5+) sees
+        // its writes inside the same request — same CQRS convention as
+        // FakeCustomerStorage. AdminSessionInterface defaults to the
+        // anonymous binding (`new FakeAdminSession(null)`) to match the
+        // customer-side default: tests that exercise an admin-only path
+        // rebind it via override module (same `rebindSession` helper
+        // pattern as ChangeResourceTest, but for AdminSessionInterface).
+        $this->bind(FakeAdminStorage::class)->in(Scope::SINGLETON);
+        $this->bind(AdminQueryInterface::class)->to(FakeAdminQuery::class);
+        $this->bind(AdminSessionInterface::class)->toInstance(new FakeAdminSession(null));
     }
 }
