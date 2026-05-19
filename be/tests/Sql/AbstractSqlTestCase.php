@@ -310,6 +310,130 @@ abstract class AbstractSqlTestCase extends TestCase
     }
 
     /**
+     * Look up the default `dtb_product_class.id` for a given
+     * `dtb_product.id`. Convention: the row with both
+     * `class_category_id1` and `class_category_id2` NULL — the same
+     * "default class" filter SqlFavoriteStorage and SqlCartCommand
+     * use to translate productCode ↔ surrogate ids.
+     */
+    protected function defaultProductClassId(int $productId): int
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT id FROM dtb_product_class '
+            . 'WHERE product_id = :product_id '
+            . 'AND class_category_id1 IS NULL '
+            . 'AND class_category_id2 IS NULL '
+            . 'LIMIT 1',
+        );
+        $stmt->execute([':product_id' => $productId]);
+        $id = $stmt->fetchColumn();
+        if ($id === false) {
+            throw new RuntimeException(sprintf(
+                'No default product_class for product_id=%d (helper expects '
+                . 'insertProduct() to have created one)',
+                $productId,
+            ));
+        }
+
+        return (int) $id;
+    }
+
+    /**
+     * Insert a dtb_cart row with sensible defaults. Returns
+     * `['id' => int, 'cartKey' => string, 'preOrderId' => string]`.
+     *
+     * Required NOT NULL columns: total_price, delivery_fee_total,
+     * create_date, update_date, add_point, use_point,
+     * discriminator_type.
+     *
+     * `cart_key` and `pre_order_id` are nullable in the schema but
+     * BeMart's CartEntity treats both as non-empty handles, so the
+     * defaults are populated with unique values.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertCart(array $overrides = []): array
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'customer_id' => null,
+            'cart_key' => sprintf('sess-%d-%d_10', $counter, random_int(1000, 9999)),
+            'pre_order_id' => sprintf('pre-%d-%d', $counter, random_int(10000, 99999)),
+            'total_price' => 0,
+            'delivery_fee_total' => 0,
+            'sort_no' => null,
+            'create_date' => $now,
+            'update_date' => $now,
+            'add_point' => 0,
+            'use_point' => 0,
+            'discriminator_type' => 'cart',
+        ], $overrides);
+
+        $columns = array_keys($row);
+        $placeholders = array_map(static fn (string $c) => ':' . $c, $columns);
+        $sql = sprintf(
+            'INSERT INTO dtb_cart (%s) VALUES (%s)',
+            implode(', ', array_map(static fn (string $c) => '`' . $c . '`', $columns)),
+            implode(', ', $placeholders),
+        );
+        $stmt = $this->pdo->prepare($sql);
+        $params = [];
+        foreach ($row as $col => $value) {
+            $params[':' . $col] = $value;
+        }
+
+        $stmt->execute($params);
+
+        return [
+            'id' => (int) $this->pdo->lastInsertId(),
+            'cartKey' => (string) $row['cart_key'],
+            'preOrderId' => $row['pre_order_id'] === null ? '' : (string) $row['pre_order_id'],
+        ];
+    }
+
+    /**
+     * Insert a dtb_cart_item row. Returns the new id.
+     *
+     * Required NOT NULL columns: price, quantity, discriminator_type.
+     * `product_class_id` is nullable in the schema (FK to
+     * dtb_product_class) but Cart hydration JOINs on it — pass the
+     * id you got from insertProduct() / defaultProductClassId().
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertCartItem(int $cartId, int $productClassId, array $overrides = []): int
+    {
+        $row = array_merge([
+            'product_class_id' => $productClassId,
+            'cart_id' => $cartId,
+            'price' => 1000,
+            'quantity' => 1,
+            'point_rate' => null,
+            'discriminator_type' => 'cartitem',
+        ], $overrides);
+
+        $columns = array_keys($row);
+        $placeholders = array_map(static fn (string $c) => ':' . $c, $columns);
+        $sql = sprintf(
+            'INSERT INTO dtb_cart_item (%s) VALUES (%s)',
+            implode(', ', array_map(static fn (string $c) => '`' . $c . '`', $columns)),
+            implode(', ', $placeholders),
+        );
+        $stmt = $this->pdo->prepare($sql);
+        $params = [];
+        foreach ($row as $col => $value) {
+            $params[':' . $col] = $value;
+        }
+
+        $stmt->execute($params);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
