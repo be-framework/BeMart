@@ -33,4 +33,19 @@ final class FakePaymentMethodFactory implements PaymentMethodFactoryInterface
             ),
         };
     }
+
+    /**
+     * Pilot (goShopping): the user-selectable methods. Id 9 (verify-failing)
+     * stays excluded; it is a test-only fault-injection method.
+     *
+     * @return list<array{paymentMethodId: int, paymentMethodName: string}>
+     */
+    #[Override]
+    public function available(): array
+    {
+        return [
+            ['paymentMethodId' => 1, 'paymentMethodName' => '代金引換'],
+            ['paymentMethodId' => 2, 'paymentMethodName' => 'クレジットカード'],
+        ];
+    }
 }
