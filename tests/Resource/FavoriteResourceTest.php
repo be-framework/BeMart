@@ -108,4 +108,57 @@ final class FavoriteResourceTest extends TestCase
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
+
+    public function testOnDeleteRemovesAndReturns200(): void
+    {
+        // Add, then delete.
+        $this->resource->post('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+        $ro = $this->resource->delete('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertFalse($ro->body['alreadyAbsent']);
+    }
+
+    public function testOnDeleteAbsentIsIdempotent(): void
+    {
+        // Delete without prior add — still 200, alreadyAbsent=true.
+        $ro = $this->resource->delete('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertTrue($ro->body['alreadyAbsent']);
+    }
+
+    public function testOnDeleteUnauthenticatedReturns401(): void
+    {
+        $this->rebindSession(null);
+
+        $ro = $this->resource->delete('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+    }
+
+    public function testOnDeleteMissingCsrfReturns403(): void
+    {
+        $ro = $this->resource->delete('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
 }
