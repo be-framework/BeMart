@@ -11,6 +11,7 @@ use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Module\BeModule;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
@@ -21,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\FakeAdminCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminQuery;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeAddressStorage;
@@ -29,6 +31,8 @@ use MyVendor\BeMart\Be\Reason\Query\FakeBaseInfoStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeClassCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeClassNameStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeLoginHistoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
@@ -59,6 +63,7 @@ use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
@@ -67,6 +72,7 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAddressIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCategoryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeClassCategoryIdGenerator;
@@ -224,8 +230,7 @@ final class AppModule extends AbstractAppModule
         $this->bind(AdminQueryInterface::class)->to(FakeAdminQuery::class);
         $this->bind(AdminSessionInterface::class)->toInstance(new FakeAdminSession(null));
 
-        // Wave 8α: admin product CRUD — split Query from the Pilot 1 fixture
-        // binding so the new FakeProductCommand shares one corpus.
+        // Wave 8α: admin product CRUD.
         $this->bind(FakeProductStorage::class)->in(Scope::SINGLETON);
         $this->bind(ProductCommandInterface::class)->to(FakeProductCommand::class);
 
@@ -237,9 +242,13 @@ final class AppModule extends AbstractAppModule
         $this->bind(ClassCategoryStorageInterface::class)->to(FakeClassCategoryStorage::class)->in(Scope::SINGLETON);
         $this->bind(ClassCategoryIdGeneratorInterface::class)->to(FakeClassCategoryIdGenerator::class);
 
-        // Wave 8ε: admin plugin lifecycle + simple settings. toInstance pattern
-        // (G-14): the storages hold state directly, so Iface and Impl bindings
-        // must share one object reference.
+        // Wave 8γ: admin member CRUD + login history.
+        $this->bind(AdminCommandInterface::class)->to(FakeAdminCommand::class);
+        $this->bind(AdminIdGeneratorInterface::class)->to(FakeAdminIdGenerator::class);
+        $this->bind(LoginHistoryStorageInterface::class)
+            ->to(FakeLoginHistoryStorage::class)->in(Scope::SINGLETON);
+
+        // Wave 8ε: admin plugin lifecycle + simple settings. toInstance pattern (G-14).
         $pluginStorage = new FakePluginStorage();
         $baseInfoStorage = new FakeBaseInfoStorage();
         $mailTemplateStorage = new FakeMailTemplateStorage();
