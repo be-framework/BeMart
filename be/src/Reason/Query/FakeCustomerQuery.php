@@ -31,4 +31,13 @@ final class FakeCustomerQuery implements CustomerQueryInterface
     {
         return $this->storage->getById($customerId);
     }
+
+    /**
+     * @return list<CustomerEntity>
+     */
+    #[Override]
+    public function search(?string $nameKeyword, ?string $emailKeyword, int $limit = 50): array
+    {
+        return $this->storage->search($nameKeyword, $emailKeyword, $limit);
+    }
 }
