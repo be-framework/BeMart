@@ -19,4 +19,11 @@ final class FakeCartQuery implements CartQueryInterface
     {
         return $this->storage->get($cartKey);
     }
+
+    /** @return list<CartEntity> */
+    #[Override]
+    public function bySessionPrefix(string $sessionPrefix): array
+    {
+        return $this->storage->getBySessionPrefix($sessionPrefix);
+    }
 }
