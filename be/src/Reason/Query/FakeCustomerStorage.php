@@ -17,12 +17,13 @@ use const JSON_THROW_ON_ERROR;
 
 /**
  * In-memory Customer store shared by FakeEmailUniquenessChecker +
- * FakeCustomerCommand. Bound as Singleton so the Command's writes
- * are visible to the uniqueness check within the same request.
+ * FakeCustomerCommand + FakeCustomerQuery. Bound as Singleton so a
+ * Command's writes are visible to all readers within the same request.
  *
  * The seed fixture (`var/fake/customers.json`) holds a handful of
  * pre-registered customers used in tests as the "email already taken"
- * case.
+ * case (Pilot 4), the "happy-path login" case (Pilot 6), and the
+ * "activate provisional customer" case (Pilot 7).
  */
 final class FakeCustomerStorage
 {
@@ -35,19 +36,79 @@ final class FakeCustomerStorage
     }
 
     /**
-     * Fetch a Customer by email, or null if none. Used by the future
-     * login flow and by tests that need to verify what was persisted
-     * (e.g. password hash round-trip) without reaching for reflection.
+     * Fetch a Customer by email, or null if none. Used by the login
+     * flow (Pilot 6 via FakeCustomerQuery) and by tests that need to
+     * verify what was persisted (e.g. password hash round-trip)
+     * without reaching for reflection.
      */
     public function getByEmail(string $email): CustomerEntity|null
     {
         return $this->load()[$email] ?? null;
     }
 
+    /**
+     * Look up a Customer by their email-verification secretKey.
+     * Returns null when no customer carries that key (already activated,
+     * wrong key, expired). Pilot 7 (doActivateCustomer).
+     */
+    public function getBySecretKey(string $secretKey): CustomerEntity|null
+    {
+        foreach ($this->load() as $customer) {
+            if ($customer->secretKey === $secretKey) {
+                return $customer;
+            }
+        }
+
+        return null;
+    }
+
     public function put(CustomerEntity $customer): void
     {
         $this->load();
         $this->byEmail[$customer->email] = $customer;
+    }
+
+    /**
+     * Mark the customer as active (status=2) and clear the secretKey.
+     * Idempotent: a customer that is already active is left untouched.
+     * Pilot 7 (doActivateCustomer).
+     */
+    public function activate(string $customerId): void
+    {
+        $rows = $this->load();
+        foreach ($rows as $email => $customer) {
+            if ($customer->customerId !== $customerId) {
+                continue;
+            }
+
+            if ($customer->customerStatus === 2 && $customer->secretKey === null) {
+                return;
+            }
+
+            $this->byEmail[$email] = new CustomerEntity(
+                customerId: $customer->customerId,
+                email: $customer->email,
+                passwordHash: $customer->passwordHash,
+                name01: $customer->name01,
+                name02: $customer->name02,
+                kana01: $customer->kana01,
+                kana02: $customer->kana02,
+                companyName: $customer->companyName,
+                phoneNumber: $customer->phoneNumber,
+                postalCode: $customer->postalCode,
+                pref: $customer->pref,
+                addr01: $customer->addr01,
+                addr02: $customer->addr02,
+                birth: $customer->birth,
+                sex: $customer->sex,
+                job: $customer->job,
+                initialPoint: $customer->initialPoint,
+                customerStatus: 2,
+                secretKey: null,
+            );
+
+            return;
+        }
     }
 
     /** @return array<string, CustomerEntity> */
@@ -63,7 +124,7 @@ final class FakeCustomerStorage
             throw new RuntimeException(sprintf('Fake fixture missing: %s', $path));
         }
 
-        /** @var array<string, array{customerId: string, email: string, passwordHash: string, name01: string, name02: string, kana01: ?string, kana02: ?string, companyName: ?string, phoneNumber: ?string, postalCode: ?string, pref: ?int, addr01: ?string, addr02: ?string, birth: ?string, sex: ?int, job: ?int, initialPoint: int, customerStatus: int}|string> $rows */
+        /** @var array<string, array{customerId: string, email: string, passwordHash: string, name01: string, name02: string, kana01: ?string, kana02: ?string, companyName: ?string, phoneNumber: ?string, postalCode: ?string, pref: ?int, addr01: ?string, addr02: ?string, birth: ?string, sex: ?int, job: ?int, initialPoint: int, customerStatus: int, secretKey?: ?string}|string> $rows */
         $rows = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         if (! is_array($rows)) {
             throw new RuntimeException(sprintf('Fake fixture must be a JSON object: %s', $path));
@@ -94,6 +155,7 @@ final class FakeCustomerStorage
                 job: $row['job'] ?? null,
                 initialPoint: $row['initialPoint'],
                 customerStatus: $row['customerStatus'],
+                secretKey: $row['secretKey'] ?? null,
             );
         }
 

@@ -79,5 +79,26 @@
     "job": null,
     "initialPoint": 100,
     "customerStatus": 2
+  },
+  "provisional@example.com": {
+    "customerId": "20000000dddd2222eeee3333ffff4444",
+    "email": "provisional@example.com",
+    "passwordHash": "$2y$12$placeholder.hash.never.verified.never.0123456789abcde",
+    "name01": "高橋",
+    "name02": "三郎",
+    "kana01": null,
+    "kana02": null,
+    "companyName": null,
+    "phoneNumber": null,
+    "postalCode": null,
+    "pref": null,
+    "addr01": null,
+    "addr02": null,
+    "birth": null,
+    "sex": null,
+    "job": null,
+    "initialPoint": 100,
+    "customerStatus": 1,
+    "secretKey": "pending-secret-key-pilot7-2026abcd"
   }
 }
