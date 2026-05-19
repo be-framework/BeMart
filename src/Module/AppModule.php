@@ -12,6 +12,7 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Module\BeModule;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
@@ -24,6 +25,7 @@ use MyVendor\BeMart\Be\Reason\Query\FakeAdminQuery;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeBaseInfoStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeClassCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeClassNameStorage;
@@ -36,17 +38,23 @@ use MyVendor\BeMart\Be\Reason\Query\FakeCustomerStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeEmailUniquenessChecker;
 use MyVendor\BeMart\Be\Reason\Query\FakeFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeMailTemplateStorage;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakePasswordResetTokenStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakePluginStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductClassQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeTradeLawStorage;
+use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
@@ -213,17 +221,28 @@ final class AppModule extends AbstractAppModule
         $this->bind(AdminQueryInterface::class)->to(FakeAdminQuery::class);
         $this->bind(AdminSessionInterface::class)->toInstance(new FakeAdminSession(null));
 
-        // Reason (Wave 7 admin catalog hierarchy — Category / ClassName /
-        // ClassCategory). Three storages + three id generators, same
-        // Singleton convention as the customer address book so a POST's
-        // writes are visible to the same request's GET / PUT / DELETE.
-        // Placed at the END of configure() to minimise cherry-pick
-        // conflicts with parallel agents.
+        // Wave 8β: admin catalog hierarchy (Category / ClassName / ClassCategory).
         $this->bind(CategoryStorageInterface::class)->to(FakeCategoryStorage::class)->in(Scope::SINGLETON);
         $this->bind(CategoryIdGeneratorInterface::class)->to(FakeCategoryIdGenerator::class);
         $this->bind(ClassNameStorageInterface::class)->to(FakeClassNameStorage::class)->in(Scope::SINGLETON);
         $this->bind(ClassNameIdGeneratorInterface::class)->to(FakeClassNameIdGenerator::class);
         $this->bind(ClassCategoryStorageInterface::class)->to(FakeClassCategoryStorage::class)->in(Scope::SINGLETON);
         $this->bind(ClassCategoryIdGeneratorInterface::class)->to(FakeClassCategoryIdGenerator::class);
+
+        // Wave 8ε: admin plugin lifecycle + simple settings. toInstance pattern
+        // (G-14): the storages hold state directly, so Iface and Impl bindings
+        // must share one object reference.
+        $pluginStorage = new FakePluginStorage();
+        $baseInfoStorage = new FakeBaseInfoStorage();
+        $mailTemplateStorage = new FakeMailTemplateStorage();
+        $tradeLawStorage = new FakeTradeLawStorage();
+        $this->bind(FakePluginStorage::class)->toInstance($pluginStorage);
+        $this->bind(PluginStorageInterface::class)->toInstance($pluginStorage);
+        $this->bind(FakeBaseInfoStorage::class)->toInstance($baseInfoStorage);
+        $this->bind(BaseInfoStorageInterface::class)->toInstance($baseInfoStorage);
+        $this->bind(FakeMailTemplateStorage::class)->toInstance($mailTemplateStorage);
+        $this->bind(MailTemplateStorageInterface::class)->toInstance($mailTemplateStorage);
+        $this->bind(FakeTradeLawStorage::class)->toInstance($tradeLawStorage);
+        $this->bind(TradeLawStorageInterface::class)->toInstance($tradeLawStorage);
     }
 }
