@@ -190,6 +190,10 @@ ec-cube-alps/
 | Wave 5M | `31e1d93` | goCustomerList — Direct + admin AUTHZ + filter | 完了 |
 | Wave 5N | `1e22b42` | goCustomer — Direct + admin AUTHZ + aggregation | 完了 |
 | Wave 5O | `0bb3ea0` | doCreateCustomer — Multi-Reason Being + admin AUTHZ | 完了 |
+| Wave 6P | `2e7184b` | customer address book (4 transition) — Direct + AUTHZ | 完了 |
+| Wave 6Q | `bb9a328` | goFavoriteList — Direct safe-read | 完了 |
+| Wave 6R | `0f0ffe1` | goOrderHistory — Direct + pagination | 完了 |
+| Wave 6S | `b071142` | doDeleteCustomer — Direct + admin soft-delete | 完了 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 | Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 
