@@ -14,11 +14,13 @@ use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCustomerCommand;
+use MyVendor\BeMart\Be\Reason\Query\FakeCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCustomerStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeEmailUniquenessChecker;
 use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
@@ -99,6 +101,8 @@ final class AppModule extends AbstractAppModule
         $this->bind(FakeCustomerStorage::class)->in(Scope::SINGLETON);
         $this->bind(EmailUniquenessCheckerInterface::class)->to(FakeEmailUniquenessChecker::class);
         $this->bind(CustomerCommandInterface::class)->to(FakeCustomerCommand::class);
+        // Pilot 6 (doLogin): read-side Customer lookup over the same Storage.
+        $this->bind(CustomerQueryInterface::class)->to(FakeCustomerQuery::class);
         $this->bind(PasswordHasherInterface::class)->to(FakePasswordHasher::class);
         $this->bind(CustomerIdGeneratorInterface::class)->to(FakeCustomerIdGenerator::class);
         $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class);
