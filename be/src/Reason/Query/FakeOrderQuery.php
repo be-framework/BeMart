@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use Override;
 use RuntimeException;
 
@@ -23,16 +24,33 @@ use const JSON_THROW_ON_ERROR;
  *
  * Phase 2 will swap this for a Ray.MediaQuery binding against dtb_order
  * (orderStatus=PROCESSING(8)) joined with dtb_order_item.
+ *
+ * The `itemsByOrderNo` path reads from FakeFinalizedOrderStorage rather
+ * than the pre-order JSON fixture: finalized order items are written by
+ * checkout (or seeded into the storage for past orders) and outlive the
+ * pre-order row. Pilot 12 (doReorder) is the first consumer.
  */
 final class FakeOrderQuery implements OrderQueryInterface
 {
     /** @var array<string, OrderEntity>|null */
     private array|null $cache = null;
 
+    public function __construct(
+        private readonly FakeFinalizedOrderStorage $finalizedOrderStorage,
+    ) {
+    }
+
     #[Override]
     public function byPreOrderId(string $preOrderId): OrderEntity|null
     {
         return $this->load()[$preOrderId] ?? null;
+    }
+
+    /** @return list<OrderItemEntity> */
+    #[Override]
+    public function itemsByOrderNo(string $orderNo): array
+    {
+        return $this->finalizedOrderStorage->itemsByOrderNo($orderNo);
     }
 
     /** @return array<string, OrderEntity> */
