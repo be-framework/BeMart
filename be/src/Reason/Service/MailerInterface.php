@@ -47,4 +47,15 @@ interface MailerInterface
      * @psalm-taint-sink html $email
      */
     public function sendPasswordReset(string $email, string $resetKey): void;
+
+    /**
+     * Pilot doWithdrawCustomer: send the "your account has been
+     * withdrawn" confirmation. The Final captures the ORIGINAL email
+     * (before it is overwritten with the dummy placeholder) and passes
+     * it here, so the goodbye message reaches the human who still owns
+     * the address. The name fields go into the greeting.
+     *
+     * @psalm-taint-sink html $email
+     */
+    public function sendWithdrawConfirmation(string $email, string $name01, string $name02): void;
 }

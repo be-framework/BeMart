@@ -49,6 +49,24 @@ final class FakeCartStorage
         }
     }
 
+    /**
+     * Drop every cart whose key begins with `{sessionPrefix}_`. Used by
+     * doWithdrawCustomer to clear all session-scoped carts at once
+     * (mirror of getBySessionPrefix's read side).
+     */
+    public function removeBySessionPrefix(string $sessionPrefix): void
+    {
+        $rows = $this->load();
+        $prefix = $sessionPrefix . '_';
+        foreach ($rows as $cartKey => $_cart) {
+            if (str_starts_with($cartKey, $prefix)) {
+                unset($rows[$cartKey]);
+            }
+        }
+
+        $this->carts = $rows;
+    }
+
     public function getByPreOrderId(string $preOrderId): CartEntity|null
     {
         foreach ($this->load() as $cart) {
