@@ -23,6 +23,9 @@ final class FakeMailer implements MailerInterface
     /** @var list<ContactEntity> */
     private array $contactInquiries = [];
 
+    /** @var list<array{email: string, resetKey: string}> */
+    private array $passwordResets = [];
+
     #[Override]
     public function sendOrderConfirmation(FinalizedOrderEntity $order): void
     {
@@ -45,5 +48,17 @@ final class FakeMailer implements MailerInterface
     public function contactInquiries(): array
     {
         return $this->contactInquiries;
+    }
+
+    #[Override]
+    public function sendPasswordReset(string $email, string $resetKey): void
+    {
+        $this->passwordResets[] = ['email' => $email, 'resetKey' => $resetKey];
+    }
+
+    /** @return list<array{email: string, resetKey: string}> */
+    public function passwordResets(): array
+    {
+        return $this->passwordResets;
     }
 }

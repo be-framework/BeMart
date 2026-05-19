@@ -38,4 +38,13 @@ interface MailerInterface
      * @psalm-taint-sink html $contact
      */
     public function sendContactInquiry(ContactEntity $contact): void;
+
+    /**
+     * Pilot 14 doRequestPasswordReset: dispatch the reset link.
+     * The resetKey itself originates from a CSPRNG (not user input),
+     * so it is not a sink concern. The email is the recipient.
+     *
+     * @psalm-taint-sink html $email
+     */
+    public function sendPasswordReset(string $email, string $resetKey): void;
 }
