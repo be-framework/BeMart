@@ -23,7 +23,9 @@ use MyVendor\BeMart\Be\Reason\Query\FakeCustomerCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCustomerStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeEmailUniquenessChecker;
+use MyVendor\BeMart\Be\Reason\Query\FakeFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
+use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductClassQuery;
@@ -151,5 +153,10 @@ final class AppModule extends AbstractAppModule
         // `csrfToken` body field; tests that need to exercise rejection
         // simply omit it or pass a mismatch.
         $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class)->in(Scope::SINGLETON);
+
+        // Reason (Pilot 13 doAddFavorite): unified Query+Command for the
+        // customer favorites list. Singleton so adds within a request
+        // are visible to subsequent reads.
+        $this->bind(FavoriteStorageInterface::class)->to(FakeFavoriteStorage::class)->in(Scope::SINGLETON);
     }
 }
