@@ -7,6 +7,10 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 
+use function array_slice;
+use function strcmp;
+use function usort;
+
 /**
  * In-memory store for finalized Orders (orderStatus=NEW).
  *
@@ -67,6 +71,32 @@ final class FakeFinalizedOrderStorage
         }
 
         return null;
+    }
+
+    /**
+     * Return the customer's finalized orders sorted newest first (by
+     * `orderDate`) and capped to the most recent `$limit` rows. Used by
+     * the goMypage dashboard's "recent orders" projection — Mypage only
+     * needs the head of the list, not the full history.
+     *
+     * @return list<FinalizedOrderEntity>
+     */
+    public function getByCustomerId(string $customerId, int $limit): array
+    {
+        $matching = [];
+        foreach ($this->orders as $order) {
+            if ($order->customerId === $customerId) {
+                $matching[] = $order;
+            }
+        }
+
+        usort(
+            $matching,
+            static fn (FinalizedOrderEntity $a, FinalizedOrderEntity $b): int
+                => strcmp($b->orderDate, $a->orderDate),
+        );
+
+        return array_slice($matching, 0, $limit);
     }
 
     /** @return list<OrderItemEntity> */

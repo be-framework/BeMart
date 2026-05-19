@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
+use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use Override;
@@ -51,6 +52,13 @@ final class FakeOrderQuery implements OrderQueryInterface
     public function itemsByOrderNo(string $orderNo): array
     {
         return $this->finalizedOrderStorage->itemsByOrderNo($orderNo);
+    }
+
+    /** @return list<FinalizedOrderEntity> */
+    #[Override]
+    public function listByCustomer(string $customerId, int $limit = 10): array
+    {
+        return $this->finalizedOrderStorage->getByCustomerId($customerId, $limit);
     }
 
     /** @return array<string, OrderEntity> */
