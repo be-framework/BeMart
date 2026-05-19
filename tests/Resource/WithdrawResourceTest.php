@@ -50,6 +50,39 @@ final class WithdrawResourceTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    public function testOnGetReturnsFormMetadata(): void
+    {
+        $ro = $this->resource->get('page://self/mypage/withdraw');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('goMypageWithdraw', $ro->body['transitionId']);
+        $this->assertSame(['sessionPrefix', 'csrfToken'], $ro->body['fields']);
+        $this->assertSame('POST', $ro->body['submitTo']['method']);
+        $this->assertSame('page://self/mypage/withdraw', $ro->body['submitTo']['href']);
+        $this->assertNull($ro->body['csrfToken']);
+    }
+
+    public function testOnGetShowsCurrentCustomer(): void
+    {
+        $ro = $this->resource->get('page://self/mypage/withdraw');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertSame('alice@example.com', $ro->body['email']);
+        $this->assertSame('山田', $ro->body['name01']);
+        $this->assertSame('アリス', $ro->body['name02']);
+    }
+
+    public function testOnGetUnauthenticatedReturns401(): void
+    {
+        $this->rebindSession(null);
+
+        $ro = $this->resource->get('page://self/mypage/withdraw');
+
+        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+        $this->assertStringContainsString('ログイン', $ro->body['message']);
+    }
+
     public function testOnPostHappyPathReturns200(): void
     {
         $ro = $this->resource->post('page://self/mypage/withdraw', [
