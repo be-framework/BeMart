@@ -169,6 +169,9 @@ ec-cube-alps/
 | Pilot 6 | `f34bd78` | doLogin — Direct (credentials verification) | 完了 |
 | Pilot 7 | `27e8ee9` | doActivateCustomer — Direct (idempotent activation) | 完了 |
 | Pilot 8 | `2039e43` | doUpdateCustomer — Direct (AUTHZ + partial merge) | 完了 |
+| Pilot 9 | `111000b` | goCart — Direct (safe read, multi-cart aggregation) | 完了 |
+| Pilot 10 | `a9f45ee` | doUpdateCartItemQuantity — Linear (G-17 chain-class-fixed) | 完了 |
+| Pilot 11 | `a9f45ee` | doRemoveCartItem — Direct | 完了 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 | Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 
