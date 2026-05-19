@@ -13,6 +13,7 @@ use function file_get_contents;
 use function is_array;
 use function json_decode;
 use function sprintf;
+use function str_starts_with;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -57,6 +58,26 @@ final class FakeCartStorage
         }
 
         return null;
+    }
+
+    /**
+     * All carts whose cartKey begins with the supplied sessionPrefix.
+     * cartKey = `{sessionPrefix}_{saleTypeId}` so the prefix scopes a
+     * shopping session into N carts (one per sale type). Pilot 9 (goCart).
+     *
+     * @return list<CartEntity>
+     */
+    public function getBySessionPrefix(string $sessionPrefix): array
+    {
+        $prefix = $sessionPrefix . '_';
+        $out = [];
+        foreach ($this->load() as $cartKey => $cart) {
+            if (str_starts_with($cartKey, $prefix)) {
+                $out[] = $cart;
+            }
+        }
+
+        return $out;
     }
 
     /** @return array<string, CartEntity> */
