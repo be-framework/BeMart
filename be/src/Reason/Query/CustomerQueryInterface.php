@@ -25,4 +25,10 @@ interface CustomerQueryInterface
      * distinguish "wrong key" from "expired" at this layer.
      */
     public function findBySecretKey(string $secretKey): CustomerEntity|null;
+
+    /**
+     * Look up a customer by their opaque id — Pilot 8 (doUpdateCustomer
+     * and other "the logged-in customer is editing themselves" flows).
+     */
+    public function findById(string $customerId): CustomerEntity|null;
 }

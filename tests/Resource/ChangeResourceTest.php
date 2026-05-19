@@ -1,0 +1,107 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Tests\Resource;
+
+use BEAR\AppMeta\Meta;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Module\AppModule;
+use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
+use Ray\Di\Injector;
+
+use function dirname;
+
+final class ChangeResourceTest extends TestCase
+{
+    private const ALICE_ID = '0123456789abcdef0123456789abcdef';
+
+    private ResourceInterface $resource;
+
+    protected function setUp(): void
+    {
+        $this->rebindSession(self::ALICE_ID);
+    }
+
+    private function rebindSession(string|null $customerId): void
+    {
+        $session = new FakeSession($customerId);
+        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(SessionInterface::class)->toInstance($this->session);
+            }
+        };
+        $base->override($override);
+
+        $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
+        $this->resource = $injector->getInstance(ResourceInterface::class);
+    }
+
+    public function testOnPostPatchesAndReturns200(): void
+    {
+        $ro = $this->resource->post('page://self/mypage/change', [
+            'email' => 'alice@example.com',
+            'phoneNumber' => '0309998888',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertSame('alice@example.com', $ro->body['email']);
+    }
+
+    public function testOnPostEmailCollisionReturns409(): void
+    {
+        $ro = $this->resource->post('page://self/mypage/change', [
+            'email' => 'bob@example.com',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(409, $ro->code);
+        $this->assertSame('bob@example.com', $ro->body['email']);
+    }
+
+    public function testOnPostWithoutSessionReturns401(): void
+    {
+        $this->rebindSession(null);
+
+        $ro = $this->resource->post('page://self/mypage/change', [
+            'email' => 'alice@example.com',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+        $this->assertStringContainsString('ログイン', $ro->body['message']);
+    }
+
+    public function testOnPostMissingCsrfReturns403(): void
+    {
+        $ro = $this->resource->post('page://self/mypage/change', [
+            'email' => 'alice@example.com',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+
+    public function testOnPostInvalidEmailReturns400(): void
+    {
+        $ro = $this->resource->post('page://self/mypage/change', [
+            'email' => 'not-an-email',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::BAD_REQUEST, $ro->code);
+    }
+}
