@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Be\Reason\Query;
+
+use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
+
+/**
+ * Admin catalog class categories (規格分類) — unified Query + Command
+ * (Wave 7, same convention as the two sibling storages).
+ *
+ *   - listByClassName(classNameId): scoped to one axis (UI default view)
+ *   - list(): every row regardless of axis (admin grid)
+ *   - getById(classCategoryId): single-row lookup
+ *   - put(classCategory): upsert
+ *   - remove(classCategoryId): drop (silent no-op on miss)
+ */
+interface ClassCategoryStorageInterface
+{
+    /** @return list<ClassCategoryEntity> */
+    public function listByClassName(string $classNameId): array;
+
+    /** @return list<ClassCategoryEntity> */
+    public function list(): array;
+
+    public function getById(string $classCategoryId): ClassCategoryEntity|null;
+
+    public function put(ClassCategoryEntity $classCategory): void;
+
+    public function remove(string $classCategoryId): void;
+}
