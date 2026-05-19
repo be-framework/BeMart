@@ -47,6 +47,12 @@ final class FakeOrderQuery implements OrderQueryInterface
         return $this->load()[$preOrderId] ?? null;
     }
 
+    #[Override]
+    public function byOrderNo(string $orderNo): FinalizedOrderEntity|null
+    {
+        return $this->finalizedOrderStorage->getByOrderNo($orderNo);
+    }
+
     /** @return list<OrderItemEntity> */
     #[Override]
     public function itemsByOrderNo(string $orderNo): array

@@ -1,0 +1,99 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Resource\Page\Mypage;
+
+use BEAR\Resource\Annotation\Link;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
+use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedOrderAccessException;
+use MyVendor\BeMart\Be\Final\Reordered;
+use MyVendor\BeMart\Be\Input\ReorderInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+
+use function assert;
+
+/**
+ * EC-CUBE doReorder — 再注文 (Mypage/Reorder, Pilot 12).
+ *
+ * Repopulates the current customer's cart(s) from a past order.
+ * ALPS: "在庫切れ商品はスキップ、現在価格を適用" — out-of-stock /
+ * discontinued products are skipped, current prices apply.
+ *
+ * Failure mapping:
+ *   - SemanticVariableException           → 400 (orderNo malformed)
+ *   - UnauthenticatedException            → 401 (no logged-in customer)
+ *   - UnauthorizedOrderAccessException    → 403 (not the order owner)
+ *   - OrderNotFoundException              → 404 (no such order)
+ *   - CSRF                                → 403 (checked before AUTHN)
+ */
+class Reorder extends ResourceObject
+{
+    public function __construct(
+        private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
+    ) {
+    }
+
+    /**
+     * @psalm-taint-source input $orderNo
+     * @psalm-taint-source input $csrfToken
+     */
+    #[Link(rel: 'goCart', href: 'page://self/cart')]
+    public function onPost(string $orderNo, string|null $csrfToken = null): static
+    {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+
+            return $this;
+        }
+
+        try {
+            $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = [
+                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
+                'orderNo' => $orderNo,
+            ];
+
+            return $this;
+        } catch (UnauthenticatedException) {
+            $this->code = Code::UNAUTHORIZED;
+            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
+
+            return $this;
+        } catch (UnauthorizedOrderAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この注文へのアクセス権限がありません。', 'orderNo' => $orderNo];
+
+            return $this;
+        } catch (OrderNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => 'Order not found.', 'orderNo' => $orderNo];
+
+            return $this;
+        }
+
+        assert($final instanceof Reordered);
+
+        $this->code = Code::CREATED;
+        $this->headers['Location'] = '/cart';
+        $this->body = [
+            'customerId' => $final->customerId,
+            'orderNo' => $final->orderNo,
+            'addedCount' => $final->addedCount,
+            'skippedCount' => $final->skippedCount,
+            'skippedProductCodes' => $final->skippedProductCodes,
+            'cartKeys' => $final->cartKeys,
+        ];
+
+        return $this;
+    }
+}
