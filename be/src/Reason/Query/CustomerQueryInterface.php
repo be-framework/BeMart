@@ -18,4 +18,11 @@ interface CustomerQueryInterface
 {
     /** @return CustomerEntity|null  null when no customer has this email. */
     public function findByEmail(string $email): CustomerEntity|null;
+
+    /**
+     * Look up a customer by email-verification secret key — Pilot 7
+     * (doActivateCustomer). Returns null on miss; callers MUST NOT
+     * distinguish "wrong key" from "expired" at this layer.
+     */
+    public function findBySecretKey(string $secretKey): CustomerEntity|null;
 }
