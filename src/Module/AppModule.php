@@ -20,6 +20,12 @@ use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\FakeDeliveryStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakePaymentMethodAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeTaxRuleStorage;
+use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
@@ -75,6 +81,7 @@ use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
+use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAddressIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
@@ -84,22 +91,27 @@ use MyVendor\BeMart\Be\Reason\Service\FakeClassNameIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerInitialPoint;
+use MyVendor\BeMart\Be\Reason\Service\FakeDeliveryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeInventoryAllocator;
 use MyVendor\BeMart\Be\Reason\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Service\FakeOrderNumberGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakePasswordHasher;
 use MyVendor\BeMart\Be\Reason\Service\FakePaymentGateway;
+use MyVendor\BeMart\Be\Reason\Service\FakePaymentMethodAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakePaymentMethodFactory;
 use MyVendor\BeMart\Be\Reason\Service\FakePurchaseFlow;
 use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\FakeTaxRuleIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Be\Reason\Service\OrderNumberGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
+use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use Ray\Di\Scope;
 
 final class AppModule extends AbstractAppModule
@@ -269,6 +281,20 @@ final class AppModule extends AbstractAppModule
         // Wave 9η: order extras — shipping-address storage.
         $this->bind(ShippingAddressStorageInterface::class)
             ->to(FakeShippingAddressStorage::class)->in(Scope::SINGLETON);
+
+        // Wave 9θ: payment/delivery/tax — admin shop-settings CRUD.
+        $this->bind(PaymentMethodAdminStorageInterface::class)
+            ->to(FakePaymentMethodAdminStorage::class)->in(Scope::SINGLETON);
+        $this->bind(PaymentMethodAdminIdGeneratorInterface::class)
+            ->to(FakePaymentMethodAdminIdGenerator::class);
+        $this->bind(DeliveryStorageInterface::class)
+            ->to(FakeDeliveryStorage::class)->in(Scope::SINGLETON);
+        $this->bind(DeliveryIdGeneratorInterface::class)
+            ->to(FakeDeliveryIdGenerator::class);
+        $this->bind(TaxRuleStorageInterface::class)
+            ->to(FakeTaxRuleStorage::class)->in(Scope::SINGLETON);
+        $this->bind(TaxRuleIdGeneratorInterface::class)
+            ->to(FakeTaxRuleIdGenerator::class);
 
         // Wave 9ι: misc admin transitions.
         $this->bind(CsvColumnConfigStorageInterface::class)
