@@ -75,13 +75,14 @@ final class FakeFinalizedOrderStorage
 
     /**
      * Return the customer's finalized orders sorted newest first (by
-     * `orderDate`) and capped to the most recent `$limit` rows. Used by
-     * the goMypage dashboard's "recent orders" projection — Mypage only
-     * needs the head of the list, not the full history.
+     * `orderDate`), advanced by `$offset` rows and capped to the next
+     * `$limit` rows. The goMypage dashboard pulls the head of the list
+     * (limit=5, offset=0); goOrderHistory pages through the full list
+     * (default limit=50, with `$offset` walking subsequent pages).
      *
      * @return list<FinalizedOrderEntity>
      */
-    public function getByCustomerId(string $customerId, int $limit): array
+    public function getByCustomerId(string $customerId, int $limit, int $offset = 0): array
     {
         $matching = [];
         foreach ($this->orders as $order) {
@@ -96,7 +97,7 @@ final class FakeFinalizedOrderStorage
                 => strcmp($b->orderDate, $a->orderDate),
         );
 
-        return array_slice($matching, 0, $limit);
+        return array_slice($matching, $offset, $limit);
     }
 
     /** @return list<OrderItemEntity> */
