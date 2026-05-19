@@ -176,6 +176,13 @@ ec-cube-alps/
 | Pilot 13 | `26a1591` | doAddFavorite — Direct (idempotent + AUTHZ) | 完了 |
 | Pilot 14 | `8709bbe` | doRequestPasswordReset — Direct (anti-enumeration) | 完了 |
 | Pilot 15 | `3e821e0` | doSubmitContact — Direct (anonymous + dual mail) | 完了 |
+| Wave 1A | `3028041` | Pilot 12 prep (OrderItemEntity infrastructure) | 完了 |
+| Wave 1B | `c366723` | doRemoveFavorite — Direct (Pilot 13 inverse) | 完了 |
+| Wave 1C | `87e0319` | doResetPassword — Direct (Pilot 14 consumer, single-use) | 完了 |
+| Pilot 12 | `263c525` | doReorder — Diamond-Cascade | 完了 |
+| Wave 2E | `351dcd1` | doLogout — Direct | 完了 |
+| Wave 2F | `cef5447` | goMypage — Direct safe-read aggregation | 完了 |
+| Wave 2G | `ab2e674` | doWithdrawCustomer — Direct + multi-side-effect | 完了 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 | Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 
