@@ -29,4 +29,16 @@ final class FakePasswordResetTokenStorage implements PasswordResetTokenStorageIn
 
         return null;
     }
+
+    #[Override]
+    public function delete(string $resetKey): void
+    {
+        foreach ($this->byCustomerId as $customerId => $token) {
+            if ($token->resetKey === $resetKey) {
+                unset($this->byCustomerId[$customerId]);
+
+                return;
+            }
+        }
+    }
 }
