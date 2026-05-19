@@ -7,11 +7,14 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use RuntimeException;
 
+use function array_values;
+use function array_slice;
 use function dirname;
 use function file_get_contents;
 use function is_array;
 use function json_decode;
 use function sprintf;
+use function str_contains;
 
 use const JSON_THROW_ON_ERROR;
 
@@ -81,6 +84,53 @@ final class FakeCustomerStorage
     {
         $this->load();
         $this->byEmail[$customer->email] = $customer;
+    }
+
+    /**
+     * Pilot Wave 5 (goCustomerList) — admin-side substring filter scan.
+     * Walks the whole in-memory corpus; both keywords are optional and
+     * combined with AND when both are present. Case-sensitive
+     * `str_contains` is sufficient for v1 (the EC-CUBE admin grid does
+     * substring matching too, and the seed corpus uses Japanese strings
+     * where case folding is a no-op anyway). Returns at most `$limit`
+     * rows so the admin grid stays bounded even for an empty filter.
+     *
+     * @return list<CustomerEntity>
+     */
+    public function search(?string $nameKeyword, ?string $emailKeyword, int $limit = 50): array
+    {
+        $rows = array_values($this->load());
+        $matches = [];
+        foreach ($rows as $customer) {
+            if ($nameKeyword !== null && $nameKeyword !== '' && ! $this->nameMatches($customer, $nameKeyword)) {
+                continue;
+            }
+
+            if ($emailKeyword !== null && $emailKeyword !== '' && ! str_contains($customer->email, $emailKeyword)) {
+                continue;
+            }
+
+            $matches[] = $customer;
+        }
+
+        return array_slice($matches, 0, $limit);
+    }
+
+    private function nameMatches(CustomerEntity $customer, string $keyword): bool
+    {
+        if (str_contains($customer->name01, $keyword)) {
+            return true;
+        }
+
+        if (str_contains($customer->name02, $keyword)) {
+            return true;
+        }
+
+        if ($customer->companyName !== null && str_contains($customer->companyName, $keyword)) {
+            return true;
+        }
+
+        return false;
     }
 
     /**
