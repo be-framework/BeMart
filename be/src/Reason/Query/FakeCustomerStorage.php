@@ -62,10 +62,46 @@ final class FakeCustomerStorage
         return null;
     }
 
+    /**
+     * Look up a Customer by their opaque id — Pilot 8
+     * (doUpdateCustomer). Returns null when no such customer exists.
+     */
+    public function getById(string $customerId): CustomerEntity|null
+    {
+        foreach ($this->load() as $customer) {
+            if ($customer->customerId === $customerId) {
+                return $customer;
+            }
+        }
+
+        return null;
+    }
+
     public function put(CustomerEntity $customer): void
     {
         $this->load();
         $this->byEmail[$customer->email] = $customer;
+    }
+
+    /**
+     * Replace a customer record, handling the case where the email
+     * field itself changed (the storage indexes by email, so we
+     * remove the old key before inserting the new one). Pilot 8
+     * (doUpdateCustomer).
+     */
+    public function replace(CustomerEntity $customer): void
+    {
+        $rows = $this->load();
+        foreach ($rows as $email => $existing) {
+            if ($existing->customerId === $customer->customerId) {
+                unset($rows[$email]);
+
+                break;
+            }
+        }
+
+        $rows[$customer->email] = $customer;
+        $this->byEmail = $rows;
     }
 
     /**

@@ -18,4 +18,12 @@ interface CustomerCommandInterface
      * `idempotent`).
      */
     public function activate(string $customerId): void;
+
+    /**
+     * Replace the customer record with the supplied entity — Pilot 8
+     * (doUpdateCustomer). Callers MUST construct the entity from the
+     * persisted current state merged with the validated update fields;
+     * this interface does not perform the merge itself.
+     */
+    public function update(CustomerEntity $customer): void;
 }
