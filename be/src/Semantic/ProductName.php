@@ -16,13 +16,22 @@ use function trim;
  *
  * Non-empty, <= 255 chars.
  *
+ * Wave 8 extension: accepts null so partial-update flows
+ * (doUpdateProduct) can pass `productName=null` to mean "do not change
+ * this field". Same convention as {@see \MyVendor\BeMart\Be\Semantic\Charge}
+ * et al.
+ *
  * @link https://schema.org/name
  */
 final class ProductName
 {
     #[Validate]
-    public function validate(string $productName): void
+    public function validate(string|null $productName): void
     {
+        if ($productName === null) {
+            return;
+        }
+
         if (trim($productName) === '') {
             throw new EmptyProductNameException();
         }
