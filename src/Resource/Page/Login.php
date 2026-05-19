@@ -45,6 +45,35 @@ class Login extends ResourceObject
     }
 
     /**
+     * EC-CUBE goLogin — show the login form scaffolding.
+     *
+     * Pure form-info endpoint: no Be Framework involved, no domain
+     * logic. Anonymous-accessible (returns 200 regardless of session
+     * state). The `csrfToken` body field is intentionally `null` —
+     * CsrfTokenInterface stays `isValid()`-only (Slice 8 decision);
+     * the EC-CUBE EventListener mirrors the Symfony-issued token
+     * into the session for the subsequent POST.
+     */
+    #[Link(rel: 'doLogin', href: 'page://self/login', method: 'post')]
+    #[Link(rel: 'goCustomerRegistration', href: 'page://self/entry')]
+    #[Link(rel: 'doRequestPasswordReset', href: 'page://self/forgot-password', method: 'post')]
+    public function onGet(): static
+    {
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'goLogin',
+            'fields' => ['email', 'password', 'csrfToken'],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/login',
+            ],
+            'csrfToken' => null,
+        ];
+
+        return $this;
+    }
+
+    /**
      * Phase B Slice 9: every form field is user-controlled input.
      *
      * @psalm-taint-source input $email

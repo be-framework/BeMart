@@ -30,6 +30,38 @@ class Contact extends ResourceObject
     }
 
     /**
+     * EC-CUBE goContactForm — show the contact form scaffolding.
+     *
+     * Pure form-info endpoint: no Be Framework involved, no domain
+     * logic. Anonymous-accessible (returns 200 regardless of session
+     * state). `csrfToken` body field stays `null` for the same reason
+     * described on Login::onGet — EventListener mirrors the Symfony
+     * token into the session for the subsequent POST.
+     */
+    #[Link(rel: 'doSubmitContact', href: 'page://self/contact', method: 'post')]
+    public function onGet(): static
+    {
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'goContactForm',
+            'fields' => [
+                'contactName01',
+                'contactName02',
+                'contactEmail',
+                'contactContents',
+                'csrfToken',
+            ],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/contact',
+            ],
+            'csrfToken' => null,
+        ];
+
+        return $this;
+    }
+
+    /**
      * @psalm-taint-source input $contactName01
      * @psalm-taint-source input $contactName02
      * @psalm-taint-source input $contactEmail

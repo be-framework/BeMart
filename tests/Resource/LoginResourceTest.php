@@ -27,6 +27,21 @@ final class LoginResourceTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    public function testOnGetReturnsFormMetadata(): void
+    {
+        $ro = $this->resource->get('page://self/login');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('goLogin', $ro->body['transitionId']);
+        $this->assertSame(['email', 'password', 'csrfToken'], $ro->body['fields']);
+        $this->assertSame('POST', $ro->body['submitTo']['method']);
+        $this->assertSame('page://self/login', $ro->body['submitTo']['href']);
+        // csrfToken in body is intentionally null — the production
+        // EventListener mirrors the live Symfony token into the
+        // session for the subsequent POST.
+        $this->assertNull($ro->body['csrfToken']);
+    }
+
     public function testOnPostAuthenticatesAndReturns200(): void
     {
         $ro = $this->resource->post('page://self/login', [

@@ -27,6 +27,24 @@ final class EntryResourceTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    public function testOnGetReturnsFormMetadata(): void
+    {
+        $ro = $this->resource->get('page://self/entry');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('goCustomerRegistration', $ro->body['transitionId']);
+        // 4 required + 11 optional + csrfToken
+        $this->assertContains('email', $ro->body['fields']);
+        $this->assertContains('password', $ro->body['fields']);
+        $this->assertContains('name01', $ro->body['fields']);
+        $this->assertContains('name02', $ro->body['fields']);
+        $this->assertContains('phoneNumber', $ro->body['fields']);
+        $this->assertContains('csrfToken', $ro->body['fields']);
+        $this->assertSame('POST', $ro->body['submitTo']['method']);
+        $this->assertSame('page://self/entry', $ro->body['submitTo']['href']);
+        $this->assertNull($ro->body['csrfToken']);
+    }
+
     public function testOnPostRegistersAndReturns201(): void
     {
         $ro = $this->resource->post('page://self/entry', [
