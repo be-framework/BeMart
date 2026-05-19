@@ -105,6 +105,50 @@ final class FakeCustomerStorage
     }
 
     /**
+     * Swap the customer's passwordHash in place — Pilot 15
+     * (doResetPassword). Smaller surface than `replace()` because the
+     * reset path only touches the credential field; addr/profile/etc.
+     * are preserved verbatim. Silently does nothing when the
+     * customerId is not in the store (the Final's caller has already
+     * proven existence via the reset-token lookup, so the no-op branch
+     * is unreachable in practice — it exists only to keep this method
+     * total).
+     */
+    public function replacePassword(string $customerId, string $passwordHash): void
+    {
+        $rows = $this->load();
+        foreach ($rows as $email => $customer) {
+            if ($customer->customerId !== $customerId) {
+                continue;
+            }
+
+            $this->byEmail[$email] = new CustomerEntity(
+                customerId: $customer->customerId,
+                email: $customer->email,
+                passwordHash: $passwordHash,
+                name01: $customer->name01,
+                name02: $customer->name02,
+                kana01: $customer->kana01,
+                kana02: $customer->kana02,
+                companyName: $customer->companyName,
+                phoneNumber: $customer->phoneNumber,
+                postalCode: $customer->postalCode,
+                pref: $customer->pref,
+                addr01: $customer->addr01,
+                addr02: $customer->addr02,
+                birth: $customer->birth,
+                sex: $customer->sex,
+                job: $customer->job,
+                initialPoint: $customer->initialPoint,
+                customerStatus: $customer->customerStatus,
+                secretKey: $customer->secretKey,
+            );
+
+            return;
+        }
+    }
+
+    /**
      * Mark the customer as active (status=2) and clear the secretKey.
      * Idempotent: a customer that is already active is left untouched.
      * Pilot 7 (doActivateCustomer).
