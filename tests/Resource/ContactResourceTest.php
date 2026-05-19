@@ -30,6 +30,21 @@ final class ContactResourceTest extends TestCase
         $this->mailer = $injector->getInstance(FakeMailer::class);
     }
 
+    public function testOnGetReturnsFormMetadata(): void
+    {
+        $ro = $this->resource->get('page://self/contact');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('goContactForm', $ro->body['transitionId']);
+        $this->assertSame(
+            ['contactName01', 'contactName02', 'contactEmail', 'contactContents', 'csrfToken'],
+            $ro->body['fields'],
+        );
+        $this->assertSame('POST', $ro->body['submitTo']['method']);
+        $this->assertSame('page://self/contact', $ro->body['submitTo']['href']);
+        $this->assertNull($ro->body['csrfToken']);
+    }
+
     public function testOnPostSubmitsContactAndReturns201(): void
     {
         $ro = $this->resource->post('page://self/contact', [

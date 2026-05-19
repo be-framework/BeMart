@@ -12,7 +12,9 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
+use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 
 use function assert;
 
@@ -34,7 +36,62 @@ class Withdraw extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly SessionInterface $session,
+        private readonly CustomerQueryInterface $customerQuery,
     ) {
+    }
+
+    /**
+     * EC-CUBE goMypageWithdraw — show the withdrawal confirmation page.
+     *
+     * Pure form-info endpoint: no Be Framework involved, no domain
+     * logic. Authenticated (mirrors Pilot 8 behavior): returns 401
+     * directly from the Resource when no session is present.
+     *
+     * Surfaces the current customer's email + name01/name02 so the
+     * confirm page can render "退会されるアカウント: name01 name02
+     * (email)". `csrfToken` body field stays `null` — EventListener
+     * mirrors the Symfony token into the session for the subsequent
+     * POST.
+     */
+    #[Link(rel: 'doWithdrawCustomer', href: 'page://self/mypage/withdraw', method: 'post')]
+    public function onGet(): static
+    {
+        $customerId = $this->session->customerId();
+        if ($customerId === null) {
+            $this->code = Code::UNAUTHORIZED;
+            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
+
+            return $this;
+        }
+
+        $customer = $this->customerQuery->findById($customerId);
+        if ($customer === null) {
+            // Stale session: the session points to a customerId that
+            // no longer exists in the store (e.g. already withdrawn
+            // in another tab). Treat as unauthenticated.
+            $this->code = Code::UNAUTHORIZED;
+            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'goMypageWithdraw',
+            'fields' => ['sessionPrefix', 'csrfToken'],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/mypage/withdraw',
+            ],
+            'csrfToken' => null,
+            'customerId' => $customer->customerId,
+            'email' => $customer->email,
+            'name01' => $customer->name01,
+            'name02' => $customer->name02,
+        ];
+
+        return $this;
     }
 
     /**
