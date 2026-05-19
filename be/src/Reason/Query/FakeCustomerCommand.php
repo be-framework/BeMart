@@ -30,4 +30,10 @@ final class FakeCustomerCommand implements CustomerCommandInterface
     {
         $this->storage->replace($customer);
     }
+
+    #[Override]
+    public function updatePassword(string $customerId, string $passwordHash): void
+    {
+        $this->storage->replacePassword($customerId, $passwordHash);
+    }
 }

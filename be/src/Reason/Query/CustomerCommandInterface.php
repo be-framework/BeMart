@@ -26,4 +26,13 @@ interface CustomerCommandInterface
      * this interface does not perform the merge itself.
      */
     public function update(CustomerEntity $customer): void;
+
+    /**
+     * Update the customer's password hash — Pilot 15 (doResetPassword)
+     * consumer of Pilot 14's reset token. Caller MUST pass an
+     * already-hashed value (computed via PasswordHasherInterface). This
+     * interface does NOT accept plaintext: plaintext-handling is the
+     * Final's job, persistence is this command's job.
+     */
+    public function updatePassword(string $customerId, string $passwordHash): void;
 }
