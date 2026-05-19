@@ -1665,3 +1665,71 @@ orchestrator が事後追記:
 
 これで Wave 4 で実装した 2 transition が ALPS-traceable に。alps.json の JSON validity も `php -r json_decode` で確認済。
 
+
+## Wave 6 — domain 拡張 + pair completion (7 transition、4 agent 並列)
+
+| Agent | 対象 | 内訳 | 結果 | テスト |
+|---|---|---|---|---|
+| P | customer address book (4 transition) | `goCustomerAddressList` / `doCreateCustomerAddress` / `doUpdateCustomerAddress` / `doDeleteCustomerAddress` — 単一 agent で `AddressEntity` infrastructure 込み | `30065aa` | +26 |
+| Q | `goFavoriteList` | Pilot 13 read pair | `dc660f2` | +6 |
+| R | `goOrderHistory` | customer 全件 + pagination | `bea5948` | +7 |
+| S | `doDeleteCustomer` | admin soft-delete、Wave 5O pair | `1b31d91` | +11 |
+
+Wave 6 net: 256 → 306 (+50 tests)、新 transition 7 件。
+
+### Wave 6 で発見された設計事項
+
+#### G-20: Singleton storage と cross-session 切替テスト
+Wave 6P で発見:
+- AUTHZ test (Alice の address を Bob が編集しようとして 403) で session を rebind すると、各 Injector が独立した `FakeAddressStorage` singleton を持つため、Alice の write が Bob の view に見えない
+- **解決**: テスト setUp で `$storage = new FakeAddressStorage(); $module->bind(AddressStorageInterface::class)->toInstance($storage); $module->bind(FakeAddressStorage::class)->toInstance($storage);` を rebind 時にも維持する
+- これは Pilot 5 で発見した **G-14 (Ray.Di binding gotcha)** の cross-session 切替版。今後の AUTHZ test で session rebind パターンを使うケースに適用
+
+#### G-21: idempotent DELETE の 2 つのスタイル
+Wave 6 で 2 つの DELETE 実装が並存:
+- Pilot 11 / 13 / 6S `doRemoveFavorite`: **silent idempotent** — 不在の item を削除しても 200 + `alreadyAbsent: true`、UI が flag で区別
+- Pilot 11 `doRemoveCartItem` / Wave 6P `doDeleteCustomerAddress`: **404 on miss** — 認証済み caller には精密 feedback、idempotent 性は「persisted state は同じ」 で保たれる
+
+**規約**: 一般的な "rare-but-OK" path (お気に入りを 2 回押した) は silent、本当に変更を期待する path (cart や住所) は 404。Wave 6P がこの規約を明文化。
+
+#### G-22: pagination の Semantic 命名
+Wave 6R `goOrderHistory` で、既存 `Limit` Semantic (1-50) を再利用するか別 `HistoryLimit` Semantic を作るかが論点に:
+- 既存 `OrderLimit` (1-50) は dashboard / grid 用、`Limit` (1-50) は admin search 用、`HistoryLimit` (1-200) は full-history 用
+- Be Framework の per-param-name wiring 規約により、param 名で Semantic が選択される → 同じ「数値の cap」 でも context によって別 class
+- DRY 違反だが、cap range が context-specific であるべきという ALPS 思想とも整合
+- **Wave 3 `OrderLimit` 設定時にこの分岐が起きていれば DRY の議論が浮上していたが、当時 Wave 6R を想定していなかった**
+
+### 累計進捗 (Wave 6 末)
+
+| 指標 | Pilot 1-5 | Pilot 15 末 | Wave 2 末 | Wave 5 末 | Wave 6 末 |
+|---|---|---|---|---|---|
+| 移植 transition | 5 (3.6%) | 14 (10.2%) | 20 (14.6%) | 30 (21.9%) | **37 (27.0%)** |
+| Tests | 90 | 141 | 188 | 256 | **306** |
+| Assertions | 205 | 323 | 477 | 798 | **962** |
+
+### 累計 skill gap 一覧 (このセッションで発見)
+
+| ID | 内容 | 発見 wave |
+|---|---|---|
+| G-14 | Ray.Di `bind(Iface)->to(Impl)` は singleton scope を consult しない | Pilot 5 (前 session) |
+| G-15 | Multi-side-effect Final (Complex Convergence) の判定基準 | Pilot 5 (前 session) |
+| G-16 | server-derived Semantic 登録漏れ | Pilot 5 (前 session) |
+| G-17 | Be Framework chain は `#[Be]` で class-level fixed → Input-per-intent + Being-per-shape | Pilot 10 |
+| G-18 | ALPS 不在 transition の発見規約 — agent が conventional 名で実装 + orchestrator が ALPS 整合 | Wave 4 |
+| G-19 | admin AAA は parallel firewall (`SessionInterface` / `AdminSessionInterface` 分離) | Wave 4 |
+| G-20 | cross-session rebind 時の singleton storage 共有パターン | Wave 6P |
+| G-21 | idempotent DELETE の "silent" vs "404 on miss" 規約 | Wave 6P |
+| G-22 | pagination Semantic は context-specific (`Limit` / `OrderLimit` / `HistoryLimit`) | Wave 6R |
+
+これら G-17 以降は **`be-framework-skills` repo / `alps-skills` repo へ contribute する候補** として整理可能。Wave 7 (SKILL bake) で実施候補。
+
+### orchestration マトリクスの定常運転
+
+セッション後半 (Wave 1-6) の運用パターン:
+1. orchestrator が wave 設計時に dependency 表を作成 (Wave 4 で漏れて Wave 5 brief で補完)
+2. agent 並列度は 3-4 が安全圏 (Wave 2 で 4 agent、Wave 5/6 で 3-4 agent)
+3. 各 agent には briefing で「STOP and report」 ルートを明示 → S1-S7 stop condition 相当の自律判断を委譲
+4. 完了通知ごとに orchestrator が cherry-pick + integrated test/psalm verify → push
+5. wave 完了時に HANDOVER 追記 + HOW_TO_CONTINUE 反映 + PR body 更新 (orchestrator 専任)
+
+walltime 効率: 直列なら累計 12-15 unit が、6 wave × ~5-10 min walls で着地。約 60-90 分セッション内で 32 新 transition + 9 skill gap 発見。
