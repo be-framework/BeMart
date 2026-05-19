@@ -15,6 +15,11 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
  * no pre-order exists for the given id (e.g. session expired or the customer
  * skipped the Shopping page).
  *
+ * `byOrderNo` returns the finalized-order header (orderStatus=NEW(1) onwards)
+ * — the row that EC-CUBE persists into dtb_order at checkout time. Returns
+ * null when the orderNo is unknown. Pilot 12 (doReorder) uses this to AUTHZ
+ * the request against the order's customerId before replaying the items.
+ *
  * `itemsByOrderNo` returns the line-item snapshot of a finalized Order
  * (orderStatus=NEW(1) onwards) — the rows that EC-CUBE persists into
  * dtb_order_item at checkout time. Returns an empty list when the order has
@@ -30,6 +35,8 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 interface OrderQueryInterface
 {
     public function byPreOrderId(string $preOrderId): ?OrderEntity;
+
+    public function byOrderNo(string $orderNo): ?FinalizedOrderEntity;
 
     /** @return list<OrderItemEntity> */
     public function itemsByOrderNo(string $orderNo): array;
