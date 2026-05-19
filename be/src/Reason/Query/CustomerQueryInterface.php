@@ -31,4 +31,21 @@ interface CustomerQueryInterface
      * and other "the logged-in customer is editing themselves" flows).
      */
     public function findById(string $customerId): CustomerEntity|null;
+
+    /**
+     * Pilot Wave 5 goCustomerList: admin-side filter search over the
+     * customer corpus. Both keywords are substring-matched and ANDed
+     * when both are present; pass null to disable that filter. Returns
+     * an empty list when no customer matches.
+     *
+     * Filter scope (first iteration): name (matched against name01,
+     * name02, companyName) and email. Phase 2 will add phoneNumber,
+     * dateRange, and purchaseAmount filters per the original EC-CUBE
+     * admin search form. Caller-supplied `$limit` caps the result set
+     * size (default 50) so the admin grid stays bounded even for a
+     * "blank" search.
+     *
+     * @return list<CustomerEntity>
+     */
+    public function search(?string $nameKeyword, ?string $emailKeyword, int $limit = 50): array;
 }
