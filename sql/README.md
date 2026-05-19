@@ -50,6 +50,30 @@ sudo mysql -e "FLUSH PRIVILEGES;"
 
 Defaults: host `127.0.0.1`, port `3306`, user `dbuser`, password `secret`.
 
+## SQL implementations landed so far
+
+Phase 2a is bootstrapping the SQL backend incrementally — every new
+class lives under `be/src/Reason/Query/Sql*.php` and is tested via the
+`bemart-sql` testsuite. **Production DI is still bound to the Fakes**;
+each SQL class is wired manually in tests until Phase 2b flips the
+bindings.
+
+| Class | Backed by | Notes |
+|---|---|---|
+| `SqlCustomerQuery` (Step 2) | `dtb_customer` | Grade A 1:1 mapping |
+| `SqlOrderQuery` (Step 3) | `dtb_order` + `dtb_order_item` | Excludes `order_status_id = 8` (PROCESSING) from finalized reads; `byPreOrderId` is the lone PROCESSING reader |
+| `SqlFavoriteStorage` (Step 3) | `dtb_customer_favorite_product` + `dtb_product` + `dtb_product_class` | 3-way JOIN; uses `class_category_id1/2 IS NULL` to pick the "default" product_class for `product_code` + `price02` |
+
+## Integration test pattern
+
+End-to-end smokes wire the SQL implementations directly into a
+Final-under-test's constructor (no injector, no Becoming chain). The
+AdminSession is substituted with the in-process `FakeAdminSession`
+because the production cookie/JWT adapter is deferred. See
+[`be/tests/Sql/AdminCustomerFetchedSqlIntegrationTest.php`](../be/tests/Sql/AdminCustomerFetchedSqlIntegrationTest.php)
+for the canonical shape (3 SQL backends + a test-fake AdminSession,
+asserting projection counts + projection shape + AUTHZ/404 ladder).
+
 ## Phase 2b planning
 
 See [`diff/entity-vs-eccube.md`](diff/entity-vs-eccube.md) for the
