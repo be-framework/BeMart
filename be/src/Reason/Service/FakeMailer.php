@@ -26,6 +26,9 @@ final class FakeMailer implements MailerInterface
     /** @var list<array{email: string, resetKey: string}> */
     private array $passwordResets = [];
 
+    /** @var list<array{email: string, name01: string, name02: string}> */
+    private array $withdrawConfirmations = [];
+
     #[Override]
     public function sendOrderConfirmation(FinalizedOrderEntity $order): void
     {
@@ -60,5 +63,21 @@ final class FakeMailer implements MailerInterface
     public function passwordResets(): array
     {
         return $this->passwordResets;
+    }
+
+    #[Override]
+    public function sendWithdrawConfirmation(string $email, string $name01, string $name02): void
+    {
+        $this->withdrawConfirmations[] = [
+            'email' => $email,
+            'name01' => $name01,
+            'name02' => $name02,
+        ];
+    }
+
+    /** @return list<array{email: string, name01: string, name02: string}> */
+    public function withdrawConfirmations(): array
+    {
+        return $this->withdrawConfirmations;
     }
 }
