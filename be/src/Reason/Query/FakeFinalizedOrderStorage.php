@@ -107,6 +107,29 @@ final class FakeFinalizedOrderStorage
     }
 
     /**
+     * Return every finalized order sorted newest first by `orderDate`,
+     * advanced by `$offset` and capped at `$limit`. Wave 7 (goOrderList)
+     * uses this for the admin grid.
+     *
+     * @return list<FinalizedOrderEntity>
+     */
+    public function getAll(int $limit, int $offset = 0): array
+    {
+        $all = [];
+        foreach ($this->orders as $order) {
+            $all[] = $order;
+        }
+
+        usort(
+            $all,
+            static fn (FinalizedOrderEntity $a, FinalizedOrderEntity $b): int
+                => strcmp($b->orderDate, $a->orderDate),
+        );
+
+        return array_slice($all, $offset, $limit);
+    }
+
+    /**
      * Install one past finalized order for customer-001 plus a couple of
      * order-item rows. Pilot 12 (doReorder) needs at least one historical
      * order with items to verify the read path; the values mirror an
