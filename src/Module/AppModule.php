@@ -14,6 +14,9 @@ use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
@@ -21,6 +24,9 @@ use MyVendor\BeMart\Be\Reason\Query\FakeAdminQuery;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeCategoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeClassCategoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeClassNameStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
@@ -43,11 +49,17 @@ use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAddressIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Service\FakeCategoryIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeClassCategoryIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeClassNameIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerInitialPoint;
@@ -200,5 +212,18 @@ final class AppModule extends AbstractAppModule
         $this->bind(FakeAdminStorage::class)->in(Scope::SINGLETON);
         $this->bind(AdminQueryInterface::class)->to(FakeAdminQuery::class);
         $this->bind(AdminSessionInterface::class)->toInstance(new FakeAdminSession(null));
+
+        // Reason (Wave 7 admin catalog hierarchy — Category / ClassName /
+        // ClassCategory). Three storages + three id generators, same
+        // Singleton convention as the customer address book so a POST's
+        // writes are visible to the same request's GET / PUT / DELETE.
+        // Placed at the END of configure() to minimise cherry-pick
+        // conflicts with parallel agents.
+        $this->bind(CategoryStorageInterface::class)->to(FakeCategoryStorage::class)->in(Scope::SINGLETON);
+        $this->bind(CategoryIdGeneratorInterface::class)->to(FakeCategoryIdGenerator::class);
+        $this->bind(ClassNameStorageInterface::class)->to(FakeClassNameStorage::class)->in(Scope::SINGLETON);
+        $this->bind(ClassNameIdGeneratorInterface::class)->to(FakeClassNameIdGenerator::class);
+        $this->bind(ClassCategoryStorageInterface::class)->to(FakeClassCategoryStorage::class)->in(Scope::SINGLETON);
+        $this->bind(ClassCategoryIdGeneratorInterface::class)->to(FakeClassCategoryIdGenerator::class);
     }
 }
