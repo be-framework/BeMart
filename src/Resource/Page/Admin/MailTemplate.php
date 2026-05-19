@@ -11,21 +11,27 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\MailTemplateNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\MailTemplateListFetched;
 use MyVendor\BeMart\Be\Final\MailTemplateUpdated;
+use MyVendor\BeMart\Be\Input\GetMailTemplateListInput;
 use MyVendor\BeMart\Be\Input\UpdateMailTemplateInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
 /**
- * EC-CUBE doUpdateMailTemplate — メールテンプレートを更新する (Wave 8).
+ * EC-CUBE doUpdateMailTemplate + goMailTemplateList — メールテンプレート
+ * (Wave 8 + Wave 9).
  *
- * POST. The migration scope only covers UPDATE of subject + body +
- * htmlBody — creating a new template requires setting the underlying
- * file_name, which is Phase 2 scope.
+ *   - GET  → goMailTemplateList (collection list, safe, admin, Wave 9ι)
+ *   - POST → doUpdateMailTemplate (per-id update, idempotent, Wave 8ε)
+ *
+ * The migration scope only covers UPDATE of subject + body + htmlBody —
+ * creating a new template requires setting the underlying file_name,
+ * which is Phase 2 scope.
  *
  * Failure mapping:
- *   - Invalid CSRF                          → 403
+ *   - Invalid CSRF                          → 403 (POST only)
  *   - SemanticVariableException             → 400 (subject / body format)
  *   - UnauthorizedAdminAccessException      → 403 (no admin session)
  *   - MailTemplateNotFoundException         → 404 (unknown id)
@@ -36,6 +42,32 @@ class MailTemplate extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
     ) {
+    }
+
+    /**
+     * Wave 9ι: goMailTemplateList — admin lists every mail template.
+     */
+    #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
+    public function onGet(): static
+    {
+        try {
+            $final = ($this->becoming)(new GetMailTemplateListInput());
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof MailTemplateListFetched);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'mailTemplates' => $final->mailTemplates,
+            'count' => $final->count,
+        ];
+
+        return $this;
     }
 
     /**

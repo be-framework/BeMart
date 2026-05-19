@@ -19,6 +19,7 @@ use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
@@ -31,6 +32,7 @@ use MyVendor\BeMart\Be\Reason\Query\FakeBaseInfoStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeClassCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeClassNameStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeCsvColumnConfigStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeLoginHistoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
@@ -261,5 +263,13 @@ final class AppModule extends AbstractAppModule
         $this->bind(MailTemplateStorageInterface::class)->toInstance($mailTemplateStorage);
         $this->bind(FakeTradeLawStorage::class)->toInstance($tradeLawStorage);
         $this->bind(TradeLawStorageInterface::class)->toInstance($tradeLawStorage);
+
+        // Wave 9ι: misc admin transitions.
+        // doUpdateCsv stores the column vector per csvType. The read-side
+        // pairs of goBaseInfo / goMailTemplateList / goTradeLawList reuse
+        // the Wave 8ε storage bindings above. goExportCustomer reuses the
+        // Wave 8β FakeCustomerStorage::search via CustomerQueryInterface.
+        $this->bind(CsvColumnConfigStorageInterface::class)
+            ->to(FakeCsvColumnConfigStorage::class)->in(Scope::SINGLETON);
     }
 }
