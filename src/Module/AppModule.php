@@ -14,6 +14,7 @@ use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
@@ -31,6 +32,17 @@ use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeBlockStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeLayoutStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeNewsStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakePageStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeTagStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeTemplateStorage;
+use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminStorage;
@@ -75,6 +87,7 @@ use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
@@ -85,9 +98,16 @@ use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAddressIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Service\FakeBlockIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCategoryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeClassCategoryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeClassNameIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeNewsIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakePageIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeTagIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerInitialPoint;
@@ -299,5 +319,17 @@ final class AppModule extends AbstractAppModule
         // Wave 9ι: misc admin transitions.
         $this->bind(CsvColumnConfigStorageInterface::class)
             ->to(FakeCsvColumnConfigStorage::class)->in(Scope::SINGLETON);
+
+        // Wave 9ζ: CMS admin CRUD (Page / News / Block / Layout / Tag / Template).
+        $this->bind(PageStorageInterface::class)->to(FakePageStorage::class)->in(Scope::SINGLETON);
+        $this->bind(PageIdGeneratorInterface::class)->to(FakePageIdGenerator::class);
+        $this->bind(NewsStorageInterface::class)->to(FakeNewsStorage::class)->in(Scope::SINGLETON);
+        $this->bind(NewsIdGeneratorInterface::class)->to(FakeNewsIdGenerator::class);
+        $this->bind(BlockStorageInterface::class)->to(FakeBlockStorage::class)->in(Scope::SINGLETON);
+        $this->bind(BlockIdGeneratorInterface::class)->to(FakeBlockIdGenerator::class);
+        $this->bind(LayoutStorageInterface::class)->to(FakeLayoutStorage::class)->in(Scope::SINGLETON);
+        $this->bind(TagStorageInterface::class)->to(FakeTagStorage::class)->in(Scope::SINGLETON);
+        $this->bind(TagIdGeneratorInterface::class)->to(FakeTagIdGenerator::class);
+        $this->bind(TemplateStorageInterface::class)->to(FakeTemplateStorage::class)->in(Scope::SINGLETON);
     }
 }
