@@ -18,6 +18,8 @@ use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminQuery;
+use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\FakeAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
@@ -39,10 +41,12 @@ use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeAddressIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
@@ -165,6 +169,13 @@ final class AppModule extends AbstractAppModule
         // customer favorites list. Singleton so adds within a request
         // are visible to subsequent reads.
         $this->bind(FavoriteStorageInterface::class)->to(FakeFavoriteStorage::class)->in(Scope::SINGLETON);
+
+        // Reason (Pilot 16 customer address book): unified Query+Command
+        // for the address store + an opaque-id generator. Singleton on
+        // storage so a request's POST is visible to the same request's
+        // GET / PUT / DELETE within a single test.
+        $this->bind(AddressStorageInterface::class)->to(FakeAddressStorage::class)->in(Scope::SINGLETON);
+        $this->bind(AddressIdGeneratorInterface::class)->to(FakeAddressIdGenerator::class);
 
         // Reason (Pilot 14 doRequestPasswordReset): reset-token store +
         // mailer for the password-reset link. Singleton so a test can
