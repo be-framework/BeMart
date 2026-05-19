@@ -1,0 +1,118 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
+
+use BEAR\Resource\Annotation\Link;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\AdminTaxRuleListFetched;
+use MyVendor\BeMart\Be\Final\TaxRuleCreated;
+use MyVendor\BeMart\Be\Input\CreateTaxRuleInput;
+use MyVendor\BeMart\Be\Input\GetAdminTaxRuleListInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+
+use function assert;
+use function sprintf;
+use function urlencode;
+
+/**
+ * EC-CUBE goTaxRuleList + doCreateTaxRule — collection endpoint
+ * (Wave 9θ).
+ *
+ *   - GET  → goTaxRuleList    (admin lists tax rules — safe read)
+ *   - POST → doCreateTaxRule  (admin adds a new tax rule)
+ *
+ * Per the alps.json profile, there is NO `doUpdateTaxRule` — edits flow
+ * as delete + create so the applyDate audit trail remains explicit.
+ * The single-row affordance (`doDeleteTaxRule`) lives at
+ * `page://self/admin/tax-rule/tax-rule`.
+ */
+class TaxRuleList extends ResourceObject
+{
+    public function __construct(
+        private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
+    ) {
+    }
+
+    #[Link(rel: 'doCreateTaxRule', href: 'page://self/admin/tax-rule/tax-rule-list', method: 'post')]
+    #[Link(rel: 'doDeleteTaxRule', href: 'page://self/admin/tax-rule/tax-rule', method: 'delete')]
+    public function onGet(): static
+    {
+        try {
+            $final = ($this->becoming)(new GetAdminTaxRuleListInput());
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof AdminTaxRuleListFetched);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'count' => $final->count,
+            'taxRules' => $final->taxRules,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @psalm-taint-source input $taxRate
+     * @psalm-taint-source input $applyDate
+     * @psalm-taint-source input $roundingType
+     * @psalm-taint-source input $csrfToken
+     */
+    #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
+    public function onPost(
+        float $taxRate,
+        string $applyDate,
+        int $roundingType = 1,
+        string|null $csrfToken = null,
+    ): static {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+
+            return $this;
+        }
+
+        try {
+            $final = ($this->becoming)(new CreateTaxRuleInput(
+                taxRate: $taxRate,
+                applyDate: $applyDate,
+                roundingType: $roundingType,
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
+
+            return $this;
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof TaxRuleCreated);
+
+        $this->code = Code::CREATED;
+        $this->headers['Location'] = sprintf('/admin/tax-rule/tax-rule?taxRuleId=%s', urlencode($final->taxRuleId));
+        $this->body = [
+            'taxRuleId' => $final->taxRuleId,
+            'taxRate' => $final->taxRate,
+            'roundingType' => $final->roundingType,
+            'applyDate' => $final->applyDate,
+        ];
+
+        return $this;
+    }
+}
