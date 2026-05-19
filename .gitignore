@@ -4,3 +4,6 @@
 /var/tmp/
 .DS_Store
 /.claude/worktrees/
+
+# EC-CUBE source clone for schema extraction (Phase 2a)
+/tools/ec-cube-source/
