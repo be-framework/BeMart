@@ -1,0 +1,165 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Resource\Page\Admin\Page;
+
+use BEAR\Resource\Annotation\Link;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\PageNotFoundException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\AdminPageFetched;
+use MyVendor\BeMart\Be\Final\PageDeleted;
+use MyVendor\BeMart\Be\Final\PageUpdated;
+use MyVendor\BeMart\Be\Input\DeletePageInput;
+use MyVendor\BeMart\Be\Input\GetAdminPageInput;
+use MyVendor\BeMart\Be\Input\UpdatePageInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+
+use function assert;
+
+/**
+ * EC-CUBE goPage + doUpdatePage + doDeletePage — single-row endpoint
+ * (Wave 9 CMS).
+ */
+class Page extends ResourceObject
+{
+    public function __construct(
+        private readonly BecomingInterface $becoming,
+        private readonly CsrfTokenInterface $csrf,
+    ) {
+    }
+
+    /**
+     * @psalm-taint-source input $pageId
+     */
+    #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
+    public function onGet(string $pageId): static
+    {
+        try {
+            $final = ($this->becoming)(new GetAdminPageInput(pageId: $pageId));
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        } catch (PageNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
+
+            return $this;
+        }
+
+        assert($final instanceof AdminPageFetched);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'pageId' => $final->pageId,
+            'pageName' => $final->pageName,
+            'pageUrl' => $final->pageUrl,
+            'pageFileName' => $final->pageFileName,
+            'pageEditType' => $final->pageEditType,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @psalm-taint-source input $pageId
+     * @psalm-taint-source input $pageName
+     * @psalm-taint-source input $pageUrl
+     * @psalm-taint-source input $pageFileName
+     * @psalm-taint-source input $csrfToken
+     */
+    #[Link(rel: 'goPage', href: 'page://self/admin/page/page')]
+    public function onPut(
+        string $pageId,
+        string|null $pageName = null,
+        string|null $pageUrl = null,
+        string|null $pageFileName = null,
+        string|null $csrfToken = null,
+    ): static {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+
+            return $this;
+        }
+
+        try {
+            $final = ($this->becoming)(new UpdatePageInput(
+                pageId: $pageId,
+                pageName: $pageName,
+                pageUrl: $pageUrl,
+                pageFileName: $pageFileName,
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
+
+            return $this;
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        } catch (PageNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
+
+            return $this;
+        }
+
+        assert($final instanceof PageUpdated);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'pageId' => $final->pageId,
+            'pageName' => $final->pageName,
+            'pageUrl' => $final->pageUrl,
+            'pageFileName' => $final->pageFileName,
+            'pageEditType' => $final->pageEditType,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @psalm-taint-source input $pageId
+     * @psalm-taint-source input $csrfToken
+     */
+    #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
+    public function onDelete(string $pageId, string|null $csrfToken = null): static
+    {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+
+            return $this;
+        }
+
+        try {
+            $final = ($this->becoming)(new DeletePageInput(pageId: $pageId));
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        } catch (PageNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
+
+            return $this;
+        }
+
+        assert($final instanceof PageDeleted);
+
+        $this->code = Code::OK;
+        $this->body = ['pageId' => $final->pageId];
+
+        return $this;
+    }
+}
