@@ -1573,3 +1573,95 @@ Agent D (Pilot 12) と Agent F (goMypage) は両者 `OrderQueryInterface` / `Fak
 - Diamond-Cascade: 3 件 (Pilot 2, 5, 12)
 - Branching Final: 1 件 (Pilot 3)
 
+
+## Wave 3 + Wave 4 + Wave 5 — オーケストレーション習熟期
+
+**1 turn = 3-4 並列 agent + per-agent cherry-pick + integrated test/psalm verify** のループが定常運転に。Wave 3 で 8 transition (3 agent)、Wave 4 で admin 基盤 + 2 transition (1 agent)、Wave 5 で 3 transition (3 agent) を投入。
+
+### Wave 3 (8 transition、3 agent 並列)
+
+| Agent | 対象 | 結果 | テスト |
+|---|---|---|---|
+| H | go* pure renderers (`goLogin` / `goCustomerRegistration` / `goContactForm` / `goMypageWithdraw`) | `6dba995` | +6 |
+| I | `goMypageHistory` / `goMypageChange` (Direct + authenticated) | `e6ac521` | +13 |
+| J | `goShopping` (Direct aggregation) | `ac1ce6f` | +9 |
+
+Wave 3 net: 188 → 216 (+28 tests)、新 transition 7 件 (goForgotPassword は ALPS 不在のため正当に skip)。
+
+#### 発見
+
+- **pure form-info endpoint** は Be Framework を使わず BEAR Resource 単体で実装する規約を確立 (H が判断)。`{transitionId, fields, submitTo, csrfToken}` のuniform body shape
+- **`goForgotPassword` が ALPS に無い** — `doRequestPasswordReset` (POST) は存在するが、その入口の form-show transition は ALPS に登録されていない。agent が invent しなかったのは正解 (orchestrator briefing で「skip して報告」 と明示済)
+- **`PaymentMethodFactoryInterface::available()`** を Wave 3J が新規追加 (Pilot 5 では single method lookup のみ実装、enumeration は未着手だった)
+
+### Wave 4 (admin AAA infrastructure + 2 transition、1 agent)
+
+| 対象 | 結果 | テスト |
+|---|---|---|
+| admin AAA infra + `doAdminLogin` + `doAdminLogout` | `b925397` | +13 |
+
+#### 重要な発見 (G-18): 仕様外 transition の発見規約
+
+agent が ALPS を網羅探索した結果、**`doAdminLogin` / `doAdminLogout` は alps.json に存在しない** ことを発見。Member 系 admin user CRUD (`goMemberList` / `doUpdateMember` 等) は存在するが、admin 自身の auth/logout transition は欠落。
+
+採用した対応:
+- agent は「conventional な命名 (`doAdminLogin` / `doAdminLogout`) で実装、docblock に ALPS 欠落を明記、orchestrator に報告」 を選択
+- orchestrator が事後に alps.json に該当 transition を追記 (`actor-admin` tag、`loginId` + `password` descriptor)
+
+**G-18 として記録**: ALPS と実装の往復は片方向ではない。実装 agent が「ALPS にあるべきだがない」 transition を見つけた場合、agent が ALPS を勝手に編集するのではなく、(a) conventional 名で実装 (b) gap を docblock + return message で報告 (c) orchestrator が ALPS の整合性を取る、の責務分担を採用。
+
+#### admin AAA infrastructure (新設)
+
+- `AdminEntity` (parallel to `CustomerEntity`、admin shape: `adminId` / `loginId` / `passwordHash` / `name` / `mailAddress` / `authority`)
+- `AdminQueryInterface` (`findByLoginId` / `findById`) + `FakeAdminQuery` + `FakeAdminStorage`
+- `AdminSessionInterface` (`adminId(): ?string`、`@psalm-taint-source session`) + `FakeAdminSession`
+- `admins.json` fixture (3 seed admins、`test-admin` が本物の bcrypt password)
+- `UnauthorizedAdminAccessException` / `AdminLoginFailedException` / `LoginIdFormatException`
+- `LoginId` Semantic
+
+EC-CUBE は admin と customer の二重 firewall モデル — それを mirror。同じ `SessionInterface` に admin id を相乗りさせず、別 interface に分離した方が AAA boundary が明確になる。
+
+### Wave 5 (3 transition、3 agent 並列、admin AUTHZ 量産)
+
+| Agent | 対象 | パターン | 結果 | テスト |
+|---|---|---|---|---|
+| M | `goCustomerList` | Direct + admin AUTHZ + filter search | `31e1d93` | +11 |
+| N | `goCustomer` | Direct + admin AUTHZ + aggregation | `1e22b42` | +7 |
+| O | `doCreateCustomer` | Multi-Reason Being + admin AUTHZ (Pilot 4 並列) | `0bb3ea0` | +9 |
+
+Wave 5 net: 229 → 256 (+27 tests)、新 transition 3 件。
+
+#### 発見
+
+- **admin AUTHZ pattern が CustomerQuery / OrderQuery / FavoriteStorage を across 透過的に使える** — admin が customer entity を読む経路は customer 自身が読む経路と同じ Reason を共有 (AAA は session-side で吸収)。読み専用 Reason 群が role-agnostic に設計されていた効果
+- **G-17 再確認** — Wave 5O `doCreateCustomer` で改めて確認: Pilot 4 `CustomerRegistering` を再利用すれば DRY だが `#[Be(CustomerRegistered)]` が class-level fixed なので admin 用 Final へ流せない。Input-per-intent + Being-per-shape を踏襲して `AdminCustomerCreating` を別 class 化
+- **Anti-enumeration ladder** — Wave 5N `goCustomer` で AUTHZ check (403) → existence check (404) の順序を確立。403 のレスポンスは email を echo back しないことを test で pin
+
+### 累計進捗 (Wave 5 末)
+
+| 指標 | Pilot 1-5 | Pilot 15 末 | Wave 2 末 | Wave 5 末 |
+|---|---|---|---|---|
+| 移植 transition | 5 (3.6%) | 14 (10.2%) | 20 (14.6%) | **30 (21.9%)** |
+| Tests | 90 | 141 | 188 | **256** |
+| Assertions | 205 | 323 | 477 | **798** |
+
+実証された pattern instance:
+- Direct: 19 件 (累計)
+- Linear: 1 件 (Pilot 10)
+- Multi-Reason Being: 2 件 (Pilot 4 + Wave 5O `doCreateCustomer`)
+- Diamond-Cascade: 3 件 (Pilot 2, 5, 12)
+- Branching Final: 1 件 (Pilot 3)
+
+#### 新 skill gap
+
+- **G-18: ALPS 不在 transition の発見と編集責務** — 上記
+- **G-19: admin AAA は parallel firewall として独立 interface 化する** — Wave 4 で発見。`SessionInterface` (customer) / `AdminSessionInterface` (admin) を分離することで、(a) 一方の null check で他方を無効化する事故を防げる (b) audit log で role 判別が明示的になる (c) BEAR resource で `Code::UNAUTHORIZED` (顧客) vs `Code::FORBIDDEN` (admin-only endpoint だが顧客 logged-in、role mismatch) を明確に分けられる
+
+### alps.json update
+
+orchestrator が事後追記:
+- `doAdminLogin` (unsafe、`actor-admin` tag、`loginId` + `password` descriptor)
+- `doAdminLogout` (idempotent、`actor-admin` tag、no descriptor)
+
+これで Wave 4 で実装した 2 transition が ALPS-traceable に。alps.json の JSON validity も `php -r json_decode` で確認済。
+
