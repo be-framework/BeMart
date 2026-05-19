@@ -12,7 +12,9 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\FavoriteAdded;
+use MyVendor\BeMart\Be\Final\FavoriteRemoved;
 use MyVendor\BeMart\Be\Input\AddFavoriteInput;
+use MyVendor\BeMart\Be\Input\RemoveFavoriteInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
@@ -74,6 +76,56 @@ class Favorite extends ResourceObject
             'productName' => $final->productName,
             'unitPrice' => $final->unitPrice,
             'alreadyExisted' => $final->alreadyExisted,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doRemoveFavorite — お気に入りから削除 (idempotent inverse
+     * of Pilot 13). DELETE is idempotent (ALPS type=idempotent):
+     * re-removing an already-absent item returns 200 with
+     * alreadyAbsent=true rather than 404. The flag lets the UI
+     * distinguish first-remove from re-remove without leaking the
+     * underlying state.
+     *
+     * Unlike onPost, we do NOT validate that productCode resolves to
+     * a real product — DELETE removes a stored row, not a product.
+     *
+     * @psalm-taint-source input $productCode
+     * @psalm-taint-source input $csrfToken
+     */
+    #[Link(rel: 'goMypage', href: 'page://self/mypage')]
+    public function onDelete(string $productCode, string|null $csrfToken = null): static
+    {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+
+            return $this;
+        }
+
+        try {
+            $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
+
+            return $this;
+        } catch (UnauthenticatedException) {
+            $this->code = Code::UNAUTHORIZED;
+            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof FavoriteRemoved);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'customerId' => $final->customerId,
+            'productCode' => $final->productCode,
+            'alreadyAbsent' => $final->alreadyAbsent,
         ];
 
         return $this;
