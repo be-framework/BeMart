@@ -48,6 +48,15 @@ class Checkout extends ResourceObject
     ) {
     }
 
+    /**
+     * Phase B Slice 9: both params arrive from the HTTP request body.
+     * `$preOrderId` is a 40-hex-char id that PreOrderId Semantic
+     * format-validates; `$csrfToken` is the Slice 8 boundary token.
+     * Both are sources so Psalm can trace into downstream sinks.
+     *
+     * @psalm-taint-source input $preOrderId
+     * @psalm-taint-source input $csrfToken
+     */
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onPost(string $preOrderId, string|null $csrfToken = null): static

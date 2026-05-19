@@ -21,6 +21,15 @@ use MyVendor\BeMart\Be\Being\QuantityAdjusted;
 #[Be([QuantityAdjusted::class])]
 final readonly class AddCartItemInput
 {
+    /**
+     * Phase B Slice 9: `productCode` and `quantity` originate from the
+     * HTTP request body. `sessionPrefix` has a default but can be
+     * overridden by a future Resource call — also treat as input.
+     *
+     * @psalm-taint-source input $productCode
+     * @psalm-taint-source input $quantity
+     * @psalm-taint-source input $sessionPrefix
+     */
     public function __construct(
         public string $productCode,
         public int $quantity,

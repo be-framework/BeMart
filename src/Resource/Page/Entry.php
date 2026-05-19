@@ -42,6 +42,29 @@ class Entry extends ResourceObject
     ) {
     }
 
+    /**
+     * Phase B Slice 9: every form field is user-controlled input. Declared
+     * as taint sources so Psalm can trace them. Semantic value objects
+     * format-validate but do not universally escape — sinks downstream
+     * still need their own defense (bound params, HTML escape on render).
+     *
+     * @psalm-taint-source input $email
+     * @psalm-taint-source input $password
+     * @psalm-taint-source input $name01
+     * @psalm-taint-source input $name02
+     * @psalm-taint-source input $kana01
+     * @psalm-taint-source input $kana02
+     * @psalm-taint-source input $companyName
+     * @psalm-taint-source input $phoneNumber
+     * @psalm-taint-source input $postalCode
+     * @psalm-taint-source input $pref
+     * @psalm-taint-source input $addr01
+     * @psalm-taint-source input $addr02
+     * @psalm-taint-source input $birth
+     * @psalm-taint-source input $sex
+     * @psalm-taint-source input $job
+     * @psalm-taint-source input $csrfToken
+     */
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onPost(
         string $email,

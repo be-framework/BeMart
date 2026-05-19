@@ -34,6 +34,17 @@ class Item extends ResourceObject
     ) {
     }
 
+    /**
+     * Phase B Slice 9: all three params arrive from the HTTP request body
+     * and are user-controlled. Declared as taint sources so Psalm can
+     * trace them through Becoming into any downstream sink (Phase 2 will
+     * surface real flows once Fake Reasons are swapped for DB-backed
+     * implementations).
+     *
+     * @psalm-taint-source input $productCode
+     * @psalm-taint-source input $quantity
+     * @psalm-taint-source input $csrfToken
+     */
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping', method: 'post')]

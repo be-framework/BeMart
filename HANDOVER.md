@@ -1185,9 +1185,114 @@ CSRF は HTTP boundary concern であり、Be domain は HTTP origin を知ら�
 
 ### 次の Slice (Slice 9 以降)
 
+Slice 9 は本 HANDOVER 内の "Phase B — Slice 9: Taint annotation" セクションを参照。
+
 | 候補 | 性質 | 一行コメント |
 |---|---|---|
-| Slice 9: Taint annotation | 半決定的 | Psalm `@psalm-taint-*` を Pilot 1-5 全体に適用。`$_POST` / `$_SESSION` source → `gateway::charge` 等 sink の graph。CSRF check site は taint sanitizer として annotate する |
-| (追加検討) Slice 10: 存在オラクル軽減 | 非決定的 | 既存 user に対する 404 / 403 統一 |
+| (追加検討) Slice 10: 存在オラクル軽減 | 非決定的 | 既存 user に対する 404 / 403 統一。今や CSRF と AUTHZ の両方が 403 を返すので、404 → 403 の方向で揃えるか判断が必要 |
+| (追加検討) Slice 11: Be Framework 用 Psalm plugin | 非決定的 | Slice 9 で発覚した「#[Be] chain が Psalm に opaque」 問題への対策。plugin で `#[Be]` を辿るか、per-class manual propagation を組むか |
 | (追加検討) bear-security-setup skill 適用 | skill bake | Slice 6-7-8 で手動構築した AUTHZ + CSRF 基盤を skill 化するレビュー |
 | **Slice 7.2 / 8.2 統合**: EC-CUBE 側 EventListener | Phase 2 入口 | `customer_id` mirror (Slice 7.2) + `_csrf_token` mirror (Slice 8.2) を 1 つの Symfony EventListener にまとめる。Phase 2 のキックオフ slice として扱う |
+
+---
+
+## Phase B — Slice 9: Taint annotation (Pilot 1-5 全体)
+
+Resource boundary に `@psalm-taint-source`、Reason interface の sink 候補に `@psalm-taint-sink` を導入し、`composer psalm-taint` を「真の audit graph」へ近づける slice。Slice 1 で scaffolding した taint analysis に「BEAR/Be flow に合わせた contract」を後付けする位置づけ。
+
+### Why now (Slice 順序の判断)
+
+Slice 8 で確立した「Resource onPost 引数 = user input boundary」 のおかげで、source の位置が明確になっている (`csrfToken` 含む全 onPost 引数)。先に Slice 10 (存在オラクル) に進む手もあったが、Slice 10 は user observability の判断であって Phase B のセキュリティ強化路線とは別軸。Slice 9 を先に閉じる方が「Slice 1 の宿題 (annotation 必要)」を解消できる。
+
+### 追加 / 変更ファイル
+
+変更のみ (新規なし):
+
+- `src/Resource/Page/Product.php`, `Cart/Item.php`, `Entry.php`, `Shopping/Checkout.php` — `onPost` / `onGet` の全 user-input 引数に `@psalm-taint-source input $paramName`。
+- `be/src/Input/{AddCartItem,Checkout,ConfirmOrder,GetProduct,RegisterCustomer}Input.php` — 全 promoted constructor 引数に `@psalm-taint-source input` (Input の property 経由でアクセスされた場合に flow が立つ)。
+- `be/src/Reason/Service/MailerInterface.php` — `sendOrderConfirmation($order)` に `@psalm-taint-sink html` (実装が email body として render するため)。
+- `be/src/Reason/Service/PaymentGatewayInterface.php` — `checkout()` の全 3 引数に `@psalm-taint-sink network` (custom taint type、外部 service への出口)。
+- `be/src/Reason/Service/SessionInterface.php` — `customerId()` return に `@psalm-taint-source session` (HTTP session 由来、AAA boundary)。
+
+### Honest finding (重要) — Be Framework は Psalm から opaque
+
+annotation 追加後も `composer psalm-taint` は **0 errors のまま**。これは「flow が存在しない」 のではなく「Psalm の data-flow analyzer が Be Framework の `#[Be]` cascade を辿れない」ためである。
+
+具体的な観察:
+
+1. `Shopping/Checkout::onPost($preOrderId)` に `@psalm-taint-source input $preOrderId` を付与
+2. その値が `new CheckoutInput(preOrderId: $preOrderId)` に渡る — ここまでは Psalm が見える
+3. `($this->becoming)($input)` で metamorphose — `BecomingInterface::__invoke()` は `object` を返すので、Psalm は次の class が `CheckoutPrepared` であることを知らない
+4. `CheckoutPrepared::__construct(#[Input] string $preOrderId, ...)` で再度 string を受けるが、Psalm にとってはこの string は別の origin から来た新規変数
+5. 以降 `CheckoutSettled` / `CheckoutCompleted` まで同様 — taint chain が `Becoming::__invoke` で切れる
+
+結果として、`PaymentGateway::checkout($preOrderId, ...)` の sink には到達するが、源流は「Becoming の object 返り値」 までしか辿れず、Resource onPost の `@psalm-taint-source` と接続されない。
+
+これは Slice 1 の commit message が予告していた通り:
+> Psalm's stock taint sources are PHP superglobals; BEAR's #[Input] and Be's Input classes are unknown to it.
+
+Slice 9 で Input class の property にも source annotation を足したが、`#[Input]` attribute が Psalm にとってただの noop 装飾なので、Being の constructor `#[Input] string $preOrderId` 経由でも flow は再構築されなかった。
+
+### Slice 9 の現状認識 (重要)
+
+`composer psalm-taint` の green は **「セキュリティ OK」 を意味しない**。Slice 1 と同じ honest framing を踏襲する:
+
+- annotation は「boundary contract の文書化」として機能する (Resource onPost = source、Mailer = sink、等)
+- 実装変更 (例: Mailer impl が直接 `$_GET` を読む) などで Psalm が見える範囲で flow ができれば、その時点で taint analysis が flag を上げる
+- Be Framework chain 経由の flow を audit したい場合、(a) Psalm plugin を書く、(b) per-class explicit propagation を Being constructor に追加する、(c) 別ツール (Phan, Psalm shepherd, または手動 review) を併用する、のいずれかが必要
+
+### 検証
+
+- `composer test` — 90 tests / 205 assertions green (Slice 8 から変化なし、annotation 追加のみのため)
+- `composer psalm` — errors なし
+- `composer psalm-taint` — errors なし (前述の理由で、Be Framework chain 内の flow は不可視。annotation は文書化価値あり)
+
+### 設計上の判断
+
+#### Command / Query interface は sink を付けない
+
+`CartCommandInterface::save()`, `OrderCommandInterface::register()`, 各 `*QueryInterface::byXxx()` 等は SQL に到達する候補だが、現在の Fake 実装は in-memory map なので「sink がまだ存在しない」。Phase 2 で Doctrine / Ray.MediaQuery 実装が入った時点で `@psalm-taint-sink sql` を付与する方が、誤検知を作らない。
+
+代わりに HANDOVER の「EC-CUBE-side contract」 セクションで「将来 SQL impl を入れる時の sink ポイント」 として明文化する (本 Slice の積み残しに記載)。
+
+#### Semantic 値オブジェクトに escape を付けない
+
+`Semantic\Email::__construct` 等は format-validate するが「html / sql / shell を escape する」 とは厳密に言えない。例えば valid email `foo+'<x>@example.com` は HTML / SQL コンテキストでは依然危険。Psalm の `@psalm-taint-escape` は「この sink type を完全に無害化した」 という宣言なので、format-only validation には付けない方が誠実。
+
+#### `network` taint type の採用
+
+Psalm 組み込みの taint type には「外部サービスへの出口」 を直接表すものがない (`header` は HTTP response header、`ldap` は LDAP query 等)。`network` を custom type として採用し、PaymentGateway の sink に使う。本コードベース内で意味が閉じていれば custom type も Psalm は track する。
+
+#### CsrfTokenInterface には taint marker を付けない
+
+Slice 8 の `CsrfTokenInterface::isValid($token)` は `$token` を比較するだけで、それ以上どこへも流さない。Psalm の sink としては「validate 後の比較対象が leak しないか」 が論点になり得るが、`hash_equals` で局所利用されるだけなので flow が成立しない。annotation を付けても情報量がゼロのため省略。
+
+### Slice 9 の振り返り (決定的/非決定的)
+
+- **決定的だった**:
+  - Resource onPost を source としてマークする方針
+  - Mailer / PaymentGateway を sink としてマークする方針
+  - SessionInterface::customerId を session source としてマーク
+- **非決定的だった (= ユーザー判断要)**:
+  - Command/Query interface に sink を付けるかどうか — 「付けない」 を採用 (Phase 2 で実装と同時)
+  - Semantic 値オブジェクトに escape を付けるかどうか — 「付けない」 を採用 (format validate ≠ context escape)
+  - `network` taint type の命名 — `network` を採用
+- **積み残し**:
+  - **Be Framework `#[Be]` chain の opacity** — 本 Slice の最大の発見。Slice 11 候補 (Psalm plugin or per-class manual propagation) で対応。
+  - **Phase 2 sink 追加 TODO list** — 以下の interface には real impl 投入時に `@psalm-taint-sink` を必ず追加すること:
+    - `CartCommandInterface::save / clearByPreOrderId` → `sql`
+    - `OrderCommandInterface::register` → `sql`
+    - `CustomerCommandInterface::register` → `sql`
+    - `*QueryInterface::*` (preOrderId / productCode / cartKey が WHERE 句に入る) → `sql`
+    - 任意の log writer → `log`
+  - **EccubeSharedSessionAdapter / EccubeSharedCsrfTokenAdapter** — `$_SESSION` を読むので Psalm 組み込みの session source としては既に認識されているはず。明示的な annotation は冗長になるため省略。
+  - **psalm-baseline.xml** — 本 Slice では update なし (新規 issue ゼロ)。
+
+### 次の Slice (Slice 10 以降)
+
+| 候補 | 性質 | 一行コメント |
+|---|---|---|
+| (追加検討) Slice 10: 存在オラクル軽減 | 非決定的 | 既存 user に対する 404 / 403 統一 |
+| **Slice 11**: Be Framework Psalm plugin | 非決定的 | Slice 9 で発見した opacity 問題への対策。plugin が `#[Be]` の chain を辿って flow propagation を行う |
+| (追加検討) bear-security-setup skill 適用 | skill bake | Slice 6-7-8 で手動構築した AUTHZ + CSRF + Slice 9 の taint contract を skill 化するレビュー |
+| **Slice 7.2 / 8.2 統合**: EC-CUBE 側 EventListener | Phase 2 入口 | `customer_id` + `_csrf_token` の両 mirror を 1 つの Symfony EventListener にまとめる。Phase 2 キックオフ |
