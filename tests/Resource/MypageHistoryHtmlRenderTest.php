@@ -44,11 +44,13 @@ use function trim;
  * order belongs to `customer-001`, so the `html` context's
  * `SessionInterface` is rebound to `customer-001`.
  *
- * EC-CUBE's history.twig renders per-Shipping blocks, PaymentMethod,
- * the order message and MailHistories — entities BeMart's
- * MypageHistoryFetched projection does not carry. Those blocks are
- * omitted and enumerated as missing-body-field residuals; see the port
- * header in var/templates/Page/Mypage/History.html.twig.
+ * Phase 3 enrichment — the MypageHistoryFetched projection was widened
+ * to carry the per-shipping address blocks (with their line items), the
+ * payment method, the order message and the mail-delivery history. The
+ * History template now wires all four, so EC-CUBE's history.twig and
+ * BeMart's port diff only on the EC-CUBE runtime's own <head> furniture
+ * (the residual allowlist). See the port header in
+ * var/templates/Page/Mypage/History.html.twig.
  */
 final class MypageHistoryHtmlRenderTest extends TestCase
 {
@@ -57,10 +59,25 @@ final class MypageHistoryHtmlRenderTest extends TestCase
      * is a whitespace-collapsed line; the comment states WHY it is
      * acceptable.
      *
+     * Phase 3 ENRICHMENT — this allowlist shrank from ~40 lines to the
+     * ~11-line EC-CUBE-runtime-only baseline. The MypageHistoryFetched
+     * projection was widened to carry the per-shipping address blocks,
+     * the payment method, the order message and the mail-delivery
+     * history; the History template now wires all four. Every former
+     * "missing body field" residual (the omitted shipping / payment /
+     * message / mail blocks) is gone — the only residual left is the
+     * EC-CUBE runtime's own <head> furniture, shared with every other
+     * DATA-page render-diff test.
+     *
      * @var list<string>
      */
     private const RESIDUAL_ALLOWLIST = [
         // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
+        // EC-CUBE's default_frame.twig emits a CSRF <meta> + an inline
+        // jQuery $.ajaxSetup() <script> that wires the token into every
+        // XHR. BeMart's storefront is server-rendered hypermedia — there
+        // is no global XHR CSRF wiring — so these nodes have no port
+        // counterpart. Same baseline residual as CartHtmlRenderTest et al.
         '<meta name="eccube-csrf-token" content="">',
         '<script>',
         '$(function() {',
@@ -70,53 +87,11 @@ final class MypageHistoryHtmlRenderTest extends TestCase
         '});',
         '});',
         '</script>',
+        // The shop name in the <title> differs by brand (BeMart vs
+        // EC-CUBE) — a fixture/runtime label, not port drift.
         '<title>BeMart / マイページ</title>',
         '<title>EC-CUBE / マイページ</title>',
         '<meta name="author" content="">',
-
-        // --- order detail: per-Shipping address blocks (missing body) ---
-        // EC-CUBE's history.twig renders one `ec-orderDelivery__title` +
-        // address block per `Order.Shippings` row (recipient name, postal
-        // address, delivery date/time, the shipping provider). BeMart's
-        // MypageHistoryFetched projection carries only the order totals +
-        // a flat `items` list — no Shipping entities — so the per-shipping
-        // title / address / delivery-date rows are omitted. Follow-up:
-        // the history projection would need a `shippings` sub-array.
-        '<div class="ec-orderDelivery__title">お届け先</div>',
-        '<p></p>',
-        '<p>&nbsp;&nbsp;',
-        '(&nbsp;)</p>',
-        '<p>〒 </p>',
-        // per-item product THUMBNAIL — EC-CUBE renders an
-        // `ec-imageGrid__img` wrapper with the product image; BeMart's
-        // OrderItemEntity carries no image, so the thumbnail is omitted.
-        '<div class="ec-imageGrid__img">',
-        '<img src="/assets/img/common/no_image_product.png"/>',
-        // per-shipping delivery-method / date / time definition rows —
-        // part of the omitted Shipping entity family.
-        '<dt>配送方法 :</dt>',
-        '<dd></dd>',
-        '<dt>お届け日 :</dt>',
-        '<dd>指定なし</dd>',
-        '<dt>お届け時間 :</dt>',
-
-        // --- order detail: payment / message / mail blocks (missing) ----
-        // EC-CUBE renders `ec-orderPayment` (Order.PaymentMethod),
-        // `ec-orderConfirm` (Order.message) and `ec-orderMails`
-        // (Order.MailHistories). BeMart's projection carries none of
-        // those entities, so the three blocks are omitted. Follow-up:
-        // paymentMethod / message / mailHistories would need adding to
-        // MypageHistoryFetched.
-        '<div class="ec-orderPayment">',
-        '<div class="ec-rectHeading">',
-        '<h2>お支払い情報</h2>',
-        '<p>お支払い方法 : </p>',
-        '<div class="ec-orderConfirm">',
-        '<h2>お問い合わせ</h2>',
-        '<p>記載なし</p>',
-        '<div class="ec-orderMails">',
-        '<h2>メール配信履歴一覧</h2>',
-        '<p class="ec-reportDescription">メール履歴はありません。</p>',
     ];
 
     private ResourceInterface $resource;
@@ -209,17 +184,17 @@ final class MypageHistoryHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
-        // The residual is larger than the other Mypage pages because
-        // MypageHistoryFetched is a deliberately-thin projection: it
-        // carries the order totals + a flat items list but NOT the
-        // Shipping / PaymentMethod / order-message / MailHistory
-        // entities EC-CUBE's history.twig renders. Those four omitted
-        // blocks account for ~40 enumerated residual lines — every one
-        // justified in RESIDUAL_ALLOWLIST / isResidual and flagged as a
-        // follow-up (the projection would need shipping/payment/mail
-        // sub-objects). The guard catches genuine port drift only.
+        // Phase 3 enrichment shrank the residual from ~40 lines to the
+        // EC-CUBE-runtime-only baseline: the MypageHistoryFetched
+        // projection now carries the per-shipping address blocks, the
+        // payment method, the order message and the mail-delivery
+        // history, and the History template wires all four. The only
+        // residual left is EC-CUBE's <head> furniture (the CSRF <meta>
+        // + ajaxSetup <script>, the brand <title>) — the same baseline
+        // every DATA-page render-diff test carries. The guard catches
+        // genuine port drift only.
         $this->assertLessThanOrEqual(
-            45,
+            13,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -231,17 +206,14 @@ final class MypageHistoryHtmlRenderTest extends TestCase
             return true;
         }
 
+        // Only the EC-CUBE-runtime <head> furniture remains a family
+        // match — the order-detail blocks (Shippings, PaymentMethod,
+        // order message, MailHistories) are now fully ported and diff to
+        // zero, so they are no longer residual families.
         foreach ([
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
-            // The order-detail blocks below carry data BeMart's
-            // projection does not model (Shippings, PaymentMethod,
-            // MailHistories). Their inner lines vary, so match by family.
-            'ec-orderDelivery__address',
-            'ec-definitions--soft',
-            'ec-orderMail',
-            'ec-rectHeading',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -269,19 +241,22 @@ final class MypageHistoryHtmlRenderTest extends TestCase
         // seed (SEED_ORDER_NO): subtotal 11000 / delivery 600 / tax 1100
         // / total 12700 / addPoint 127, two product items
         // (`サンプル商品 A` x1 @￥1,200, `Sample Product B` x1 @￥9,800).
-        // EC-CUBE nests the item rows under `Order.Shippings`; BeMart's
-        // projection has a FLAT `items` list (no Shipping entity), so the
-        // port renders the items directly under `ec-orderDelivery`. To
-        // keep the item rows comparable, EC-CUBE is fed a SINGLE Shipping
-        // carrying the same two items — the item-content markup then
-        // diffs to zero; the per-shipping ADDRESS / title / delivery-date
-        // rows + the `ec-imageGrid__img` thumbnail wrapper remain the
-        // enumerated missing-body-field residual.
+        //
+        // Phase 3 enrichment — the History projection now carries the
+        // full per-shipping address blocks, the payment method, the
+        // order message and the mail-delivery history. EC-CUBE is fed
+        // the SAME enriched seed (one Shipping with a recipient address
+        // + delivery method/date/time carrying both items, the `銀行振込`
+        // payment method, the `配送は平日希望です。` order message and a
+        // single mail-history row) so the previously-omitted shipping /
+        // payment / message / mail blocks now diff to zero. Only the
+        // EC-CUBE-runtime <head> nodes remain in the residual.
         $items = [
             new EcCubeStub([
                 'productName' => 'サンプル商品 A',
                 'quantity' => 1,
                 'price_inc_tax' => 1200,
+                'product' => null,
                 'Product' => null,
                 'ProductClass' => null,
                 'productClass' => null,
@@ -290,6 +265,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
                 'productName' => 'Sample Product B',
                 'quantity' => 1,
                 'price_inc_tax' => 9800,
+                'product' => null,
                 'Product' => null,
                 'ProductClass' => null,
                 'productClass' => null,
@@ -297,12 +273,19 @@ final class MypageHistoryHtmlRenderTest extends TestCase
         ];
         $shipping = new EcCubeStub([
             'productOrderItems' => $items,
-            'name01' => '', 'name02' => '', 'kana01' => '', 'kana02' => '',
-            'postal_code' => '', 'Pref' => '', 'addr01' => '', 'addr02' => '',
-            'phone_number' => '',
-            'shipping_delivery_name' => '',
-            'shipping_delivery_date' => null,
-            'shipping_delivery_time' => null,
+            'name01' => '山田', 'name02' => '太郎',
+            'kana01' => 'ヤマダ', 'kana02' => 'タロウ',
+            'postal_code' => '530-0001', 'Pref' => '大阪府',
+            'addr01' => '大阪市北区梅田', 'addr02' => '1-2-3',
+            'phone_number' => '0612345678',
+            'shipping_delivery_name' => 'サンプル宅配便',
+            'shipping_delivery_date' => '2026-04-03',
+            'shipping_delivery_time' => '午前中',
+        ]);
+        $mailHistory = new EcCubeStub([
+            'send_date' => '2026-04-01 10:05:00',
+            'mail_subject' => 'ご注文ありがとうございます',
+            'mail_body' => "この度はご注文いただきありがとうございます。\n商品の発送まで今しばらくお待ちください。",
         ]);
         $order = new EcCubeStub([
             'order_date' => '2026-04-01 10:00:00',
@@ -321,9 +304,9 @@ final class MypageHistoryHtmlRenderTest extends TestCase
             'tax_free_discount_items' => [],
             'total_by_tax_rate' => [],
             'tax_by_tax_rate' => [],
-            'PaymentMethod' => '',
-            'message' => null,
-            'MailHistories' => [],
+            'PaymentMethod' => '銀行振込',
+            'message' => '配送は平日希望です。',
+            'MailHistories' => [$mailHistory],
         ], []);
 
         return $twig->render('Mypage/history.twig', [
@@ -376,7 +359,15 @@ final class MypageHistoryHtmlRenderTest extends TestCase
             return $text;
         };
         $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('nl2br', static fn (string $s): string => nl2br((string) $s)));
+        // EC-CUBE's real `nl2br` filter is registered `is_safe => html`
+        // (it emits literal <br /> tags that must NOT be re-escaped).
+        // Mirror that here so the stubbed render matches EC-CUBE's actual
+        // behaviour — and BeMart's native Twig `nl2br`.
+        $twig->addFilter(new TwigFilter(
+            'nl2br',
+            static fn (string $s): string => nl2br((string) $s),
+            ['is_safe' => ['html']],
+        ));
         $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
         $twig->addFilter(new TwigFilter('date_sec', static fn ($d): string => (string) $d));
         $twig->addFilter(new TwigFilter('date_day_with_weekday', static fn ($d): string => (string) $d));

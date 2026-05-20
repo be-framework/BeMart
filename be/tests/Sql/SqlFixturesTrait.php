@@ -1792,6 +1792,41 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_mail_history row (one sent-mail audit entry per
+     * order). Returns the inserted id.
+     *
+     * dtb_mail_history has no NOT NULL business columns — `order_id` and
+     * `creator_id` are nullable FKs (creator_id → dtb_member, empty in
+     * the structure-only dump → always NULL), `send_date` /
+     * `mail_subject` / `mail_body` / `mail_html_body` are all nullable.
+     * Only `discriminator_type` is NOT NULL. Callers pass `order_id` (the
+     * FK SqlOrderQuery::historyByOrderNo joins on) plus the mail fields
+     * under assertion.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertMailHistory(int $orderId, array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'order_id' => $orderId,
+            'creator_id' => null,
+            'send_date' => $now,
+            'mail_subject' => sprintf('Test Mail %d', $counter),
+            'mail_body' => sprintf('Test mail body %d', $counter),
+            'mail_html_body' => null,
+            'discriminator_type' => 'mailhistory',
+        ], $overrides);
+
+        $this->executeInsert('dtb_mail_history', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Shared INSERT helper. Backticks every column to allow MySQL
      * reserved words and binds via named placeholders.
      *
