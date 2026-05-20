@@ -23,9 +23,9 @@ Three plausible causes:
 2. **No spec abstraction**. Many projects have no machine-readable spec. They may have OpenAPI, but the OpenAPI is treated as documentation rather than truth. With no spec, "what the system should do" is whatever the implementation does — and the test layer that mirrors spec-driven navigation (hypermedia testing) has nothing to mirror.
 3. **The "running browser is the only ground truth" reflex**. If the DOM is visible, the system is real. If the system is a constructed graph in memory, it is suspect. This is empiricism without the discipline of theory — the resource graph is just as real, but it does not look like anything.
 
-## The comedy of the E2E acceptor who rejects hypermedia
+## The incoherence of accepting E2E while rejecting hypermedia
 
-The position "hypermedia tests are overengineering" combined with the position "E2E tests are necessary" is incoherent.
+The position "hypermedia tests are overengineering" combined with the position "E2E tests are necessary" is internally inconsistent.
 
 E2E tests are massively heavier than hypermedia tests:
 
@@ -43,7 +43,7 @@ For most assertions a team actually writes — "POST returns 201 with the create
 
 A team that does E2E but skips hypermedia is paying 10-100x for the assertions that overlap, while still missing the narrower assertions that only E2E can cover (because they have not narrowed their E2E suite to those). The result is slow, flaky, expensive coverage of the wrong layer.
 
-Calling the cheaper, faster, more rigorous solution "overengineering" while accepting the more expensive, slower, more fragile one is not a defensible engineering position. It is theatre.
+Calling the cheaper, faster, more rigorous solution "overengineering" while accepting the more expensive, slower, more fragile one is not a defensible engineering position. It is a category error: the label "overengineering" is being assigned to the layer that minimizes engineering cost, and withheld from the layer that maximizes it.
 
 ## Property-based equivalence proof
 
