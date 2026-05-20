@@ -381,6 +381,33 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_tag row. Returns the inserted id.
+     *
+     * dtb_tag has only four columns and no FK constraints (id is
+     * AUTO_INCREMENT, name / sort_no / discriminator_type are NOT
+     * NULL). The defaults match SqlTagStorage's write contract
+     * (sort_no = 0, discriminator_type = 'tag') so callers that want
+     * to mimic an admin-created tag only need to override `name`.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertTag(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $row = array_merge([
+            'name' => sprintf('Tag-%d', $counter),
+            'sort_no' => 0,
+            'discriminator_type' => 'tag',
+        ], $overrides);
+
+        $this->executeInsert('dtb_tag', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
