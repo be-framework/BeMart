@@ -573,6 +573,51 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_page row. Returns the inserted id.
+     *
+     * dtb_page's NOT NULL columns are url (varchar(255)), edit_type
+     * (smallint DEFAULT 1), create_date, update_date, discriminator_type.
+     * Every other column (master_page_id, page_name, file_name, author,
+     * description, keyword, meta_robots, meta_tags) is nullable. The
+     * defaults match SqlPageStorage's INSERT contract:
+     * master_page_id = NULL (the dtb_page self-FK is a Phase-2 layout
+     * concern, not exposed by the admin slice), edit_type = 0
+     * (EDIT_TYPE_USER — the value PageCreated writes for new free
+     * pages), discriminator_type = 'page'. Pass `edit_type` >= 2 to
+     * mimic an EC-CUBE system page (PageDeleted refuses deletion in
+     * that range, mirroring the Fake-backed `pg-homepage` seed which
+     * has pageEditType = 2).
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertPage(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'master_page_id' => null,
+            'page_name' => sprintf('Page %d', $counter),
+            'url' => sprintf('page_%d', $counter),
+            'file_name' => sprintf('page_%d', $counter),
+            'edit_type' => 0,
+            'author' => null,
+            'description' => null,
+            'keyword' => null,
+            'create_date' => $now,
+            'update_date' => $now,
+            'meta_robots' => null,
+            'meta_tags' => null,
+            'discriminator_type' => 'page',
+        ], $overrides);
+
+        $this->executeInsert('dtb_page', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
