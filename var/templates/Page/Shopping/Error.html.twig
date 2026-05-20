@@ -1,0 +1,51 @@
+{#
+  BeMart Shopping error page — EC-CUBE goShoppingError.
+
+  PORT of EC-CUBE 4.3 default-theme `Shopping/shopping_error.twig`
+  (src/Eccube/Resource/template/default/Shopping/shopping_error.twig).
+
+  DATA page (see var/templates/README.md). Markup skeleton, the
+  `ec-role` / `ec-pageHeader` / `ec-off3Grid` / `ec-off4Grid` /
+  `ec-blockBtn--cancel` classes and the block structure are kept
+  verbatim from EC-CUBE.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `{{ include('Shopping/alert.twig', {'error_only': true}) }}` —
+     EC-CUBE's alert partial iterates `app.session.flashbag` to surface
+     the underlying error reason (stock / payment / session). BeMart has
+     no flashbag transport (the Error resource is a Wave 3H pure
+     renderer — see src/Resource/Page/Shopping/Error.php), so the
+     include is OMITTED; with an empty flashbag EC-CUBE's alert partial
+     also emits nothing, so it contributes nothing to the render diff.
+     Surfacing the actual error reason is a MISSING BODY FIELD
+     follow-up (a flashbag-equivalent error transport).
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'cart_page' %}
+{% set route = 'shopping_error' %}
+{% set title = '購入エラー' %}
+
+{% block main %}
+
+<div class="ec-role">
+    <div class="ec-pageHeader">
+        <h1>購入エラー</h1>
+    </div>
+</div>
+
+<!-- アラートメッセージ -->
+
+<div class="ec-role">
+    <div class="ec-off3Grid">
+        <div class="ec-off3Grid__cell">
+            <div class="ec-off4Grid">
+                <div class="ec-off4Grid__cell">
+                    <a class="ec-blockBtn--cancel" href="{{ url('cart') }}">カートに戻る</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+{#
+  BeMart Shopping shipping page — EC-CUBE goShoppingShipping.
+
+  PORT of EC-CUBE 4.3 default-theme `Shopping/shipping.twig`
+  (src/Eccube/Resource/template/default/Shopping/shipping.twig).
+
+  DATA page (radio list of registered shipping addresses) — see
+  var/templates/README.md. Markup skeleton, the `ec-role` /
+  `ec-pageHeader` / `ec-registerRole` / `ec-off1Grid` / `ec-addressRole` /
+  `ec-addressList` / `ec-registerRole__actions` classes and the block
+  structure are kept verbatim from EC-CUBE.
+
+  EC-CUBE renders one `<input type="radio">` per address inside a
+  `{% for choice in form.addresses.vars.choices %}` loop. The address
+  set is NOT a free-text form — it is a fixed radio list of the
+  customer's already-registered addresses — so the port renders the
+  radios as plain markup driven by the body's `addresses` list (the
+  data-page recipe), not through a form object.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
+     input bound to the body's `csrfToken` (null in the html context).
+   - `Customer.CustomerAddresses|length < eccube_config.eccube_deliv_
+     addr_max` — the over-limit warning is gated on a count the body
+     does not carry. The body's `addresses` list is empty (a Wave-future
+     TODO — see src/Resource/Page/Shopping/Shipping.php), which is below
+     any limit, so the port renders the add-new-address branch (the
+     common case). The over-limit warning branch is OMITTED.
+   - `has_errors(form.addresses)` — request-validation runtime; resolves
+     false on a fresh page, so the unselected-address warning is OMITTED.
+
+  MISSING BODY FIELD follow-up: the authenticated customer's registered
+  shipping-address list (`addresses` is empty). With no addresses the
+  `{% for %}` radio loop emits nothing — exactly the empty
+  `ec-addressList` skeleton. Surfacing the address book is a dedicated
+  vertical-slice (AddressStorage scoped to the session), tracked in the
+  enrichment backlog.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'other_page' %}
+{% set route = 'shopping_shipping' %}
+{% set title = 'お届け先の指定' %}
+
+{% block main %}
+    <div class="ec-role">
+        <div class="ec-pageHeader">
+            <h1>お届け先の指定</h1>
+        </div>
+    </div>
+
+    <div class="ec-registerRole">
+        <div class="ec-off1Grid">
+            <div class="ec-off1Grid__cell">
+                <div class="ec-addressRole">
+                    <div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="{{ url('shopping_shipping_edit') }}">新規お届け先を追加する</a></div>
+                </div>
+
+                <form method="post" action="{{ url('shopping_shipping') }}">
+                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <div class="ec-addressList">
+                        {% for address in addresses %}
+                        <div class="ec-addressList__item">
+                            <div class="ec-addressList__remove">
+                                <input type="radio" id="address{{ address.id }}" name="address" value="{{ address.id }}" />
+                            </div>
+                            <div class="ec-addressList__address">
+                                <div>{{ address.name01 }}&nbsp;{{ address.name02 }}</div>
+                                <div>〒{{ address.postalCode }} {{ address.pref }}{{ address.addr01 }}{{ address.addr02 }}</div>
+                                <div>{{ address.phoneNumber }}</div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="ec-registerRole__actions">
+                        <div class="ec-off4Grid">
+                            <div class="ec-off4Grid__cell">
+                                <button type="submit" class="ec-blockBtn--action">選択したお届け先に送る</button>
+                                <a class="ec-blockBtn--cancel" href="{{ url('shopping') }}">戻る</a>
+                            </div>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
