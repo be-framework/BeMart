@@ -14,6 +14,7 @@ use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
@@ -27,6 +28,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlBlockStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlCategoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlClassNameStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
@@ -40,12 +42,14 @@ use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlBlockIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlCategoryIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlClassNameIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
@@ -140,6 +144,15 @@ use function dirname;
  *       generator emits 32-char hex that the SQL impl rejects as
  *       non-numeric, same shape as the Block / Page / Tag / News /
  *       TaxRule generator pairings)
+ *   - ClassNameStorageInterface    → SqlClassNameStorage  (Phase 2b —
+ *       product-variation AXIS, dtb_class_name; remove pre-clears child
+ *       dtb_class_category rows to avoid FK 1451, same shape as the
+ *       Category → dtb_product_category cascade)
+ *   - ClassNameIdGeneratorInterface → SqlClassNameIdGenerator (Phase 2b —
+ *       the ClassName-create Final needs a numeric id pre-allocated so
+ *       SqlClassNameStorage can persist with that explicit PK; the Fake
+ *       generator emits 32-char hex that the SQL impl rejects as
+ *       non-numeric, same shape as the Category generator pairing)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -329,6 +342,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(CategoryIdGeneratorInterface::class)
                     ->to(SqlCategoryIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(ClassNameStorageInterface::class)
+                    ->to(SqlClassNameStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(ClassNameIdGeneratorInterface::class)
+                    ->to(SqlClassNameIdGenerator::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(AdminQueryInterface::class)
                     ->to(SqlAdminQuery::class)

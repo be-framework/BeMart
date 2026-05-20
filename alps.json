@@ -48,6 +48,7 @@
       {"id": "tagId", "title": "タグID","tag": "src-entity", "doc": {"value": "dtb_tag.id の不透明な文字列ハンドル。BeMart の TagEntity 層は数値ではなく文字列として保持する。Fake 実装は `tg-` プレフィックス付きの英数字を生成し、SQL 実装は dtb_tag.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlTagStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (TagDeleted) を踏むため、シードハンドル `tg-new` / `tg-sale` は Fake 専用"}},
       {"id": "tagName", "title": "タグ名","tag": "src-entity", "doc": {"value": "商品に付与するタグの表示名"}},
 
+      {"id": "classNameId", "title": "規格名ID","tag": "src-entity", "doc": {"value": "dtb_class_name.id の不透明な文字列ハンドル。BeMart の ClassNameEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_class_name.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlClassNameStorage では miss として扱われ getById / put / remove のいずれも 404 経路（規格名の更新・削除 Final）を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。categoryId / blockId / tagId と同じ Fake↔SQL 二重性"}},
       {"id": "classNameLabel", "title": "規格名","tag": "src-entity", "doc": {"value": "商品バリエーション軸の名前（例: カラー、サイズ）。EC-CUBEの\"class\"はOOPのクラスではなく商品規格を意味する"}},
       {"id": "classNameBackendName", "title": "規格管理名","tag": "src-entity", "doc": {"value": "管理画面でのみ使用する規格の内部名。classNameLabelとは別に管理用の名称を持てる"}},
       {"id": "classCategoryName", "title": "規格分類名","tag": "src-entity", "doc": {"value": "商品バリエーション軸の具体的な値（例: 赤、Lサイズ）。EC-CUBEの\"classCategory\"はOOPのカテゴリではなく規格値を意味する"}},
@@ -375,8 +376,10 @@
         ]
       },
 
-      {"id": "ClassName", "title": "規格名","tag": "catalog src-template",
+      {"id": "ClassName", "title": "規格名","tag": "catalog src-entity src-template",
+        "doc": {"value": "dtb_class_name 1行を平坦化した投影。商品バリエーションの軸（例: カラー・サイズ）を表す — EC-CUBE の \"class\" は OOP のクラスではなく商品規格の意味。BeMart の ClassNameEntity は 2 項目 (classNameId / name) のみ保持し、EC-CUBE の backend_name / sort_no / creator_id / create_date / update_date は投影外。sort_no（int unsigned NOT NULL、表示順、DEFAULT なし）は INSERT 時に MAX(sort_no)+1 で末尾追加スロットを導出して書くが投影は読まず、UPDATE 時は触らない（リネームで表示位置を保持）。backend_name は nullable のため固定 NULL（admin slice に編集 UI なし）。creator_id は dtb_member が structure-only ダンプで空のため固定 NULL（非 NULL は FK 1452）。dtb_class_category（FK class_name_id → dtb_class_name.id、規格軸の具体値）の子行は Wave 7 admin slice では INSERT しないが、remove 時のみ防御的に DELETE して FK 1451 を回避（外部投入された子行があっても DELETE 成功）— SqlCategoryStorage が dtb_product_category に対して行うのと同形。Phase 2b で SqlClassNameStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#classNameId"},
           {"href": "#classNameLabel"},
           {"href": "#classNameBackendName"},
           {"href": "#sortNo"},
