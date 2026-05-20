@@ -101,9 +101,16 @@ trait SqlFixturesTrait
      * — EC-CUBE's convention for products without variations). Returns
      * the new dtb_product.id.
      *
+     * The optional `sale_type_id` / `sale_limit` / `delivery_fee`
+     * overrides feed {@see \MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery},
+     * which reads them off the default class row. `sale_type_id` is a
+     * nullable FK to the EMPTY mtb_sale_type master — callers that want
+     * a non-NULL value (so SqlProductClassQuery resolves a saleTypeName)
+     * must seed the master first via {@see seedSaleTypes}.
+     *
      * @param array<string, mixed> $overrides Per-column overrides.
      *   Recognised keys: `name`, `product_code`, `price02`, `stock`,
-     *   `stock_unlimited`.
+     *   `stock_unlimited`, `sale_type_id`, `sale_limit`, `delivery_fee`.
      */
     protected function insertProduct(array $overrides = []): int
     {
@@ -130,14 +137,19 @@ trait SqlFixturesTrait
             ?? sprintf('TEST-%d-%d', $counter, random_int(1000, 9999));
         $stmt = $this->pdo->prepare(
             'INSERT INTO dtb_product_class '
-            . '(product_id, product_code, price02, stock, stock_unlimited, '
+            . '(product_id, product_code, sale_type_id, sale_limit, '
+            . 'delivery_fee, price02, stock, stock_unlimited, '
             . 'visible, create_date, update_date, discriminator_type) '
-            . 'VALUES (:product_id, :product_code, :price02, :stock, '
+            . 'VALUES (:product_id, :product_code, :sale_type_id, :sale_limit, '
+            . ':delivery_fee, :price02, :stock, '
             . ':stock_unlimited, 1, :created, :updated, :discriminator)',
         );
         $stmt->execute([
             ':product_id' => $productId,
             ':product_code' => $productCode,
+            ':sale_type_id' => $overrides['sale_type_id'] ?? null,
+            ':sale_limit' => $overrides['sale_limit'] ?? null,
+            ':delivery_fee' => $overrides['delivery_fee'] ?? null,
             ':price02' => $overrides['price02'] ?? 1000,
             ':stock' => $overrides['stock'] ?? null,
             ':stock_unlimited' => $overrides['stock_unlimited'] ?? 1,
@@ -147,6 +159,96 @@ trait SqlFixturesTrait
         ]);
 
         return $productId;
+    }
+
+    /**
+     * Insert an extra dtb_product_class row for an EXISTING product —
+     * a per-variation SKU row pinned to a `[class_category_id1,
+     * class_category_id2]` axis pair. Returns the new
+     * dtb_product_class.id.
+     *
+     * `insertProduct` already creates the default class (both axes
+     * NULL); this helper adds the variation rows that exercise the
+     * default-class filter in {@see \MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery}
+     * — a productCode that ONLY appears on a variation row (non-NULL
+     * axis) must NOT resolve, because the query restricts to the
+     * default class. Callers pass `class_category_id1` (and optionally
+     * `class_category_id2`) as ids minted by {@see insertClassCategory}.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     *   Recognised keys: `product_code`, `class_category_id1`,
+     *   `class_category_id2`, `price02`, `stock`, `stock_unlimited`,
+     *   `sale_type_id`, `sale_limit`, `delivery_fee`.
+     */
+    protected function insertProductClassVariation(int $productId, array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'product_id' => $productId,
+            'sale_type_id' => null,
+            'class_category_id1' => null,
+            'class_category_id2' => null,
+            'delivery_duration_id' => null,
+            'creator_id' => null,
+            'product_code' => sprintf('VAR-%d-%d', $counter, random_int(1000, 9999)),
+            'stock' => null,
+            'stock_unlimited' => 1,
+            'sale_limit' => null,
+            'price01' => null,
+            'price02' => 1000,
+            'delivery_fee' => null,
+            'visible' => 1,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'productclass',
+        ], $overrides);
+
+        $this->executeInsert('dtb_product_class', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
+     * Insert (idempotently) an mtb_sale_type row so the FK from
+     * dtb_product_class.sale_type_id → mtb_sale_type.id can be
+     * satisfied AND {@see \MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery}
+     * can resolve a human-readable saleTypeName.
+     *
+     * mtb_sale_type is empty in the structure-only schema dump.
+     * EC-CUBE 4.3 ships three rows: 1 = 通常販売, 2 = 予約販売,
+     * 3 = ダウンロード販売 — the same saleType set the Fake fixture
+     * var/fake/product_classes.json uses. {@see seedSaleTypes} seeds
+     * all three.
+     */
+    protected function insertSaleType(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_sale_type (id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'saletype',
+        ]);
+    }
+
+    /**
+     * Seed the master table mtb_sale_type (referenced by
+     * dtb_product_class.sale_type_id) with the EC-CUBE 4.3 canonical
+     * rows. Idempotent (`INSERT IGNORE`), so calling it once in setUp
+     * is sufficient — same precedent as {@see seedDeviceTypes} /
+     * {@see seedAdminMasters}.
+     */
+    protected function seedSaleTypes(): void
+    {
+        $this->insertSaleType(1, '通常販売');
+        $this->insertSaleType(2, '予約販売');
+        $this->insertSaleType(3, 'ダウンロード販売');
     }
 
     /**
