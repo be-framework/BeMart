@@ -100,4 +100,91 @@ final class CartResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame([], $ro->body['carts']);
         $this->assertSame(0, $ro->body['totalPrice']);
     }
+
+    /**
+     * The cart-row body carries the display fields the re-derived ALPS
+     * `CartItem` descriptor composes: productName, the main image (the
+     * lowest-sort_no dtb_product_image), and the variation axes joined
+     * from dtb_class_category -> dtb_class_name. Verified through the
+     * full hypermedia path, against the real schema.
+     */
+    public function testOnGetItemBodyCarriesJoinedCartRowDisplayFields(): void
+    {
+        // A product WITH an image and a colour variation.
+        $productId = $this->insertProduct([
+            'name' => 'SQL Cart Display Product',
+            'product_code' => 'SQL-CART-DISP',
+        ]);
+        // Two images — the cart row must pick the lowest sort_no.
+        $this->insertProductImage($productId, ['file_name' => 'second.jpg', 'sort_no' => 5]);
+        $this->insertProductImage($productId, ['file_name' => 'main.jpg', 'sort_no' => 1]);
+
+        // A "Colour" axis with a "Red" value, and a variation SKU
+        // pinned to it (NOT the default class).
+        $colourAxis = $this->insertClassName(['name' => 'Colour']);
+        $redValue = $this->insertClassCategory([
+            'class_name_id' => $colourAxis,
+            'name' => 'Red',
+        ]);
+        $redSku = $this->insertProductClassVariation($productId, [
+            'product_code' => 'SQL-CART-DISP-RED',
+            'class_category_id1' => $redValue,
+            'price02' => 1800,
+        ]);
+
+        $cart = $this->insertCart(['cart_key' => 'disp-sess_1']);
+        // The cart item points at the SPECIFIC SKU, not the default class.
+        $this->insertCartItem($cart['id'], $redSku, ['price' => 1800, 'quantity' => 2]);
+
+        $ro = $this->resource->get('page://self/cart', [
+            'sessionPrefix' => 'disp-sess',
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $item = $ro->body['carts'][0]['items'][0];
+        $this->assertSame('SQL-CART-DISP-RED', $item['productCode']);
+        $this->assertSame('SQL Cart Display Product', $item['productName']);
+        $this->assertSame($redSku, $item['productClassId']);
+        $this->assertSame($productId, $item['productId']);
+        // Lowest sort_no image wins.
+        $this->assertSame('main.jpg', $item['mainImage']);
+        // Variation axis 1 resolved through class_category -> class_name.
+        $this->assertSame('Red', $item['classCategoryName1']);
+        $this->assertSame('Colour', $item['className1']);
+        // No axis 2 — LEFT JOIN yields null.
+        $this->assertNull($item['classCategoryName2']);
+        $this->assertNull($item['className2']);
+    }
+
+    /**
+     * A product with no image and no variation yields nulls for the
+     * optional display fields — the LEFT JOINs and the image
+     * sub-select tolerate the absent rows.
+     */
+    public function testOnGetItemBodyToleratesAbsentImageAndVariation(): void
+    {
+        $productId = $this->insertProduct([
+            'name' => 'Plain Product',
+            'product_code' => 'SQL-CART-PLAIN',
+        ]);
+        $cart = $this->insertCart(['cart_key' => 'plain-sess_1']);
+        $this->insertCartItem(
+            $cart['id'],
+            $this->defaultProductClassId($productId),
+            ['price' => 900, 'quantity' => 1],
+        );
+
+        $ro = $this->resource->get('page://self/cart', [
+            'sessionPrefix' => 'plain-sess',
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $item = $ro->body['carts'][0]['items'][0];
+        $this->assertSame('Plain Product', $item['productName']);
+        $this->assertNull($item['mainImage']);
+        $this->assertNull($item['classCategoryName1']);
+        $this->assertNull($item['className1']);
+        $this->assertNull($item['classCategoryName2']);
+        $this->assertNull($item['className2']);
+    }
 }

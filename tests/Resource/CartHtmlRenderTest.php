@@ -28,13 +28,23 @@ use function preg_replace;
 use function trim;
 
 /**
- * Phase 3 Step 1 (redo) — fidelity check for the Cart HTML port.
+ * Phase 3 — fidelity check for the Cart HTML port.
  *
  * The corrected Phase 3 standard: BeMart's storefront templates are PORTS
  * of EC-CUBE 4.3's default-theme Twig templates. ALPS deliberately carries
  * no presentation, so grading the HTML against ALPS would grade markup
  * against a spec that is silent on markup. The honest reference is
  * EC-CUBE's own templates.
+ *
+ * Phase 3 Step 2 (this revision): the cart ROW is now a faithful
+ * reproduction. The earlier port could only render the bare productCode
+ * because the ALPS `CartItem` descriptor had been back-formed from a
+ * deliberately-thin Entity. `CartItem` has since been re-derived from
+ * EC-CUBE's cart screen — it composes productName / mainImage /
+ * classCategoryName / productId / productClassId — and CartItemEntity,
+ * SqlCartQuery's JOIN and FakeCartQuery's read-side enrichment carry the
+ * fields through. The render-diff residual fell from ~16 lines to 11,
+ * all of which are now genuinely EC-CUBE-runtime-only.
  *
  * This test therefore does NOT just assert "body data appears". It:
  *
@@ -82,10 +92,11 @@ final class CartHtmlRenderTest extends TestCase
         '});',
         '});',
         '</script>',
-        // EC-CUBE's <title> is "<shop_name> / <page title>" from BaseInfo
-        // + the trans'd page title; BeMart's body carries neither, so the
-        // title falls back to the bare shop name.
-        '<title>BeMart</title>',
+        // EC-CUBE's <title> is "<shop_name> / <page title>" with the
+        // shop name from BaseInfo; BeMart's html context has no BaseInfo,
+        // so the shop name differs ("BeMart" vs the stub's "EC-CUBE").
+        // Same composition, different shop-name source.
+        '<title>BeMart / ショッピングカート</title>',
         '<title>EC-CUBE / ショッピングカート</title>',
         // EC-CUBE injects meta.twig (description/keywords/OGP). BeMart has
         // no Page entity; the include renders nothing.
@@ -99,30 +110,23 @@ final class CartHtmlRenderTest extends TestCase
         // The block.twig include is stubbed empty here too, so on the
         // EC-CUBE side these are also empty — no residual from blocks.
 
-        // --- cart page: data CartItemEntity does not carry --------------
-        // EC-CUBE renders a product thumbnail (Product.MainListImage) and
-        // a product-detail link (url('product_detail', {id})). BeMart's
-        // CartItemEntity has only productCode/quantity/price (the 厳密移植
-        // Grade-C scope dropped the ProductClass/Product joins), so the
-        // image column and the linked product name are omitted; BeMart
-        // renders the bare productCode in ec-cartRow__name instead.
-        '<div class="ec-cartRow__img">',
-        // class category lines (ProductClass.ClassCategory1/2) — same
-        // reason: no ProductClass join in scope.
-        // BeMart renders the bare productCode as the cart-row name (the
-        // ec-cartRow__name family below covers EC-CUBE's linked name);
-        // on BeMart's side the code surfaces as this standalone line.
-        'sample-001',
-
         // --- cart page: delivery-fee-free progress ----------------------
         // EC-CUBE's ec-cartRole__progress shows a "あと N 円で送料無料"
         // message computed from BaseInfo thresholds. BeMart's body has no
-        // BaseInfo, so the block is kept (structure) but empty.
+        // BaseInfo, so the block is kept (structure) but empty. No diff
+        // line: both sides emit the empty block (BaseInfo thresholds are
+        // null in the EC-CUBE stub too).
 
-        // --- cart page: CSRF anchor tokens ------------------------------
-        // EC-CUBE adds csrf_token_for_anchor() to the up/down/remove <a>
-        // tags. BeMart's html context has no CSRF widget; the attribute
-        // is omitted from the anchors.
+        // NOTE — Phase 3 Step 2: the cart ROW now matches structurally.
+        // The corrected ALPS `CartItem` descriptor (re-derived from
+        // EC-CUBE's Cart/index.twig, no longer back-formed from the thin
+        // Entity) composes productName / mainImage / classCategoryName /
+        // productId / productClassId; CartItemEntity, SqlCartQuery's JOIN
+        // and FakeCartQuery's read-side enrichment carry them through, so
+        // the product thumbnail, the product-detail link, the linked
+        // product name and the variation axes are all reproduced. The
+        // former image / product_detail / ClassCategory / ec-cartRow__name
+        // / cart_handle_item-keying residual entries are therefore GONE.
     ];
 
     private ResourceInterface $resource;
@@ -231,9 +235,13 @@ final class CartHtmlRenderTest extends TestCase
         );
 
         // Sanity: the diff is genuinely small — the bulk of the markup
-        // matches. (If this ever balloons, the port has drifted.)
+        // matches. Phase 3 Step 2 cut it to 11 lines (a 1-line title
+        // shop-name difference + the 9-line EC-CUBE jQuery-CSRF
+        // <script>; was ~16 when the cart row could not render
+        // name/image/link/variation). If this balloons, the port has
+        // drifted.
         $this->assertLessThan(
-            40,
+            16,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -241,9 +249,14 @@ final class CartHtmlRenderTest extends TestCase
 
     /**
      * A line is "residual" if it is an exact allowlist entry, or it
-     * belongs to one of the structurally-explained omission families
-     * (image markup, product-detail links, class categories, CSRF anchor
-     * attrs, delivery-fee-free message) documented in the allowlist.
+     * belongs to one of the few structurally-explained families that
+     * genuinely cannot match.
+     *
+     * Phase 3 Step 2 shrank this set sharply: the cart ROW is now a
+     * faithful reproduction (image, product-detail link, linked name,
+     * variation axes — all carried by the re-derived ALPS CartItem).
+     * What remains is EC-CUBE-runtime-only <head> material plus the
+     * CSRF anchor token, none of which BeMart's html context models.
      */
     private static function isResidual(string $line): bool
     {
@@ -253,28 +266,15 @@ final class CartHtmlRenderTest extends TestCase
             }
         }
 
-        // Structurally-explained families (see RESIDUAL_ALLOWLIST comments).
+        // Genuinely-unmatched families (EC-CUBE runtime artefacts only).
         foreach ([
-            'ec-cartRow__img',                       // product thumbnail block
-            'product_detail',                        // product-detail anchor
-            'no_image_product',                      // image fallback (never reached here)
-            'ClassCategory',                         // product class categories
+            // EC-CUBE adds csrf_token_for_anchor() to the up/down/remove
+            // <a> tags. BeMart's html context has no per-request CSRF
+            // widget, so the attribute is absent. EC-CUBE-runtime only.
             'csrf_token',                            // CSRF anchor token
-            'ec-cartRow__name',                      // name cell: linked (EC) vs plain code (BeMart)
-            'delivery_fee_free',                     // delivery-fee-free message
             'eccube-csrf-token',                     // <head> CSRF meta
             '<title>',                               // shop title composition
             'meta name="author"',                    // meta.twig include
-            // The cart-item operation links (delete/up/down). EC-CUBE
-            // keys them by ProductClass.id (`productClassId=N`); BeMart's
-            // CartItemEntity has no ProductClass join (厳密移植 Grade-C),
-            // so the port keys them by productCode. Same <a>, same
-            // classes, same operations — only the id param differs.
-            'cart_handle_item',
-            // EC-CUBE's product thumbnail <img>. BeMart's CartItemEntity
-            // carries no image; the <img> (and its ec-cartRow__img
-            // wrapper, above) is omitted.
-            'alt="sample-001"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -302,14 +302,25 @@ final class CartHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // The same logical cart as BeMart's html-context fixture.
+        // The same logical cart as BeMart's html-context fixture: the
+        // sample-001 item, name resolved through the product-class Fake
+        // (サンプル商品 A). The Fake write path (CartMerged) does not
+        // carry the surrogate ids, so productClassId / productId surface
+        // as 0 on both sides; the product has no image (→ no_image
+        // fallback) and no variation. The corrected ALPS CartItem
+        // descriptor means BeMart's cart row now reproduces EC-CUBE's
+        // thumbnail, product-detail link and (absent here) variation.
         $normalItem = new EcCubeStub([
             'price' => 1200,
             'quantity' => 3,
             'total_price' => 3600,
             'ProductClass' => new EcCubeStub([
-                'id' => 1,
-                'Product' => new EcCubeStub(['id' => 1, 'name' => 'sample-001']),
+                'id' => 0,
+                'Product' => new EcCubeStub([
+                    'id' => 0,
+                    'name' => 'サンプル商品 A',
+                    'MainListImage' => null,
+                ]),
                 'ClassCategory1' => null,
                 'ClassCategory2' => null,
             ]),
@@ -388,7 +399,15 @@ final class CartHtmlRenderTest extends TestCase
 
             return (string) $f->formatCurrency((float) ($n ?? 0), 'JPY');
         }));
-        $twig->addFilter(new TwigFilter('no_image_product', static fn ($s): string => (string) $s));
+        // EC-CUBE's no_image_product filter substitutes the shared
+        // placeholder image when the product has no MainListImage. The
+        // ported Cart.html.twig uses `|default('assets/img/common/
+        // no_image_product.png')` for the same effect, so this stub
+        // returns the same path for a falsy value.
+        $twig->addFilter(new TwigFilter(
+            'no_image_product',
+            static fn ($s): string => $s ? (string) $s : 'assets/img/common/no_image_product.png',
+        ));
 
         $twig->addFunction(new TwigFunction('trans', $trans));
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
