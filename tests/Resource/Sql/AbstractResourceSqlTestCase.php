@@ -18,6 +18,7 @@ use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
@@ -33,6 +34,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlClassCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlClassNameStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlLayoutStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
@@ -170,6 +172,13 @@ use function dirname;
  *       explicit PK; the Fake generator emits 32-char hex that the SQL
  *       impl rejects as non-numeric, same shape as the ClassName /
  *       Category generator pairings)
+ *   - LayoutStorageInterface       → SqlLayoutStorage (Phase 2b — admin
+ *       CMS layout list + update against dtb_layout. The interface has
+ *       only list / getById / put — no create, no delete affordance per
+ *       ALPS — so there is NO LayoutIdGenerator pairing: layoutIds are
+ *       never minted by the BeMart slice, only read back from rows the
+ *       installer/fixture seeded. SqlLayoutStorage rejects a non-numeric
+ *       id as a miss, so `nonexistent` folds to a 404 on both backends)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -380,6 +389,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(AdminIdGeneratorInterface::class)
                     ->to(SqlAdminIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(LayoutStorageInterface::class)
+                    ->to(SqlLayoutStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };
