@@ -6,13 +6,30 @@
 
   Markup skeleton, `ec-orderRole` / `ec-orderRole__detail` /
   `ec-orderOrder` / `ec-definitions` / `ec-orderDelivery` /
+  `ec-orderPayment` / `ec-orderConfirm` / `ec-orderMails` /
   `ec-orderRole__summary` / `ec-totalBox` classes and the block
   structure are kept verbatim from EC-CUBE. Only the dynamic bindings
   are rebound to the History resource body
-  (src/Resource/Page/Mypage/History.php):
-    orderNo, subtotal, deliveryFeeTotal, charge, discount, tax, total,
-    paymentTotal, addPoint, usePoint, orderStatus, orderDate,
-    paymentDate, items[] { productCode, productName, quantity, unitPrice }
+  (src/Resource/Page/Mypage/History.php).
+
+  Phase 3 ENRICHMENT — the MypageHistoryFetched projection was widened
+  (be/src/Final/MypageHistoryFetched.php) from a thin header to the FULL
+  order-history detail. The body now carries:
+    orderNo, message, paymentMethod, subtotal, deliveryFeeTotal, charge,
+    discount, tax, total, paymentTotal, addPoint, usePoint, orderStatus,
+    orderDate, paymentDate,
+    shippings[] {
+      name01, name02, kana01, kana02, postalCode, prefName, addr01,
+      addr02, phoneNumber, deliveryName, deliveryDate, deliveryTime,
+      items[] { productCode, productName, quantity, unitPrice }
+    },
+    mailHistories[] { sendDate, mailSubject, mailBody }
+
+  The previously-missing sections — per-Shipping address blocks,
+  PaymentMethod, the order message and MailHistories — are now wired to
+  the present body fields. The render-diff residual shrinks from ~40 to
+  the ~12-line EC-CUBE-runtime-only baseline (the <title> pair + the
+  <head> csrf/ajax <script> block).
 
   Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
 
@@ -20,20 +37,13 @@
    - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
    - `BaseInfo.option_mypage_order_status_display` / `isOptionPoint` —
      store options; the render-diff stub sets them truthy so both sides
-     emit the order-status / point rows (BeMart's body carries
-     orderStatus / addPoint / usePoint).
+     emit the order-status / point rows.
    - `price` filter -> JPY NumberFormatter (BeMartTwigExtension).
-   - MISSING BODY FIELDS — EC-CUBE's history.twig renders per-Shipping
-     blocks (`Order.Shippings`: addresses, delivery dates, product
-     thumbnails), `Order.PaymentMethod`, `Order.message`, and
-     `Order.MailHistories`. BeMart's MypageHistoryFetched projection
-     carries only the totals + a flat `items` list (no Shipping /
-     PaymentMethod / MailHistory entities), so those blocks are OMITTED
-     and flagged as follow-ups. The order detail renders the line-item
-     list from `items` and the financial summary from the totals. The
-     `ec-orderDelivery` heading is kept (structure) with the items list
-     under it; the EC-CUBE stub feeds the SAME flat items so the item
-     rows diff to zero.
+   - per-item product THUMBNAIL — EC-CUBE renders the no-image
+     placeholder when `orderItem.product is null`; BeMart's
+     OrderHistoryItemEntity carries no Product entity, so every row
+     renders the same `no_image_product` placeholder (matching EC-CUBE's
+     null-product branch verbatim).
 #}
 {% extends 'base.html.twig' %}
 
@@ -78,18 +88,69 @@
                     <div class="ec-rectHeading">
                         <h2>配送情報</h2>
                     </div>
-                    {% for orderItem in items %}
-                        <div class="ec-orderDelivery__item">
-                            <div class="ec-imageGrid">
-                                <div class="ec-imageGrid__content">
-                                    <p>
-                                        {{ orderItem.productName }}
-                                        ×{{ orderItem.quantity }} </p>
-                                    <p>{{ orderItem.unitPrice|price }}
-                                        × {{ orderItem.quantity|number_format }}</p>
+                    {% for shipping in shippings %}
+                        <div class="ec-orderDelivery__title">お届け先{% if shippings|length > 1 %}({{ loop.index }}){% endif %}</div>
+                        {% for orderItem in shipping.items %}
+                            <div class="ec-orderDelivery__item">
+                                <div class="ec-imageGrid">
+                                    <div class="ec-imageGrid__img">
+                                        <img src="{{ asset('assets/img/common/no_image_product.png', 'save_image') }}"/>
+                                    </div>
+                                    <div class="ec-imageGrid__content">
+                                        <p>
+                                            {{ orderItem.productName }}
+                                            ×{{ orderItem.quantity }} </p>
+                                        <p>{{ orderItem.unitPrice|price }}
+                                            × {{ orderItem.quantity|number_format }}</p>
+                                    </div>
                                 </div>
                             </div>
+                        {% endfor %}
+                        <p></p>
+                        <div class="ec-orderDelivery__address">
+                            <p>{{ shipping.name01 }}&nbsp;{{ shipping.name02 }}&nbsp;
+                                ({{ shipping.kana01 }}&nbsp;{{ shipping.kana02 }})</p>
+                            <p>〒{{ shipping.postalCode }} {{ shipping.prefName }}{{ shipping.addr01 }}{{ shipping.addr02 }}</p>
+                            <p>{{ shipping.phoneNumber }}</p>
                         </div>
+                        <div class="ec-definitions--soft">
+                            <dt>配送方法 :</dt>
+                            <dd>{{ shipping.deliveryName }}</dd>
+                        </div>
+                        <div class="ec-definitions--soft">
+                            <dt>お届け日 :</dt>
+                            <dd>{{ shipping.deliveryDate|default('指定なし') }}</dd>
+                        </div>
+                        <div class="ec-definitions--soft">
+                            <dt>お届け時間 :</dt>
+                            <dd>{{ shipping.deliveryTime|default('指定なし') }}</dd>
+                        </div>
+                    {% endfor %}
+                </div>
+                <div class="ec-orderPayment">
+                    <div class="ec-rectHeading">
+                        <h2>お支払い情報</h2>
+                    </div>
+                    <p>お支払い方法 : {{ paymentMethod }}</p>
+                </div>
+                <div class="ec-orderConfirm">
+                    <div class="ec-rectHeading">
+                        <h2>お問い合わせ</h2>
+                    </div>
+                    <p>{{ message|default('記載なし')|nl2br }}</p>
+                </div>
+                <div class="ec-orderMails">
+                    <div class="ec-rectHeading">
+                        <h2>メール配信履歴一覧</h2>
+                    </div>
+                    {% for mailHistory in mailHistories %}
+                        <div class="ec-orderMail">
+                            <div class="ec-orderMail__time">{{ mailHistory.sendDate }}</div>
+                            <div class="ec-orderMail__link"><a>{{ mailHistory.mailSubject }}</a></div>
+                            <div class="ec-orderMail__body">{{ mailHistory.mailBody|nl2br }}<p class="ec-orderMail__close"><a>閉じる</a></p></div>
+                        </div>
+                    {% else %}
+                        <p class="ec-reportDescription">メール履歴はありません。</p>
                     {% endfor %}
                 </div>
             </div>

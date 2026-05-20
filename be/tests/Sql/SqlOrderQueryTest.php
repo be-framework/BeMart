@@ -242,4 +242,148 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         $query = new SqlOrderQuery($this->pdo);
         $this->assertSame([], $query->itemsByOrderNo('EMPTY-ORD'));
     }
+
+    public function testHistoryByOrderNoReturnsNullWhenMissing(): void
+    {
+        $query = new SqlOrderQuery($this->pdo);
+        $this->assertNull($query->historyByOrderNo('NO-SUCH-ORDER'));
+    }
+
+    public function testHistoryByOrderNoReturnsNullForPreOrders(): void
+    {
+        $this->insertOrder([
+            'order_no' => 'HIST-PROC',
+            'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
+        ]);
+        $query = new SqlOrderQuery($this->pdo);
+        $this->assertNull($query->historyByOrderNo('HIST-PROC'));
+    }
+
+    public function testHistoryByOrderNoJoinsHeaderMessageAndPaymentMethod(): void
+    {
+        $customerId = $this->insertCustomer();
+        $paymentId = $this->insertPayment(['payment_method' => '銀行振込']);
+        $this->insertOrder([
+            'customer_id' => $customerId,
+            'payment_id' => $paymentId,
+            'order_no' => 'HIST-001',
+            'message' => '配送は平日希望です。',
+            'total' => 12700,
+            'payment_total' => 12700,
+            'add_point' => 127,
+        ]);
+
+        $query = new SqlOrderQuery($this->pdo);
+        $history = $query->historyByOrderNo('HIST-001');
+
+        $this->assertNotNull($history);
+        $this->assertSame('HIST-001', $history->orderNo);
+        $this->assertSame((string) $customerId, $history->customerId);
+        $this->assertSame('配送は平日希望です。', $history->message);
+        $this->assertSame('銀行振込', $history->paymentMethod);
+        $this->assertSame(12700, $history->total);
+        $this->assertSame(127, $history->addPoint);
+    }
+
+    public function testHistoryByOrderNoDegradesGracefullyWhenPaymentMissing(): void
+    {
+        // payment_id NULL — the LEFT JOIN must not drop the order; the
+        // payment-method name degrades to the empty string.
+        $this->insertOrder([
+            'order_no' => 'HIST-NOPAY',
+            'payment_id' => null,
+            'message' => null,
+        ]);
+
+        $query = new SqlOrderQuery($this->pdo);
+        $history = $query->historyByOrderNo('HIST-NOPAY');
+
+        $this->assertNotNull($history);
+        $this->assertSame('', $history->paymentMethod);
+        $this->assertSame('', $history->message);
+        $this->assertSame([], $history->shippings);
+        $this->assertSame([], $history->mailHistories);
+    }
+
+    public function testHistoryByOrderNoCarriesPerShippingBlocksWithGroupedItems(): void
+    {
+        $order = $this->insertOrder(['order_no' => 'HIST-SHIP']);
+        $shippingId = $this->insertShipping([
+            'order_id' => $order['id'],
+            'name01' => '山田',
+            'name02' => '太郎',
+            'kana01' => 'ヤマダ',
+            'kana02' => 'タロウ',
+            'postal_code' => '5300001',
+            'addr01' => '大阪市北区梅田',
+            'addr02' => '1-2-3',
+            'phone_number' => '0612345678',
+            'delivery_name' => 'サンプル宅配便',
+            'delivery_date' => '2026-04-03 00:00:00',
+            'delivery_time' => '午前中',
+        ]);
+        $this->insertOrderItem($order['id'], [
+            'shipping_id' => $shippingId,
+            'product_name' => 'Widget',
+            'product_code' => 'WID-1',
+            'price' => 1200,
+            'quantity' => 2,
+        ]);
+        $this->insertOrderItem($order['id'], [
+            'shipping_id' => $shippingId,
+            'product_name' => 'Gizmo',
+            'product_code' => 'GIZ-2',
+            'price' => 9800,
+            'quantity' => 1,
+        ]);
+
+        $query = new SqlOrderQuery($this->pdo);
+        $history = $query->historyByOrderNo('HIST-SHIP');
+
+        $this->assertNotNull($history);
+        $this->assertCount(1, $history->shippings);
+        $shipping = $history->shippings[0];
+        $this->assertSame('山田', $shipping->name01);
+        $this->assertSame('太郎', $shipping->name02);
+        $this->assertSame('ヤマダ', $shipping->kana01);
+        $this->assertSame('5300001', $shipping->postalCode);
+        $this->assertSame('大阪市北区梅田', $shipping->addr01);
+        $this->assertSame('サンプル宅配便', $shipping->deliveryName);
+        $this->assertSame('午前中', $shipping->deliveryTime);
+        // mtb_pref is empty in the structure-only dump — prefName
+        // degrades to the empty string via the LEFT JOIN.
+        $this->assertSame('', $shipping->prefName);
+
+        $this->assertCount(2, $shipping->items);
+        $this->assertSame('WID-1', $shipping->items[0]->productCode);
+        $this->assertSame('Widget', $shipping->items[0]->productName);
+        $this->assertSame(1200, $shipping->items[0]->unitPrice);
+        $this->assertSame(2, $shipping->items[0]->quantity);
+        $this->assertSame('Gizmo', $shipping->items[1]->productName);
+    }
+
+    public function testHistoryByOrderNoCarriesMailHistoriesOldestFirst(): void
+    {
+        $order = $this->insertOrder(['order_no' => 'HIST-MAIL']);
+        $this->insertMailHistory($order['id'], [
+            'send_date' => '2026-04-02 09:00:00',
+            'mail_subject' => '発送のお知らせ',
+            'mail_body' => '商品を発送しました。',
+        ]);
+        $this->insertMailHistory($order['id'], [
+            'send_date' => '2026-04-01 10:05:00',
+            'mail_subject' => 'ご注文ありがとうございます',
+            'mail_body' => 'ご注文を承りました。',
+        ]);
+
+        $query = new SqlOrderQuery($this->pdo);
+        $history = $query->historyByOrderNo('HIST-MAIL');
+
+        $this->assertNotNull($history);
+        $this->assertCount(2, $history->mailHistories);
+        // Oldest send first — matches the order EC-CUBE's history.twig
+        // walks the MailHistories collection.
+        $this->assertSame('ご注文ありがとうございます', $history->mailHistories[0]->mailSubject);
+        $this->assertSame('発送のお知らせ', $history->mailHistories[1]->mailSubject);
+    }
 }
