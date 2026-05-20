@@ -1,0 +1,108 @@
+{#
+  BeMart Contact form page — EC-CUBE goContactForm.
+
+  PORT of EC-CUBE 4.3 default-theme `Contact/index.twig`
+  (src/Eccube/Resource/template/default/Contact/index.twig).
+
+  Markup skeleton, `ec-contactRole` / `ec-pageHeader` / `ec-off1Grid` /
+  `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` / `ec-select` /
+  `ec-input` / `ec-telInput` / `ec-RegisterRole__actions` / `ec-off4Grid`
+  classes + the <dl>/<dt>/<dd> definition-list structure are kept
+  verbatim from EC-CUBE. Only the dynamic bindings are rebound to the
+  Contact resource body (src/Resource/Page/Contact.php):
+    transitionId, fields[] (5), submitTo { method, href }, csrfToken
+
+  Note — EC-CUBE's contact form collects MORE fields than BeMart's
+  Contact resource carries. EC-CUBE's form has name / kana / address
+  (postal/pref/addr) / phone_number / email / contents; BeMart's
+  SubmitContactInput models only contactName01 / contactName02 /
+  contactEmail / contactContents (the ALPS `ContactForm` descriptor
+  scope). The kana / address / phone rows are therefore EC-CUBE markup
+  with no BeMart body field — they are kept (verbatim skeleton) but their
+  widgets resolve to empty/plain inputs, and the difference is enumerated
+  as a residual family. See the render test for the missing-field note.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `form_label` / `form_widget` / `form_errors` — Symfony FormView;
+     BeMart carries field names, not a FormView, so labels + inputs are
+     authored plainly. FormView-runtime markup is a residual family.
+   - `form._token` — Symfony CSRF widget; kept as a hidden input with an
+     empty value (BeMart's html context has no CSRF widget).
+   - the entity-extension `{% for f in form|filter(...) %}` loop is
+     OMITTED (a core install has no entity extensions — emits nothing).
+   - `has_errors(...)` — request-validation runtime; false on a fresh
+     form, so the conditional ` error` class never appears.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'other_page' %}
+{% set route = 'contact' %}
+{% set title = 'お問い合わせ' %}
+
+{% block javascript %}
+    <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+{% endblock javascript %}
+
+{% block main %}
+
+    <div class="ec-contactRole">
+        <div class="ec-pageHeader">
+            <h1>お問い合わせ</h1>
+        </div>
+        <div class="ec-off1Grid">
+            <div class="ec-off1Grid__cell">
+                <form method="post" action="{{ url('contact') }}" class="h-adr" novalidate>
+                    <span class="p-country-name" style="display:none;">Japan</span>
+                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <p class="ec-para-normal">内容によっては回答をさしあげるのにお時間をいただくこともございます。<br />
+また、休業日は翌営業日以降の対応となりますのでご了承ください。<br />
+</p>
+                    <div class="ec-borderedDefs">
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-halfInput">
+                                    <input type="text" name="contactName01" placeholder="姓">
+                                    <input type="text" name="contactName02" placeholder="名">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">メールアドレス</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-input">
+                                    <input type="text" name="contactEmail">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お問い合わせ内容</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-input">
+                                    <textarea name="contactContents"></textarea>
+                                </div>
+                                <p>ご注文に関するお問い合わせには、必ず「ご注文番号」をご記入くださいますようお願いいたします。</p>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="ec-RegisterRole__actions">
+                        <div class="ec-off4Grid">
+                            <div class="ec-off4Grid__cell">
+                                <button type="submit" class="ec-blockBtn--action" name="mode" value="confirm">確認ページへ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
