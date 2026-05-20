@@ -50,8 +50,17 @@ use PDO;
  */
 final class SqlAddressStorage implements AddressStorageInterface
 {
-    private const SELECT_COLUMNS = 'id, customer_id, name01, name02, kana01, kana02, '
-        . 'company_name, phone_number, postal_code, pref_id, addr01, addr02';
+    private const SELECT_COLUMNS = 'ca.id, ca.customer_id, ca.name01, ca.name02, '
+        . 'ca.kana01, ca.kana02, ca.company_name, ca.phone_number, '
+        . 'ca.postal_code, ca.pref_id, ca.addr01, ca.addr02, '
+        // Phase 3 enrichment — the prefecture DISPLAY name. mtb_pref is a
+        // nullable FK target left EMPTY in the structure-only schema dump,
+        // so this is a LEFT JOIN: a missing match degrades to NULL (the
+        // hydrator coalesces to null prefName), it does NOT drop the row.
+        . 'pref.name AS pref_name';
+
+    private const FROM_JOIN = 'FROM dtb_customer_address ca '
+        . 'LEFT JOIN mtb_pref pref ON pref.id = ca.pref_id';
 
     private const DISCRIMINATOR = 'customeraddress';
 
@@ -68,8 +77,8 @@ final class SqlAddressStorage implements AddressStorageInterface
             return [];
         }
 
-        $sql = 'SELECT ' . self::SELECT_COLUMNS . ' FROM dtb_customer_address '
-            . 'WHERE customer_id = :customer_id ORDER BY id ASC';
+        $sql = 'SELECT ' . self::SELECT_COLUMNS . ' ' . self::FROM_JOIN . ' '
+            . 'WHERE ca.customer_id = :customer_id ORDER BY ca.id ASC';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':customer_id' => (int) $customerId]);
 
@@ -92,8 +101,8 @@ final class SqlAddressStorage implements AddressStorageInterface
             return null;
         }
 
-        $sql = 'SELECT ' . self::SELECT_COLUMNS . ' FROM dtb_customer_address '
-            . 'WHERE id = :id LIMIT 1';
+        $sql = 'SELECT ' . self::SELECT_COLUMNS . ' ' . self::FROM_JOIN . ' '
+            . 'WHERE ca.id = :id LIMIT 1';
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => (int) $addressId]);
         $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -212,6 +221,12 @@ final class SqlAddressStorage implements AddressStorageInterface
             pref: $row['pref_id'] === null ? 0 : (int) $row['pref_id'],
             addr01: $row['addr01'] === null ? '' : (string) $row['addr01'],
             addr02: $row['addr02'] === null ? '' : (string) $row['addr02'],
+            // Phase 3 enrichment — the prefecture display name from the
+            // mtb_pref JOIN; NULL when pref_id is unset or the master
+            // row is absent (structure-only dump).
+            prefName: isset($row['pref_name']) && $row['pref_name'] !== null
+                ? (string) $row['pref_name']
+                : null,
         );
     }
 }
