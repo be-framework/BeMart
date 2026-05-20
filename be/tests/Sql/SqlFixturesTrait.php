@@ -857,6 +857,46 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_template row. Returns the inserted id.
+     *
+     * dtb_template's column shape matches dtb_layout: NOT NULL columns
+     * are template_code, template_name, create_date, update_date,
+     * discriminator_type; `device_type_id` is a nullable smallint FK to
+     * mtb_device_type (FK_94C12A694FFA550E).
+     *
+     * The default writes `device_type_id = 10` (PC) so the
+     * TemplateEntity projection round-trips a real EC-CUBE device enum
+     * value — callers MUST seed the master row first via
+     * {@see seedDeviceTypes} (or pass `device_type_id` => null to write
+     * a NULL, which the SqlTemplateStorage hydrator coalesces back to
+     * deviceType = 0). template_code is the install-time unique code
+     * (the stock EC-CUBE template is 'default'); a per-row counter
+     * keeps it unique across calls. discriminator_type is 'template' —
+     * the Doctrine single-table inheritance value EC-CUBE writes.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertTemplate(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'device_type_id' => 10,
+            'template_code' => sprintf('template-%d', $counter),
+            'template_name' => sprintf('Template %d', $counter),
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'template',
+        ], $overrides);
+
+        $this->executeInsert('dtb_template', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert (idempotently) an mtb_work row so the FK from
      * dtb_member.work_id → mtb_work.id can be satisfied.
      *

@@ -40,8 +40,10 @@ use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlTemplateStorage;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
@@ -179,6 +181,14 @@ use function dirname;
  *       never minted by the BeMart slice, only read back from rows the
  *       installer/fixture seeded. SqlLayoutStorage rejects a non-numeric
  *       id as a miss, so `nonexistent` folds to a 404 on both backends)
+ *   - TemplateStorageInterface     → SqlTemplateStorage (Phase 2b — admin
+ *       design-template registry list against dtb_template. The
+ *       interface is `list()` only — ALPS exposes a single affordance
+ *       (`goTemplateList`), no create / update / delete, no upload flow
+ *       — so there is NO TemplateIdGenerator and no getById / put /
+ *       remove. Templates are filesystem-backed in EC-CUBE; dtb_template
+ *       is only the installed-flavour registry, read-only from this
+ *       slice. Same column shape as dtb_layout)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -392,6 +402,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(LayoutStorageInterface::class)
                     ->to(SqlLayoutStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(TemplateStorageInterface::class)
+                    ->to(SqlTemplateStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };

@@ -209,6 +209,7 @@
       {"id": "pluginVersion", "title": "プラグインバージョン","def": "https://schema.org/softwareVersion", "tag": "src-entity", "doc": {"value": "プラグインのバージョン文字列"}},
       {"id": "pluginEnabled", "title": "プラグイン有効","tag": "src-entity", "doc": {"value": "プラグインが有効か。インストール直後は無効"}},
 
+      {"id": "templateId", "title": "テンプレートID","tag": "src-entity", "doc": {"value": "dtb_template.id の不透明な文字列ハンドル。BeMart の TemplateEntity 層は数値ではなく文字列として保持する。Fake 実装は `tp-` プレフィックス付きのシードハンドル（tp-default-pc / tp-default-sp）を持ち、SQL 実装は dtb_template.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。Template には list アフォーダンスのみ（goTemplateList）で作成・更新・削除が無いため ID ジェネレータは存在せず、テンプレートはインストーラ/fixture が seed した行から読み出すのみ。layoutId / blockId / categoryId と同じ Fake↔SQL 二重性。templateCode（一意の install-time コード）とは別物 — TemplateEntity の投影は id ハンドルを用い templateCode は投影外"}},
       {"id": "templateCode", "title": "テンプレートコード","tag": "src-entity", "doc": {"value": "テンプレートの一意識別コード。標準テンプレートは'default'"}},
       {"id": "templateName", "title": "テンプレート名","tag": "src-entity", "doc": {"value": "テンプレートの表示名"}},
       {"id": "deviceType", "title": "デバイス種別","tag": "src-entity", "doc": {"value": "デバイス種別マスタ（EC-CUBE 2.xからの名残）。値: 2=モバイル, 10=PC。非連番のIDは旧バージョンのデバイスサポート（ガラケー等）に由来。ページレイアウトのデバイス別表示に使用"}},
@@ -1185,8 +1186,10 @@
         ]
       },
 
-      {"id": "Template", "title": "デザインテンプレート","tag": "plugin src-template",
+      {"id": "Template", "title": "デザインテンプレート","tag": "plugin src-entity src-template",
+        "doc": {"value": "dtb_template 1行を平坦化した投影。EC-CUBE 管理画面のデザインテンプレート（installed flavour）の登録レジストリを表す。テンプレート本体はファイルシステム上に存在し dtb_template は登録レジストリのみ。BeMart の TemplateEntity は 3 項目 (templateId / templateName / deviceType) のみ保持し、EC-CUBE の templateCode / createDate / updateDate / discriminator_type は投影外。TemplateStorageInterface は list() のみ — ALPS 上 goTemplateList のみで作成・更新・削除アフォーダンスが無いため SqlTemplateIdGenerator も getById / put / remove も存在せず、FK cascade 問題は発生しない（テンプレートはこのスライスから変更されない）。dtb_template の列形状は dtb_layout と同一（id / device_type_id / *_code / *_name / create_date / update_date / discriminator_type）。device_type_id は smallint(5) unsigned nullable で FK → mtb_device_type.id（FK_94C12A694FFA550E）。TemplateEntity::deviceType は non-null int（10=PC, 2=モバイル）で read 時 NULL → 0 に coalesce。template_name は EC-CUBE 上 NOT NULL。Phase 2b で SqlTemplateStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#templateId"},
           {"href": "#templateCode"},
           {"href": "#templateName"},
           {"href": "#deviceType"},
