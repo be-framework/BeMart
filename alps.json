@@ -159,6 +159,7 @@
       {"id": "applyDate", "title": "適用日","tag": "src-entity", "doc": {"value": "この税率ルールが有効になる日時。適用日以降の注文にこの税率が適用される。複数の税率ルールがある場合、注文日時点で最も新しい適用日のルールが使用される。過去の受注には影響しない"}},
       {"id": "roundingType", "title": "端数処理","tag": "src-entity", "doc": {"value": "1=四捨五入, 2=切り捨て, 3=切り上げ。受注明細の税額計算時の端数処理方式。TaxRuleで設定"}},
 
+      {"id": "newsId", "title": "ニュースID","tag": "src-entity", "doc": {"value": "dtb_news.id の不透明な文字列ハンドル。BeMart の NewsEntity 層は数値ではなく文字列として保持する。Fake 実装は `nw-` プレフィックス付きの英数字を生成し（シード `nw-welcome` を含む）、SQL 実装は dtb_news.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlNewsStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (AdminNewsFetched / NewsUpdated / NewsDeleted) を踏むため、シードハンドル `nw-welcome` や `nonexistent` は Fake / SQL 双方で 404 が同形"}},
       {"id": "newsTitle", "title": "ニュースタイトル","def": "https://schema.org/headline", "tag": "src-entity", "doc": {"value": "ニュース記事の見出し"}},
       {"id": "newsDescription", "title": "ニュース本文","def": "https://schema.org/articleBody", "tag": "src-entity", "doc": {"value": "ニュース記事の本文。HTML入力可能でHTMLPurifierによる浄化あり"}},
       {"id": "newsUrl", "title": "外部URL","def": "https://schema.org/url", "tag": "src-entity", "doc": {"value": "外部リンクURL。設定時はニュース本文の代わりにこのURLへ遷移"}},
@@ -990,8 +991,10 @@
         ]
       },
 
-      {"id": "News", "title": "ニュース","tag": "content src-template",
+      {"id": "News", "title": "ニュース","tag": "content src-entity src-template",
+        "doc": {"value": "dtb_news 1行を平坦化した投影。BeMart の NewsEntity は 6 項目 (newsId / newsTitle / newsDescription / newsUrl / publishDate / linkMethod) のみ保持し、EC-CUBE の creator_id（FK to dtb_member）と visible は Phase 2 スコープ外で常に NULL/1 を書く。creator_id は構造ダンプ上 dtb_member が空のため NULL 以外は FK 1452 を起こすため固定 NULL。visible はデフォルト表示（インストーラ既定）として 1 を書く。publish_date は MySQL `datetime`（タイムゾーン無し）で、SqlNewsStorage は BeMart の ISO-8601 文字列を `Y-m-d H:i:s` に直列化し、read 時に Asia/Tokyo として ISO-8601 (`+09:00`) に戻すことで Fake 投影と同一形を維持（同パターン: SqlTaxRuleStorage の apply_date）。link_method は tinyint(1) と bool の bidirectional cast。doUpdateNews 遷移が存在するため UPDATE 経路は実運用で踏まれる（TaxRule との差）。Phase 2b で SqlNewsStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#newsId"},
           {"href": "#newsTitle"},
           {"href": "#newsDescription"},
           {"href": "#newsUrl"},

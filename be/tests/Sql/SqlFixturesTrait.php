@@ -535,6 +535,44 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_news row. Returns the inserted id.
+     *
+     * dtb_news's NOT NULL columns are title (varchar(255)), link_method
+     * (tinyint(1) DEFAULT 0), create_date, update_date, visible
+     * (tinyint(1) DEFAULT 1), discriminator_type. creator_id (FK to
+     * dtb_member) and publish_date are nullable. The defaults match
+     * SqlNewsStorage's INSERT contract: creator_id = NULL (dtb_member
+     * is empty in the structure-only dump so any non-NULL FK value
+     * would raise 1452), visible = 1 (default-shown), discriminator
+     * = 'news'.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertNews(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'creator_id' => null,
+            'publish_date' => $now,
+            'title' => sprintf('News %d', $counter),
+            'description' => null,
+            'url' => null,
+            'link_method' => 0,
+            'visible' => 1,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'news',
+        ], $overrides);
+
+        $this->executeInsert('dtb_news', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().

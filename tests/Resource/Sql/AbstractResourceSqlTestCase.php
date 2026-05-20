@@ -12,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlBaseInfoStorage;
@@ -19,13 +20,16 @@ use MyVendor\BeMart\Be\Reason\Query\SqlCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTaxRuleIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
@@ -93,6 +97,12 @@ use function dirname;
  *       SqlTaxRuleStorage can persist with that explicit PK; the
  *       Fake generator emits hex that the SQL impl rejects as
  *       non-numeric, same shape as the Tag generator pairing)
+ *   - NewsStorageInterface         → SqlNewsStorage  (Phase 2b)
+ *   - NewsIdGeneratorInterface     → SqlNewsIdGenerator (Phase 2b —
+ *       NewsCreated needs a numeric id pre-allocated so SqlNewsStorage
+ *       can persist with that explicit PK; the Fake generator emits an
+ *       `nw-` prefix that the SQL impl rejects as non-numeric, same
+ *       shape as the Tag / TaxRule generator pairings)
  *   - PDO::class                   → shared test PDO singleton
  *
  * NOT rebound:
@@ -247,6 +257,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(TaxRuleIdGeneratorInterface::class)
                     ->to(SqlTaxRuleIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(NewsStorageInterface::class)
+                    ->to(SqlNewsStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(NewsIdGeneratorInterface::class)
+                    ->to(SqlNewsIdGenerator::class)
                     ->in(Scope::SINGLETON);
             }
         };
