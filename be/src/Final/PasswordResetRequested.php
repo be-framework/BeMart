@@ -8,8 +8,8 @@ use DateTimeImmutable;
 use MyVendor\BeMart\Be\Reason\Entity\PasswordResetTokenEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
+use MyVendor\BeMart\Be\Reason\Service\ResetKeyGeneratorInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -39,7 +39,7 @@ final readonly class PasswordResetRequested
         #[Input] string $email,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] PasswordResetTokenStorageInterface $tokenStorage,
-        #[Inject] CustomerIdGeneratorInterface $tokenGenerator,
+        #[Inject] ResetKeyGeneratorInterface $resetKeyGenerator,
         #[Inject] MailerInterface $mailer,
     ) {
         $customer = $customerQuery->findByEmail($email);
@@ -51,7 +51,7 @@ final readonly class PasswordResetRequested
             return;
         }
 
-        $resetKey = $tokenGenerator->generate();
+        $resetKey = $resetKeyGenerator->generate();
         $tokenStorage->put(new PasswordResetTokenEntity(
             customerId: $customer->customerId,
             resetKey: $resetKey,
