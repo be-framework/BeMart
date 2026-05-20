@@ -659,6 +659,52 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_category row. Returns the inserted id.
+     *
+     * dtb_category's NOT NULL columns are category_name (varchar(255)),
+     * hierarchy (int unsigned — the depth cache, no DEFAULT), sort_no
+     * (int(11), no DEFAULT), create_date, update_date,
+     * discriminator_type. `parent_category_id` is a nullable self-FK
+     * (FK_5ED2C2B796A8F92 → dtb_category.id) and `creator_id` a
+     * nullable FK to dtb_member.
+     *
+     * The defaults match SqlCategoryStorage's INSERT contract:
+     * parent_category_id = NULL (root category), creator_id = NULL
+     * (dtb_member is empty in the structure-only dump so any non-NULL
+     * value would raise FK 1452), hierarchy = 1 (root depth),
+     * sort_no = 0, discriminator_type = 'category'.
+     *
+     * Self-FK ordering: a child category MUST be inserted after its
+     * parent. Callers seeding a tree pass the parent's id back as the
+     * `parent_category_id` override and bump `hierarchy` accordingly
+     * (root=1, child=2…) — same depth cache SqlCategoryStorage derives
+     * on its own INSERT path.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertCategory(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'parent_category_id' => null,
+            'creator_id' => null,
+            'category_name' => sprintf('Category %d', $counter),
+            'hierarchy' => 1,
+            'sort_no' => 0,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'category',
+        ], $overrides);
+
+        $this->executeInsert('dtb_category', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert (idempotently) an mtb_work row so the FK from
      * dtb_member.work_id → mtb_work.id can be satisfied.
      *
