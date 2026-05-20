@@ -14,6 +14,7 @@ use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlBaseInfoStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartCommand;
@@ -22,14 +23,17 @@ use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
+use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTaxRuleIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
@@ -103,6 +107,12 @@ use function dirname;
  *       can persist with that explicit PK; the Fake generator emits an
  *       `nw-` prefix that the SQL impl rejects as non-numeric, same
  *       shape as the Tag / TaxRule generator pairings)
+ *   - PageStorageInterface         → SqlPageStorage  (Phase 2b)
+ *   - PageIdGeneratorInterface     → SqlPageIdGenerator (Phase 2b —
+ *       PageCreated needs a numeric id pre-allocated so SqlPageStorage
+ *       can persist with that explicit PK; the Fake generator emits a
+ *       `pg-` prefix that the SQL impl rejects as non-numeric, same
+ *       shape as the Tag / News / TaxRule generator pairings)
  *   - PDO::class                   → shared test PDO singleton
  *
  * NOT rebound:
@@ -263,6 +273,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(NewsIdGeneratorInterface::class)
                     ->to(SqlNewsIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(PageStorageInterface::class)
+                    ->to(SqlPageStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(PageIdGeneratorInterface::class)
+                    ->to(SqlPageIdGenerator::class)
                     ->in(Scope::SINGLETON);
             }
         };

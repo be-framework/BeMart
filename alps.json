@@ -167,6 +167,7 @@
       {"id": "linkMethod", "title": "新規ウィンドウで開く","tag": "src-entity", "doc": {"value": "外部URLのリンク開き方（boolean）。false=同一ウィンドウ, true=新規ウィンドウ（target=\"_blank\"）。テンプレートでtarget属性の出力制御に使用"}},
       {"id": "newsVisible", "title": "ニュース表示","tag": "src-entity", "doc": {"value": "ニュースをフロントに表示するか"}},
 
+      {"id": "pageId", "title": "ページID","tag": "src-entity", "doc": {"value": "dtb_page.id の不透明な文字列ハンドル。BeMart の PageEntity 層は数値ではなく文字列として保持する。Fake 実装は `pg-` プレフィックス付きの英数字を生成し（シード `pg-homepage` を含む）、SQL 実装は dtb_page.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlPageStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (AdminPageFetched / PageUpdated / PageDeleted) を踏むため、シードハンドル `pg-homepage` や `nonexistent-zzz` は Fake / SQL 双方で 404 が同形"}},
       {"id": "pageUrl", "title": "ページURL","tag": "src-entity", "doc": {"value": "ページのURLパス（Symfonyルート名。例: homepage, product_list）"}},
       {"id": "pageFileName", "title": "テンプレートファイル名","tag": "src-entity", "doc": {"value": "ページのテンプレートファイル名"}},
       {"id": "pageName", "title": "ページ名","tag": "src-entity", "doc": {"value": "管理画面でのページ表示名"}},
@@ -1017,8 +1018,10 @@
         ]
       },
 
-      {"id": "Page", "title": "ページ","tag": "content src-template",
+      {"id": "Page", "title": "ページ","tag": "content src-entity src-template",
+        "doc": {"value": "dtb_page 1行を平坦化した投影。BeMart の PageEntity は 5 項目 (pageId / pageName / pageUrl / pageFileName / pageEditType) のみ保持し、EC-CUBE の master_page_id / author / description / keyword / meta_robots / meta_tags / create_date / update_date は Phase 2 スコープ外で常に NULL を書く（dtb_page_layout 関連は別スコープ）。master_page_id はEC-CUBEのデフォルトテンプレ上書き機構（self-FK）で BeMart 管理 UI 非対応のため固定 NULL。page_name / file_name は EC-CUBE 上 nullable だが PageEntity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。edit_type は smallint(5) unsigned NOT NULL DEFAULT 1（PageCreated は EDIT_TYPE_USER=0 を書く / システム seed は 2）。doUpdatePage 遷移が存在するため UPDATE 経路は実運用で踏まれる。dtb_page_layout（FK page_id → dtb_page.id）の placement 行は Wave 9 admin slice では INSERT しないが、remove 時のみ防御的に DELETE して FK 1451 を回避（外部投入された placement 行があっても DELETE 成功）。Phase 2b で SqlPageStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#pageId"},
           {"href": "#pageName"},
           {"href": "#pageUrl"},
           {"href": "#pageFileName"},
