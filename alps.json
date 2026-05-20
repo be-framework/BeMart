@@ -207,10 +207,11 @@
       {"id": "csvType", "title": "CSV種別","tag": "src-entity", "doc": {"value": "dtb_csv.csv_type_id — mtb_csv_type への FK（1=注文CSV, 2=会員CSV, 3=商品CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）"}},
       {"id": "csvColumnName", "title": "CSV列名","tag": "src-entity", "doc": {"value": "CSV出力列の識別名。dtb_csv.field_name に格納。CsvColumnConfigEntity の columnName に対応する管理フォーム上の行ハンドル。dtb_csv の NOT NULL 列 entity_name / disp_name は Wave 9 の Entity では持たないため、SqlCsvColumnConfigStorage の INSERT は field_name の値をそれらにエコーする（実体の entity_name / disp_name を供給する列カタログは Phase 2）"}},
 
-      {"id": "pluginName", "title": "プラグイン名","tag": "src-entity", "doc": {"value": "プラグインの表示名"}},
-      {"id": "pluginCode", "title": "プラグインコード","tag": "src-entity", "doc": {"value": "プラグインの一意識別子"}},
-      {"id": "pluginVersion", "title": "プラグインバージョン","def": "https://schema.org/softwareVersion", "tag": "src-entity", "doc": {"value": "プラグインのバージョン文字列"}},
-      {"id": "pluginEnabled", "title": "プラグイン有効","tag": "src-entity", "doc": {"value": "プラグインが有効か。インストール直後は無効"}},
+      {"id": "pluginName", "title": "プラグイン名","tag": "src-entity", "doc": {"value": "プラグインの表示名。dtb_plugin.name に格納。PluginEntity の pluginName に対応"}},
+      {"id": "pluginCode", "title": "プラグインコード","tag": "src-entity", "doc": {"value": "プラグインの一意識別子。dtb_plugin.code に格納する自然キー — 列名は `code` であって `plugin_code` ではない（dtb_plugin は EC-CUBE 後発の dtb_*_code 命名規約より古い）。findByCode / install / uninstall / setEnabled の全ライフサイクルメソッドがこの列をプローブする。dtb_plugin は FK 制約を持たないが structure-only ダンプでは空のため、SQL ハイパーメディアテストは seedPlugins で2つのデモプラグイン（Sample/SamplePlugin, Sample/DisabledPlugin）をシードする"}},
+      {"id": "pluginVersion", "title": "プラグインバージョン","def": "https://schema.org/softwareVersion", "tag": "src-entity", "doc": {"value": "プラグインのバージョン文字列。dtb_plugin.version に格納。PluginEntity の version に対応"}},
+      {"id": "pluginInstalled", "title": "プラグインインストール済み","tag": "src-entity", "doc": {"value": "プラグインがインストール済みか（ファイル配置 + マイグレーション適用済み）。dtb_plugin に `installed` 列は存在せず、PluginEntity の installed 軸は dtb_plugin.initialized（tinyint(1)）に対応づけられる — 行の存在自体は「登録済み」を意味し initialized がインストールパイプライン実行済みフラグ。initialized=1 がインストール済み、initialized=0 が登録済みだが未インストール。SqlPluginStorage::install は code をプローブし、行が無ければ initialized=1 で INSERT、initialized=0 の登録済み行があれば initialized を昇格 UPDATE（重複 INSERT しない）。uninstall は行を完全削除（後続 listAll が未インストールスタブを表面化しないように）。(installed=false, enabled=true) の組み合わせは禁止 — setEnabled がそれを拒否する"}},
+      {"id": "pluginEnabled", "title": "プラグイン有効","tag": "src-entity", "doc": {"value": "プラグインが有効か（コンテナへのロード対象か）。インストール直後は無効 — install は自動有効化しない（EC-CUBE 規約）。dtb_plugin.enabled（tinyint(1)）に格納。PluginEntity の enabled に対応。setEnabled は installed なプラグインにのみ有効で、値が既に一致する場合は冪等な no-op"}},
 
       {"id": "templateId", "title": "テンプレートID","tag": "src-entity", "doc": {"value": "dtb_template.id の不透明な文字列ハンドル。BeMart の TemplateEntity 層は数値ではなく文字列として保持する。Fake 実装は `tp-` プレフィックス付きのシードハンドル（tp-default-pc / tp-default-sp）を持ち、SQL 実装は dtb_template.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。Template には list アフォーダンスのみ（goTemplateList）で作成・更新・削除が無いため ID ジェネレータは存在せず、テンプレートはインストーラ/fixture が seed した行から読み出すのみ。layoutId / blockId / categoryId と同じ Fake↔SQL 二重性。templateCode（一意の install-time コード）とは別物 — TemplateEntity の投影は id ハンドルを用い templateCode は投影外"}},
       {"id": "templateCode", "title": "テンプレートコード","tag": "src-entity", "doc": {"value": "テンプレートの一意識別コード。標準テンプレートは'default'"}},
@@ -1207,6 +1208,7 @@
           {"href": "#pluginName"},
           {"href": "#pluginCode"},
           {"href": "#pluginVersion"},
+          {"href": "#pluginInstalled"},
           {"href": "#pluginEnabled"},
           {"href": "#createDate"},
           {"href": "#updateDate"},

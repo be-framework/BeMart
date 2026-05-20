@@ -28,6 +28,7 @@ use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
@@ -52,6 +53,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlPluginStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlShippingAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
@@ -296,6 +298,18 @@ use function dirname;
  *       is an enforced FK to the empty mtb_csv_type master — seeded via
  *       seedCsvTypes, same precedent as seedSaleTypes. No generator: the
  *       row identity is the AUTO_INCREMENT id, never minted by the slice)
+ *   - PluginStorageInterface       → SqlPluginStorage (Phase 2b — plugin
+ *       lifecycle registry against dtb_plugin. listAll / findByCode /
+ *       install / uninstall / setEnabled, all keyed by the natural key
+ *       `code` (the column is `code`, NOT `plugin_code`). install is
+ *       idempotent — probe code, INSERT only if absent, UPDATE
+ *       initialized only on a registered-but-not-installed row;
+ *       uninstall is a scoped DELETE; setEnabled is a guarded enabled
+ *       flip. The BeMart `installed` axis maps onto `dtb_plugin.initialized`.
+ *       dtb_plugin has no FK constraints, so no master seeding — but the
+ *       table is empty in the structure-only dump, so the hypermedia
+ *       test seeds the two demo plugins via seedPlugins. No generator:
+ *       the row identity is the AUTO_INCREMENT id, never minted)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -544,6 +558,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(CsvColumnConfigStorageInterface::class)
                     ->to(SqlCsvColumnConfigStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(PluginStorageInterface::class)
+                    ->to(SqlPluginStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };
