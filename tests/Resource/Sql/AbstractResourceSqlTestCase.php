@@ -24,6 +24,7 @@ use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
@@ -51,6 +52,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlEmailUniquenessChecker;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlLayoutStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlLoginHistoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlMailTemplateStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
@@ -347,6 +349,18 @@ use function dirname;
  *       generator emits 32-char hex that the SQL impl rejects as
  *       non-numeric, same shape as the Block / Page / Tag generator
  *       pairings)
+ *   - MailTemplateStorageInterface → SqlMailTemplateStorage (Phase 2b —
+ *       admin mail-template list + per-id subject UPDATE against
+ *       dtb_mail_template. list / findById / update. After the 厳密移植
+ *       narrowing (MailTemplate Phase A) the 4-field MailTemplateEntity
+ *       (mailTemplateId / mailTemplateName / fileName / subject) is 1:1
+ *       with dtb_mail_template's modeled columns — the table has no body
+ *       columns (EC-CUBE 4.3 stores mail bodies as on-disk Twig files),
+ *       so SqlMailTemplateStorage touches none. update writes only
+ *       mail_subject (+ update_date); file_name is fixed at create time.
+ *       Update-only contract — no INSERT path, so there is no
+ *       MailTemplateIdGenerator pairing and update raises
+ *       MailTemplateNotFoundException on an unknown id)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -607,6 +621,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(DeliveryIdGeneratorInterface::class)
                     ->to(SqlDeliveryIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(MailTemplateStorageInterface::class)
+                    ->to(SqlMailTemplateStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };
