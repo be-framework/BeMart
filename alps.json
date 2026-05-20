@@ -153,6 +153,7 @@
       {"id": "confirmUrl", "title": "追跡URL","tag": "src-entity", "doc": {"value": "配送業者の荷物追跡ページURL。フィールド名は\"confirm_url\"だが注文確認URLではない。管理画面では\"お問い合わせ番号URL\"と表示。trackingNumberと組み合わせて追跡リンクを構成"}},
       {"id": "deliveryVisible", "title": "配送方法表示","tag": "src-entity", "doc": {"value": "この配送方法をフロントに表示するか"}},
 
+      {"id": "taxRuleId", "title": "税率ルールID","tag": "src-entity", "doc": {"value": "dtb_tax_rule.id の不透明な文字列ハンドル。BeMart の TaxRuleEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_tax_rule.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlTaxRuleStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (TaxRuleDeleted) を踏むため、シードハンドル（`nonexistent-zzz` 等）は Fake / SQL 双方で 404 が同形"}},
       {"id": "taxRuleRate", "title": "マスタ税率","tag": "src-entity", "doc": {"value": "税率ルールマスタ（TaxRule）の適用税率（%）。受注明細のtaxRateはこの値のスナップショット。applyDate（適用日）と組み合わせて時限変更が可能"}},
       {"id": "taxRuleAdjust", "title": "マスタ税調整額","tag": "src-entity", "doc": {"value": "税率ルールマスタ（TaxRule）の端数処理による税額調整値。受注明細のtaxAdjustはこの値のスナップショット"}},
       {"id": "applyDate", "title": "適用日","tag": "src-entity", "doc": {"value": "この税率ルールが有効になる日時。適用日以降の注文にこの税率が適用される。複数の税率ルールがある場合、注文日時点で最も新しい適用日のルールが使用される。過去の受注には影響しない"}},
@@ -968,8 +969,10 @@
         ]
       },
 
-      {"id": "TaxRule", "title": "税率ルール","tag": "shop src-template",
+      {"id": "TaxRule", "title": "税率ルール","tag": "shop src-entity src-template",
+        "doc": {"value": "dtb_tax_rule 1行を平坦化した投影。BeMart の TaxRuleEntity は 4 項目 (taxRuleId / taxRate / roundingType / applyDate) のみ保持し、EC-CUBE の per-scope 列（product_class_id / product_id / country_id / pref_id）と tax_adjust / creator_id は Phase 2 スコープ外で常に NULL/0 を書く。tax_rate は `decimal(10,0) unsigned` で小数部はスキーマレベルで切り捨てられる（EC-CUBE 4.3 の制約。整数% のみ保持可能）。FK 5本のうち rounding_type_id → mtb_rounding_type, country_id → mtb_country, pref_id → mtb_pref は構造ダンプ上はマスタが空のため、テストでは NULL で seed する（rounding_type_id は SqlTaxRuleStorage が常に NULL を書き、hydrate は roundingType=1（STD_ROUND=四捨五入）にフォールバック。CreateTaxRuleInput の roundingType デフォルト 1 と一致）。apply_date は MySQL `datetime`（タイムゾーン無し）で、SqlTaxRuleStorage は BeMart の ISO-8601 文字列を `Y-m-d H:i:s` に直列化し、read 時に Asia/Tokyo として ISO-8601 (`+09:00`) に戻すことで Fake 投影と同一形を維持。doUpdateTaxRule 遷移は存在せず、編集は delete+create フローで applyDate 進行が監査ログ的に保存される。Phase 2b で SqlTaxRuleStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#taxRuleId"},
           {"href": "#taxRuleRate"},
           {"href": "#taxRuleAdjust"},
           {"href": "#applyDate"},

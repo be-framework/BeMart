@@ -21,11 +21,15 @@ use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlTaxRuleIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use MyVendor\BeMart\Be\Tests\Sql\SqlFixturesTrait;
 use MyVendor\BeMart\Module\AppModule;
 use PDO;
@@ -83,6 +87,12 @@ use function dirname;
  *       fields when the row is missing so the hypermedia contract is
  *       identical to the Fake-backed baseline with no extra fixture
  *       setup required)
+ *   - TaxRuleStorageInterface      → SqlTaxRuleStorage  (Phase 2b)
+ *   - TaxRuleIdGeneratorInterface  → SqlTaxRuleIdGenerator (Phase 2b —
+ *       TaxRuleCreated needs a numeric id pre-allocated so
+ *       SqlTaxRuleStorage can persist with that explicit PK; the
+ *       Fake generator emits hex that the SQL impl rejects as
+ *       non-numeric, same shape as the Tag generator pairing)
  *   - PDO::class                   → shared test PDO singleton
  *
  * NOT rebound:
@@ -231,6 +241,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(BaseInfoStorageInterface::class)
                     ->to(SqlBaseInfoStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(TaxRuleStorageInterface::class)
+                    ->to(SqlTaxRuleStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(TaxRuleIdGeneratorInterface::class)
+                    ->to(SqlTaxRuleIdGenerator::class)
                     ->in(Scope::SINGLETON);
             }
         };
