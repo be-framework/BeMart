@@ -1,0 +1,131 @@
+{#
+  BeMart order-history detail — EC-CUBE goMypageHistory.
+
+  PORT of EC-CUBE 4.3 default-theme `Mypage/history.twig`
+  (src/Eccube/Resource/template/default/Mypage/history.twig).
+
+  Markup skeleton, `ec-orderRole` / `ec-orderRole__detail` /
+  `ec-orderOrder` / `ec-definitions` / `ec-orderDelivery` /
+  `ec-orderRole__summary` / `ec-totalBox` classes and the block
+  structure are kept verbatim from EC-CUBE. Only the dynamic bindings
+  are rebound to the History resource body
+  (src/Resource/Page/Mypage/History.php):
+    orderNo, subtotal, deliveryFeeTotal, charge, discount, tax, total,
+    paymentTotal, addPoint, usePoint, orderStatus, orderDate,
+    paymentDate, items[] { productCode, productName, quantity, unitPrice }
+
+  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `BaseInfo.option_mypage_order_status_display` / `isOptionPoint` —
+     store options; the render-diff stub sets them truthy so both sides
+     emit the order-status / point rows (BeMart's body carries
+     orderStatus / addPoint / usePoint).
+   - `price` filter -> JPY NumberFormatter (BeMartTwigExtension).
+   - MISSING BODY FIELDS — EC-CUBE's history.twig renders per-Shipping
+     blocks (`Order.Shippings`: addresses, delivery dates, product
+     thumbnails), `Order.PaymentMethod`, `Order.message`, and
+     `Order.MailHistories`. BeMart's MypageHistoryFetched projection
+     carries only the totals + a flat `items` list (no Shipping /
+     PaymentMethod / MailHistory entities), so those blocks are OMITTED
+     and flagged as follow-ups. The order detail renders the line-item
+     list from `items` and the financial summary from the totals. The
+     `ec-orderDelivery` heading is kept (structure) with the items list
+     under it; the EC-CUBE stub feeds the SAME flat items so the item
+     rows diff to zero.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'mypage' %}
+{% set route = 'mypage_history' %}
+{% set title = 'マイページ' %}
+
+{% block main %}
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>マイページ/ご注文履歴詳細</h1>
+            </div>
+            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'index', name01: name01|default(''), name02: name02|default('') } %}
+        </div>
+
+        <div class="ec-orderRole">
+            <div class="ec-orderRole__detail">
+                <div class="ec-orderOrder">
+                    <div class="ec-definitions">
+                        <dt>ご注文日時</dt>
+                        <dd>{{ orderDate }}</dd>
+                    </div>
+                    <div class="ec-definitions">
+                        <dt>ご注文番号</dt>
+                        <dd>{{ orderNo }}</dd>
+                    </div>
+                    <div class="ec-definitions">
+                        <dt>ご注文状況</dt>
+                        <dd>{{ orderStatus }}</dd>
+                    </div>
+                    <div class="ec-definitions">
+                        <dt>ご利用ポイント</dt>
+                        <dd>{{ usePoint|number_format }} pt</dd>
+                    </div>
+                    <div class="ec-definitions">
+                        <dt>加算ポイント</dt>
+                        <dd>{{ addPoint|number_format }} pt</dd>
+                    </div>
+                </div>
+                <div class="ec-orderDelivery">
+                    <div class="ec-rectHeading">
+                        <h2>配送情報</h2>
+                    </div>
+                    {% for orderItem in items %}
+                        <div class="ec-orderDelivery__item">
+                            <div class="ec-imageGrid">
+                                <div class="ec-imageGrid__content">
+                                    <p>
+                                        {{ orderItem.productName }}
+                                        ×{{ orderItem.quantity }} </p>
+                                    <p>{{ orderItem.unitPrice|price }}
+                                        × {{ orderItem.quantity|number_format }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="ec-orderRole__summary">
+                <div class="ec-totalBox">
+                    <dl class="ec-totalBox__spec">
+                        <dt>小計</dt>
+                        <dd>{{ subtotal|price }}</dd>
+                    </dl>
+                    <dl class="ec-totalBox__spec">
+                        <dt>手数料</dt>
+                        <dd>{{ charge|price }}</dd>
+                    </dl>
+                    <dl class="ec-totalBox__spec">
+                        <dt>送料</dt>
+                        <dd>{{ deliveryFeeTotal|price }}</dd>
+                    </dl>
+                    {% if discount < 0 %}
+                    <dl class="ec-totalBox__spec">
+                        <dt>値引き</dt>
+                        <dd>{{ discount|price }}</dd>
+                    </dl>
+                    {% endif %}
+                    <div class="ec-totalBox__total">合計<span
+                                class="ec-totalBox__price">{{ total|price }}</span><span
+                                class="ec-totalBox__taxLabel">税込</span></div>
+                    <div class="ec-totalBox__paymentTotal">合計<span
+                                class="ec-totalBox__price">{{ paymentTotal|price }}</span><span
+                                class="ec-totalBox__taxLabel">税込</span></div>
+                </div>
+            </div>
+        </div>
+        <div class="ec-role ec-orderRole">
+            <div class="ec-orderRole__detail">
+                <a href="{{ url('mypage') }}" class="ec-inlineBtn ec-font-bold">戻る</a>
+            </div>
+        </div>
+    </div>
+{% endblock %}

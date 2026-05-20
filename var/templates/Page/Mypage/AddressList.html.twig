@@ -1,0 +1,90 @@
+{#
+  BeMart address book list — EC-CUBE goCustomerAddressList.
+
+  PORT of EC-CUBE 4.3 default-theme `Mypage/delivery.twig`
+  (src/Eccube/Resource/template/default/Mypage/delivery.twig).
+
+  Markup skeleton, `ec-mypageRole` / `ec-off1Grid` / `ec-addressRole` /
+  `ec-addressList` / `ec-addressList__item` classes and the block
+  structure are kept verbatim from EC-CUBE. Only the dynamic bindings
+  are rebound to the AddressList resource body
+  (src/Resource/Page/Mypage/AddressList.php):
+    customerId, count,
+    addresses[] { addressId, name01, name02, kana01, kana02,
+                  companyName, phoneNumber, postalCode, pref,
+                  addr01, addr02 }
+
+  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `Customer.CustomerAddresses` -> the resource body's `addresses`
+     list; `|length` -> the body's `count`.
+   - `eccube_config.eccube_deliv_addr_max` — the address-count cap that
+     gates the add-button vs the over-limit message. The render-diff
+     stub feeds the same cap on both sides so the add-button branch is
+     taken identically (a list under the cap).
+   - `csrf_token_for_anchor()` — EC-CUBE per-request CSRF widget on the
+     delete anchor; BeMart's html context has no CSRF widget, so the
+     attribute is absent. EC-CUBE-runtime only — enumerated as residual.
+   - MISSING BODY FIELD — EC-CUBE renders `CustomerAddress.Pref` (the
+     prefecture's display NAME, from the `mtb_pref` master). BeMart's
+     AddressEntity carries `pref` as the integer master id only (no Pref
+     name join), so the integer is rendered in the address line and the
+     name is OMITTED. Enumerated as residual / follow-up.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'mypage' %}
+{% set route = 'mypage_delivery' %}
+{% set title = 'マイページ' %}
+
+{% block main %}
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>マイページ/お届け先一覧</h1>
+            </div>
+            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'delivery', name01: name01|default(''), name02: name02|default('') } %}
+        </div>
+        <div class="ec-mypageRole">
+            {% if count > 0 %}
+                <p class="ec-para-normal">{{ count }}件のお届け先があります</p>
+            {% else %}
+                <p class="ec-para-normal">お届け先は登録されていません。</p>
+            {% endif %}
+        </div>
+        <div class="ec-mypageRole">
+            <div class="ec-off1Grid">
+                <div class="ec-off1Grid__cell">
+                    <div class="ec-addressRole">
+                        <div class="ec-addressRole__actions">
+                            <a class="ec-inlineBtn" href="{{ url('mypage_delivery_new') }}">新規お届け先を追加する</a>
+                        </div>
+                    </div>
+                    {% if count > 0 %}
+                        <div class="ec-addressList">
+                            {% for CustomerAddress in addresses %}
+                                <div class="ec-addressList__item">
+                                    <a class="ec-addressList__remove" href="{{ url('mypage_delivery_delete', { id : CustomerAddress.addressId }) }}" data-method="delete">
+                                        <div class="ec-icon">
+                                            <img src="{{ asset('assets/icon/cross.svg') }}" alt="remove">
+                                        </div>
+                                    </a>
+                                    <div class="ec-addressList__address">
+                                        <div>{{ CustomerAddress.name01 }}&nbsp;{{ CustomerAddress.name02 }}</div>
+                                        <div>〒{{ CustomerAddress.postalCode }} {{ CustomerAddress.pref }}{{ CustomerAddress.addr01 }}{{ CustomerAddress.addr02 }}</div>
+                                        <div>{{ CustomerAddress.phoneNumber }}</div>
+                                    </div>
+                                    <div class="ec-addressList__action">
+                                        <a class="ec-inlineBtn" href="{{ url('mypage_delivery_edit', { id : CustomerAddress.addressId }) }}">変更</a>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
