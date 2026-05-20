@@ -8,12 +8,77 @@ Phase 2 inputs that drive the EC-CUBE → BEAR.Sunday + Be Framework migration.
 sql/
 ├── schema/                              # source-of-truth EC-CUBE 4.3 schema
 │   └── ec-cube-4.3-mysql-mysqldump.sql  # 65 tables, structure only, utf8mb4_bin
+├── seed/                                # committed reference/master data
+│   └── mtb-master.sql                   # 22 mtb_* tables, 395 reference rows
 ├── diff/                                # planning docs
 │   └── entity-vs-eccube.md              # BeMart Entity ↔ EC-CUBE table diff (Phase 2b)
+├── setup-db.sh                          # reproducible prod DB bring-up
 └── README.md
 ```
 
-Future (Phase 2b+): `sql/migrations/` (schema deltas), `sql/fixtures/` (seed data).
+Future (Phase 2b+): `sql/migrations/` (schema deltas).
+
+## Production database bring-up
+
+A live production database needs two committed artefacts: the **schema**
+(`schema/ec-cube-4.3-mysql-mysqldump.sql`) and the **mtb_\* master seed**
+(`seed/mtb-master.sql`). `setup-db.sh` stitches them together so a prod DB
+can be stood up reproducibly:
+
+```bash
+# from a DATABASE_URL (Symfony/Doctrine style)
+sql/setup-db.sh 'mysql://dbuser:secret@127.0.0.1:3306/eccubedb?charset=utf8mb4'
+
+# or from explicit args
+sql/setup-db.sh --host 127.0.0.1 --port 3306 \
+                --user dbuser --pass secret --db eccubedb
+
+# or from the DATABASE_URL environment variable
+DATABASE_URL='mysql://...' sql/setup-db.sh
+```
+
+The script:
+
+1. **DROPs + CREATEs** the target database (`utf8mb4` / `utf8mb4_bin`,
+   matching the dump). It is idempotent — re-running gives the same result.
+   The DROP is required because the schema dump uses bare `CREATE TABLE`
+   (not `CREATE TABLE IF NOT EXISTS`). **Warning:** any existing data in the
+   target database is destroyed; never point it at a populated prod DB —
+   use it to *bring up* a fresh one.
+2. Loads the schema **wrapped in `SET FOREIGN_KEY_CHECKS=0/1`**. The dump
+   carries cross-table FKs but no such pragma, so a plain sequential load
+   trips on the first table (`dtb_authority_role` → `dtb_member`). This
+   mirrors the workaround in `be/tests/Sql/bootstrap.php` (Phase 2a Step 2).
+3. Loads `seed/mtb-master.sql`.
+4. Prints exact `COUNT(*)` per `mtb_*` table as a sanity check
+   (e.g. `mtb_pref = 47`).
+
+After this, the database has the full schema + all reference data and is
+ready for `dtb_*` operational data. Migrating `dtb_*` customer/order/product
+data from a live EC-CUBE instance is a **separate operational concern** and
+is **not** performed by this script.
+
+## The mtb_* master seed (`seed/mtb-master.sql`)
+
+`mtb_*` tables are EC-CUBE's reference/enum data — prefectures, order
+statuses, sale types, sexes, jobs, csv types, authorities, countries,
+device types, rounding/tax types, work flags, etc. This is the seedable,
+version-controllable part of the database (master data, no PII), so it is
+committed.
+
+- **Source:** EC-CUBE 4.3's installer fixtures —
+  `src/Eccube/Resource/doctrine/import_csv/ja/mtb_*.csv` (the same CSVs
+  EC-CUBE's installer / `bin/console eccube:fixtures:load` read). The
+  EC-CUBE source is cloned at `tools/ec-cube-source/` (gitignored).
+- **Coverage:** all 22 `mtb_*` tables in the schema, 395 reference rows
+  total. (`definition.yml` also lists `mtb_shipping_status`, but EC-CUBE 4.3
+  ships no such table or CSV — it is a stale entry and is correctly absent.)
+- **Idempotent:** each table is `TRUNCATE`d then re-`INSERT`ed, wrapped in
+  `SET FOREIGN_KEY_CHECKS=0/1` (mtb_* rows are FK targets of dtb_* tables).
+  Applying the seed alone, or re-running `setup-db.sh`, is safe.
+
+To regenerate the seed after an EC-CUBE version bump, re-extract from the
+updated CSVs under `tools/ec-cube-source/.../import_csv/ja/`.
 
 ## Workflow — ALPS-first
 
