@@ -33,6 +33,8 @@ use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlAdminCommand;
@@ -61,6 +63,8 @@ use MyVendor\BeMart\Be\Reason\Query\SqlPasswordResetTokenStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlPluginStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery;
+use MyVendor\BeMart\Be\Reason\Query\SqlProductCommand;
+use MyVendor\BeMart\Be\Reason\Query\SqlProductQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlShippingAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
@@ -296,6 +300,30 @@ use function dirname;
  *       it is read-only, the productCode is never minted by this slice.
  *       A productCode that only appears on a non-default variation row
  *       is an honest miss → null)
+ *   - ProductQueryInterface        → SqlProductQuery (Phase 2b — the
+ *       admin product read side. item / listAll / search / listForExport
+ *       against the flattened Product × default-ProductClass row:
+ *       productName / productStatus / description / searchWord / note
+ *       from dtb_product, productCode / price02 / stock from the default
+ *       dtb_product_class row (both class_category_id* axes NULL — the
+ *       same convention SqlProductClassQuery uses). product_code lives
+ *       on dtb_product_class, so the natural key resolves through the
+ *       class table. No generator: it is read-only)
+ *   - ProductCommandInterface      → SqlProductCommand (Phase 2b — the
+ *       admin product write side. create / update / delete / copy /
+ *       bulkUpdateStatus. ProductEntity is a flattened two-table row,
+ *       so create / copy INSERT BOTH a dtb_product header and its
+ *       default dtb_product_class row inside one atomic unit (SAVEPOINT-
+ *       aware, same shape as SqlCsvColumnConfigStorage). delete is a
+ *       SOFT delete — flips dtb_product.product_status_id to
+ *       STATUS_WITHDRAWN=3, never a physical DELETE (order-history
+ *       snapshots must survive), idempotent on replay. bulkUpdateStatus
+ *       flips product_status_id for a list of codes, returning the
+ *       count actually changed. product_status_id is a nullable FK to
+ *       the empty mtb_product_status master — seeded via
+ *       seedProductStatus. No generator: ProductEntity is keyed by the
+ *       caller-supplied productCode string; dtb_product.id is autoinc
+ *       and internal)
  *   - CsvColumnConfigStorageInterface → SqlCsvColumnConfigStorage
  *       (Phase 2b — CSV column-config storage against dtb_csv. Each row
  *       is one column-config entry; a csvType owns many rows.
@@ -606,6 +634,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(ProductClassQueryInterface::class)
                     ->to(SqlProductClassQuery::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(ProductQueryInterface::class)
+                    ->to(SqlProductQuery::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(ProductCommandInterface::class)
+                    ->to(SqlProductCommand::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(CsvColumnConfigStorageInterface::class)
                     ->to(SqlCsvColumnConfigStorage::class)
