@@ -240,6 +240,7 @@
       {"id": "taxType", "title": "課税区分","tag": "src-entity", "doc": {"value": "1=課税（商品・送料・手数料・値引き）, 2=不課税（ポイント値引き）, 3=非課税。税額計算の対象判定に使用"}},
       {"id": "taxDisplayType", "title": "税表示区分","tag": "src-entity", "doc": {"value": "1=税抜（商品明細で使用）, 2=税込（送料・手数料・値引きで使用）。orderItemTypeと連動し、明細行の価格が税抜/税込どちらで格納されているかを示す"}},
       {"id": "saleTypeName", "title": "販売種別","tag": "src-entity", "doc": {"value": "販売種別の名称。カート分離の基準となる。異なる販売種別の商品は別カート(cartKey)に分離される"}},
+      {"id": "saleTypeId", "title": "販売種別ID","tag": "src-entity", "doc": {"value": "dtb_product_class.sale_type_id — mtb_sale_type への FK（1=通常販売, 2=予約販売, 3=ダウンロード販売）。cartKey の組み立て(`{sessionPrefix}_{saleTypeId}`)に用いられ、異なる販売種別の商品を別カートに分離する基準。マスタ未登録時は 0 にフォールバック"}},
       {"id": "deliveryFeeAmount", "title": "地域別送料","tag": "src-entity", "doc": {"value": "都道府県別の送料金額（DeliveryFee.fee）。配送方法（Delivery）と都道府県（Pref）の組み合わせで定義されるマスタ値。DeliveryFeePreprocessorでdeliveryFee（商品別送料）と合算されdeliveryFeeTotal（送料合計）に集計される"}},
       {"id": "deliveryDurationName", "title": "発送日目安名","tag": "src-entity", "doc": {"value": "発送日目安の表示名。例: 1〜2日後"}},
       {"id": "deliveryDurationDays", "title": "発送日目安日数","tag": "src-entity", "doc": {"value": "発送日目安の日数値。配送希望日の選択肢計算に使用。負の値はお取り寄せ品を意味し、配送希望日の選択不可となる"}},
@@ -274,6 +275,7 @@
         "doc": {"value": "dtb_product_class 1行 — 1商品の規格バリエーション。重要な発見（Phase 2a Step 3 Favorite/Cart 実装由来）: dtb_product_class.class_category_id1 と class_category_id2 は dtb_class_category への2つの独立 FK で、それぞれ「軸1」「軸2」を表す（OOP の継承構造ではなく、バリエーション軸の2次元マトリクス）。バリエーション無し商品は両方 NULL の \"default class\" 行を1件持ち、Favorite / Cart の productCode 解決はこの IS NULL 条件で行う。price02（販売価格）と product_code は class 行に乗り、商品ヘッダ（dtb_product）には乗らない"},
         "descriptor": [
           {"href": "#productCode"},
+          {"href": "#productName"},
           {"href": "#stock"},
           {"href": "#stockUnlimited"},
           {"href": "#saleLimit"},
@@ -284,6 +286,7 @@
           {"href": "#currencyCode"},
           {"href": "#pointRate"},
           {"href": "#saleTypeName"},
+          {"href": "#saleTypeId"},
           {"href": "#classCategory1"},
           {"href": "#classCategory2"},
           {"href": "#classCategoryName"},
