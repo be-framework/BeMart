@@ -23,6 +23,7 @@ use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
@@ -43,6 +44,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlLayoutStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlLoginHistoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
@@ -133,6 +135,15 @@ use function dirname;
  *       guard, a trivial existence probe against dtb_customer.email,
  *       the natural read-guard companion of the customer write side)
  *   - OrderQueryInterface          → SqlOrderQuery
+ *   - OrderCommandInterface        → SqlOrderCommand (Phase 2b — write
+ *       side of dtb_order: register / update / updateStatus. register
+ *       is an UPSERT keyed by pre_order_id — it PROMOTES an existing
+ *       pre-order row (PROCESSING→NEW, EC-CUBE's mutate-the-same-row
+ *       checkout semantics) and only INSERTs when no pre-order exists
+ *       (admin data-entry order). Mirrors SqlOrderQuery's column↔field
+ *       map so a read-after-write round-trips. order_status_id has no
+ *       FK constraint so no master seeding is needed; customer_id is an
+ *       int FK — a non-numeric BeMart handle writes NULL)
  *   - FavoriteStorageInterface     → SqlFavoriteStorage
  *   - CartQueryInterface           → SqlCartQuery
  *   - CartCommandInterface         → SqlCartCommand
@@ -391,6 +402,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(OrderQueryInterface::class)
                     ->to(SqlOrderQuery::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(OrderCommandInterface::class)
+                    ->to(SqlOrderCommand::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(FavoriteStorageInterface::class)
                     ->to(SqlFavoriteStorage::class)
