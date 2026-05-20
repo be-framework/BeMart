@@ -316,6 +316,71 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert (idempotent) an mtb_pref row so the FK from
+     * dtb_customer_address.pref_id → mtb_pref.id can be satisfied.
+     * The structure-only schema dump leaves mtb_pref empty, so any
+     * test that wants to set a non-NULL pref must seed the master row
+     * first. id is supplied (matches the EC-CUBE 1..47 prefecture
+     * convention); name/sort_no get sensible placeholders.
+     */
+    protected function insertPref(int $id, string $name = 'Tokyo'): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_pref (id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'pref',
+        ]);
+    }
+
+    /**
+     * Insert a dtb_customer_address row with sensible defaults. Returns
+     * the inserted id.
+     *
+     * NOT NULL columns we MUST satisfy: name01, name02, create_date,
+     * update_date, discriminator_type. Everything else (customer_id,
+     * country_id, pref_id, kana01/02, company_name, postal_code,
+     * addr01/02, phone_number) is column-nullable and defaults to NULL
+     * so callers only override what they need. Most call sites pass
+     * `customer_id` (the FK to dtb_customer) since the SqlAddressStorage
+     * read paths filter by it.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertAddress(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'customer_id' => null,
+            'country_id' => null,
+            'pref_id' => null,
+            'name01' => 'Yamada',
+            'name02' => sprintf('Addr%d', $counter),
+            'kana01' => null,
+            'kana02' => null,
+            'company_name' => null,
+            'postal_code' => null,
+            'addr01' => null,
+            'addr02' => null,
+            'phone_number' => null,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'customeraddress',
+        ], $overrides);
+
+        $this->executeInsert('dtb_customer_address', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
