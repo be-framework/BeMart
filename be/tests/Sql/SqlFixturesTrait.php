@@ -1124,6 +1124,55 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert (idempotently) an mtb_customer_status row so the FK from
+     * dtb_customer.customer_status_id → mtb_customer_status.id can be
+     * satisfied.
+     *
+     * mtb_customer_status is empty in the structure-only schema dump.
+     * EC-CUBE 4.3 ships exactly three rows: 1 = 仮会員 (provisional —
+     * email unverified), 2 = 本会員 (active — verified), 3 = 退会
+     * (withdrawn). Those are the only `customerStatus` values
+     * {@see \MyVendor\BeMart\Be\Reason\Query\SqlCustomerCommand} ever
+     * writes (a fresh registration → 2, activation flips 1→2,
+     * withdrawal → 3). {@see seedCustomerStatus} seeds all three.
+     */
+    protected function insertCustomerStatus(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_customer_status '
+            . '(id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'customerstatus',
+        ]);
+    }
+
+    /**
+     * Seed the master table dtb_customer's FK references
+     * (mtb_customer_status) with the EC-CUBE 4.3 canonical rows.
+     *
+     * The structure-only schema dump leaves mtb_customer_status empty,
+     * and `dtb_customer.customer_status_id` is a (nullable) FK to it —
+     * so any SQL test that inserts a dtb_customer row with a NON-NULL
+     * customer_status_id (every {@see \MyVendor\BeMart\Be\Reason\Query\SqlCustomerCommand}
+     * write does — registration writes 2, withdrawal 3) MUST call this
+     * first. Idempotent (`INSERT IGNORE`), so calling it once in setUp
+     * is sufficient. Same precedent {@see seedAdminMasters} /
+     * {@see seedLoginHistoryStatus} set for the analogous empty-master
+     * FK case.
+     */
+    protected function seedCustomerStatus(): void
+    {
+        $this->insertCustomerStatus(1, '仮会員');
+        $this->insertCustomerStatus(2, '本会員');
+        $this->insertCustomerStatus(3, '退会');
+    }
+
+    /**
      * Insert a dtb_login_history row (one admin-login-attempt audit
      * record). Returns the inserted id.
      *
