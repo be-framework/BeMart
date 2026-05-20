@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Form\ContactForm;
+use MyVendor\BeMart\Form\ForgotForm;
 use MyVendor\BeMart\Module\HtmlModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -33,37 +33,23 @@ use function str_contains;
 use function trim;
 
 /**
- * Phase 3 — fidelity check for the Contact (goContactForm) HTML port.
+ * Phase 3 — fidelity check for the ForgotPassword (goRequestPasswordReset)
+ * HTML port.
  *
  * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
  * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
  *
- * WAVE-1 was authored BEFORE the form-page recipe existed: static
- * `<input>`s with no value/error binding, render-diff 46 lines.
- *
- * This rework adopts the Ray.WebFormModule form-page recipe (see
- * var/templates/README.md). BeMart's Contact resource now exposes a real
- * {@see ContactForm} (an AbstractForm) as `body.form`, and the port
- * renders the inputs via `{{ form.input('contactEmail') }}`. This test
- * renders EC-CUBE's `form_widget` / `form_label` calls through the SAME
- * `ContactForm` instance — so the widgets diff to ZERO.
- *
- * MISSING-BODY-FIELD residual. EC-CUBE's `ContactType` collects MORE
- * fields than BeMart's Contact resource carries. EC-CUBE's form has
- * name / kana / address (postal_code / pref / addr01 / addr02) /
- * phone_number / email / contents; BeMart's `SubmitContactInput` (and
- * the ALPS `ContactForm` descriptor) model ONLY contactName01 /
- * contactName02 / contactEmail / contactContents. The kana / address /
- * phone <dl> rows therefore exist in EC-CUBE's output with no BeMart
- * body field behind them — they are OMITTED from BeMart's port (never
- * invented) and recorded here as an explained EC-CUBE-only residual.
- *
- * Per the Phase-3 recipe these missing-field rows are NOT fixed in a
- * template wave (no Entity/SQL/ALPS enrichment); the Contact page is
- * FLAGGED for a follow-up vertical-slice that would model kana / address
- * / phone on `SubmitContactInput` + the ALPS `ContactForm` descriptor.
+ * EC-CUBE's `Forgot/index.twig` is a single-input FORM page. This port
+ * follows the Ray.WebFormModule form-page recipe (see
+ * var/templates/README.md): the ForgotPassword resource exposes a real
+ * {@see ForgotForm} (an AbstractForm) as `body.form`, the port renders
+ * `{{ form.input('login_email') }}`, and this test renders EC-CUBE's
+ * `form_widget(form.login_email)` through the SAME `ForgotForm` instance
+ * so the input diffs to ZERO. The residual is the genuinely
+ * EC-CUBE-runtime-only `<head>` frame material + the empty CSRF hidden
+ * value.
  */
-final class ContactHtmlRenderTest extends TestCase
+final class ForgotPasswordHtmlRenderTest extends TestCase
 {
     /**
      * EC-CUBE lines with no BeMart counterpart and vice versa. Each entry
@@ -83,41 +69,14 @@ final class ContactHtmlRenderTest extends TestCase
         '});',
         '});',
         '</script>',
-        '<title>BeMart / お問い合わせ</title>',
-        '<title>EC-CUBE / お問い合わせ</title>',
+        '<title>BeMart / パスワードの再発行</title>',
+        '<title>EC-CUBE / パスワードの再発行</title>',
         '<meta name="author" content="">',
 
-        // --- contact form: CSRF hidden input ----------------------------
+        // --- forgot form: CSRF hidden input -----------------------------
         // EC-CUBE's hidden _token carries a live form CSRF token; BeMart's
         // html context has no CSRF widget, so the value is empty.
         '<input type="hidden" name="_token" value="">',
-    ];
-
-    /**
-     * EC-CUBE-side lines for the kana / address / phone <dl> rows that
-     * BeMart's Contact body does NOT model (missing-body-field residual).
-     * EC-CUBE renders these rows; BeMart's port omits them entirely. Each
-     * line is whitespace-collapsed exactly as the diff sees it. NOT fixed
-     * in this template wave — flagged for a vertical-slice enrichment.
-     *
-     * @var list<string>
-     */
-    private const ECCUBE_MISSING_FIELD_LINES = [
-        // kana row — `<dt>` label + `<dd>` half-input wrapper.
-        '<label class="ec-label">お名前(カナ)</label>',
-        // address row — postal / zip-help / pref-select / addr lines.
-        '<label class="ec-label">住所</label>',
-        '<div class="ec-zipInput">',
-        '<span>〒</span>',
-        '<div class="ec-zipInputHelp">',
-        '<div class="ec-zipInputHelp__icon">',
-        '<div class="ec-icon"><img',
-        'src="/assets/icon/question-white.svg" alt="">',
-        '</div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>',
-        '<div class="ec-select">',
-        // phone row — `<dt>` label + `<dd>` tel-input wrapper.
-        '<label class="ec-label">電話番号</label>',
-        '<div class="ec-telInput">',
     ];
 
     private ResourceInterface $resource;
@@ -132,9 +91,9 @@ final class ContactHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testContactPageRendersAsHtmlDocument(): void
+    public function testForgotPageRendersAsHtmlDocument(): void
     {
-        $ro = $this->resource->get('page://self/contact');
+        $ro = $this->resource->get('page://self/forgot-password');
 
         $this->assertSame(Code::OK, $ro->code);
 
@@ -148,21 +107,21 @@ final class ContactHtmlRenderTest extends TestCase
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testContactPagePreservesEcCubeMarkupStructure(): void
+    public function testForgotPagePreservesEcCubeMarkupStructure(): void
     {
-        $html = $this->resource->get('page://self/contact')->toString();
+        $html = $this->resource->get('page://self/forgot-password')->toString();
 
         foreach ([
-            '<div class="ec-contactRole">',
+            '<div class="ec-role">',
             '<div class="ec-pageHeader">',
+            '<div class="ec-forgotRole">',
+            '<form name="form1" id="form1" method="post"',
             '<div class="ec-off1Grid">',
             'class="ec-off1Grid__cell"',
-            '<form method="post" action="/contact" class="h-adr" novalidate>',
-            '<span class="p-country-name"',
-            '<p class="ec-para-normal">',
+            'class="ec-forgotRole__form"',
+            'class="ec-forgotRole__intro"',
             '<div class="ec-borderedDefs">',
-            '<div class="ec-halfInput">',
-            '<div class="ec-RegisterRole__actions">',
+            '<div class="ec-input">',
             '<div class="ec-off4Grid">',
             'class="ec-blockBtn--action"',
         ] as $needle) {
@@ -171,30 +130,25 @@ final class ContactHtmlRenderTest extends TestCase
     }
 
     /**
-     * The form inputs are rendered by a real form library: the page
-     * carries `<input>` / `<textarea>` with the EC-CUBE field names.
+     * The email input is rendered by a real form library.
      */
-    public function testContactPageRendersRealFormInputs(): void
+    public function testForgotPageRendersRealFormInput(): void
     {
-        $html = $this->resource->get('page://self/contact')->toString();
+        $html = $this->resource->get('page://self/forgot-password')->toString();
 
-        $this->assertStringContainsString('name="contactName01"', $html);
-        $this->assertStringContainsString('placeholder="姓"', $html);
-        $this->assertStringContainsString('name="contactName02"', $html);
-        $this->assertStringContainsString('name="contactEmail"', $html);
-        $this->assertStringContainsString('<textarea', $html);
-        $this->assertStringContainsString('name="contactContents"', $html);
+        $this->assertStringContainsString('name="login_email"', $html);
+        $this->assertStringContainsString('type="text"', $html);
     }
 
     /**
-     * The honesty test: diff BeMart's rendered contact page against
+     * The honesty test: diff BeMart's rendered forgot page against
      * EC-CUBE's own rendering. Every difference must be in the residual
-     * allowlist or the explained missing-body-field family.
+     * allowlist.
      */
-    public function testContactHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    public function testForgotHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        $beMart = $this->resource->get('page://self/contact')->toString();
-        $ecCube = $this->renderEcCubeContact();
+        $beMart = $this->resource->get('page://self/forgot-password')->toString();
+        $ecCube = $this->renderEcCubeForgot();
 
         $beMartLines = $this->normalize($beMart);
         $ecCubeLines = $this->normalize($ecCube);
@@ -210,23 +164,19 @@ final class ContactHtmlRenderTest extends TestCase
         $this->assertSame(
             [],
             $unexplained,
-            "BeMart's contact HTML diverged from EC-CUBE's beyond the "
+            "BeMart's forgot HTML diverged from EC-CUBE's beyond the "
             . "residual allowlist. Unexplained diff lines:\n  "
             . implode("\n  ", $unexplained)
             . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
-        // With the modelled form inputs rendered by a real ContactForm on
-        // both sides, wave-1's 46-line residual collapses to 23 — ALL
-        // explained: 13 shared <head>/<title>/CSRF frame lines + 10
-        // distinct EC-CUBE-only kana/address/phone missing-body-field
-        // lines (some collapse-equal across the three rows). The
-        // form-widget residual family is eliminated; what remains is the
-        // frame + the genuinely-missing fields, which are flagged for a
-        // follow-up vertical slice (not fixed in a template wave).
+        // With the email input + label rendered by a real ForgotForm /
+        // ported `form_label` on both sides, the residual is purely the
+        // shared <head> frame material + the empty CSRF hidden value —
+        // no form-widget residual at all. Same family as the Login pilot.
         $this->assertLessThanOrEqual(
-            24,
+            12,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -235,10 +185,6 @@ final class ContactHtmlRenderTest extends TestCase
     private static function isResidual(string $line): bool
     {
         if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
-
-        if (in_array($line, self::ECCUBE_MISSING_FIELD_LINES, true)) {
             return true;
         }
 
@@ -256,16 +202,13 @@ final class ContactHtmlRenderTest extends TestCase
     }
 
     /**
-     * Render EC-CUBE 4.3's real Contact/index.twig + default_frame.twig
+     * Render EC-CUBE 4.3's real Forgot/index.twig + default_frame.twig
      * from the gitignored clone, with EC-CUBE's Twig API stubbed.
      *
-     * `form_widget` / `form_label` for the four MODELLED fields delegate
-     * to the real {@see ContactForm} so they diff to ZERO. The kana /
-     * address / phone compound children resolve to `null` field names;
-     * the stubbed form_widget renders nothing for them — those rows are
-     * the missing-body-field residual.
+     * `form_widget(form.login_email)` delegates to the real
+     * {@see ForgotForm} so the input is byte-identical to BeMart's port.
      */
-    private function renderEcCubeContact(): string
+    private function renderEcCubeForgot(): string
     {
         $ecCubeTemplates = dirname(__DIR__, 2)
             . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
@@ -279,21 +222,9 @@ final class ContactHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        return $twig->render('Contact/index.twig', [
+        return $twig->render('Forgot/index.twig', [
             'form' => new EcCubeStub([
-                // MODELLED fields — resolve to ContactForm field names.
-                'name' => new EcCubeStub([
-                    'name01' => 'contactName01', 'name02' => 'contactName02',
-                ]),
-                'email' => 'contactEmail',
-                'contents' => 'contactContents',
-                // MISSING fields — kana / address / phone have no BeMart
-                // body field. Their compound leaves resolve to null; the
-                // stubbed form_widget emits nothing for them.
-                'kana' => new EcCubeStub([]),
-                'postal_code' => null,
-                'address' => new EcCubeStub([]),
-                'phone_number' => null,
+                'login_email' => 'login_email',
                 '_token' => '__token__',
             ]),
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
@@ -314,9 +245,9 @@ final class ContactHtmlRenderTest extends TestCase
             ]),
             'app' => new EcCubeStub(['session' => new EcCubeStub([
                 'flashbag' => new EcCubeFlashBag(),
-            ]), 'request' => new EcCubeStub(['_route' => 'contact'])]),
-            'subtitle' => 'お問い合わせ',
-            'title' => 'お問い合わせ',
+            ]), 'request' => new EcCubeStub(['_route' => 'forgot'])]),
+            'subtitle' => 'パスワードの再発行',
+            'title' => 'パスワードの再発行',
         ]);
     }
 
@@ -332,10 +263,7 @@ final class ContactHtmlRenderTest extends TestCase
             return $text;
         };
         $twig->addFilter(new TwigFilter('trans', $trans));
-        // EC-CUBE's real `nl2br` filter returns safe Markup (it emits
-        // <br /> tags). Mark the stub safe so Twig does not re-escape the
-        // <br /> the way it would for a plain string.
-        $twig->addFilter(new TwigFilter('nl2br', static fn (string $s): string => nl2br($s), ['is_safe' => ['html']]));
+        $twig->addFilter(new TwigFilter('nl2br', static fn (string $s): string => nl2br($s)));
         $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
         $twig->addFilter(new TwigFilter('price', static function ($n): string {
             $f = new \NumberFormatter('ja_JP', \NumberFormatter::CURRENCY);
@@ -358,31 +286,22 @@ final class ContactHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
-        // FORM-PAGE recipe: `form_widget(form.<field>)` for the four
-        // MODELLED fields delegates to BeMart's real ContactForm so the
-        // inputs are byte-identical. The missing kana / address / phone
-        // compound children resolve to null — the stub emits nothing for
-        // them (those rows are the missing-body-field residual).
-        $contactForm = (new FormFactory())->newInstance(ContactForm::class);
-        $modelled = ['contactName01', 'contactName02', 'contactEmail', 'contactContents'];
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($contactForm, $modelled): Markup {
+        // FORM-PAGE recipe: `form_widget(form.login_email)` delegates to
+        // BeMart's real ForgotForm so the input is byte-identical.
+        $forgotForm = (new FormFactory())->newInstance(ForgotForm::class);
+        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($forgotForm): Markup {
             if ($field === '__token__') {
                 return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
             }
 
-            if ($contactForm instanceof ContactForm && is_string($field) && in_array($field, $modelled, true)) {
-                return new Markup($contactForm->input($field), 'UTF-8');
+            if ($forgotForm instanceof ForgotForm && is_string($field) && $field !== '') {
+                return new Markup($forgotForm->input($field), 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');
         }));
-        // EC-CUBE's `form_label` renders a Symfony FormView <label>; for
-        // the MODELLED fields BeMart authors the same `<label
-        // class="ec-label">ja</label>`, so the stub renders the real
-        // <label> and the two diff to zero. For the MISSING kana /
-        // address / phone rows the <label> still renders on EC-CUBE's
-        // side — those label lines are listed in the missing-field
-        // residual family.
+        // `form_label` renders the same `<label class="ec-label">` BeMart
+        // authors plainly — the label IS a port, so it diffs to zero.
         $twig->addFunction(new TwigFunction('form_label', static function ($f = '', $l = '', $o = []) use ($trans): Markup {
             $text = is_string($l) ? $trans($l) : '';
 

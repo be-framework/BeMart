@@ -8,25 +8,37 @@
   `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` / `ec-select` /
   `ec-input` / `ec-telInput` / `ec-RegisterRole__actions` / `ec-off4Grid`
   classes + the <dl>/<dt>/<dd> definition-list structure are kept
-  verbatim from EC-CUBE. Only the dynamic bindings are rebound to the
-  Contact resource body (src/Resource/Page/Contact.php):
-    transitionId, fields[] (5), submitTo { method, href }, csrfToken
+  verbatim from EC-CUBE.
 
-  Note — EC-CUBE's contact form collects MORE fields than BeMart's
-  Contact resource carries. EC-CUBE's form has name / kana / address
-  (postal/pref/addr) / phone_number / email / contents; BeMart's
-  SubmitContactInput models only contactName01 / contactName02 /
-  contactEmail / contactContents (the ALPS `ContactForm` descriptor
-  scope). The kana / address / phone rows are therefore EC-CUBE markup
-  with no BeMart body field — they are kept (verbatim skeleton) but their
-  widgets resolve to empty/plain inputs, and the difference is enumerated
-  as a residual family. See the render test for the missing-field note.
+  Phase 3 — FORM page (Ray.WebFormModule). Wave 1 authored static
+  `<input>`s (residual 46 lines). This rework adopts the form-page
+  recipe: the Contact resource exposes a real `ContactForm` (an
+  AbstractForm) as `body.form`, and the modelled inputs are rendered
+  through it:
+
+    {{ form.input('contactEmail')|raw }}   <- real <input> w/ name/attrs
+    {{ form.error('contactEmail') }}       <- inline Be-domain error
+
+  Validation authority stays with the Be Framework Becoming chain.
+
+  MISSING-FIELD NOTE — EC-CUBE's contact form collects MORE fields than
+  BeMart's Contact resource carries. EC-CUBE's `ContactType` has name /
+  kana / address (postal_code / pref / addr01 / addr02) / phone_number /
+  email / contents; BeMart's `SubmitContactInput` (and the ALPS
+  `ContactForm` descriptor) model ONLY contactName01 / contactName02 /
+  contactEmail / contactContents. Per the Phase-3 recipe a template wave
+  does NOT enrich the Input/ALPS — the kana / address / phone <dl> rows
+  are therefore OMITTED from this port (never invented; the resource has
+  no body field behind them). They are enumerated as an EC-CUBE-only
+  missing-body-field residual family in the render test, and the Contact
+  page is FLAGGED for a follow-up vertical-slice enrichment.
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
    - `form_label` / `form_widget` / `form_errors` — Symfony FormView;
-     BeMart carries field names, not a FormView, so labels + inputs are
-     authored plainly. FormView-runtime markup is a residual family.
+     `form.input(...)` / `form.error(...)` (Ray.WebFormModule) is
+     BeMart's equivalent. The render-diff test stubs EC-CUBE's
+     `form_widget` to delegate to the same ContactForm.
    - `form._token` — Symfony CSRF widget; kept as a hidden input with an
      empty value (BeMart's html context has no CSRF widget).
    - the entity-extension `{% for f in form|filter(...) %}` loop is
@@ -65,8 +77,10 @@
                             </dt>
                             <dd>
                                 <div class="ec-halfInput">
-                                    <input type="text" name="contactName01" placeholder="姓">
-                                    <input type="text" name="contactName02" placeholder="名">
+                                    {{ form.input('contactName01')|raw }}
+                                    {{ form.input('contactName02')|raw }}
+                                    {{ form.error('contactName01') }}
+                                    {{ form.error('contactName02') }}
                                 </div>
                             </dd>
                         </dl>
@@ -76,7 +90,8 @@
                             </dt>
                             <dd>
                                 <div class="ec-input">
-                                    <input type="text" name="contactEmail">
+                                    {{ form.input('contactEmail')|raw }}
+                                    {{ form.error('contactEmail') }}
                                 </div>
                             </dd>
                         </dl>
@@ -86,7 +101,8 @@
                             </dt>
                             <dd>
                                 <div class="ec-input">
-                                    <textarea name="contactContents"></textarea>
+                                    {{ form.input('contactContents')|raw }}
+                                    {{ form.error('contactContents') }}
                                 </div>
                                 <p>ご注文に関するお問い合わせには、必ず「ご注文番号」をご記入くださいますようお願いいたします。</p>
                             </dd>
