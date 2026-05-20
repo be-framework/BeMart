@@ -705,6 +705,81 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_class_name row (a product-variation AXIS — e.g.
+     * "Color" / "Size"). Returns the inserted id.
+     *
+     * dtb_class_name's NOT NULL columns are name (varchar(255)),
+     * sort_no (int unsigned — display order, no DEFAULT), create_date,
+     * update_date, discriminator_type. `backend_name` is a nullable
+     * admin-only internal name and `creator_id` a nullable FK to
+     * dtb_member.
+     *
+     * The defaults match SqlClassNameStorage's INSERT contract:
+     * backend_name = NULL, creator_id = NULL (dtb_member is empty in
+     * the structure-only dump so any non-NULL value would raise FK
+     * 1452), sort_no = 0, discriminator_type = 'classname'.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertClassName(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'creator_id' => null,
+            'backend_name' => null,
+            'name' => sprintf('Axis %d', $counter),
+            'sort_no' => 0,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'classname',
+        ], $overrides);
+
+        $this->executeInsert('dtb_class_name', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
+     * Insert a dtb_class_category row (an axis VALUE — e.g. "Red"
+     * under the "Color" axis). Returns the inserted id.
+     *
+     * Used only to seed a child row that exercises
+     * SqlClassNameStorage::remove's defensive
+     * `DELETE FROM dtb_class_category WHERE class_name_id = ?` cascade
+     * (FK_9B0D1DBAB462FB2A). dtb_class_category's NOT NULL columns are
+     * name, sort_no, visible (DEFAULT 1), create_date, update_date,
+     * discriminator_type; class_name_id is the nullable FK back to
+     * dtb_class_name.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertClassCategory(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'class_name_id' => null,
+            'creator_id' => null,
+            'backend_name' => null,
+            'name' => sprintf('Value %d', $counter),
+            'sort_no' => 0,
+            'visible' => 1,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'classcategory',
+        ], $overrides);
+
+        $this->executeInsert('dtb_class_category', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert (idempotently) an mtb_work row so the FK from
      * dtb_member.work_id → mtb_work.id can be satisfied.
      *
