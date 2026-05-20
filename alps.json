@@ -335,6 +335,7 @@
           {"href": "#goProductList"},
           {"href": "#doAddCartItem"},
           {"href": "#doAddFavorite"},
+          {"href": "#doRemoveFavorite"},
           {"href": "#goCategory"},
           {"href": "#doCreateProduct"},
           {"href": "#doUpdateProduct"},
@@ -347,7 +348,8 @@
           {"href": "#goProduct"},
           {"href": "#goProductList"},
           {"href": "#goCategoryList"},
-          {"href": "#doCreateProduct"}
+          {"href": "#doCreateProduct"},
+          {"href": "#doCopyProduct"}
         ]
       },
 
@@ -388,7 +390,8 @@
         "descriptor": [
           {"href": "#Tag"},
           {"href": "#goTagList"},
-          {"href": "#doCreateTag"}
+          {"href": "#doCreateTag"},
+          {"href": "#doSortNoMove"}
         ]
       },
 
@@ -409,7 +412,8 @@
         "descriptor": [
           {"href": "#ClassName"},
           {"href": "#goClassNameList"},
-          {"href": "#doCreateClassName"}
+          {"href": "#doCreateClassName"},
+          {"href": "#doSortNoMove"}
         ]
       },
 
@@ -432,7 +436,9 @@
         "descriptor": [
           {"href": "#ClassCategory"},
           {"href": "#goClassCategoryList"},
-          {"href": "#doCreateClassCategory"}
+          {"href": "#doCreateClassCategory"},
+          {"href": "#doSortNoMove"},
+          {"href": "#doToggleVisible"}
         ]
       },
 
@@ -447,7 +453,8 @@
           {"href": "#classNameLabel"},
           {"href": "#classCategoryName"},
           {"href": "#quantity"},
-          {"href": "#unitPrice"}
+          {"href": "#unitPrice"},
+          {"href": "#goProduct"}
         ]
       },
 
@@ -655,6 +662,8 @@
           {"href": "#doUpdateOrder"},
           {"href": "#doUpdateOrderStatus"},
           {"href": "#doSendOrderMail"},
+          {"href": "#doUpdateTrackingNumber"},
+          {"href": "#doSendShippingNotifyMail"},
           {"href": "#doReorder"}
         ]
       },
@@ -724,7 +733,8 @@
           {"href": "#Customer"},
           {"href": "#goCustomer"},
           {"href": "#goCustomerList"},
-          {"href": "#doCreateCustomer"}
+          {"href": "#doCreateCustomer"},
+          {"href": "#doResendActivationMail"}
         ]
       },
 
@@ -762,8 +772,8 @@
         ]
       },
 
-      {"id": "Favorite", "title": "お気に入り","tag": "favorite src-entity",
-        "doc": {"value": "dtb_customer_favorite_product 1行を平坦化した投影。BeMart の FavoriteEntity と1:1 (customerId / productCode / productName / unitPrice の4項目)。productName と unitPrice は表示用スナップショットで、dtb_product / dtb_product_class への JOIN で取得（default class 規約: class_category_id1 IS NULL AND class_category_id2 IS NULL）。所有者キーは customerId のみで、productCode が同じでも customerId が異なれば別行。EC-CUBE 4.3 には (customer_id, product_id) UNIQUE が無く、SqlFavoriteStorage は ON DUPLICATE KEY UPDATE id=id でベストエフォート冪等にしている"},
+      {"id": "Favorite", "title": "お気に入り","tag": "favorite src-template",
+        "doc": {"value": "EC-CUBE のお気に入り一覧画面（Mypage/favorite.twig）が1行あたり描画する情報構造。dtb_customer_favorite_product の実カラム（customer_id / product_id）に加え、お気に入り行を描画するために dtb_product / dtb_product_class を辿って表示する商品名・単価を含む — このディスクリプタは画面から再導出された投影であり、Entity から逆生成したものではない（CartItem と同型）。productCode と customerId のみが dtb_customer_favorite_product 由来の真の leaf 列（customerId は所有者 FK、productCode は default class 規約 class_category_id1 IS NULL AND class_category_id2 IS NULL で解決する自然キー）。productName と unitPrice は dtb_product / dtb_product_class への JOIN で取得する表示用投影フィールド。所有者キーは customerId のみで、productCode が同じでも customerId が異なれば別行。EC-CUBE 4.3 には (customer_id, product_id) UNIQUE が無く、SqlFavoriteStorage は ON DUPLICATE KEY UPDATE id=id でベストエフォート冪等にしている"},
         "descriptor": [
           {"href": "#customerId"},
           {"href": "#productCode"},
@@ -791,7 +801,8 @@
         "descriptor": [
           {"href": "#email"},
           {"href": "#password"},
-          {"href": "#doLogin"}
+          {"href": "#doLogin"},
+          {"href": "#goCustomerRegistration"}
         ]
       },
       {"id": "PasswordReset", "title": "パスワードリセット","tag": "account src-template",
@@ -854,6 +865,7 @@
           {"href": "#discount"},
           {"href": "#total"},
           {"href": "#paymentTotal"},
+          {"href": "#goProduct"},
           {"href": "#goMypage"},
           {"href": "#doReorder"}
         ]
@@ -980,7 +992,9 @@
         "descriptor": [
           {"href": "#Payment"},
           {"href": "#goPaymentList"},
-          {"href": "#doCreatePayment"}
+          {"href": "#doCreatePayment"},
+          {"href": "#doSortNoMove"},
+          {"href": "#doToggleVisible"}
         ]
       },
 
@@ -1023,7 +1037,9 @@
         "descriptor": [
           {"href": "#Delivery"},
           {"href": "#goDeliveryList"},
-          {"href": "#doCreateDelivery"}
+          {"href": "#doCreateDelivery"},
+          {"href": "#doSortNoMove"},
+          {"href": "#doToggleVisible"}
         ]
       },
 
@@ -1070,7 +1086,9 @@
           {"href": "#News"},
           {"href": "#goNewsList"},
           {"href": "#goNews"},
-          {"href": "#doCreateNews"}
+          {"href": "#doCreateNews"},
+          {"href": "#doSortNoMove"},
+          {"href": "#doToggleVisible"}
         ]
       },
 
@@ -1476,6 +1494,13 @@
       {"id": "doImportShippingCsv", "title": "配送CSVをインポートする", "type": "unsafe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router",
         "doc": {"value": "配送CSVから伝票番号・出荷日を一括登録する。配送業者から受領した出荷情報の取り込み用。"}},
+      {"id": "doUpdateTrackingNumber", "title": "伝票番号を更新する", "type": "idempotent", "rt": "#Order",
+        "tag": "order flow-manage-order actor-admin src-router",
+        "doc": {"value": "受注一覧画面（admin/Order/index.twig）から配送（Shipping）の伝票番号をインラインで更新する。EC-CUBE の admin_shipping_update_tracking_number ルートから導出。doImportShippingCsv の CSV 一括版に対する1配送行単位の手動更新。同一伝票番号の再送は同一状態となる冪等操作。"},
+        "descriptor": [{"href": "#trackingNumber"}]},
+      {"id": "doSendShippingNotifyMail", "title": "出荷通知メールを送信する", "type": "unsafe", "rt": "#Order",
+        "tag": "order flow-manage-order actor-admin src-router",
+        "doc": {"value": "受注一覧画面（admin/Order/index.twig）から配送（Shipping）単位の出荷通知メールを顧客へ送信する。EC-CUBE の admin_shipping_notify_mail ルートから導出。受注メール手動送信（doSendOrderMail）とは別物で、出荷済みの配送に対する顧客通知。送信のたびにメールが発生するため unsafe。"}},
       {"id": "goExportOrderPdf", "title": "帳票PDFをエクスポートする", "type": "safe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router",
         "doc": {"value": "選択受注の納品書・領収書PDFを出力する。テンプレートは設定で変更可能。"}},
@@ -1560,6 +1585,10 @@
         "tag": "account flow-manage-customer actor-admin src-router",
         "doc": {"value": "会員を物理削除する。受注は会員IDをNULLにして保持。"},
         "descriptor": [{"href": "#email"}]},
+      {"id": "doResendActivationMail", "title": "認証メールを再送する", "type": "unsafe", "rt": "#CustomerList",
+        "tag": "account flow-manage-customer actor-admin src-router",
+        "doc": {"value": "会員一覧画面（admin/Customer/index.twig）から仮会員へメール認証（本登録）メールを再送する。EC-CUBE の admin_customer_resend ルートから導出。secretKey を含む認証リンクを再送し、顧客は doActivateCustomer で本会員に昇格する。送信のたびにメールが発生するため unsafe。"},
+        "descriptor": [{"href": "#email"}]},
       {"id": "goExportCustomer", "title": "会員CSVをエクスポートする", "type": "safe", "rt": "#CustomerList",
         "tag": "account flow-manage-customer actor-admin src-router",
         "doc": {"value": "会員データをCSV形式でダウンロードする。検索条件で絞り込み可能。"}},
@@ -1620,6 +1649,12 @@
       {"id": "doUpdateBaseInfo", "title": "基本情報を更新する", "type": "idempotent", "rt": "#BaseInfo",
         "tag": "shop flow-manage-shop actor-admin src-router",
         "doc": {"value": "店舗基本情報を更新する。`BaseInfo` テーブルは 1 レコードのみで全店舗共通設定として参照される。"}},
+      {"id": "doSortNoMove", "title": "並び順を変更する", "type": "idempotent", "rt": "#AdminTop",
+        "tag": "admin-system flow-manage-shop actor-admin src-router",
+        "doc": {"value": "管理画面の一覧画面で行をドラッグ＆ドロップして表示順（sort_no）を更新する汎用インライン操作。EC-CUBE の *_sort_no_move ルート群（admin_setting_shop_payment_sort_no_move / admin_setting_shop_delivery_sort_no_move / admin_product_tag_sort_no_move / admin_product_class_name_sort_no_move / admin_product_class_category_sort_no_move / admin_content_news 等、10+ ルート）から導出した抽象遷移。並べ替え結果は冪等（同一順序の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
+      {"id": "doToggleVisible", "title": "表示・非表示を切り替える", "type": "idempotent", "rt": "#AdminTop",
+        "tag": "admin-system flow-manage-shop actor-admin src-router",
+        "doc": {"value": "管理画面の一覧画面で行の表示／非表示（visible）をインラインでトグルする汎用操作。EC-CUBE の *_visible(ity) ルート群（admin_setting_shop_payment_visible / admin_setting_shop_delivery_visibility 等）から導出した抽象遷移。トグルは可視状態を明示値に設定する冪等操作（同一値の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
       {"id": "goPaymentList", "title": "支払方法一覧を見る", "type": "safe", "rt": "#PaymentList",
         "tag": "shop flow-manage-shop actor-admin src-router",
         "doc": {"value": "支払方法のマスタ一覧を表示する。各支払方法には対応する PaymentMethod クラス（クレカ/コンビニ/代引等）が紐づく。"}},
