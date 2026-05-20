@@ -94,6 +94,7 @@
       {"id": "orderItemType", "title": "受注明細区分","tag": "src-entity", "doc": {"value": "1=商品(課税/税抜), 2=送料(課税/税込), 3=手数料(課税/税込), 4=値引き(課税/税込), 5=税, 6=ポイント値引き(不課税/税込)。受注明細の行種別。商品は税抜価格で登録され税額を加算して計算、送料・手数料は税込価格で登録"}},
 
       {"id": "deliveryName", "title": "配送業者名","tag": "src-entity", "doc": {"value": "注文時点の配送業者名スナップショット"}},
+      {"id": "deliveryId", "title": "配送方法ID","tag": "src-entity", "doc": {"value": "dtb_delivery.id の不透明な文字列ハンドル。BeMart の DeliveryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_delivery.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlDeliveryStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (DeliveryUpdated / DeliveryDeleted) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。blockId / pageId / categoryId と同じ Fake↔SQL 二重性"}},
       {"id": "deliveryTime", "title": "配送時間帯","tag": "src-entity", "doc": {"value": "顧客が選択した配送希望時間帯（例: 午前中、14-16時）"}},
       {"id": "deliveryDate", "title": "配送希望日","def": "https://schema.org/deliveryDate", "tag": "src-entity", "doc": {"value": "顧客が指定した配送希望日"}},
       {"id": "shippingDate", "title": "出荷日","tag": "src-entity", "doc": {"value": "実際の出荷日。管理者が出荷処理時に記録"}},
@@ -973,8 +974,10 @@
         ]
       },
 
-      {"id": "Delivery", "title": "配送方法","tag": "shop src-template",
+      {"id": "Delivery", "title": "配送方法","tag": "shop src-entity src-template",
+        "doc": {"value": "dtb_delivery 1行を平坦化した投影。BeMart の DeliveryEntity は 厳密移植 整合のため 3 項目 (deliveryId / deliveryName / visible) のみ保持し、dtb_delivery の id / name / visible 列と 1:1。dtb_delivery には送料列が存在しないため SqlDeliveryStorage は送料列を一切触らない — 地域別の基本送料は dtb_delivery_fee（都道府県別行）、送料無料閾値はグローバルな dtb_base_info.delivery_free_amount であり、いずれも別モデルとして後フェーズに繰り延べ。creator_id（dtb_member 空）/ sale_type_id（mtb_sale_type 空）は structure-only ダンプで参照先マスタが空のため固定 NULL（非 NULL 値は FK 1452 を発生させる）。name は EC-CUBE 上 nullable だが DeliveryEntity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。visible は tinyint(1) NOT NULL DEFAULT 1。doUpdateDelivery 遷移が存在するため UPDATE 経路は実運用で踏まれる。remove は単純 DELETE（BeMart slice は子 dtb_delivery_fee / dtb_delivery_time / dtb_payment_option 行を INSERT しないため cascade 不要）。DeliveryFee（地域別送料）/ DeliveryTime（配送時間帯）/ DeliveryDuration（発送日目安）の子は dtb_delivery_fee 等のモデル化時に参照する template フレーバとして残置。Phase 2b で SqlDeliveryStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#deliveryId"},
           {"href": "#deliveryMethodName"},
           {"href": "#serviceName"},
           {"href": "#deliveryDescription"},

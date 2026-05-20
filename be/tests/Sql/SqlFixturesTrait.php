@@ -1409,6 +1409,50 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_delivery row. Returns the inserted id.
+     *
+     * dtb_delivery's NOT NULL columns are visible (tinyint, DEFAULT 1),
+     * create_date, update_date, discriminator_type. `name`,
+     * `service_name`, `description`, `confirm_url`, `sort_no` are all
+     * nullable; `creator_id` is a nullable FK to dtb_member and
+     * `sale_type_id` a nullable FK to mtb_sale_type.
+     *
+     * The defaults match SqlDeliveryStorage's INSERT contract:
+     * creator_id = NULL and sale_type_id = NULL (dtb_member and
+     * mtb_sale_type are empty in the structure-only dump so a non-NULL
+     * value would raise FK 1452 — the BeMart slice projects neither
+     * axis), service_name / description / confirm_url / sort_no = NULL
+     * (no UI in the admin slice), visible = 1 (default-shown),
+     * discriminator_type = 'delivery'.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertDelivery(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'creator_id' => null,
+            'sale_type_id' => null,
+            'name' => sprintf('Delivery %d', $counter),
+            'service_name' => null,
+            'description' => null,
+            'confirm_url' => null,
+            'sort_no' => null,
+            'visible' => 1,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'delivery',
+        ], $overrides);
+
+        $this->executeInsert('dtb_delivery', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert (idempotently) an mtb_csv_type row so the FK from
      * dtb_csv.csv_type_id → mtb_csv_type.id can be satisfied.
      *
