@@ -173,6 +173,7 @@
       {"id": "pageName", "title": "ページ名","tag": "src-entity", "doc": {"value": "管理画面でのページ表示名"}},
       {"id": "pageEditType", "title": "ページ編集区分","tag": "src-entity", "doc": {"value": "ページ編集レベル。0=EDIT_TYPE_USER（ユーザー作成、完全編集/削除可）, 1=EDIT_TYPE_PREVIEW（プレビュー）, 2=EDIT_TYPE_DEFAULT（システムページ、構造ロック・削除不可）, 3=EDIT_TYPE_DEFAULT_CONFIRM（内容編集可能なシステムページ、利用規約等）。editType>=2は削除不可"}},
 
+      {"id": "adminId", "title": "管理者ID","tag": "src-entity", "doc": {"value": "dtb_member.id の不透明な文字列ハンドル。BeMart の AdminEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を `ad` プレフィックス付きで生成し（シード `ad000000000000000000000000000001` 等、customerId と同形だが識別空間は別）、SQL 実装は dtb_member.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlAdminQuery::findById では miss として扱われ、SqlAdminCommand の create / update / delete / updateAuthority のいずれも no-op に倒すため、Fake ハンドルを SQL バックエンドに渡しても 404 / 403 経路（MemberDeleted / AuthorityRoleUpdated）が同形。addressId / pageId / blockId / tagId と同じ Fake↔SQL 二重性"}},
       {"id": "memberName", "title": "管理者名","tag": "src-entity", "doc": {"value": "管理者メンバーの表示名"}},
       {"id": "department", "title": "所属","tag": "src-entity", "doc": {"value": "管理者の所属部署名"}},
       {"id": "loginId", "title": "ログインID","tag": "src-entity", "doc": {"value": "管理画面ログイン用のID。一意"}},
@@ -1064,6 +1065,7 @@
 
       {"id": "Member", "title": "管理者メンバー","tag": "admin-system src-template",
         "descriptor": [
+          {"href": "#adminId"},
           {"href": "#memberName"},
           {"href": "#department"},
           {"href": "#loginId"},
