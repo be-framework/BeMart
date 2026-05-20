@@ -688,6 +688,8 @@
           {"href": "#job"},
           {"href": "#password"},
           {"href": "#secretKey"},
+          {"href": "#resetKey"},
+          {"href": "#resetExpire"},
           {"href": "#customerStatus"},
           {"href": "#firstBuyDate"},
           {"href": "#lastBuyDate"},

@@ -27,6 +27,7 @@ use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
@@ -52,6 +53,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlPasswordResetTokenStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlPluginStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery;
@@ -310,6 +312,20 @@ use function dirname;
  *       table is empty in the structure-only dump, so the hypermedia
  *       test seeds the two demo plugins via seedPlugins. No generator:
  *       the row identity is the AUTO_INCREMENT id, never minted)
+ *   - PasswordResetTokenStorageInterface → SqlPasswordResetTokenStorage
+ *       (Phase 2b — password-reset token issue / lookup / consume.
+ *       EC-CUBE 4.3 has NO separate token table — the token lives as
+ *       the `reset_key` / `reset_expire` columns on dtb_customer, so
+ *       put / getByResetKey / delete are column UPDATEs / a SELECT on
+ *       dtb_customer (Option A: mirror EC-CUBE, no schema change). put
+ *       is a column UPDATE keyed by customerId so a re-issue replaces
+ *       the prior token (latest-wins); delete nulls both columns
+ *       (single-use). getByResetKey returns the row REGARDLESS of
+ *       expiry — the consumer PasswordResetCompleted does its own
+ *       `expiresAt < now` check, matching the Fake. No generator: the
+ *       reset_key is minted by the issuer's CustomerIdGenerator, not by
+ *       this storage. The surface is disjoint from SqlCustomerQuery /
+ *       SqlCustomerCommand which never touch the reset_* columns)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -561,6 +577,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(PluginStorageInterface::class)
                     ->to(SqlPluginStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(PasswordResetTokenStorageInterface::class)
+                    ->to(SqlPasswordResetTokenStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };
