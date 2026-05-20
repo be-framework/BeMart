@@ -7,22 +7,36 @@
   Markup skeleton, `ec-role` / `ec-pageHeader` / `ec-off2Grid` /
   `ec-login` / `ec-grid2` classes and structure are kept verbatim from
   EC-CUBE. Only the dynamic bindings are rebound to the Login resource
-  body (src/Resource/Page/Login.php):
-    transitionId, fields[], submitTo { method, href }, csrfToken
+  body (src/Resource/Page/Login.php).
+
+  Phase 3 — FORM page (Ray.WebFormModule pilot). The login inputs are
+  now rendered through a real form object — `LoginForm` (an
+  AbstractForm), exposed by the Login resource as `body.form`:
+
+    {{ form.input('login_email') }}   <- real <input> w/ id/attrs/value
+    {{ form.error('login_email') }}   <- inline Be-domain error, if any
+
+  EC-CUBE renders the same inputs through the Symfony FormView
+  (`form_widget(form.login_email)`); Ray.WebFormModule (Aura.Input +
+  Aura.Html) is BeMart's BEAR-idiomatic equivalent. The field names /
+  ids / attributes in LoginForm::init() are ported from EC-CUBE's
+  `CustomerLoginType` + the template's `form_widget` `attr` options, so
+  the rendered markup carries EC-CUBE's `ec-*` form shape.
+
+  Validation authority stays with the Be Framework Becoming chain — the
+  form is a field-definition + renderer. On a domain rejection the Login
+  resource repopulates `form` (entered email) and the resource body
+  carries the form-level `message`, rendered below in the EC-CUBE
+  `ec-errorMessage` <p> exactly as EC-CUBE's `error` block does.
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `form_widget(form.login_email/login_pass)` — EC-CUBE renders these
-     through the Symfony FormView. BeMart's resource body carries the
-     field NAMES (`fields`), not a FormView, so the `<input>` widgets are
-     authored plainly here with the EC-CUBE field names + placeholders.
-     The exact Symfony-generated widget attributes (id, validation
-     wiring) are EC-CUBE-runtime-only and enumerated as residual.
    - `csrf_token('authenticate')` — EC-CUBE per-request CSRF widget.
-     BeMart's html context has no CSRF widget; `csrfToken` is null.
-     The hidden `_csrf_token` input is kept (structure) with an empty
-     value. EC-CUBE-runtime only.
-   - `app.session.flashBag.*`, `is_granted(...)`, `BaseInfo.*`, `error`
+     BeMart's CSRF is the existing CsrfTokenInterface (Slice 8); the
+     hidden `_csrf_token` input is kept (structure) with the body's
+     `csrfToken` (null in the html context — the EventListener mirrors
+     the live token in). EC-CUBE-runtime only.
+   - `app.session.flashBag.*`, `is_granted(...)`, `BaseInfo.*`
      — request-flash / auth-state / BaseInfo runtime. The remember-me
      checkbox depends on `BaseInfo.option_remember_me`; BeMart has no
      BaseInfo, so it is OMITTED (never invented) and noted as residual.
@@ -47,9 +61,12 @@
                         </div>
                         <div class="ec-login__input">
                             <div class="ec-input">
-                                <input type="text" id="login_email" name="login_email" style="ime-mode: disabled;" placeholder="メールアドレス" autofocus="autofocus">
-                                <input type="password" id="login_pass" name="login_pass" placeholder="パスワード">
+                                {{ form.input('login_email')|raw }}
+                                {{ form.input('login_pass')|raw }}
                             </div>
+                            {% if message is defined and message %}
+                                <p class="ec-errorMessage">{{ message }}</p>
+                            {% endif %}
                         </div>
                         <div class="ec-grid2">
                             <div class="ec-grid2__cell">

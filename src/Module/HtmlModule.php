@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Module;
 use BEAR\Package\AbstractAppModule;
 use Madapaja\TwigModule\TwigModule;
 use Override;
+use Ray\WebFormModule\WebFormModule;
 use Twig\Environment;
 
 /**
@@ -56,5 +57,21 @@ final class HtmlModule extends AbstractAppModule
         // the Twig Environment with BeMartTwigExtension so the ported
         // markup renders unchanged.
         $this->bind(Environment::class)->toProvider(HtmlTwigEnvironmentProvider::class);
+
+        // Phase 3 — FORM pages. Ray.WebFormModule (Aura.Input + Aura.Filter
+        // + Aura.Html) supplies real form objects: AbstractForm subclasses
+        // (e.g. LoginForm) get their Builder / FilterFactory /
+        // HelperLocatorFactory injected here, so the HTML port can render
+        // `<input>`s via `{{ form.input(...) }}` with real values / errors.
+        //
+        // Installed in HtmlModule (the HTML context) ONLY — the JSON
+        // contexts (`app`, `prod`, `test`) never render Twig and need no
+        // form library, so the 1445 JSON-context tests stay untouched.
+        //
+        // Note: the `#[FormValidation]` interceptor WebFormModule binds is
+        // inert here — no resource method is annotated with it. Validation
+        // authority stays with the Be Framework Becoming chain; the form is
+        // used as a field-definition + renderer only. See LoginForm.
+        $this->install(new WebFormModule());
     }
 }

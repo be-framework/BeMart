@@ -20,7 +20,8 @@
         "madapaja/twig-module": "^2.7",
         "my-vendor/be-mart-be": "@dev",
         "ray/di": "^2.18",
-        "ray/input-query": "^1.0"
+        "ray/input-query": "^1.0",
+        "ray/web-form-module": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^10.0",
