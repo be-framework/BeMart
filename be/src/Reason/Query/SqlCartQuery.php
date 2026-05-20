@@ -32,7 +32,11 @@ use function substr;
  *   effort" stance).
  * - `dtb_cart_item.product_class_id` references `dtb_product_class.id`;
  *   BeMart's `CartItemEntity::productCode` is on `dtb_product_class`,
- *   so the item hydration JOINs cart_item → product_class.
+ *   so the item hydration JOINs cart_item → product_class. The cart
+ *   row also carries the display fields EC-CUBE's `ec-cartRow` renders
+ *   (product name, thumbnail, detail link, variation axes); those are
+ *   resolved by joining onward to dtb_product / dtb_product_image /
+ *   dtb_class_category — see {@see fetchItems}.
  * - Money columns (`total_price`, `delivery_fee_total`, `price`) are
  *   `decimal(12,2)` in the schema. We cast to int (JPY assumption —
  *   same as Step 3).
@@ -152,17 +156,39 @@ final class SqlCartQuery implements CartQueryInterface
      * dtb_cart_item.id ascending — stable for tests and matches the
      * insertion order in the absence of explicit reordering.
      *
+     * The JOIN resolves the cart row's display fields against the
+     * item's ACTUAL `product_class_id` (the specific purchased SKU,
+     * NOT the default class): dtb_product_class → dtb_product (name +
+     * id), and dtb_product_class.class_category_id1/2 →
+     * dtb_class_category (variation value) → dtb_class_name (axis
+     * name). The main image is a correlated sub-select over
+     * dtb_product_image for the lowest sort_no. Every join past
+     * dtb_product_class is a LEFT JOIN — a product with no image or no
+     * variation simply yields NULL, which CartItemEntity's nullable
+     * display fields accept.
+     *
+     * dtb_cart_item rows whose product_class is missing (FK breakage)
+     * are skipped silently — they can't render and the safer default
+     * is to drop them than throw.
+     *
      * @return list<CartItemEntity>
      */
     private function fetchItems(int $cartId): array
     {
-        // JOIN dtb_cart_item → dtb_product_class to surface product_code
-        // (BeMart's public handle). dtb_cart_item rows whose product_class
-        // is missing (FK breakage) are skipped silently — they can't
-        // render and the safer default is to drop them than throw.
-        $sql = 'SELECT pc.product_code, ci.quantity, ci.price '
+        $sql = 'SELECT pc.id AS product_class_id, p.id AS product_id, '
+            . 'pc.product_code, p.name AS product_name, ci.quantity, ci.price, '
+            . '(SELECT pi.file_name FROM dtb_product_image pi '
+            . 'WHERE pi.product_id = p.id '
+            . 'ORDER BY pi.sort_no ASC, pi.id ASC LIMIT 1) AS main_image, '
+            . 'cc1.name AS class_category_name1, cn1.name AS class_name1, '
+            . 'cc2.name AS class_category_name2, cn2.name AS class_name2 '
             . 'FROM dtb_cart_item ci '
             . 'INNER JOIN dtb_product_class pc ON pc.id = ci.product_class_id '
+            . 'INNER JOIN dtb_product p ON p.id = pc.product_id '
+            . 'LEFT JOIN dtb_class_category cc1 ON cc1.id = pc.class_category_id1 '
+            . 'LEFT JOIN dtb_class_name cn1 ON cn1.id = cc1.class_name_id '
+            . 'LEFT JOIN dtb_class_category cc2 ON cc2.id = pc.class_category_id2 '
+            . 'LEFT JOIN dtb_class_name cn2 ON cn2.id = cc2.class_name_id '
             . 'WHERE ci.cart_id = :cart_id '
             . 'ORDER BY ci.id ASC';
         $stmt = $this->pdo->prepare($sql);
@@ -174,6 +200,14 @@ final class SqlCartQuery implements CartQueryInterface
                 productCode: (string) ($row['product_code'] ?? ''),
                 quantity: (int) $row['quantity'],
                 price: (int) $row['price'],
+                productClassId: (int) $row['product_class_id'],
+                productId: (int) $row['product_id'],
+                productName: (string) ($row['product_name'] ?? ''),
+                mainImage: $row['main_image'] !== null ? (string) $row['main_image'] : null,
+                classCategoryName1: $row['class_category_name1'] !== null ? (string) $row['class_category_name1'] : null,
+                className1: $row['class_name1'] !== null ? (string) $row['class_name1'] : null,
+                classCategoryName2: $row['class_category_name2'] !== null ? (string) $row['class_category_name2'] : null,
+                className2: $row['class_name2'] !== null ? (string) $row['class_name2'] : null,
             );
         }
 

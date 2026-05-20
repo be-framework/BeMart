@@ -40,6 +40,8 @@
       {"id": "pointRate", "title": "ポイント付与率","tag": "src-entity", "doc": {"value": "この商品規格固有のポイント付与率（%）。未設定時はbasicPointRateが適用"}},
       {"id": "fileName", "title": "ファイル名","tag": "src-entity", "doc": {"value": "商品画像のファイル名"}},
       {"id": "sortNo", "title": "表示順","tag": "src-entity", "doc": {"value": "一覧における並び順"}},
+      {"id": "productId", "title": "商品ID","tag": "src-template", "doc": {"value": "dtb_product.id — 商品ヘッダの代理キー。商品詳細リンク（EC-CUBE の url('product_detail', {id})）のターゲットとして画面に露出する。自然キー productCode（dtb_product_class 側）とは別物で、こちらは商品ヘッダ単位の識別子"}},
+      {"id": "productClassId", "title": "商品規格ID","tag": "src-template", "doc": {"value": "dtb_product_class.id — 特定 SKU（規格バリエーション行）の代理キー。EC-CUBE のカート画面では削除/数量増減リンク（cart_handle_item の productClassId パラメータ）のキーとして使われる。CartItem 1件は default class ではなく購入された具体的な product_class を指す"}},
 
       {"id": "categoryId", "title": "カテゴリID","tag": "src-entity", "doc": {"value": "dtb_category.id の不透明な文字列ハンドル。BeMart の CategoryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_category.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlCategoryStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (CategoryUpdated / CategoryDeleted / CategoryCreated の親解決) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。parentId（自己参照 FK parent_category_id）も同じ文字列ハンドルで表現され、非数値 parentId は SQL では NULL（ルート）に倒れる。blockId / pageId / tagId と同じ Fake↔SQL 二重性"}},
       {"id": "categoryName", "title": "カテゴリ名","tag": "src-entity", "doc": {"value": "カテゴリの表示名"}},
@@ -434,10 +436,16 @@
         ]
       },
 
-      {"id": "CartItem", "title": "カート明細","tag": "cart src-entity",
-        "doc": {"value": "dtb_cart_item 由来の明細1件。BeMart の CartItemEntity と1:1 (productCode / quantity / unitPrice の3項目)。unitPrice はカート追加時点での price02 のスナップショット — マスタ改定の影響を受けない。dtb_cart_item.product_class_id（FK to dtb_product_class）は BeMart 側では surface に出さず、productCode で正規化"},
+      {"id": "CartItem", "title": "カート明細","tag": "cart src-template",
+        "doc": {"value": "EC-CUBE のショッピングカート画面（Cart/index.twig の ec-cartRow）が1明細あたり描画する情報構造。dtb_cart_item の実カラム（product_class_id / price / quantity）に加え、カート行を描画するために CartItem.ProductClass → Product / ClassCategory を辿って表示する商品名・商品画像・規格バリエーションを含む — このディスクリプタは画面から再導出された投影であり、Entity から逆生成したものではない。productClassId は購入された具体的 SKU（dtb_product_class.id）で、削除/数量増減リンクのキー。productId は商品詳細リンクのターゲット（dtb_product.id）。mainImage は dtb_product_image の最小 sort_no 行のファイル名（バリエーション無し・画像無し商品では NULL）。classCategoryName1/2 と className1/2 は ProductClass.ClassCategory1/2 のバリエーション値とその軸名（例『色：赤』、規格無し商品では NULL）。unitPrice はカート追加時点での price02 のスナップショット。明細小計（unitPrice × quantity）はテンプレートで算出"},
         "descriptor": [
+          {"href": "#productClassId"},
+          {"href": "#productId"},
           {"href": "#productCode"},
+          {"href": "#productName"},
+          {"href": "#fileName"},
+          {"href": "#classNameLabel"},
+          {"href": "#classCategoryName"},
           {"href": "#quantity"},
           {"href": "#unitPrice"}
         ]

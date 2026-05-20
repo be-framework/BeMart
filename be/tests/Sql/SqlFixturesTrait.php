@@ -1052,6 +1052,41 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_product_image row (a product photo). Returns the
+     * inserted id.
+     *
+     * Used to exercise the cart-row main-image join in
+     * {@see \MyVendor\BeMart\Be\Reason\Query\SqlCartQuery}, which picks
+     * the lowest-`sort_no` image for a product. dtb_product_image's
+     * NOT NULL columns are file_name, sort_no, create_date,
+     * discriminator_type — note there is NO update_date column.
+     * `creator_id` is a nullable FK to the (empty) dtb_member master,
+     * so it defaults to NULL.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     *   Recognised keys: `file_name`, `sort_no`.
+     */
+    protected function insertProductImage(int $productId, array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'product_id' => $productId,
+            'creator_id' => null,
+            'file_name' => sprintf('product-image-%d.jpg', $counter),
+            'sort_no' => 0,
+            'create_date' => $now,
+            'discriminator_type' => 'productimage',
+        ], $overrides);
+
+        $this->executeInsert('dtb_product_image', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert (idempotently) an mtb_device_type row so the FK from
      * dtb_layout.device_type_id → mtb_device_type.id can be satisfied.
      *
