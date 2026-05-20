@@ -34,7 +34,6 @@ final readonly class MemberFetched
     public string $adminId;
     public string $loginId;
     public string $name;
-    public string $mailAddress;
     public int $authority;
     public int $work;
 
@@ -55,7 +54,6 @@ final readonly class MemberFetched
         $this->adminId = $admin->adminId;
         $this->loginId = $admin->loginId;
         $this->name = $admin->name;
-        $this->mailAddress = $admin->mailAddress;
         $this->authority = $admin->authority;
         $this->work = $admin->work;
     }

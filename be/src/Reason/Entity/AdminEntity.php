@@ -43,7 +43,6 @@ final readonly class AdminEntity
         public string $loginId,
         public string $passwordHash,
         public string $name,
-        public string $mailAddress,
         public int $authority,
         public int $work = self::WORK_ACTIVE,
     ) {
