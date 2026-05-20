@@ -7,8 +7,7 @@
     "productStatus": 1,
     "description": "Pilot 1 happy-path fixture",
     "searchWord": null,
-    "note": null,
-    "sortNo": 1
+    "note": null
   },
   {
     "productCode": "sample-002",
@@ -18,8 +17,7 @@
     "productStatus": 1,
     "description": "Stock-unlimited fixture",
     "searchWord": null,
-    "note": null,
-    "sortNo": 2
+    "note": null
   },
   {
     "productCode": "admin-active-001",
@@ -29,8 +27,7 @@
     "productStatus": 1,
     "description": "Wave 8 admin grid: visible row",
     "searchWord": "管理 active",
-    "note": "internal note A",
-    "sortNo": 10
+    "note": "internal note A"
   },
   {
     "productCode": "admin-hidden-001",
@@ -40,8 +37,7 @@
     "productStatus": 2,
     "description": "Wave 8 admin grid: hidden row",
     "searchWord": "管理 hidden",
-    "note": "internal note B",
-    "sortNo": 11
+    "note": "internal note B"
   },
   {
     "productCode": "admin-withdrawn-001",
@@ -51,7 +47,6 @@
     "productStatus": 3,
     "description": "Wave 8 admin grid: withdrawn row",
     "searchWord": "管理 withdrawn",
-    "note": "internal note C",
-    "sortNo": 12
+    "note": "internal note C"
   }
 ]

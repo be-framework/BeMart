@@ -43,7 +43,6 @@ final readonly class AdminProductCreated
         #[Input] string|null $description,
         #[Input] string|null $searchWord,
         #[Input] string|null $note,
-        #[Input] int|null $sortNo,
         #[Inject] ProductCommandInterface $command,
     ) {
         $command->create(new ProductEntity(
@@ -55,7 +54,6 @@ final readonly class AdminProductCreated
             description: $description,
             searchWord: $searchWord,
             note: $note,
-            sortNo: $sortNo,
         ));
 
         $this->productCode = $productCode;

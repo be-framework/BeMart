@@ -63,7 +63,6 @@ final readonly class AdminProductUpdated
         #[Input] string|null $description,
         #[Input] string|null $searchWord,
         #[Input] string|null $note,
-        #[Input] int|null $sortNo,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] ProductQueryInterface $productQuery,
         #[Inject] ProductCommandInterface $productCommand,
@@ -91,7 +90,6 @@ final readonly class AdminProductUpdated
             description: $description ?? $current->description,
             searchWord: $searchWord ?? $current->searchWord,
             note: $note ?? $current->note,
-            sortNo: $sortNo ?? $current->sortNo,
         );
 
         $productCommand->update($merged);
