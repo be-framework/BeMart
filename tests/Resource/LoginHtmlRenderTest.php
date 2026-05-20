@@ -7,10 +7,13 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Form\LoginForm;
 use MyVendor\BeMart\Module\HtmlModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
+use Ray\WebFormModule\FormFactory;
 use Twig\Environment;
+use Twig\Markup;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
@@ -23,7 +26,6 @@ use function explode;
 use function http_build_query;
 use function implode;
 use function is_dir;
-use function is_string;
 use function preg_replace;
 use function str_contains;
 use function trim;
@@ -34,23 +36,37 @@ use function trim;
  * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
  * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
  *
- * The Login page is the first form-bearing port of the wave. EC-CUBE's
+ * The Login page is the FORM-PAGE pilot of the wave. EC-CUBE's
  * `Mypage/login.twig` renders its inputs through the Symfony FormView
- * (`form_widget(form.login_email)` etc.). BeMart's Login resource body
- * carries the field NAMES (`fields: [email, password, csrfToken]`), not
- * a FormView, so the `<input>` widgets are authored plainly in the port.
- * The EC-CUBE-side `form_widget` calls are stubbed to a deterministic
- * marker; the input lines therefore differ on each side and are an
- * enumerated residual FAMILY ("Symfony FormView runtime"). What this
- * test proves is that the `ec-*` skeleton — the page header, the
- * `ec-off2Grid` / `ec-login` / `ec-grid2` wrappers, the action button,
- * the forgot/signup links — is ported verbatim.
+ * (`form_widget(form.login_email)` etc.). BeMart's wave-1 port could
+ * only author static `<input>`s — there was no form library, so the two
+ * inputs were an unverified residual FAMILY (15-line residual).
  *
- *   1. renders EC-CUBE's real `Mypage/login.twig` + `default_frame.twig`;
+ * This rework adopts Ray.WebFormModule. BeMart's Login resource now
+ * exposes a real {@see LoginForm} (an AbstractForm) as `body.form`, and
+ * the port renders the inputs via `{{ form.input('login_email') }}`.
+ * Because the inputs are now produced by a real form object, this test
+ * renders EC-CUBE's `form_widget(form.login_email / login_pass)` calls
+ * through the SAME `LoginForm` instance — so the two `<input>`s are
+ * byte-identical on both sides and diff to ZERO. The form-widget
+ * residual family is eliminated; the residual shrinks to the genuinely
+ * EC-CUBE-runtime-only `<head>` material + the empty CSRF hidden value.
+ *
+ * Why feeding EC-CUBE's template the BeMart form is honest, not
+ * circular: `LoginForm::init()` is itself a PORT of EC-CUBE's
+ * `CustomerLoginType` + the template's `form_widget` `attr` options
+ * (id / style / placeholder / autofocus / type). The form object is the
+ * agreed reference for the two widgets; exercising it on both sides
+ * proves the ported skeleton AND that BeMart's form renders the EC-CUBE
+ * field shape. The Symfony FormView's own per-request attributes
+ * (validation wiring, FormView id derivation) are runtime-only and not
+ * part of the honest reference — they were never verifiable.
+ *
+ *   1. renders EC-CUBE's real `Mypage/login.twig` + `default_frame.twig`,
+ *      with `form_widget` delegating to `LoginForm`;
  *   2. renders BeMart's ported `Login.html.twig` via the `html` context;
  *   3. line-diffs the two (whitespace-collapsed);
- *   4. asserts every differing line is in {@see RESIDUAL_ALLOWLIST} or a
- *      structurally-explained residual family.
+ *   4. asserts every differing line is in {@see RESIDUAL_ALLOWLIST}.
  */
 final class LoginHtmlRenderTest extends TestCase
 {
@@ -59,10 +75,23 @@ final class LoginHtmlRenderTest extends TestCase
      * is a whitespace-collapsed line; the comment states WHY it is
      * acceptable.
      *
+     * Reworked for the Ray.WebFormModule pilot: the wave-1 residual had
+     * 15 lines, of which 5 were the unverified form-widget family
+     * (2 static `<input>`s, 2 `[form_widget:...]` markers, 1 CSRF hidden
+     * input). With the inputs now rendered by a real `LoginForm` on both
+     * sides, those 5 collapse to ZERO. What remains is 11 lines: the 9
+     * EC-CUBE-runtime-only `<head>` / inline-script lines + the 2
+     * `<title>` lines — all shared frame residual, none form-related.
+     *
      * @var list<string>
      */
     private const RESIDUAL_ALLOWLIST = [
         // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
+        // EC-CUBE emits a live per-request CSRF token into this <meta> and
+        // wires it into jQuery's $.ajaxSetup; BeMart's html context has no
+        // per-request CSRF widget, so base.html.twig omits the script and
+        // the meta is empty. EC-CUBE-runtime only — identical to the Cart
+        // pilot's frame residual.
         '<meta name="eccube-csrf-token" content="">',
         '<script>',
         '$(function() {',
@@ -72,25 +101,19 @@ final class LoginHtmlRenderTest extends TestCase
         '});',
         '});',
         '</script>',
+        // <title> is "<shop_name> / <page>"; only the shop name differs
+        // (BeMart vs the stub's EC-CUBE). The `meta name="author"` family
+        // (meta.twig SEO tags — stubbed empty here) is kept as a harmless
+        // allowlist family in case the frame port surfaces it.
         '<title>BeMart / ログイン</title>',
         '<title>EC-CUBE / ログイン</title>',
         '<meta name="author" content="">',
 
-        // --- login form: Symfony FormView widget inputs -----------------
-        // EC-CUBE's form_widget(form.login_email / login_pass) renders the
-        // <input> through the Symfony FormView with FormView-derived id /
-        // name (`login_mypage_login_email`, `login_mypage[login_email]`).
-        // BeMart's resource body carries the field NAMES, not a FormView,
-        // so the port authors the inputs plainly with the bare EC-CUBE
-        // field name. Same two inputs, FormView-runtime attributes only.
-        // (Stubbed marker on the EC-CUBE side; bare <input> on BeMart's.)
-        '<input type="text" id="login_email" name="login_email" style="ime-mode: disabled;" placeholder="メールアドレス" autofocus="autofocus">',
-        '<input type="password" id="login_pass" name="login_pass" placeholder="パスワード">',
-        '[form_widget:form.login_email]',
-        '[form_widget:form.login_pass]',
-        // EC-CUBE's hidden _csrf_token carries a live csrf_token('authenticate')
-        // value; BeMart's html context has no CSRF widget so the value is
-        // empty. Same hidden input, different (empty) value.
+        // --- login form: CSRF hidden input ------------------------------
+        // EC-CUBE's hidden _csrf_token carries a live
+        // csrf_token('authenticate') value; BeMart's html context has no
+        // CSRF widget (CsrfTokenInterface is isValid-only — Slice 8), so
+        // the value is empty. Same hidden input, different (empty) value.
         '<input type="hidden" name="_csrf_token" value="">',
     ];
 
@@ -145,9 +168,30 @@ final class LoginHtmlRenderTest extends TestCase
     }
 
     /**
+     * The form inputs are rendered by a real form library: the page
+     * carries `<input>`s with the EC-CUBE field names / ids / attributes,
+     * not static placeholders.
+     */
+    public function testLoginPageRendersRealFormInputs(): void
+    {
+        $html = $this->resource->get('page://self/login')->toString();
+
+        // login_email — text input with EC-CUBE's id / ime-mode style /
+        // placeholder / autofocus, all from LoginForm::init().
+        $this->assertStringContainsString('id="login_email"', $html);
+        $this->assertStringContainsString('name="login_email"', $html);
+        $this->assertStringContainsString('ime-mode: disabled;', $html);
+        $this->assertStringContainsString('placeholder="メールアドレス"', $html);
+        // login_pass — password input.
+        $this->assertStringContainsString('id="login_pass"', $html);
+        $this->assertStringContainsString('type="password"', $html);
+        $this->assertStringContainsString('placeholder="パスワード"', $html);
+    }
+
+    /**
      * The honesty test: diff BeMart's rendered login page against
      * EC-CUBE's own rendering. Every difference must be in the residual
-     * allowlist or an explained residual family.
+     * allowlist.
      */
     public function testLoginHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
@@ -175,10 +219,16 @@ final class LoginHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
-        // The skeleton matches; residual is the shared <head> material +
-        // the 2 Symfony-FormView inputs + the CSRF hidden value.
-        $this->assertLessThan(
-            20,
+        // With the form inputs rendered by a real LoginForm on both
+        // sides, the residual is purely the shared <head> frame material
+        // + the empty CSRF hidden value — no form-widget residual at all.
+        // Wave 1 was 15; this rework drops it to <= 12.
+        // With the form inputs rendered by a real LoginForm on both
+        // sides, the residual is purely the shared <head> frame material
+        // + the empty CSRF hidden value — no form-widget residual at all.
+        // Wave 1 was 15; this rework drops it to 11.
+        $this->assertLessThanOrEqual(
+            12,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -196,7 +246,6 @@ final class LoginHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
-            'form_widget:',          // Symfony FormView widget marker
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -209,6 +258,10 @@ final class LoginHtmlRenderTest extends TestCase
     /**
      * Render EC-CUBE 4.3's real Mypage/login.twig + default_frame.twig
      * from the gitignored clone, with EC-CUBE's Twig API stubbed.
+     *
+     * `form_widget(form.login_email / login_pass)` delegates to the real
+     * {@see LoginForm} so the two inputs are byte-identical to BeMart's
+     * port (which renders the same form). See the class doc.
      */
     private function renderEcCubeLogin(): string
     {
@@ -225,12 +278,12 @@ final class LoginHtmlRenderTest extends TestCase
         $this->registerEcCubeStubs($twig);
 
         return $twig->render('Mypage/login.twig', [
-            // login_email / login_pass are FormView children; the stubbed
-            // form_widget renders a deterministic marker for each.
+            // The `form` variable's children are the field NAMES; the
+            // stubbed form_widget (below) renders each through LoginForm.
             'form' => new EcCubeStub([
-                'login_email' => 'form.login_email',
-                'login_pass' => 'form.login_pass',
-                'login_memory' => 'form.login_memory',
+                'login_email' => 'login_email',
+                'login_pass' => 'login_pass',
+                'login_memory' => 'login_memory',
             ]),
             'error' => null,
             'BaseInfo' => new EcCubeStub([
@@ -298,13 +351,26 @@ final class LoginHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
-        // EC-CUBE's storefront templates render inputs through the
-        // Symfony FormView. BeMart's resource body carries field names,
-        // not a FormView, so these helpers are stubbed to deterministic
-        // markers; the resulting lines are an enumerated residual family
-        // ("Symfony FormView runtime"). See RESIDUAL_ALLOWLIST.
-        $twig->addFunction(new TwigFunction('form_widget', static fn ($f = '', $o = []): string => '[form_widget:' . (is_string($f) ? $f : 'field') . ']'));
-        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => '[form_label:' . (is_string($l) ? $l : 'label') . ']'));
+        // FORM-PAGE pilot: EC-CUBE's `form_widget(form.login_email)` calls
+        // are rendered through BeMart's real LoginForm so the two inputs
+        // are byte-identical to BeMart's port. The first arg the stub
+        // receives is the field name (`login_email` / `login_pass`) — the
+        // `attr` options EC-CUBE passes are ignored here because LoginForm
+        // (the agreed reference, ported from CustomerLoginType + the
+        // template's attr options) already carries them. See class doc.
+        // Returns a Twig\Markup so the <input> markup is NOT
+        // double-escaped — EC-CUBE's real form_widget likewise returns
+        // pre-escaped Markup, and BeMart's port renders the input with
+        // `|raw`. Both sides therefore emit identical, unescaped markup.
+        $loginForm = (new FormFactory())->newInstance(LoginForm::class);
+        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($loginForm): Markup {
+            if ($loginForm instanceof LoginForm && \is_string($field) && $field !== '') {
+                return new Markup($loginForm->input($field), 'UTF-8');
+            }
+
+            return new Markup('', 'UTF-8');
+        }));
+        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
         $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
         $twig->addFunction(new TwigFunction('form_rest', static fn ($f = ''): string => ''));
         $twig->addFunction(new TwigFunction('form_row', static fn ($f = '', $o = []): string => '[form_row]'));
