@@ -1018,6 +1018,93 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert (idempotently) an mtb_login_history_status row so the FK
+     * from dtb_login_history.login_history_status_id →
+     * mtb_login_history_status.id can be satisfied.
+     *
+     * mtb_login_history_status is empty in the structure-only schema
+     * dump. EC-CUBE 4.3 ships exactly two rows: 0 = 失敗 (FAILURE),
+     * 1 = 成功 (SUCCESS) — the only two values
+     * {@see \MyVendor\BeMart\Be\Reason\Query\SqlLoginHistoryStorage}
+     * ever writes (a successful attempt → 1, a failed attempt → 0).
+     * {@see seedLoginHistoryStatus} seeds both.
+     */
+    protected function insertLoginHistoryStatus(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_login_history_status '
+            . '(id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'loginhistorystatus',
+        ]);
+    }
+
+    /**
+     * Seed the master table dtb_login_history's FK references
+     * (mtb_login_history_status) with the EC-CUBE 4.3 canonical rows.
+     *
+     * The structure-only schema dump leaves mtb_login_history_status
+     * empty, and `dtb_login_history.login_history_status_id` is NOT
+     * NULL with a non-deferrable FK — so any SQL test that appends a
+     * dtb_login_history row MUST call this first. Idempotent (`INSERT
+     * IGNORE`), so calling it once in setUp is sufficient. Same
+     * precedent {@see seedAdminMasters} set for the analogous
+     * empty-master FK case.
+     */
+    protected function seedLoginHistoryStatus(): void
+    {
+        $this->insertLoginHistoryStatus(0, '失敗');
+        $this->insertLoginHistoryStatus(1, '成功');
+    }
+
+    /**
+     * Insert a dtb_login_history row (one admin-login-attempt audit
+     * record). Returns the inserted id.
+     *
+     * dtb_login_history's NOT NULL columns are login_history_status_id
+     * (smallint unsigned, FK to mtb_login_history_status, no DEFAULT),
+     * create_date, update_date, discriminator_type. `member_id` (FK to
+     * dtb_member), `user_name` and `client_ip` are nullable. The
+     * defaults match SqlLoginHistoryStorage's INSERT contract:
+     * member_id = NULL (dtb_member is empty in the structure-only dump
+     * so any non-NULL value would raise FK 1452 — resolving loginId →
+     * member_id is Phase-2 scope), login_history_status_id = 1
+     * (SUCCESS), discriminator_type = 'login_history'.
+     *
+     * Callers MUST seed mtb_login_history_status first via
+     * {@see seedLoginHistoryStatus} — the FK is NOT NULL and the master
+     * table is empty in the dump. Pass `login_history_status_id` => 0
+     * to mimic a failed attempt.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertLoginHistory(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'login_history_status_id' => 1,
+            'member_id' => null,
+            'user_name' => sprintf('admin-%d', $counter),
+            'client_ip' => '192.0.2.1',
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'login_history',
+        ], $overrides);
+
+        $this->executeInsert('dtb_login_history', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
