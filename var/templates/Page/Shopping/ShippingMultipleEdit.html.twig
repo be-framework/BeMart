@@ -1,0 +1,155 @@
+{#
+  BeMart Shopping shipping-multiple-edit page — EC-CUBE
+  goShoppingShippingMultipleEdit.
+
+  PORT of EC-CUBE 4.3 default-theme `Shopping/shipping_multiple_edit.twig`
+  (src/Eccube/Resource/template/default/Shopping/shipping_multiple_edit.twig).
+
+  FORM page (Ray.WebFormModule) — see var/templates/README.md. This is
+  the "新規お届け先を追加する" form reached from the multi-destination
+  screen (`Shopping/shipping_multiple.twig`). EC-CUBE renders its address
+  inputs through the SAME `CustomerAddressType` used by
+  `Shopping/shipping_edit.twig`, so the BeMart port reuses the same
+  `ShoppingShippingEditForm` (an AbstractForm) — the two pages differ
+  only in the submit-target route + the page header text.
+
+  Markup skeleton, the `ec-role` / `ec-pageHeader` / `ec-registerRole` /
+  `ec-off1Grid` / `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` /
+  `ec-select` / `ec-input` / `ec-telInput` / `ec-registerRole__actions`
+  classes + the `<dl>`/`<dt>`/`<dd>` definition-list structure are kept
+  verbatim from EC-CUBE.
+
+  The ShippingMultipleEdit resource exposes a real
+  `ShoppingShippingEditForm` as `body.form`; the inputs are rendered
+  through it:
+
+    {{ form.input('name01')|raw }}   <- real <input> w/ name/attrs
+    {{ form.error('name01') }}       <- inline Be-domain error, if any
+
+  EC-CUBE's `CustomerAddressType` nests fields under compound types, but
+  BeMart's body carries them FLAT (mirrors ALPS `#ShoppingShippingEdit`),
+  so the form declares them flat. The render-diff test stubs EC-CUBE's
+  `form_widget` / `form_label` to delegate to the SAME form so the inputs
+  + labels diff to ZERO. Validation authority stays with the Be Becoming
+  chain.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
+     input bound to the body's `csrfToken` (null in the html context).
+   - `has_errors(...)` — request-validation runtime; resolves false on a
+     fresh form, so the conditional ` error` class never appears.
+   - The `{% for f in form|filter(...) %}` entity-extension auto-render
+     loop is OMITTED — a core install has no such extensions.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'other_page' %}
+{% set route = 'shopping_shipping_multiple_edit' %}
+{% set title = 'お届け先の追加' %}
+
+{% block javascript %}
+    <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+{% endblock javascript %}
+
+{% block main %}
+    <div class="ec-registerRole">
+        <div class="ec-pageHeader">
+            <h1>お届け先の追加</h1>
+        </div>
+        <div class="ec-off1Grid">
+            <div class="ec-off1Grid__cell">
+                    <form method="post" action="{{ url('shopping_shipping_multiple_edit') }}" class="h-adr">
+                        <span class="p-country-name" style="display:none;">Japan</span>
+                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                        <div class="ec-borderedDefs">
+                            <dl>
+                                <dt>
+                                    <label class="ec-label">お名前</label>
+                                </dt>
+                                <dd>
+                                    <div class="ec-halfInput">
+                                        {{ form.input('name01')|raw }}
+                                        {{ form.input('name02')|raw }}
+                                        {{ form.error('name01') }}
+                                        {{ form.error('name02') }}
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label class="ec-label">お名前(カナ)</label>
+                                </dt>
+                                <dd>
+                                    <div class="ec-halfInput">
+                                        {{ form.input('kana01')|raw }}
+                                        {{ form.input('kana02')|raw }}
+                                        {{ form.error('kana01') }}
+                                        {{ form.error('kana02') }}
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label class="ec-label">会社名</label>
+                                </dt>
+                                <dd>
+                                    <div class="ec-halfInput">
+                                        {{ form.input('companyName')|raw }}
+                                        {{ form.error('companyName') }}
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label class="ec-label">住所</label>
+                                </dt>
+                                <dd>
+                                    <div class="ec-zipInput"><span>〒</span>
+                                        {{ form.input('postalCode')|raw }}
+                                        <div class="ec-zipInputHelp">
+                                            <div class="ec-zipInputHelp__icon">
+                                                <div class="ec-icon"><img src="{{ asset('assets/icon/question-white.svg') }}" alt=""></div>
+                                            </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>
+                                        </div>
+                                        {{ form.error('postalCode') }}
+                                    </div>
+                                    <div class="ec-select">
+                                        {{ form.input('pref')|raw }}
+                                        {{ form.error('pref') }}
+                                    </div>
+                                    <div class="ec-input">
+                                        {{ form.input('addr01')|raw }}
+                                        {{ form.error('addr01') }}
+                                    </div>
+                                    <div class="ec-input">
+                                        {{ form.input('addr02')|raw }}
+                                        {{ form.error('addr02') }}
+                                    </div>
+                                </dd>
+                            </dl>
+                            <dl>
+                                <dt>
+                                    <label class="ec-label">電話番号</label>
+                                </dt>
+                                <dd>
+                                    <div class="ec-telInput">
+                                        {{ form.input('phoneNumber')|raw }}
+                                        {{ form.error('phoneNumber') }}
+                                    </div>
+                                </dd>
+                            </dl>
+                        </div>
+                        <div class="ec-registerRole__actions">
+                            <div class="ec-off4Grid">
+                                <div class="ec-off4Grid__cell">
+                                    <button type="submit" class="ec-blockBtn--action">登録する</button>
+                                    <a href="{{ url('shopping_shipping_multiple') }}" class="ec-blockBtn--cancel">戻る</a>
+                                </div>
+                            </div>
+                        </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
