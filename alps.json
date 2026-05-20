@@ -558,9 +558,11 @@
         ]
       },
 
-      {"id": "Order", "title": "受注","tag": "order src-template",
+      {"id": "Order", "title": "受注","tag": "order src-entity src-template",
         "descriptor": [
           {"href": "#orderNo"},
+          {"href": "#preOrderId"},
+          {"href": "#customerId"},
           {"href": "#name01"},
           {"href": "#name02"},
           {"href": "#kana01"},
