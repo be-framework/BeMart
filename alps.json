@@ -41,6 +41,7 @@
       {"id": "fileName", "title": "ファイル名","tag": "src-entity", "doc": {"value": "商品画像のファイル名"}},
       {"id": "sortNo", "title": "表示順","tag": "src-entity", "doc": {"value": "一覧における並び順"}},
 
+      {"id": "categoryId", "title": "カテゴリID","tag": "src-entity", "doc": {"value": "dtb_category.id の不透明な文字列ハンドル。BeMart の CategoryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_category.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlCategoryStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (CategoryUpdated / CategoryDeleted / CategoryCreated の親解決) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。parentId（自己参照 FK parent_category_id）も同じ文字列ハンドルで表現され、非数値 parentId は SQL では NULL（ルート）に倒れる。blockId / pageId / tagId と同じ Fake↔SQL 二重性"}},
       {"id": "categoryName", "title": "カテゴリ名","tag": "src-entity", "doc": {"value": "カテゴリの表示名"}},
       {"id": "hierarchy", "title": "階層レベル","tag": "src-entity", "doc": {"value": "カテゴリツリーにおける深さ。ルートが1、子が2と増加"}},
 
@@ -333,8 +334,10 @@
         ]
       },
 
-      {"id": "Category", "title": "カテゴリ","tag": "catalog src-template",
+      {"id": "Category", "title": "カテゴリ","tag": "catalog src-entity src-template",
+        "doc": {"value": "dtb_category 1行を平坦化した投影。BeMart の CategoryEntity は 4 項目 (categoryId / categoryName / parentId / sortNo) のみ保持し、EC-CUBE の hierarchy / creator_id / create_date / update_date は投影外。hierarchy（int unsigned NOT NULL、深さキャッシュ）は INSERT/UPDATE 時に親から導出（ルート=1、子=親.hierarchy+1）して書くが投影は読まない — サブツリー再親付け時に孫へカスケードはしない（平坦 admin slice のスコープ外）。creator_id は dtb_member が structure-only ダンプで空のため固定 NULL（非 NULL は FK 1452）。parent_category_id は自己参照 FK (FK_5ED2C2B796A8F92 → dtb_category.id) で、子行は親の INSERT 後でなければ挿入できない — Be 層 (CategoryCreated) が put 前に getById(parentId) で親存在を検証し未知なら CategoryNotFoundException(404)。dtb_product_category（FK category_id → dtb_category.id、商品割当の結合表）の行は Wave 7 admin slice では INSERT しないが、remove 時のみ防御的に DELETE して FK 1451 を回避（外部投入された割当行があっても DELETE 成功）— SqlBlockStorage が dtb_block_position に対して行うのと同形。子を持つ親の削除は自己 FK 1451 を踏ませる（EC-CUBE 同様の正しい挙動、空でない親は削除不可）。Phase 2b で SqlCategoryStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#categoryId"},
           {"href": "#categoryName"},
           {"href": "#hierarchy"},
           {"href": "#sortNo"},
