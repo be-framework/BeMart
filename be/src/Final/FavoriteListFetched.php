@@ -39,7 +39,7 @@ final readonly class FavoriteListFetched
 {
     public string $customerId;
 
-    /** @var list<array{productCode: string, productName: string, unitPrice: int}> */
+    /** @var list<array{productCode: string, productName: string, unitPrice: int, fileName: string|null}> */
     public array $favorites;
 
     public int $favoriteCount;
@@ -61,6 +61,7 @@ final readonly class FavoriteListFetched
                 'productCode' => $favorite->productCode,
                 'productName' => $favorite->productName,
                 'unitPrice' => $favorite->unitPrice,
+                'fileName' => $favorite->fileName,
             ],
             $rows,
         );

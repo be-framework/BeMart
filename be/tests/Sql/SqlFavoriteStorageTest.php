@@ -44,6 +44,36 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $this->assertArrayHasKey('BANANA-2', $byCode);
         $this->assertSame('Banana', $byCode['BANANA-2']->productName);
         $this->assertSame(180, $byCode['BANANA-2']->unitPrice);
+
+        // Phase 3 enrichment — a product with no dtb_product_image rows
+        // yields a null fileName (the favorites screen falls back to the
+        // shared placeholder).
+        $this->assertNull($byCode['APPLE-1']->fileName);
+    }
+
+    /**
+     * Phase 3 enrichment — listByCustomer JOINs dtb_product_image and
+     * surfaces the lowest-sort_no image as `fileName`, the favorites-row
+     * thumbnail. Mirrors SqlCartQuery's main-image sub-select.
+     */
+    public function testListByCustomerSurfacesLowestSortNoProductImage(): void
+    {
+        $customerId = $this->insertCustomer();
+        $product = $this->insertProduct([
+            'name' => 'Cherry',
+            'product_code' => 'CHERRY-IMG',
+            'price02' => 600,
+        ]);
+        // Two images — the lowest sort_no wins.
+        $this->insertProductImage($product, ['file_name' => 'cherry-2.jpg', 'sort_no' => 2]);
+        $this->insertProductImage($product, ['file_name' => 'cherry-1.jpg', 'sort_no' => 1]);
+        $this->insertFavorite($customerId, $product);
+
+        $storage = new SqlFavoriteStorage($this->pdo);
+        $favorites = $storage->listByCustomer((string) $customerId);
+
+        $this->assertCount(1, $favorites);
+        $this->assertSame('cherry-1.jpg', $favorites[0]->fileName);
     }
 
     public function testListByCustomerReturnsEmptyWhenCustomerHasNone(): void
