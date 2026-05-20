@@ -108,9 +108,17 @@ trait SqlFixturesTrait
      * a non-NULL value (so SqlProductClassQuery resolves a saleTypeName)
      * must seed the master first via {@see seedSaleTypes}.
      *
+     * The optional `product_status_id` / `description_detail` /
+     * `search_word` / `note` overrides feed {@see \MyVendor\BeMart\Be\Reason\Query\SqlProductQuery},
+     * which reads them off the dtb_product header. `product_status_id`
+     * is a nullable FK to the EMPTY mtb_product_status master — callers
+     * passing a non-NULL value MUST seed the master first via
+     * {@see seedProductStatus}.
+     *
      * @param array<string, mixed> $overrides Per-column overrides.
      *   Recognised keys: `name`, `product_code`, `price02`, `stock`,
-     *   `stock_unlimited`, `sale_type_id`, `sale_limit`, `delivery_fee`.
+     *   `stock_unlimited`, `sale_type_id`, `sale_limit`, `delivery_fee`,
+     *   `product_status_id`, `description_detail`, `search_word`, `note`.
      */
     protected function insertProduct(array $overrides = []): int
     {
@@ -122,11 +130,17 @@ trait SqlFixturesTrait
         $productName = $overrides['name'] ?? sprintf('Test Product %d', $counter);
         $stmt = $this->pdo->prepare(
             'INSERT INTO dtb_product '
-            . '(name, create_date, update_date, discriminator_type) '
-            . 'VALUES (:name, :created, :updated, :discriminator)',
+            . '(product_status_id, name, note, description_detail, '
+            . 'search_word, create_date, update_date, discriminator_type) '
+            . 'VALUES (:product_status_id, :name, :note, :description_detail, '
+            . ':search_word, :created, :updated, :discriminator)',
         );
         $stmt->execute([
+            ':product_status_id' => $overrides['product_status_id'] ?? null,
             ':name' => $productName,
+            ':note' => $overrides['note'] ?? null,
+            ':description_detail' => $overrides['description_detail'] ?? null,
+            ':search_word' => $overrides['search_word'] ?? null,
             ':created' => $now,
             ':updated' => $now,
             ':discriminator' => 'product',
@@ -249,6 +263,55 @@ trait SqlFixturesTrait
         $this->insertSaleType(1, '通常販売');
         $this->insertSaleType(2, '予約販売');
         $this->insertSaleType(3, 'ダウンロード販売');
+    }
+
+    /**
+     * Insert (idempotently) an mtb_product_status row so the FK from
+     * dtb_product.product_status_id → mtb_product_status.id can be
+     * satisfied.
+     *
+     * mtb_product_status is empty in the structure-only schema dump.
+     * EC-CUBE 4.3 ships 1 = 公開 and 2 = 非公開; the BeMart slice
+     * additionally uses 3 = 廃止 as its soft-delete (logical-withdraw)
+     * sentinel — see {@see \MyVendor\BeMart\Be\Reason\Entity\ProductEntity}
+     * STATUS_VISIBLE / STATUS_HIDDEN / STATUS_WITHDRAWN. {@see seedProductStatus}
+     * seeds all three so {@see \MyVendor\BeMart\Be\Reason\Query\SqlProductCommand}
+     * can write any of them without raising FK 1452.
+     */
+    protected function insertProductStatus(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_product_status '
+            . '(id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'productstatus',
+        ]);
+    }
+
+    /**
+     * Seed the master table dtb_product's FK reference
+     * (mtb_product_status) with the canonical rows the BeMart Product
+     * slice writes.
+     *
+     * The structure-only schema dump leaves mtb_product_status empty,
+     * and `dtb_product.product_status_id` is an enforced (nullable) FK
+     * to it — so any SQL test that inserts a dtb_product row with a
+     * NON-NULL product_status_id (every {@see \MyVendor\BeMart\Be\Reason\Query\SqlProductCommand}
+     * create / status flip does) MUST call this first. Idempotent
+     * (`INSERT IGNORE`), so calling it once in setUp is sufficient.
+     * Same precedent {@see seedSaleTypes} / {@see seedCsvTypes} set for
+     * the analogous empty-master FK case.
+     */
+    protected function seedProductStatus(): void
+    {
+        $this->insertProductStatus(1, '公開');
+        $this->insertProductStatus(2, '非公開');
+        $this->insertProductStatus(3, '廃止');
     }
 
     /**
