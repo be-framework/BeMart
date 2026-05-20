@@ -19,8 +19,8 @@ use MyVendor\BeMart\Be\Being\MemberCreating;
  *
  * The required surface (`loginId`, `password`, `name`, `authority`)
  * matches `doCreateMember.descriptor[]` in alps.json (memberName /
- * loginId / password / authority / work). `mailAddress` is optional
- * — EC-CUBE allows admins without an explicit contact address.
+ * loginId / password / authority / work). EC-CUBE 4.3 dtb_member has
+ * no email column, so no mailAddress / mail input is accepted.
  *
  * Be Framework G-17: this Input has its own dedicated Being / Final
  * pair rather than reusing AdminCustomerCreating — different entity
@@ -41,14 +41,12 @@ final readonly class CreateMemberInput
      * @psalm-taint-source input $password
      * @psalm-taint-source input $name
      * @psalm-taint-source input $authority
-     * @psalm-taint-source input $mailAddress
      */
     public function __construct(
         public string $loginId,
         public string $password,
         public string $name,
         public int $authority,
-        public string $mailAddress = 'admin-no-mail@example.invalid',
     ) {
     }
 }
