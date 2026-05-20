@@ -51,6 +51,7 @@
       {"id": "classNameId", "title": "規格名ID","tag": "src-entity", "doc": {"value": "dtb_class_name.id の不透明な文字列ハンドル。BeMart の ClassNameEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_class_name.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlClassNameStorage では miss として扱われ getById / put / remove のいずれも 404 経路（規格名の更新・削除 Final）を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。categoryId / blockId / tagId と同じ Fake↔SQL 二重性"}},
       {"id": "classNameLabel", "title": "規格名","tag": "src-entity", "doc": {"value": "商品バリエーション軸の名前（例: カラー、サイズ）。EC-CUBEの\"class\"はOOPのクラスではなく商品規格を意味する"}},
       {"id": "classNameBackendName", "title": "規格管理名","tag": "src-entity", "doc": {"value": "管理画面でのみ使用する規格の内部名。classNameLabelとは別に管理用の名称を持てる"}},
+      {"id": "classCategoryId", "title": "規格分類ID","tag": "src-entity", "doc": {"value": "dtb_class_category.id の不透明な文字列ハンドル。BeMart の ClassCategoryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_class_category.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlClassCategoryStorage では miss として扱われ getById / put / remove のいずれも 404 経路（規格分類の更新・削除 Final）を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。classNameId / categoryId / blockId / tagId と同じ Fake↔SQL 二重性"}},
       {"id": "classCategoryName", "title": "規格分類名","tag": "src-entity", "doc": {"value": "商品バリエーション軸の具体的な値（例: 赤、Lサイズ）。EC-CUBEの\"classCategory\"はOOPのカテゴリではなく規格値を意味する"}},
       {"id": "classCategoryBackendName", "title": "規格分類管理名","tag": "src-entity", "doc": {"value": "管理画面でのみ使用する規格分類の内部名"}},
       {"id": "classCategoryVisible", "title": "規格分類表示","tag": "src-entity", "doc": {"value": "この規格分類値を商品選択肢として表示するか"}},
@@ -397,8 +398,11 @@
         ]
       },
 
-      {"id": "ClassCategory", "title": "規格分類","tag": "catalog src-template",
+      {"id": "ClassCategory", "title": "規格分類","tag": "catalog src-entity src-template",
+        "doc": {"value": "dtb_class_category 1行を平坦化した投影。商品バリエーション軸（ClassName）の具体値（例: 「カラー」軸の「赤」「青」、「サイズ」軸の S/M/L）を表す。BeMart の ClassCategoryEntity は 3 項目 (classCategoryId / classNameId / name) のみ保持し、EC-CUBE の backend_name / sort_no / visible / creator_id / create_date / update_date は投影外。classNameId は所属する規格軸（FK class_name_id → dtb_class_name.id）を示し NOT NULL — SQL 実装は put 時に親 dtb_class_name 行の存在を前提とする（fixture は親 class_name を先に INSERT）。sort_no（int unsigned NOT NULL、表示順、DEFAULT なし）は INSERT 時に MAX(sort_no)+1 で末尾追加スロットを導出して書くが投影は読まず、UPDATE 時は触らない（リネームで表示位置を保持）。visible は固定 1（admin slice に表示切替 UI なし）。backend_name は nullable のため固定 NULL。creator_id は dtb_member が structure-only ダンプで空のため固定 NULL（非 NULL は FK 1452）。dtb_product_class（FK class_category_id1/2 → dtb_class_category.id）が子参照を持つが Wave 7 admin slice では INSERT しないため remove はその FK を防御的にケアしない（外部投入があれば FK 1451 が表面化 — 契約テストはこのケースをシードしない）。Phase 2b で SqlClassCategoryStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#classCategoryId"},
+          {"href": "#classNameId"},
           {"href": "#classCategoryName"},
           {"href": "#classCategoryBackendName"},
           {"href": "#classCategoryVisible"},
