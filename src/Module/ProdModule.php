@@ -25,6 +25,13 @@ use Override;
  * EccubeSharedSessionAdapter under prod (vs. FakeSession under dev/test).
  * Slice 8 added ProdCsrfOverrideModule: CsrfTokenInterface is bound to
  * EccubeSharedCsrfTokenAdapter under prod (vs. FakeCsrfToken under dev/test).
+ *
+ * Phase 2c added SqlModule: the production cutover. It overrides every
+ * storage-interface Reason and every *IdGenerator Fake -> Sql and binds a
+ * real PDO (from DATABASE_URL), so the prod context runs the SQL-backed
+ * Reasons that the bemart-sql suite proved green. AppModule stays
+ * Fake-bound, so the test / app (dev) contexts keep their fast, DB-free
+ * Fake Reasons.
  */
 final class ProdModule extends AbstractAppModule
 {
@@ -35,5 +42,6 @@ final class ProdModule extends AbstractAppModule
         $this->override(new ProdLoggingOverrideModule());
         $this->override(new ProdSessionOverrideModule());
         $this->override(new ProdCsrfOverrideModule());
+        $this->override(new SqlModule());
     }
 }
