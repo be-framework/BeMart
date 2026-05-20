@@ -37,8 +37,6 @@ class Delivery extends ResourceObject
     /**
      * @psalm-taint-source input $deliveryId
      * @psalm-taint-source input $deliveryName
-     * @psalm-taint-source input $feeBase
-     * @psalm-taint-source input $freeAmount
      * @psalm-taint-source input $visible
      * @psalm-taint-source input $csrfToken
      */
@@ -46,8 +44,6 @@ class Delivery extends ResourceObject
     public function onPut(
         string $deliveryId,
         string|null $deliveryName = null,
-        int|null $feeBase = null,
-        int|null $freeAmount = null,
         bool|null $visible = null,
         string|null $csrfToken = null,
     ): static {
@@ -62,8 +58,6 @@ class Delivery extends ResourceObject
             $final = ($this->becoming)(new UpdateDeliveryInput(
                 deliveryId: $deliveryId,
                 deliveryName: $deliveryName,
-                feeBase: $feeBase,
-                freeAmount: $freeAmount,
                 visible: $visible,
             ));
         } catch (SemanticVariableException $e) {
@@ -89,8 +83,6 @@ class Delivery extends ResourceObject
         $this->body = [
             'deliveryId' => $final->deliveryId,
             'deliveryName' => $final->deliveryName,
-            'feeBase' => $final->feeBase,
-            'freeAmount' => $final->freeAmount,
             'visible' => $final->visible,
         ];
 

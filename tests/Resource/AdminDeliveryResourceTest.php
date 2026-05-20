@@ -63,11 +63,10 @@ final class AdminDeliveryResourceTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    private function seed(string $name, int $fee = 500): string
+    private function seed(string $name): string
     {
         $ro = $this->resource->post('page://self/admin/delivery/delivery-list', [
             'deliveryName' => $name,
-            'feeBase' => $fee,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $id = $ro->body['deliveryId'];
@@ -80,15 +79,13 @@ final class AdminDeliveryResourceTest extends TestCase
     {
         $ro = $this->resource->post('page://self/admin/delivery/delivery-list', [
             'deliveryName' => 'ヤマト宅急便',
-            'feeBase' => 800,
-            'freeAmount' => 5000,
+            'visible' => true,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('ヤマト宅急便', $ro->body['deliveryName']);
-        $this->assertSame(800, $ro->body['feeBase']);
-        $this->assertSame(5000, $ro->body['freeAmount']);
+        $this->assertTrue($ro->body['visible']);
     }
 
     public function testCreateRejectsAnonymousAdmin(): void
@@ -113,7 +110,7 @@ final class AdminDeliveryResourceTest extends TestCase
     public function testListReturnsRows(): void
     {
         $this->seed('ヤマト宅急便');
-        $this->seed('ゆうパック', 700);
+        $this->seed('ゆうパック');
 
         $ro = $this->resource->get('page://self/admin/delivery/delivery-list');
 
@@ -135,13 +132,13 @@ final class AdminDeliveryResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/delivery/delivery', [
             'deliveryId' => $id,
             'deliveryName' => 'ヤマト宅急便',
-            'feeBase' => 900,
+            'visible' => false,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('ヤマト宅急便', $ro->body['deliveryName']);
-        $this->assertSame(900, $ro->body['feeBase']);
+        $this->assertFalse($ro->body['visible']);
     }
 
     public function testPutUnknownIdReturns404(): void

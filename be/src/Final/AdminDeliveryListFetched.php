@@ -28,8 +28,6 @@ final readonly class AdminDeliveryListFetched
      * @var list<array{
      *     deliveryId: string,
      *     deliveryName: string,
-     *     feeBase: int,
-     *     freeAmount: int|null,
      *     visible: bool,
      * }>
      */
@@ -50,8 +48,6 @@ final readonly class AdminDeliveryListFetched
             static fn (DeliveryEntity $row): array => [
                 'deliveryId' => $row->deliveryId,
                 'deliveryName' => $row->deliveryName,
-                'feeBase' => $row->feeBase,
-                'freeAmount' => $row->freeAmount,
                 'visible' => $row->visible,
             ],
             $rows,
