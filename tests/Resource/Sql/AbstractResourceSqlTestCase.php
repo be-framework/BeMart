@@ -6,16 +6,20 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
+use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
 use MyVendor\BeMart\Be\Tests\Sql\SqlFixturesTrait;
 use MyVendor\BeMart\Module\AppModule;
 use PDO;
@@ -54,12 +58,16 @@ use function dirname;
  *   that tearDown rolls back.
  *
  * Rebound interfaces (production-Fake → test-Sql):
- *   - CustomerQueryInterface  → SqlCustomerQuery
- *   - OrderQueryInterface     → SqlOrderQuery
- *   - FavoriteStorageInterface → SqlFavoriteStorage
- *   - CartQueryInterface      → SqlCartQuery
- *   - CartCommandInterface    → SqlCartCommand
- *   - PDO::class              → shared test PDO singleton
+ *   - CustomerQueryInterface       → SqlCustomerQuery
+ *   - OrderQueryInterface          → SqlOrderQuery
+ *   - FavoriteStorageInterface     → SqlFavoriteStorage
+ *   - CartQueryInterface           → SqlCartQuery
+ *   - CartCommandInterface         → SqlCartCommand
+ *   - AddressStorageInterface      → SqlAddressStorage  (Phase 2b)
+ *   - AddressIdGeneratorInterface  → SqlAddressIdGenerator (Phase 2b —
+ *       CustomerAddressCreated needs a numeric id pre-allocated so
+ *       SqlAddressStorage can persist with that explicit PK)
+ *   - PDO::class                   → shared test PDO singleton
  *
  * NOT rebound:
  *   - CustomerCommandInterface  — no SqlCustomerCommand impl yet (Phase 2b)
@@ -192,6 +200,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(CartCommandInterface::class)
                     ->to(SqlCartCommand::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(AddressStorageInterface::class)
+                    ->to(SqlAddressStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(AddressIdGeneratorInterface::class)
+                    ->to(SqlAddressIdGenerator::class)
                     ->in(Scope::SINGLETON);
             }
         };

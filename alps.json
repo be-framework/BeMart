@@ -110,6 +110,7 @@
       {"id": "point", "title": "ポイント","tag": "src-entity", "doc": {"value": "会員の現在のポイント残高。注文時にポイント使用で減算、付与は発送済み(DELIVERED)ステータスへの遷移時に加算。付与計算: 商品単価(税抜) x pointRate x 数量 - 利用ポイント分控除"}},
       {"id": "secretKey", "title": "認証キー","tag": "src-entity", "doc": {"value": "会員アカウントのメール認証トークン。/entry/activate/{secret_key}形式のURLに使用。暗号鍵やAPIシークレットではない。会員登録時にランダム生成"}},
       {"id": "customerId", "title": "会員ID","tag": "src-entity", "doc": {"value": "dtb_customer.id の不透明な文字列ハンドル。BeMart の Entity 層は数値ではなく文字列として保持する（マスアサインメント防止のため、Session/AuthZ 経由で読み出し、リクエスト本文からは受け取らない）。Favorite / Cart / Order の所有者キーとして横断使用"}},
+      {"id": "addressId", "title": "配送先住所ID","tag": "src-entity", "doc": {"value": "dtb_customer_address.id の不透明な文字列ハンドル。BeMart の AddressEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_customer_address.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。所有者は customerId、AUTHZ 検査は CustomerAddressUpdated / CustomerAddressDeleted で getById → customerId 一致確認の順で実施"}},
       {"id": "resetKey", "title": "リセットキー","tag": "src-entity", "doc": {"value": "パスワードリセット用のワンタイムトークン。リセット要求時に生成、使用後にクリア"}},
       {"id": "resetExpire", "title": "リセット期限","tag": "src-entity", "doc": {"value": "パスワードリセットキーの有効期限"}},
 
@@ -672,18 +673,27 @@
         ]
       },
 
-      {"id": "CustomerAddress", "title": "配送先住所","tag": "account src-template",
+      {"id": "Address", "title": "配送先住所エンティティ","tag": "account src-entity",
+        "doc": {"value": "dtb_customer_address 1行を平坦化した投影。BeMart の AddressEntity と1:1 (12項目: addressId / customerId / name01 / name02 / kana01 / kana02 / companyName / phoneNumber / postalCode / pref / addr01 / addr02)。所有者キーは customerId のみで、AUTHZ は CustomerAddressUpdated / CustomerAddressDeleted が getById → 一致確認の順で実施。Entity vs schema の差: postalCode/addr01/addr02 は Entity 非 null だが column NULL 可（hydrator で空文字に正規化）、pref は Entity int だが pref_id NULL 可（hydrator で 0 に正規化）、addressId は Entity string だが id は int auto-increment（cast (string) で対応）。Phase 2b で SqlAddressStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#addressId"},
+          {"href": "#customerId"},
           {"href": "#name01"},
           {"href": "#name02"},
           {"href": "#kana01"},
           {"href": "#kana02"},
           {"href": "#companyName"},
+          {"href": "#phoneNumber"},
           {"href": "#postalCode"},
           {"href": "#pref"},
           {"href": "#addr01"},
-          {"href": "#addr02"},
-          {"href": "#phoneNumber"},
+          {"href": "#addr02"}
+        ]
+      },
+
+      {"id": "CustomerAddress", "title": "配送先住所","tag": "account src-template",
+        "descriptor": [
+          {"href": "#Address"},
           {"href": "#createDate"},
           {"href": "#updateDate"},
           {"href": "#doUpdateCustomerAddress"},
