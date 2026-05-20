@@ -18,8 +18,12 @@ use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
+use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
+use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
 use MyVendor\BeMart\Be\Tests\Sql\SqlFixturesTrait;
 use MyVendor\BeMart\Module\AppModule;
 use PDO;
@@ -67,6 +71,11 @@ use function dirname;
  *   - AddressIdGeneratorInterface  → SqlAddressIdGenerator (Phase 2b —
  *       CustomerAddressCreated needs a numeric id pre-allocated so
  *       SqlAddressStorage can persist with that explicit PK)
+ *   - TagStorageInterface          → SqlTagStorage  (Phase 2b)
+ *   - TagIdGeneratorInterface      → SqlTagIdGenerator (Phase 2b —
+ *       TagCreated needs a numeric id pre-allocated so SqlTagStorage
+ *       can persist with that explicit PK; the Fake generator emits
+ *       a `tg-` prefix that the SQL impl rejects as non-numeric)
  *   - PDO::class                   → shared test PDO singleton
  *
  * NOT rebound:
@@ -206,6 +215,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(AddressIdGeneratorInterface::class)
                     ->to(SqlAddressIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(TagStorageInterface::class)
+                    ->to(SqlTagStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(TagIdGeneratorInterface::class)
+                    ->to(SqlTagIdGenerator::class)
                     ->in(Scope::SINGLETON);
             }
         };
