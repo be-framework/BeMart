@@ -44,7 +44,7 @@ use function count;
  */
 final readonly class ProductListFetched
 {
-    /** @var list<array{productCode: string, productName: string, price02: int, stock: int|null, productStatus: int, sortNo: int|null}> */
+    /** @var list<array{productCode: string, productName: string, price02: int, stock: int|null, productStatus: int}> */
     public array $products;
 
     public int $count;
@@ -78,7 +78,6 @@ final readonly class ProductListFetched
                 'price02' => $p->price02,
                 'stock' => $p->stock,
                 'productStatus' => $p->productStatus,
-                'sortNo' => $p->sortNo,
             ],
             $rows,
         );

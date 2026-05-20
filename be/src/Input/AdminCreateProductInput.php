@@ -22,7 +22,7 @@ use MyVendor\BeMart\Be\Being\AdminProductCreating;
  *
  * ALPS `doCreateProduct.descriptor[]` lists `productName` and
  * `productStatus` as the headline fields; the remaining columns
- * (productCode, price02, stock, description, searchWord, note, sortNo)
+ * (productCode, price02, stock, description, searchWord, note)
  * are part of the EC-CUBE admin form and map 1:1 to ProductEntity.
  *
  * `productStatus` is optional on the wire — null defaults to
@@ -45,7 +45,6 @@ final readonly class AdminCreateProductInput
      * @psalm-taint-source input $description
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
-     * @psalm-taint-source input $sortNo
      */
     public function __construct(
         public string $productCode,
@@ -56,7 +55,6 @@ final readonly class AdminCreateProductInput
         public string|null $description = null,
         public string|null $searchWord = null,
         public string|null $note = null,
-        public int|null $sortNo = null,
     ) {
     }
 }
