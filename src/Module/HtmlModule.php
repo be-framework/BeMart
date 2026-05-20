@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Module;
 use BEAR\Package\AbstractAppModule;
 use Madapaja\TwigModule\TwigModule;
 use Override;
+use Twig\Environment;
 
 /**
  * HTML presentation context (Phase 3 Step 1 — Twig rendering pilot).
@@ -33,8 +34,10 @@ use Override;
  * the resource class file and swaps `.php` for `.html.twig`. `$ro->body`
  * is passed as the template context (the renderer also injects `_ro`).
  *
- * Remaining ~138 pages are mechanical: one `var/templates/<path>.html.twig`
- * per resource, no module or wiring changes.
+ * Remaining ~138 pages are mechanical: each is a PORT of EC-CUBE's
+ * default-theme Twig file into `var/templates/<path>.html.twig`, no
+ * module or wiring changes. See var/templates/README.md for the port
+ * method + residual-diff verification standard.
  */
 final class HtmlModule extends AbstractAppModule
 {
@@ -47,5 +50,11 @@ final class HtmlModule extends AbstractAppModule
         // makes it win over the JSON renderer that PackageModule installed
         // through AppModule.
         $this->override(new TwigModule());
+
+        // The storefront templates are ports of EC-CUBE's default-theme
+        // Twig, which call `price` / `asset` / `url` / `path`. Decorate
+        // the Twig Environment with BeMartTwigExtension so the ported
+        // markup renders unchanged.
+        $this->bind(Environment::class)->toProvider(HtmlTwigEnvironmentProvider::class);
     }
 }
