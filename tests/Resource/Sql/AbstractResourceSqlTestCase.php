@@ -27,6 +27,7 @@ use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlAdminCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlAdminQuery;
@@ -48,6 +49,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlShippingAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTemplateStorage;
@@ -259,6 +261,17 @@ use function dirname;
  *       installer-default body when the carrier row is absent so the
  *       hypermedia contract is identical to the Fake-backed baseline
  *       with no extra fixture setup required)
+ *   - ShippingAddressStorageInterface → SqlShippingAddressStorage
+ *       (Phase 2b — per-order delivery target against dtb_shipping.
+ *       getByOrderNo / put / listAll, all keyed by the customer-facing
+ *       orderNo. dtb_shipping references the order via the int FK
+ *       order_id, so every method resolves order_no → dtb_order.id (a
+ *       sub-SELECT for reads, a JOIN for listAll). put enforces the
+ *       single-row-per-order invariant by probing order_id and
+ *       UPDATEing in place — dtb_shipping has no UNIQUE on order_id.
+ *       No generator: the row identity is the order_id, never minted.
+ *       pref_id is a nullable FK to the empty mtb_pref master — pref=0
+ *       writes NULL, NULL reads back as 0)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -498,6 +511,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(TradeLawStorageInterface::class)
                     ->to(SqlTradeLawStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(ShippingAddressStorageInterface::class)
+                    ->to(SqlShippingAddressStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };
