@@ -166,6 +166,16 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
             'common.job' => '職業',
             'common.go_to_confirm' => '確認ページへ',
             'common.go_to_cart' => 'カートへ進む',
+            'common.next' => '次へ',
+            'common.registration' => '登録する',
+            // --- front.forgot.* (Forgot/index|reset|complete.twig) ------
+            'front.forgot.title' => 'パスワードの再発行',
+            'front.forgot.message1' => 'ご登録時のメールアドレスを入力して「次へ」ボタンをクリックしてください。',
+            'front.forgot.message2' => '※パスワード再発行メールを送信します。メールの内容をご確認の上、新しいパスワードを登録してください。',
+            'front.forgot.reset_title' => 'パスワード再発行(再設定)',
+            'front.forgot.complete_title' => 'パスワードの再発行(メール送信)',
+            'front.forgot.complete_message__title' => 'パスワード再発行メールの送信が完了しました。',
+            'front.forgot.complete_message__body' => "ご登録メールアドレスにパスワードを再発行するためのメールを送信いたしました。\nメールの内容をご確認いただきますよう、お願いいたします。\n※メールが届かない場合はメールアドレスをご確認の上、再度お試しください。\n",
             // --- front.entry.* (Entry/index.twig) -----------------------
             'front.entry.title' => '新規会員登録',
             'front.entry.agree' => '同意する',
