@@ -168,7 +168,6 @@ final class FakeAdminStorage
                 loginId: $admin->loginId,
                 passwordHash: $admin->passwordHash,
                 name: $admin->name,
-                mailAddress: $admin->mailAddress,
                 authority: $admin->authority,
                 work: AdminEntity::WORK_INACTIVE,
             );
@@ -197,7 +196,6 @@ final class FakeAdminStorage
                 loginId: $admin->loginId,
                 passwordHash: $admin->passwordHash,
                 name: $admin->name,
-                mailAddress: $admin->mailAddress,
                 authority: $newAuthority,
                 work: $admin->work,
             );
@@ -219,7 +217,7 @@ final class FakeAdminStorage
             throw new RuntimeException(sprintf('Fake fixture missing: %s', $path));
         }
 
-        /** @var array<string, array{adminId: string, loginId: string, passwordHash: string, name: string, mailAddress: string, authority: int, work?: int}|string> $rows */
+        /** @var array<string, array{adminId: string, loginId: string, passwordHash: string, name: string, authority: int, work?: int}|string> $rows */
         $rows = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         if (! is_array($rows)) {
             throw new RuntimeException(sprintf('Fake fixture must be a JSON object: %s', $path));
@@ -236,7 +234,6 @@ final class FakeAdminStorage
                 loginId: $row['loginId'],
                 passwordHash: $row['passwordHash'],
                 name: $row['name'],
-                mailAddress: $row['mailAddress'],
                 authority: $row['authority'],
                 work: $row['work'] ?? AdminEntity::WORK_ACTIVE,
             );
