@@ -1506,6 +1506,83 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_plugin row (one plugin registry entry). Returns the
+     * inserted id.
+     *
+     * dtb_plugin's NOT NULL columns are name, code, enabled (tinyint(1)
+     * DEFAULT 0), version, source, initialized (tinyint(1) DEFAULT 0),
+     * create_date, update_date, discriminator_type. There is no
+     * AUTO-defaulted `source` — the column is NOT NULL with no DEFAULT,
+     * so the helper supplies 0 (the EC-CUBE store-download origin).
+     *
+     * The defaults match {@see \MyVendor\BeMart\Be\Reason\Query\SqlPluginStorage}'s
+     * INSERT contract: source = 0, discriminator_type = 'plugin'. Note
+     * the BeMart {@see \MyVendor\BeMart\Be\Reason\Entity\PluginEntity}
+     * `installed` axis maps onto `initialized` — pass `initialized` => 1
+     * to mimic an installed plugin, `enabled` => 1 for an enabled one.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     *   Use the schema column names (snake_case: `code`, `name`,
+     *   `version`, `enabled`, `initialized`).
+     */
+    protected function insertPlugin(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'name' => sprintf('Plugin %d', $counter),
+            'code' => sprintf('Vendor/Plugin%d', $counter),
+            'enabled' => 0,
+            'version' => '1.0.0',
+            'source' => 0,
+            'initialized' => 0,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'plugin',
+        ], $overrides);
+
+        $this->executeInsert('dtb_plugin', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
+     * Seed dtb_plugin with the two demo plugins {@see \MyVendor\BeMart\Be\Reason\Query\FakePluginStorage}
+     * carries, so a SQL-backed hypermedia test starts from the same
+     * client-observable baseline as the Fake-backed contract test:
+     *
+     *   - `Sample/SamplePlugin`   — installed + enabled
+     *   - `Sample/DisabledPlugin` — installed + disabled
+     *
+     * `installed` maps onto `dtb_plugin.initialized` (see SqlPluginStorage
+     * class doc) — both seeds are written `initialized=1`. The
+     * structure-only schema dump leaves dtb_plugin empty, so any SQL
+     * test that mirrors the AdminPlugin* Resource contract MUST call
+     * this first. Same empty-table seed precedent as {@see seedCsvTypes}
+     * — though dtb_plugin has no FK constraints, so this seeds the
+     * fixture rows directly rather than a master table.
+     */
+    protected function seedPlugins(): void
+    {
+        $this->insertPlugin([
+            'code' => 'Sample/SamplePlugin',
+            'name' => 'Sample Plugin',
+            'version' => '1.0.0',
+            'initialized' => 1,
+            'enabled' => 1,
+        ]);
+        $this->insertPlugin([
+            'code' => 'Sample/DisabledPlugin',
+            'name' => 'Disabled Sample Plugin',
+            'version' => '1.0.0',
+            'initialized' => 1,
+            'enabled' => 0,
+        ]);
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
