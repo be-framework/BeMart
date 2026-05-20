@@ -23,6 +23,7 @@ use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlAdminCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlAdminQuery;
@@ -40,6 +41,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlLoginHistoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTemplateStorage;
@@ -54,6 +56,7 @@ use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlBlockIdGenerator;
@@ -62,6 +65,7 @@ use MyVendor\BeMart\Be\Reason\Service\SqlClassCategoryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlClassNameIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlPaymentMethodAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTaxRuleIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
@@ -199,6 +203,17 @@ use function dirname;
  *       LoginHistoryIdGenerator. login_history_status_id is a NOT NULL
  *       FK to the empty mtb_login_history_status master — seeded via
  *       seedLoginHistoryStatus, same precedent as seedAdminMasters)
+ *   - PaymentMethodAdminStorageInterface → SqlPaymentMethodAdminStorage
+ *       (Phase 2b — admin payment-method master CRUD against
+ *       dtb_payment. list / getById / put / remove; remove pre-clears
+ *       child dtb_payment_option link rows to avoid FK 1451, same shape
+ *       as the Block → dtb_block_position cascade)
+ *   - PaymentMethodAdminIdGeneratorInterface → SqlPaymentMethodAdminIdGenerator
+ *       (Phase 2b — PaymentMethodAdminCreated needs a numeric id
+ *       pre-allocated so SqlPaymentMethodAdminStorage can persist with
+ *       that explicit PK; the Fake generator emits 32-char hex that the
+ *       SQL impl rejects as non-numeric, same shape as the Block / Tag /
+ *       News generator pairings)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -418,6 +433,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(LoginHistoryStorageInterface::class)
                     ->to(SqlLoginHistoryStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(PaymentMethodAdminStorageInterface::class)
+                    ->to(SqlPaymentMethodAdminStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(PaymentMethodAdminIdGeneratorInterface::class)
+                    ->to(SqlPaymentMethodAdminIdGenerator::class)
                     ->in(Scope::SINGLETON);
             }
         };
