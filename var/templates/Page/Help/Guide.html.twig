@@ -1,0 +1,30 @@
+{#
+  BeMart Help — ご利用ガイド (EC-CUBE goHelpGuide).
+
+  PORT of EC-CUBE 4.3 default-theme `Help/guide.twig`
+  (src/Eccube/Resource/template/default/Help/guide.twig).
+
+  Markup skeleton, `ec-role` / `ec-pageHeader` classes and structure
+  are kept verbatim from EC-CUBE. EC-CUBE's `Help/guide.twig` carries
+  no data binding at all — it renders only the page header; the body
+  is admin-editable content surfaced through the layout block system,
+  which BeMart has no equivalent for. The Help/Guide resource
+  (src/Resource/Page/Help/Guide.php) is a pure renderer carrying an
+  empty `staticContent.sections`, so this port is the header-only page
+  exactly as EC-CUBE's default install renders it.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'front.guide.title'|trans }}` -> the ja literal "ご利用ガイド".
+#}
+{% extends 'base.html.twig' %}
+
+{% set route = 'help_guide' %}
+{% set title = 'ご利用ガイド' %}
+
+{% block main %}
+    <div class="ec-role">
+        <div class="ec-pageHeader">
+            <h1>ご利用ガイド</h1>
+        </div>
+    </div>
+{% endblock %}
