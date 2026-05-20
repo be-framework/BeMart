@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 
 /**
@@ -41,12 +42,22 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
  * this is unfiltered by ownership: every finalized order on the system is
  * in scope. AUTHZ is enforced by the Final via {@see AdminSessionInterface}
  * — there is no API for a non-admin to call this directly.
+ *
+ * `historyByOrderNo` returns the enriched {@see OrderHistoryEntity}
+ * screen projection behind goMypageHistory (Phase 3 enrichment) — the
+ * order header plus its message, payment method, per-shipping address
+ * blocks (with their line items) and mail-delivery history. Returns null
+ * when the orderNo is unknown (same miss semantics as `byOrderNo`). The
+ * History Final uses it for both the AUTHZ owner check (`customerId`)
+ * and the full screen body.
  */
 interface OrderQueryInterface
 {
     public function byPreOrderId(string $preOrderId): ?OrderEntity;
 
     public function byOrderNo(string $orderNo): ?FinalizedOrderEntity;
+
+    public function historyByOrderNo(string $orderNo): ?OrderHistoryEntity;
 
     /** @return list<OrderItemEntity> */
     public function itemsByOrderNo(string $orderNo): array;
