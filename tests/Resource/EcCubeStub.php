@@ -176,16 +176,27 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
             'front.forgot.complete_title' => 'パスワードの再発行(メール送信)',
             'front.forgot.complete_message__title' => 'パスワード再発行メールの送信が完了しました。',
             'front.forgot.complete_message__body' => "ご登録メールアドレスにパスワードを再発行するためのメールを送信いたしました。\nメールの内容をご確認いただきますよう、お願いいたします。\n※メールが届かない場合はメールアドレスをご確認の上、再度お試しください。\n",
-            // --- front.entry.* (Entry/index.twig) -----------------------
+            // --- front.entry.* (Entry/index|confirm|complete|activate) --
             'front.entry.title' => '新規会員登録',
             'front.entry.agree' => '同意する',
             'front.entry.disagree' => '同意しない',
             'front.entry.agree_with_terms' => '<a class="ec-link" href="%url%" target="_blank">利用規約</a>に同意してお進みください',
-            // --- front.contact.* (Contact/index.twig) -------------------
+            'front.entry.confirm_title' => '新規会員登録(確認)',
+            'front.entry.confirm_message' => "下記の内容で登録してもよろしいでしょうか？\nよろしければ、一番下の「会員登録をする」ボタンをクリックしてください。\n",
+            'front.entry.do_register' => '会員登録をする',
+            'front.entry.complete_title' => '新規会員登録(完了)',
+            'front.entry.complete_title__temporary' => '新規会員登録(仮登録完了)',
+            'front.entry.complete_message__title' => '会員登録ありがとうございます',
+            'front.entry.complete_message__temporary' => "現在、仮会員の状態です。ただいま、ご入力いただいたメールアドレス宛に、ご本人様確認用のメールをお送りいたしました。\nメール本文内のURLをクリックすると、本会員登録が完了となります。\n",
+            'front.entry.complete_message__activated' => "会員登録が完了しました。\nメールアドレスとパスワードでログイン後、ショッピングをお楽しみください。\n",
+            // --- front.contact.* (Contact/index|confirm|complete) -------
             'front.contact.title' => 'お問い合わせ',
             'front.contact.inquiry_notice' => "内容によっては回答をさしあげるのにお時間をいただくこともございます。\nまた、休業日は翌営業日以降の対応となりますのでご了承ください。\n",
             'front.contact.inquiry_contents' => 'お問い合わせ内容',
             'front.contact.order_notice' => 'ご注文に関するお問い合わせには、必ず「ご注文番号」をご記入くださいますようお願いいたします。',
+            'front.contact.complete_title' => 'お問い合わせ(完了)',
+            'front.contact.complete_message__title' => 'お問い合わせ内容の送信が完了いたしました',
+            'front.contact.complete_message__body' => '万一、ご確認メールが届かない場合は、トラブルの可能性もありますので大変お手数ではございますがもう一度お問い合わせいただくか、お電話にてお問い合わせくださいませ。',
             // --- front.product.* (Product/list.twig) --------------------
             'front.product.all_category' => '全て',
             'front.product.search__category_not_found' => 'ご指定のカテゴリは存在しません',
@@ -257,6 +268,7 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
             'common.shop_name' => '店名',
             // --- common.* (Mypage form / order-summary keys) ------------
             'common.back' => '戻る',
+            'common.send' => '送信する',
             'common.close' => '閉じる',
             'common.change' => '変更',
             'common.tax_include' => '税込',
