@@ -9,15 +9,23 @@
   rebound to the Cart resource body (src/Resource/Page/Cart.php):
     cartCount, totalPrice, deliveryFeeTotal,
     carts[] { cartKey, saleTypeId, saleTypeName, totalPrice,
-              deliveryFeeTotal, items[] { productCode, quantity, price } }
+              deliveryFeeTotal,
+              items[] { productClassId, productId, productCode,
+                        productName, mainImage,
+                        classCategoryName1, className1,
+                        classCategoryName2, className2,
+                        quantity, price } }
 
-  Fields EC-CUBE renders that BeMart's body does not carry are OMITTED
-  (never invented) and enumerated as explained residual in
+  The cart row reproduces EC-CUBE's `ec-cartRow`: product thumbnail,
+  product-detail link on the name, the two variation axes, and the
+  remove/up/down operation links keyed on productClassId — these are
+  derived from the corrected ALPS `CartItem` descriptor, which is a
+  faithful projection of EC-CUBE's cart screen (not a thin Entity).
+
+  Fields EC-CUBE renders that BeMart's body still does not carry are
+  OMITTED (never invented) and enumerated as explained residual in
   tests/Resource/CartHtmlRenderTest.php. Notable omissions:
    - `app.session.flashbag` error blocks — request-flash, no BeMart equiv.
-   - per-row product image / product detail link / class categories —
-     CartItemEntity carries only productCode/quantity/price (厳密移植
-     Grade-C scope dropped ProductClass joins).
    - delivery-fee-free progress block — depends on BaseInfo thresholds.
    - CSRF anchor tokens on the up/down/remove links.
   See var/templates/README.md for the port + residual-diff method.
@@ -107,14 +115,25 @@
                             {% for item in cart.items %}
                                 <ul class="ec-cartRow">
                                     <li class="ec-cartRow__delColumn">
-                                        <a href="{{ url('cart_handle_item', {'operation': 'remove', 'productCode': item.productCode}) }}" class="ec-icon" data-method="put" data-message="カートから商品を削除してよろしいですか？">
+                                        <a href="{{ url('cart_handle_item', {'operation': 'remove', 'productClassId': item.productClassId}) }}" class="ec-icon" data-method="put" data-message="カートから商品を削除してよろしいですか？">
                                             <img src="{{ asset('assets/icon/cross.svg') }}" alt="delete">
                                         </a>
                                     </li>
                                     <li class="ec-cartRow__contentColumn">
+                                        <div class="ec-cartRow__img">
+                                            <a target="_blank" href="{{ url('product_detail', {id: item.productId}) }}">
+                                                <img src="{{ asset(item.mainImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ item.productName }}"/>
+                                            </a>
+                                        </div>
                                         <div class="ec-cartRow__summary">
                                             <div class="ec-cartRow__name">
-                                                {{ item.productCode }}
+                                                <a target="_blank" href="{{ url('product_detail', {id: item.productId}) }}">{{ item.productName }}</a>
+                                                {% if item.classCategoryName1 %}
+                                                    <br>{{ item.className1 }}：{{ item.classCategoryName1 }}
+                                                {% endif %}
+                                                {% if item.classCategoryName2 %}
+                                                    <br>{{ item.className2 }}：{{ item.classCategoryName2 }}
+                                                {% endif %}
                                             </div>
                                             <div class="ec-cartRow__unitPrice">{{ item.price|price }}</div>
                                             <div class="ec-cartRow__sutbtotalSP">小計：{{ (item.price * item.quantity)|price }}</div>
@@ -125,7 +144,7 @@
                                         <div class="ec-cartRow__amountSP">数量：{{ item.quantity|number_format }}</div>
                                         <div class="ec-cartRow__amountUpDown">
                                             {% if item.quantity > 1 %}
-                                                <a href="{{ url('cart_handle_item', {'operation': 'down', 'productCode': item.productCode}) }}" class="ec-cartRow__amountDownButton load-overlay" data-method="put" data-confirm="false">
+                                                <a href="{{ url('cart_handle_item', {'operation': 'down', 'productClassId': item.productClassId}) }}" class="ec-cartRow__amountDownButton load-overlay" data-method="put" data-confirm="false">
                                                     <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus-dark.svg') }}" alt="reduce"></span>
                                                 </a>
                                             {% else %}
@@ -133,7 +152,7 @@
                                                     <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus.svg') }}" alt="reduce"></span>
                                                 </div>
                                             {% endif %}
-                                            <a href="{{ url('cart_handle_item', {'operation': 'up', 'productCode': item.productCode}) }}" class="ec-cartRow__amountUpButton load-overlay" data-method="put" data-confirm="false">
+                                            <a href="{{ url('cart_handle_item', {'operation': 'up', 'productClassId': item.productClassId}) }}" class="ec-cartRow__amountUpButton load-overlay" data-method="put" data-confirm="false">
                                                 <span class="ec-cartRow__amountUpButton__icon"><img src="{{ asset('assets/icon/plus-dark.svg') }}" alt="increase"></span>
                                             </a>
                                         </div>
