@@ -143,6 +143,7 @@
       {"id": "pointConversionRate", "title": "ポイント換算レート","tag": "src-entity", "doc": {"value": "1ポイントあたりの通貨換算額（円）。ポイント使用時の値引き額計算に使用"}},
       {"id": "invoiceRegistrationNumber", "title": "インボイス登録番号","tag": "src-entity", "doc": {"value": "適格請求書発行事業者の登録番号（Tから始まる13桁）。インボイス制度対応"}},
 
+      {"id": "paymentId", "title": "支払方法ID","tag": "src-entity", "doc": {"value": "dtb_payment.id の不透明な文字列ハンドル。BeMart の PaymentMethodAdminEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_payment.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlPaymentMethodAdminStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (PaymentMethodAdminUpdated / PaymentMethodAdminDeleted) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。categoryId / blockId / tagId と同じ Fake↔SQL 二重性"}},
       {"id": "paymentMethodName", "title": "支払方法名","tag": "src-entity", "doc": {"value": "支払方法の表示名"}},
       {"id": "paymentCharge", "title": "決済手数料（マスタ）","tag": "src-entity", "doc": {"value": "支払方法マスタの手数料設定値。受注作成時にPaymentChargePreprocessorでcharge（受注の手数料）にスナップショットされる。利用条件金額の判定にはこの手数料を含めた金額が使用される"}},
       {"id": "paymentRuleMin", "title": "利用条件(下限)","tag": "src-entity", "doc": {"value": "この支払方法を選択できる最低注文金額。未設定時は下限なし。判定対象は決済手数料(paymentCharge)を含めた合計金額"}},
@@ -921,8 +922,10 @@
         ]
       },
 
-      {"id": "Payment", "title": "支払方法","tag": "shop src-template",
+      {"id": "Payment", "title": "支払方法","tag": "shop src-entity src-template",
+        "doc": {"value": "dtb_payment 1行を平坦化した投影。BeMart の PaymentMethodAdminEntity は 6 項目 (paymentId / paymentMethodName / charge / ruleMin / ruleMax / visible) を保持し、これは dtb_payment の id / payment_method / charge / rule_min / rule_max / visible に対応する。list / getById / put / remove のフル CRUD マスタ (PaymentMethodAdminStorageInterface)。paymentId は SqlPaymentMethodAdminIdGenerator が MAX(id)+1 で先行採番（PaymentMethodAdminCreated が Entity 構築前に paymentId を確定するため）。creator_id (FK to dtb_member) は常に NULL を書く（構造ダンプ上 dtb_member が空のため NULL 以外は FK 1452）。sort_no / payment_image / method_class は BeMart 管理スライスに UI がなく常に NULL。fixed は NOT NULL DEFAULT 1 でスキーマ既定値 1 を書く。payment_method は nullable だが Entity は非NULL → read 時に NULL→'' へ coalesce。charge は decimal(12,2) nullable で JPY に小数部はなく read 時に (int) へ truncate（NULL→0）。rule_min / rule_max は decimal nullable で NULL は NULL のまま。visible は tinyint NOT NULL の bidirectional cast。remove は dtb_payment_option（delivery↔payment のリンク表、payment_id が dtb_payment.id への FK）の子行を先に削除して FK 1451 を回避（Block→dtb_block_position と同形の防御的カスケード）。create_date / update_date は NOW() で維持（dtb_payment にタイムゾーン列なし、サーバローカル解釈）。discriminator_type は 'payment'。非数値 paymentId は SQL では miss として 404 経路に倒れる。Phase 2b で SqlPaymentMethodAdminStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#paymentId"},
           {"href": "#paymentMethodName"},
           {"href": "#paymentCharge"},
           {"href": "#paymentRuleMin"},
@@ -936,7 +939,8 @@
           {"href": "#doDeletePayment"}
         ]
       },
-      {"id": "PaymentList", "title": "支払方法一覧","tag": "shop src-template",
+      {"id": "PaymentList", "title": "支払方法一覧","tag": "shop src-entity src-template",
+        "doc": {"value": "支払方法マスタ (dtb_payment) の管理一覧。AdminPaymentListFetched が PaymentMethodAdminStorageInterface::list() を id 昇順で投影する。Payment ディスクリプタを参照。"},
         "descriptor": [
           {"href": "#Payment"},
           {"href": "#goPaymentList"},

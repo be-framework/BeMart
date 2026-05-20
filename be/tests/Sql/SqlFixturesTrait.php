@@ -1105,6 +1105,52 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_payment row (one admin-editable payment-method
+     * master record). Returns the inserted id.
+     *
+     * dtb_payment's NOT NULL columns are id (AUTO_INCREMENT), fixed
+     * (tinyint(1) DEFAULT 1), visible (tinyint(1) DEFAULT 1),
+     * create_date, update_date, discriminator_type. `creator_id` (FK to
+     * dtb_member), `payment_method`, `charge` (decimal, DEFAULT 0.00),
+     * `rule_max`, `sort_no`, `payment_image`, `rule_min`,
+     * `method_class` are all nullable. The defaults match
+     * SqlPaymentMethodAdminStorage's INSERT contract: creator_id = NULL
+     * (dtb_member is empty in the structure-only dump so any non-NULL
+     * value would raise FK 1452), sort_no / payment_image /
+     * method_class = NULL (no UI in the BeMart admin slice), fixed = 1
+     * (schema default), visible = 1 (default-shown),
+     * discriminator_type = 'payment'.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertPayment(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'creator_id' => null,
+            'payment_method' => sprintf('Payment %d', $counter),
+            'charge' => 0,
+            'rule_max' => null,
+            'sort_no' => null,
+            'fixed' => 1,
+            'payment_image' => null,
+            'rule_min' => null,
+            'method_class' => null,
+            'visible' => 1,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'payment',
+        ], $overrides);
+
+        $this->executeInsert('dtb_payment', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
