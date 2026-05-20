@@ -189,6 +189,7 @@
 
       {"id": "denyUrl", "title": "拒否URL","tag": "src-entity", "doc": {"value": "アクセスを拒否する管理画面URLパターン。authority=1（店舗オーナー）に対して適用"}},
 
+      {"id": "mailTemplateId", "title": "メールテンプレートID","tag": "src-entity", "doc": {"value": "dtb_mail_template.id（int unsigned AUTO_INCREMENT）の正の整数主キー。doUpdateMailTemplate の必須入力で、既存行を指す必要がある。SqlMailTemplateStorage は findById / update をこの id で引き、未知 id は MailTemplateNotFoundException（404）。新規テンプレート作成フローは file_name 設定と Twig ファイル書き出しを伴うため Phase 2 scope であり、ID 生成器は存在しない（更新専用契約）"}},
       {"id": "mailTemplateName", "title": "テンプレート名","tag": "src-entity", "doc": {"value": "メールテンプレートの表示名"}},
       {"id": "mailTemplateFileName", "title": "テンプレートファイルパス","tag": "src-entity", "doc": {"value": "メールテンプレートのTwigファイルパス。'Mail/{入力値}.twig'形式で保存。新規作成時のみ設定可能"}},
       {"id": "mailSubject", "title": "メール件名","tag": "src-entity", "doc": {"value": "メールの件名。テンプレート変数を含む場合あり"}},
@@ -1145,8 +1146,10 @@
         ]
       },
 
-      {"id": "MailTemplate", "title": "メールテンプレート","tag": "mail src-template",
+      {"id": "MailTemplate", "title": "メールテンプレート","tag": "mail src-entity src-template",
+        "doc": {"value": "dtb_mail_template 1行を平坦化した投影。BeMart の MailTemplateEntity は 厳密移植 整合のため 4 項目 (mailTemplateId / mailTemplateName / fileName / mailSubject) のみ保持し、dtb_mail_template の id / name / file_name / mail_subject 列と 1:1。dtb_mail_template には本文列が存在しない — EC-CUBE 4.3 はメール本文をディスク上の Twig ファイルとして保持し file_name がそのパス。BeMart 由来で schema から乖離していた body / htmlBody は削除済み。name / file_name / mail_subject は EC-CUBE 上 nullable だが Entity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。creator_id（dtb_member 空）は structure-only ダンプで参照先が空のため固定 NULL。update は mail_subject（+ update_date）のみ書き込み、file_name は作成時固定で更新不可。更新専用契約のため INSERT 経路はなく ID 生成器も存在しない（未知 id は MailTemplateNotFoundException）。Phase 2b で SqlMailTemplateStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#mailTemplateId"},
           {"href": "#mailTemplateName"},
           {"href": "#mailTemplateFileName"},
           {"href": "#mailSubject"},

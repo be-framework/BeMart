@@ -1453,6 +1453,49 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_mail_template row. Returns the inserted id.
+     *
+     * dtb_mail_template's NOT NULL columns are create_date, update_date,
+     * deletable (tinyint(1) DEFAULT 0), discriminator_type. `name`,
+     * `file_name`, `mail_subject` are all nullable; `creator_id` is a
+     * nullable FK to dtb_member.
+     *
+     * 厳密移植 note: dtb_mail_template has NO body columns — EC-CUBE 4.3
+     * stores mail bodies as on-disk Twig files (`file_name` is the
+     * path), so there is nothing here for the dropped body / htmlBody
+     * fields.
+     *
+     * The defaults match SqlMailTemplateStorage's read contract:
+     * creator_id = NULL (dtb_member is empty in the structure-only dump
+     * so any non-NULL value would raise FK 1452), deletable = 0 (the
+     * stock seeded notification templates are not operator-removable),
+     * discriminator_type = 'mailtemplate'.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertMailTemplate(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'creator_id' => null,
+            'name' => sprintf('Mail Template %d', $counter),
+            'file_name' => sprintf('Mail/template_%d.twig', $counter),
+            'mail_subject' => sprintf('Subject %d', $counter),
+            'create_date' => $now,
+            'update_date' => $now,
+            'deletable' => 0,
+            'discriminator_type' => 'mailtemplate',
+        ], $overrides);
+
+        $this->executeInsert('dtb_mail_template', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert (idempotently) an mtb_csv_type row so the FK from
      * dtb_csv.csv_type_id → mtb_csv_type.id can be satisfied.
      *
