@@ -1,0 +1,165 @@
+{#
+  BeMart Product List page — EC-CUBE goProductList.
+
+  PORT of EC-CUBE 4.3 default-theme `Product/list.twig`
+  (src/Eccube/Resource/template/default/Product/list.twig).
+
+  Markup skeleton, `ec-searchnavRole` / `ec-topicpath` / `ec-shelfRole`
+  / `ec-shelfGrid` / `ec-pagerRole` / `ec-modal` classes and structure
+  are kept verbatim from EC-CUBE. Only the dynamic bindings are rebound
+  to the Products resource body (src/Resource/Page/Products.php):
+    transitionId, totalItemCount, products[]
+
+  NOTE — scope. The Products resource is a Phase 3 pure renderer (same
+  shape as Index): it declares the hypermedia surface and an EMPTY
+  product list. A faithful product LISTING needs a real catalog query
+  (filter + pagination) — a vertical slice (Entity + SQL) that is out of
+  scope for this template-porting wave. So this port renders the
+  `totalItemCount > 0` ELSE branch of EC-CUBE's `Product/list.twig`: the
+  search-nav with the topicpath and the "お探しの商品は見つかりませんでした"
+  empty-result counter. The populated `ec-shelfGrid` branch + the
+  `eccube.productsClassCategories` JS + the add-cart modal are kept in
+  EC-CUBE's template behind `if pagination.totalItemCount > 0`; with an
+  empty list EC-CUBE emits none of them, so the port omits them too and
+  they contribute nothing to the diff. The populated-list branch is
+  flagged for a follow-up ProductList vertical-slice enrichment.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `search_form` is the Symfony search FormView; it is only iterated /
+     widget-rendered inside the `totalItemCount > 0` branch, which the
+     empty list never enters, so no FormView markup is emitted.
+   - the `block javascript` `class_categories_as_json` loop iterates
+     `pagination` — empty here, so it emits an empty JS object literal.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'product_page' %}
+{% set route = 'product_list' %}
+{% set title = '商品一覧' %}
+
+{% block javascript %}
+    <script>
+        eccube.productsClassCategories = {
+            {% for product in products %}
+            "{{ product.id }}": {}{% if loop.last == false %}, {% endif %}
+            {% endfor %}
+        };
+
+        $(function() {
+
+            // 表示件数を変更
+            $('.disp-number').change(function() {
+                var dispNumber = $(this).val();
+                $('#disp_number').val(dispNumber);
+                $('#pageno').val(1);
+                $("#form1").submit();
+            });
+
+            // 並び順を変更
+            $('.order-by').change(function() {
+                var orderBy = $(this).val();
+                $('#orderby').val(orderBy);
+                $('#pageno').val(1);
+                $("#form1").submit();
+            });
+
+            $('.add-cart').on('click', function(e) {
+                var $form = $(this).parents('li').find('form');
+
+                // 個数フォームのチェック
+                var $quantity = $form.parent().find('.quantity');
+                if ($quantity.val() < 1) {
+                    $quantity[0].setCustomValidity('1以上で入力してください。');
+                    setTimeout(function() {
+                        loadingOverlay('hide');
+                    }, 100);
+                    return true;
+                } else {
+                    $quantity[0].setCustomValidity('');
+                }
+                e.preventDefault();
+                $.ajax({
+                    url: $form.attr('action'),
+                    type: $form.attr('method'),
+                    data: $form.serialize(),
+                    dataType: 'json',
+                    beforeSend: function(xhr, settings) {
+                        // Buttonを無効にする
+                        $('.add-cart').prop('disabled', true);
+                    }
+                }).done(function(data) {
+                    // レスポンス内のメッセージをalertで表示
+                    $.each(data.messages, function() {
+                        $('#ec-modal-header').text(this);
+                    });
+
+                    $('.ec-modal').show()
+
+                    // カートブロックを更新する
+                    $.ajax({
+                        url: '{{ url('block_cart') }}',
+                        type: 'GET',
+                        dataType: 'html'
+                    }).done(function(html) {
+                        $('.ec-headerRole__cart').html(html);
+                    });
+                }).fail(function(data) {
+                    alert('カートへの追加に失敗しました。');
+                }).always(function(data) {
+                    // Buttonを有効にする
+                    $('.add-cart').prop('disabled', false);
+                });
+            });
+        });
+
+        $('.ec-modal-wrap').on('click', function(e) {
+            // モーダル内の処理は外側にバブリングさせない
+            e.stopPropagation();
+        });
+        $('.ec-modal-overlay, .ec-modal, .ec-modal-close, .ec-inlineBtn--cancel').on('click', function() {
+            $('.ec-modal').hide()
+        });
+    </script>
+{% endblock %}
+
+{% block main %}
+    <div class="ec-searchnavRole">
+        <form name="form1" id="form1" method="get" action="?">
+        </form>
+        <div class="ec-searchnavRole__topicpath">
+            <ol class="ec-topicpath">
+                <li class="ec-topicpath__item"><a href="{{ url('product_list') }}">全て</a>
+                </li>
+            </ol>
+        </div>
+        <div class="ec-searchnavRole__infos">
+            <div class="ec-searchnavRole__counter">
+                {% if totalItemCount > 0 %}
+                    <span class="ec-font-bold">{{ totalItemCount }}件</span><span>の商品が見つかりました</span>
+                {% else %}
+                    <span>お探しの商品は見つかりませんでした</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% if totalItemCount > 0 %}
+        <div class="ec-shelfRole">
+            <ul class="ec-shelfGrid">
+                {% for product in products %}
+                    <li class="ec-shelfGrid__item">
+                        <a href="{{ url('product_detail', {'id': product.id}) }}">
+                            <p class="ec-shelfGrid__item-image">
+                                <img src="{{ asset(product.mainListImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ product.name }}">
+                            </p>
+                            <p>{{ product.name }}</p>
+                            <p class="price02-default">
+                                {{ product.price02|price }}
+                            </p>
+                        </a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+{% endblock %}
