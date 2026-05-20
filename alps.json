@@ -641,6 +641,19 @@
           {"href": "#doReorder"}
         ]
       },
+      {"id": "ShippingAddress", "title": "配送先住所エンティティ","tag": "order src-entity",
+        "doc": {"value": "dtb_shipping 1行を平坦化した投影。BeMart の ShippingAddressEntity と1:1 (8項目: orderNo / name01 / name02 / postalCode / pref / addr01 / addr02 / phoneNumber)。受注単位の単一お届け先を表し、orderNo をキーに doSelectShippingAddress / doUpdateShippingAddress が put、goExportShipping が listAll で全件取得する。dtb_shipping は order_id で dtb_order を参照するため、SQL 層は order_no → order_id を解決して読み書きする。Order 配下のインライン Shipping 記述子は EC-CUBE スキーマ全列を写すテンプレート視点で、こちらは storage source-of-truth の src-entity 視点。Entity vs schema の差: name01/name02 は column NOT NULL（直接）、postalCode/addr01/addr02 は Entity 非 null だが column NULL 可（hydrator で空文字に正規化）、pref は Entity int だが pref_id NULL 可 FK→空の mtb_pref（pref=0 は NULL 書き込み、読み出し時 NULL→0）、phoneNumber は 14 文字上限。dtb_shipping は単一受注に複数行（複数配送先）を許すが BeMart は order_id 単一行を前提（put は order_id で既存行を探索し UPDATE か INSERT）。Phase 2b で SqlShippingAddressStorage が src-entity として参照"},
+        "descriptor": [
+          {"href": "#orderNo"},
+          {"href": "#name01"},
+          {"href": "#name02"},
+          {"href": "#postalCode"},
+          {"href": "#pref"},
+          {"href": "#addr01"},
+          {"href": "#addr02"},
+          {"href": "#phoneNumber"}
+        ]
+      },
       {"id": "OrderList", "title": "受注一覧","tag": "order src-template",
         "descriptor": [
           {"href": "#Order"},

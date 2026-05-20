@@ -231,6 +231,52 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_shipping row (one per-order delivery target).
+     * Returns the inserted id.
+     *
+     * dtb_shipping's NOT NULL columns are name01, name02, create_date,
+     * update_date, discriminator_type. Every FK column (order_id →
+     * dtb_order, pref_id → mtb_pref, country_id → mtb_country,
+     * delivery_id → dtb_delivery, creator_id → dtb_member) plus the
+     * remaining address columns are nullable and default to NULL so
+     * callers only override what they need. Most call sites pass
+     * `order_id` (the FK SqlShippingAddressStorage resolves order_no
+     * against) and the address fields under assertion.
+     *
+     * The defaults match SqlShippingAddressStorage's INSERT contract:
+     * pref_id = NULL (mtb_pref is empty in the structure-only dump —
+     * callers wanting a non-NULL pref must seed it via {@see insertPref}),
+     * discriminator_type = 'shipping'.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertShipping(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'order_id' => null,
+            'country_id' => null,
+            'pref_id' => null,
+            'name01' => 'Yamada',
+            'name02' => sprintf('Ship%d', $counter),
+            'postal_code' => null,
+            'addr01' => null,
+            'addr02' => null,
+            'phone_number' => null,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'shipping',
+        ], $overrides);
+
+        $this->executeInsert('dtb_shipping', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Look up the default `dtb_product_class.id` for a given
      * `dtb_product.id`. Convention: the row with both
      * `class_category_id1` and `class_category_id2` NULL — the same
