@@ -106,9 +106,16 @@ final class SqlFavoriteStorage implements FavoriteStorageInterface
 
         // Three-way join: favorite → product (for name) → product_class
         // (for code + price). The default-class filter on product_class
-        // ensures exactly one row per favorited product.
+        // ensures exactly one row per favorited product. The main image
+        // (Phase 3 enrichment) is a correlated sub-select over
+        // dtb_product_image for the lowest sort_no — same shape
+        // SqlCartQuery uses for the cart-row thumbnail; NULL when the
+        // product has no image.
         $sql = 'SELECT fav.customer_id, pc.product_code, p.name AS product_name, '
-            . 'pc.price02 AS unit_price '
+            . 'pc.price02 AS unit_price, '
+            . '(SELECT pi.file_name FROM dtb_product_image pi '
+            . 'WHERE pi.product_id = p.id '
+            . 'ORDER BY pi.sort_no ASC, pi.id ASC LIMIT 1) AS main_image '
             . 'FROM dtb_customer_favorite_product fav '
             . 'INNER JOIN dtb_product p ON p.id = fav.product_id '
             . 'INNER JOIN dtb_product_class pc ON pc.product_id = p.id '
@@ -126,6 +133,7 @@ final class SqlFavoriteStorage implements FavoriteStorageInterface
                 productCode: (string) ($row['product_code'] ?? ''),
                 productName: (string) $row['product_name'],
                 unitPrice: (int) $row['unit_price'],
+                fileName: $row['main_image'] !== null ? (string) $row['main_image'] : null,
             );
         }
 
