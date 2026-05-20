@@ -30,9 +30,24 @@ use function count;
  */
 final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
 {
-    /** @param array<string, mixed> $data */
-    public function __construct(private array $data = [])
-    {
+    /** @var list<mixed>|null Explicit `{% for %}` iteration items. */
+    private array|null $iterationItems;
+
+    /**
+     * @param array<string, mixed> $data
+     * @param list<mixed>|null     $iterationItems When EC-CUBE iterates
+     *        the object itself (`{% for x in pagination %}`,
+     *        `{% for x in search_form %}`) the iteration set differs from
+     *        the property bag — e.g. a `pagination` with `totalItemCount`
+     *        readable but ZERO product rows. Pass the iteration items
+     *        explicitly; `null` falls back to iterating `$data` (the
+     *        Cart-pilot behaviour).
+     */
+    public function __construct(
+        private array $data = [],
+        array|null $iterationItems = null,
+    ) {
+        $this->iterationItems = $iterationItems;
     }
 
     public function __get(string $name): mixed
@@ -82,24 +97,27 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
 
     public function getIterator(): Traversable
     {
-        yield from $this->data;
+        yield from $this->iterationItems ?? $this->data;
     }
 
     public function count(): int
     {
-        return count($this->data);
+        return count($this->iterationItems ?? $this->data);
     }
 
     /**
-     * The EC-CUBE 4.3 messages.ja.yaml values the Cart port substitutes
-     * for `{{ '...'|trans }}`. Only the keys Cart/index.twig +
-     * default_frame.twig actually use are listed.
+     * The EC-CUBE 4.3 messages.ja.yaml values the storefront template
+     * ports substitute for `{{ '...'|trans }}`. Only the keys the ported
+     * pages (Cart / Top / ProductList / Login / Entry / Contact) and
+     * default_frame.twig actually use are listed — the values are copied
+     * verbatim from src/Eccube/Resource/locale/messages.ja.yaml.
      *
      * @return array<string, string>
      */
     public static function jaMessages(): array
     {
         return [
+            // --- Cart/index.twig + default_frame.twig -------------------
             'front.cart.title' => 'ショッピングカート',
             'front.cart.nav__cart_items' => 'カートの商品',
             'front.cart.nav__customer_info' => 'お客様情報',
@@ -120,6 +138,56 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
             'common.subtotal__with_separator' => '小計：',
             'common.total__with_separator' => '合計：',
             'common.pagetop' => 'ページトップへ',
+            // --- common.* (Login / Entry / Contact / ProductList) -------
+            'common.login' => 'ログイン',
+            'common.remember_me' => '次回から自動的にログインする',
+            'common.signup' => '新規会員登録',
+            'common.forgot_login' => 'ログイン情報をお忘れですか？',
+            'common.name' => 'お名前',
+            'common.kana' => 'お名前(カナ)',
+            'common.first_name' => '名',
+            'common.last_name' => '姓',
+            'common.first_name_kana' => 'メイ',
+            'common.last_name_kana' => 'セイ',
+            'common.company_name' => '会社名',
+            'common.address' => '住所',
+            'common.postal_symbol' => '〒',
+            'common.search_postal_code' => '郵便番号検索',
+            'common.address_sample_01' => '市区町村名(例：大阪市北区)',
+            'common.address_sample_02' => '番地・ビル名(例：西梅田1丁目6-8)',
+            'common.phone_number' => '電話番号',
+            'common.mail_address' => 'メールアドレス',
+            'common.mail_address_sample' => '例：ec-cube@example.com',
+            'common.repeated_confirm' => '確認のためもう一度入力してください',
+            'common.password' => 'パスワード',
+            'common.password_sample' => '半角英数記号%min%〜%max%文字',
+            'common.gender' => '性別',
+            'common.birth_day' => '生年月日',
+            'common.job' => '職業',
+            'common.go_to_confirm' => '確認ページへ',
+            'common.go_to_cart' => 'カートへ進む',
+            // --- front.entry.* (Entry/index.twig) -----------------------
+            'front.entry.title' => '新規会員登録',
+            'front.entry.agree' => '同意する',
+            'front.entry.disagree' => '同意しない',
+            'front.entry.agree_with_terms' => '<a class="ec-link" href="%url%" target="_blank">利用規約</a>に同意してお進みください',
+            // --- front.contact.* (Contact/index.twig) -------------------
+            'front.contact.title' => 'お問い合わせ',
+            'front.contact.inquiry_notice' => "内容によっては回答をさしあげるのにお時間をいただくこともございます。\nまた、休業日は翌営業日以降の対応となりますのでご了承ください。\n",
+            'front.contact.inquiry_contents' => 'お問い合わせ内容',
+            'front.contact.order_notice' => 'ご注文に関するお問い合わせには、必ず「ご注文番号」をご記入くださいますようお願いいたします。',
+            // --- front.product.* (Product/list.twig) --------------------
+            'front.product.all_category' => '全て',
+            'front.product.search__category_not_found' => 'ご指定のカテゴリは存在しません',
+            'front.product.search__product_not_found' => 'お探しの商品は見つかりませんでした',
+            'front.product.search_result__keyword' => '「%name%」の検索結果',
+            'front.product.search_result__detail' => '<span class="ec-font-bold">%count%件</span><span>の商品が見つかりました</span>',
+            'front.product.add_cart_complete' => 'カートに追加しました。',
+            'front.product.add_cart_error' => 'カートへの追加に失敗しました。',
+            'front.product.add_cart' => 'カートに入れる',
+            'front.product.out_of_stock' => 'ただいま品切れ中です。',
+            'front.product.continue' => 'お買い物を続ける',
+            'front.product.invalid_quantity' => '1以上で入力してください。',
         ];
     }
 }

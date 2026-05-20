@@ -10,6 +10,7 @@ use Twig\Source;
 use function file_exists;
 use function file_get_contents;
 use function in_array;
+use function preg_replace;
 use function str_contains;
 
 /**
@@ -25,6 +26,14 @@ use function str_contains;
  * nothing on either side of the diff (BeMart's base.html.twig leaves the
  * same regions empty). This keeps the comparison focused on the cart
  * page + frame skeleton that were actually ported.
+ *
+ * The storefront form pages (Entry / Contact / ProductList) use the
+ * Symfony twig-bridge `{% form_theme %}` tag, which is not installed in
+ * this repo (no symfony/form, no symfony/twig-bridge). `form_theme` only
+ * SELECTS the form theme; with the `form_widget` / `form_label` /
+ * `form_errors` helpers stubbed to deterministic markers, the tag is a
+ * pure no-op. So the loader strips the `{% form_theme ... %}` tag from
+ * the source before handing it to Twig — there is nothing for it to do.
  */
 final class EcCubeStubLoader implements LoaderInterface
 {
@@ -46,8 +55,14 @@ final class EcCubeStubLoader implements LoaderInterface
         }
 
         $path = $this->templateRoot . '/' . $name;
+        $source = (string) file_get_contents($path);
 
-        return new Source((string) file_get_contents($path), $name, $path);
+        // `{% form_theme ... %}` is a Symfony twig-bridge tag (not
+        // installed). It only selects a form theme; with the form_*
+        // helpers stubbed it is a no-op, so strip it so Twig can parse.
+        $source = (string) preg_replace('/\{%-?\s*form_theme\b.*?-?%\}/s', '', $source);
+
+        return new Source($source, $name, $path);
     }
 
     public function getCacheKey(string $name): string

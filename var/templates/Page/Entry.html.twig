@@ -1,0 +1,203 @@
+{#
+  BeMart Customer Registration page — EC-CUBE goCustomerRegistration.
+
+  PORT of EC-CUBE 4.3 default-theme `Entry/index.twig`
+  (src/Eccube/Resource/template/default/Entry/index.twig).
+
+  Markup skeleton, `ec-registerRole` / `ec-pageHeader` / `ec-off1Grid` /
+  `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` / `ec-select` /
+  `ec-input` / `ec-birth` / `ec-radio` / `ec-telInput` /
+  `ec-registerRole__actions` / `ec-off4Grid` classes + the <dl>/<dt>/<dd>
+  definition-list structure are kept verbatim from EC-CUBE. Only the
+  dynamic bindings are rebound to the Entry resource body
+  (src/Resource/Page/Entry.php):
+    transitionId, fields[] (16), submitTo { method, href }, csrfToken
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `form_label(...)` / `form_widget(...)` / `form_errors(...)` —
+     EC-CUBE renders every input through the Symfony FormView. BeMart's
+     resource body carries the field NAMES (`fields`), not a FormView,
+     so the labels + `<input>`/`<select>` widgets are authored plainly
+     here using the EC-CUBE field names + placeholders. The exact
+     Symfony-generated widget attributes (FormView ids, name brackets,
+     validation wiring, pref/sex/job <option> sets) are EC-CUBE-runtime
+     only and enumerated as a residual family.
+   - `form._token` / `form.user_policy_check` — Symfony CSRF + policy
+     widgets; BeMart has no CSRF widget, the hidden token is kept with an
+     empty value, the policy checkbox is rendered plainly.
+   - The `{% for f in form|filter(f => f.vars.eccube_form_options
+     .auto_render) %}` entity-extension auto-render loop is OMITTED —
+     it iterates EC-CUBE plugin/Doctrine entity extensions, of which a
+     core install has none, so it emits nothing on either side.
+   - `has_errors(...)` — request-validation runtime; resolves false on
+     a fresh form, so the conditional ` error` class never appears.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'registration_page' %}
+{% set route = 'entry' %}
+{% set title = '新規会員登録' %}
+
+{% block javascript %}
+    <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+{% endblock javascript %}
+
+{% block main %}
+    <div class="ec-registerRole">
+        <div class="ec-pageHeader">
+            <h1>新規会員登録</h1>
+        </div>
+        <div class="ec-off1Grid">
+            <div class="ec-off1Grid__cell">
+                <form method="post" action="{{ url('entry') }}" novalidate class="h-adr">
+                    <span class="p-country-name" style="display:none;">Japan</span>
+                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <div class="ec-borderedDefs">
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-halfInput">
+                                    <input type="text" name="name01" placeholder="姓">
+                                    <input type="text" name="name02" placeholder="名">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前(カナ)</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-halfInput">
+                                    <input type="text" name="kana01" placeholder="セイ">
+                                    <input type="text" name="kana02" placeholder="メイ">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">会社名</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-halfInput">
+                                    <input type="text" name="companyName">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">住所</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-zipInput"><span>〒</span>
+                                    <input type="text" name="postalCode">
+                                    <div class="ec-zipInputHelp">
+                                        <div class="ec-zipInputHelp__icon">
+                                            <div class="ec-icon"><img
+                                                        src="{{ asset('assets/icon/question-white.svg') }}" alt="">
+                                            </div>
+                                        </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>
+                                    </div>
+                                </div>
+
+                                <div class="ec-select">
+                                    <select name="pref"></select>
+                                </div>
+                                <div class="ec-input">
+                                    <input type="text" name="addr01" placeholder="市区町村名(例：大阪市北区)">
+                                </div>
+                                <div class="ec-input">
+                                    <input type="text" name="addr02" placeholder="番地・ビル名(例：西梅田1丁目6-8)">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">電話番号</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-telInput">
+                                    <input type="text" name="phoneNumber">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">メールアドレス</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-input">
+                                    <input type="text" name="email" placeholder="例：ec-cube@example.com">
+                                </div>
+                                <div class="ec-input">
+                                    <input type="text" name="email_confirm" placeholder="確認のためもう一度入力してください">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">パスワード</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-input">
+                                    <input type="password" name="password" placeholder="半角英数記号8〜32文字">
+                                </div>
+                                <div class="ec-input">
+                                    <input type="password" name="password_confirm" placeholder="確認のためもう一度入力してください">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">生年月日</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-birth">
+                                    <select name="birth_year"></select><span>/</span>
+                                    <select name="birth_month"></select><span>/</span>
+                                    <select name="birth_day"></select>
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">性別</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-radio">
+                                    <input type="radio" name="sex">
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">職業</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-select">
+                                    <select name="job"></select>
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="ec-registerRole__actions">
+                        <div class="ec-checkbox">
+                            <label>
+                                <input type="checkbox" name="user_policy_check">
+                                <a class="ec-link" href="{{ url('help_agreement') }}" target="_blank">利用規約</a>に同意してお進みください
+                            </label>
+                        </div>
+                        <div class="ec-off4Grid">
+                            <div class="ec-off4Grid__cell">
+                                <button class="ec-blockBtn--action" type="submit" name="mode" value="confirm">同意する</button>
+                                <a class="ec-blockBtn--cancel" href="{{ url('homepage') }}">同意しない</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
