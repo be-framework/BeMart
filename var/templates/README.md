@@ -203,6 +203,104 @@ For Login this dropped the render-diff residual from wave-1's 15 lines
 (8 of which were the unverified form-widget family) to **11** — all
 shared `<head>` / inline-script frame residual, none form-related.
 
+## Admin pages — the admin-theme port recipe
+
+Everything above describes the **storefront** port (~40 pages, all done).
+EC-CUBE also has an **admin** UI — ~100 templates under
+`tools/ec-cube-source/src/Eccube/Resource/template/admin/`. The admin
+pages are ported with the SAME two recipes (data-page + form-page) and
+the SAME residual-diff verification standard; only two things differ.
+
+### Difference 1 — a different layout
+
+Storefront pages `{% extends 'base.html.twig' %}` (the port of EC-CUBE's
+default-theme `default_frame.twig`). **Admin pages
+`{% extends 'admin-base.html.twig' %}`** — `var/templates/admin-base.html.twig`
+is the port of EC-CUBE's *admin-theme* `default_frame.twig`
+(`template/admin/default_frame.twig`). The admin frame is structurally
+different: a left sidebar nav (`c-mainNavArea`), a top header bar
+(`c-headerBar`) with the logged-in operator's menu, and a
+`c-contentsArea` content region with a `c-pageTitle`. The admin pages
+set `title` / `sub_title` / `route` and fill `{% block main %}` /
+`{% block stylesheet %}` / `{% block javascript %}`.
+
+`admin-base.html.twig` keeps EC-CUBE's admin markup skeleton + `c-*`
+classes verbatim. The EC-CUBE-ism rebinding is the same as the
+storefront frame (`trans` → ja literal, `asset`/`url` →
+`BeMartTwigExtension`, the CSRF `<meta>` + `$.ajaxSetup` script →
+EC-CUBE-runtime-only residual), plus two admin-specific ones:
+
+- **operator header menu** (`app.user.*` — login date, name,
+  change-password / 2FA / logout links) → BeMart's html context has no
+  operator entity, so the `c-headerBar__userMenu` anchor shows a fixed
+  `管理者 様` label. Enumerated as residual.
+- **dynamic sidebar nav** (`@admin/nav.twig` loops `eccubeNav`, the menu
+  tree, with `active_menus()` state) → BeMart has no nav tree, so the
+  nav is inlined minimally: only the static ホーム / 情報 bookend `<li>`s
+  (EC-CUBE's `nav.twig` `{% for %}` over `eccubeNav` is dropped).
+  Enumerated as residual.
+
+The other admin frame includes (`@admin/alert.twig`, `info.twig`,
+`notice_debug_mode.twig`, `snippet.twig`, `pager.twig`,
+`@common/lang.twig`) are flash / notice / plugin / pager / JS-i18n
+fragments with no BeMart equivalent — dropped, exactly as the storefront
+frame drops `meta.twig` / `block.twig`.
+
+### Difference 2 — admin auth context
+
+Admin resources (`src/Resource/Page/Admin/...`) are authenticated at the
+resource layer via `AdminSessionInterface`. `AppModule` binds the
+**anonymous** `FakeAdminSession(null)` by default, so an admin page in
+the `html` context returns `403 FORBIDDEN` unless the test rebinds
+`AdminSessionInterface` to a seeded admin id (the render tests
+`override()` `HtmlModule` with `new FakeAdminSession('ad00…01')` — the
+same move the admin *resource* tests already make).
+
+### Otherwise the recipes transfer unchanged
+
+- **Data/list pages** — port the EC-CUBE admin template, rebind the
+  `{% for %}` loop to the resource body, render-diff against EC-CUBE's
+  real admin template via `EcCubeAdminStubLoader` (the admin counterpart
+  of `EcCubeStubLoader` — it serves `@admin/default_frame.twig` +
+  `@admin/nav.twig` for real, stubs the rest empty). Pilot:
+  `Page/Admin/News/NewsList.html.twig` + `AdminNewsListHtmlRenderTest`
+  (residual ~15 lines — the EC-CUBE-runtime `<head>` baseline + the
+  admin operator-menu / dynamic-nav families + the omitted
+  `News.visible` display-status column + the `csrf_token_for_anchor()`
+  on the delete link).
+- **Form/CRUD pages** — `ray/web-form-module`; `<Name>Form extends
+  AbstractForm` ports EC-CUBE's `Form/Type/Admin/...Type`, the resource
+  exposes `body['form']`, Twig renders `{{ form.input('x')|raw }}`, the
+  render-diff test stubs EC-CUBE's `form_widget` to delegate to the same
+  form object so the inputs diff to zero. Pilot:
+  `src/Form/AdminNewsForm.php` + `Page/Admin/News/News.html.twig` +
+  `AdminNewsHtmlRenderTest` (residual ~30 lines — the admin-frame
+  baseline + the form `_token` hidden CSRF input + the omitted `visible`
+  select). Add admin `trans` keys to `EcCubeStub::jaMessages()` as
+  needed.
+
+### Fan-out — grouping the ~100 admin pages into section-waves
+
+The admin templates are organised by section directory under
+`template/admin/`; each is an independent wave (clean file-path split,
+no cross-wave coupling):
+
+| Section wave | Directory | rough pages |
+|---|---|---|
+| Product | `admin/Product/` | ~12 (product list/edit, category, class-name, class-category, tag, CSV) |
+| Order | `admin/Order/` | ~10 (order list/edit, shipping, mail, CSV import/export) |
+| Customer | `admin/Customer/` | ~6 (customer list/edit, delete, CSV) |
+| Content | `admin/Content/` | ~14 (news, page, layout, block, file, CSS/JS, cache, maintenance) |
+| Setting/Shop | `admin/Setting/shop/` | ~16 (base-info, delivery, payment, tax, mail, csv, order-status) |
+| Setting/System | `admin/Setting/system/` | ~14 (member, authority, log, 2FA, masterdata, security) |
+| Store/Plugin | `admin/Store/` | ~12 (plugin list/install, owner-store, template) |
+| Top-level | `admin/` (index, login, error, change_password, …) | ~10 |
+
+Each wave follows this recipe page-for-page; no module or wiring change
+is needed beyond extending `EcCubeStub::jaMessages()` with that
+section's `trans` keys and adding `<Name>Form` classes for form pages.
+`admin-base.html.twig` + `EcCubeAdminStubLoader` are shared.
+
 ## Per-page workflow for the remaining ~138 pages
 
 Each page is mechanical and self-contained:
