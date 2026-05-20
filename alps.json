@@ -211,6 +211,7 @@
 
       {"id": "layoutName", "title": "レイアウト名","tag": "src-entity", "doc": {"value": "レイアウトの表示名"}},
 
+      {"id": "blockId", "title": "ブロックID","tag": "src-entity", "doc": {"value": "dtb_block.id の不透明な文字列ハンドル。BeMart の BlockEntity 層は数値ではなく文字列として保持する。Fake 実装は `bk-` プレフィックス付きの英数字を生成し（シード `bk-header` を含む）、SQL 実装は dtb_block.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlBlockStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (BlockUpdated / BlockDeleted) を踏むため、シードハンドル `bk-header` や `nonexistent-zzz` は Fake / SQL 双方で 404 が同形"}},
       {"id": "blockName", "title": "ブロック名","tag": "src-entity", "doc": {"value": "ブロックの表示名"}},
       {"id": "blockFileName", "title": "ブロックファイル名","tag": "src-entity", "doc": {"value": "ブロックのテンプレートファイル名"}},
       {"id": "blockDeletable", "title": "ブロック削除可否","tag": "src-entity", "doc": {"value": "このブロックを管理画面から削除できるか。システム標準ブロックは削除不可"}},
@@ -1203,8 +1204,10 @@
         ]
       },
 
-      {"id": "Block", "title": "ブロック","tag": "cms src-template",
+      {"id": "Block", "title": "ブロック","tag": "cms src-entity src-template",
+        "doc": {"value": "dtb_block 1行を平坦化した投影。BeMart の BlockEntity は 4 項目 (blockId / blockName / blockFileName / blockDeletable) のみ保持し、EC-CUBE の device_type_id / use_controller / create_date / update_date は Phase 2 スコープ外で常に NULL / 0 を書く（dtb_block_position 関連は別スコープ）。device_type_id はEC-CUBEのデバイス別バリアント機構で BeMart 管理 UI 非対応かつ mtb_device_type が structure-only ダンプで空のため固定 NULL（非 NULL 値は FK 1452 を発生させる）。use_controller は 0 固定（プレーンテンプレ／管理 UI 非対応）。block_name は EC-CUBE 上 nullable だが BlockEntity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。deletable は tinyint(1) NOT NULL DEFAULT 1（BlockCreated は true=1 を書く / システム seed は 0=false）。doUpdateBlock 遷移が存在するため UPDATE 経路は実運用で踏まれる。dtb_block_position（FK block_id → dtb_block.id）の placement 行は Wave 9 admin slice では INSERT しないが、remove 時のみ防御的に DELETE して FK 1451 を回避（外部投入された placement 行があっても DELETE 成功）— SqlPageStorage が dtb_page_layout に対して行うのと同形。Phase 2b で SqlBlockStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#blockId"},
           {"href": "#blockName"},
           {"href": "#blockFileName"},
           {"href": "#blockDeletable"},

@@ -8,6 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlBaseInfoStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlBlockStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
@@ -29,9 +31,11 @@ use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlBlockIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
@@ -113,6 +117,12 @@ use function dirname;
  *       can persist with that explicit PK; the Fake generator emits a
  *       `pg-` prefix that the SQL impl rejects as non-numeric, same
  *       shape as the Tag / News / TaxRule generator pairings)
+ *   - BlockStorageInterface        → SqlBlockStorage  (Phase 2b)
+ *   - BlockIdGeneratorInterface    → SqlBlockIdGenerator (Phase 2b —
+ *       BlockCreated needs a numeric id pre-allocated so SqlBlockStorage
+ *       can persist with that explicit PK; the Fake generator emits a
+ *       `bk-` prefix that the SQL impl rejects as non-numeric, same
+ *       shape as the Page / Tag / News / TaxRule generator pairings)
  *   - PDO::class                   → shared test PDO singleton
  *
  * NOT rebound:
@@ -279,6 +289,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(PageIdGeneratorInterface::class)
                     ->to(SqlPageIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(BlockStorageInterface::class)
+                    ->to(SqlBlockStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(BlockIdGeneratorInterface::class)
+                    ->to(SqlBlockIdGenerator::class)
                     ->in(Scope::SINGLETON);
             }
         };
