@@ -618,6 +618,47 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_block row. Returns the inserted id.
+     *
+     * dtb_block's NOT NULL columns are file_name (varchar(255)),
+     * use_controller (tinyint(1) DEFAULT 0), deletable (tinyint(1)
+     * DEFAULT 1), create_date, update_date, discriminator_type.
+     * device_type_id (FK to mtb_device_type) and block_name are
+     * nullable. The defaults match SqlBlockStorage's INSERT contract:
+     * device_type_id = NULL (mtb_device_type is empty in the
+     * structure-only dump — any non-NULL value would raise FK 1452),
+     * use_controller = 0 (plain template, no controller),
+     * deletable = 1 (user-editable — matches the BlockCreated default),
+     * discriminator_type = 'block'. Pass `deletable` = 0 to mimic an
+     * EC-CUBE system block (BlockDeleted refuses deletion when the row's
+     * blockDeletable is false, mirroring the Fake-backed `bk-header`
+     * seed which has blockDeletable = false).
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertBlock(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'device_type_id' => null,
+            'block_name' => sprintf('Block %d', $counter),
+            'file_name' => sprintf('block_%d', $counter),
+            'use_controller' => 0,
+            'deletable' => 1,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'block',
+        ], $overrides);
+
+        $this->executeInsert('dtb_block', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
