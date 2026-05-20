@@ -666,6 +666,7 @@
           {"href": "#sex"},
           {"href": "#job"},
           {"href": "#password"},
+          {"href": "#secretKey"},
           {"href": "#customerStatus"},
           {"href": "#firstBuyDate"},
           {"href": "#lastBuyDate"},

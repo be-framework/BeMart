@@ -16,7 +16,9 @@ use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
@@ -34,7 +36,9 @@ use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlClassCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlClassNameStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlCustomerCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
+use MyVendor\BeMart\Be\Reason\Query\SqlEmailUniquenessChecker;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlLayoutStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlLoginHistoryStorage;
@@ -56,6 +60,7 @@ use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
@@ -65,6 +70,7 @@ use MyVendor\BeMart\Be\Reason\Service\SqlBlockIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlCategoryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlClassCategoryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlClassNameIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlCustomerIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlPaymentMethodAdminIdGenerator;
@@ -111,6 +117,21 @@ use function dirname;
  *
  * Rebound interfaces (production-Fake → test-Sql):
  *   - CustomerQueryInterface       → SqlCustomerQuery
+ *   - CustomerCommandInterface     → SqlCustomerCommand (Phase 2b —
+ *       write side of dtb_customer: register / activate / update /
+ *       updatePassword. Mirrors SqlCustomerQuery's column↔field map
+ *       so a read-after-write round-trips. secret_key is NOT NULL
+ *       UNIQUE — register synthesises a unique token when the entity
+ *       carries a null; activate keeps the key rather than nulling it)
+ *   - CustomerIdGeneratorInterface → SqlCustomerIdGenerator (Phase 2b —
+ *       CustomerRegistering needs a numeric id pre-allocated so
+ *       SqlCustomerCommand::register can persist with an explicit PK;
+ *       the Fake generator emits 32-char hex that the SQL impl rejects
+ *       as non-numeric, same shape as the Admin generator pairing)
+ *   - EmailUniquenessCheckerInterface → SqlEmailUniquenessChecker
+ *       (Phase 2b — registration / profile-update duplicate-email
+ *       guard, a trivial existence probe against dtb_customer.email,
+ *       the natural read-guard companion of the customer write side)
  *   - OrderQueryInterface          → SqlOrderQuery
  *   - FavoriteStorageInterface     → SqlFavoriteStorage
  *   - CartQueryInterface           → SqlCartQuery
@@ -241,7 +262,6 @@ use function dirname;
  *   - PDO::class                   → shared test PDO singleton
  *
  * NOT rebound:
- *   - CustomerCommandInterface  — no SqlCustomerCommand impl yet (Phase 2b)
  *   - SessionInterface / AdminSessionInterface — admin/customer session
  *     is in-memory by design (the production cookie/JWT adapter is deferred).
  *     Subclasses rebind these via the same Module pattern when an
@@ -359,6 +379,15 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                 // the PDO above via the constructor.
                 $this->bind(CustomerQueryInterface::class)
                     ->to(SqlCustomerQuery::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(CustomerCommandInterface::class)
+                    ->to(SqlCustomerCommand::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(CustomerIdGeneratorInterface::class)
+                    ->to(SqlCustomerIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(EmailUniquenessCheckerInterface::class)
+                    ->to(SqlEmailUniquenessChecker::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(OrderQueryInterface::class)
                     ->to(SqlOrderQuery::class)
