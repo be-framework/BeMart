@@ -492,6 +492,49 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_tax_rule row. Returns the inserted id.
+     *
+     * dtb_tax_rule's NOT NULL columns are tax_rate (decimal(10,0)),
+     * tax_adjust (decimal(10,0) DEFAULT 0), apply_date (datetime),
+     * create_date, update_date, discriminator_type. Five FK columns
+     * (product_class_id / product_id / country_id / pref_id /
+     * creator_id) plus rounding_type_id all default to NULL — the
+     * relevant master / parent tables (mtb_country / mtb_pref /
+     * mtb_rounding_type / dtb_member / dtb_product / dtb_product_class)
+     * are empty in the structure-only dump, so callers that want
+     * non-NULL FKs must seed the targets first (same convention as
+     * `insertAddress` / `insertBaseInfo`).
+     *
+     * The defaults match SqlTaxRuleStorage's INSERT contract:
+     * rounding_type_id = NULL (re-derived to roundingType=1 on read),
+     * tax_adjust = 0, discriminator_type = 'taxrule'.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertTaxRule(array $overrides = []): int
+    {
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'product_class_id' => null,
+            'creator_id' => null,
+            'country_id' => null,
+            'pref_id' => null,
+            'product_id' => null,
+            'rounding_type_id' => null,
+            'tax_rate' => 10,
+            'tax_adjust' => 0,
+            'apply_date' => $now,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'taxrule',
+        ], $overrides);
+
+        $this->executeInsert('dtb_tax_rule', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
