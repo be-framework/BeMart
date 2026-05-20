@@ -1,71 +1,178 @@
-<!DOCTYPE html>
 {#
-  Phase 3 Step 1 pilot template — EC-CUBE goCart.
+  BeMart Cart page — EC-CUBE goCart.
 
-  Driven entirely by the Cart resource body (src/Resource/Page/Cart.php):
+  PORT of EC-CUBE 4.3 default-theme `Cart/index.twig`
+  (src/Eccube/Resource/template/default/Cart/index.twig).
+
+  Markup skeleton, `ec-cartRole` / `ec-progress` / `ec-cartRow` classes
+  and structure are kept verbatim from EC-CUBE. Only the cart data is
+  rebound to the Cart resource body (src/Resource/Page/Cart.php):
     cartCount, totalPrice, deliveryFeeTotal,
     carts[] { cartKey, saleTypeId, saleTypeName, totalPrice,
               deliveryFeeTotal, items[] { productCode, quantity, price } }
 
-  Resolved by madapaja/twig-module's TemplateFinder:
-    src/Resource/Page/Cart.php -> var/templates/Page/Cart.html.twig
+  Fields EC-CUBE renders that BeMart's body does not carry are OMITTED
+  (never invented) and enumerated as explained residual in
+  tests/Resource/CartHtmlRenderTest.php. Notable omissions:
+   - `app.session.flashbag` error blocks — request-flash, no BeMart equiv.
+   - per-row product image / product detail link / class categories —
+     CartItemEntity carries only productCode/quantity/price (厳密移植
+     Grade-C scope dropped ProductClass joins).
+   - delivery-fee-free progress block — depends on BaseInfo thresholds.
+   - CSRF anchor tokens on the up/down/remove links.
+  See var/templates/README.md for the port + residual-diff method.
 #}
-<html lang="ja">
-<head>
-    <meta charset="utf-8">
-    <title>カート | BeMart</title>
-</head>
-<body>
-    <h1>ショッピングカート</h1>
+{% extends 'base.html.twig' %}
 
-    {% if cartCount == 0 %}
-        <p class="cart-empty">カートに商品がありません。</p>
-    {% else %}
-        <p class="cart-summary">
-            カート数: <span class="cart-count">{{ cartCount }}</span> /
-            合計: <span class="cart-total">{{ totalPrice }}</span> 円 /
-            送料合計: <span class="cart-delivery-fee">{{ deliveryFeeTotal }}</span> 円
-        </p>
+{% set body_class = 'cart_page' %}
+{% set route = 'cart' %}
+{% set title = 'ショッピングカート' %}
 
-        {% for cart in carts %}
-            <section class="cart" data-cart-key="{{ cart.cartKey }}">
-                <h2>{{ cart.saleTypeName }}（{{ cart.cartKey }}）</h2>
+{% block main %}
 
-                {% if cart.items is empty %}
-                    <p class="cart-items-empty">この販売区分の商品はありません。</p>
-                {% else %}
-                    <table class="cart-items">
-                        <thead>
-                            <tr>
-                                <th>商品コード</th>
-                                <th>数量</th>
-                                <th>単価</th>
-                                <th>小計</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for item in cart.items %}
-                                <tr class="cart-item">
-                                    <td class="item-code">{{ item.productCode }}</td>
-                                    <td class="item-quantity">{{ item.quantity }}</td>
-                                    <td class="item-price">{{ item.price }}</td>
-                                    <td class="item-subtotal">{{ item.price * item.quantity }}</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                {% endif %}
+    <div class="ec-role">
+        <div class="ec-pageHeader">
+            <h1>ショッピングカート</h1>
+        </div>
+    </div>
 
-                <p class="cart-line-total">
-                    小計: {{ cart.totalPrice }} 円（送料 {{ cart.deliveryFeeTotal }} 円）
+    <div class="ec-cartRole">
+        <div class="ec-cartRole__progress">
+            <ul class="ec-progress">
+                {% set step = 1 %}
+                <li class="ec-progress__item is-complete">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">カートの商品
+                    </div>
+                </li>
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">お客様情報
+                    </div>
+                </li>
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">ご注文手続き
+                    </div>
+                </li>
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">ご注文内容確認
+                    </div>
+                </li>
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">完了
+                    </div>
+                </li>
+            </ul>
+        </div>
+        {% if cartCount > 0 %}
+            <div class="ec-cartRole__totalText">
+                <p>
+                    商品の合計金額は「<strong>{{ totalPrice|price }}</strong>」です。
                 </p>
-            </section>
-        {% endfor %}
-    {% endif %}
+            </div>
+            {% if carts|length > 1 %}
+                <div class="ec-cartRole__error">
+                    <div class="ec-alert-warning">
+                        <div class="ec-alert-warning__inner">
+                            <div class="ec-alert-warning__inner__item">
+                                <div class="ec-alert-warning__text">
+                                    同時購入できない商品のカートを分けました。お手数ですが別々で注文してください。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endif %}
 
-    <nav class="cart-actions">
-        <a href="/shopping">レジに進む</a>
-        <a href="/products">買い物を続ける</a>
-    </nav>
-</body>
-</html>
+            <form name="form" id="form_cart" class="ec-cartRole" method="post" action="/cart">
+
+                {% for cart in carts %}
+                    {% set cartKey = cart.cartKey %}
+                    <div class="ec-cartRole__cart">
+                        <div class="ec-cartTable">
+                            <ol class="ec-cartHeader">
+                                <li class="ec-cartHeader__label">削除</li>
+                                <li class="ec-cartHeader__label">商品内容</li>
+                                <li class="ec-cartHeader__label">数量</li>
+                                <li class="ec-cartHeader__label">小計</li>
+                            </ol>
+                            {% for item in cart.items %}
+                                <ul class="ec-cartRow">
+                                    <li class="ec-cartRow__delColumn">
+                                        <a href="{{ url('cart_handle_item', {'operation': 'remove', 'productCode': item.productCode}) }}" class="ec-icon" data-method="put" data-message="カートから商品を削除してよろしいですか？">
+                                            <img src="{{ asset('assets/icon/cross.svg') }}" alt="delete">
+                                        </a>
+                                    </li>
+                                    <li class="ec-cartRow__contentColumn">
+                                        <div class="ec-cartRow__summary">
+                                            <div class="ec-cartRow__name">
+                                                {{ item.productCode }}
+                                            </div>
+                                            <div class="ec-cartRow__unitPrice">{{ item.price|price }}</div>
+                                            <div class="ec-cartRow__sutbtotalSP">小計：{{ (item.price * item.quantity)|price }}</div>
+                                        </div>
+                                    </li>
+                                    <li class="ec-cartRow__amountColumn">
+                                        <div class="ec-cartRow__amount">{{ item.quantity|number_format }}</div>
+                                        <div class="ec-cartRow__amountSP">数量：{{ item.quantity|number_format }}</div>
+                                        <div class="ec-cartRow__amountUpDown">
+                                            {% if item.quantity > 1 %}
+                                                <a href="{{ url('cart_handle_item', {'operation': 'down', 'productCode': item.productCode}) }}" class="ec-cartRow__amountDownButton load-overlay" data-method="put" data-confirm="false">
+                                                    <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus-dark.svg') }}" alt="reduce"></span>
+                                                </a>
+                                            {% else %}
+                                                <div class="ec-cartRow__amountDownButtonDisabled">
+                                                    <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus.svg') }}" alt="reduce"></span>
+                                                </div>
+                                            {% endif %}
+                                            <a href="{{ url('cart_handle_item', {'operation': 'up', 'productCode': item.productCode}) }}" class="ec-cartRow__amountUpButton load-overlay" data-method="put" data-confirm="false">
+                                                <span class="ec-cartRow__amountUpButton__icon"><img src="{{ asset('assets/icon/plus-dark.svg') }}" alt="increase"></span>
+                                            </a>
+                                        </div>
+                                    </li>
+                                    <li class="ec-cartRow__subtotalColumn">
+                                        <div class="ec-cartRow__sutbtotal">{{ (item.price * item.quantity)|price }}</div>
+                                    </li>
+                                </ul>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="ec-cartRole__progress">
+                    </div>
+                    <div class="ec-cartRole__actions">
+                        <div class="ec-cartRole__total">合計：<span class="ec-cartRole__totalAmount">{{ cart.totalPrice|price }}</span>
+                        </div>
+                        <a class="ec-blockBtn--action" href="{{ path('cart_buystep', {'cart_key': cartKey}) }}">レジに進む</a>
+                        {% if loop.last %}
+                            <a class="ec-blockBtn--cancel" href="{{ path('homepage') }}">お買い物を続ける</a>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </form>
+        {% else %}
+            <div class="ec-role">
+                <div class="ec-off3Grid">
+                    <div class="ec-off3Grid__cell">
+                        <div class="ec-alert-warning">
+                            <div class="ec-alert-warning__inner">
+                                <div class="ec-alert-warning__inner__item">
+                                    <div class="ec-alert-warning__icon"><img src="{{ asset('assets/icon/exclamation-white.svg') }}"></div>
+                                    <div class="ec-alert-warning__text">現在カート内に商品はございません。</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+
+{% endblock %}
