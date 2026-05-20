@@ -44,6 +44,7 @@
       {"id": "categoryName", "title": "カテゴリ名","tag": "src-entity", "doc": {"value": "カテゴリの表示名"}},
       {"id": "hierarchy", "title": "階層レベル","tag": "src-entity", "doc": {"value": "カテゴリツリーにおける深さ。ルートが1、子が2と増加"}},
 
+      {"id": "tagId", "title": "タグID","tag": "src-entity", "doc": {"value": "dtb_tag.id の不透明な文字列ハンドル。BeMart の TagEntity 層は数値ではなく文字列として保持する。Fake 実装は `tg-` プレフィックス付きの英数字を生成し、SQL 実装は dtb_tag.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlTagStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (TagDeleted) を踏むため、シードハンドル `tg-new` / `tg-sale` は Fake 専用"}},
       {"id": "tagName", "title": "タグ名","tag": "src-entity", "doc": {"value": "商品に付与するタグの表示名"}},
 
       {"id": "classNameLabel", "title": "規格名","tag": "src-entity", "doc": {"value": "商品バリエーション軸の名前（例: カラー、サイズ）。EC-CUBEの\"class\"はOOPのクラスではなく商品規格を意味する"}},
@@ -349,12 +350,12 @@
         ]
       },
 
-      {"id": "Tag", "title": "タグ","tag": "catalog src-template",
+      {"id": "Tag", "title": "タグ","tag": "catalog src-entity src-template",
+        "doc": {"value": "dtb_tag 1行を平坦化した投影。BeMart の TagEntity と1:1 (2項目: tagId / tagName)。dtb_tag は id / name / sort_no / discriminator_type の4列のみで FK 制約なし、UNIQUE インデックスなし。SqlTagStorage は entity に存在しない sort_no を INSERT 時に 0 で固定する（並び順は admin 画面の Wave 9 スコープ外）。createDate / updateDate も dtb_tag には無いため hydrate しない（src-template 派生だが Tag テーブルには時刻列なし）。所有者キーなし（admin 全体で共有）。Phase 2b で SqlTagStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#tagId"},
           {"href": "#tagName"},
           {"href": "#sortNo"},
-          {"href": "#createDate"},
-          {"href": "#updateDate"},
           {"href": "#doDeleteTag"}
         ]
       },
