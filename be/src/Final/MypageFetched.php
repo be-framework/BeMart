@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
@@ -41,6 +42,17 @@ use function count;
  * itself — so the dashboard renders a flat structure and the entity's
  * internal layout (paymentTotal, addPoint, …) does not leak into the
  * HTTP body.
+ *
+ * Phase 3 enrichment — each `recentOrders` row now carries an `items`
+ * sub-array (the order's line-item snapshot). EC-CUBE's `Mypage/index.twig`
+ * renders a per-order product list (`Order.MergedProductOrderItems`)
+ * under each order's header; the earlier flat projection carried no
+ * items, so the `ec-historyRole__detail` block rendered empty. The
+ * line items are read via `OrderQuery::itemsByOrderNo` — the same read
+ * path Pilot 12 (doReorder) uses — so no widely-shared Entity is
+ * mutated and Fake/SQL parity holds structurally (both back ends
+ * implement `itemsByOrderNo`). For the dashboard's small cap
+ * (`orderLimit` defaults to 5) the per-order item read is bounded.
  */
 final readonly class MypageFetched
 {
@@ -49,7 +61,12 @@ final readonly class MypageFetched
     public string $name01;
     public string $name02;
 
-    /** @var list<array{orderNo: string, total: int, orderDate: string, orderStatus: int}> */
+    /**
+     * @var list<array{
+     *   orderNo: string, total: int, orderDate: string, orderStatus: int,
+     *   items: list<array{productCode: string, productName: string, quantity: int, unitPrice: int}>
+     * }>
+     */
     public array $recentOrders;
 
     public int $recentOrderCount;
@@ -88,6 +105,15 @@ final readonly class MypageFetched
                 'total' => $order->total,
                 'orderDate' => $order->orderDate,
                 'orderStatus' => $order->orderStatus,
+                'items' => array_map(
+                    static fn (OrderItemEntity $item): array => [
+                        'productCode' => $item->productCode,
+                        'productName' => $item->productName,
+                        'quantity' => $item->quantity,
+                        'unitPrice' => $item->unitPrice,
+                    ],
+                    $orderQuery->itemsByOrderNo($order->orderNo),
+                ),
             ],
             $orders,
         );
