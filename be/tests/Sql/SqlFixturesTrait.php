@@ -492,6 +492,67 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert (idempotently) a dtb_tradelaw carrier row.
+     *
+     * The 特定商取引法 page is, in EC-CUBE proper, up to 15 per-item
+     * rows. The Wave-8 BeMart {@see \MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface}
+     * is single-blob — {@see \MyVendor\BeMart\Be\Reason\Query\SqlTradeLawStorage}
+     * stores the whole-page body in ONE carrier row's `description`
+     * column at `dtb_tradelaw.id = 1` (the same singleton-row shape
+     * SqlBaseInfoStorage uses for dtb_base_info.id=1). This helper
+     * seeds that carrier row so a SQL test can exercise a non-default
+     * `get()` projection.
+     *
+     * dtb_tradelaw's NOT NULL columns are id (AUTO_INCREMENT, supplied
+     * explicitly here), sort_no (smallint, no DEFAULT),
+     * display_order_screen (tinyint(1), no DEFAULT), discriminator_type.
+     * `name` and `description` are nullable. The defaults match
+     * SqlTradeLawStorage's INSERT contract: name = NULL (the Wave-8
+     * blob has no per-item name), sort_no = 1, display_order_screen = 0,
+     * discriminator_type = 'tradelaw'. The structure-only schema dump
+     * seeds no rows, so any SQL test that wants SqlTradeLawStorage to
+     * return a non-default body must seed it first.
+     *
+     * `INSERT IGNORE` makes the helper a no-op on a second call inside
+     * the same transaction — same singleton-row convention as
+     * {@see insertBaseInfo}.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     *   Use the schema column names (snake_case: `description`,
+     *   `sort_no`, `display_order_screen`).
+     */
+    protected function insertTradeLaw(array $overrides = []): int
+    {
+        $row = array_merge([
+            'id' => 1,
+            'name' => null,
+            'description' => null,
+            'sort_no' => 1,
+            'display_order_screen' => 0,
+            'discriminator_type' => 'tradelaw',
+        ], $overrides);
+
+        // INSERT IGNORE so a second call inside the same transaction
+        // is a silent no-op (singleton carrier-row contract).
+        $columns = array_keys($row);
+        $placeholders = array_map(static fn (string $c) => ':' . $c, $columns);
+        $sql = sprintf(
+            'INSERT IGNORE INTO dtb_tradelaw (%s) VALUES (%s)',
+            implode(', ', array_map(static fn (string $c) => '`' . $c . '`', $columns)),
+            implode(', ', $placeholders),
+        );
+        $stmt = $this->pdo->prepare($sql);
+        $params = [];
+        foreach ($row as $col => $value) {
+            $params[':' . $col] = $value;
+        }
+
+        $stmt->execute($params);
+
+        return (int) $row['id'];
+    }
+
+    /**
      * Insert a dtb_tax_rule row. Returns the inserted id.
      *
      * dtb_tax_rule's NOT NULL columns are tax_rate (decimal(10,0)),
