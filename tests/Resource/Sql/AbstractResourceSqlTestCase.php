@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
@@ -39,6 +40,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlClassCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlClassNameStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlCsvColumnConfigStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlEmailUniquenessChecker;
@@ -284,6 +286,16 @@ use function dirname;
  *       it is read-only, the productCode is never minted by this slice.
  *       A productCode that only appears on a non-default variation row
  *       is an honest miss → null)
+ *   - CsvColumnConfigStorageInterface → SqlCsvColumnConfigStorage
+ *       (Phase 2b — CSV column-config storage against dtb_csv. Each row
+ *       is one column-config entry; a csvType owns many rows.
+ *       listByType reads the per-type vector sorted by sort_no;
+ *       replaceType is an atomic per-type vector replace (DELETE all
+ *       rows for the csvType, INSERT the new vector, in a savepoint-
+ *       aware transaction — same shape as SqlCartCommand). csv_type_id
+ *       is an enforced FK to the empty mtb_csv_type master — seeded via
+ *       seedCsvTypes, same precedent as seedSaleTypes. No generator: the
+ *       row identity is the AUTO_INCREMENT id, never minted by the slice)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -529,6 +541,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(ProductClassQueryInterface::class)
                     ->to(SqlProductClassQuery::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(CsvColumnConfigStorageInterface::class)
+                    ->to(SqlCsvColumnConfigStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };
