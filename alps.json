@@ -1139,7 +1139,8 @@
         ]
       },
 
-      {"id": "LoginHistory", "title": "ログイン履歴","tag": "admin-system src-template",
+      {"id": "LoginHistory", "title": "ログイン履歴","tag": "admin-system src-entity src-template",
+        "doc": {"value": "dtb_login_history 1行を平坦化した投影。BeMart の LoginHistoryEntity は 4 項目 (timestamp / loginId / success / clientIp) のみ保持し、これは dtb_login_history の create_date / user_name / login_history_status_id / client_ip に対応する。append + list の追記専用監査ログで、getById / update / delete はない（監査行はクライアント可視のハンドルを持たず、変更もされない）ため LoginHistoryIdGenerator は存在しない。EC-CUBE の member_id（FK to dtb_member）は Phase 2 スコープ外で常に NULL を書く（構造ダンプ上 dtb_member が空のため NULL 以外は FK 1452 を起こす。loginId→member_id 解決は Phase 2）。login_history_status_id は smallint unsigned NOT NULL で mtb_login_history_status への FK（0=失敗, 1=成功）。当該マスタは構造ダンプ上空のため、append には seedLoginHistoryStatus で 2 行を先行投入する必要がある（seedAdminMasters と同じ空マスタ FK 対応の先例）。success(bool) ↔ login_history_status_id の bidirectional cast。create_date は MySQL `datetime`（タイムゾーン無し）で、SqlLoginHistoryStorage は BeMart の ISO-8601 文字列を `Y-m-d H:i:s` に直列化し、read 時に Asia/Tokyo として ISO-8601 (`+09:00`) に戻すことで Fake 投影と同一形を維持（同パターン: SqlNewsStorage の publish_date）。update_date は append 時に create_date と同値（監査行は更新されない）。Phase 2b で SqlLoginHistoryStorage が src-entity として参照"},
         "descriptor": [
           {"href": "#userName"},
           {"href": "#clientIp"},

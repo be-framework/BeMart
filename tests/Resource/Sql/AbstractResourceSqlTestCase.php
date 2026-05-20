@@ -19,6 +19,7 @@ use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
@@ -35,6 +36,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlClassNameStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlLayoutStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlLoginHistoryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
@@ -189,6 +191,14 @@ use function dirname;
  *       remove. Templates are filesystem-backed in EC-CUBE; dtb_template
  *       is only the installed-flavour registry, read-only from this
  *       slice. Same column shape as dtb_layout)
+ *   - LoginHistoryStorageInterface → SqlLoginHistoryStorage (Phase 2b —
+ *       admin login-attempt audit log against dtb_login_history. The
+ *       interface is listRecent + append — an append + list audit log,
+ *       no getById / update / delete (an audit row has no
+ *       client-meaningful handle and is never mutated), so there is NO
+ *       LoginHistoryIdGenerator. login_history_status_id is a NOT NULL
+ *       FK to the empty mtb_login_history_status master — seeded via
+ *       seedLoginHistoryStatus, same precedent as seedAdminMasters)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -405,6 +415,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(TemplateStorageInterface::class)
                     ->to(SqlTemplateStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(LoginHistoryStorageInterface::class)
+                    ->to(SqlLoginHistoryStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };
