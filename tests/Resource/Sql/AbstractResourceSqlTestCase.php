@@ -45,9 +45,11 @@ use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTemplateStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlTradeLawStorage;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
@@ -214,6 +216,17 @@ use function dirname;
  *       that explicit PK; the Fake generator emits 32-char hex that the
  *       SQL impl rejects as non-numeric, same shape as the Block / Tag /
  *       News generator pairings)
+ *   - TradeLawStorageInterface     → SqlTradeLawStorage (Phase 2b — the
+ *       特定商取引法 page. EC-CUBE models it as up to 15 per-item rows;
+ *       the Wave-8 interface is single-blob — get() returns the whole
+ *       page body, update() replaces it — so SqlTradeLawStorage stores
+ *       the blob in ONE carrier row's description column at
+ *       dtb_tradelaw.id=1, the same singleton-row shape SqlBaseInfoStorage
+ *       uses for dtb_base_info.id=1. No generator: the row identity is
+ *       fixed, never minted. get() falls back to FakeTradeLawStorage's
+ *       installer-default body when the carrier row is absent so the
+ *       hypermedia contract is identical to the Fake-backed baseline
+ *       with no extra fixture setup required)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -439,6 +452,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(PaymentMethodAdminIdGeneratorInterface::class)
                     ->to(SqlPaymentMethodAdminIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(TradeLawStorageInterface::class)
+                    ->to(SqlTradeLawStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };
