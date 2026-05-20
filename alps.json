@@ -226,6 +226,7 @@
       {"id": "tradeLawName", "title": "項目名","tag": "src-entity", "doc": {"value": "特定商取引法に基づく表記の項目名"}},
       {"id": "tradeLawDescription", "title": "項目説明","tag": "src-entity", "doc": {"value": "特定商取引法に基づく表記の項目内容。HTML入力可能でHTMLPurifierによる浄化あり"}},
       {"id": "displayOrderScreen", "title": "注文画面表示","tag": "src-entity", "doc": {"value": "注文確認画面にこの項目を表示するか"}},
+      {"id": "tradeLawBody", "title": "特定商取引法本文","tag": "src-entity", "doc": {"value": "Wave 8 単一ブロブ投影での特定商取引法ページ本文。EC-CUBE 4.3 では dtb_tradelaw が項目ごとの行（最大15行、tradeLawName / tradeLawDescription / sortNo / displayOrderScreen を持つ）だが、Wave 8 の TradeLawStorageInterface はページ全体を 1 本のテキスト本文として扱う（get は現在の全文を返し、update は全文を置換）。非空・65535文字以内（防御的な MySQL TEXT 上限）。FakeTradeLawStorage はインストーラ既定本文（販売業者 / 所在地 / 連絡先 の3行）をシードする。SQL 実装 SqlTradeLawStorage はこの本文ブロブを単一キャリア行 dtb_tradelaw.id=1 の description 列に格納し（SqlBaseInfoStorage が dtb_base_info.id=1 に対して行うのと同じ単一行シングルトンパターン）、行不在時は Fake と同一のインストーラ既定本文へフォールバックするため Fake/SQL 双方のハイパーメディア契約が同形。TradeLawUpdated の冪等判定（get()->body !== newBody）はバイト単位ロスレス往復を要求するため、改行・コロンを含む本文も単一列格納で完全往復する。Phase 2 で項目ごとの行へ分割予定（その時点で tradeLawName / sortNo / displayOrderScreen が独立して投影される）"}},
 
       {"id": "contactName01", "title": "お問い合わせ姓","tag": "src-entity", "doc": {"value": "お問い合わせフォームの姓。内部的にはNameTypeのname01と同じ仕組み"}},
       {"id": "contactName02", "title": "お問い合わせ名","tag": "src-entity", "doc": {"value": "お問い合わせフォームの名。内部的にはNameTypeのname02と同じ仕組み"}},
@@ -1250,9 +1251,11 @@
       },
 
       {"id": "TradeLaw", "title": "特定商取引法","tag": "cms src-template",
+        "doc": {"value": "特定商取引法ページの項目。EC-CUBE 4.3 では dtb_tradelaw の1行（tradeLawName / tradeLawDescription / sortNo / displayOrderScreen）。Wave 8 の移植スコープではページ全体を tradeLawBody 単一ブロブとして扱い、TradeLawStorageInterface の get/update がその本文を読み書きする。Phase 2b の SqlTradeLawStorage は本文を単一キャリア行 dtb_tradelaw.id=1 の description に格納（src-entity 参照）。Phase 2 で項目ごとの行へ分割予定"},
         "descriptor": [
           {"href": "#tradeLawName"},
           {"href": "#tradeLawDescription"},
+          {"href": "#tradeLawBody"},
           {"href": "#sortNo"},
           {"href": "#displayOrderScreen"}
         ]
