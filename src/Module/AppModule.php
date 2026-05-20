@@ -130,6 +130,8 @@ use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
+use MyVendor\BeMart\Be\Reason\Service\ResetKeyGenerator;
+use MyVendor\BeMart\Be\Reason\Service\ResetKeyGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use Ray\Di\Scope;
@@ -247,6 +249,13 @@ final class AppModule extends AbstractAppModule
         // inspect what was issued.
         $this->bind(PasswordResetTokenStorageInterface::class)
             ->to(FakePasswordResetTokenStorage::class)->in(Scope::SINGLETON);
+        // The reset key is an unguessable one-time token — minted by a
+        // dedicated CSPRNG-backed generator, NOT a customer-id generator.
+        // ResetKeyGenerator emits 32-char hex, well above the ResetKey
+        // Semantic's 16-char floor; the same real impl is bound in test,
+        // dev and production since the reset→consume flow tests read the
+        // issued key back from storage rather than pinning a known value.
+        $this->bind(ResetKeyGeneratorInterface::class)->to(ResetKeyGenerator::class);
 
         // Reason (Wave 4 doAdminLogin / doAdminLogout): admin role AAA
         // infrastructure — parallel firewall to the customer-side

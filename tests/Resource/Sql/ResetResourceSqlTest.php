@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
-use Ray\Di\AbstractModule;
 
 use function assert;
 use function is_string;
@@ -49,24 +46,15 @@ use function is_string;
  *  - mtb_customer_status (FK target of customer_status_id) is empty in
  *    the structure-only dump — seeded in setUp.
  *
- *  - CustomerIdGeneratorInterface is rebound (via {@see extraOverride})
- *    back to {@see FakeCustomerIdGenerator}. The forgot-password issuer
- *    {@see \MyVendor\BeMart\Be\Final\PasswordResetRequested} reuses the
- *    customer-id generator to mint the reset KEY. The base SQL override
- *    points it at SqlCustomerIdGenerator (correct for registration —
- *    it must emit a numeric dtb_customer.id), but that generator's
- *    `MAX(id)+1` output is a 1-2 digit string, far short of the
- *    ResetKey semantic-validation floor of 16 chars
- *    ({@see \MyVendor\BeMart\Be\Input\ResetPasswordInput}) — so a
- *    SQL-generated key would fail the reset endpoint with a spurious
- *    400. This is a genuine DI-envelope mismatch that the hypermedia
- *    layer surfaces (exactly the G-23 promise: per-storage unit tests
- *    would never catch it). The reset flow never registers a customer,
- *    so the customer-id SHAPE is irrelevant here; only a valid-length
- *    token matters. FakeCustomerIdGenerator emits 32-char hex — a
- *    valid ResetKey — so we rebind it for this suite. The eventual
- *    production fix is a dedicated token generator for the issuer; out
- *    of scope for a storage swap.
+ *  - the reset KEY comes from the dedicated {@see \MyVendor\BeMart\Be\Reason\Service\ResetKeyGeneratorInterface}
+ *    (CSPRNG-backed, 32-char hex), NOT from the customer-id generator —
+ *    so this suite needs no generator rebind. Earlier the forgot-password
+ *    issuer {@see \MyVendor\BeMart\Be\Final\PasswordResetRequested} reused
+ *    CustomerIdGeneratorInterface to mint the key; under SQL the
+ *    `SqlCustomerIdGenerator` `MAX(id)+1` output is a 1-2 digit string,
+ *    far short of the ResetKey semantic floor of 16 chars, so the reset
+ *    endpoint 400'd. The fix split the concern into its own generator;
+ *    whichever customer-id generator is bound is now irrelevant to reset.
  *
  * Why mirror exactly: per G-23 the Resource-layer contract MUST stay
  * green for both Fake and SQL backings — Fake green AND SQL green =
@@ -96,23 +84,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
             'name02' => 'アリス',
             'customer_status_id' => 2,
         ]);
-    }
-
-    /**
-     * Rebind the customer-id generator (which the forgot-password
-     * issuer reuses as the reset-key generator) back to the Fake — its
-     * 32-char hex output is a valid-length ResetKey, whereas the SQL
-     * generator's MAX(id)+1 string is too short. See the class docblock.
-     */
-    protected function extraOverride(): AbstractModule|null
-    {
-        return new class extends AbstractModule {
-            protected function configure(): void
-            {
-                $this->bind(CustomerIdGeneratorInterface::class)
-                    ->to(FakeCustomerIdGenerator::class);
-            }
-        };
     }
 
     /**
