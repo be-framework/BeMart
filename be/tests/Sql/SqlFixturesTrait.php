@@ -1409,6 +1409,103 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert (idempotently) an mtb_csv_type row so the FK from
+     * dtb_csv.csv_type_id → mtb_csv_type.id can be satisfied.
+     *
+     * mtb_csv_type is empty in the structure-only schema dump and
+     * `dtb_csv.csv_type_id` carries an enforced FK (FK_F55F48C3E8507796).
+     * EC-CUBE 4.3 ships exactly four rows: 1 = 注文CSV, 2 = 会員CSV,
+     * 3 = 商品CSV, 4 = 出荷CSV — the only `csvType` values
+     * {@see \MyVendor\BeMart\Be\Reason\Query\SqlCsvColumnConfigStorage}
+     * ever writes. {@see seedCsvTypes} seeds all four.
+     */
+    protected function insertCsvType(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_csv_type (id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'csvtype',
+        ]);
+    }
+
+    /**
+     * Seed the master table dtb_csv's FK reference (mtb_csv_type) with
+     * the EC-CUBE 4.3 canonical rows.
+     *
+     * The structure-only schema dump leaves mtb_csv_type empty, and
+     * `dtb_csv.csv_type_id` is a (NOT NULL-on-write) FK to it — so any
+     * SQL test that inserts a dtb_csv row MUST call this first.
+     * Idempotent (`INSERT IGNORE`), so calling it once in setUp is
+     * sufficient. Same precedent {@see seedAdminMasters} /
+     * {@see seedSaleTypes} / {@see seedLoginHistoryStatus} set for the
+     * analogous empty-master FK case.
+     */
+    protected function seedCsvTypes(): void
+    {
+        $this->insertCsvType(1, '注文CSV');
+        $this->insertCsvType(2, '会員CSV');
+        $this->insertCsvType(3, '商品CSV');
+        $this->insertCsvType(4, '出荷CSV');
+    }
+
+    /**
+     * Insert a dtb_csv row (one CSV column-config entry). Returns the
+     * inserted id.
+     *
+     * dtb_csv's NOT NULL columns are entity_name, field_name, disp_name,
+     * sort_no (smallint unsigned, no DEFAULT), enabled (tinyint(1)
+     * DEFAULT 1), create_date, update_date, discriminator_type.
+     * `csv_type_id` (FK to mtb_csv_type) and `creator_id` (FK to
+     * dtb_member) and `reference_field_name` are nullable.
+     *
+     * The defaults match {@see \MyVendor\BeMart\Be\Reason\Query\SqlCsvColumnConfigStorage}'s
+     * INSERT contract: creator_id = NULL (dtb_member is empty in the
+     * structure-only dump so any non-NULL value would raise FK 1452),
+     * reference_field_name = NULL, entity_name / disp_name echo
+     * field_name (the Wave 9 Entity carries only field_name as
+     * columnName — the column catalog supplying the real entity/display
+     * names is Phase 2), discriminator_type = 'csv'.
+     *
+     * Callers MUST seed mtb_csv_type first via {@see seedCsvTypes} — the
+     * csv_type_id FK is enforced and the master table is empty in the
+     * dump.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     *   Recognised keys: `csv_type_id`, `field_name`, `sort_no`,
+     *   `enabled`, `entity_name`, `disp_name`.
+     */
+    protected function insertCsvColumn(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $fieldName = $overrides['field_name'] ?? sprintf('column_%d', $counter);
+        $row = array_merge([
+            'csv_type_id' => 3,
+            'creator_id' => null,
+            'entity_name' => $fieldName,
+            'field_name' => $fieldName,
+            'reference_field_name' => null,
+            'disp_name' => $fieldName,
+            'sort_no' => $counter,
+            'enabled' => 1,
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'csv',
+        ], $overrides);
+
+        $this->executeInsert('dtb_csv', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().

@@ -203,7 +203,9 @@
       {"id": "csvEntityName", "title": "CSVエンティティ名","tag": "src-entity", "doc": {"value": "CSV出力対象のDoctrineエンティティクラス名（完全修飾名。例: Eccube\\Entity\\Product）"}},
       {"id": "csvFieldName", "title": "CSVフィールド名","tag": "src-entity", "doc": {"value": "CSV出力対象のフィールド名"}},
       {"id": "csvDispName", "title": "CSV表示名","tag": "src-entity", "doc": {"value": "CSVヘッダ行に表示する列名"}},
-      {"id": "csvEnabled", "title": "CSV列有効","tag": "src-entity", "doc": {"value": "このCSV列を出力に含めるか"}},
+      {"id": "csvEnabled", "title": "CSV列有効","tag": "src-entity", "doc": {"value": "このCSV列を出力に含めるか。dtb_csv.enabled（tinyint(1)）。CsvColumnConfigEntity の enabled に対応"}},
+      {"id": "csvType", "title": "CSV種別","tag": "src-entity", "doc": {"value": "dtb_csv.csv_type_id — mtb_csv_type への FK（1=注文CSV, 2=会員CSV, 3=商品CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）"}},
+      {"id": "csvColumnName", "title": "CSV列名","tag": "src-entity", "doc": {"value": "CSV出力列の識別名。dtb_csv.field_name に格納。CsvColumnConfigEntity の columnName に対応する管理フォーム上の行ハンドル。dtb_csv の NOT NULL 列 entity_name / disp_name は Wave 9 の Entity では持たないため、SqlCsvColumnConfigStorage の INSERT は field_name の値をそれらにエコーする（実体の entity_name / disp_name を供給する列カタログは Phase 2）"}},
 
       {"id": "pluginName", "title": "プラグイン名","tag": "src-entity", "doc": {"value": "プラグインの表示名"}},
       {"id": "pluginCode", "title": "プラグインコード","tag": "src-entity", "doc": {"value": "プラグインの一意識別子"}},
@@ -1187,6 +1189,16 @@
           {"href": "#csvEnabled"},
           {"href": "#sortNo"},
           {"href": "#doUpdateCsv"}
+        ]
+      },
+
+      {"id": "CsvColumnConfig", "title": "CSV列設定","tag": "admin-system src-entity",
+        "doc": {"value": "dtb_csv 1行を平坦化した投影 — 1つの CSV 出力列の設定エントリ。BeMart の CsvColumnConfigEntity と1:1（csvType / columnName / enabled / sortNo の4項目）。1つの csvType（mtb_csv_type への FK）が複数の dtb_csv 行を所有し、各行が「この列を出力に含めるか」(enabled) と列順 (sortNo) を保持する。columnName は dtb_csv.field_name に対応し、EC-CUBE の NOT NULL 列 entity_name / disp_name は Wave 9 の投影外（SqlCsvColumnConfigStorage の INSERT は field_name をエコー、実体の値を供給する列カタログは Phase 2）。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、ストレージは per-type 行集合をアトミックに置換する（DELETE all rows for the csvType → INSERT the new vector、savepoint 対応トランザクション内 — SqlCartCommand と同形）。csv_type_id は mtb_csv_type への enforced FK で、structure-only ダンプではマスタが空のため SQL テストは seedCsvTypes でシード（seedSaleTypes と同じ空マスタ FK シード規約）。Phase 2b で SqlCsvColumnConfigStorage が src-entity として参照"},
+        "descriptor": [
+          {"href": "#csvType"},
+          {"href": "#csvColumnName"},
+          {"href": "#csvEnabled"},
+          {"href": "#sortNo"}
         ]
       },
 
