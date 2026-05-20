@@ -104,6 +104,37 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
         $this->assertSame('1500002', $entity->postalCode);
         $this->assertSame('渋谷3-3-3', $entity->addr02);
         $this->assertSame('0312345678', $entity->phoneNumber);
+        // pref_id unset → prefName degrades to null (mtb_pref empty).
+        $this->assertNull($entity->prefName);
+    }
+
+    /**
+     * Phase 3 enrichment — listByCustomer / getById LEFT JOIN mtb_pref
+     * and surface the prefecture display name as `prefName`, so the
+     * address-book screen can render the name rather than the bare
+     * integer master id.
+     */
+    public function testPrefNameResolvedFromMtbPrefJoin(): void
+    {
+        $customerId = $this->insertCustomer();
+        $this->insertPref(13, '東京都');
+        $id = $this->insertAddress([
+            'customer_id' => $customerId,
+            'name01' => '山田',
+            'name02' => 'アリス',
+            'pref_id' => 13,
+        ]);
+
+        $storage = new SqlAddressStorage($this->pdo);
+
+        $entity = $storage->getById((string) $id);
+        $this->assertInstanceOf(AddressEntity::class, $entity);
+        $this->assertSame(13, $entity->pref);
+        $this->assertSame('東京都', $entity->prefName);
+
+        $list = $storage->listByCustomer((string) $customerId);
+        $this->assertCount(1, $list);
+        $this->assertSame('東京都', $list[0]->prefName);
     }
 
     public function testGetByIdReturnsNullForMissingRow(): void
