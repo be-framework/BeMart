@@ -27,6 +27,7 @@ use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlAdminCommand;
@@ -49,6 +50,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlShippingAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlTaxRuleStorage;
@@ -272,6 +274,16 @@ use function dirname;
  *       No generator: the row identity is the order_id, never minted.
  *       pref_id is a nullable FK to the empty mtb_pref master — pref=0
  *       writes NULL, NULL reads back as 0)
+ *   - ProductClassQueryInterface   → SqlProductClassQuery (Phase 2b —
+ *       the per-variation SKU lookup against dtb_product_class, keyed by
+ *       the customer-facing productCode. item() resolves the "default
+ *       class" row (class_category_id1 IS NULL AND class_category_id2 IS
+ *       NULL — the same convention SqlFavoriteStorage / SqlCartCommand
+ *       use), INNER JOINs dtb_product for the header name and LEFT JOINs
+ *       the empty mtb_sale_type master for saleTypeName. No generator:
+ *       it is read-only, the productCode is never minted by this slice.
+ *       A productCode that only appears on a non-default variation row
+ *       is an honest miss → null)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -514,6 +526,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(ShippingAddressStorageInterface::class)
                     ->to(SqlShippingAddressStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(ProductClassQueryInterface::class)
+                    ->to(SqlProductClassQuery::class)
                     ->in(Scope::SINGLETON);
             }
         };
