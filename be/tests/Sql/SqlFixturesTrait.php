@@ -780,6 +780,83 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert (idempotently) an mtb_device_type row so the FK from
+     * dtb_layout.device_type_id → mtb_device_type.id can be satisfied.
+     *
+     * mtb_device_type is empty in the structure-only schema dump.
+     * EC-CUBE 4.3 ships exactly two rows: 10 = PC, 2 = モバイル — the
+     * non-contiguous ids are a leftover of the 2.x garake-era device
+     * support. Those are the only `deviceType` values LayoutEntity
+     * ever carries. {@see seedDeviceTypes} seeds both.
+     */
+    protected function insertDeviceType(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_device_type (id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'devicetype',
+        ]);
+    }
+
+    /**
+     * Seed the master table dtb_layout's FK references
+     * (mtb_device_type) with the EC-CUBE 4.3 canonical rows.
+     *
+     * The structure-only schema dump leaves mtb_device_type empty. Any
+     * SQL test that inserts a dtb_layout row with a NON-NULL
+     * device_type_id MUST call this first. Idempotent (`INSERT
+     * IGNORE`), so calling it once in setUp is sufficient.
+     */
+    protected function seedDeviceTypes(): void
+    {
+        $this->insertDeviceType(10, 'PC');
+        $this->insertDeviceType(2, 'モバイル');
+    }
+
+    /**
+     * Insert a dtb_layout row. Returns the inserted id.
+     *
+     * dtb_layout's NOT NULL columns are create_date, update_date,
+     * discriminator_type. `layout_name` is a nullable varchar(255) and
+     * `device_type_id` a nullable smallint FK to mtb_device_type
+     * (FK_5A62AA7C4FFA550E).
+     *
+     * The default writes `device_type_id = 10` (PC) so the LayoutEntity
+     * projection round-trips a real EC-CUBE device enum value — callers
+     * MUST seed the master row first via {@see seedDeviceTypes} (or
+     * pass `device_type_id` => null to write a NULL, which the
+     * SqlLayoutStorage hydrator coalesces back to deviceType = 0).
+     * discriminator_type is 'layout' — the Doctrine single-table
+     * inheritance value EC-CUBE writes, same as SqlLayoutStorage's
+     * INSERT contract.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertLayout(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'device_type_id' => 10,
+            'layout_name' => sprintf('Layout %d', $counter),
+            'create_date' => $now,
+            'update_date' => $now,
+            'discriminator_type' => 'layout',
+        ], $overrides);
+
+        $this->executeInsert('dtb_layout', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert (idempotently) an mtb_work row so the FK from
      * dtb_member.work_id → mtb_work.id can be satisfied.
      *

@@ -213,6 +213,7 @@
       {"id": "templateName", "title": "テンプレート名","tag": "src-entity", "doc": {"value": "テンプレートの表示名"}},
       {"id": "deviceType", "title": "デバイス種別","tag": "src-entity", "doc": {"value": "デバイス種別マスタ（EC-CUBE 2.xからの名残）。値: 2=モバイル, 10=PC。非連番のIDは旧バージョンのデバイスサポート（ガラケー等）に由来。ページレイアウトのデバイス別表示に使用"}},
 
+      {"id": "layoutId", "title": "レイアウトID","tag": "src-entity", "doc": {"value": "dtb_layout.id の不透明な文字列ハンドル。BeMart の LayoutEntity 層は数値ではなく文字列として保持する。Fake 実装は `lo-` プレフィックス付きのシードハンドル（lo-pc-default / lo-sp-default）を持ち、SQL 実装は dtb_layout.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。Layout には作成・削除アフォーダンスが無い（goLayoutList + doUpdateLayout のみ）ため ID ジェネレータは存在せず、レイアウトはインストーラ/fixture が seed した行から読み出すのみ。非数値 ID は SqlLayoutStorage では miss として扱われ getById / put のいずれも 404 経路 (LayoutUpdated) を踏むため、シードハンドル `lo-pc-default` や `nonexistent` は Fake / SQL 双方で 404 が同形。blockId / categoryId と同じ Fake↔SQL 二重性"}},
       {"id": "layoutName", "title": "レイアウト名","tag": "src-entity", "doc": {"value": "レイアウトの表示名"}},
 
       {"id": "blockId", "title": "ブロックID","tag": "src-entity", "doc": {"value": "dtb_block.id の不透明な文字列ハンドル。BeMart の BlockEntity 層は数値ではなく文字列として保持する。Fake 実装は `bk-` プレフィックス付きの英数字を生成し（シード `bk-header` を含む）、SQL 実装は dtb_block.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlBlockStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (BlockUpdated / BlockDeleted) を踏むため、シードハンドル `bk-header` や `nonexistent-zzz` は Fake / SQL 双方で 404 が同形"}},
@@ -1200,8 +1201,10 @@
         ]
       },
 
-      {"id": "Layout", "title": "レイアウト","tag": "cms src-template",
+      {"id": "Layout", "title": "レイアウト","tag": "cms src-entity src-template",
+        "doc": {"value": "dtb_layout 1行を平坦化した投影。EC-CUBE 管理画面 CMS のレイアウト（PC標準 / スマホ標準など）を表す。BeMart の LayoutEntity は 3 項目 (layoutId / layoutName / deviceType) のみ保持し、EC-CUBE の create_date / update_date / discriminator_type は投影外。LayoutStorageInterface は list / getById / put のみ — 作成・削除アフォーダンスは無い（ALPS 上 goLayoutList + doUpdateLayout のみ）ため SqlLayoutIdGenerator も remove メソッドも存在せず、dtb_block_position / dtb_page_layout への cascade 問題はこのインターフェイスでは発生しない（レイアウトは削除されないため FK 参照先の事前クリアが不要）。layout_name は EC-CUBE 上 nullable だが LayoutEntity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。device_type_id は smallint(5) unsigned nullable で FK → mtb_device_type.id（FK_5A62AA7C4FFA550E）。LayoutEntity::deviceType は non-null int（10=PC, 2=モバイル）だが mtb_device_type が structure-only ダンプで空のため INSERT は常に device_type_id = NULL を書き（非 NULL 値は FK 1452 を発生）、read 時 NULL → 0 に coalesce。fixture は device_type_id を直接 seed（10/2）するため実運用で踏まれる唯一の書き経路（doUpdateLayout 経由の UPDATE）は device_type_id を触らず deviceType 投影は EC-CUBE enum を round-trip する。put は SELECT 1 で probe し hit → UPDATE（layout_name のみ、device_type_id は不変）/ miss → 明示 id で INSERT（防御的 — Layout 作成 Final は存在しないため未到達）。Phase 2b で SqlLayoutStorage が src-entity として参照"},
         "descriptor": [
+          {"href": "#layoutId"},
           {"href": "#layoutName"},
           {"href": "#deviceType"},
           {"href": "#createDate"},
