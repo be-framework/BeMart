@@ -8,14 +8,23 @@ declare(strict_types=1);
  * Mirrors bin/app.php for HTTP. Reads APP_CONTEXT to choose Module:
  *   APP_CONTEXT=prod  → ProdModule (no PII log file write)
  *   APP_CONTEXT=app   → AppModule  (dev default, DevBecoming + DevSemanticLogger)
+ *   APP_CONTEXT=html  → HtmlModule (Twig HTML rendering — Phase 3 Step 1)
  *   (unset / empty)   → app
  *
+ * Response representation is selected by context, not by Accept header:
+ *   - JSON contexts (`app`, `prod`) emit `json_encode($ro->body)` with
+ *     `application/json`. The resource bodies are PHP arrays; the 1422
+ *     existing tests assert on those arrays and are unaffected.
+ *   - The `html` context binds a Twig `RenderInterface` (see HtmlModule).
+ *     Here we call `$ro->toString()` so BEAR runs the bound renderer and
+ *     emit `$ro->view` (rendered HTML) with the renderer-set Content-Type.
+ * This keeps a single dispatch path: same resources, the context decides
+ * whether the body is serialized as JSON or rendered through a template.
+ *
  * The dispatch is intentionally minimal — REQUEST_METHOD + REQUEST_URI →
- * resource call, JSON response. No router, no AOP compile, no caching
- * headers. Slice 5 is about wiring the env gate, not building a
- * production HTTP server. A proper front controller (BEAR WebRouter +
- * compiled injector + APP_CONTEXT=prod-hal-app composition) lands in a
- * later slice.
+ * resource call. No router, no AOP compile, no caching headers. A proper
+ * front controller (BEAR WebRouter + compiled injector) lands in a later
+ * slice.
  */
 
 use BEAR\AppMeta\Meta;
@@ -89,6 +98,25 @@ if ($ro === null) {
 }
 
 http_response_code($ro->code);
+
+if ($context === 'html') {
+    // Render through the context-bound RenderInterface (Twig). toString()
+    // invokes the renderer, which also sets $ro->headers['Content-Type'].
+    $view = $ro->toString();
+    foreach ($ro->headers as $name => $value) {
+        if (is_string($value)) {
+            header($name . ': ' . $value);
+        }
+    }
+
+    if (! isset($ro->headers['Content-Type'])) {
+        header('Content-Type: text/html; charset=utf-8');
+    }
+
+    echo $view;
+    exit;
+}
+
 header('Content-Type: application/json; charset=utf-8');
 foreach ($ro->headers as $name => $value) {
     if (is_string($value)) {

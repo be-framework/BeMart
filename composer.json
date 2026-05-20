@@ -14,9 +14,10 @@
     ],
     "require": {
         "php": "^8.3",
-        "bear/sunday": "^1.6",
-        "bear/package": "^1.14",
         "be-framework/be": "0.x-dev as 0.1.0",
+        "bear/package": "^1.14",
+        "bear/sunday": "^1.6",
+        "madapaja/twig-module": "^2.7",
         "my-vendor/be-mart-be": "@dev",
         "ray/di": "^2.18",
         "ray/input-query": "^1.0"
