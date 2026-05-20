@@ -19,6 +19,7 @@ use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
@@ -45,6 +46,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlClassNameStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCsvColumnConfigStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
+use MyVendor\BeMart\Be\Reason\Query\SqlDeliveryStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlEmailUniquenessChecker;
 use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlLayoutStorage;
@@ -73,6 +75,7 @@ use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
@@ -83,6 +86,7 @@ use MyVendor\BeMart\Be\Reason\Service\SqlCategoryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlClassCategoryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlClassNameIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlCustomerIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\SqlDeliveryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\SqlPaymentMethodAdminIdGenerator;
@@ -326,6 +330,23 @@ use function dirname;
  *       reset_key is minted by the issuer's CustomerIdGenerator, not by
  *       this storage. The surface is disjoint from SqlCustomerQuery /
  *       SqlCustomerCommand which never touch the reset_* columns)
+ *   - DeliveryStorageInterface     → SqlDeliveryStorage (Phase 2b — admin
+ *       delivery-method master CRUD against dtb_delivery. list / getById
+ *       / put / remove. After the 厳密移植 narrowing (Delivery Phase A)
+ *       the 3-field DeliveryEntity (deliveryId / deliveryName / visible)
+ *       is 1:1 with dtb_delivery's modeled columns — dtb_delivery has no
+ *       fee columns, so SqlDeliveryStorage touches none. sale_type_id is
+ *       a nullable FK to the empty mtb_sale_type master — written NULL
+ *       since the slice projects no sale-type axis. remove is a plain
+ *       DELETE: the BeMart slice never INSERTs child dtb_delivery_fee /
+ *       dtb_delivery_time / dtb_payment_option rows so there is no
+ *       cascade to pre-clear)
+ *   - DeliveryIdGeneratorInterface → SqlDeliveryIdGenerator (Phase 2b —
+ *       DeliveryCreated needs a numeric id pre-allocated so
+ *       SqlDeliveryStorage can persist with that explicit PK; the Fake
+ *       generator emits 32-char hex that the SQL impl rejects as
+ *       non-numeric, same shape as the Block / Page / Tag generator
+ *       pairings)
  *   - AdminQueryInterface          → SqlAdminQuery   (Admin auth Phase B)
  *   - AdminCommandInterface        → SqlAdminCommand (Admin auth Phase B —
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
@@ -580,6 +601,12 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(PasswordResetTokenStorageInterface::class)
                     ->to(SqlPasswordResetTokenStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(DeliveryStorageInterface::class)
+                    ->to(SqlDeliveryStorage::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(DeliveryIdGeneratorInterface::class)
+                    ->to(SqlDeliveryIdGenerator::class)
                     ->in(Scope::SINGLETON);
             }
         };
