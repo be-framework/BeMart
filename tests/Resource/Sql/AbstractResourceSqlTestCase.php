@@ -7,12 +7,14 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
+use MyVendor\BeMart\Be\Reason\Query\SqlBaseInfoStorage;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
@@ -76,6 +78,11 @@ use function dirname;
  *       TagCreated needs a numeric id pre-allocated so SqlTagStorage
  *       can persist with that explicit PK; the Fake generator emits
  *       a `tg-` prefix that the SQL impl rejects as non-numeric)
+ *   - BaseInfoStorageInterface     → SqlBaseInfoStorage (Phase 2b —
+ *       singleton row at id=1; the SQL impl returns installer-default
+ *       fields when the row is missing so the hypermedia contract is
+ *       identical to the Fake-backed baseline with no extra fixture
+ *       setup required)
  *   - PDO::class                   → shared test PDO singleton
  *
  * NOT rebound:
@@ -221,6 +228,9 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(TagIdGeneratorInterface::class)
                     ->to(SqlTagIdGenerator::class)
+                    ->in(Scope::SINGLETON);
+                $this->bind(BaseInfoStorageInterface::class)
+                    ->to(SqlBaseInfoStorage::class)
                     ->in(Scope::SINGLETON);
             }
         };

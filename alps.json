@@ -865,7 +865,8 @@
         ]
       },
 
-      {"id": "BaseInfo", "title": "基本情報","tag": "shop src-template",
+      {"id": "BaseInfo", "title": "基本情報","tag": "shop src-entity src-template",
+        "doc": {"value": "dtb_base_info 1行を平坦化した投影。EC-CUBE 4.3 の dtb_base_info はインストーラが必ず id=1 の単一行を seed する設計のため、所有者キーなしのシングルトン（`WHERE id = 1` 固定）。BeMart の BaseInfoEntity は Wave 8 / Wave 9 が要求する 12 列 (shopName / shopKana / shopNameEng / companyName / postalCode / pref / addr01 / addr02 / phoneNumber / businessHour / shopEmail01 / shopMessage) のみ保持し、残りの ~25 列（point / tax / option_* / delivery_free_* / invoice_registration_number / company_kana / shop_email02..04 / good_traded / ga_id 等）は Phase 2 スコープ外。FK は pref_id → mtb_pref / country_id → mtb_country の 2 本だが構造ダンプ上は両マスタとも空のため pref を扱うテストは `insertPref()` で先に seed する必要がある。SqlBaseInfoStorage は id=1 の行が無い場合 BaseInfoEntity の null 値で hydrate（installer 前状態を表現）し、update は INSERT-or-UPDATE で id=1 を idempotent に維持する"},
         "descriptor": [
           {"href": "#shopName"},
           {"href": "#shopKana"},

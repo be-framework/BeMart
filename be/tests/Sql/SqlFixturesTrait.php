@@ -408,6 +408,90 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert (idempotently) the singleton dtb_base_info row at id=1.
+     *
+     * dtb_base_info is a single-row config table — EC-CUBE's installer
+     * always writes id=1 and every admin screen reads it back the same
+     * way. The structure-only schema dump leaves the table empty, so
+     * any SQL test that wants {@see SqlBaseInfoStorage} to return a
+     * non-default row must seed it first.
+     *
+     * `INSERT IGNORE` makes the helper a no-op on second call inside
+     * the same test — useful when both a hypermedia test's setUp and
+     * a per-case override want a row to exist with their own values
+     * (the test that needs the override should call the helper once
+     * with the overrides, not first the seed then the overrides).
+     *
+     * NOT NULL columns we MUST satisfy: update_date,
+     * option_mypage_order_status_display (DEFAULT 1),
+     * option_nostock_hidden (DEFAULT 0), option_favorite_product
+     * (DEFAULT 1), option_product_delivery_fee (DEFAULT 0),
+     * option_product_tax_rule (DEFAULT 0), option_customer_activate
+     * (DEFAULT 1), option_remember_me (DEFAULT 1), option_mail_notifier
+     * (DEFAULT 0), option_point (DEFAULT 1), discriminator_type.
+     * The schema covers all the option_* tinyints via DEFAULT so we
+     * only supply update_date and discriminator_type plus whatever
+     * shop-info columns the caller overrides.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     *   Use the schema column names (snake_case: `shop_name`,
+     *   `pref_id`, `email01`, `message`, etc.), not the Entity field
+     *   names — same convention as the other fixture helpers.
+     */
+    protected function insertBaseInfo(array $overrides = []): int
+    {
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'id' => 1,
+            'country_id' => null,
+            'pref_id' => null,
+            'company_name' => null,
+            'company_kana' => null,
+            'postal_code' => null,
+            'addr01' => null,
+            'addr02' => null,
+            'phone_number' => null,
+            'business_hour' => null,
+            'email01' => null,
+            'email02' => null,
+            'email03' => null,
+            'email04' => null,
+            'shop_name' => null,
+            'shop_kana' => null,
+            'shop_name_eng' => null,
+            'update_date' => $now,
+            'good_traded' => null,
+            'message' => null,
+            'delivery_free_amount' => null,
+            'delivery_free_quantity' => null,
+            'invoice_registration_number' => null,
+            'authentication_key' => null,
+            'php_path' => null,
+            'ga_id' => null,
+            'discriminator_type' => 'baseinfo',
+        ], $overrides);
+
+        // INSERT IGNORE so a second call inside the same transaction
+        // is a silent no-op (singleton row contract).
+        $columns = array_keys($row);
+        $placeholders = array_map(static fn (string $c) => ':' . $c, $columns);
+        $sql = sprintf(
+            'INSERT IGNORE INTO dtb_base_info (%s) VALUES (%s)',
+            implode(', ', array_map(static fn (string $c) => '`' . $c . '`', $columns)),
+            implode(', ', $placeholders),
+        );
+        $stmt = $this->pdo->prepare($sql);
+        $params = [];
+        foreach ($row as $col => $value) {
+            $params[':' . $col] = $value;
+        }
+
+        $stmt->execute($params);
+
+        return (int) $row['id'];
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
