@@ -12,6 +12,8 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Final\NonMemberSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitNonMemberInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\NonMemberForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 use function sprintf;
@@ -37,12 +39,22 @@ use function sprintf;
  * Coexists with `Resource\Page\Shopping\Checkout.php` (Pilot 5) under
  * the same `Shopping/` directory — the same file-plus-sibling-directory
  * pattern as Mypage / Entry.
+ *
+ * Phase 3 — HTML FORM page. `Shopping/nonmember.twig` renders the
+ * guest-info inputs through the Symfony FormView; BeMart exposes a
+ * {@see NonMemberForm} (Ray.WebFormModule AbstractForm) as `body['form']`
+ * so the HTML port renders real `<input>`s via `{{ form.input(...) }}`.
+ * The form is a field-definition + renderer only — VALIDATION AUTHORITY
+ * STAYS WITH the Be Becoming chain (doSubmitNonMember /
+ * SubmitNonMemberInput). On a domain rejection the resource bridges the
+ * verdict onto the form. JSON contexts ignore `body['form']`.
  */
 class NonMember extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -81,6 +93,9 @@ class NonMember extends ResourceObject
                 'href' => 'page://self/shopping/non-member',
             ],
             'csrfToken' => null,
+            // Phase 3: an empty NonMemberForm for the HTML port to render
+            // the guest-info inputs. JSON contexts ignore it.
+            'form' => $this->formFactory->newInstance(NonMemberForm::class),
         ];
 
         return $this;
@@ -143,10 +158,31 @@ class NonMember extends ResourceObject
                 addr02: $addr02,
             ));
         } catch (SemanticVariableException $e) {
+            // Be Framework Semantics rejected a guest field. Bridge the
+            // domain verdict onto a repopulated NonMemberForm so the HTML
+            // page re-renders with the entered values + the inline error.
+            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
+            $form = $this->formFactory->newInstance(NonMemberForm::class);
+            assert($form instanceof NonMemberForm);
+            $form->fillValues([
+                'name01' => $name01,
+                'name02' => $name02,
+                'kana01' => $kana01,
+                'kana02' => $kana02,
+                'email' => $email,
+                'phoneNumber' => $phoneNumber,
+                'postalCode' => $postalCode,
+                'pref' => $pref,
+                'addr01' => $addr01,
+                'addr02' => $addr02,
+            ]);
+            $form->setDomainError('email', $message);
+
             $this->code = Code::BAD_REQUEST;
             $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
+                'message' => $message,
                 'email' => $email,
+                'form' => $form,
             ];
 
             return $this;

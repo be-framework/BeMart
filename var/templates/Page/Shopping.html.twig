@@ -1,0 +1,217 @@
+{#
+  BeMart Shopping (checkout) page — EC-CUBE goShopping.
+
+  PORT of EC-CUBE 4.3 default-theme `Shopping/index.twig`
+  (src/Eccube/Resource/template/default/Shopping/index.twig).
+
+  FORM page (Ray.WebFormModule) — see var/templates/README.md. The
+  checkout page is form-heavy: shipping-address review, delivery-method
+  / delivery-date / delivery-time selects, the payment-method radio
+  group and the order-message textarea. Markup skeleton, the `ec-role` /
+  `ec-cartRole` / `ec-progress` / `ec-orderRole` / `ec-orderAccount` /
+  `ec-orderDelivery` / `ec-orderPayment` / `ec-orderConfirm` /
+  `ec-totalBox` / `ec-rectHeading` / `ec-selects` / `ec-radio` classes
+  and the block structure are kept verbatim from EC-CUBE.
+
+  The Shopping resource exposes a real `ShoppingOrderForm` (an
+  AbstractForm) as `body.form`; the message textarea + the delivery
+  selects are rendered through it:
+
+    {{ form.input('message')|raw }}
+    {{ form.input('delivery')|raw }}
+
+  EC-CUBE renders the same inputs through the Symfony FormView
+  (`form_widget(form.message)`, `form_widget(form.Shippings[idx].
+  Delivery)`); EC-CUBE's `OrderType` nests the per-shipping delivery
+  selects under a `Shippings` CollectionType and the payment radios
+  under a `Payment` EntityType, but BeMart's Shopping body carries a
+  single default shipping address + a flat `paymentMethods` list, so
+  ShoppingOrderForm declares the delivery selects FLAT and the payment
+  radios are rendered from `body.paymentMethods`. The render-diff test
+  stubs EC-CUBE's `form_widget` to delegate to the SAME ShoppingOrderForm
+  so the inputs diff to ZERO. Validation authority stays with the Be
+  Becoming chain (doCheckout / CheckoutInput).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `form._token` / `form.redirect_to` — Symfony CSRF + redirect
+     widgets; the hidden `_token` input is kept bound to the body's
+     `csrfToken` (null in the html context); `redirect_to` is a hidden
+     control with no body value.
+   - `is_granted('ROLE_USER')` — EC-CUBE auth-state runtime. The
+     anonymous-only customer-edit JS / progress step / inline-edit panel
+     are OMITTED; the port renders the member-checkout path (the common
+     case — the page requires AUTHN, see Shopping.php). The `{% block
+     javascript %}` redirect-to wiring is OMITTED as EC-CUBE-runtime.
+   - `has_errors(...)` — request-validation runtime; resolves false on a
+     fresh page, so the conditional ` error` classes never appear.
+   - `price` / `number_format` filters — BeMartTwigExtension JPY filter.
+
+  MISSING BODY FIELD follow-ups — the Shopping body is the checkout
+  REVIEW projection (customer name / email / default shipping address /
+  carts / payment methods / totals); EC-CUBE's `index.twig` reads off a
+  fully-aggregated `Order` entity. Absent from the body and OMITTED:
+   - the per-order-item rows of each shipping (`shipping.product
+     OrderItems`) — the body carries `carts` (cart-level) but not the
+     order-item breakdown an aggregated Order produces;
+   - `charge` / `discount` / tax-rate-broken-down totals
+     (`taxable_total` / `payment_total` / `total_by_tax_rate`) — the
+     body carries `totalPrice` / `deliveryFeeTotal` only;
+   - the point block (`BaseInfo.isOptionPoint` / `Order.Customer.Point`)
+     and the trade-law sections (`activeTradeLaws`).
+     A `doConfirmOrder`-grade Order aggregation is the fix; tracked in
+     the enrichment backlog. Recorded as residuals in the render test.
+#}
+{% extends 'base.html.twig' %}
+
+{% set route = 'shopping' %}
+{% set title = 'ご注文手続き' %}
+
+{% block main %}
+
+    <div class="ec-role">
+        <div class="ec-pageHeader">
+            <h1>ご注文手続き</h1>
+        </div>
+    </div>
+
+    <div class="ec-cartRole">
+        <div class="ec-cartRole__progress">
+            <ul class="ec-progress">
+                {% set step = 1 %}
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">カートの商品
+                    </div>
+                </li>
+                <li class="ec-progress__item is-complete">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">ご注文手続き
+                    </div>
+                </li>
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">ご注文内容確認
+                    </div>
+                </li>
+                <li class="ec-progress__item">
+                    <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                    </div>
+                    <div class="ec-progress__label">完了
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- アラートメッセージ -->
+    </div>
+
+    <form id="shopping-form" method="post" action="{{ url('shopping_confirm') }}">
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" id="shopping_order_redirect_to" name="redirect_to" value="">
+        <div class="ec-orderRole">
+            <div class="ec-orderRole__detail">
+                <div class="ec-orderAccount">
+                    <div class="ec-rectHeading">
+                        <h2>お客様情報</h2>
+                    </div>
+                    <div class="ec-orderAccount__account non-customer-display">
+                        <p class="ec-halfInput"><span class="customer-edit customer-name01">{{ name01|default('') }}</span> <span class="customer-edit customer-name02">{{ name02|default('') }}</span> 様</p>
+                        <p class="ec-halfInput"><span class="customer-edit customer-kana01"></span> <span class="customer-edit customer-kana02"></span></p>
+                        <p class="ec-input"><span class="customer-edit customer-company_name"></span></p>
+                        <p class="ec-zipInput">〒<span class="customer-edit customer-postal_code">{{ defaultShippingAddress.postalCode|default('') }}</span></p>
+                        <p class="ec-input"><span class="customer-edit customer-pref">{{ defaultShippingAddress.pref|default('') }}</span><span class="customer-edit customer-addr01">{{ defaultShippingAddress.addr01|default('') }}</span><span class="customer-edit customer-addr02">{{ defaultShippingAddress.addr02|default('') }}</span></p>
+                        <p class="ec-telInput"><span class="customer-edit customer-phone_number">{{ defaultShippingAddress.phoneNumber|default('') }}</span></p>
+                        <p class="ec-input"><span class="customer-edit customer-email">{{ email|default('') }}</span></p>
+                    </div>
+                </div>
+                <div class="ec-orderDelivery">
+                    <div class="ec-rectHeading">
+                        <h2>配送情報</h2>
+                    </div>
+                    {% if defaultShippingAddress %}
+                        <div class="ec-orderDelivery__title">お届け先
+                            <div class="ec-orderDelivery__change">
+                                <button class="ec-inlineBtn" type="button">変更</button>
+                            </div>
+                        </div>
+                        <div class="ec-orderDelivery__address">
+                            <p>{{ name01|default('') }} {{ name02|default('') }} 様</p>
+                            <p>〒{{ defaultShippingAddress.postalCode|default('') }} {{ defaultShippingAddress.pref|default('') }}{{ defaultShippingAddress.addr01|default('') }}{{ defaultShippingAddress.addr02|default('') }}</p>
+                            <p>{{ defaultShippingAddress.phoneNumber|default('') }}</p>
+                        </div>
+                        <div class="ec-orderDelivery__actions">
+                            <div class="ec-selects">
+                                <div class="ec-select">
+                                    <label>配送方法</label>
+                                    {{ form.input('delivery')|raw }}
+                                </div>
+                                <div class="ec-select ec-select__delivery">
+                                    <label>お届け日</label>
+                                    {{ form.input('shipping_delivery_date')|raw }}
+                                </div>
+                                <div class="ec-select ec-select__time">
+                                    <label>お届け時間</label>
+                                    {{ form.input('delivery_time')|raw }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="ec-orderDelivery__edit">
+                        <button type="button" class="ec-inlineBtn" data-trigger="click" data-path="{{ path('shopping_shipping_multiple') }}">お届け先を追加する</button>
+                    </div>
+                </div>
+                <div class="ec-orderPayment">
+                    <div class="ec-rectHeading">
+                        <h2>お支払方法</h2>
+                    </div>
+                    <div class="ec-radio">
+                        {% for payment in paymentMethods %}
+                            <div style="display: block;">
+                                <label>
+                                    <input type="radio" name="payment" value="{{ payment.paymentMethodId }}">
+                                    {{ payment.paymentMethodName }}
+                                </label>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <div class="ec-input ">{{ form.error('payment') }}</div>
+                </div>
+                <div class="ec-orderConfirm">
+                    <div class="ec-rectHeading">
+                        <h2>お問い合わせ</h2>
+                    </div>
+                    <div class="ec-input">
+                        {{ form.input('message')|raw }}
+                        {{ form.error('message') }}
+                    </div>
+                </div>
+            </div>
+            <div class="ec-orderRole__summary">
+                <div class="ec-totalBox">
+                    <dl class="ec-totalBox__spec">
+                        <dt>小計</dt>
+                        <dd class="ec-totalBox__specTotal">{{ totalPrice|default(0)|price }}</dd>
+                    </dl>
+                    <dl class="ec-totalBox__spec">
+                        <dt>手数料</dt>
+                        <dd>{{ charge|default(0)|price }}</dd>
+                    </dl>
+                    <dl class="ec-totalBox__spec">
+                        <dt>送料</dt>
+                        <dd>{{ deliveryFeeTotal|default(0)|price }}</dd>
+                    </dl>
+                    <div class="ec-totalBox__total">合計<span class="ec-totalBox__price">{{ (totalPrice|default(0) + deliveryFeeTotal|default(0))|price }}</span><span class="ec-totalBox__taxLabel">税込</span></div>
+                    <div class="ec-totalBox__paymentTotal">お支払い合計<span class="ec-totalBox__price">{{ (totalPrice|default(0) + deliveryFeeTotal|default(0))|price }}</span><span class="ec-totalBox__taxLabel">税込</span></div>
+                    <div class="ec-totalBox__btn">
+                        <button type="submit" class="ec-blockBtn--action">確認する</button>
+                        <a href="{{ url("cart") }}" class="ec-blockBtn--cancel">カートに戻る</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

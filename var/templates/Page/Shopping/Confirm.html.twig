@@ -1,0 +1,171 @@
+{#
+  BeMart Shopping confirm page — EC-CUBE goShoppingConfirm.
+
+  PORT of EC-CUBE 4.3 default-theme `Shopping/confirm.twig`
+  (src/Eccube/Resource/template/default/Shopping/confirm.twig).
+
+  DATA page (+ a checkout submit form/button) — see
+  var/templates/README.md. Markup skeleton, the `ec-role` /
+  `ec-cartRole` / `ec-progress` / `ec-orderRole` / `ec-orderAccount` /
+  `ec-orderDelivery` / `ec-orderPayment` / `ec-orderConfirm` /
+  `ec-totalBox` classes and the block structure are kept verbatim from
+  EC-CUBE.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `is_granted('ROLE_USER')` — EC-CUBE auth-state runtime. The
+     customer-info progress step renders for anonymous purchases only;
+     BeMart's html context has no auth state, so the step is OMITTED
+     (the member-checkout path) and the step numbering advances
+     accordingly — identical to EC-CUBE's member-checkout output.
+   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
+     input bound to the body's `csrfToken` (null in the html context —
+     the EventListener mirrors the live token in).
+   - `price` / `number_format` filters — BeMartTwigExtension JPY filter.
+   - `is_reduced_tax_rate(...)` / `date_day_with_weekday` — EC-CUBE
+     runtime helpers; the reduced-tax-rate mark and the weekday-format
+     of the delivery date are gated behind data the body does not carry.
+
+  MISSING BODY FIELD follow-ups (this resource is a thin pure renderer
+  — see src/Resource/Page/Shopping/Confirm.php):
+   - The aggregated `Order` projection — `Order.shippings`,
+     `Order.order_items`, `Order.Payment`, the customer-info fields, the
+     tax-rate-broken-down totals (`subtotal` / `charge` /
+     `deliveryFeeTotal` / `taxable_total` / `payment_total` / ...).
+     The body carries none of it (a `doConfirmOrder` Be Becoming chain
+     producing an `OrderConfirmed` Final is an enrichment-backlog item),
+     so the `{% for %}` order-detail loops emit nothing and the scalar
+     `Order.*` cells render empty. Recorded as residuals in the render
+     test.
+#}
+{% extends 'base.html.twig' %}
+
+{% set route = 'shopping_confirm' %}
+{% set title = 'ご注文内容のご確認' %}
+
+{% block main %}
+
+<div class="ec-role">
+    <div class="ec-pageHeader">
+        <h1>ご注文内容のご確認</h1>
+    </div>
+</div>
+
+<div class="ec-cartRole">
+    <div class="ec-cartRole__progress">
+        <ul class="ec-progress">
+            {% set step = 1 %}
+            <li class="ec-progress__item">
+                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                </div>
+                <div class="ec-progress__label">カートの商品
+                </div>
+            </li>
+            <li class="ec-progress__item">
+                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                </div>
+                <div class="ec-progress__label">ご注文手続き
+                </div>
+            </li>
+            <li class="ec-progress__item is-complete">
+                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                </div>
+                <div class="ec-progress__label">ご注文内容確認
+                </div>
+            </li>
+            <li class="ec-progress__item">
+                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
+                </div>
+                <div class="ec-progress__label">完了
+                </div>
+            </li>
+        </ul>
+    </div>
+</div>
+
+    <form id="shopping-form" method="post" action="{{ url('shopping_checkout') }}">
+    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <div class="ec-orderRole">
+        <div class="ec-orderRole__detail">
+            <div class="ec-orderAccount">
+                <div class="ec-rectHeading">
+                    <h2>お客様情報</h2>
+                </div>
+                <div class="ec-orderAccount__account">
+                    <p class="ec-halfInput">{{ Order.name01|default('') }} {{ Order.name02|default('') }} 様</p>
+                    <p class="ec-halfInput">{{ Order.kana01|default('') }} {{ Order.kana02|default('') }}</p>
+                    <p class="ec-input">{{ Order.companyName|default('') }}</p>
+                    <p class="ec-zipInput">〒{{ Order.postal_code|default('') }}</p>
+                    <p class="ec-input">{{ Order.pref|default('') }}{{ Order.addr01|default('') }}{{ Order.addr02|default('') }}</p>
+                    <p class="ec-telInput">{{ Order.phone_number|default('') }}</p>
+                    <p class="ec-input">{{ Order.email|default('') }}</p>
+                </div>
+            </div>
+            <div class="ec-orderDelivery">
+                <div class="ec-rectHeading">
+                    <h2>配送情報</h2>
+                </div>
+                {% for shipping in Order.shippings|default([]) %}
+                    <div class="ec-orderDelivery__item">
+                        <ul class="ec-borderedList">
+                            {% for orderItem in shipping.productOrderItems %}
+                            <li>
+                                <div class="ec-imageGrid">
+                                    <div class="ec-imageGrid__content">
+                                        <p>{{ orderItem.productName }}</p>
+                                        <p>{{ orderItem.priceIncTax|price }} × {{ orderItem.quantity|number_format }}<span>小計：{{ orderItem.totalPrice|price }}</span></p>
+                                    </div>
+                                </div>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    <div class="ec-orderDelivery__address">
+                        <p>{{ shipping.name01 }} {{ shipping.name02 }} ({{ shipping.kana01 }} {{ shipping.kana02 }}) 様</p>
+                        <p>〒{{ shipping.postal_code }} {{ shipping.pref }}{{ shipping.addr01 }}{{ shipping.addr02 }}</p>
+                        <p>{{ shipping.phone_number }}</p>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="ec-orderPayment">
+                <div class="ec-rectHeading">
+                    <h2>お支払方法</h2>
+                </div>
+                <div class="ec-blockRadio">
+                    {{ Order.Payment|default('') }}({{ Order.charge|default(0)|price }})
+                </div>
+            </div>
+            <div class="ec-orderConfirm">
+                <div class="ec-rectHeading">
+                    <h2>お問い合わせ</h2>
+                </div>
+                <div class="ec-input">
+                    {{ Order.message|default('')|nl2br }}
+                </div>
+            </div>
+        </div>
+        <div class="ec-orderRole__summary">
+            <div class="ec-totalBox">
+                <dl class="ec-totalBox__spec">
+                    <dt>小計</dt>
+                    <dd class="ec-totalBox__specTotal">{{ Order.subtotal|default(0)|price }}</dd>
+                </dl>
+                <dl class="ec-totalBox__spec">
+                    <dt>手数料</dt>
+                    <dd>{{ Order.charge|default(0)|price }}</dd>
+                </dl>
+                <dl class="ec-totalBox__spec">
+                    <dt>送料</dt>
+                    <dd>{{ Order.deliveryFeeTotal|default(0)|price }}</dd>
+                </dl>
+                <div class="ec-totalBox__total">合計<span class="ec-totalBox__price">{{ Order.taxable_total|default(0)|price }}</span><span class="ec-totalBox__taxLabel">税込</span></div>
+                <div class="ec-totalBox__paymentTotal">お支払い合計<span class="ec-totalBox__price">{{ Order.payment_total|default(0)|price }}</span><span class="ec-totalBox__taxLabel">税込</span></div>
+                <div class="ec-totalBox__btn">
+                    <button type="submit" class="ec-blockBtn--action">注文する</button>
+                    <a href="{{ url('shopping') }}" class="ec-blockBtn--cancel">ご注文手続きに戻る</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}
