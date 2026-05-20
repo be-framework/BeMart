@@ -659,6 +659,127 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert (idempotently) an mtb_work row so the FK from
+     * dtb_member.work_id → mtb_work.id can be satisfied.
+     *
+     * mtb_work is empty in the structure-only schema dump. EC-CUBE
+     * 4.3 ships exactly two rows: 0 = NON_ACTIVE, 1 = ACTIVE — those
+     * are the only `work` values AdminEntity / SqlAdminCommand ever
+     * write (a fresh admin is ACTIVE; soft-delete flips to
+     * NON_ACTIVE). {@see seedAdminMasters} seeds both.
+     */
+    protected function insertWork(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_work (id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'work',
+        ]);
+    }
+
+    /**
+     * Insert (idempotently) an mtb_authority row so the FK from
+     * dtb_member.authority_id → mtb_authority.id can be satisfied.
+     *
+     * mtb_authority is empty in the structure-only dump. EC-CUBE 4.3
+     * ships 0 = システム管理者 and 1 = 店舗オーナー — the two values the
+     * BeMart admin slice uses. {@see seedAdminMasters} seeds both.
+     */
+    protected function insertAuthority(int $id, string $name): void
+    {
+        $stmt = $this->pdo->prepare(
+            'INSERT IGNORE INTO mtb_authority (id, name, sort_no, discriminator_type) '
+            . 'VALUES (:id, :name, :sort_no, :discriminator)',
+        );
+        $stmt->execute([
+            ':id' => $id,
+            ':name' => $name,
+            ':sort_no' => $id,
+            ':discriminator' => 'authority',
+        ]);
+    }
+
+    /**
+     * Seed the two master tables dtb_member's FKs reference
+     * (mtb_work + mtb_authority) with the EC-CUBE 4.3 canonical rows.
+     *
+     * The structure-only schema dump leaves both tables empty. Any
+     * SQL test that inserts a dtb_member row with a NON-NULL work_id
+     * / authority_id — or that exercises soft-delete (which writes an
+     * explicit work_id=0) — MUST call this first. Idempotent
+     * (`INSERT IGNORE`), so calling it once in setUp is sufficient.
+     */
+    protected function seedAdminMasters(): void
+    {
+        $this->insertWork(0, 'NON_ACTIVE');
+        $this->insertWork(1, 'ACTIVE');
+        $this->insertAuthority(0, 'システム管理者');
+        $this->insertAuthority(1, '店舗オーナー');
+    }
+
+    /**
+     * Insert a dtb_member row (admin account). Returns the inserted id.
+     *
+     * dtb_member's NOT NULL columns are login_id, password, sort_no
+     * (smallint, no DEFAULT), create_date, update_date,
+     * discriminator_type, plus `two_factor_auth_enabled` (tinyint(1)
+     * NOT NULL DEFAULT 0). `work_id` / `authority_id` are nullable
+     * FKs to mtb_work / mtb_authority — both EMPTY in the structure-
+     * only dump. The defaults below write `work_id=1` (ACTIVE) and
+     * `authority_id=0` (system admin), so callers MUST seed those
+     * master rows first via {@see seedAdminMasters} (or pass `null`
+     * overrides). `creator_id` is a self-FK on dtb_member; leaving
+     * NULL avoids the chicken-and-egg of the first row.
+     *
+     * The defaults match {@see \MyVendor\BeMart\Be\Reason\Query\SqlAdminCommand}'s
+     * INSERT contract (sort_no = 0, discriminator_type = 'member',
+     * password = the bcrypt hash of `local-dev-admin-password`).
+     * Same hash the Fake fixture `var/fake/admins.json` uses for
+     * `test-admin`, so the admin-login Resource SQL test can attempt
+     * a login against a freshly-inserted row with the canonical
+     * plaintext.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertAdmin(array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'work_id' => 1,
+            'authority_id' => 0,
+            'creator_id' => null,
+            'name' => sprintf('Admin-%d', $counter),
+            'department' => null,
+            'login_id' => sprintf('admin-%d-%d', $counter, random_int(1000, 9999)),
+            // Canonical bcrypt of `local-dev-admin-password` — same
+            // value var/fake/admins.json carries for test-admin so the
+            // admin-login Resource SQL sibling can verify with the
+            // hard-coded plaintext used by the Fake-backed test.
+            'password' => '$2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi',
+            'salt' => null,
+            'sort_no' => 0,
+            'two_factor_auth_key' => null,
+            'two_factor_auth_enabled' => 0,
+            'create_date' => $now,
+            'update_date' => $now,
+            'login_date' => null,
+            'discriminator_type' => 'member',
+        ], $overrides);
+
+        $this->executeInsert('dtb_member', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert a dtb_customer_favorite_product row. Returns the new id.
      *
      * create_date / update_date are NOT NULL — populate with now().
