@@ -1,0 +1,159 @@
+{#
+  BeMart admin News edit — EC-CUBE goNews (新着情報登録/編集).
+
+  PORT of EC-CUBE 4.3 admin-theme `Content/news_edit.twig`
+  (src/Eccube/Resource/template/admin/Content/news_edit.twig).
+
+  This is the admin pilot's FORM/CRUD page. It extends the admin frame
+  (`admin-base.html.twig`), not the storefront `base.html.twig`. The
+  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
+  from EC-CUBE; only the dynamic bindings are rebound.
+
+  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
+  the News resource (src/Resource/Page/Admin/News/News.php) exposes an
+  {@see \MyVendor\BeMart\Form\AdminNewsForm} as `body['form']`, pre-filled
+  with the persisted row. The inputs render through that real form
+  object:
+
+    {{ form.input('title')|raw }}       <- real <input> w/ id/attrs/value
+    {{ form.error('title') }}           <- inline Be-domain error, if any
+
+  EC-CUBE renders the same inputs through the Symfony FormView
+  (`form_widget(form.title)`); Ray.WebFormModule is BeMart's
+  BEAR-idiomatic equivalent. `AdminNewsForm::init()` ports the field
+  names / ids / attributes from EC-CUBE's `NewsType` (block prefix
+  `admin_news`) so the rendered markup carries EC-CUBE's form shape.
+
+  VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
+  form is a field-definition + renderer. On a domain rejection the News
+  resource repopulates `form` and exposes `body.message`.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
+     hidden `_token` input is kept (structure) with an empty value;
+     EC-CUBE-runtime only — enumerated as residual.
+   - `form_widget(form.visible)` (公開 / 非公開 display-status select)
+     -> NOT carried by the AdminNewsFetched projection (EC-CUBE's
+     dtb_news.visible was out of the Wave 9 CMS slice). The conversion-
+     area visible select is OMITTED, not invented. Enumerated as residual.
+   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
+     Symfony form-theme / EC-CUBE entity-extension runtime. No BeMart
+     equivalent; dropped. EC-CUBE-runtime only — enumerated as residual.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_content_news_edit' %}
+{% set title = '新着情報管理' %}
+{% set sub_title = 'コンテンツ管理' %}
+
+{% block main %}
+    <form role="form" class="form-horizontal" name="form1" id="form1" method="post" action="?">
+        <input type="hidden" id="news__token" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8">
+                                    <span class="card-title">新着情報登録</span></div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#newsForm"
+                                                                 aria-expanded="true" aria-controls="newsForm"><i class="fa fa-lg fa-angle-up"></i></a></div>
+                            </div>
+                        </div>
+                        <div class="ec-cardCollapse collapse show" id="newsForm" style="">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-3">
+                                        <span>公開日時</span>
+                                        <span class="badge bg-primary ms-1">
+                                                必須
+                                        </span>
+                                    </div>
+
+                                    <div class="col mb-2">
+                                        {{ form.input('publish_date')|raw }}
+                                        {% if form.error('publish_date') %}<span class="invalid-feedback d-block">{{ form.error('publish_date') }}</span>{% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-3">
+                                        <span>タイトル</span>
+                                        <span class="badge bg-primary ms-1">
+                                                必須
+                                        </span>
+                                    </div>
+                                    <div class="col mb-2">
+                                        {{ form.input('title')|raw }}
+                                        {% if form.error('title') %}<span class="invalid-feedback d-block">{{ form.error('title') }}</span>{% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="リンク先のURLを入力してください。">
+                                            <span>URL</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col mb-2">
+                                        {{ form.input('url')|raw }}
+                                        {% if form.error('url') %}<span class="invalid-feedback d-block">{{ form.error('url') }}</span>{% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-3">&nbsp;</div>
+                                    <div class="col mb-2">
+                                        {{ form.input('link_method')|raw }}
+                                        {% if form.error('link_method') %}<span class="invalid-feedback d-block">{{ form.error('link_method') }}</span>{% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="本文を入力してください。">
+                                            <span>本文</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col mb-2">
+                                        {{ form.input('description')|raw }}
+                                        {% if form.error('description') %}<span class="invalid-feedback d-block">{{ form.error('description') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="c-conversionArea">
+                    <div class="c-conversionArea__container">
+                        <div class="row justify-content-between align-items-center">
+                            <div class="col-6">
+                                <div class="c-conversionArea__leftBlockItem">
+                                    <a class="c-baseLink" href="{{ url('admin_content_news') }}">
+                                        <i class="fa fa-backward" aria-hidden="true"></i>
+                                        <span>新着情報管理</span></a>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                                    <div class="col-auto">
+                                        <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if message is defined and message %}
+        <p class="ec-errorMessage">{{ message }}</p>
+    {% endif %}
+{% endblock %}
