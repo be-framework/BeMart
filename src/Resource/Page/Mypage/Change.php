@@ -16,7 +16,10 @@ use MyVendor\BeMart\Be\Final\MypageChangeFormFetched;
 use MyVendor\BeMart\Be\Input\GetMypageChangeInput;
 use MyVendor\BeMart\Be\Input\UpdateCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\ChangeForm;
+use Ray\WebFormModule\FormFactory;
 
+use function array_filter;
 use function assert;
 
 /**
@@ -37,6 +40,7 @@ class Change extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -46,6 +50,14 @@ class Change extends ResourceObject
      *
      * Safe read. No CSRF (read-only). AUTHN in the Be layer maps null
      * session → 401.
+     *
+     * Phase 3 — HTML FORM page. The resource builds a {@see ChangeForm}
+     * (Ray.WebFormModule AbstractForm), pre-populates it with the
+     * fetched profile, and exposes it as `body['form']` so the HTML port
+     * renders real `<input>`s via `{{ form.input(...) }}`. VALIDATION
+     * AUTHORITY STAYS WITH the Be Framework Becoming chain (onPost). The
+     * JSON contexts ignore `body['form']`; the flat profile keys stay on
+     * `body` for the JSON-context tests.
      */
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
@@ -66,6 +78,22 @@ class Change extends ResourceObject
 
         assert($final instanceof MypageChangeFormFetched);
 
+        $form = $this->formFactory->newInstance(ChangeForm::class);
+        assert($form instanceof ChangeForm);
+        $form->fillValues(array_filter([
+            'name01' => $final->name01,
+            'name02' => $final->name02,
+            'kana01' => $final->kana01,
+            'kana02' => $final->kana02,
+            'companyName' => $final->companyName,
+            'postalCode' => $final->postalCode,
+            'pref' => $final->pref,
+            'addr01' => $final->addr01,
+            'addr02' => $final->addr02,
+            'phoneNumber' => $final->phoneNumber,
+            'email' => $final->email,
+        ], static fn (mixed $v): bool => $v !== null));
+
         $this->code = Code::OK;
         $this->body = [
             'customerId' => $final->customerId,
@@ -81,6 +109,9 @@ class Change extends ResourceObject
             'addr01' => $final->addr01,
             'addr02' => $final->addr02,
             'submitTo' => $final->submitTo,
+            // Phase 3: a ChangeForm pre-populated with the current
+            // profile for the HTML port. JSON contexts ignore it.
+            'form' => $form,
         ];
 
         return $this;

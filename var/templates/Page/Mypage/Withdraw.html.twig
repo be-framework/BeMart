@@ -1,0 +1,67 @@
+{#
+  BeMart withdrawal-confirm page — EC-CUBE doWithdrawCustomer.
+
+  PORT of EC-CUBE 4.3 default-theme `Mypage/withdraw.twig`
+  (src/Eccube/Resource/template/default/Mypage/withdraw.twig).
+
+  Markup skeleton, `ec-mypageRole` / `ec-withdrawRole` / `ec-off3Grid` /
+  `ec-off4Grid` / `ec-withdrawRole__title` / `ec-withdrawRole__description`
+  classes and the block structure are kept verbatim from EC-CUBE. Only
+  the dynamic bindings are rebound to the Withdraw resource body
+  (src/Resource/Page/Mypage/Withdraw.php):
+    transitionId, fields, submitTo, csrfToken,
+    customerId, email, name01, name02
+
+  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
+
+  This is a confirm screen — it has NO form FIELDS, only a submit button
+  and a CSRF hidden token. EC-CUBE's withdraw.twig emits the token via
+  `{{ form_widget(form._token) }}` (the Symfony CSRF widget); BeMart has
+  no CSRF widget, so the hidden `_token` input is authored plainly with
+  the body's `csrfToken` value (null in the html context — the
+  EventListener mirrors the live token in for the POST). Because withdraw
+  carries no editable fields, no AbstractForm is needed (the form-page
+  recipe's `<Name>Form` exists for screens that render `<input>` fields;
+  a confirm page does not). EC-CUBE-runtime only — enumerated as residual.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'mypage' %}
+{% set route = 'mypage_withdraw' %}
+{% set title = 'マイページ' %}
+
+{% block main %}
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>マイページ/退会手続き</h1>
+            </div>
+            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'withdraw', name01: name01|default(''), name02: name02|default('') } %}
+        </div>
+        <div class="ec-withdrawRole">
+            <form method="post" action="{{ url('mypage_withdraw') }}">
+                <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <div class="ec-off3Grid">
+                    <div class="ec-off3Grid__cell">
+                        <div style="font-size:100px;text-align:center;">
+                            <div class="ec-icon"><img src="{{ asset('assets/icon/exclamation.svg') }}" alt=""></div>
+                        </div>
+                        <p class="ec-withdrawRole__title">退会手続きの前にご確認ください
+                        </p>
+                        <p class="ec-withdrawRole__description">退会手続きが完了した時点で、現在保存されている購入履歴やお届け先等の情報は、すべて削除されますのでご注意ください。
+                        </p>
+                    </div>
+                </div>
+                <div class="ec-off4Grid">
+                    <div class="ec-off4Grid__cell">
+                        <button type="submit" class="ec-blockBtn--cancel" name="mode"
+                                value="confirm">退会手続きへ</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
