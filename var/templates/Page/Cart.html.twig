@@ -115,7 +115,7 @@
                             {% for item in cart.items %}
                                 <ul class="ec-cartRow">
                                     <li class="ec-cartRow__delColumn">
-                                        <a href="{{ url('cart_handle_item', {'operation': 'remove', 'productClassId': item.productClassId}) }}" class="ec-icon" data-method="put" data-message="カートから商品を削除してよろしいですか？">
+                                        <a href="{{ url('cart_handle_item', {'operation': 'remove', 'productClassId': item.productClassId}) }}" class="ec-icon" data-method="put" data-message="カートから商品を削除してもよろしいですか?">
                                             <img src="{{ asset('assets/icon/cross.svg') }}" alt="delete">
                                         </a>
                                     </li>
