@@ -1,0 +1,67 @@
+{#
+  BeMart admin delivery-method editor — EC-CUBE Setting/Shop/delivery_edit.twig.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_shop_delivery_edit' %}
+{% set title = '配送方法設定' %}
+{% set sub_title = '店舗設定' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_setting_shop_delivery_edit') }}" id="delivery_edit_form" name="form1" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="deliveryId" value="{{ deliveryId|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">配送方法</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3">
+                                    <span>配送業者名</span>
+                                    <span class="badge bg-primary ms-1">必須</span>
+                                </div>
+                                <div class="col">
+                                    {{ form.input('name')|raw }}
+                                    {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3">
+                                    <span>有効・無効</span>
+                                </div>
+                                <div class="col">
+                                    {{ form.input('visible')|raw }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_setting_shop_delivery') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>配送方法設定一覧へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
