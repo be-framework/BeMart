@@ -247,7 +247,7 @@ final class ShoppingCompleteHtmlRenderTest extends TestCase
         // Member checkout — matches the member-path port (the
         // customer-info progress step is the anonymous-only branch).
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => true));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p): string => '/' . $p));
+        EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
