@@ -22,6 +22,8 @@ use MyVendor\BeMart\Be\Input\DeleteMemberInput;
 use MyVendor\BeMart\Be\Input\GetMemberInput;
 use MyVendor\BeMart\Be\Input\UpdateMemberInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminMemberForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 use function sprintf;
@@ -63,6 +65,7 @@ class Member extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -106,6 +109,16 @@ class Member extends ResourceObject
             'authority' => $final->authority,
             'work' => $final->work,
         ];
+        // Phase 3: an AdminMemberForm pre-filled with the persisted row,
+        // for the HTML edit page (var/templates/Page/Admin/Member.html.twig)
+        // to render via `{{ form.input(...) }}`. The form is a renderer
+        // here, never a validator — VALIDATION AUTHORITY STAYS WITH the
+        // Be Becoming chain. JSON contexts (`app`, `prod`, `test`) ignore
+        // `body['form']`; the resource tests assert key-wise on `body`.
+        $form = $this->formFactory->newInstance(AdminMemberForm::class);
+        assert($form instanceof AdminMemberForm);
+        $form->fillValues($this->body);
+        $this->body['form'] = $form;
 
         return $this;
     }
