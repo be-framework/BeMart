@@ -205,13 +205,15 @@ shared `<head>` / inline-script frame residual, none form-related.
 
 ## Admin pages — the admin-theme port recipe
 
-Everything above describes the **storefront** port (~40 pages, all done).
-EC-CUBE also has an **admin** UI — 77 page templates under
-`tools/ec-cube-source/src/Eccube/Resource/template/admin/`. **Admin
-Tier-1 (34 pages) is done** — see "Fan-out status" below; the recipe in
-this section is the established, exercised one. Admin pages are ported
-with the SAME two recipes (data-page + form-page) and the SAME
-residual-diff verification standard; only two things differ.
+Everything above describes the **storefront** port (41 page templates +
+2 Block widgets, all done). EC-CUBE also has an **admin** UI — 77 page
+templates under
+`tools/ec-cube-source/src/Eccube/Resource/template/admin/`. **63 of 77
+admin pages are ported** — every in-scope page; the only unported pages
+are the out-of-scope Store/Plugin install/search subtree. See "Fan-out
+status" below. Admin pages are ported with the SAME two recipes
+(data-page + form-page) and the SAME residual-diff verification
+standard; only two things differ.
 
 ### Difference 1 — a different layout
 
@@ -330,59 +332,49 @@ files. The remaining waves (Product / Order / Content / Setting/Shop /
 Setting/System / Store / Top-level) can run in parallel with zero
 cross-wave file contention.
 
-### Fan-out status — 8 section-waves, Tier-1 done
+### Fan-out status — 8 section-waves, in-scope port complete
 
 The admin templates are organised by section directory under
 `template/admin/`; each section ran as an independent wave (clean
 file-path split, no cross-wave coupling — the per-section ja-message
-mechanism above is what keeps them parallel-safe). Each wave ported its
-**Tier-1** pages — list/data pages and simple CRUD whose BEAR resource
-already serves a GET — and deferred **Tier-2**: multi-panel editors and
-pages whose resource is action-only (POST/CSV/PDF) with no GET-serving
-`onGet`.
+mechanism above is what keeps them parallel-safe). Each wave first
+ported its **Tier-1** pages — list/data pages and simple CRUD whose
+BEAR resource already serves a GET — then a **Tier-2** wave handled the
+rest: multi-panel editors and pages whose resource was action-only
+(POST/CSV/PDF) with no GET-serving `onGet`.
 
-| Section | Directory | Tier-1 done | Tier-2 deferred |
-|---|---|---|---|
-| Top-level | `admin/` | login, dashboard, change-password, 2FA verify/setup, empty placeholder — 6 | — |
-| Product | `admin/Product/` | list, tag, class-name, class-category — 4 | `product` (~932L editor), `product_class` (~448L matrix), `category`, 4× `csv_*` |
-| Order | `admin/Order/` | order list — 1 | `edit` (~1057L), `shipping` (~709L), `mail`, `mail_confirm`, `order_pdf`, `csv_shipping` |
-| Customer | `admin/Customer/` | list, edit — 2 · **Tier-2:** delivery-edit — 1 | — (Customer complete) |
-| Content | `admin/Content/` | news list/edit, page list/edit, layout list/edit, block list/edit, file, css, js, cache, maintenance — 13 | (essentially complete) |
-| Setting/Shop | `admin/Setting/shop/` | payment list, delivery list, tax-rule list — 3 · **Tier-2 wave:** calendar, csv, mail, order_status, tradelaw — 5 · **edit-page wave:** payment_edit, delivery_edit, shop_master — 3 | — (Setting/Shop complete) |
-| Setting/System | `admin/Setting/system/` | member list, member edit, login-history — 3 · **Tier-2 wave:** authority, system, log, masterdata, security, two_factor_auth_edit — 6 | — (Setting/System complete) |
-| Store/Plugin | `admin/Store/` | plugin list, template list — 2 | `plugin_install/search/confirm/confirm_uninstall/handler`, `authentication_setting`, `template_add` |
+| Section | Directory | Tier-1 done | Tier-2 done | Out of scope |
+|---|---|---|---|---|
+| Top-level | `admin/` | login, dashboard, change-password, 2FA verify/setup, empty placeholder — 6 | — | — |
+| Product | `admin/Product/` | list, tag, class-name, class-category — 4 | `product`, `product_class`, `category`, 4× `csv_*` — 7 | — |
+| Order | `admin/Order/` | order list — 1 | `edit`, `shipping`, `mail`, `mail_confirm`, `order_pdf`, `csv_shipping` — 6 | — |
+| Customer | `admin/Customer/` | list, edit — 2 | delivery-edit — 1 | — |
+| Content | `admin/Content/` | news list/edit, page list/edit, layout list/edit, block list/edit, file, css, js, cache, maintenance — 13 | — | — |
+| Setting/Shop | `admin/Setting/shop/` | payment list, delivery list, tax-rule list — 3 | calendar, csv, mail, order_status, tradelaw, payment_edit, delivery_edit, shop_master — 8 | — |
+| Setting/System | `admin/Setting/system/` | member list, member edit, login-history — 3 | authority, system, log, masterdata, security, two_factor_auth_edit — 6 | — |
+| Store/Plugin | `admin/Store/` | plugin list, template list — 2 | template_add — 1 | `plugin_install/search/confirm/confirm_uninstall/handler`, `authentication_setting` |
 
-**Tier-1 total: 34 of 77 admin page templates** — plus the
-**flow-manage-system Tier-2 wave** (6 pages: authority, system, log,
-masterdata, security, two_factor_auth_edit), the **Customer
-delivery-edit Tier-2 page** (1 page), the **Setting/Shop Tier-2
-wave** (5 pages: calendar, csv, mail, order_status, tradelaw), and the
-**Setting/Shop edit-page wave** (3 pages: payment_edit, delivery_edit,
-shop_master) → **49 of 77 ported.** Each
-Tier-1 wave followed the recipe page-for-page with no module/wiring
-change beyond its own `Admin/<Section>JaMessages.php` and `<Name>Form`
-classes; the four shared files (`admin-base.html.twig`,
-`EcCubeAdminStubLoader`, `EcCubeStub`, `AdminJaMessages`) stayed
-untouched — that is what kept the waves parallel-safe.
+**63 of 77 admin page templates ported** — Tier-1 (34, across 8
+section-waves) + every Tier-2 editor wave (29 pages: Product 7, Order 6,
+Customer 1, Setting/Shop 8, Setting/System 6, Store 1). The **14
+unported pages are the Store/Plugin `install`/`search` subtree, which is
+out of scope** — plug-ins are excluded from this migration. Each Tier-1
+wave followed the recipe page-for-page with no module/wiring change
+beyond its own `Admin/<Section>JaMessages.php` and `<Name>Form` classes;
+the four shared files (`admin-base.html.twig`, `EcCubeAdminStubLoader`,
+`EcCubeStub`, `AdminJaMessages`) stayed untouched — that is what kept
+the waves parallel-safe.
 
-**Tier-2 (~28 pages remaining) is a different kind of work.** It is not
-template porting — it needs new BEAR resources, `onGet` additions to
-action-only resources, and `be/src` domain body-shape work. Plan it as a
-resource-creation effort, section by section, NOT as another
-template-port fan-out. The flow-manage-system Tier-2 wave is the worked
-example: 5 new GET resources + `AuthorityRole::onGet()` + 3 `<Name>Form`
-classes + `AdminMasterRegistry` body-shape methods, each with a
-`*ResourceTest` and a `*HtmlRenderTest`. The Customer delivery-edit page
-is the smallest worked example: 1 new GET resource + 1 `<Name>Form`,
-completing its section. The Setting/Shop Tier-2 wave shows both patterns
-at once: 1 new GET resource (`Calendar`) + 4 `onGet` additions to the
-action-only `CsvConfig`/`MailTemplate`/`OrderStatus`/`TradeLaw`
-resources + 5 `<Name>Form` classes, each with a `*HtmlRenderTest`. The
-Setting/Shop edit-page wave then completed that section: 3 `onGet`
-editor additions to the action-only `Payment`/`Delivery` resources and
-`BaseInfo` + 3 `<Name>Form` classes, each with a `*HtmlRenderTest`.
-Per-section deferred lists are the table above;
-`docs/phases/admin-fanout-plan.md` carries the full per-page audit.
+**Tier-2 was a different kind of work** — not template porting but
+resource creation: new BEAR resources, `onGet` additions to action-only
+resources, and `be/src` domain body-shape work. The flow-manage-system
+wave was the largest worked example (5 new GET resources +
+`AuthorityRole::onGet()` + 3 `<Name>Form` classes + `AdminMasterRegistry`
+body-shape methods). The Order and Product waves ported the big
+multi-panel editors (`Order/edit`, `Order/shipping`, `Product/product`
+~932L, `Product/product_class` ~448L) page-by-page with sequential
+commits for cutoff resistance. `docs/phases/admin-fanout-plan.md`
+carries the full per-page audit.
 
 ## Per-page workflow (storefront data pages)
 
