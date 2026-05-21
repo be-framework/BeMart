@@ -7,62 +7,112 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
+use MyVendor\BeMart\Be\Final\OrderConfirmed;
+use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
+use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
+
+use function assert;
 
 /**
- * EC-CUBE goShoppingConfirm — 注文内容のご確認 (Phase 3 — thin pure renderer).
+ * EC-CUBE goShoppingConfirm — 注文内容のご確認.
  *
- * NEW RESOURCE — flagged as a follow-up. EC-CUBE's checkout flow has a
- * `doConfirmOrder` → `ShoppingConfirm` screen (ALPS `#ShoppingConfirm`)
- * between `goShopping` and `doCheckout`: the order-summary review page
- * the customer confirms before the order is committed. BeMart's Pilot 5
- * collapsed the flow — `Shopping::onGet` (review) hands straight to
- * `Shopping/Checkout::onPost` (doCheckout) — so no `ShoppingConfirm`
- * resource existed. Phase 3 needs a page to render `Shopping/confirm.twig`
- * against, so this THIN PURE RENDERER is added: no Be Framework, no
- * domain logic, no Reasons. It exposes only the confirm-screen shape +
- * the outbound transitions (doCheckout / goShoppingError) per ALPS
- * `#ShoppingConfirm`.
+ * The order-review screen the customer confirms before `doCheckout`.
+ * EC-CUBE's checkout flow runs `doConfirmOrder` → `ShoppingConfirm`
+ * (ALPS `#ShoppingConfirm`) between `goShopping` and `doCheckout`.
  *
- * FOLLOW-UP — the confirm screen's body should carry the aggregated
- * order projection (the same Order shape `confirm.twig` reads:
- * shippings / orderItems / payment / the tax-rate-broken-down totals).
- * Wiring `doConfirmOrder` into the Be Becoming chain — a real
- * PurchaseFlow-equivalent aggregation that produces an `OrderConfirmed`
- * Final — is a dedicated vertical-slice, tracked in the enrichment
- * backlog. Until then `confirm.twig`'s order-detail loops render empty
- * (the `Order.shippings` / `Order.order_items` body fields are absent),
- * recorded as MISSING BODY FIELD residuals in the render test.
+ * Phase 3 enrichment — this resource now drives the `doConfirmOrder` Be
+ * Becoming chain ({@see ConfirmOrderInput} → … → {@see OrderConfirmed})
+ * rather than being a thin pure renderer. The chain resolves the
+ * processing pre-order, runs the PurchaseFlow totals, verifies payment
+ * and branches; on success the body carries the full confirm-screen
+ * projection EC-CUBE's `Shopping/confirm.twig` renders — the customer
+ * info, the order's line items, the payment method and the
+ * tax-inclusive totals.
+ *
+ * On a verify failure the chain produces an {@see OrderConfirmFailed}
+ * Final; the resource forwards the customer to the ShoppingError state
+ * (`goShoppingError`), mirroring EC-CUBE's controller behaviour.
  *
  * Maps to `page://self/shopping/confirm`. The submit target is
  * doCheckout (`page://self/shopping/checkout`).
  */
 class Confirm extends ResourceObject
 {
+    public function __construct(
+        private readonly BecomingInterface $becoming,
+    ) {
+    }
+
     /**
-     * @todo Enrichment backlog: surface the aggregated order projection
-     *     (shippings / orderItems / payment / totals broken down by tax
-     *     rate) so the confirm screen renders the real order summary.
-     *     Requires a `doConfirmOrder` Be Becoming chain producing an
-     *     `OrderConfirmed` Final.
+     * @psalm-taint-source input $preOrderId
+     * @psalm-taint-source input $paymentMethodId
      */
     #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
     #[Link(rel: 'goShoppingError', href: 'page://self/shopping/error')]
-    public function onGet(): static
-    {
+    public function onGet(
+        string $preOrderId = 'aceface0000000000000000000000000000a11ce',
+        int $paymentMethodId = 2,
+    ): static {
+        try {
+            $final = ($this->becoming)(new ConfirmOrderInput(
+                preOrderId: $preOrderId,
+                paymentMethodId: $paymentMethodId,
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
+
+            return $this;
+        } catch (PreOrderNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => 'Pre-order not found.', 'preOrderId' => $preOrderId];
+
+            return $this;
+        }
+
+        if ($final instanceof OrderConfirmFailed) {
+            // verify() rejected the pre-order — bounce to ShoppingError.
+            $this->code = Code::SEE_OTHER;
+            $this->headers['Location'] = '/shopping/error';
+            $this->body = [
+                'message' => '決済の確認に失敗しました。',
+                'errors' => $final->errors,
+            ];
+
+            return $this;
+        }
+
+        assert($final instanceof OrderConfirmed);
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goShoppingConfirm',
-            'fields' => ['csrfToken'],
+            'preOrderId' => $final->preOrderId,
+            'paymentMethodId' => $final->paymentMethodId,
+            'paymentMethodName' => $final->paymentMethodName,
+            'customer' => $final->customer,
+            'items' => $final->items,
+            'subtotal' => $final->subtotal,
+            'deliveryFeeTotal' => $final->deliveryFeeTotal,
+            'charge' => $final->charge,
+            'discount' => $final->discount,
+            'tax' => $final->tax,
+            'total' => $final->total,
+            'paymentTotal' => $final->paymentTotal,
+            'addPoint' => $final->addPoint,
+            'usePoint' => $final->usePoint,
             'submitTo' => [
                 'method' => 'POST',
                 'href' => 'page://self/shopping/checkout',
             ],
-            'staticContent' => null,
+            'csrfToken' => null,
             'links' => [
                 'doCheckout' => 'page://self/shopping/checkout',
                 'goShoppingError' => 'page://self/shopping/error',
             ],
-            'csrfToken' => null,
         ];
 
         return $this;

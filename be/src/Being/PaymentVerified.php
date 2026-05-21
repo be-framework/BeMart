@@ -22,8 +22,10 @@ use Ray\InputQuery\Attribute\Input;
  * Existence of this object proves a verify call returned a definite answer
  * (success or failure with errors). It does NOT mean payment succeeded.
  *
- * Public surface carries totals forward so OrderConfirming can hand them to
- * PaymentSuccessCase on the happy path.
+ * Public surface carries totals — and (Phase 3 enrichment) the resolved
+ * pre-order $order — forward so OrderConfirming can hand them to
+ * PaymentSuccessCase on the happy path, and OrderConfirmed can compose
+ * the confirm-screen order-detail projection.
  */
 #[Be(OrderConfirming::class)]
 final readonly class PaymentVerified
@@ -33,7 +35,7 @@ final readonly class PaymentVerified
     public function __construct(
         #[Input] public string $preOrderId,
         #[Input] public int $paymentMethodId,
-        #[Input] OrderEntity $order,
+        #[Input] public OrderEntity $order,
         #[Input] public PurchaseFlowResult $totals,
         #[Inject] PaymentMethodFactoryInterface $paymentMethodFactory,
     ) {
