@@ -1,0 +1,198 @@
+{#
+  BeMart admin Security management — EC-CUBE Setting/System/security.twig.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_system_security' %}
+{% set title = 'セキュリティ管理' %}
+{% set sub_title = 'システム設定' %}
+
+{% block stylesheet %}
+    <style type="text/css">
+        .col-sm-2 {
+            max-width: none;
+        }
+
+        label {
+            display: inline;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <form method="post" action="{{ url('admin_setting_system_security') }}">
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8">
+                                    <span class="card-title">管理画面URL設定</span>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#urlConfig" aria-expanded="false" aria-controls="basicConfig"><i class="fa fa-angle-up fa-lg"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="urlConfig">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="管理画面URLを設定します。">
+                                            <span>管理画面URL</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                        {{ form.input('admin_route_dir')|raw }}
+                                        {% if form.error('admin_route_dir') %}{{ form.error('admin_route_dir') }}{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8">
+                                    <span class="card-title">管理画面IP制限設定</span>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#adminIpConfig" aria-expanded="false" aria-controls="basicConfig"><i class="fa fa-angle-up fa-lg"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="adminIpConfig">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="管理画面のIP許可リストです。">
+                                            <span>IP制限(許可リスト)</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        {{ form.input('admin_allow_hosts')|raw }}
+                                        <p>改行区切りでIPアドレスまたはCIDRを入力してください。</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="管理画面のIP拒否リストです。">
+                                            <span>IP制限(拒否リスト)</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        {{ form.input('admin_deny_hosts')|raw }}
+                                        <p>改行区切りでIPアドレスまたはCIDRを入力してください。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8">
+                                    <span class="card-title">フロント画面IP制限設定</span>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#frontIpConfig" aria-expanded="false" aria-controls="basicConfig"><i class="fa fa-angle-up fa-lg"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="frontIpConfig">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="フロント画面のIP許可リストです。">
+                                            <span>IP制限(許可リスト)</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        {{ form.input('front_allow_hosts')|raw }}
+                                        <p>改行区切りでIPアドレスまたはCIDRを入力してください。</p>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="フロント画面のIP拒否リストです。">
+                                            <span>IP制限(拒否リスト)</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        {{ form.input('front_deny_hosts')|raw }}
+                                        <p>改行区切りでIPアドレスまたはCIDRを入力してください。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8">
+                                    <span class="card-title">接続設定</span>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#networkConfig" aria-expanded="false" aria-controls="basicConfig"><i class="fa fa-angle-up fa-lg"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="networkConfig">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="SSLを強制します。">
+                                            <span>SSLを強制</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        {{ form.input('force_ssl')|raw }}
+                                        {% if not isSecureRequest %}
+                                            <p class="text-danger">HTTPS接続ではないため、実際の強制SSL切替は未実行です。</p>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="信頼できるホスト名を設定します。">
+                                            <span>信頼できるホスト名</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                        {{ form.input('trusted_hosts')|raw }}
+                                        {% if form.error('trusted_hosts') %}{{ form.error('trusted_hosts') }}{% endif %}
+                                        <p>正規表現でホスト名を入力してください。</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="c-conversionArea">
+                <div class="c-conversionArea__container">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-6">
+                            <div class="c-conversionArea__leftBlockItem"></div>
+                        </div>
+                        <div class="col-6">
+                            <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -6,6 +6,12 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Exception\MasterOperationNotSupportedException;
 use MyVendor\BeMart\Be\Exception\MasterTypeFormatException;
+use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
+use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
+use MyVendor\BeMart\Be\Reason\Entity\DeliveryEntity;
+use MyVendor\BeMart\Be\Reason\Entity\NewsEntity;
+use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
+use MyVendor\BeMart\Be\Reason\Entity\TagEntity;
 use Override;
 
 use function in_array;
@@ -21,6 +27,16 @@ use function in_array;
  */
 final class AdminMasterRegistry implements AdminMasterRegistryInterface
 {
+    /** @var list<array{value: string, label: string, table: string}> */
+    private const MASTER_TYPES = [
+        ['value' => 'payment', 'label' => '支払方法', 'table' => 'dtb_payment'],
+        ['value' => 'delivery', 'label' => '配送方法', 'table' => 'dtb_delivery'],
+        ['value' => 'tag', 'label' => 'タグ', 'table' => 'dtb_tag'],
+        ['value' => 'className', 'label' => '規格', 'table' => 'dtb_class_name'],
+        ['value' => 'classCategory', 'label' => '規格分類', 'table' => 'dtb_class_category'],
+        ['value' => 'news', 'label' => '新着情報', 'table' => 'dtb_news'],
+    ];
+
     /** @var list<string> masters with a `sort_no` column */
     private const SORTABLE = ['payment', 'delivery', 'tag', 'className', 'classCategory'];
 
@@ -35,6 +51,68 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
         private readonly ClassCategoryStorageInterface $classCategories,
         private readonly NewsStorageInterface $news,
     ) {
+    }
+
+    /**
+     * @return list<array{value: string, label: string, table: string}>
+     */
+    #[Override]
+    public function listMasterTypes(): array
+    {
+        return self::MASTER_TYPES;
+    }
+
+    /**
+     * @return list<array{id: string, name: string}>
+     */
+    #[Override]
+    public function listRows(string $masterType): array
+    {
+        return match ($masterType) {
+            'payment' => array_map(
+                static fn (PaymentMethodAdminEntity $row): array => [
+                    'id' => $row->paymentId,
+                    'name' => $row->paymentMethodName,
+                ],
+                $this->payments->list(),
+            ),
+            'delivery' => array_map(
+                static fn (DeliveryEntity $row): array => [
+                    'id' => $row->deliveryId,
+                    'name' => $row->deliveryName,
+                ],
+                $this->deliveries->list(),
+            ),
+            'tag' => array_map(
+                static fn (TagEntity $row): array => [
+                    'id' => $row->tagId,
+                    'name' => $row->tagName,
+                ],
+                $this->tags->list(),
+            ),
+            'className' => array_map(
+                static fn (ClassNameEntity $row): array => [
+                    'id' => $row->classNameId,
+                    'name' => $row->name,
+                ],
+                $this->classNames->list(),
+            ),
+            'classCategory' => array_map(
+                static fn (ClassCategoryEntity $row): array => [
+                    'id' => $row->classCategoryId,
+                    'name' => $row->name,
+                ],
+                $this->classCategories->list(),
+            ),
+            'news' => array_map(
+                static fn (NewsEntity $row): array => [
+                    'id' => $row->newsId,
+                    'name' => $row->newsTitle,
+                ],
+                $this->news->list(),
+            ),
+            default => throw new MasterTypeFormatException(),
+        };
     }
 
     #[Override]
