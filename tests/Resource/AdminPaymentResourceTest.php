@@ -12,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Form\AdminPaymentForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -173,5 +174,44 @@ final class AdminPaymentResourceTest extends TestCase
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
         $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
+    }
+
+    public function testOnGetNewReturnsBlankForm(): void
+    {
+        $ro = $this->resource->get('page://self/admin/payment/payment');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminPaymentForm::class, $ro->body['form']);
+        $this->assertSame('', $ro->body['paymentId']);
+        $this->assertNull($ro->body['payment']);
+    }
+
+    public function testOnGetReturnsPaymentForm(): void
+    {
+        $id = $this->seed('クレジットカード', 200);
+
+        $ro = $this->resource->get('page://self/admin/payment/payment', ['paymentId' => $id]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminPaymentForm::class, $ro->body['form']);
+        $this->assertSame($id, $ro->body['paymentId']);
+        $this->assertSame('クレジットカード', $ro->body['payment']['paymentMethodName']);
+        $this->assertSame(200, $ro->body['payment']['charge']);
+    }
+
+    public function testOnGetUnknownIdReturns404(): void
+    {
+        $ro = $this->resource->get('page://self/admin/payment/payment', ['paymentId' => 'nonexistent-zzz']);
+
+        $this->assertSame(Code::NOT_FOUND, $ro->code);
+    }
+
+    public function testOnGetRejectsAnonymousAdmin(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->get('page://self/admin/payment/payment');
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

@@ -348,23 +348,24 @@ pages whose resource is action-only (POST/CSV/PDF) with no GET-serving
 | Order | `admin/Order/` | order list — 1 | `edit` (~1057L), `shipping` (~709L), `mail`, `mail_confirm`, `order_pdf`, `csv_shipping` |
 | Customer | `admin/Customer/` | list, edit — 2 · **Tier-2:** delivery-edit — 1 | — (Customer complete) |
 | Content | `admin/Content/` | news list/edit, page list/edit, layout list/edit, block list/edit, file, css, js, cache, maintenance — 13 | (essentially complete) |
-| Setting/Shop | `admin/Setting/shop/` | payment list, delivery list, tax-rule list — 3 · **Tier-2 wave:** calendar, csv, mail, order_status, tradelaw — 5 | `payment_edit`, `delivery_edit`, `shop_master` |
+| Setting/Shop | `admin/Setting/shop/` | payment list, delivery list, tax-rule list — 3 · **Tier-2 wave:** calendar, csv, mail, order_status, tradelaw — 5 · **edit-page wave:** payment_edit, delivery_edit, shop_master — 3 | — (Setting/Shop complete) |
 | Setting/System | `admin/Setting/system/` | member list, member edit, login-history — 3 · **Tier-2 wave:** authority, system, log, masterdata, security, two_factor_auth_edit — 6 | — (Setting/System complete) |
 | Store/Plugin | `admin/Store/` | plugin list, template list — 2 | `plugin_install/search/confirm/confirm_uninstall/handler`, `authentication_setting`, `template_add` |
 
 **Tier-1 total: 34 of 77 admin page templates** — plus the
 **flow-manage-system Tier-2 wave** (6 pages: authority, system, log,
 masterdata, security, two_factor_auth_edit), the **Customer
-delivery-edit Tier-2 page** (1 page), and the **Setting/Shop Tier-2
-wave** (5 pages: calendar, csv, mail, order_status, tradelaw) →
-**46 of 77 ported.** Each
+delivery-edit Tier-2 page** (1 page), the **Setting/Shop Tier-2
+wave** (5 pages: calendar, csv, mail, order_status, tradelaw), and the
+**Setting/Shop edit-page wave** (3 pages: payment_edit, delivery_edit,
+shop_master) → **49 of 77 ported.** Each
 Tier-1 wave followed the recipe page-for-page with no module/wiring
 change beyond its own `Admin/<Section>JaMessages.php` and `<Name>Form`
 classes; the four shared files (`admin-base.html.twig`,
 `EcCubeAdminStubLoader`, `EcCubeStub`, `AdminJaMessages`) stayed
 untouched — that is what kept the waves parallel-safe.
 
-**Tier-2 (~31 pages remaining) is a different kind of work.** It is not
+**Tier-2 (~28 pages remaining) is a different kind of work.** It is not
 template porting — it needs new BEAR resources, `onGet` additions to
 action-only resources, and `be/src` domain body-shape work. Plan it as a
 resource-creation effort, section by section, NOT as another
@@ -376,7 +377,10 @@ is the smallest worked example: 1 new GET resource + 1 `<Name>Form`,
 completing its section. The Setting/Shop Tier-2 wave shows both patterns
 at once: 1 new GET resource (`Calendar`) + 4 `onGet` additions to the
 action-only `CsvConfig`/`MailTemplate`/`OrderStatus`/`TradeLaw`
-resources + 5 `<Name>Form` classes, each with a `*HtmlRenderTest`.
+resources + 5 `<Name>Form` classes, each with a `*HtmlRenderTest`. The
+Setting/Shop edit-page wave then completed that section: 3 `onGet`
+editor additions to the action-only `Payment`/`Delivery` resources and
+`BaseInfo` + 3 `<Name>Form` classes, each with a `*HtmlRenderTest`.
 Per-section deferred lists are the table above;
 `docs/phases/admin-fanout-plan.md` carries the full per-page audit.
 
