@@ -7,51 +7,64 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 
 /**
- * EC-CUBE goShoppingComplete — ご注文完了 (Phase 3 — thin pure renderer).
+ * EC-CUBE goShoppingComplete — ご注文完了 (Phase 3 — thin renderer).
  *
- * NEW RESOURCE — flagged as a follow-up. EC-CUBE renders the
- * order-complete screen (ALPS `#ShoppingComplete`) after `doCheckout`
- * succeeds. BeMart's `Shopping/Checkout::onPost` (doCheckout) returns
- * the `CheckoutCompleted` projection and sets `Location:
- * /shopping/complete?orderNo=...`, but no resource backed that URL —
- * the complete screen was never rendered as a page. Phase 3 needs a
- * page to render `Shopping/complete.twig` against, so this THIN PURE
- * RENDERER is added: no Be Framework, no domain logic, no Reasons. It
- * exposes the complete-screen shape + the outbound transitions
- * (goTop / goCart) per ALPS `#ShoppingComplete`.
+ * EC-CUBE renders the order-complete screen (ALPS `#ShoppingComplete`)
+ * after `doCheckout` succeeds. BeMart's `Shopping/Checkout::onPost`
+ * (doCheckout) returns the `CheckoutCompleted` projection and sets
+ * `Location: /shopping/complete?orderNo=...`; this resource backs that
+ * URL and renders `Shopping/complete.twig`.
  *
- * FOLLOW-UP — the complete screen displays the freshly-placed order's
- * number + the complete message. EC-CUBE re-fetches the `Order` by id
- * from the request. The honest binding is for `Checkout::onPost` to
- * carry `orderNo` / `completeMessage` into this page's body (the
- * `CheckoutCompleted` Final already produces them). Threading that
- * post-redirect handoff — a flash / order-id transport — is a dedicated
- * slice, tracked in the enrichment backlog. Until then `complete.twig`'s
- * `{% if Order.id %}` order-number block and the `Order.complete_message`
- * block render empty (the body carries no `orderNo`), recorded as a
- * MISSING BODY FIELD residual in the render test.
+ * Phase 3 enrichment — the complete screen displays the freshly-placed
+ * order's number (`#orderNo`) and the per-order complete message
+ * (`#completeMessage`), the two data descriptors ALPS `#ShoppingComplete`
+ * carries beyond the `goTop` / `goCart` transitions. EC-CUBE re-fetches
+ * the `Order` row by id from the request; BeMart mirrors that: the
+ * post-checkout redirect carries `orderNo` as a query parameter, and the
+ * resource resolves the finalized-order header through
+ * {@see OrderQueryInterface::byOrderNo} (the same NEW(1)-onwards row
+ * `CheckoutCompleted` registered). The body then carries `orderNo` so
+ * the screen shows the real order number.
+ *
+ * `completeMessage` is intentionally empty — EC-CUBE lets payment
+ * plugins append to it via `appendCompleteMessage()`, but the finalized
+ * order header carries no such field ({@see CheckoutCompleted} produces
+ * an empty string in Pilot 5 — a future Plugin Pilot wires it up). The
+ * body surfaces it as a `''` default so the template's
+ * complete-message block degrades to empty, matching EC-CUBE's
+ * plugin-less render.
+ *
+ * No Be Framework chain — the screen is a pure read of an
+ * already-finalized order, no domain transition. An unknown `orderNo`
+ * (or none supplied — a direct visit to the URL) still renders the
+ * thank-you screen; the order-number block simply stays empty.
  *
  * Maps to `page://self/shopping/complete`.
  */
 class Complete extends ResourceObject
 {
+    public function __construct(
+        private readonly OrderQueryInterface $orderQuery,
+    ) {
+    }
+
     /**
-     * @todo Enrichment backlog: thread the placed order's `orderNo` /
-     *     `completeMessage` from `Checkout::onPost` (CheckoutCompleted)
-     *     into this page's body so the complete screen shows the real
-     *     order number. Requires a post-redirect order-id transport.
+     * @psalm-taint-source input $orderNo
      */
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    public function onGet(): static
+    public function onGet(string $orderNo = ''): static
     {
+        $order = $orderNo === '' ? null : $this->orderQuery->byOrderNo($orderNo);
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goShoppingComplete',
-            'fields' => [],
-            'submitTo' => null,
+            'orderNo' => $order?->orderNo ?? '',
+            'completeMessage' => '',
             'staticContent' => [
                 'page' => 'shopping-complete',
                 'title' => 'ご注文完了',
