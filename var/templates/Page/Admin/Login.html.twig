@@ -1,0 +1,84 @@
+{#
+  BeMart admin login page — EC-CUBE doAdminLogin (管理者ログイン).
+
+  PORT of EC-CUBE 4.3 admin-theme `login.twig`
+  (src/Eccube/Resource/template/admin/login.twig).
+
+  This is the top-level wave's login-context FORM page. It extends the
+  admin LOGIN frame (`admin-login-base.html.twig`, the port of EC-CUBE's
+  `login_frame.twig`) — NOT the standard `admin-base.html.twig` (which
+  has the sidebar + header bar). EC-CUBE's login page likewise extends
+  `@admin/login_frame.twig`. The markup skeleton + Bootstrap classes are
+  kept verbatim from EC-CUBE; only the dynamic bindings are rebound.
+
+  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
+  the admin Login resource (src/Resource/Page/Admin/Login.php) exposes an
+  {@see \MyVendor\BeMart\Form\AdminLoginForm} as `body['form']`. The
+  inputs render through that real form object:
+
+    {{ form.input('login_id')|raw }}    <- real <input> w/ id/attrs/value
+    {{ form.input('password')|raw }}    <- real password <input>
+
+  EC-CUBE renders the same inputs through the Symfony FormView
+  (`form_widget(form.login_id)`); Ray.WebFormModule is BeMart's
+  BEAR-idiomatic equivalent. `AdminLoginForm::init()` ports the field
+  names / ids / attributes from EC-CUBE's `LoginType` (block prefix
+  `admin_login`) + the template's per-widget `attr` overrides.
+
+  VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
+  form is a field-definition + renderer. On a domain rejection the admin
+  Login resource exposes `body.message` and re-fills the form.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `path('admin_login')` -> deterministic `/{route}` (BeMartTwigExtension).
+   - `csrf_token('authenticate')` -> EC-CUBE per-request CSRF widget.
+     BeMart's CSRF is the CsrfTokenInterface (Slice 8); the hidden
+     `_csrf_token` input is kept (structure) with the body's `csrfToken`
+     (null in the html context — the EventListener mirrors the live token
+     in). EC-CUBE-runtime only — enumerated as residual.
+   - `error.messageKey|trans(...)` -> EC-CUBE's Symfony auth-error
+     object. BeMart surfaces the domain rejection through `body.message`,
+     rendered in the same `text-danger` block.
+   - `"now"|date("Y")` in the copyright line -> the current year; the
+     port inlines the EC-CUBE-equivalent literal.
+#}
+{% extends 'admin-login-base.html.twig' %}
+
+{% set title = 'ログイン' %}
+
+{% block main %}
+
+    <div class="container" style="margin-top: 150px;">
+        <div class="row">
+            <div class="col-12 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
+                <div class="text-center p-5 bg-white">
+                    <form name="form1" id="form1" method="post" action="{{ url('admin_login') }}">
+                        <input type="hidden" name="_csrf_token" value="{{ csrfToken|default('') }}">
+                        <p><img src="{{ asset('assets/img/logo2.png') }}" width="106"></p>
+                        <div class="mb-3">
+                            {{ form.input('login_id')|raw }}
+                        </div>
+                        <div class="mb-3">
+                            {{ form.input('password')|raw }}
+                        </div>
+                        {% if message is defined and message %}
+                            <div class="mb-3">
+                                <span class="text-danger">{{ message }}</span>
+                            </div>
+                        {% endif %}
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg w-100">ログイン</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="col-12">
+                <p class="text-center mt-3">
+                    <small>Copyright &copy; 2000-2026 EC-CUBE CO.,LTD. All Rights Reserved.</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
