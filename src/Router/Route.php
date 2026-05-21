@@ -83,14 +83,14 @@ final class Route
         }
 
         $params = [];
+        /** @var array<array-key, string> $matches */
         foreach ($matches as $key => $value) {
             if (! is_string($key)) {
                 continue;
             }
 
             $resourceParam = $this->paramMap[$key] ?? $key;
-            /** @psalm-suppress PossiblyInvalidArgument $value is a string capture */
-            $params[$resourceParam] = rawurldecode((string) $value);
+            $params[$resourceParam] = rawurldecode($value);
         }
 
         return $params;
@@ -128,7 +128,11 @@ final class Route
         return $path;
     }
 
-    /** Compile the `{placeholder}` pattern into an anchored named-group regex. */
+    /**
+     * Compile the `{placeholder}` pattern into an anchored named-group regex.
+     *
+     * @return non-empty-string The literal `#^...$#` delimiters guarantee it.
+     */
     private function toRegex(): string
     {
         $segments = explode('/', $this->path);
