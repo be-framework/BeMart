@@ -204,7 +204,7 @@ final class AdminLoginHtmlRenderTest extends TestCase
         $twig->addFilter(new TwigFilter('nl2br', static fn ($v): string => (string) $v));
 
         $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p, string ...$rest): string => '/' . $p));
+        EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
 

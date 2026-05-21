@@ -203,7 +203,7 @@ final class AdminTwoFactorAuthSetHtmlRenderTest extends TestCase
         $twig->addFilter(new TwigFilter('url_encode', static fn ($v): string => rawurlencode((string) $v)));
 
         $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p, string ...$rest): string => '/' . $p));
+        EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
 
