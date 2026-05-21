@@ -32,6 +32,9 @@ final class FakeMailer implements MailerInterface
     /** @var list<array{order: FinalizedOrderEntity, trackingNumber: string|null}> */
     private array $shippingNotifications = [];
 
+    /** @var list<array{email: string, secretKey: string}> */
+    private array $customerActivations = [];
+
     #[Override]
     public function sendOrderConfirmation(FinalizedOrderEntity $order): void
     {
@@ -97,5 +100,17 @@ final class FakeMailer implements MailerInterface
     public function shippingNotifications(): array
     {
         return $this->shippingNotifications;
+    }
+
+    #[Override]
+    public function sendCustomerActivation(string $email, string $secretKey): void
+    {
+        $this->customerActivations[] = ['email' => $email, 'secretKey' => $secretKey];
+    }
+
+    /** @return list<array{email: string, secretKey: string}> */
+    public function customerActivations(): array
+    {
+        return $this->customerActivations;
     }
 }

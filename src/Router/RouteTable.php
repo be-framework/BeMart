@@ -207,6 +207,17 @@ final class RouteTable
             // ---- Admin: orders + customers ----
             new Route('admin_order', ['GET', 'POST'], '/admin/order', 'page://self/admin/order-list'),
             new Route('admin_customer', ['GET', 'POST'], '/admin/customer', 'page://self/admin/customer-list'),
+            // `admin_customer_resend` POSTs the "resend the email-verification
+            // mail to a 仮会員" action from a customer-list row. EC-CUBE keys
+            // its route by the customer id in the path; the BeMart Be Input
+            // takes the customer's `email`, so the action POSTs the email in
+            // the body and the path stays parameterless.
+            new Route(
+                'admin_customer_resend',
+                ['POST'],
+                '/admin/customer/resend-activation-mail',
+                'page://self/admin/customer/resend-activation-mail',
+            ),
 
             // ---- Admin: content (CMS) ----
             new Route(

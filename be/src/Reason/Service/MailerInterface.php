@@ -77,4 +77,23 @@ interface MailerInterface
      * @psalm-taint-sink html $order
      */
     public function sendShippingNotification(FinalizedOrderEntity $order, string|null $trackingNumber): void;
+
+    /**
+     * `doResendActivationMail`: re-dispatch the email-verification
+     * (full-registration) mail for a provisional customer. EC-CUBE's
+     * `admin_customer_resend` route lets an ADMIN re-send the activation
+     * mail from the customer-list screen when a 仮会員 never followed the
+     * original link. The mail carries an activation URL embedding the
+     * customer's `secretKey`; the customer later promotes to a full
+     * member via `doActivateCustomer`.
+     *
+     * The `secretKey` is a server-minted email-verification token (not
+     * user input), so it is not a sink concern — the email is the
+     * recipient. ALPS marks the transition `unsafe`: each call sends a
+     * fresh mail. Like the rest of the Mailer contract this method MUST
+     * NOT throw — delivery failure is logged, not propagated.
+     *
+     * @psalm-taint-sink html $email
+     */
+    public function sendCustomerActivation(string $email, string $secretKey): void;
 }
