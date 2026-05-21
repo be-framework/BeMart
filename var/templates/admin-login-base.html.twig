@@ -20,9 +20,8 @@
      messages.ja.yaml. The chrome labels (the page <title>, the
      `admin.login.enable_javascript` noscript message) are inlined as ja
      literals.
-   - `asset('x', 'admin'|'bundle')` -> `/x` passthrough
-     (`BeMartTwigExtension`). The asset PACKAGE argument is dropped — see
-     `admin-base.html.twig`.
+   - `asset('x', 'admin'|'bundle')` -> static URL (`BeMartTwigExtension`).
+     The asset PACKAGE argument is KEPT — see `admin-base.html.twig`.
    - `{{ BaseInfo.shop_name }}` in the <title> -> BeMart has no BaseInfo
      entity; the shop name is the page's `shop_name` var (default
      `BeMart`). EC-CUBE-runtime only — enumerated as residual.
@@ -40,9 +39,9 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="robots" content="noindex,nofollow"/>
-    <link rel="icon" href="{{ asset('assets/img/favicon.ico') }}">
-    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
-    <script src="{{ asset('admin.bundle.js') }}"></script>
+    <link rel="icon" href="{{ asset('assets/img/favicon.ico', 'admin') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css', 'admin') }}">
+    <script src="{{ asset('admin.bundle.js', 'bundle') }}"></script>
 </head>
 <body id="login-page" class="bg-light">
 <noscript>
@@ -57,7 +56,7 @@
     </div>
 </div>
 
-<script src="{{ asset('assets/js/function.js') }}"></script>
+<script src="{{ asset('assets/js/function.js', 'admin') }}"></script>
 {% block javascript %}{% endblock %}
 </body>
 </html>
