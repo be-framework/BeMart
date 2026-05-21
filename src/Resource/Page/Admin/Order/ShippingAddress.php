@@ -16,7 +16,10 @@ use MyVendor\BeMart\Be\Final\AdminShippingAddressSelected;
 use MyVendor\BeMart\Be\Final\AdminShippingAddressUpdated;
 use MyVendor\BeMart\Be\Input\AdminSelectShippingAddressInput;
 use MyVendor\BeMart\Be\Input\AdminUpdateShippingAddressInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminOrderShippingForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -53,7 +56,50 @@ class ShippingAddress extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * EC-CUBE 出荷登録 / 配送先編集 — Order Tier-2.
+     *
+     * Thin GET renderer for `admin/Order/shipping.twig` (~709 lines).
+     * The POST / PUT methods below carry the address-book-pick and the
+     * explicit-overwrite transitions; this GET serves the editor shell
+     * keyed by the order being shipped. BeMart has no Be transition to
+     * READ an order's current shipping target, so the editor renders a
+     * blank shipping form — the render-smoke test exercises this with
+     * empty Fake storage. AUTHZ is a direct admin-session check
+     * (Pattern B — no Be transition is invoked on the GET path).
+     *
+     * @psalm-taint-source input $orderNo
+     */
+    #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
+    #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
+    public function onGet(string $orderNo = ''): static
+    {
+        if ($this->adminSession->adminId() === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        $form = $this->formFactory->newInstance(AdminOrderShippingForm::class);
+        assert($form instanceof AdminOrderShippingForm);
+        $form->fillValues([
+            'name01' => '', 'name02' => '', 'postal_code' => '', 'pref' => '',
+            'addr01' => '', 'addr02' => '', 'phone_number' => '',
+        ]);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'form' => $form,
+            'orderNo' => $orderNo,
+        ];
+
+        return $this;
     }
 
     /**
