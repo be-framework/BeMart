@@ -15,6 +15,8 @@ use MyVendor\BeMart\Be\Final\TaxRuleCreated;
 use MyVendor\BeMart\Be\Input\CreateTaxRuleInput;
 use MyVendor\BeMart\Be\Input\GetAdminTaxRuleListInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminTaxRuleForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 use function sprintf;
@@ -37,6 +39,7 @@ class TaxRuleList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -60,6 +63,14 @@ class TaxRuleList extends ResourceObject
             'count' => $final->count,
             'taxRules' => $final->taxRules,
         ];
+        // Phase 3: an empty AdminTaxRuleForm for the HTML list page
+        // (var/templates/Page/Admin/TaxRule/TaxRuleList.html.twig) to
+        // render the inline-create inputs via `{{ form.input(...) }}`.
+        // The form is a renderer here, never a validator — VALIDATION
+        // AUTHORITY STAYS WITH the Be Becoming chain. JSON contexts
+        // (`app`, `prod`, `test`) ignore `body['form']`; the resource
+        // tests assert key-wise on `body`.
+        $this->body['form'] = $this->formFactory->newInstance(AdminTaxRuleForm::class);
 
         return $this;
     }
