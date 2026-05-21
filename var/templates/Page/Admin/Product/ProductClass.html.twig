@@ -1,0 +1,109 @@
+{#
+  BeMart admin product-class editor — EC-CUBE admin-theme
+  `Product/product_class.twig`.
+
+  PORT of EC-CUBE 4.3
+  `src/Eccube/Resource/template/admin/Product/product_class.twig`
+  — the ~448-line product-class matrix editor. It extends the admin
+  frame (`admin-base.html.twig`), not the storefront frame.
+
+  Tier-2 port note: EC-CUBE's editor renders one table row per
+  規格1 × 規格2 class-category cell, each carrying its own price /
+  stock / stock-unlimited / product-code / sale-type / delivery-date /
+  shipping-charge controls plus a per-row 一括登録 helper. The Be
+  domain has no transition to READ a product's ProductClass matrix
+  (the ProductClass join is Grade-C 厳密移植 scope), so the port
+  renders the blank "新規規格" row — the editor shell, the matrix
+  table header and one blank editable row. The per-cell bulk-apply JS
+  + the class-axis picker are EC-CUBE-runtime fragments dropped as
+  enumerated residuals.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
+     AdminProductClassForm leaf fields (Ray.WebFormModule).
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_product_product_class' %}
+{% set title = '商品規格' %}
+{% set sub_title = '商品管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_product_product_class') }}" id="product_class_form" name="form1" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">規格一覧</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm" id="product_class_table">
+                                <thead>
+                                <tr>
+                                    <th class="border-top-0 pt-2 pb-2 ps-3">商品コード</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-end">販売価格</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">在庫数</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">在庫無制限</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-end pe-3">送料</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for cls in classes %}
+                                    <tr>
+                                        <td class="align-middle ps-3">{{ cls.productCode }}</td>
+                                        <td class="align-middle text-end">{{ cls.price02 }}</td>
+                                        <td class="align-middle text-center">{{ cls.stock }}</td>
+                                        <td class="align-middle text-center">{{ cls.stockUnlimited ? '無制限' : '' }}</td>
+                                        <td class="align-middle text-end pe-3">{{ cls.deliveryFee }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr id="product_class_new_row">
+                                        <td class="align-middle ps-3">{{ form.input('product_code')|raw }}</td>
+                                        <td class="align-middle text-end">
+                                            {{ form.input('price02')|raw }}
+                                            {% if form.error('price02') %}<span class="invalid-feedback d-block">{{ form.error('price02') }}</span>{% endif %}
+                                        </td>
+                                        <td class="align-middle text-center">{{ form.input('stock')|raw }}</td>
+                                        <td class="align-middle text-center">{{ form.input('stock_unlimited')|raw }}</td>
+                                        <td class="align-middle text-end pe-3">{{ form.input('delivery_fee')|raw }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_product') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>商品一覧へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
