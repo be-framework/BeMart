@@ -82,7 +82,17 @@ final class EcCubeAdminStubLoader implements LoaderInterface
 
     public function getCacheKey(string $name): string
     {
-        return $name;
+        // Namespace the cache key so admin templates compile to a
+        // DIFFERENT Twig class than an identically-named default-theme
+        // template loaded by {@see EcCubeStubLoader}. Twig derives the
+        // compiled-class name from `getCacheKey()` (see
+        // Environment::getTemplateClass), and a process-wide PHP class is
+        // reused once declared — so without a namespace, the admin
+        // `index.twig` / `default_frame.twig` and the storefront ones of
+        // the same bare name would collide, and whichever test compiled
+        // first would feed its template to the other. The prefix keeps
+        // the two render-diff suites isolated regardless of run order.
+        return '@admin-stub/' . $name;
     }
 
     public function isFresh(string $name, int $time): bool

@@ -1,0 +1,143 @@
+{#
+  BeMart admin Block list — EC-CUBE goBlockList.
+
+  PORT of EC-CUBE 4.3 admin-theme `Content/block.twig`
+  (src/Eccube/Resource/template/admin/Content/block.twig).
+
+  DATA/LIST page. Extends the admin frame (`admin-base.html.twig`). The
+  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
+  from EC-CUBE; only the dynamic bindings are rebound to the BlockList
+  resource body (src/Resource/Page/Admin/Block/BlockList.php — body
+  carries `count` + `blocks`, a list of {blockId, blockName,
+  blockFileName, blockDeletable}).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`
+     (`BeMartTwigExtension`).
+   - `{% for Block in Blocks %}` -> the resource body's `blocks` list.
+   - `Block.deletable` -> `Block.blockDeletable`; an undeletable system
+     block (the seed ヘッダー) shows no delete affordance.
+   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
+     CSRF widget. OMITTED. EC-CUBE-runtime only — enumerated as residual.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_content_block' %}
+{% set title = 'ブロック管理' %}
+{% set sub_title = 'コンテンツ管理' %}
+
+{% block stylesheet %}
+    <style type="text/css">
+        li.list-group-item {
+            z-index: inherit !important;
+        }
+    </style>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        // searchWordの実行
+        $('#search-block').on('input', function() {
+            searchWord($(this).val(), $(".list-group li"));
+        });
+    </script>
+{% endblock javascript %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="row justify-content-between mb-2">
+                    <div class="col-9">
+                        <a class="btn btn-ec-regular" href="{{ url('admin_content_block_new') }}">新規作成</a>
+                    </div>
+                    <div class="col-3">
+                        <div class="row">
+                            <div class="col">
+                                <div class="input-group mb-3">
+                                    <div class="input-group-text">
+                                        <span id="basic-addon1"><i class="fa fa-search"></i></span>
+                                    </div>
+                                    <input id="search-block" class="form-control" type="search" aria-label="Search">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-body p-0">
+                        <div class="card rounded border-0">
+                            <ul class="list-group list-group-flush">
+                                <li>
+                                    <div class="row p-3 fw-bold">
+                                        <div class="col-4 col-md-6">ブロック名</div>
+                                        <div class="col-3 col-md-4">ファイル名</div>
+                                        <div class="col-5 col-md-2"></div>
+                                    </div>
+                                </li>
+                                {% for Block in blocks %}
+                                    <li id="ex-block-{{ Block.blockId }}" class="list-group-item">
+                                        <div class="row">
+                                            <div class="col-4 col-md-6 d-flex align-items-center">
+                                                <a href="{{ url('admin_content_block_edit', {id: Block.blockId}) }}">
+                                                    {{ Block.blockName }}
+                                                </a>
+                                            </div>
+                                            <div class="col-3 col-md-4 d-flex align-items-center">
+                                                {{ Block.blockFileName }}.twig
+                                            </div>
+                                            <div class="col-5 col-md-2">
+                                                <div class="row">
+                                                    <div class="col-6 text-end">
+                                                        <a href="{{ url('admin_content_block_edit', {id: Block.blockId}) }}"
+                                                           class="btn btn-ec-actionIcon me-3" data-bs-toggle="tooltip"
+                                                           data-bs-placement="top" title="編集">
+                                                            <i class="fa fa-pencil fa-lg text-secondary"></i>
+                                                        </a>
+                                                    </div>
+                                                    {% if Block.blockDeletable %}
+                                                        <div class="col-6">
+                                                            <div class="d-inline-block me-3" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
+                                                                <a href="#" data-bs-toggle="modal" data-bs-target="#confirmModal-{{ Block.blockId }}" class="btn btn-ec-actionIcon">
+                                                                    <i class="fa fa-close fa-lg text-secondary"></i>
+                                                                </a>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal fade" id="confirmModal-{{ Block.blockId }}" tabindex="-1" role="dialog"
+                                                             aria-labelledby="confirmModal-{{ Block.blockId }}" aria-hidden="true">
+                                                            <div class="modal-dialog" role="document">
+                                                                <div class="modal-content">
+                                                                    <div class="modal-header">
+                                                                        <h5 class="modal-title fw-bold">削除します</h5>
+                                                                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close">
+
+                                                                        </button>
+                                                                    </div>
+                                                                    <div class="modal-body text-start">
+                                                                        <p class="text-start">この操作はあとから取り消すことができません。「{{ Block.blockName }}」を削除してよろしいですか？</p>
+                                                                    </div>
+                                                                    <div class="modal-footer">
+                                                                        <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
+                                                                        <a href="{{ url('admin_content_block_delete', {id: Block.blockId} ) }}"
+                                                                           class="btn btn-ec-delete" data-confirm="false"  data-method="delete">
+                                                                            削除
+                                                                        </a>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    {% endif %}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

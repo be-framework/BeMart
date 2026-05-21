@@ -16,6 +16,8 @@ use MyVendor\BeMart\Be\Final\BlockUpdated;
 use MyVendor\BeMart\Be\Input\DeleteBlockInput;
 use MyVendor\BeMart\Be\Input\UpdateBlockInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminBlockForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -23,14 +25,44 @@ use function assert;
  * EC-CUBE doUpdateBlock + doDeleteBlock — single-row endpoint (Wave 9).
  *
  * ALPS has no goBlock — the admin edits a block from the list view
- * directly. Only PUT and DELETE are exposed here.
+ * directly. Only PUT and DELETE are exposed here for the domain.
+ *
+ * Phase 3 — HTML FORM page. `onGet` exposes an {@see AdminBlockForm}
+ * (Ray.WebFormModule AbstractForm) as `body['form']` so the admin block
+ * edit page (`Content/block_edit.twig` port) can render real `<input>`s
+ * via `{{ form.input(...) }}`.
+ *
+ * NOTE — single-row prefill: ALPS / the Be domain expose no
+ * `GetAdminBlockInput` / `AdminBlockFetched` (single-row fetch), so
+ * `onGet` renders the NEW-block form (the `admin_content_block_new`
+ * case). Pre-filling an existing row would need a Be fetch Input — a
+ * `be/src/` change out of this Phase 3 HTML wave's scope. FLAGGED:
+ * follow-up to add `GetAdminBlockInput` for existing-block edit prefill.
  */
 class Block extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * Renders the block edit form (new-block case).
+     *
+     * The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
+     */
+    #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
+    public function onGet(): static
+    {
+        $form = $this->formFactory->newInstance(AdminBlockForm::class);
+        assert($form instanceof AdminBlockForm);
+
+        $this->code = Code::OK;
+        $this->body = ['form' => $form];
+
+        return $this;
     }
 
     /**
