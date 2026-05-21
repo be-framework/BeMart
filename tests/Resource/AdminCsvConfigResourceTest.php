@@ -11,6 +11,7 @@ use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Form\AdminCsvConfigForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -57,6 +58,27 @@ final class AdminCsvConfigResourceTest extends TestCase
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->resource = $injector->getInstance(ResourceInterface::class);
         $this->storage = $injector->getInstance(CsvColumnConfigStorageInterface::class);
+    }
+
+    public function testOnGetReturnsCsvConfigForm(): void
+    {
+        $ro = $this->resource->get('page://self/admin/csv-config');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminCsvConfigForm::class, $ro->body['form']);
+        $this->assertSame(1, $ro->body['id']);
+        $this->assertArrayHasKey('orderNo', $ro->body['outputColumns']);
+        $this->assertArrayHasKey('paymentMethod', $ro->body['notOutputColumns']);
+    }
+
+    public function testOnGetAnonymousAdminReturns403(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->get('page://self/admin/csv-config');
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 
     public function testOnPostHappyPathPersistsColumnVector(): void
