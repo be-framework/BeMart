@@ -1,0 +1,63 @@
+{#
+  BeMart shared ADMIN LOGIN-CONTEXT layout.
+
+  PORT of EC-CUBE 4.3 admin-theme `login_frame.twig`
+  (src/Eccube/Resource/template/admin/login_frame.twig).
+
+  EC-CUBE's admin UI has TWO frames: the standard `default_frame.twig`
+  (sidebar + header bar + content area — ported as `admin-base.html.twig`)
+  and a much smaller `login_frame.twig` used by the unauthenticated
+  login-context pages (login / 2段階認証チャレンジ / 2段階認証デバイス登録).
+  This file is the port of that login frame; the top-level login-context
+  pages do `{% extends 'admin-login-base.html.twig' %}`.
+
+  Same port standard as `admin-base.html.twig` (see var/templates/README.md,
+  "Admin pages"): keep EC-CUBE's markup skeleton and `c-*` class names
+  verbatim; only the EC-CUBE-runtime bindings are rebound.
+
+  EC-CUBE-ism rebinding (documented; see README "Admin pages"):
+   - `{{ '...'|trans }}`  -> the Japanese literal the key resolves to in
+     messages.ja.yaml. The chrome labels (the page <title>, the
+     `admin.login.enable_javascript` noscript message) are inlined as ja
+     literals.
+   - `asset('x', 'admin'|'bundle')` -> `/x` passthrough
+     (`BeMartTwigExtension`). The asset PACKAGE argument is dropped — see
+     `admin-base.html.twig`.
+   - `{{ BaseInfo.shop_name }}` in the <title> -> BeMart has no BaseInfo
+     entity; the shop name is the page's `shop_name` var (default
+     `BeMart`). EC-CUBE-runtime only — enumerated as residual.
+   - `{{ include('@admin/alert.twig') }}` -> EC-CUBE flash-message
+     partial. BeMart has no flash bag; the include is dropped exactly as
+     `admin-base.html.twig` drops it. The render-diff test serves it as
+     an empty template so it contributes nothing on either side.
+#}
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ title|default('ログイン画面') }} - {{ shop_name|default('BeMart') }}</title>
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="robots" content="noindex,nofollow"/>
+    <link rel="icon" href="{{ asset('assets/img/favicon.ico') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css') }}">
+    <script src="{{ asset('admin.bundle.js') }}"></script>
+</head>
+<body id="login-page" class="bg-light">
+<noscript>
+    <p>JavaScript を有効にしてご利用ください</p>
+</noscript>
+
+<div class="c-container">
+    <div class="c-contentsArea">
+
+        {% block main %}{% endblock %}
+
+    </div>
+</div>
+
+<script src="{{ asset('assets/js/function.js') }}"></script>
+{% block javascript %}{% endblock %}
+</body>
+</html>
