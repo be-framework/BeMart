@@ -19,6 +19,10 @@ use Twig\Environment;
  * call), and serves it as the unqualified Environment so TwigRenderer
  * gets an extension-equipped instance.
  *
+ * The extension defaults to {@see \MyVendor\BeMart\Router\RouteTable::default()}
+ * — the same route map the HTTP front controller dispatches with — so the
+ * `url()` / `path()` hrefs it emits are URLs the router can resolve.
+ *
  * @implements ProviderInterface<Environment>
  */
 final class HtmlTwigEnvironmentProvider implements ProviderInterface
