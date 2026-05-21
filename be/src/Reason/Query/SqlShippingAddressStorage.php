@@ -123,6 +123,80 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
         $this->insertRow($orderId, $address);
     }
 
+    #[Override]
+    public function updateTrackingNumber(string $orderNo, string $trackingNumber): void
+    {
+        $orderId = $this->orderIdByOrderNo($orderNo);
+        if ($orderId === null) {
+            // No dtb_order row — the Final gates on OrderQuery first, so
+            // this is the defensive branch: silent no-op, same shape as
+            // `put`.
+            return;
+        }
+
+        $existsStmt = $this->pdo->prepare(
+            'SELECT id FROM dtb_shipping WHERE order_id = :order_id '
+            . 'ORDER BY id ASC LIMIT 1',
+        );
+        $existsStmt->execute([':order_id' => $orderId]);
+        $existingId = $existsStmt->fetchColumn();
+
+        if ($existingId !== false) {
+            // Update the `tracking_number` column in place — no other
+            // column of the row is touched (the address fields and the
+            // tracking number are edited by separate transitions).
+            $stmt = $this->pdo->prepare(
+                'UPDATE dtb_shipping SET tracking_number = :tn, '
+                . 'update_date = NOW() WHERE id = :id',
+            );
+            $stmt->execute([
+                ':id' => (int) $existingId,
+                ':tn' => $trackingNumber,
+            ]);
+
+            return;
+        }
+
+        // No dtb_shipping row yet — EC-CUBE always has one per order,
+        // but BeMart only INSERTs via `put`. Create a minimal row so the
+        // tracking number is recorded, mirroring the Fake which records
+        // it unconditionally. name01 / name02 are NOT NULL with no
+        // DEFAULT → write empty strings (the address-edit transition
+        // fills them in later); discriminator is 'shipping'.
+        $stmt = $this->pdo->prepare(
+            'INSERT INTO dtb_shipping '
+            . '(order_id, name01, name02, tracking_number, '
+            . 'create_date, update_date, discriminator_type) '
+            . 'VALUES (:order_id, :name01, :name02, :tn, '
+            . 'NOW(), NOW(), :discriminator)',
+        );
+        $stmt->execute([
+            ':order_id' => $orderId,
+            ':name01' => '',
+            ':name02' => '',
+            ':tn' => $trackingNumber,
+            ':discriminator' => self::DISCRIMINATOR,
+        ]);
+    }
+
+    #[Override]
+    public function trackingNumberByOrderNo(string $orderNo): string|null
+    {
+        $orderId = $this->orderIdByOrderNo($orderNo);
+        if ($orderId === null) {
+            return null;
+        }
+
+        $stmt = $this->pdo->prepare(
+            'SELECT tracking_number FROM dtb_shipping '
+            . 'WHERE order_id = :order_id ORDER BY id ASC LIMIT 1',
+        );
+        $stmt->execute([':order_id' => $orderId]);
+        $value = $stmt->fetchColumn();
+
+        return $value === false || $value === null ? null : (string) $value;
+    }
+
     /** @return list<ShippingAddressEntity> */
     #[Override]
     public function listAll(): array
