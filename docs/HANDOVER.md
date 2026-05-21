@@ -1948,7 +1948,7 @@ Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEA
 - **Admin HTML Tier-2（残 約 28 テンプレート）** — Tier-1（77 ページ中 34、list/data + 単純 CRUD）は 8 section-wave で完了（下記「Admin HTML — section-wave 並列移植」参照）。その後 4 つの Tier-2 wave で 15 ページを回収（下記「Admin HTML Tier-2 — section ごとの回収」参照）。残る Tier-2 は重量エディタと、action-only リソースに `onGet` が無く新規リソース＝`be/src` ドメイン層追加を要するページ群。
 - **enrichment backlog の残 5 件**（上記）
 - **`Block/*` ウィジェットテンプレート** — ヘッダ/フッタ/カート/ログイン/検索のブロック領域は今は EC-CUBE ランタイム residual のまま。ウィジェットレンダリングのサブステップが必要（Block は ALPS で意図的に未モデル化）。
-- Phase 3 中の ALPS 是正で追加した 5 遷移（`doSortNoMove` 等）は `be/src` にドメイン実装が無い（domain coverage が 139/144 である理由）
+- ~~Phase 3 中の ALPS 是正で追加した 5 遷移（`doSortNoMove` 等）は `be/src` にドメイン実装が無い~~ → **解消済み**。5 遷移すべてドメイン実装完了（下記「Phase-3 是正遷移のドメイン実装完了」参照）。domain coverage は **144/144**。
 
 ### Admin HTML — section-wave 並列移植（Tier-1 完了）
 
@@ -2018,4 +2018,35 @@ Store/Plugin の install/search 系が主）。
 
 `vendor/bin/phpunit` → **約 1796 tests / 5889 assertions, OK**（deprecation 3 件のみ、failure なし）。
 正確な現在値は `docs/migration-status.md` を参照。
+
+### Phase-3 是正遷移のドメイン実装完了
+
+Phase 3 の ALPS 監査（`8d93500`/`f01e1ae`）で追加した 5 遷移は当初 ALPS-only
+（`be/src` ドメイン実装なし）だった。その後 4 遷移（`doSortNoMove` /
+`doToggleVisible` / `doUpdateTrackingNumber` / `doSendShippingNotifyMail`）が
+実装され、最後に残った **`doResendActivationMail`** を実装して
+**domain coverage 143/144 → 144/144** を達成した。
+
+- **`doResendActivationMail`（認証メールを再送する）** — EC-CUBE
+  `admin_customer_resend` ルートから導出。管理画面の会員一覧から ADMIN が
+  仮会員（`customerStatus = 1`）へメール認証（本登録）メールを再送する。
+  ALPS type は `unsafe`（送信のたびに新規メールが発生）。
+  - **shape は `doSendShippingNotifyMail` を踏襲** — admin-only / unsafe /
+    メール送信という同型の遷移。`MailerInterface` に
+    `sendCustomerActivation(string $email, string $secretKey)` を追加
+    （`FakeMailer` が `customerActivations` に記録）。
+  - **AUTHZ ラダー**（クロスファイアウォール → 存在 → 状態の順）:
+    管理者セッション無し → `UnauthorizedAdminAccessException`（403）→
+    メール未解決 → `CustomerNotFoundException`（404、既存例外を再利用）→
+    対象が仮会員でない（既に本会員） → `CustomerAlreadyActivatedException`
+    （409、新規ドメイン例外）。既に本会員へ再送するのは無意味な要求なので
+    silent success ではなく明示的な 4xx で返す。
+  - リソース `Page\Admin\Customer\ResendActivationMail`
+    （`page://self/admin/customer/resend-activation-mail`、POST、CSRF ガード）。
+    `RouteTable` に `admin_customer_resend` を登録。
+    Final の公開面は `customerId` / `email` のみ — `secretKey` はメール本文
+    専用トークンなので echo しない。
+  - テストは Fake のみ（モック禁止）。seed `provisional@example.com`
+    （`customerStatus = 1`、`secretKey` 保持）を happy-path の仮会員ターゲット、
+    `alice@example.com`（`customerStatus = 2`）を 409 ケースに使用。
 
