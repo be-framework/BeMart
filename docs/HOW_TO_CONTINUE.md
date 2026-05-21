@@ -37,6 +37,19 @@ cd ec-cube-alps
 git checkout be-first-migration-bootstrap
 ```
 
+Phase 3 の render-diff テスト（`tests/Resource/*HtmlRenderTest.php`）は EC-CUBE 4.3 の
+**実テンプレート**と差分を取る。その参照元として EC-CUBE 4.3 のソースを
+`tools/ec-cube-source/`（gitignore 対象、リポジトリには含まれない）に clone する。
+**これが無いと全 HTML render テストが動かない**:
+
+```bash
+git clone --depth 1 -b 4.3 https://github.com/EC-CUBE/ec-cube.git tools/ec-cube-source
+```
+
+テストが参照するのは `tools/ec-cube-source/src/Eccube/Resource/template/`（`default`
+テーマ + `admin` テーマの Twig）と `.../locale/messages.ja.yaml` のみ。`composer install`
+や DB セットアップは EC-CUBE 側では不要。
+
 ### 1.2 依存インストール
 
 ```bash
