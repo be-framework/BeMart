@@ -232,6 +232,49 @@ final class SqlPaymentMethodAdminStorage implements PaymentMethodAdminStorageInt
         $stmt->execute([':id' => $id]);
     }
 
+    #[Override]
+    public function reorder(string $paymentId, int $sortNo): void
+    {
+        if (! ctype_digit($paymentId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake.
+            return;
+        }
+
+        // Generic `doSortNoMove` — rewrite the `sort_no` column
+        // (smallint unsigned, nullable) directly. sort_no is outside the
+        // 6-field PaymentMethodAdminEntity projection.
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_payment SET sort_no = :sort_no, update_date = NOW() '
+            . 'WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $paymentId,
+            ':sort_no' => $sortNo,
+        ]);
+    }
+
+    #[Override]
+    public function setVisible(string $paymentId, bool $visible): void
+    {
+        if (! ctype_digit($paymentId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake.
+            return;
+        }
+
+        // Generic `doToggleVisible` — rewrite the `visible` column
+        // (tinyint(1) NOT NULL DEFAULT 1). `visible` IS part of the
+        // PaymentMethodAdminEntity projection, so a subsequent read
+        // reflects it.
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_payment SET visible = :visible, update_date = NOW() '
+            . 'WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $paymentId,
+            ':visible' => (int) $visible,
+        ]);
+    }
+
     /**
      * @param array<string, mixed> $row
      */
