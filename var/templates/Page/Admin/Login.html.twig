@@ -55,7 +55,7 @@
                 <div class="text-center p-5 bg-white">
                     <form name="form1" id="form1" method="post" action="{{ url('admin_login') }}">
                         <input type="hidden" name="_csrf_token" value="{{ csrfToken|default('') }}">
-                        <p><img src="{{ asset('assets/img/logo2.png') }}" width="106"></p>
+                        <p><img src="{{ asset('assets/img/logo2.png', 'admin') }}" width="106"></p>
                         <div class="mb-3">
                             {{ form.input('login_id')|raw }}
                         </div>

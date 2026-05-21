@@ -14,8 +14,11 @@
    - `{{ '...'|trans }}`  -> Japanese literal the key resolves to in
      messages.ja.yaml. BeMart has no translation layer; substituting the
      literal is the lower-noise option (no Twig extension to register).
-   - `asset('x')`         -> `/x` passthrough. BeMart has no asset-hash
-     pipeline; the path is kept so the <link>/<script> markup survives.
+   - `asset('x'[, pkg])`  -> static URL. BeMart has no asset-hash
+     pipeline; BeMartTwigExtension::asset() ports EC-CUBE's asset PACKAGE
+     map (default theme -> `/`, `admin` -> `/template/admin/`, `bundle` ->
+     `/bundle/`) so the <link>/<script> markup keeps real, resolvable
+     hrefs against the deployed `public/` tree.
    - `app.*`, `is_granted()`, `csrf_token()` — EC-CUBE runtime only.
      The CSRF <meta> and the `body id="page_{route}"` are rendered with
      stable BeMart-side values; enumerated as residual in the diff test.
@@ -42,7 +45,7 @@
     <link rel="icon" href="{{ asset('assets/img/common/favicon.ico') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.2/css/all.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <script src="{{ asset('front.bundle.js') }}"></script>
+    <script src="{{ asset('front.bundle.js', 'bundle') }}"></script>
     {% block stylesheet %}{% endblock %}
     <link rel="stylesheet" href="{{ asset('assets/css/customize.css') }}">
 </head>
