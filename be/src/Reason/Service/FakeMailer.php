@@ -29,6 +29,9 @@ final class FakeMailer implements MailerInterface
     /** @var list<array{email: string, name01: string, name02: string}> */
     private array $withdrawConfirmations = [];
 
+    /** @var list<array{order: FinalizedOrderEntity, trackingNumber: string|null}> */
+    private array $shippingNotifications = [];
+
     #[Override]
     public function sendOrderConfirmation(FinalizedOrderEntity $order): void
     {
@@ -79,5 +82,20 @@ final class FakeMailer implements MailerInterface
     public function withdrawConfirmations(): array
     {
         return $this->withdrawConfirmations;
+    }
+
+    #[Override]
+    public function sendShippingNotification(FinalizedOrderEntity $order, string|null $trackingNumber): void
+    {
+        $this->shippingNotifications[] = [
+            'order' => $order,
+            'trackingNumber' => $trackingNumber,
+        ];
+    }
+
+    /** @return list<array{order: FinalizedOrderEntity, trackingNumber: string|null}> */
+    public function shippingNotifications(): array
+    {
+        return $this->shippingNotifications;
     }
 }
