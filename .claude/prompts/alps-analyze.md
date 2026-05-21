@@ -9,7 +9,7 @@
 - `alps.json` が**正（source of truth）**である。Symfony コードは見ない
 - ALPS は 403 ディスクリプタ（container 266 + safe 58 + unsafe 35 + idempotent 44 = transition 計 137）で EC-CUBE 4.3 を記述済み
 - 全 transition は doc 付き。container も主要ドメインは doc 付き
-- このリポジトリの ALPS 構造とタグ体系は `tag.md` を参照
+- このリポジトリの ALPS 構造とタグ体系は `docs/tag.md` を参照
 
 ## 手順
 
