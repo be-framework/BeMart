@@ -21,7 +21,7 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 | **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | ストアフロント完了 / Admin HTML 未着手 / enrichment backlog 残 |
 
 > **現在の移植ステータス（レイヤ別マトリクス・残作業 punch-list）の正は
-> [`docs/migration-status.md`](docs/migration-status.md)**。本ファイルは「引き継いだ人が
+> [`docs/migration-status.md`](migration-status.md)**。本ファイルは「引き継いだ人が
 > 次に何をするか」を示す。数値はステータスマトリクス側を必ず参照すること。
 
 ---
@@ -83,12 +83,12 @@ composer psalm-taint                        # taint mode
 
 1. **`docs/migration-status.md`** — レイヤ別ステータスマトリクスと残作業 punch-list。
    「今どこまで出来ているか」はここが正。最初に読む。
-2. **`HANDOVER.md`** — 構築プロセスの全記録。Phase A（Pilot 1-15 + Wave 1-9）/
+2. **`docs/HANDOVER.md`** — 構築プロセスの全記録。Phase A（Pilot 1-15 + Wave 1-9）/
    Phase B（Slice 1-9）/ Phase 2（SQL）/ Phase 3（HTML）の決定ログと積み残し。
 3. **`CLAUDE.md`** — プロジェクト規約（ALPS が source of truth、5 レイヤ構成、`/run migrate`）。
 4. **`alps.json`** — EC-CUBE 4.3 のセマンティクス定義。移植の契約。
 5. レイヤ別の詳細: `sql/README.md`（Phase 2）/ `var/templates/README.md`（Phase 3）/
-   `docs/alps-audit-phase3.md`（ALPS 監査）/ `docs/skills/`（G-14 〜 G-23 の skill gap）。
+   `docs/phases/alps-audit-phase3.md`（ALPS 監査）/ `docs/skills/`（G-14 〜 G-23 の skill gap）。
 
 ---
 
@@ -98,7 +98,7 @@ composer psalm-taint                        # taint mode
 おおまかな優先度順:
 
 1. **Admin HTML（約 100 テンプレート、最大の残作業）** — EC-CUBE admin テーマの
-   テンプレートが 1 件も port されていない。`docs/alps-audit-phase3.md` は admin を
+   テンプレートが 1 件も port されていない。`docs/phases/alps-audit-phase3.md` は admin を
    約 14 件サンプリングしたのみ。残りの監査 → port が必要。手順は
    `var/templates/README.md` のページ単位ワークフローに従う。
 2. **HTML enrichment backlog** — リソース本体が薄すぎて EC-CUBE テンプレートを
@@ -122,10 +122,19 @@ composer psalm-taint                        # taint mode
 ```text
 ec-cube-alps/
 ├── alps.json                 # source of truth（EC-CUBE 4.3 ALPS）
-├── docs/migration-status.md  # 移植ステータスの正（レイヤ別マトリクス）
-├── HANDOVER.md               # 全工程の決定記録
-├── HOW_TO_CONTINUE.md        # このファイル
 ├── CLAUDE.md                 # プロジェクト規約
+├── README.md                 # エントリポイント
+├── docs/                     # ドキュメント（GitHub Pages publish root）
+│   ├── README.md             #   docs/ 配下のドキュメントマップ
+│   ├── migration-status.md   #   移植ステータスの正（レイヤ別マトリクス）
+│   ├── HANDOVER.md           #   全工程の決定記録
+│   ├── HOW_TO_CONTINUE.md    #   このファイル
+│   ├── tag.md                #   タグ分類体系
+│   ├── methodology/          #   再利用可能な方法論・原則
+│   ├── phases/               #   フェーズ別の成果物（ALPS 監査・admin fan-out 計画）
+│   ├── skills/               #   G-14 〜 G-23 の skill gap ドキュメント
+│   ├── quality/              #   Phase 1 ALPS 監査ノート
+│   └── archive/              #   旧トラッカー・初期計画（参考・現状とは乖離）
 ├── src/                      # BEAR.Sunday アプリ層
 │   ├── Resource/Page/        #   ResourceObject（page://*、storefront + Admin/*）
 │   ├── Module/               #   AppModule / SqlModule / HtmlModule
@@ -136,7 +145,6 @@ ec-cube-alps/
 ├── sql/                      # EC-CUBE スキーマダンプ・mtb_* seed・setup-db.sh（Phase 2）
 ├── var/templates/            # HTML テンプレート（EC-CUBE 移植、Phase 3）
 ├── tests/                    # BEAR 層のテスト（render-diff / hypermedia 含む）
-├── docs/skills/              # G-14 〜 G-23 の skill gap ドキュメント
 └── .claude/                  # /run migrate ワークフロー（commands / workflows / prompts）
 ```
 
@@ -175,7 +183,7 @@ composer psalm / composer psalm-taint       # 型 / taint 解析
 
 ## 6. 移行で持ち越せないもの（新マシンで再構築が必要）
 
-- **Claude Code のセッション履歴** — ローカル保存。`HANDOVER.md` + `docs/migration-status.md`
+- **Claude Code のセッション履歴** — ローカル保存。`docs/HANDOVER.md` + `docs/migration-status.md`
   経由で文脈を再ロードするのが唯一の正解。
 - **インストール済 skill**（`be-framework-skills`, `alps-skills`, `bear-skills` 等）—
   `.claude/prompts/` がこれらを名指しで呼ぶので、欠けていると `/run migrate` が動かない。

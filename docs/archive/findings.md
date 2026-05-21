@@ -4,8 +4,8 @@
 > 移植方針を固めるまでの findings / decisions を残した歴史的ドキュメント。
 > ここに書かれた一部の決定（PHP orchestrator の採用など）は後に撤回・変更された
 > （Phase 7 pivot、および Phase 2 で実際に SQL 永続化層を構築した経緯を参照）。
-> 移植の**現状・残作業**は [`docs/migration-status.md`](docs/migration-status.md)、
-> **構築プロセスの決定ログ**は [`HANDOVER.md`](HANDOVER.md) が正。
+> 移植の**現状・残作業**は [`docs/migration-status.md`](../migration-status.md)、
+> **構築プロセスの決定ログ**は [`docs/HANDOVER.md`](../HANDOVER.md) が正。
 > 本ファイルは初期判断の経緯を辿るための記録として残している。
 
 ## Requirements
