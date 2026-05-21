@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
+use MyVendor\BeMart\Form\AdminOrderMailForm;
 use MyVendor\BeMart\Form\AdminOrderShippingForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
@@ -254,6 +255,27 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+
+    public function testOnGetSendMailRendersComposer(): void
+    {
+        $ro = $this->resource->get('page://self/admin/order/send-mail', [
+            'orderNo' => self::ORDER_NO_A,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminOrderMailForm::class, $ro->body['form']);
+        $this->assertSame(self::ORDER_NO_A, $ro->body['orderNo']);
+    }
+
+    public function testOnGetSendMailRejectsAnonymousAdmin(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->get('page://self/admin/order/send-mail');
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 
     // ------------------------------------------------------------------
