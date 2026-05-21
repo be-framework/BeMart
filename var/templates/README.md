@@ -1,4 +1,4 @@
-# BeMart storefront templates — EC-CUBE template port
+# BeMart templates — EC-CUBE template port
 
 Phase 3 renders the BEAR.Sunday resources as HTML. The templates here are
 **ports of EC-CUBE 4.3's `default`-theme Twig templates**, not freshly
@@ -206,10 +206,12 @@ shared `<head>` / inline-script frame residual, none form-related.
 ## Admin pages — the admin-theme port recipe
 
 Everything above describes the **storefront** port (~40 pages, all done).
-EC-CUBE also has an **admin** UI — ~100 templates under
-`tools/ec-cube-source/src/Eccube/Resource/template/admin/`. The admin
-pages are ported with the SAME two recipes (data-page + form-page) and
-the SAME residual-diff verification standard; only two things differ.
+EC-CUBE also has an **admin** UI — 77 page templates under
+`tools/ec-cube-source/src/Eccube/Resource/template/admin/`. **Admin
+Tier-1 (34 pages) is done** — see "Fan-out status" below; the recipe in
+this section is the established, exercised one. Admin pages are ported
+with the SAME two recipes (data-page + form-page) and the SAME
+residual-diff verification standard; only two things differ.
 
 ### Difference 1 — a different layout
 
@@ -328,31 +330,43 @@ files. The remaining waves (Product / Order / Content / Setting/Shop /
 Setting/System / Store / Top-level) can run in parallel with zero
 cross-wave file contention.
 
-### Fan-out — grouping the ~100 admin pages into section-waves
+### Fan-out status — 8 section-waves, Tier-1 done
 
 The admin templates are organised by section directory under
-`template/admin/`; each is an independent wave (clean file-path split,
-no cross-wave coupling):
+`template/admin/`; each section ran as an independent wave (clean
+file-path split, no cross-wave coupling — the per-section ja-message
+mechanism above is what keeps them parallel-safe). Each wave ported its
+**Tier-1** pages — list/data pages and simple CRUD whose BEAR resource
+already serves a GET — and deferred **Tier-2**: multi-panel editors and
+pages whose resource is action-only (POST/CSV/PDF) with no GET-serving
+`onGet`.
 
-| Section wave | Directory | rough pages |
-|---|---|---|
-| Product | `admin/Product/` | ~12 (product list/edit, category, class-name, class-category, tag, CSV) |
-| Order | `admin/Order/` | ~10 (order list/edit, shipping, mail, CSV import/export) |
-| Customer | `admin/Customer/` | ~6 (customer list/edit, delete, CSV) |
-| Content | `admin/Content/` | ~14 (news, page, layout, block, file, CSS/JS, cache, maintenance) |
-| Setting/Shop | `admin/Setting/shop/` | ~16 (base-info, delivery, payment, tax, mail, csv, order-status) |
-| Setting/System | `admin/Setting/system/` | ~14 (member, authority, log, 2FA, masterdata, security) |
-| Store/Plugin | `admin/Store/` | ~12 (plugin list/install, owner-store, template) |
-| Top-level | `admin/` (index, login, error, change_password, …) | ~10 |
+| Section | Directory | Tier-1 done | Tier-2 deferred |
+|---|---|---|---|
+| Top-level | `admin/` | login, dashboard, change-password, 2FA verify/setup, empty placeholder — 6 | — |
+| Product | `admin/Product/` | list, tag, class-name, class-category — 4 | `product` (~932L editor), `product_class` (~448L matrix), `category`, 4× `csv_*` |
+| Order | `admin/Order/` | order list — 1 | `edit` (~1057L), `shipping` (~709L), `mail`, `mail_confirm`, `order_pdf`, `csv_shipping` |
+| Customer | `admin/Customer/` | list, edit — 2 | `delivery_edit` |
+| Content | `admin/Content/` | news list/edit, page list/edit, layout list/edit, block list/edit, file, css, js, cache, maintenance — 13 | (essentially complete) |
+| Setting/Shop | `admin/Setting/shop/` | payment list, delivery list, tax-rule list — 3 | `payment_edit`, `delivery_edit`, `order_status`, `csv`, `mail`, `tradelaw`, `shop_master`, `calendar` |
+| Setting/System | `admin/Setting/system/` | member list, member edit, login-history — 3 | `authority`, `system`, `log`, `masterdata`, `security`, `two_factor_auth_edit` |
+| Store/Plugin | `admin/Store/` | plugin list, template list — 2 | `plugin_install/search/confirm/confirm_uninstall/handler`, `authentication_setting`, `template_add` |
 
-Each wave follows this recipe page-for-page; no module or wiring change
-is needed beyond adding the section's own `Admin/<Section>JaMessages.php`
-(see "The per-section ja-message mechanism" above) and `<Name>Form`
-classes for form pages. `admin-base.html.twig`, `EcCubeAdminStubLoader`,
-`EcCubeStub` and `AdminJaMessages` are shared and stay untouched — that
-is what keeps the waves parallel-safe.
+**Tier-1 total: 34 of 77 admin page templates.** Each wave followed the
+recipe page-for-page with no module/wiring change beyond its own
+`Admin/<Section>JaMessages.php` and `<Name>Form` classes; the four
+shared files (`admin-base.html.twig`, `EcCubeAdminStubLoader`,
+`EcCubeStub`, `AdminJaMessages`) stayed untouched — that is what kept
+the waves parallel-safe.
 
-## Per-page workflow for the remaining ~138 pages
+**Tier-2 (~43 pages) is a different kind of work.** It is not template
+porting — it needs new BEAR resources, `onGet` additions to action-only
+resources, and `be/src` domain body-shape work. Plan it as a
+resource-creation effort, section by section, NOT as another
+template-port fan-out. Per-section deferred lists are the table above;
+`docs/phases/admin-fanout-plan.md` carries the full per-page audit.
+
+## Per-page workflow (storefront data pages)
 
 Each page is mechanical and self-contained:
 

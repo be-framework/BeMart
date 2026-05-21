@@ -4,7 +4,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 
 | メタ | 値 |
 |---|---|
-| Last updated | 2026-05-18 |
+| Last updated | 2026-05-21 |
 | Latest session | phase-b-slice-5-env-gated-entry-point-opus-4.7 |
 | Scope | ALPS プロファイル + Be/BEAR 移植 Pilot (Pilot 1 goProduct / Pilot 2 doAddCartItem — Cascade / Pilot 3 doConfirmOrder — Branching + 4 段 Linear Cascade / Pilot 4 doRegisterCustomer — Multi-Reason Being / Pilot 5 doCheckout — Diamond-Cascade + Multi-side-effect Final) + alps-to-be-bear skill dogfooding + **Phase B Slice 1-5** (Psalm setup / ProdModule / Mass-assignment fix / env-gated entry point) |
 
@@ -1945,13 +1945,53 @@ Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEA
 
 ### 積み残し
 
-- **Admin HTML（約 100 テンプレート）が未着手** — EC-CUBE admin テーマの全テンプレートが未 port。`docs/phases/alps-audit-phase3.md` は admin を約 14 件サンプリングしただけで、残り ~50+ は未監査。
+- **Admin HTML Tier-2（約 43 テンプレート）** — Tier-1（77 ページ中 34、list/data + 単純 CRUD）は 8 section-wave で完了（下記「Admin HTML — section-wave 並列移植」参照）。残る Tier-2 は重量エディタと、action-only リソースに `onGet` が無く新規リソース＝`be/src` ドメイン層追加を要するページ群。
 - **enrichment backlog の残 5 件**（上記）
 - **`Block/*` ウィジェットテンプレート** — ヘッダ/フッタ/カート/ログイン/検索のブロック領域は今は EC-CUBE ランタイム residual のまま。ウィジェットレンダリングのサブステップが必要（Block は ALPS で意図的に未モデル化）。
 - Phase 3 中の ALPS 是正で追加した 5 遷移（`doSortNoMove` 等）は `be/src` にドメイン実装が無い（domain coverage が 139/144 である理由）
 
-### Phase 3 末のテスト規模
+### Admin HTML — section-wave 並列移植（Tier-1 完了）
 
-`vendor/bin/phpunit` → **約 1574 tests / 5006 assertions, OK**（deprecation 3 件のみ、failure なし）。
+ストアフロント完了後、admin テーマ（EC-CUBE `template/admin/`）の移植に着手した。
+
+- **admin レシピ確立 + News pilot**（`f91e10f`）— `admin-base.html.twig`（admin テーマ
+  `default_frame.twig` の port。左サイドバー `c-mainNavArea` + ヘッダ `c-headerBar`）、
+  `EcCubeAdminStubLoader`（admin frame/nav を実レンダリングし他を空 stub）、admin 認証
+  context（render テストが `AdminSessionInterface` を seeded admin id に rebind）を整備。
+  News list/edit をパイロット移植。
+- **per-section ja-message split**（`1e91e92`）— admin `trans` キーを section ごとに
+  分割。`EcCubeStub::jaMessages()` は storefront baseline として凍結、`AdminJaMessages`
+  が共有 chrome（frame + nav）、各 section は自前の `Admin/<Section>JaMessages.php` を
+  持つ。これにより section-wave が共有ファイル衝突なしで**並列実行可能**になった。
+- **Customer wave**（`da48413`）— Customer list/edit。
+- **section-wave 8 本**（per-section ja-split を土台に並列実行）—
+  - バッチ 1（4 並列）: Product（`64e5e03`）/ Setting-System（`f65279b`）/
+    Content（`855c412`）/ Top-level（`dff64ca`）
+  - バッチ 2（3 並列）: Setting-Shop（`3b3b42f`/`1b122af`/`974b233`）/
+    Store（`9261b8e`/`3acfc6a`）/ Order（`5a112a1`）
+  - 計 **34 admin ページ**移植、テスト 1656 → 1734。
+
+**Tier-1 / Tier-2 の切り分け** — 各 section-wave は「BEAR リソースが既に GET を提供する
+ページ（list/data + 単純 CRUD）」= **Tier-1** を移植し、以下を **Tier-2** として defer した:
+
+- **重量エディタ** — `Order/edit`（約 1057 行）/ `Product/product`（約 932 行）/
+  `Product/product_class`（約 448 行マトリクス）/ `Order/shipping`（約 709 行）
+- **新規リソースが必要なページ** — action-only リソース（POST/CSV/PDF）に `onGet` が
+  無いページ群。Store の plugin install/search/confirm 系、Order の mail 系、
+  Setting/Shop の payment_edit/delivery_edit/calendar 系、Setting/System の
+  authority/system/log/masterdata/security。これらは `be/src` ドメイン層
+  （Input/Final/body-shape）の追加を伴うため、テンプレ移植 wave とは別種の作業。
+
+Tier-2 は 77 ページ中 43 ページ。section 別の defer リストは
+`docs/phases/admin-fanout-plan.md` と `var/templates/README.md`「Fan-out status」が正。
+
+**並列オーケストレーションの教訓** — バッチ 1 の 2 agent（Content / Top-level）が
+アカウントの session limit で commit 直前にカットオフされた。両者の WIP は完成・green
+だったため手動 salvage で 2 commit に分割して回収（`855c412` / `dff64ca`）。バッチ 2 では
+各 agent に**ページ単位の逐次 commit**を指示し、カットオフ耐性を確保した。
+
+### Phase 3 現在のテスト規模
+
+`vendor/bin/phpunit` → **約 1734 tests / 5633 assertions, OK**（deprecation 3 件のみ、failure なし）。
 正確な現在値は `docs/migration-status.md` を参照。
 

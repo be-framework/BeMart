@@ -2,7 +2,7 @@
 
 別マシン / 別セッションでこの **BeMart** プロジェクト（EC-CUBE 4.3 → BEAR.Sunday +
 Be Framework 移植）の作業を再開するための引き継ぎガイド。
-最終更新: 2026-05-20（Phase 3 ストアフロント完了直後）
+最終更新: 2026-05-21（Phase 3 admin Tier-1 完了直後）
 
 ---
 
@@ -10,7 +10,8 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 
 - **ブランチ**: `be-first-migration-bootstrap`
 - **リモート**: `https://github.com/koriym/ec-cube-alps.git`
-- **テスト**: `vendor/bin/phpunit` → 約 1574 tests / 5006 assertions, OK（deprecation 3 件のみ、failure なし）
+- **PR**: #2（draft、`be-first-migration-bootstrap` → `1.x`）
+- **テスト**: `vendor/bin/phpunit` → 約 1734 tests / 5633 assertions, OK（deprecation 3 件のみ、failure なし）
 
 移植は ALPS を契約として 3 フェーズ進行している:
 
@@ -18,7 +19,7 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 |---|---|---|
 | **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了（139 transition、stub 7 件あり） |
 | **Phase 2** | 全 34 ストレージ Fake → SQL（MariaDB/MySQL）、本番カットオーバー | 完了 |
-| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | ストアフロント完了 / Admin HTML 未着手 / enrichment backlog 残 |
+| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | ストアフロント完了 / Admin **Tier-1 完了**（77 ページ中 34）/ Admin Tier-2（約 43）+ enrichment backlog 残 |
 
 > **現在の移植ステータス（レイヤ別マトリクス・残作業 punch-list）の正は
 > [`docs/migration-status.md`](migration-status.md)**。本ファイルは「引き継いだ人が
@@ -71,7 +72,7 @@ sudo mysql -e "FLUSH PRIVILEGES;"
 ### 1.4 動作確認
 
 ```bash
-vendor/bin/phpunit                          # 全テスト（約 1574、OK なら緑）
+vendor/bin/phpunit                          # 全テスト（約 1734、OK なら緑）
 vendor/bin/phpunit --testsuite bemart-sql   # SQL ストレージ + Final-direct（DATABASE_URL 要）
 composer psalm                              # 型解析
 composer psalm-taint                        # taint mode
@@ -97,10 +98,16 @@ composer psalm-taint                        # taint mode
 残作業の punch-list は `docs/migration-status.md` の「Outstanding work」が正。
 おおまかな優先度順:
 
-1. **Admin HTML（約 100 テンプレート、最大の残作業）** — EC-CUBE admin テーマの
-   テンプレートが 1 件も port されていない。`docs/phases/alps-audit-phase3.md` は admin を
-   約 14 件サンプリングしたのみ。残りの監査 → port が必要。手順は
-   `var/templates/README.md` のページ単位ワークフローに従う。
+1. **Admin HTML Tier-2（約 43 テンプレート、最大の残作業）** — admin Tier-1（77 ページ中
+   34、list/data + 単純 CRUD）は 8 section-wave で完了。残る Tier-2 は性質が異なる:
+   - **重量エディタ** — `Order/edit`（約 1057 行）/ `Product/product`（約 932 行）/
+     `Product/product_class`（約 448 行）/ `Order/shipping`（約 709 行）
+   - **新規リソースが必要なページ** — action-only リソース（POST/CSV/PDF）に `onGet` が
+     無いページ群。`be/src` ドメイン層（Input/Final/body-shape）の追加を伴う
+   テンプレ移植 wave では片付かない別種の作業。section 別の defer リストは
+   `docs/phases/admin-fanout-plan.md` と `var/templates/README.md`「Fan-out status」。
+   admin ページ移植のレシピ（`admin-base.html.twig`・per-section ja-message・
+   render-diff テスト）は `var/templates/README.md`「Admin pages」節が正。
 2. **HTML enrichment backlog** — リソース本体が薄すぎて EC-CUBE テンプレートを
    忠実 port できないデータページ。Cart / Mypage History はパイロット完了。
    残: Shopping confirm/complete・Mypage ダッシュボード・Favorite・Address・Contact。
@@ -114,6 +121,15 @@ composer psalm-taint                        # taint mode
    `doUpdateCsv` の本物実装。
 
 各項目の詳細・コミット・unverified 注記は `docs/migration-status.md` を参照。
+
+**Admin section-wave を並列で回す場合** — per-section ja-message split（`1e91e92`）に
+より、admin の section 単位 wave は共有ファイル衝突なしで並列実行できる（各 wave が
+触るのは自 section の templates / tests / `src/Form/` + 自前の
+`tests/Resource/Admin/<Section>JaMessages.php` のみ）。並列 agent には**ページ単位の
+逐次 commit**を指示すること — 長時間 agent が session limit でカットオフされても
+commit 済み分は失われない（バッチ 1 で 2 agent がカットオフされた実例あり。
+未 commit の WIP は手動 salvage で回収した。HANDOVER「Admin HTML — section-wave
+並列移植」参照）。
 
 ---
 
