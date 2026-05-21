@@ -11,6 +11,8 @@ use MyVendor\BeMart\Be\Reason\Query\FakeNewsStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
+use MyVendor\BeMart\Tests\Resource\Admin\ContentJaMessages;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -301,8 +303,8 @@ final class AdminNewsListHtmlRenderTest extends TestCase
 
     private function registerEcCubeStubs(Environment $twig): void
     {
-        $trans = static function (string $key, array $params = []): string {
-            $messages = EcCubeStub::jaMessages();
+        $messages = AdminJaMessages::forSection(ContentJaMessages::keys());
+        $trans = static function (string $key, array $params = []) use ($messages): string {
             $text = $messages[$key] ?? $key;
             foreach ($params as $name => $value) {
                 $text = str_replace($name, (string) $value, $text);
