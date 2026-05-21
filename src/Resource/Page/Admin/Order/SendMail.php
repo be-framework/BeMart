@@ -13,7 +13,10 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderMailSent;
 use MyVendor\BeMart\Be\Input\AdminSendOrderMailInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminOrderMailForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -40,7 +43,47 @@ class SendMail extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * EC-CUBE 受注メール送信 — Order Tier-2.
+     *
+     * Thin GET renderer for `admin/Order/mail.twig` — the order-mail
+     * composition screen. The POST below re-sends the confirmation
+     * mail; this GET serves the composition form keyed by the order.
+     * AUTHZ is a direct admin-session check (Pattern B — no Be
+     * transition is invoked on the GET path). The composition fields
+     * render blank so the page is faithful with empty Fake storage.
+     *
+     * @psalm-taint-source input $orderNo
+     */
+    #[Link(rel: 'doSendOrderMail', href: 'page://self/admin/order/send-mail', method: 'post')]
+    #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    public function onGet(string $orderNo = ''): static
+    {
+        if ($this->adminSession->adminId() === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        $form = $this->formFactory->newInstance(AdminOrderMailForm::class);
+        assert($form instanceof AdminOrderMailForm);
+        $form->fillValues([
+            'template' => '', 'mail_subject' => '', 'mail_header' => '', 'mail_footer' => '',
+        ]);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'form' => $form,
+            'orderNo' => $orderNo,
+        ];
+
+        return $this;
     }
 
     /**
