@@ -1,8 +1,25 @@
 # Admin HTML Fan-out Manifest
 
 Phase 3 (HTML presentation) has finished the storefront (~40 pages) and the admin
-pilot (`admin-base.html.twig` + News pages, commit `f91e10f`). The remaining work is
-the admin HTML page templates, ported in parallel section-waves.
+pilot (`admin-base.html.twig` + News pages, commit `f91e10f`). The admin HTML page
+templates are ported in parallel section-waves.
+
+## Status (2026-05-21) — Tier-1 done
+
+8 section-waves have run (News pilot + Customer + batch 1 + batch 2).
+**Admin Tier-1 — 34 of the 77 page templates — is ported and green**
+(full suite 1734 tests). Tier-1 = list/data pages + simple CRUD whose
+BEAR resource already serves a GET.
+
+The remaining **~43 templates are Tier-2** and were deliberately
+deferred by every wave: multi-panel editors (`Order/edit` ~1057L,
+`Product/product` ~932L, `Product/product_class` ~448L, `Order/shipping`
+~709L) and pages whose BEAR resource is action-only (POST/CSV/PDF) with
+no GET-serving `onGet`. Tier-2 is **not** a template-port job — it needs
+new BEAR resources / `onGet` additions / `be/src` domain body-shape
+work. The per-section Tier-1/Tier-2 split is summarised in
+`var/templates/README.md` "Fan-out status"; the per-page audit below is
+the input for the Tier-2 resource-creation effort.
 
 This document is the **complete, first-pass audit** of every Twig template under the
 EC-CUBE 4.3 admin template root
