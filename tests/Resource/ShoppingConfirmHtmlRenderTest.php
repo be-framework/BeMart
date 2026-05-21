@@ -75,6 +75,54 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         '<title>BeMart / ご注文内容のご確認</title>',
         '<title>EC-CUBE / ご注文内容のご確認</title>',
         '<meta name="author" content="">',
+
+        // --- order-delivery item: product thumbnail --------------------
+        // EC-CUBE's confirm.twig (L92-93) renders an `ec-imageGrid__img`
+        // wrapping the product image (no_image_product fallback when the
+        // product carries none). BeMart's confirm projection (the
+        // OrderConfirmed Final → Confirm.php body `items[]`) carries only
+        // productCode / productName / quantity / unitPrice / totalPrice —
+        // the厳密移植 Grade-C scope dropped the Product/ProductClass image
+        // joins, exactly as the Cart row port did (see CartHtmlRenderTest).
+        // The ported template renders only `ec-imageGrid__content`; the
+        // `__img` wrapper is omitted, never invented.
+        '<div class="ec-imageGrid__img"><img src="/assets/img/common/no_image_product.png" alt="サンプル商品 A"></div>',
+        '<div class="ec-imageGrid__img"><img src="/assets/img/common/no_image_product.png" alt="2026 春予約バッグ"></div>',
+
+        // --- order-delivery item: reduced-tax-rate notice --------------
+        // confirm.twig L108 emits `<p>{{ isShowReducedTaxMess ? ... }}</p>`
+        // — an empty <p> unless an item is reduced-tax-rate (the
+        // `is_reduced_tax_rate()` EC-CUBE runtime helper, stubbed false).
+        // BeMart's PurchaseFlow folds tax into one `tax` total and carries
+        // no per-item reduced-rate flag, so the reduced-tax mark and this
+        // <p> are omitted (documented in the file docblock + the port
+        // template header). EC-CUBE still emits the empty <p>.
+        '<p></p>',
+
+        // --- order-delivery: the per-shipping delivery method/date/time -
+        // confirm.twig L115-134 renders `ec-orderDelivery__actions` — the
+        // delivery method (+ delivery fee), the delivery date and the
+        // delivery time, read from `Order.Shippings[idx]` (Delivery /
+        // shipping_delivery_date / shipping_delivery_time). BeMart's
+        // confirm projection is single-shipping with the delivery fee
+        // FOLDED into one `deliveryFeeTotal`; the OrderConfirmed Final
+        // carries no delivery-method name and no per-shipping date/time
+        // selection (those are chosen on the prior goShopping screen, not
+        // re-modelled in the confirm body). The ported template therefore
+        // omits the whole `ec-orderDelivery__actions` block rather than
+        // inventing empty selects. The delivery fee itself is still shown
+        // in the `ec-totalBox` 送料 row (diffs to zero). `指定なし`
+        // appears twice — once for date, once for time.
+        '<div class="ec-orderDelivery__actions">',
+        '<div class="ec-selects">',
+        '<div class="ec-select">',
+        '<label>配送方法</label>',
+        '(￥800)',
+        '<div class="ec-select ec-select__delivery">',
+        '<label>お届け日</label>',
+        '<div class="ec-select ec-select__time">',
+        '<label>お届け時間</label>',
+        '指定なし',
     ];
 
     private ResourceInterface $resource;
@@ -151,8 +199,18 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
+        // Sanity bound on the raw diff size. The residual is the 11-line
+        // EC-CUBE-runtime <head> family (CSRF meta + jQuery $.ajaxSetup
+        // script + shop-name <title>) plus the 14 genuinely-unmodelled
+        // confirm-screen lines enumerated in RESIDUAL_ALLOWLIST — the
+        // product thumbnails, the empty reduced-tax <p>, and the whole
+        // `ec-orderDelivery__actions` per-shipping method/date/time block
+        // (BeMart's confirm projection is single-shipping with the
+        // delivery fee folded into `deliveryFeeTotal`). Every diff line is
+        // accounted for in the allowlist; the bound just guards against an
+        // unexplained balloon.
         $this->assertLessThan(
-            14,
+            27,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -216,8 +274,24 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         // items + the recipient address (alice's default address — the
         // BeMart confirm projection is single-shipping, EC-CUBE's
         // default-theme checkout norm).
+        //
+        // `shipping.order_items` (confirm.twig L120) is the FULL ordered-item
+        // set for the shipping — product lines plus the delivery-fee line.
+        // The template filters it (`|filter(item => item.isDeliveryFee)`) to
+        // pull the delivery charge out. BeMart's confirm projection folds the
+        // delivery fee into one `deliveryFeeTotal` (￥800), so the reference
+        // fixture carries the product lines (isDeliveryFee=false) plus one
+        // delivery-fee line (isDeliveryFee=true, total_price 800). The
+        // BeMart-side template reads `order.deliveryFeeTotal` directly; both
+        // sides therefore render the same ￥800 next to the delivery method.
+        $shippingOrderItems = [
+            new EcCubeStub(['isDeliveryFee' => false, 'total_price' => 2400]),
+            new EcCubeStub(['isDeliveryFee' => false, 'total_price' => 13500]),
+            new EcCubeStub(['isDeliveryFee' => true, 'total_price' => 800]),
+        ];
         $shipping = new EcCubeStub([
             'productOrderItems' => $items,
+            'order_items' => $shippingOrderItems,
             'name01' => '山田', 'name02' => 'アリス',
             'kana01' => 'ヤマダ', 'kana02' => 'アリス',
             'postal_code' => '1500001', 'pref' => 13,
