@@ -34,6 +34,16 @@ namespace MyVendor\BeMart\Be\Reason\Query;
  */
 interface AdminMasterRegistryInterface
 {
+    /**
+     * @return list<array{value: string, label: string, table: string}>
+     */
+    public function listMasterTypes(): array;
+
+    /**
+     * @return list<array{id: string, name: string}>
+     */
+    public function listRows(string $masterType): array;
+
     public function supportsReorder(string $masterType): bool;
 
     public function supportsVisible(string $masterType): bool;

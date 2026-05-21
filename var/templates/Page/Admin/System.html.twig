@@ -1,0 +1,72 @@
+{#
+  BeMart admin System info — EC-CUBE Setting/System/system.twig.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_system_system' %}
+{% set title = 'システム情報' %}
+{% set sub_title = 'システム設定' %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-8" id="server_info_box__header">
+                                <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="このEC-CUBEに関係しているシステム環境の情報を表示しています。">
+                                    <span class="card-title ">システム情報</span>
+                                    <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                </div>
+                            </div>
+                            <div class="col-4 text-end">
+                                <a data-bs-toggle="collapse" href="#systemInfo" aria-expanded="false" aria-controls="systemInfo">
+                                    <i class="fa fa-angle-up fa-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapse show ec-cardCollapse" id="systemInfo">
+                        <div class="card-body" id="server_info_box__body_inner">
+                            {% for item in info %}
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <span>{{ item.title }}</span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col" id="server_info_box__value--{{ loop.index }}">
+                                                {{ item.value }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {% if phpinfoEnabled %}
+            <div class="c-primaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header">
+                        <div class="row">
+                            <div class="col-8" id="php_info_box__header">
+                                <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="PHP情報を表示します。">
+                                    <span class="card-title">PHP情報</span>
+                                    <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="php_info_box__frame">
+                        <iframe name="php_info" src="{{ url('admin_setting_system_system_phpinfo') }}" height="500" frameborder="0" style="width: 100%;"></iframe>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

@@ -15,11 +15,11 @@ not optimistically.
 |---|---|---|
 | 1. ALPS spec (`alps.json`) | 144/144 transitions, 444 descriptors | Complete. 144 transitions (135 flow-tagged + 9 untagged), 276+ data descriptors. Post-Phase-A remediation added 5 transitions. |
 | 2. Be domain (`be/src`) | 143/144 transitions | Phase A migrated 139 transitions; Phase-3 remediation added 4 (`doSortNoMove` / `doToggleVisible` / `doUpdateTrackingNumber` / `doSendShippingNotifyMail`). 1 ALPS-only transition (`doResendActivationMail`) still has **no domain impl**; 7 Phase-A transitions are functional **stubs**. 128 Final / 127 Input / 137 Semantic / 14 Being / 38 Entity. |
-| 3. BEAR Resource | 119 Page resources | All Phase-A transitions exposed as resources (`src/Resource/Page/**`): 73 admin + 46 storefront. Phase 3 admin-HTML waves added ~13 page resources (dashboard, login, change-password, 2FA, CMS file/css/js/cache, …). |
+| 3. BEAR Resource | 124 Page resources | All Phase-A transitions exposed as resources (`src/Resource/Page/**`): 78 admin + 46 storefront. Phase 3 admin-HTML waves added ~18 page resources (dashboard, login, change-password, 2FA, CMS file/css/js/cache, system/log/security/masterdata, …). |
 | 4. SQL persistence (`be/src/Reason/Query/Sql*`) | 34/34 storage interfaces | Phase 2 complete. Every Fake storage has a SQL twin; prod context binds SQL Reasons; reproducible prod DB seed script exists. |
-| 5. HTML presentation (`var/templates`) | ~75/~118 page templates | Phase 3 in progress. Storefront done (41 templates, all pages). Admin **Tier-1 done** — 34 of 77 admin page templates ported across 8 section-waves (list/data pages + simple CRUD whose BEAR resource already serves GET). Admin **Tier-2 backlog** (~43 templates — multi-panel editors + pages needing new resources) open. Enrichment backlog open. |
+| 5. HTML presentation (`var/templates`) | ~81/~118 page templates | Phase 3 in progress. Storefront done (41 templates, all pages). Admin **Tier-1 done** — 34 of 77 admin page templates ported across 8 section-waves (list/data pages + simple CRUD whose BEAR resource already serves GET). The **flow-manage-system Tier-2 wave** then ported 6 more (system/log/security/masterdata/authority/2FA-edit) with new resources + forms. Admin **Tier-2 backlog** (~37 templates — multi-panel editors + pages needing new resources) open. Enrichment backlog open. |
 
-**Test count:** `vendor/bin/phpunit` → **1734 tests, 5633 assertions, OK** (3 deprecations; "issues" = deprecations only — no failures).
+**Test count:** `vendor/bin/phpunit` → **1760 tests, 5735 assertions, OK** (3 deprecations from `aura/html` form rendering; "issues" = deprecations only — no failures). The 1320 non-SQL tests (`--testsuite bemart,bemart-be`) run without a database; the `bemart-sql` suite needs a local MariaDB.
 
 ---
 
@@ -43,7 +43,7 @@ Counts are ALPS transitions per flow. `✓` done · `~` partial · `✗` pending
 | flow-manage-shop | ✓ 15 | ✓ | ✓ | ✓ | ~ admin (payment/delivery/tax list done; edits + shop-master Tier-2) |
 | flow-manage-content | ✓ 9 | ✓ | ✓ | ✓ | ~ admin (news/page/file/css/js/cache done) |
 | flow-manage-cms (layout/block) | ✓ 8 | ✓ | ~ (Template list only) | ✓ | ~ admin (layout/block/template list done) |
-| flow-manage-system | ✓ 8 | ✓ | ✓ | ✓ | ~ admin (member/login-history done; authority/log/system Tier-2) |
+| flow-manage-system | ✓ 8 | ✓ | ✓ | ✓ | ~ admin (member/login-history + system/log/security/masterdata/authority/2FA-edit done) |
 | flow-manage-mail | ✓ 2 | ✓ | ✓ | ✓ | ✗ admin (mail editors Tier-2) |
 | flow-manage-plugin | ✓ 6 | ~ (`doInstallPlugin` stub) | ✓ | ✓ | ~ admin (plugin list done; install/search Tier-2) |
 | (untagged transitions) | ✓ 9 | ✓ | n/a | n/a | n/a |
@@ -51,7 +51,7 @@ Counts are ALPS transitions per flow. `✓` done · `~` partial · `✗` pending
 Layer-specific notes:
 
 - **SQL: 34/34** — every storage interface listed in `be/src/Reason/Query/` has a `Sql*` implementation.
-- **HTML: storefront ✓ / admin Tier-1 ✓ / admin Tier-2 ✗** — storefront has 41 page `.html.twig` files + `base.html.twig`; all EC-CUBE storefront pages ported. Admin has 34 page `.html.twig` files + the `admin-base.html.twig` / `admin-login-base.html.twig` frames; 34 of 77 EC-CUBE admin page templates ported (Tier-1). The 43 Tier-2 templates (multi-panel editors + action-only-resource pages) are not ported. No `Block/*` widget templates exist yet.
+- **HTML: storefront ✓ / admin Tier-1 ✓ / admin Tier-2 ~** — storefront has 41 page `.html.twig` files + `base.html.twig`; all EC-CUBE storefront pages ported. Admin has 40 page `.html.twig` files + the `admin-base.html.twig` / `admin-login-base.html.twig` frames; 40 of 77 EC-CUBE admin page templates ported (Tier-1 = 34 across 8 section-waves + the flow-manage-system Tier-2 wave = 6: system/log/security/masterdata/authority/2FA-edit). The remaining ~37 Tier-2 templates (multi-panel editors + action-only-resource pages) are not ported. No `Block/*` widget templates exist yet.
 - **flow-manage-cms Resource** — only `Admin/Template/TemplateList.php` exists for the CMS template feature; layout/block resources are present but the CMS template-management surface is partial — *unverified* in full.
 
 ---
@@ -73,7 +73,7 @@ it re-tagged Favorite and **added 5 transitions** that Phase A's domain never sa
 
 Punch-list, roughly highest-effort first:
 
-1. **Admin HTML Tier-2 — ~43 templates (biggest remaining chunk).** Admin Tier-1 (34 of 77 page templates — list/data pages + simple CRUD whose BEAR resource already serves GET) is done. Tier-2 is the rest: multi-panel editors (`Order/edit` ~1057L, `Product/product` ~932L, `Product/product_class` ~448L, `Order/shipping` ~709L) and pages whose BEAR resource is **action-only** (POST/CSV/PDF) with no GET-serving `onGet`. Porting Tier-2 needs new resources / `onGet` additions / `be/src` domain body-shape work — a resource-creation effort, not another template-port wave. Per-section deferred lists: `docs/phases/admin-fanout-plan.md` and `var/templates/README.md` "Fan-out status".
+1. **Admin HTML Tier-2 — ~37 templates (biggest remaining chunk).** Admin Tier-1 (34 of 77 page templates — list/data pages + simple CRUD whose BEAR resource already serves GET) is done; the **flow-manage-system Tier-2 wave** then ported 6 more (system/log/security/masterdata/authority/2FA-edit — new resources + forms + render tests). Tier-2 is the rest: multi-panel editors (`Order/edit` ~1057L, `Product/product` ~932L, `Product/product_class` ~448L, `Order/shipping` ~709L) and pages whose BEAR resource is **action-only** (POST/CSV/PDF) with no GET-serving `onGet`. Porting Tier-2 needs new resources / `onGet` additions / `be/src` domain body-shape work — a resource-creation effort, not another template-port wave. Per-section deferred lists: `docs/phases/admin-fanout-plan.md` and `var/templates/README.md` "Fan-out status".
 2. **HTML enrichment backlog.** Phase 3 flagged data pages whose resource bodies are too thin for a faithful EC-CUBE port; each needs the Cart-style re-derive (ALPS → Entity/SQL/Fake enrich → template wiring). Flagged: **Mypage History** (done — `a31f8d8`/`3c1b03d`), **Shopping confirm/complete**, **Mypage dashboard**, **Favorite**, **Address**, **Contact**.
 3. **`Block/*` → widget sub-step.** No `Block/*` templates exist. Block regions (header/footer/cart/login/search) are EC-CUBE-runtime residuals today; they need a widget rendering sub-step. Block is intentionally not modelled in ALPS.
 4. **1 ALPS-only transition — no domain impl.** Of the 5 transitions the Phase-3 ALPS remediation added, 4 are now implemented in `be/src` (`doSortNoMove`, `doToggleVisible`, `doUpdateTrackingNumber`, `doSendShippingNotifyMail` — domain + storage + JSON resource + tests). `doResendActivationMail` is still pending. (This is why domain coverage is **143 of 144**.)
