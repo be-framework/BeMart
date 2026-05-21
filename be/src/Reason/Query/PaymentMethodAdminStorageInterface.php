@@ -32,4 +32,20 @@ interface PaymentMethodAdminStorageInterface
     public function put(PaymentMethodAdminEntity $payment): void;
 
     public function remove(string $paymentId): void;
+
+    /**
+     * Generic `doSortNoMove` — rewrites the storage-only `sort_no`
+     * column of dtb_payment. sort_no is NOT part of the 6-field
+     * PaymentMethodAdminEntity projection; this edits the column
+     * directly. A miss is a silent no-op (same shape as `remove`).
+     */
+    public function reorder(string $paymentId, int $sortNo): void;
+
+    /**
+     * Generic `doToggleVisible` — rewrites the `visible` column of
+     * dtb_payment. Unlike sort_no, `visible` IS projected onto
+     * {@see PaymentMethodAdminEntity}, so the Fake also rebuilds the
+     * cached entity so its `list()` projection stays consistent.
+     */
+    public function setVisible(string $paymentId, bool $visible): void;
 }

@@ -379,6 +379,50 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
+    public function testReorderRewritesSortNo(): void
+    {
+        $axis = $this->insertClassName(['name' => 'Color']);
+        $id = $this->insertClassCategory(['class_name_id' => $axis, 'sort_no' => 1]);
+        $storage = new SqlClassCategoryStorage($this->pdo);
+
+        $storage->reorder((string) $id, 88);
+
+        $stmt = $this->pdo->prepare('SELECT sort_no FROM dtb_class_category WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        $this->assertNotFalse($row);
+        $this->assertSame(88, (int) $row['sort_no']);
+    }
+
+    public function testSetVisibleRewritesVisibleColumn(): void
+    {
+        $axis = $this->insertClassName(['name' => 'Size']);
+        $id = $this->insertClassCategory(['class_name_id' => $axis, 'visible' => 1]);
+        $storage = new SqlClassCategoryStorage($this->pdo);
+
+        $storage->setVisible((string) $id, false);
+
+        $stmt = $this->pdo->prepare('SELECT visible FROM dtb_class_category WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        $this->assertNotFalse($row);
+        $this->assertSame(0, (int) $row['visible']);
+
+        $storage->setVisible((string) $id, true);
+        $stmt->execute([':id' => $id]);
+        $back = $stmt->fetch();
+        $this->assertNotFalse($back);
+        $this->assertSame(1, (int) $back['visible']);
+    }
+
+    public function testReorderAndSetVisibleAreSilentNoOpForNonNumericId(): void
+    {
+        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage->reorder('nonexistent-zzz', 5);
+        $storage->setVisible('nonexistent-zzz', false);
+        $this->assertTrue(true);
+    }
+
     public function testSqlClassCategoryIdGeneratorAllocatesIncrementingIds(): void
     {
         $generator = new SqlClassCategoryIdGenerator($this->pdo);

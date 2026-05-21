@@ -24,6 +24,15 @@ final class FakeNewsStorage implements NewsStorageInterface
     /** @var array<string, NewsEntity> keyed by newsId */
     private array $byId;
 
+    /**
+     * Storage-only `visible` per row — dtb_news has the column but
+     * {@see NewsEntity} does not project it. A row with no entry is
+     * considered visible (the schema default of 1).
+     *
+     * @var array<string, bool>
+     */
+    private array $visible = [];
+
     public function __construct()
     {
         $this->byId = [
@@ -65,6 +74,25 @@ final class FakeNewsStorage implements NewsStorageInterface
     #[Override]
     public function remove(string $newsId): void
     {
-        unset($this->byId[$newsId]);
+        unset($this->byId[$newsId], $this->visible[$newsId]);
+    }
+
+    #[Override]
+    public function setVisible(string $newsId, bool $visible): void
+    {
+        if (! isset($this->byId[$newsId])) {
+            return;
+        }
+
+        $this->visible[$newsId] = $visible;
+    }
+
+    /**
+     * Test introspection: the `visible` flag last written for a row.
+     * Defaults to true (schema default) when never toggled.
+     */
+    public function visibleOf(string $newsId): bool
+    {
+        return $this->visible[$newsId] ?? true;
     }
 }

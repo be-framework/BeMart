@@ -22,6 +22,14 @@ final class FakeTagStorage implements TagStorageInterface
     /** @var array<string, TagEntity> keyed by tagId */
     private array $byId;
 
+    /**
+     * Storage-only `sort_no` per row — dtb_tag has the column but
+     * {@see TagEntity} does not project it. Populated by `reorder`.
+     *
+     * @var array<string, int>
+     */
+    private array $sortNo = [];
+
     public function __construct()
     {
         $this->byId = [
@@ -55,6 +63,26 @@ final class FakeTagStorage implements TagStorageInterface
     #[Override]
     public function remove(string $tagId): void
     {
-        unset($this->byId[$tagId]);
+        unset($this->byId[$tagId], $this->sortNo[$tagId]);
+    }
+
+    #[Override]
+    public function reorder(string $tagId, int $sortNo): void
+    {
+        if (! isset($this->byId[$tagId])) {
+            // Silent no-op on a missing row — same shape as `remove`.
+            return;
+        }
+
+        $this->sortNo[$tagId] = $sortNo;
+    }
+
+    /**
+     * Test introspection: the `sort_no` last written for a row, or null
+     * if `reorder` was never called for it.
+     */
+    public function sortNoOf(string $tagId): int|null
+    {
+        return $this->sortNo[$tagId] ?? null;
     }
 }

@@ -15,6 +15,12 @@ use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
  *   - getById(classCategoryId): single-row lookup
  *   - put(classCategory): upsert
  *   - remove(classCategoryId): drop (silent no-op on miss)
+ *   - reorder(classCategoryId, sortNo): generic `doSortNoMove` —
+ *     rewrites the storage-only `sort_no` column.
+ *   - setVisible(classCategoryId, visible): generic `doToggleVisible`
+ *     — rewrites the storage-only `visible` column. Both columns exist
+ *     on dtb_class_category but are outside the {@see ClassCategoryEntity}
+ *     projection; the two operations edit them directly.
  */
 interface ClassCategoryStorageInterface
 {
@@ -29,4 +35,8 @@ interface ClassCategoryStorageInterface
     public function put(ClassCategoryEntity $classCategory): void;
 
     public function remove(string $classCategoryId): void;
+
+    public function reorder(string $classCategoryId, int $sortNo): void;
+
+    public function setVisible(string $classCategoryId, bool $visible): void;
 }

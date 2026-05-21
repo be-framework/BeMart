@@ -349,6 +349,46 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
+    public function testReorderRewritesSortNo(): void
+    {
+        $id = $this->insertPayment(['sort_no' => 6]);
+        $storage = new SqlPaymentMethodAdminStorage($this->pdo);
+
+        $storage->reorder((string) $id, 23);
+
+        $stmt = $this->pdo->prepare('SELECT sort_no FROM dtb_payment WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        $this->assertNotFalse($row);
+        $this->assertSame(23, (int) $row['sort_no']);
+    }
+
+    public function testSetVisibleRewritesVisibleColumnAndIsReadBack(): void
+    {
+        $id = $this->insertPayment(['visible' => 1]);
+        $storage = new SqlPaymentMethodAdminStorage($this->pdo);
+
+        $storage->setVisible((string) $id, false);
+
+        // `visible` IS part of the PaymentMethodAdminEntity projection.
+        $entity = $storage->getById((string) $id);
+        $this->assertInstanceOf(PaymentMethodAdminEntity::class, $entity);
+        $this->assertFalse($entity->visible);
+
+        $storage->setVisible((string) $id, true);
+        $back = $storage->getById((string) $id);
+        $this->assertInstanceOf(PaymentMethodAdminEntity::class, $back);
+        $this->assertTrue($back->visible);
+    }
+
+    public function testReorderAndSetVisibleAreSilentNoOpForNonNumericId(): void
+    {
+        $storage = new SqlPaymentMethodAdminStorage($this->pdo);
+        $storage->reorder('nonexistent-zzz', 5);
+        $storage->setVisible('nonexistent-zzz', false);
+        $this->assertTrue(true);
+    }
+
     public function testSqlPaymentMethodAdminIdGeneratorAllocatesIncrementingIds(): void
     {
         $generator = new SqlPaymentMethodAdminIdGenerator($this->pdo);
