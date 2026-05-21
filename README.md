@@ -100,7 +100,7 @@ Be Framework + BEAR.Sunday へ移植する実装プロジェクト（**BeMart**�
 | `src/` | BEAR.Sunday アプリケーション層（`Resource/`, `Module/`, `Form/`） |
 | `be/` | Be Framework ドメイン層（`my-vendor/be-mart-be`、path repo として参照） |
 | `sql/` | EC-CUBE 4.3 スキーマダンプ・`mtb_*` マスタ seed・`setup-db.sh`（Phase 2 成果物） |
-| `var/templates/` | ストアフロント HTML テンプレート（EC-CUBE テンプレート移植、Phase 3 成果物） |
+| `var/templates/` | HTML テンプレート（EC-CUBE storefront + admin テーマの移植、Phase 3 成果物） |
 | `docs/phases/alps-audit-phase3.md` | Phase 3 準備の ALPS 監査記録 |
 | `docs/skills/` | 移植で発見した skill gap（G-14 〜 G-23）の外部化ドキュメント |
 | `docs/archive/ec-cube-bear-be-migration-plan.md` | 移植全体の段階計画（初期版・アーカイブ） |
