@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
+use MyVendor\BeMart\Form\AdminOrderShippingForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -573,5 +574,30 @@ final class AdminOrderExtrasResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+
+    // ----------------------------------------------------------------
+    // GET /admin/order/shipping-address — Order Tier-2 shipping editor
+    // ----------------------------------------------------------------
+
+    public function testOnGetShippingRendersBlankEditor(): void
+    {
+        $ro = $this->resource->get('page://self/admin/order/shipping-address', [
+            'orderNo' => self::ORDER_NO_A,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminOrderShippingForm::class, $ro->body['form']);
+        $this->assertSame(self::ORDER_NO_A, $ro->body['orderNo']);
+    }
+
+    public function testOnGetShippingRejectsAnonymousAdmin(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->get('page://self/admin/order/shipping-address');
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 }
