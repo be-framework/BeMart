@@ -145,6 +145,15 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
             'common.subtotal__with_separator' => '小計：',
             'common.total__with_separator' => '合計：',
             'common.pagetop' => 'ページトップへ',
+            // --- Block/*.twig storefront layout widgets -----------------
+            // The default EC-CUBE layout wires the static `footer` widget
+            // into the frame's FOOTER region; BeMart ports it directly
+            // (var/templates/Block/footer.html.twig). Keys copied verbatim
+            // from messages.ja.yaml.
+            'front.block.footer.about_us' => '当サイトについて',
+            'front.block.footer.privacy_policy' => 'プライバシーポリシー',
+            'front.block.footer.act_on_specified_commercial_transactions' => '特定商取引法に基づく表記',
+            'front.block.footer.inquiry' => 'お問い合わせ',
             // --- common.* (Login / Entry / Contact / ProductList) -------
             'common.login' => 'ログイン',
             'common.remember_me' => '次回から自動的にログインする',

@@ -227,10 +227,10 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
                 'keyword' => '', 'meta_robots' => '',
             ]),
             'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [0 => 'x'],
+                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
                 'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
                 'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [0 => 'x'], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
+                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
                 'ColumnNum' => 1,
             ]),
             'app' => new EcCubeStub(['session' => new EcCubeStub([
