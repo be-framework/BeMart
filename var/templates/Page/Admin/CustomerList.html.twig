@@ -1,0 +1,279 @@
+{#
+  BeMart admin Customer list — EC-CUBE goCustomerList (会員一覧).
+
+  PORT of EC-CUBE 4.3 admin-theme `Customer/index.twig`
+  (src/Eccube/Resource/template/admin/Customer/index.twig).
+
+  Customer section, DATA/LIST + search-form page. It extends the admin
+  frame (`admin-base.html.twig`, the port of EC-CUBE's admin
+  `default_frame.twig`), not the storefront `base.html.twig`. The markup
+  skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim from
+  EC-CUBE; only the dynamic bindings are rebound to the CustomerList
+  resource body (src/Resource/Page/Admin/CustomerList.php — body carries
+  `customers` (a list of {customerId, email, name01, name02,
+  customerStatus, postalCode}), `count`, `filters` and an
+  AdminCustomerSearchForm exposed as `searchForm`).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` / `path(...)` -> deterministic `/{route}?{query}`
+     (`BeMartTwigExtension`).
+   - `form_widget(searchForm.multi)` -> `searchForm.input('multi')` — the
+     real AdminCustomerSearchForm keyword box (Ray.WebFormModule).
+   - The detail-search panel's `form_widget(searchForm.<field>)` calls
+     (status / sex / birth-month / prefecture / the seven date ranges /
+     the purchase aggregates) -> the CustomerList resource supports ONLY
+     the free-text keyword (Wave 5 first iteration — see CustomerList's
+     docblock). AdminCustomerSearchForm declares only `multi`, so those
+     widgets render EMPTY. The panel STRUCTURE (rows / labels / collapse)
+     is kept verbatim; the empty widgets are an enumerated residual.
+   - `{% for Customer in pagination %}` -> the resource body's `customers`
+     list. EC-CUBE's `pagination` is a KnpPaginator; the list endpoint
+     returns the full collection (no server-side paging in scope), so the
+     `pageMaxis` page-count dropdown + the `@admin/pager.twig` block are
+     OMITTED. Enumerated as residual.
+   - `Customer.phone_number` -> the CustomerList projection does NOT carry
+     the phone number (out of the Wave 5 shallow-list slice). The phone
+     cell renders EMPTY, not invented. FLAGGED for enrichment follow-up.
+   - `Customer.Status.id == PROVISIONAL` (the 仮会員メール再送 modal) ->
+     the projection carries `customerStatus` as an int but the resend
+     affordance has no BeMart endpoint; the provisional-resend modal is
+     OMITTED. Enumerated as residual.
+   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
+     CSRF widget. OMITTED exactly as the storefront ports omit it.
+   - `search_items.twig` include (saved-search chips) -> EC-CUBE admin
+     fragment with no BeMart equivalent; dropped (the render-diff loader
+     serves it empty).
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_customer' %}
+{% set title = '会員一覧' %}
+{% set sub_title = '会員管理' %}
+
+{% block main %}
+    <form name="search_form" id="search_form" method="post" action="">
+        <div class="c-outsideBlock">
+            <div class="c-outsideBlock__contents">
+                <div class="row justify-content-start">
+                    <div class="col-6">
+                        <div class="mb-2">
+                            <label class="col-form-label" data-bs-toggle="tooltip" data-bs-placement="top" title="情報を入力して一覧の絞り込み検索ができます。より詳細な条件を指定するには［詳細検索］を開いてください。">会員ID・メールアドレス・お名前<i class="fa fa-question-circle fa-lg ms-1"></i></label>
+                            {{ searchForm.input('multi')|raw }}
+                        </div>
+                        <div class="d-inline-block mb-3 collapsed" data-bs-toggle="collapse" href="#searchDetail" aria-expanded="false" aria-controls="searchDetail"><a><i class="fa fw-bold me-1 fa-plus-square-o"></i><span class="fw-bold">詳細検索</span></a></div>
+                    </div>
+                </div>
+            </div>
+            <div class="c-subContents ec-collapse collapse" id="searchDetail">
+                <div class="row mb-2">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="col-form-label">会員種別</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div>
+                            <label>購入商品名</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col">
+                        <div class="row">
+                            <div class="col-12">
+                                <p class="col-form-label">性別</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div>
+                            <label>購入金額</label>
+                            <div class="row align-items-center">
+                                <div class="col"></div>
+                                <div class="col-auto text-center"><span>〜</span></div>
+                                <div class="col"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col">
+                        <div>
+                            <label>誕生月</label>
+                            <div class="row">
+                                <div class="col-5"></div>
+                                <div class="col-7"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div>
+                            <label>購入件数</label>
+                            <div class="row align-items-center">
+                                <div class="col"></div>
+                                <div class="col-auto text-center"><span>〜</span></div>
+                                <div class="col"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col">
+                        <div>
+                            <label>誕生日</label>
+                            <div class="row align-items-center">
+                                <div class="col"></div>
+                                <div class="col-auto text-center"><span>〜</span></div>
+                                <div class="col"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div>
+                            <label>登録日</label>
+                            <div class="row align-items-center">
+                                <div class="col"></div>
+                                <div class="col-auto text-center"><span>〜</span></div>
+                                <div class="col"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col">
+                        <div>
+                            <label>都道府県</label>
+                            <div class="row">
+                                <div class="col-5"></div>
+                                <div class="col-7"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div>
+                            <label>更新日</label>
+                            <div class="row align-items-center">
+                                <div class="col"></div>
+                                <div class="col-auto text-center"><span>〜</span></div>
+                                <div class="col"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col">
+                        <div class="mb-3">
+                            <label>電話番号</label>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div>
+                            <label>最終購入日</label>
+                            <div class="row align-items-center">
+                                <div class="col"></div>
+                                <div class="col-auto text-center"><span>〜</span></div>
+                                <div class="col"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-outsideBlock__contents mb-5">
+            <button type="submit" class="btn btn-ec-conversion px-5">検索</button>
+            <span class="fw-bold ms-2">検索結果：{{ count }}件が該当しました</span>
+        </div>
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    {% if count %}
+                        <div class="row justify-content-between mb-2">
+                            <div class="col-6"></div>
+
+                            <div class="col-5 text-end">
+                                <div class="d-inline-block">
+                                    <div class="btn-group" role="group">
+                                        <a class="btn btn-ec-regular" href="{{ url('admin_customer_export') }}"><i class="fa fa-cloud-download me-1 text-secondary"></i><span>CSVダウンロード</span></a>
+                                        <a class="btn btn-ec-regular" href="{{ url('admin_setting_shop_csv') }}"><i class="fa fa-cog me-1 text-secondary"></i><span>CSV出力項目設定</span></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card rounded border-0 mb-4 d-block">
+                            <div class="card-body p-0">
+                                <table class="table">
+                                    <thead>
+                                    <tr>
+                                        <th class="border-top-0 pt-2 pb-3 ps-3 text-nowrap">会員ID<a href="#" class="js-listSort" data-sortkey="customer_id"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
+                                        <th class="border-top-0 pt-2 pb-3">お名前<a href="#" class="js-listSort" data-sortkey="name"><i class="fa fa-arrow-up" aria-hidden="true"></i></a></th>
+                                        <th class="border-top-0 pt-2 pb-3">電話番号</th>
+                                        <th class="border-top-0 pt-2 pb-3">メールアドレス</th>
+                                        <th class="border-top-0 pt-2 pb-3">&nbsp;</th>
+                                        <th class="border-top-0 pt-2 pb-3 pe-3">&nbsp;</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for Customer in customers %}
+                                        <tr id="ex-customer-{{ Customer.customerId }}">
+                                            <td class="align-middle ps-3">{{ Customer.customerId }}</td>
+                                            <td class="align-middle"><a href="{{ url('admin_customer_edit', { 'id': Customer.customerId}) }}">{{ Customer.name01 }}&nbsp;{{ Customer.name02 }}</a></td>
+                                            <td class="align-middle">{{ Customer.phoneNumber|default('') }}</td>
+                                            <td class="align-middle">{{ Customer.email }}</td>
+                                            <td class="align-middle"></td>
+                                            <td class="align-middle pe-3">
+                                                <div class="text-end">
+                                                    <div class="px-1 d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
+                                                        <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#discontinuance-{{ Customer.customerId }}">
+                                                            <i class="fa fa-close fa-lg text-secondary" aria-hidden="true"></i>
+                                                        </a>
+                                                    </div>
+                                                    <div class="modal fade" id="discontinuance-{{ Customer.customerId }}" tabindex="-1" role="dialog" aria-labelledby="discontinuance" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title fw-bold">
+                                                                        削除します</h5>
+                                                                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close">
+
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body text-start">
+                                                                    <p class="text-start">
+                                                                        この操作はあとから取り消すことができません。「{{ Customer.email }}」を削除してよろしいですか？</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">
+                                                                        キャンセル
+                                                                    </button>
+                                                                    <a href="{{ url('admin_customer_delete', {'id' : Customer.customerId}) }}" class="btn btn-ec-delete" data-method="delete" data-confirm="false">
+                                                                        削除
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div><!-- /.text-end -->
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="card rounded border-0">
+                            <div class="card-body p-4">
+                                <div class="text-center text-muted mb-4 h5">検索条件に合致するデータが見つかりませんでした</div>
+                                <div class="text-center text-muted">検索条件を変えて、再度検索をお試しください</div>
+                                <div class="text-center text-muted">[詳細検索]も試してみましょう</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
