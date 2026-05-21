@@ -1945,7 +1945,7 @@ Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEA
 
 ### 積み残し
 
-- **Admin HTML Tier-2（約 43 テンプレート）** — Tier-1（77 ページ中 34、list/data + 単純 CRUD）は 8 section-wave で完了（下記「Admin HTML — section-wave 並列移植」参照）。残る Tier-2 は重量エディタと、action-only リソースに `onGet` が無く新規リソース＝`be/src` ドメイン層追加を要するページ群。
+- **Admin HTML Tier-2（残 約 28 テンプレート）** — Tier-1（77 ページ中 34、list/data + 単純 CRUD）は 8 section-wave で完了（下記「Admin HTML — section-wave 並列移植」参照）。その後 4 つの Tier-2 wave で 15 ページを回収（下記「Admin HTML Tier-2 — section ごとの回収」参照）。残る Tier-2 は重量エディタと、action-only リソースに `onGet` が無く新規リソース＝`be/src` ドメイン層追加を要するページ群。
 - **enrichment backlog の残 5 件**（上記）
 - **`Block/*` ウィジェットテンプレート** — ヘッダ/フッタ/カート/ログイン/検索のブロック領域は今は EC-CUBE ランタイム residual のまま。ウィジェットレンダリングのサブステップが必要（Block は ALPS で意図的に未モデル化）。
 - Phase 3 中の ALPS 是正で追加した 5 遷移（`doSortNoMove` 等）は `be/src` にドメイン実装が無い（domain coverage が 139/144 である理由）
@@ -1990,8 +1990,32 @@ Tier-2 は 77 ページ中 43 ページ。section 別の defer リストは
 だったため手動 salvage で 2 commit に分割して回収（`855c412` / `dff64ca`）。バッチ 2 では
 各 agent に**ページ単位の逐次 commit**を指示し、カットオフ耐性を確保した。
 
+### Admin HTML Tier-2 — section ごとの回収（進行中）
+
+Tier-1 完了後、defer した 43 ページの Tier-2 を section 単位で回収中。Tier-2 は
+テンプレ移植ではなく「新規 GET リソース／action-only リソースへの `onGet` 追加／
+`be/src` body-shape」を伴うリソース生成作業（`docs/migration-status.md` の punch-list 1 参照）。
+
+- **flow-manage-system Tier-2 wave**（`37c80fb`）— 6 ページ（authority / system / log /
+  masterdata / security / two_factor_auth_edit）。5 新規 GET リソース + `AuthorityRole::onGet()`
+  + 3 `<Name>Form` + `AdminMasterRegistry` body-shape。worked example として最も大規模。
+- **Customer delivery-edit**（`f872819`）— 1 ページ。最小例: 新規 GET リソース 1 +
+  `<Name>Form` 1。Customer section 完了。
+- **Setting/Shop Tier-2 wave**（`0a3724a`）— 5 ページ（calendar / csv / mail-template /
+  order_status / tradelaw）。新規 GET リソース 1（`Calendar`）+ action-only リソース 4 への
+  `onGet` 追加 + 5 `<Name>Form`。両パターンが同居。
+- **Setting/Shop edit-page wave**（`0b54dee`）— 3 ページ（payment_edit / delivery_edit /
+  shop_master）。action-only `Payment`/`Delivery` リソースへの `onGet` エディタ追加
+  （マスタ一覧 fetch が AUTHZ ゲートを兼ねる）+ `BaseInfo.onGet` への shop-master フォーム
+  追加 + 3 `<Name>Form`。Setting/Shop section 完了。
+
+回収済み計 **15 ページ → admin HTML は 77 ページ中 49 ページ移植**。Customer /
+Setting/System / Setting/Shop の 3 section が Tier-2 まで完了。残 Tier-2 は約 28 ページ
+（Order 編集系 `edit`/`shipping`/`mail`・Product 編集系 `product`/`product_class`/`category`・
+Store/Plugin の install/search 系が主）。
+
 ### Phase 3 現在のテスト規模
 
-`vendor/bin/phpunit` → **約 1734 tests / 5633 assertions, OK**（deprecation 3 件のみ、failure なし）。
+`vendor/bin/phpunit` → **約 1796 tests / 5889 assertions, OK**（deprecation 3 件のみ、failure なし）。
 正確な現在値は `docs/migration-status.md` を参照。
 
