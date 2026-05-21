@@ -13,6 +13,8 @@ use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminLoginForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 use function sprintf;
@@ -52,6 +54,7 @@ class Login extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -78,6 +81,9 @@ class Login extends ResourceObject
                 'href' => 'page://self/admin/login',
             ],
             'csrfToken' => null,
+            // Phase 3: an empty AdminLoginForm for the HTML port to
+            // render via `{{ form.input(...) }}`. JSON contexts ignore it.
+            'form' => $this->formFactory->newInstance(AdminLoginForm::class),
         ];
 
         return $this;

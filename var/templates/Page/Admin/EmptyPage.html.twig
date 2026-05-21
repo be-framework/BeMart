@@ -1,0 +1,20 @@
+{#
+  BeMart admin empty extension-slot page — EC-CUBE admin empty_page.
+
+  PORT of EC-CUBE 4.3 admin-theme `empty_page.twig`
+  (src/Eccube/Resource/template/admin/empty_page.twig).
+
+  EC-CUBE's `empty_page.twig` is a near-empty `{% extends
+  default_frame.twig %}` with an empty `{% block main %}` — a routable
+  slot plugins fill via template events. BeMart has no plugin/template-
+  event system, so this is the faithful trivial port: the admin frame
+  (`admin-base.html.twig`) with an empty `main` block. Nothing dynamic,
+  nothing to rebind.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_homepage' %}
+
+{% block main %}
+
+{% endblock %}
