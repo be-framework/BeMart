@@ -265,7 +265,7 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('trans', $trans));
         // not-a-member branch (the お届け先の変更 header) — matches the port.
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p): string => '/' . $p));
+        EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
