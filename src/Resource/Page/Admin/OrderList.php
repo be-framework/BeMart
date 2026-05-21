@@ -12,6 +12,8 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderListFetched;
 use MyVendor\BeMart\Be\Input\GetAdminOrderListInput;
+use MyVendor\BeMart\Form\AdminOrderSearchForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -42,6 +44,7 @@ class OrderList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -82,6 +85,11 @@ class OrderList extends ResourceObject
             'limit' => $final->limit,
             'offset' => $final->offset,
         ];
+        // Phase 3: an AdminOrderSearchForm for the HTML list page to
+        // render the `multi` keyword box via `{{ searchForm.input(...) }}`.
+        // OrderList has no search axis in the Wave 7 slice, so the form is
+        // empty (no filters body). JSON contexts ignore this key.
+        $this->body['searchForm'] = $this->formFactory->newInstance(AdminOrderSearchForm::class);
 
         return $this;
     }
