@@ -1982,7 +1982,8 @@ Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEA
   authority/system/log/masterdata/security。これらは `be/src` ドメイン層
   （Input/Final/body-shape）の追加を伴うため、テンプレ移植 wave とは別種の作業。
 
-Tier-2 は 77 ページ中 43 ページ。section 別の defer リストは
+Tier-2 はこの時点で 77 ページ中 43 ページが残っていた（その後すべて回収済み —
+次節「Admin HTML Tier-2 — section ごとの回収（完了）」参照）。section 別の履歴は
 `docs/phases/admin-fanout-plan.md` と `var/templates/README.md`「Fan-out status」が正。
 
 **並列オーケストレーションの教訓** — バッチ 1 の 2 agent（Content / Top-level）が
@@ -1990,9 +1991,9 @@ Tier-2 は 77 ページ中 43 ページ。section 別の defer リストは
 だったため手動 salvage で 2 commit に分割して回収（`855c412` / `dff64ca`）。バッチ 2 では
 各 agent に**ページ単位の逐次 commit**を指示し、カットオフ耐性を確保した。
 
-### Admin HTML Tier-2 — section ごとの回収（進行中）
+### Admin HTML Tier-2 — section ごとの回収（完了）
 
-Tier-1 完了後、defer した 43 ページの Tier-2 を section 単位で回収中。Tier-2 は
+Tier-1 完了後、defer した Tier-2 を section 単位で回収。Tier-2 は
 テンプレ移植ではなく「新規 GET リソース／action-only リソースへの `onGet` 追加／
 `be/src` body-shape」を伴うリソース生成作業（`docs/migration-status.md` の punch-list 1 参照）。
 
@@ -2008,16 +2009,47 @@ Tier-1 完了後、defer した 43 ページの Tier-2 を section 単位で回�
   shop_master）。action-only `Payment`/`Delivery` リソースへの `onGet` エディタ追加
   （マスタ一覧 fetch が AUTHZ ゲートを兼ねる）+ `BaseInfo.onGet` への shop-master フォーム
   追加 + 3 `<Name>Form`。Setting/Shop section 完了。
+- **Order Tier-2 wave**（`2f59bb3`/`4c7c4a1`/`42214a3`/`2a45b43`/`30c97c6`/`a455281`）—
+  6 ページ（edit / shipping / mail / mail_confirm / order_pdf / csv_shipping）。大型
+  マルチパネルエディタ（`edit` ~1057L・`shipping` ~709L）をページ単位逐次 commit で移植。
+- **Product Tier-2 wave**（`4eb93f3`/`a08f38f`/`9ca00d6`/`0296306`）— 7 ページ
+  （product ~932L / product_class ~448L / category / csv ×4）。
+- **Store template_add**（`571dd5b`）— 1 ページ。Store section の残りは plugin
+  install/search 系のみ（移植対象外）。
 
-回収済み計 **15 ページ → admin HTML は 77 ページ中 49 ページ移植**。Customer /
-Setting/System / Setting/Shop の 3 section が Tier-2 まで完了。残 Tier-2 は約 28 ページ
-（Order 編集系 `edit`/`shipping`/`mail`・Product 編集系 `product`/`product_class`/`category`・
-Store/Plugin の install/search 系が主）。
+回収済み計 **29 ページ → admin HTML は 77 ページ中 63 ページ移植**。残 14 ページは
+**Store/Plugin の install/search サブツリーのみ — プラグインは移植対象外**のため、
+スコープ内の admin HTML 移植は完了。
+
+### Phase 3 storefront — 仕上げ
+
+- **Block ウィジェット**（`f3df0d4`）— `logo` / `footer` の 2 ウィジェットを
+  `var/templates/Block/` に移植。残る Block 領域（cart/login/search）は
+  EC-CUBE ランタイム残差のまま（Block は ALPS 非モデル化）。
+- **Shopping confirm/complete エンリッチ**（`1177e0d`/`2f8d17a`）— 薄かった
+  resource body を EC-CUBE から再導出し、テンプレートに配線。
+- **fidelity-test 修正**（`5d9e6ba`）— Cart/Confirm の render-diff を EC-CUBE
+  4.3.1 実体に合わせて是正。
+
+### Phase B — セキュリティ・本番化
+
+- **静的アセット配備**（`a002097`）— EC-CUBE 4.3 の `default` + `admin` テーマの
+  静的アセットを `public/` に配備。served URL（`/assets`・`/template/admin/assets`・
+  `/bundle`）を忠実にミラー。
+- **HTTP ルーター**（`53e587e`/`39f1117`）— `RouteTable`（EC-CUBE ルート名 ↔ URL
+  パス ↔ リソース URI のマップ）+ `Router`（`(method, path)` 照合）。
+  `public/index.php` が 404/405 セマンティクス付きでディスパッチ。
+  `BeMartTwigExtension::url()/path()` は共有 `RouteTable` 経由で解決。
+- **render-diff スタブのアセットパッケージ対応**（`16e8c9d`）— EC-CUBE の
+  `asset(path, package)` パッケージマップ（`admin`→`/template/admin/`・
+  `bundle`→`/bundle/`）を `EcCubeAssetStub` 経由で両サイド同一に評価。
 
 ### Phase 3 現在のテスト規模
 
-`vendor/bin/phpunit` → **約 1796 tests / 5889 assertions, OK**（deprecation 3 件のみ、failure なし）。
-正確な現在値は `docs/migration-status.md` を参照。
+`vendor/bin/phpunit` → **1893 tests / 4002 assertions**。非 SQL スイート
+（`--testsuite bemart,bemart-be`）は DB 無しで全 green。`bemart-sql` スイートは
+ローカル MariaDB が必要で、無い場合 745 件 skip + prod-DB コンテキスト 3 件が
+fail（既知・MariaDB 依存）。正確な現在値は `docs/migration-status.md` を参照。
 
 ### Phase-3 是正遷移のドメイン実装完了
 
