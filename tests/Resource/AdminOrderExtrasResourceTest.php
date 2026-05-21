@@ -439,6 +439,24 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
+    public function testOnGetImportShippingRendersUploadForm(): void
+    {
+        $ro = $this->resource->get('page://self/admin/order/import-shipping');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame([], $ro->body);
+    }
+
+    public function testOnGetImportShippingRejectsAnonymousAdmin(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->get('page://self/admin/order/import-shipping');
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('管理者', $ro->body['message']);
+    }
+
     // ------------------------------------------------------------------
     // doSelectShippingAddress / doUpdateShippingAddress
     // ------------------------------------------------------------------
