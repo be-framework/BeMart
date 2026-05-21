@@ -242,9 +242,11 @@ EC-CUBE-runtime-only residual), plus two admin-specific ones:
 
 The other admin frame includes (`@admin/alert.twig`, `info.twig`,
 `notice_debug_mode.twig`, `snippet.twig`, `pager.twig`,
-`@common/lang.twig`) are flash / notice / plugin / pager / JS-i18n
-fragments with no BeMart equivalent — dropped, exactly as the storefront
-frame drops `meta.twig` / `block.twig`.
+`search_items.twig`, `@common/lang.twig`) are flash / notice / plugin /
+pager / saved-search-chips / JS-i18n fragments with no BeMart equivalent
+— dropped, exactly as the storefront frame drops `meta.twig` /
+`block.twig`. `EcCubeAdminStubLoader::STUBBED_EMPTY` serves them empty so
+they contribute nothing to the render diff on either side.
 
 ### Difference 2 — admin auth context
 
@@ -276,8 +278,55 @@ same move the admin *resource* tests already make).
   `src/Form/AdminNewsForm.php` + `Page/Admin/News/News.html.twig` +
   `AdminNewsHtmlRenderTest` (residual ~30 lines — the admin-frame
   baseline + the form `_token` hidden CSRF input + the omitted `visible`
-  select). Add admin `trans` keys to `EcCubeStub::jaMessages()` as
-  needed.
+  select). A section's admin `trans` keys live in a **per-section
+  ja-messages file** — see the next subsection.
+
+### The per-section ja-message mechanism — parallel-wave safety
+
+A render-diff test substitutes EC-CUBE's `{{ 'key'|trans }}` calls with
+the Japanese literal the key resolves to in EC-CUBE's
+`messages.ja.yaml`. The storefront ports keep that map in one shared
+method, `EcCubeStub::jaMessages()`. If every admin section-wave appended
+its keys there, that single method would be a **merge-conflict hotspot**
+— two waves editing the same lines block parallel work.
+
+The admin `trans` keys are therefore split **per section**, under
+`tests/Resource/Admin/`:
+
+- **`EcCubeStub::jaMessages()`** stays the FROZEN storefront baseline.
+  Admin section-waves NEVER touch it.
+- **`Admin/AdminJaMessages.php`** is the shared admin infra. Its
+  `chrome()` carries the keys EVERY admin page needs — the admin frame
+  (`default_frame.twig`) + sidebar (`nav.twig`) chrome + `admin.common.*`
+  action labels. Stable; edited only when the frame port itself changes.
+  Its `forSection(array $sectionKeys)` builds the full map for one
+  section's test: `jaMessages()` (storefront baseline) + `chrome()`
+  (admin chrome) + the section's own keys.
+- **`Admin/<Section>JaMessages.php`** — each section ships its OWN keys
+  in its own file: a class with a `public static function keys(): array`
+  returning `array<string,string>` copied verbatim from
+  `messages.ja.yaml`. `ContentJaMessages` (News pilot) and
+  `CustomerJaMessages` (Customer wave) are the worked examples.
+
+A section's render test then does:
+
+```php
+use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
+use MyVendor\BeMart\Tests\Resource\Admin\CustomerJaMessages;
+
+$messages = AdminJaMessages::forSection(CustomerJaMessages::keys());
+$trans = static fn (string $k, array $p = []): string => /* substitute */ ;
+```
+
+and feeds `$trans` to its `trans` Twig filter/function stub.
+
+**Why this makes the fan-out conflict-free:** adding a section-wave =
+adding exactly ONE new file (`Admin/<Section>JaMessages.php`) + that
+section's templates + tests. No wave touches `EcCubeStub.php`,
+`AdminJaMessages.php` or `EcCubeAdminStubLoader.php` — the three shared
+files. The remaining waves (Product / Order / Content / Setting/Shop /
+Setting/System / Store / Top-level) can run in parallel with zero
+cross-wave file contention.
 
 ### Fan-out — grouping the ~100 admin pages into section-waves
 
@@ -297,9 +346,11 @@ no cross-wave coupling):
 | Top-level | `admin/` (index, login, error, change_password, …) | ~10 |
 
 Each wave follows this recipe page-for-page; no module or wiring change
-is needed beyond extending `EcCubeStub::jaMessages()` with that
-section's `trans` keys and adding `<Name>Form` classes for form pages.
-`admin-base.html.twig` + `EcCubeAdminStubLoader` are shared.
+is needed beyond adding the section's own `Admin/<Section>JaMessages.php`
+(see "The per-section ja-message mechanism" above) and `<Name>Form`
+classes for form pages. `admin-base.html.twig`, `EcCubeAdminStubLoader`,
+`EcCubeStub` and `AdminJaMessages` are shared and stay untouched — that
+is what keeps the waves parallel-safe.
 
 ## Per-page workflow for the remaining ~138 pages
 

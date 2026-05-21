@@ -34,11 +34,12 @@ use function substr;
  *    `@admin/nav.twig` for real — the admin layout being verified;
  *  - serves the remaining admin includes EMPTY: `alert.twig`,
  *    `info.twig`, `notice_debug_mode.twig`, `snippet.twig`,
- *    `pager.twig`, `@common/lang.twig`. Those are flash-message / notice
- *    / plugin / pager / JS-i18n fragments with no BeMart equivalent;
- *    BeMart's `admin-base.html.twig` likewise omits them, so serving
- *    them empty keeps the diff focused on the frame skeleton + nav + the
- *    page content that were actually ported.
+ *    `pager.twig`, `search_items.twig`, `@common/lang.twig`. Those are
+ *    flash-message / notice / plugin / pager / saved-search-chips /
+ *    JS-i18n fragments with no BeMart equivalent; BeMart's
+ *    `admin-base.html.twig` and the list-page ports likewise omit them,
+ *    so serving them empty keeps the diff focused on the frame skeleton
+ *    + nav + the page content that were actually ported.
  *
  * As in {@see EcCubeStubLoader}, the Symfony twig-bridge `{% form_theme %}`
  * tag is stripped from the source (not installed; a no-op once the
@@ -56,6 +57,7 @@ final class EcCubeAdminStubLoader implements LoaderInterface
         'notice_debug_mode.twig',
         'snippet.twig',
         'pager.twig',
+        'search_items.twig',
         'lang.twig',
     ];
 
