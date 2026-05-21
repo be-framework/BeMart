@@ -24,7 +24,7 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 
 | ディレクトリ | 内容 |
 |---|---|
-| [`methodology/`](methodology/) | 再利用可能な方法論・原則。`hypermedia-test-principle.md`（hypermedia テスト＝移植契約）、`FRAMEWORK_REVIEW.md`（フレームワーク評価）。 |
+| [`methodology/`](methodology/) | 再利用可能な方法論・原則。`hypermedia-test-principle.md`（hypermedia テスト＝移植契約）、`FRAMEWORK_REVIEW.md`（139 transition 規模でのフレームワーク実務レビュー）、`be-bear-ai-era.md`（Be + BEAR の AI コーディング時代における潜在能力の論評）。 |
 | [`phases/`](phases/) | フェーズ別の成果物。`alps-audit-phase3.md`（Phase 3 準備の ALPS 監査）、`admin-fanout-plan.md`（admin 移植のファンアウト計画）。 |
 | [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-23）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |
 | [`quality/`](quality/) | Phase 1 の ALPS 監査ノート（`verify-*.md` / `improvements-*.md`）。 |
