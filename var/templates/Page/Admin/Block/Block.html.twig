@@ -1,0 +1,174 @@
+{#
+  BeMart admin Block edit — EC-CUBE goBlock (ブロック登録/編集).
+
+  PORT of EC-CUBE 4.3 admin-theme `Content/block_edit.twig`
+  (src/Eccube/Resource/template/admin/Content/block_edit.twig).
+
+  FORM/CRUD page. Extends the admin frame (`admin-base.html.twig`). The
+  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
+  from EC-CUBE; only the dynamic bindings are rebound.
+
+  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
+  Block resource (src/Resource/Page/Admin/Block/Block.php) exposes an
+  {@see \MyVendor\BeMart\Form\AdminBlockForm} as `body['form']`. The
+  inputs render through that real form object:
+    {{ form.input('name')|raw }}      <- real <input> w/ id/attrs/value
+    {{ form.error('name') }}          <- inline Be-domain error, if any
+  `AdminBlockForm::init()` ports the field names / ids from EC-CUBE's
+  `BlockType` (block prefix `block`).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
+     hidden `_token` input is kept (structure) with an empty value;
+     EC-CUBE-runtime only — enumerated as residual.
+   - `form_widget(form.id)` / `form_widget(form.DeviceType)` -> hidden
+     bookkeeping inputs EC-CUBE's BlockType carries (the row id + device
+     type). The Block resource body does not carry them as form fields
+     (the AdminBlockForm declares only name/file_name/block_html); the
+     hidden inputs are omitted. Enumerated as residual.
+   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
+     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
+   - the ACE editor `block_html` source — EC-CUBE's dtb_block tpl was out
+     of the Wave 9 CMS slice, so the editor renders empty (the
+     AdminBlockForm `block_html` field has no persisted value). The
+     `<div id="editor">` shell + hidden textarea are kept.
+   - `deletable` -> renders the editable file_name branch (the new-block
+     case — see the Block resource port header: `onGet` builds the
+     new-block form).
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_content_block_new' %}
+{% set title = 'ブロック管理' %}
+{% set sub_title = 'コンテンツ管理' %}
+
+{% block stylesheet %}
+    <style>
+        .ui-resizable-se {
+            right: -3px;
+            bottom: -3px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        ace.require('ace/ext/language_tools');
+        var editor = ace.edit('editor');
+        editor.session.setMode('ace/mode/twig');
+        editor.setTheme('ace/theme/tomorrow');
+        editor.setValue('{{ blockHtml|default('')|escape('js') }}');
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            showInvisibles: true
+        });
+
+        $("#editor").resizable({
+            resize: function (event, ui) {
+                editor.resize();
+            }
+        });
+
+        $('#content_block_form').on('submit', function(elem) {
+            $('#block_block_html').val(editor.getValue());
+        });
+    </script>
+{% endblock %}
+
+{% block main %}
+    <form name="content_block_form" id="content_block_form" method="post"
+          action="{{ url('admin_content_block_new') }}">
+        <input type="hidden" id="block__token" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8"><span class="card-title">ブロック設定</span></div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#blockEdit" aria-expanded="false" aria-controls="blockEdit">
+                                        <i class="fa fa-angle-up fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="blockEdit">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="ブロックの管理用名称です。">
+                                            <span>ブロック名</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col-10">
+                                        {{ form.input('name')|raw }}
+                                        {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="このブロックの内容を記述したtwigテンプレートファイルの名前です。管理画面ではあとから変更できません。">
+                                            <span>ファイル名</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col-10">
+                                        <div class="row align-items-center">
+                                            <span class="col-3">{{ form.input('file_name')|raw }}</span><span class="col-auto ps-0">.twig</span>
+                                        </div>
+                                        {% if form.error('file_name') %}<span class="invalid-feedback d-block">{{ form.error('file_name') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="テンプレートファイルを編集します。twigで記述します。">
+                                            <span>コード</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col-10">
+                                        <div id="editor" style="height: 480px" class="form-control"></div>
+                                        <div class="d-none">
+                                            {{ form.input('block_html')|raw }}
+                                        </div>
+                                        {% if form.error('block_html') %}<span class="invalid-feedback d-block">{{ form.error('block_html') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_content_block') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i><span>ブロック管理</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if message is defined and message %}
+        <p class="ec-errorMessage">{{ message }}</p>
+    {% endif %}
+{% endblock %}
