@@ -166,6 +166,31 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
+    public function testReorderRewritesSortNo(): void
+    {
+        $id = $this->insertTag(['name' => 'movable', 'sort_no' => 3]);
+        $storage = new SqlTagStorage($this->pdo);
+
+        $storage->reorder((string) $id, 17);
+
+        $stmt = $this->pdo->prepare('SELECT sort_no FROM dtb_tag WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        $this->assertNotFalse($row);
+        $this->assertSame(17, (int) $row['sort_no']);
+        // The projection is untouched (sort_no is storage-only).
+        $entity = $storage->getById((string) $id);
+        $this->assertInstanceOf(TagEntity::class, $entity);
+        $this->assertSame('movable', $entity->tagName);
+    }
+
+    public function testReorderIsSilentNoOpForNonNumericId(): void
+    {
+        $storage = new SqlTagStorage($this->pdo);
+        $storage->reorder('tg-new', 5); // non-numeric, no exception
+        $this->assertTrue(true);
+    }
+
     public function testSqlTagIdGeneratorAllocatesIncrementingIds(): void
     {
         $generator = new SqlTagIdGenerator($this->pdo);

@@ -195,6 +195,47 @@ final class SqlDeliveryStorage implements DeliveryStorageInterface
         $stmt->execute([':id' => (int) $deliveryId]);
     }
 
+    #[Override]
+    public function reorder(string $deliveryId, int $sortNo): void
+    {
+        if (! ctype_digit($deliveryId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake.
+            return;
+        }
+
+        // Generic `doSortNoMove` — rewrite the `sort_no` column
+        // (smallint unsigned, nullable) directly.
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_delivery SET sort_no = :sort_no, update_date = NOW() '
+            . 'WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $deliveryId,
+            ':sort_no' => $sortNo,
+        ]);
+    }
+
+    #[Override]
+    public function setVisible(string $deliveryId, bool $visible): void
+    {
+        if (! ctype_digit($deliveryId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake.
+            return;
+        }
+
+        // Generic `doToggleVisible` — rewrite the `visible` column
+        // (tinyint(1) NOT NULL DEFAULT 1). `visible` IS part of the
+        // DeliveryEntity projection, so a subsequent read reflects it.
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_delivery SET visible = :visible, update_date = NOW() '
+            . 'WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $deliveryId,
+            ':visible' => (int) $visible,
+        ]);
+    }
+
     /**
      * @param array<string, mixed> $row
      */

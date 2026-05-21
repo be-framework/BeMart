@@ -19,6 +19,14 @@ final class FakeDeliveryStorage implements DeliveryStorageInterface
     /** @var array<string, DeliveryEntity> keyed by deliveryId */
     private array $byId = [];
 
+    /**
+     * Storage-only `sort_no` per row — dtb_delivery has the column but
+     * {@see DeliveryEntity} does not project it.
+     *
+     * @var array<string, int>
+     */
+    private array $sortNo = [];
+
     /** @return list<DeliveryEntity> */
     #[Override]
     public function list(): array
@@ -44,6 +52,39 @@ final class FakeDeliveryStorage implements DeliveryStorageInterface
     #[Override]
     public function remove(string $deliveryId): void
     {
-        unset($this->byId[$deliveryId]);
+        unset($this->byId[$deliveryId], $this->sortNo[$deliveryId]);
+    }
+
+    #[Override]
+    public function reorder(string $deliveryId, int $sortNo): void
+    {
+        if (! isset($this->byId[$deliveryId])) {
+            return;
+        }
+
+        $this->sortNo[$deliveryId] = $sortNo;
+    }
+
+    #[Override]
+    public function setVisible(string $deliveryId, bool $visible): void
+    {
+        $current = $this->byId[$deliveryId] ?? null;
+        if ($current === null) {
+            return;
+        }
+
+        // `visible` IS projected onto DeliveryEntity — rebuild the row
+        // so `list()` / `getById()` reflect the toggle.
+        $this->byId[$deliveryId] = new DeliveryEntity(
+            deliveryId: $current->deliveryId,
+            deliveryName: $current->deliveryName,
+            visible: $visible,
+        );
+    }
+
+    /** Test introspection: the `sort_no` last written for a row. */
+    public function sortNoOf(string $deliveryId): int|null
+    {
+        return $this->sortNo[$deliveryId] ?? null;
     }
 }

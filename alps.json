@@ -1129,7 +1129,6 @@
           {"href": "#goNewsList"},
           {"href": "#goNews"},
           {"href": "#doCreateNews"},
-          {"href": "#doSortNoMove"},
           {"href": "#doToggleVisible"}
         ]
       },
@@ -1693,7 +1692,7 @@
         "doc": {"value": "店舗基本情報を更新する。`BaseInfo` テーブルは 1 レコードのみで全店舗共通設定として参照される。"}},
       {"id": "doSortNoMove", "title": "並び順を変更する", "type": "idempotent", "rt": "#AdminTop",
         "tag": "admin-system flow-manage-shop actor-admin src-router",
-        "doc": {"value": "管理画面の一覧画面で行をドラッグ＆ドロップして表示順（sort_no）を更新する汎用インライン操作。EC-CUBE の *_sort_no_move ルート群（admin_setting_shop_payment_sort_no_move / admin_setting_shop_delivery_sort_no_move / admin_product_tag_sort_no_move / admin_product_class_name_sort_no_move / admin_product_class_category_sort_no_move / admin_content_news 等、10+ ルート）から導出した抽象遷移。並べ替え結果は冪等（同一順序の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
+        "doc": {"value": "管理画面の一覧画面で行をドラッグ＆ドロップして表示順（sort_no）を更新する汎用インライン操作。EC-CUBE の *_sort_no_move ルート群（admin_setting_shop_payment_sort_no_move / admin_setting_shop_delivery_sort_no_move / admin_product_tag_sort_no_move / admin_product_class_name_sort_no_move / admin_product_class_category_sort_no_move 等）から導出した抽象遷移。sort_no カラムを持つマスタ（dtb_payment / dtb_delivery / dtb_tag / dtb_class_name / dtb_class_category）の一覧でのみ参照される — dtb_news には sort_no カラムが無いため NewsList は本遷移を参照しない。並べ替え結果は冪等（同一順序の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
       {"id": "doToggleVisible", "title": "表示・非表示を切り替える", "type": "idempotent", "rt": "#AdminTop",
         "tag": "admin-system flow-manage-shop actor-admin src-router",
         "doc": {"value": "管理画面の一覧画面で行の表示／非表示（visible）をインラインでトグルする汎用操作。EC-CUBE の *_visible(ity) ルート群（admin_setting_shop_payment_visible / admin_setting_shop_delivery_visibility 等）から導出した抽象遷移。トグルは可視状態を明示値に設定する冪等操作（同一値の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
