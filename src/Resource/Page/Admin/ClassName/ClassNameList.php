@@ -15,6 +15,8 @@ use MyVendor\BeMart\Be\Final\ClassNameCreated;
 use MyVendor\BeMart\Be\Input\CreateClassNameInput;
 use MyVendor\BeMart\Be\Input\GetAdminClassNameListInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminClassNameForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 use function sprintf;
@@ -36,6 +38,7 @@ class ClassNameList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -60,6 +63,10 @@ class ClassNameList extends ResourceObject
             'count' => $final->count,
             'classNames' => $final->classNames,
         ];
+        // Phase 3: an empty AdminClassNameForm for the HTML list page to
+        // render the inline-create inputs via `{{ form.input(...) }}`.
+        // JSON contexts ignore `body.form`.
+        $this->body['form'] = $this->formFactory->newInstance(AdminClassNameForm::class);
 
         return $this;
     }

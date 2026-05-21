@@ -15,6 +15,8 @@ use MyVendor\BeMart\Be\Final\TagCreated;
 use MyVendor\BeMart\Be\Input\CreateTagInput;
 use MyVendor\BeMart\Be\Input\GetAdminTagListInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminTagForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 use function sprintf;
@@ -28,6 +30,7 @@ class TagList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -51,6 +54,11 @@ class TagList extends ResourceObject
             'count' => $final->count,
             'tags' => $final->tags,
         ];
+        // Phase 3: an empty AdminTagForm for the HTML list page to render
+        // the inline-create input via `{{ form.input('name') }}`. JSON
+        // contexts ignore `body.form`; the resource tests assert key-wise
+        // on body and are unaffected.
+        $this->body['form'] = $this->formFactory->newInstance(AdminTagForm::class);
 
         return $this;
     }
