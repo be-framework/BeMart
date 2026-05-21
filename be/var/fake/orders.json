@@ -1,5 +1,5 @@
 {
-  "$comment": "Pre-order (orderStatus=PROCESSING(8)) fixtures keyed by preOrderId. Used by FakeOrderQuery for Pilot 3 (doConfirmOrder) and Pilot 5 (doCheckout). preOrderId values match carts.json so end-to-end Cart → Order linkage is testable. paymentMethodId conventions: 1=代金引換 (verify always succeeds, checkout succeeds), 2=クレジットカード (verify+checkout succeed), 9=verify+checkout failure simulator. Pilot 5 adds 'completed-pilot5' (happy-path checkout) and 'oos-pilot5' (insufficient stock; products map to inventory.json tight-stock entry).",
+  "$comment": "Pre-order (orderStatus=PROCESSING(8)) fixtures keyed by preOrderId. Used by FakeOrderQuery for Pilot 3 (doConfirmOrder) and Pilot 5 (doCheckout). preOrderId values match carts.json so end-to-end Cart → Order linkage is testable. paymentMethodId conventions: 1=代金引換 (verify always succeeds, checkout succeeds), 2=クレジットカード (verify+checkout succeed), 9=verify+checkout failure simulator. Pilot 5 adds 'completed-pilot5' (happy-path checkout) and 'oos-pilot5' (insufficient stock; products map to inventory.json tight-stock entry). Phase 3 adds 'confirmscreen…' — a pre-order whose customerId resolves to a real customers.json fixture (alice) so the goShoppingConfirm screen can render the お客様情報 customer-info block; the Confirm resource defaults onGet to it.",
   "deadbeefcafe1234567890abcdef01234567890a": {
     "preOrderId": "deadbeefcafe1234567890abcdef01234567890a",
     "customerId": "customer-001",
@@ -53,5 +53,15 @@
       { "productCode": "sample-001", "quantity": 1, "price": 1000 }
     ],
     "deliveryFeeTotal": 700
+  },
+  "aceface0000000000000000000000000000a11ce": {
+    "preOrderId": "aceface0000000000000000000000000000a11ce",
+    "customerId": "0123456789abcdef0123456789abcdef",
+    "paymentMethodId": 2,
+    "items": [
+      { "productCode": "sample-001", "quantity": 2, "price": 1200 },
+      { "productCode": "preorder-2026-spring-bag", "quantity": 1, "price": 13500 }
+    ],
+    "deliveryFeeTotal": 800
   }
 }
