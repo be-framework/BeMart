@@ -1,0 +1,94 @@
+{#
+  BeMart admin Order status settings — EC-CUBE Setting/Shop/order_status.twig.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_shop_order_status' %}
+{% set title = '受注対応状況設定' %}
+{% set sub_title = '店舗設定' %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <form id="form" method="post" action="{{ url('admin_setting_shop_order_status') }}">
+                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="受注管理およびマイページで表示される対応状況の設定を行います。名称、色、件数表示の設定が可能です。">
+                                <span>受注対応状況</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                            </div>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm">
+                                <thead>
+                                <tr>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">ID</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="対応状況の名称を設定できます。ここで設定した名称は会員ログイン後のマイページで表示されます。">
+                                            <span>名称(マイページ)</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">名称(受注管理)</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="受注管理の対応状況の色を設定できます。">
+                                            <span>色</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="受注管理の対応状況ごとの受注件数の表示・非表示を設定できます。">
+                                            <span>件数表示</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for OrderStatus in orderStatuses %}
+                                    <tr id="order_status_row_{{ OrderStatus.id }}">
+                                        <td class="align-middle text-center">{{ OrderStatus.id }}</td>
+                                        <td class="align-middle">
+                                            {{ form.input(OrderStatus.customerNameKey)|raw }}
+                                            {% if form.error(OrderStatus.customerNameKey) %}{{ form.error(OrderStatus.customerNameKey) }}{% endif %}
+                                        </td>
+                                        <td class="align-middle">
+                                            {{ form.input(OrderStatus.nameKey)|raw }}
+                                            {% if form.error(OrderStatus.nameKey) %}{{ form.error(OrderStatus.nameKey) }}{% endif %}
+                                        </td>
+                                        <td class="align-middle">
+                                            <div class="input-group">
+                                                {{ form.input(OrderStatus.colorKey)|raw }}
+                                            </div>
+                                            {% if form.error(OrderStatus.colorKey) %}{{ form.error(OrderStatus.colorKey) }}{% endif %}
+                                        </td>
+                                        <td class="align-middle text-center">
+                                            {{ form.input(OrderStatus.displayOrderCountKey)|raw }}
+                                            {% if form.error(OrderStatus.displayOrderCountKey) %}{{ form.error(OrderStatus.displayOrderCountKey) }}{% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="c-conversionArea">
+                        <div class="c-conversionArea__container">
+                            <div class="row justify-content-between align-items-center">
+                                <div class="col-6">
+                                    <div class="c-conversionArea__leftBlockItem"></div>
+                                </div>
+                                <div class="col-6">
+                                    <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                                        <div class="col-auto">
+                                            <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

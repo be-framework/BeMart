@@ -1,0 +1,179 @@
+{#
+  BeMart admin mail-template editor — EC-CUBE Setting/Shop/mail.twig.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_shop_mail' %}
+{% set title = 'メール設定' %}
+{% set sub_title = '店舗設定' %}
+
+{% block stylesheet %}
+    <style>
+        .ui-resizable-se {
+            right: -3px;
+            bottom: -3px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        $(function() {
+            $('#mail_template').on('change', function() {
+                var id = $(this).val();
+                if (id) {
+                    location.href = '{{ url('admin_setting_shop_mail') }}/' + id;
+                } else {
+                    location.href = '{{ url('admin_setting_shop_mail') }}';
+                }
+            });
+
+            $('#form1').on('submit', function() {
+                $('#mail_tpl_data').val($('#editor').text());
+                $('#mail_html_tpl_data').val($('#html_editor').text());
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block main %}
+    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="">
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header"><span class="card-title">テンプレート編集</span></div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-2">
+                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="既存のメールテンプレートを選択してください。以下に内容が表示されます。">
+                                        <span>テンプレート</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                    </div>
+                                </div>
+                                {% if Mail.isDeletable %}
+                                    <div class="col-8">
+                                        {{ form.input('template')|raw }}
+                                        {% if form.error('template') %}{{ form.error('template') }}{% endif %}
+                                    </div>
+                                    <div class="col-2">
+                                        <button type="button" data-bs-toggle="modal" data-bs-target="#deleteModal" class="btn btn-ec-delete">削除</button>
+                                    </div>
+                                {% else %}
+                                    <div class="col-10">
+                                        {{ form.input('template')|raw }}
+                                        {% if form.error('template') %}{{ form.error('template') }}{% endif %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-2"><span>テンプレート名</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col-10">
+                                    {{ form.input('name')|raw }}
+                                    {% if form.error('name') %}{{ form.error('name') }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-2"><span>ファイル名</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col-10">
+                                    {% if Mail.id %}
+                                        {{ Mail.file_name }}
+                                    {% else %}
+                                        <div class="row">
+                                            <div class="col-1 pe-0 align-middle"><span class="align-middle">Mail/</span></div>
+                                            <div class="col-7 ps-0">
+                                                {{ form.input('file_name')|raw }}
+                                            </div>
+                                            <div class="col-4 ps-0">.twig</div>
+                                        </div>
+                                        {% if form.error('file_name') %}{{ form.error('file_name') }}{% endif %}
+                                    {% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-2"><span>件名</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col-10">
+                                    {{ form.input('mail_subject')|raw }}
+                                    {% if form.error('mail_subject') %}{{ form.error('mail_subject') }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-2"><span>テキスト</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col-10">
+                                    <div id="editor" style="height: 480px" class="form-control"></div>
+                                    <div style="display: none">{{ form.input('tpl_data')|raw }}</div>
+                                    {% if form.error('tpl_data') %}{{ form.error('tpl_data') }}{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-2">
+                                    <span>HTML</span>
+                                    <div class="btn-group" role="group">
+                                        <button type="button" id="preview_button" class="btn w-100 text-nowrap btn-ec-regular" data-bs-toggle="modal" data-bs-target="#htmlPreviewModal">プレビュー</button>
+                                    </div>
+                                </div>
+                                <div class="col-10">
+                                    <div id="html_editor" style="height: 480px" class="form-control"></div>
+                                    <div style="display: none">{{ form.input('html_tpl_data')|raw }}</div>
+                                    {% if form.error('html_tpl_data') %}{{ form.error('html_tpl_data') }}{% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea" id="aside_column">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem"></div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="modal fade" id="htmlPreviewModal" tabindex="-1" role="dialog" aria-labelledby="htmlPreviewModal" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">プレビュー</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="bg-light p-4 bg-ec-formGray" id="viewEmail" style="word-wrap: break-word; word-break:break-all"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">閉じる</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if Mail.isDeletable %}
+        <div class="modal fade" id="deleteModal" tabindex="-1" role="dialog" aria-labelledby="deleteModal" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold">削除してもよろしいですか？</h5>
+                        <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-start">
+                        <p class="text-start">メールテンプレートを削除します。</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
+                        <a class="btn btn-ec-delete" href="{{ url('admin_setting_shop_mail_delete', {id: Mail.id}) }}" data-method="delete" data-confirm="false">削除</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}
