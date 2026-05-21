@@ -1,0 +1,106 @@
+{#
+  BeMart admin order-mail composer — EC-CUBE admin-theme `Order/mail.twig`.
+
+  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/mail.twig`
+  — the back-office 受注メール送信 composition screen. It extends the
+  admin frame (`admin-base.html.twig`).
+
+  Tier-2 port note: EC-CUBE composes a mail (template select, subject,
+  header / footer body) and shows a send-history list + a preview
+  modal. The Be domain re-sends the order-confirmation mail keyed by
+  orderNo only ({@see \MyVendor\BeMart\Be\Input\AdminSendOrderMailInput}
+  — the Mailer interface takes the order entity), so the custom
+  subject / header / footer overrides are Phase 2 scope. The
+  composition form renders so the page is faithful; the send-history
+  list is dropped as an enumerated residual.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
+     AdminOrderMailForm leaf fields (Ray.WebFormModule).
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_order_mail' %}
+{% set title = '受注メール送信' %}
+{% set sub_title = '受注管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_order_mail', { id: orderNo }) }}" id="mail_form" name="form1" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">メール作成</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3"><span>メールテンプレート</span></div>
+                                <div class="col">{{ form.input('template')|raw }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>件名</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col">
+                                    {{ form.input('mail_subject')|raw }}
+                                    {% if form.error('mail_subject') %}<span class="invalid-feedback d-block">{{ form.error('mail_subject') }}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>ヘッダー</span></div>
+                                <div class="col">{{ form.input('mail_header')|raw }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>フッター</span></div>
+                                <div class="col">{{ form.input('mail_footer')|raw }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_order_edit', { id: orderNo }) }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>受注編集へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="button" id="preview_button" class="btn btn-ec-regular me-2" data-bs-toggle="modal" data-bs-target="#mailConfirmModal">確認画面へ</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <div class="modal fade" id="mailConfirmModal" tabindex="-1" role="dialog" aria-labelledby="mailConfirmModal" aria-hidden="true" data-bs-keyboard="false" data-bs-backdrop="static">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">送信内容の確認</h5>
+                    <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="bg-light p-4 bg-ec-formGray" id="mailPreviewBody" style="word-wrap: break-word; word-break:break-all"></div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
+                    <button class="btn btn-ec-conversion" type="submit" form="mail_form">送信</button>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
