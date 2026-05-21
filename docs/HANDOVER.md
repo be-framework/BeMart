@@ -1903,7 +1903,7 @@ Phase A は全ストレージを `Fake*Storage`（in-memory）で実装してい
 
 ### 主要な決定
 
-- **G-23 スキル — hypermedia テストが移植契約**（`a9dcdd7`、`docs/skills/G-23-*.md`）。ストレージを差し替えても、`ResourceInterface::get(...)` end-to-end の hypermedia テストが「同じ表現が出る」ことを保証する。Fake → SQL 移植の合否はこのテストで判定する、というのが Phase 2 全体の運用契約。原則エッセイ `docs/hypermedia-test-principle.md` も併設。
+- **G-23 スキル — hypermedia テストが移植契約**（`a9dcdd7`、`docs/skills/G-23-*.md`）。ストレージを差し替えても、`ResourceInterface::get(...)` end-to-end の hypermedia テストが「同じ表現が出る」ことを保証する。Fake → SQL 移植の合否はこのテストで判定する、というのが Phase 2 全体の運用契約。原則エッセイ `docs/methodology/hypermedia-test-principle.md` も併設。
 - **厳密移植の field alignment** — Sql 化の前段（Phase A）で、BeMart Entity が EC-CUBE スキーマに無いフィールド（`sortNo`, `feeBase`, `body`/`htmlBody`, `mailAddress` 等）を持っている箇所を**先に削る**。EC-CUBE 完全移植を優先し、Entity をスキーマに合わせる。
 - **SQL 実装は素の prepared statement** — `be/src/Reason/Query/Sql*.php` は Doctrine を使わず PDO の prepared statement のみ。Be の Reason 層の framework-agnostic 性を保つ。
 - **テストは 3 面**（`sql/README.md` 参照）— storage unit（Injector 無し）/ Final-direct integration / Resource hypermedia。`bemart-sql` テストスイートは毎回 `eccubedb_test` を drop + 再作成し、各テストはトランザクション内で rollback。`DATABASE_URL` 未設定なら clean skip。
@@ -1934,7 +1934,7 @@ Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEA
   - 共有レイアウト `base.html.twig` は EC-CUBE `default_frame.twig` の port
 - **レンダー差分忠実性テスト** — 各ページに `tests/Resource/<Page>HtmlRenderTest.php`。EC-CUBE の**実テンプレート**（gitignore された 4.3 クローン）をスタブ Twig env でレンダリングし、BeMart の移植テンプレートと同じ論理データで差分を取る。差分行は**説明付き residual allowlist** に限る（allowlist が honesty metric）。
 - **フォームページ — `ray/web-form-module` 採用**（`5a95435` Login pilot）。読み取り専用データページとは別に、`<input>` を持ち POST を受けるページ（Login / Entry / Contact / Forgot）用のレシピを確立。
-- **ALPS 監査 + 是正**（`8d93500`, `f01e1ae`、`docs/alps-audit-phase3.md`）。Phase 2b で多くのディスクリプタが BeMart 実装 Entity から逆生成（back-form）された疑いを 2 軸で監査し、Favorite の再タグ + 5 遷移の追加を実施。
+- **ALPS 監査 + 是正**（`8d93500`, `f01e1ae`、`docs/phases/alps-audit-phase3.md`）。Phase 2b で多くのディスクリプタが BeMart 実装 Entity から逆生成（back-form）された疑いを 2 軸で監査し、Favorite の再タグ + 5 遷移の追加を実施。
 
 ### 主要な決定
 
@@ -1945,7 +1945,7 @@ Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEA
 
 ### 積み残し
 
-- **Admin HTML（約 100 テンプレート）が未着手** — EC-CUBE admin テーマの全テンプレートが未 port。`docs/alps-audit-phase3.md` は admin を約 14 件サンプリングしただけで、残り ~50+ は未監査。
+- **Admin HTML（約 100 テンプレート）が未着手** — EC-CUBE admin テーマの全テンプレートが未 port。`docs/phases/alps-audit-phase3.md` は admin を約 14 件サンプリングしただけで、残り ~50+ は未監査。
 - **enrichment backlog の残 5 件**（上記）
 - **`Block/*` ウィジェットテンプレート** — ヘッダ/フッタ/カート/ログイン/検索のブロック領域は今は EC-CUBE ランタイム residual のまま。ウィジェットレンダリングのサブステップが必要（Block は ALPS で意図的に未モデル化）。
 - Phase 3 中の ALPS 是正で追加した 5 遷移（`doSortNoMove` 等）は `be/src` にドメイン実装が無い（domain coverage が 139/144 である理由）

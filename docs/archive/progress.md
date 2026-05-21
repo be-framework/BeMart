@@ -10,9 +10,9 @@
 >
 > 現在の正しい情報源:
 >
-> - **移植ステータス（レイヤ別マトリクス・残作業）** → [`docs/migration-status.md`](docs/migration-status.md)
-> - **構築プロセスの決定ログ** → [`HANDOVER.md`](HANDOVER.md)
-> - **引き継ぎ手順** → [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md)
+> - **移植ステータス（レイヤ別マトリクス・残作業）** → [`docs/migration-status.md`](../migration-status.md)
+> - **構築プロセスの決定ログ** → [`docs/HANDOVER.md`](../HANDOVER.md)
+> - **引き継ぎ手順** → [`docs/HOW_TO_CONTINUE.md`](../HOW_TO_CONTINUE.md)
 >
 > 旧 `progress.md` の内容（Phase 1〜7 の計画ログ）が必要な場合は git 履歴
 > （`git log -- progress.md`）で参照できる。本ファイルは現役の進捗トラッカー

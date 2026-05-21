@@ -16,9 +16,9 @@
 >
 > 現在の正しい情報源:
 >
-> - **移植ステータス（レイヤ別マトリクス・残作業 punch-list）** → [`docs/migration-status.md`](docs/migration-status.md)
-> - **構築プロセスの決定ログ** → [`HANDOVER.md`](HANDOVER.md)
-> - **引き継ぎ手順と次の作業** → [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md)
+> - **移植ステータス（レイヤ別マトリクス・残作業 punch-list）** → [`docs/migration-status.md`](../migration-status.md)
+> - **構築プロセスの決定ログ** → [`docs/HANDOVER.md`](../HANDOVER.md)
+> - **引き継ぎ手順と次の作業** → [`docs/HOW_TO_CONTINUE.md`](../HOW_TO_CONTINUE.md)
 > - **移植全体の段階計画（依然有効な背景資料）** → [`ec-cube-bear-be-migration-plan.md`](ec-cube-bear-be-migration-plan.md)
 >
 > 旧 `task_plan.md`（Phase 1〜7 のタスク・決定表）が必要な場合は git 履歴
