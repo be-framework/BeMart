@@ -12,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Form\AdminOrderStatusForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -85,6 +86,26 @@ final class AdminOrderStatusResourceTest extends TestCase
             orderDate: '2026-05-15 10:00:00',
             paymentDate: '2026-05-15 10:00:00',
         ));
+    }
+
+    public function testOnGetReturnsOrderStatusSettingsForm(): void
+    {
+        $ro = $this->resource->get('page://self/admin/order-status');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminOrderStatusForm::class, $ro->body['form']);
+        $this->assertNotEmpty($ro->body['orderStatuses']);
+        $this->assertSame(1, $ro->body['orderStatuses'][0]['id']);
+    }
+
+    public function testOnGetAnonymousAdminReturns403(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->get('page://self/admin/order-status');
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 
     public function testOnPostHappyPathFlipsStatus(): void
