@@ -106,11 +106,18 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
     }
 
     /**
-     * The EC-CUBE 4.3 messages.ja.yaml values the storefront template
+     * The EC-CUBE 4.3 messages.ja.yaml values the STOREFRONT template
      * ports substitute for `{{ '...'|trans }}`. Only the keys the ported
-     * pages (Cart / Top / ProductList / Login / Entry / Contact) and
-     * default_frame.twig actually use are listed — the values are copied
-     * verbatim from src/Eccube/Resource/locale/messages.ja.yaml.
+     * storefront pages (Cart / Top / ProductList / Login / Entry /
+     * Contact / Mypage / ...) and the default-theme `default_frame.twig`
+     * use are listed — values copied verbatim from
+     * src/Eccube/Resource/locale/messages.ja.yaml.
+     *
+     * This method is the FROZEN storefront baseline: the admin
+     * section-waves do NOT append here. Admin `trans` keys live in the
+     * per-section files under `tests/Resource/Admin/` and are merged via
+     * {@see \MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages::forSection()}
+     * — keeping this shared file conflict-free for parallel admin waves.
      *
      * @return array<string, string>
      */
@@ -341,51 +348,6 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
             'front.shopping.shipping_edit_header_customer' => 'お届け先の追加',
             'front.shopping.shipping_edit_header_nonmember' => 'お届け先の変更',
             'front.shopping.error' => '購入エラー',
-            // --- admin/* (admin HTML pilot — News list + News edit) -----
-            // Admin-theme default_frame.twig + nav.twig static chrome,
-            // plus the Content/News section keys. Values copied verbatim
-            // from src/Eccube/Resource/locale/messages.ja.yaml.
-            'admin.home' => 'ホーム',
-            'admin.info' => '情報',
-            'admin.info.official_site' => '公式サイト',
-            'admin.info.community' => '開発コミュニティ',
-            'admin.info.document' => 'ドキュメント',
-            'admin.info.manual' => '管理・運用マニュアル',
-            'admin.header.last_login' => '最終ログイン',
-            'admin.header.change_password' => 'パスワード変更',
-            'admin.header.two_factor_auth' => '2段階認証 設定',
-            'admin.header.logout' => 'ログアウト',
-            'admin.header.user_name' => '%name% 様',
-            'admin.common.create__new' => '新規作成',
-            'admin.common.registration' => '登録',
-            'admin.common.registration__new' => '新規登録',
-            'admin.common.edit' => '編集',
-            'admin.common.delete' => '削除',
-            'admin.common.cancel' => 'キャンセル',
-            'admin.common.decision' => '決定',
-            'admin.common.id' => 'ID',
-            'admin.common.up' => '上へ',
-            'admin.common.down' => '下へ',
-            'admin.common.required' => '必須',
-            'admin.common.drag_and_drop_description' => '項目の順番はドラッグ＆ドロップでも変更可能です。',
-            'admin.common.delete_modal__title' => '削除します',
-            'admin.common.delete_modal__message' => 'この操作はあとから取り消すことができません。「%name%」を削除してよろしいですか？',
-            'admin.content.contents_management' => 'コンテンツ管理',
-            'admin.content.news_management' => '新着情報管理',
-            'admin.content.news.news_registration' => '新着情報登録',
-            'admin.content.news.publish_date' => '公開日時',
-            'admin.content.news.title' => 'タイトル',
-            'admin.content.news.url' => 'URL',
-            'admin.content.news.body' => '本文',
-            'admin.content.news.display_status' => '公開状態',
-            'admin.content.news.display_status__show' => '公開',
-            'admin.content.news.display_status__hide' => '非公開',
-            'admin.content.news.new_window' => '別ウィンドウで開く',
-            'admin.product.product_management' => '商品管理',
-            'admin.product.tag_management' => 'タグ管理',
-            'admin.product.tag' => 'タグ',
-            'tooltip.content.news.url' => 'リンク先のURLを入力してください。',
-            'tooltip.content.news.body' => '本文を入力してください。',
         ];
     }
 }
