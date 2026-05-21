@@ -1,0 +1,201 @@
+{#
+  BeMart admin Plugin list — EC-CUBE goPluginList (インストールプラグイン一覧).
+
+  PORT of EC-CUBE 4.3 admin-theme `Store/plugin.twig`
+  (src/Eccube/Resource/template/admin/Store/plugin.twig) together with
+  its `plugin_table.twig` include — the user-plugin card markup is
+  inlined here.
+
+  Store section, DATA/LIST page. It extends the admin frame
+  (`admin-base.html.twig`, the port of EC-CUBE's admin `default_frame.twig`),
+  not the storefront `base.html.twig`. The markup skeleton + `c-*` / `ec-*`
+  / Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
+  bindings are rebound to the PluginList resource body
+  (src/Resource/Page/Admin/PluginList.php — body carries `count` +
+  `plugins`, a flat list of {pluginCode, pluginName, pluginVersion,
+  installed, enabled}).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`
+     (`BeMartTwigExtension`).
+   - `{% for Plugin in Plugins %}` -> the resource body's `plugins`
+     list. EC-CUBE keys the per-row action `<a>`s / `<form>` by the
+     numeric `Plugin.id` (dtb_plugin primary key); the PluginListFetched
+     projection does not surface a numeric id, only `pluginCode`, so
+     BeMart keys the row + actions by `pluginCode`. Same anchors, same
+     classes — only the id param differs.
+   - EC-CUBE's `plugin.twig` renders TWO cards: an owners-store card
+     (`plugin_table_official.twig` over `officialPlugins`) and a
+     user-plugin card (`plugin_table.twig` over `unofficialPlugins`).
+     BeMart's PluginListFetched projection carries ONE flat `plugins`
+     list with no owners-store `source` distinction (the EC-CUBE.co
+     owners-store API is out of scope — see `FakePluginStorage`'s
+     INSTALL STUB doc). The owners-store card and its
+     `plugin_table_official.twig` markup are OMITTED, not invented; only
+     the user-plugin card (`ユーザー独自プラグイン`) is ported.
+     Enumerated as residual.
+   - `plugin_forms[Plugin.id]` (the per-plugin update-archive upload
+     `<form>`) -> NOT carried by the projection; the per-row update
+     `<form>`/`{{ form_widget }}` + `アップデート` button are OMITTED
+     (the body has no upload form). Enumerated as residual.
+   - `Plugin.source` (0 == user plugin) -> the projection carries no
+     `source`; the update column is always rendered as the (omitted)
+     user-plugin shape.
+   - `configPages[Plugin.code]` (per-plugin config-page link) -> the
+     projection carries no plugin config-page registry; the cog/設定
+     `<a>` is OMITTED. Enumerated as residual.
+   - `csrf_token_for_anchor()` on the enable/disable/delete `<a>` ->
+     EC-CUBE per-request CSRF widget. OMITTED exactly as the storefront
+     ports omit it. EC-CUBE-runtime only — enumerated as residual.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_store_plugin' %}
+{% set title = 'インストールプラグイン一覧' %}
+{% set sub_title = 'オーナーズストア' %}
+
+{% block javascript %}
+    <script>
+        function changeActionSubmit(action, form_name) {
+            document.forms[form_name].action = action;
+            document.forms[form_name].submit();
+            return false;
+        }
+    </script>
+{% endblock javascript %}
+
+{% block sheetsheet %}
+    <style type="text/css">
+        table a.plugin-image:hover {
+            text-underline: none;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header">
+                        <a href="{{ url('admin_store_plugin_install') }}"
+                           class="btn btn-ec-regular me-2 float-end">アップロードして新規追加</a>
+                        <h5 class="box-title mb-3">ユーザー独自プラグイン</h5>
+                    </div>
+                    {% if plugins|length > 0 %}
+                        <div class="card-body p-0">
+                            <table class="table table-sm">
+                                <thead>
+                                <tr>
+                                    <th class="border-top-0 ps-3 pt-2 pb-2">プラグイン名</th>
+                                    <th class="border-top-0 pt-2 pb-2">バージョン</th>
+                                    <th class="border-top-0 pt-2 pb-2">コード</th>
+                                    <th class="border-top-0 pt-2 pb-2">状態</th>
+                                    <th class="border-top-0 pt-2 pb-2">アップデート</th>
+                                    <th class="border-top-0 pt-2 pb-2">&nbsp;</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for Plugin in plugins %}
+                                    <form id="{{ Plugin.pluginCode }}" name="{{ Plugin.pluginCode }}" method="post" action=""
+                                          enctype="multipart/form-data">
+                                        <tr class="{% if Plugin.enabled == false %}active{% endif %}">
+                                            <td class="align-middle ps-3">
+                                                {{ Plugin.pluginName }}
+                                            </td>
+                                            <td class="align-middle">{{ Plugin.pluginVersion }}</td>
+                                            <td class="align-middle">{{ Plugin.pluginCode }}
+                                            </td>
+                                            <td class="align-middle">
+                                                {% if Plugin.enabled %}
+                                                    <span class="text-success">有効</span>
+                                                {% else %}
+                                                    <span class="text-secondary">無効</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="align-middle">
+                                            </td>
+                                            <td class="align-middle">
+                                                <div class="col-12 col-xs-11 col-md-12 col-lg-12 float-end text-center">
+                                                    <div class="row">
+                                                            {% if Plugin.enabled == false %}
+                                                            <div class="col-6 px-0">
+                                                                <a href="#" class="btn btn-ec-actionIcon"
+                                                                   data-bs-toggle="modal"
+                                                                   data-bs-target="#localPluginDeleteModal"
+                                                                   data-delete-url="{{ url('admin_store_plugin_uninstall', { code: Plugin.pluginCode }) }}">
+                                                                    <i class="fa fa-close fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="削除"></i>
+                                                                </a>
+                                                            </div>
+                                                            {% endif %}
+                                                            {% if Plugin.enabled %}
+                                                            <div class="col-6 px-0">
+                                                                <a href="{{ url('admin_store_plugin_disable', { code: Plugin.pluginCode }) }}"
+                                                                   class="btn btn-ec-actionIcon"
+                                                                   data-method="post" data-confirm="false">
+                                                                    <i class="fa fa-pause fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="無効にする"></i>
+                                                                </a>
+                                                            </div>
+                                                            {% else %}
+                                                            <div class="col-6 px-0">
+                                                                <a href="{{ url('admin_store_plugin_enable', { code: Plugin.pluginCode }) }}"
+                                                                   class="btn btn-ec-actionIcon"
+                                                                   data-method="post" data-confirm="false">
+                                                                    <i class="fa fa-play fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="有効にする"></i>
+                                                                </a>
+                                                            </div>
+                                                            {% endif %}
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </form>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="card-body">
+                            <div class="text-danger">
+                                ユーザー独自プラグインはインストールされていません。
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="localPluginDeleteModal" tabindex="-1"
+         role="dialog"
+         aria-labelledby="localPluginDeleteModal" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fw-bold">
+                        プラグインの削除を確認する</h5>
+                    <button class="btn-close" type="button"
+                            data-bs-dismiss="modal"
+                            aria-label="Close">
+                    </button>
+                </div>
+                <div class="modal-body text-start">
+                    <p class="text-start">
+                        このプラグインを削除してもよろしいですか？</p>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-ec-sub" type="button"
+                            data-bs-dismiss="modal">キャンセル
+                    </button>
+                    <a href="#"
+                       class="btn btn-ec-delete"
+                       data-confirm="false"
+                       data-method="delete">
+                        削除
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
