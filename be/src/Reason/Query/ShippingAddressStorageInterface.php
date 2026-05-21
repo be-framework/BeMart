@@ -15,6 +15,12 @@ use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
  * (so a request that targets an unknown orderNo is rejected before
  * touching the address store).
  *
+ * The `trackingNumber` column of dtb_shipping is edited separately
+ * (`doUpdateTrackingNumber`) — it is NOT part of the address-field set
+ * {@see ShippingAddressEntity} models (a tracking number is shipment
+ * fulfilment metadata, not a delivery target), so it gets its own
+ * narrow read/write pair below.
+ *
  * Phase 2 swaps for a Ray.MediaQuery mapping over dtb_shipping rows.
  */
 interface ShippingAddressStorageInterface
@@ -30,4 +36,19 @@ interface ShippingAddressStorageInterface
      * @return list<ShippingAddressEntity>
      */
     public function listAll(): array;
+
+    /**
+     * `doUpdateTrackingNumber` — write the shipping tracking number of
+     * the order's dtb_shipping row. A miss (no shipping row for the
+     * orderNo) is a silent no-op, same shape as `put`.
+     */
+    public function updateTrackingNumber(string $orderNo, string $trackingNumber): void;
+
+    /**
+     * Read the tracking number last written for an order. Returns null
+     * when the order has no shipping row, or has one with no tracking
+     * number set. Lets the `doUpdateTrackingNumber` Final echo back the
+     * persisted value.
+     */
+    public function trackingNumberByOrderNo(string $orderNo): string|null;
 }
