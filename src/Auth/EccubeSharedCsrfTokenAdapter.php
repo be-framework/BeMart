@@ -7,9 +7,11 @@ namespace MyVendor\BeMart\Auth;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use Override;
 
+use function bin2hex;
 use function getenv;
 use function hash_equals;
 use function is_string;
+use function random_bytes;
 
 use const PHP_SAPI;
 
@@ -46,8 +48,13 @@ use const PHP_SAPI;
  * request would.
  *
  * Comparison is always timing-safe (`hash_equals`). Empty strings and
- * non-string types are rejected before comparison. The adapter never
- * issues, rotates, or writes a token — Slice 8 is validation only.
+ * non-string types are rejected before comparison.
+ *
+ * Token issuance ({@see getToken()}): the adapter returns the reference
+ * already stored under {@see SESSION_KEY}, or — when none is present —
+ * generates a cryptographically strong one and stores it back, so a
+ * form render and its subsequent POST agree even before the EC-CUBE
+ * EventListener mirror ships. It never rotates an existing token.
  */
 final class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
 {
@@ -98,5 +105,32 @@ final class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
         }
 
         return false;
+    }
+
+    /**
+     * Returns the session-bound CSRF reference, seeding one if absent.
+     *
+     * A form render calls this to embed the token in its hidden input;
+     * the matching POST echoes it back to {@see isValid()}. The token is
+     * generated only once per session — an existing reference is never
+     * rotated here, so concurrent form pages in the same session all
+     * carry the same valid token.
+     */
+    #[Override]
+    public function getToken(): string
+    {
+        $session = isset($_SESSION) ? $_SESSION : [];
+        /** @var mixed $stored */
+        $stored = $session[$this->sessionKey] ?? null;
+        if (is_string($stored) && $stored !== '') {
+            return $stored;
+        }
+
+        $token = bin2hex(random_bytes(32));
+        if (isset($_SESSION)) {
+            $_SESSION[$this->sessionKey] = $token;
+        }
+
+        return $token;
     }
 }

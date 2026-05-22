@@ -11,6 +11,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Final\ProductFetched;
 use MyVendor\BeMart\Be\Input\GetProductInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AddCartForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -44,6 +45,7 @@ class Product extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -88,6 +90,10 @@ class Product extends ResourceObject
             // through this AddCartForm. The hidden `product_id` is seeded
             // with the product code. JSON contexts ignore `form`.
             'form' => $this->addCartForm($final->productCode),
+            // CSRF reference for the add-to-cart POST: the HTML port
+            // renders it into the form's hidden `_token` input so the
+            // POST to `page://self/cart/item` passes CSRF validation.
+            'csrfToken' => $this->csrf->getToken(),
         ];
 
         return $this;

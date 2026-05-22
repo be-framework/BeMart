@@ -55,7 +55,7 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(2400, $ro->body['totalPrice']);
         $this->assertSame(1200, $ro->body['unitPrice']);
         $this->assertSame('通常販売', $ro->body['saleTypeName']);
-        $this->assertArrayHasKey('Location', $ro->headers);
+        $this->assertSame('/cart', $ro->headers['Location']);
     }
 
     public function testOnPostMissingProductReturns404(): void

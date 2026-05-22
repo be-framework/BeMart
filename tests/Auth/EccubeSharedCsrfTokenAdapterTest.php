@@ -153,4 +153,48 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 
         $this->assertTrue($adapter->isValid('shared-token'));
     }
+
+    public function testGetTokenReturnsStoredSessionReference(): void
+    {
+        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'session-token-abc';
+
+        $adapter = new EccubeSharedCsrfTokenAdapter();
+
+        $this->assertSame('session-token-abc', $adapter->getToken());
+    }
+
+    public function testGetTokenSeedsAReferenceWhenSessionIsEmpty(): void
+    {
+        $adapter = new EccubeSharedCsrfTokenAdapter();
+
+        $token = $adapter->getToken();
+
+        // A reference is generated, stored back into the session, and
+        // accepted by the matching isValid() call — the form-render ->
+        // form-POST round-trip the interface guarantees.
+        $this->assertNotSame('', $token);
+        $this->assertSame($token, $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY]);
+        $this->assertTrue($adapter->isValid($token));
+    }
+
+    public function testGetTokenDoesNotRotateAnExistingReference(): void
+    {
+        $adapter = new EccubeSharedCsrfTokenAdapter();
+
+        $first = $adapter->getToken();
+        $second = $adapter->getToken();
+
+        // Concurrent form pages in one session must all carry the same
+        // valid token — getToken() seeds once, never rotates.
+        $this->assertSame($first, $second);
+    }
+
+    public function testGetTokenHonorsACustomSessionKey(): void
+    {
+        $_SESSION['alt_csrf_field'] = 'alt-token-value';
+
+        $adapter = new EccubeSharedCsrfTokenAdapter(sessionKey: 'alt_csrf_field');
+
+        $this->assertSame('alt-token-value', $adapter->getToken());
+    }
 }

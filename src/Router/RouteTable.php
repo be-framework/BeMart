@@ -96,7 +96,12 @@ final class RouteTable
             new Route('cart_handle_item', ['PUT', 'DELETE'], '/cart/item', 'page://self/cart/item'),
 
             // ---- Storefront: contact ----
-            new Route('contact', ['GET'], '/contact', 'page://self/contact'),
+            // `contact` serves the form (GET) and the doSubmitContact
+            // POST. BeMart's Contact resource collapses EC-CUBE's
+            // confirm/complete `mode` branching into a single onPost
+            // (see Contact::onPost) — the form posts straight here and
+            // the resource redirects to `/contact/complete` on success.
+            new Route('contact', ['GET', 'POST'], '/contact', 'page://self/contact'),
             new Route('contact_confirm', ['POST'], '/contact/confirm', 'page://self/contact/confirm'),
             new Route('contact_complete', ['GET'], '/contact/complete', 'page://self/contact/complete'),
 
@@ -179,7 +184,12 @@ final class RouteTable
 
             // ---- Admin: dashboard + auth ----
             new Route('admin_login', ['GET', 'POST'], '/admin/login', 'page://self/admin/login'),
-            new Route('admin_homepage', ['GET'], '/admin', 'page://self/admin'),
+            // The dashboard resource is `Resource\Page\Admin\Index`; its
+            // BEAR URI is `page://self/admin/index` (a bare
+            // `page://self/admin` resolves to a non-existent `Page\Admin`
+            // class — Unbound). `/admin` is the EC-CUBE `admin_homepage`
+            // path.
+            new Route('admin_homepage', ['GET'], '/admin', 'page://self/admin/index'),
             new Route('admin_logout', ['POST'], '/admin/logout', 'page://self/admin/logout'),
             new Route(
                 'admin_change_password',
