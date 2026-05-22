@@ -36,10 +36,9 @@ final class LoginResourceTest extends TestCase
         $this->assertSame(['email', 'password', 'csrfToken'], $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/login', $ro->body['submitTo']['href']);
-        // csrfToken in body is intentionally null — the production
-        // EventListener mirrors the live Symfony token into the
-        // session for the subsequent POST.
-        $this->assertNull($ro->body['csrfToken']);
+        // csrfToken carries the trusted reference the HTML form must
+        // echo back so the doLogin POST passes CSRF validation.
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnPostAuthenticatesAndReturns200(): void

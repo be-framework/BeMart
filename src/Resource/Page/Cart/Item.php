@@ -21,7 +21,6 @@ use MyVendor\BeMart\Be\Input\UpdateCartItemQuantityInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
-use function sprintf;
 
 /**
  * EC-CUBE doAddCartItem —カートに商品を追加。
@@ -89,7 +88,7 @@ class Item extends ResourceObject
         assert($final instanceof CartItemAdded);
 
         $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/cart?cartKey=%s', $final->cartKey);
+        $this->headers['Location'] = '/cart';
         $this->body = [
             'cartKey' => $final->cartKey,
             'productCode' => $final->productCode,

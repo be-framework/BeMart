@@ -10,27 +10,29 @@
   to the Products resource body (src/Resource/Page/Products.php):
     transitionId, totalItemCount, products[]
 
-  NOTE — scope. The Products resource is a Phase 3 pure renderer (same
-  shape as Index): it declares the hypermedia surface and an EMPTY
-  product list. A faithful product LISTING needs a real catalog query
-  (filter + pagination) — a vertical slice (Entity + SQL) that is out of
-  scope for this template-porting wave. So this port renders the
-  `totalItemCount > 0` ELSE branch of EC-CUBE's `Product/list.twig`: the
-  search-nav with the topicpath and the "お探しの商品は見つかりませんでした"
-  empty-result counter. The populated `ec-shelfGrid` branch + the
-  `eccube.productsClassCategories` JS + the add-cart modal are kept in
-  EC-CUBE's template behind `if pagination.totalItemCount > 0`; with an
-  empty list EC-CUBE emits none of them, so the port omits them too and
-  they contribute nothing to the diff. The populated-list branch is
-  flagged for a follow-up ProductList vertical-slice enrichment.
+  NOTE — scope. The Products resource is now backed by the storefront
+  catalog query (GetStorefrontProductListInput -> StorefrontProductListFetched):
+  it projects every STATUS_VISIBLE product as `{id, name, price02}`. So
+  this port renders the populated `ec-shelfGrid` branch of EC-CUBE's
+  `Product/list.twig` when `totalItemCount > 0`, and the
+  "お探しの商品は見つかりませんでした" empty-result branch otherwise.
+
+  This is a SIMPLIFIED port (厳密移植 Grade-C, parity with the Cart port):
+  the catalog row carries only the bare name + a single `price02`, with
+  the `product_detail` link and the placeholder thumbnail. EC-CUBE's row
+  additionally renders a per-item add-cart `<form>` (ProductClass selects
+  + quantity), an `.ec-modal` add-cart dialog, the `disp_number` /
+  `orderby` sort controls and an `.ec-pagerRole` pager — all of which
+  need data the resource body does not carry (ProductClass joins, a
+  Symfony FormView, pagination metadata). Those omissions are the
+  enumerated residuals in ProductsHtmlRenderTest; category / keyword
+  filtering + pagination are deferred to Phase 2.
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `search_form` is the Symfony search FormView; it is only iterated /
-     widget-rendered inside the `totalItemCount > 0` branch, which the
-     empty list never enters, so no FormView markup is emitted.
-   - the `block javascript` `class_categories_as_json` loop iterates
-     `pagination` — empty here, so it emits an empty JS object literal.
+   - the `block javascript` loop emits `eccube.productsClassCategories`
+     keyed by the js-escaped product id; BeMart carries no ProductClass
+     data so each value is an empty object literal.
 #}
 {% extends 'base.html.twig' %}
 
@@ -42,7 +44,7 @@
     <script>
         eccube.productsClassCategories = {
             {% for product in products %}
-            "{{ product.id }}": {}{% if loop.last == false %}, {% endif %}
+            "{{ product.id|escape('js') }}": {}{% if loop.last == false %}, {% endif %}
             {% endfor %}
         };
 
@@ -150,7 +152,7 @@
                     <li class="ec-shelfGrid__item">
                         <a href="{{ url('product_detail', {'id': product.id}) }}">
                             <p class="ec-shelfGrid__item-image">
-                                <img src="{{ asset(product.mainListImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ product.name }}">
+                                <img src="{{ asset(product.mainListImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ product.name }}" {% if loop.index > 5 %} loading="lazy"{% endif %}>
                             </p>
                             <p>{{ product.name }}</p>
                             <p class="price02-default">
