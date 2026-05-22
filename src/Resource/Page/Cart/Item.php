@@ -9,6 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Auth\HtmlCartSession;
 use MyVendor\BeMart\Be\Exception\CartItemNotInCartException;
 use MyVendor\BeMart\Be\Exception\OutOfStockException;
 use MyVendor\BeMart\Be\Exception\ProductClassNotFoundException;
@@ -32,6 +33,8 @@ use function assert;
  */
 class Item extends ResourceObject
 {
+    private const DEFAULT_SESSION_PREFIX = 'session-prefix-1';
+
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
@@ -48,11 +51,17 @@ class Item extends ResourceObject
      * @psalm-taint-source input $productCode
      * @psalm-taint-source input $quantity
      * @psalm-taint-source input $csrfToken
+     * @psalm-taint-source input $sessionPrefix
      */
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping', method: 'post')]
-    public function onPost(string $productCode, int $quantity, string|null $csrfToken = null): static
+    public function onPost(
+        string $productCode,
+        int $quantity,
+        string|null $csrfToken = null,
+        string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
+    ): static
     {
         if (! $this->csrf->isValid($csrfToken)) {
             $this->code = Code::FORBIDDEN;
@@ -62,7 +71,11 @@ class Item extends ResourceObject
         }
 
         try {
-            $final = ($this->becoming)(new AddCartItemInput($productCode, $quantity));
+            $final = ($this->becoming)(new AddCartItemInput(
+                $productCode,
+                $quantity,
+                HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+            ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
             $this->body = [
@@ -110,12 +123,14 @@ class Item extends ResourceObject
      * @psalm-taint-source input $productCode
      * @psalm-taint-source input $quantity
      * @psalm-taint-source input $csrfToken
+     * @psalm-taint-source input $sessionPrefix
      */
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onPut(
         string $productCode,
         int $quantity,
         string|null $csrfToken = null,
+        string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
     ): static {
         if (! $this->csrf->isValid($csrfToken)) {
             $this->code = Code::FORBIDDEN;
@@ -128,6 +143,7 @@ class Item extends ResourceObject
             $final = ($this->becoming)(new UpdateCartItemQuantityInput(
                 productCode: $productCode,
                 quantity: $quantity,
+                sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
@@ -178,9 +194,14 @@ class Item extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      * @psalm-taint-source input $csrfToken
+     * @psalm-taint-source input $sessionPrefix
      */
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    public function onDelete(string $productCode, string|null $csrfToken = null): static
+    public function onDelete(
+        string $productCode,
+        string|null $csrfToken = null,
+        string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
+    ): static
     {
         if (! $this->csrf->isValid($csrfToken)) {
             $this->code = Code::FORBIDDEN;
@@ -190,7 +211,10 @@ class Item extends ResourceObject
         }
 
         try {
-            $final = ($this->becoming)(new RemoveCartItemInput(productCode: $productCode));
+            $final = ($this->becoming)(new RemoveCartItemInput(
+                productCode: $productCode,
+                sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+            ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
             $this->body = [
