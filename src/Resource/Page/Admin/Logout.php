@@ -9,11 +9,16 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Final\AdminLoggedOut;
 use MyVendor\BeMart\Be\Input\AdminLogoutInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
+use function getenv;
+use function session_status;
+
+use const PHP_SESSION_ACTIVE;
 
 /**
  * EC-CUBE doAdminLogout — 管理者ログアウト (Wave 4, Direct, idempotent).
@@ -35,10 +40,10 @@ use function assert;
  * `type=idempotent`, logging out an admin-anonymous client is a no-op
  * success — the response body simply carries `wasLoggedIn=false`.
  *
- * Session-clear deliberately out of scope: the Slice 7.2 contract
- * places HTTP session teardown on the EC-CUBE EventListener, which
- * observes this response and clears the admin session keys. Mirrors
- * Pilot doLogin / doLogout for the customer firewall.
+ * In the html context this resource clears the flat admin session key
+ * read by HtmlAdminSessionAdapter. The clear is guarded by
+ * APP_CONTEXT=html and PHP_SESSION_ACTIVE so app/test/prod contexts keep
+ * their existing session behaviour.
  *
  * Source-of-truth gap: alps.json does not currently carry a
  * `doAdminLogout` transition id; using the conventional name to
@@ -79,7 +84,14 @@ class Logout extends ResourceObject
 
         assert($final instanceof AdminLoggedOut);
 
+        if (getenv('APP_CONTEXT') === 'html' && session_status() === PHP_SESSION_ACTIVE) {
+            unset($_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY]);
+        }
+
+        // Post/Redirect/Get: EC-CUBE's doAdminLogout redirects back to the
+        // admin login page (the `goAdminLogin` transition declared above).
         $this->code = Code::OK;
+        $this->headers['Location'] = '/admin/login';
         $this->body = [
             'wasLoggedIn' => $final->wasLoggedIn,
             'adminId' => $final->adminId,

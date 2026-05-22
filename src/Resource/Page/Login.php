@@ -9,6 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Be\Exception\LoginFailedException;
 use MyVendor\BeMart\Be\Final\CustomerAuthenticated;
 use MyVendor\BeMart\Be\Input\LoginInput;
@@ -17,7 +18,10 @@ use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
-use function sprintf;
+use function getenv;
+use function session_status;
+
+use const PHP_SESSION_ACTIVE;
 
 /**
  * EC-CUBE doLogin — 会員ログイン (Pilot 6).
@@ -31,12 +35,12 @@ use function sprintf;
  *   - LoginFailedException      → 401 (no such email OR wrong password
  *                                       — combined, no user enumeration)
  *
- * Session-write deliberately out of scope: the Slice 7.2 contract
- * places HTTP session establishment on the EC-CUBE EventListener.
- * This resource only returns the proof of authentication; routing
- * downstream requests through the session is the EventListener's
- * responsibility once Phase B Slice 7.x lands. For test purposes,
- * AppModule binds a fixed-customer FakeSession.
+ * In the html context, public/index.php starts a PHP session before
+ * dispatch and this resource mirrors `customerId` into the flat session
+ * key read by HtmlSessionAdapter. The write is guarded by
+ * APP_CONTEXT=html and PHP_SESSION_ACTIVE so app/test/prod contexts
+ * keep their existing session behaviour and are not polluted by direct
+ * `$_SESSION` writes.
  *
  * Phase 3 — HTML FORM page. The resource builds a {@see LoginForm}
  * (Ray.WebFormModule AbstractForm) and exposes it as `body['form']` so
@@ -54,6 +58,11 @@ use function sprintf;
  */
 class Login extends ResourceObject
 {
+    // PoC fixture prefill for the browser demo. Remove these constants
+    // and the prefilledLoginForm() call before production hardening.
+    private const POC_LOGIN_EMAIL = 'login-test@example.com';
+    private const POC_LOGIN_PASSWORD = 'login-test-password-2026';
+
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
@@ -66,10 +75,10 @@ class Login extends ResourceObject
      *
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
-     * state). The `csrfToken` body field is intentionally `null` —
-     * CsrfTokenInterface stays `isValid()`-only (Slice 8 decision);
-     * the EC-CUBE EventListener mirrors the Symfony-issued token
-     * into the session for the subsequent POST.
+     * state). The `csrfToken` body field carries the trusted reference
+     * {@see CsrfTokenInterface::getToken()} issues, which the HTML port
+     * renders into the form's hidden `_csrf_token` input so the
+     * subsequent POST passes CSRF validation.
      */
     #[Link(rel: 'doLogin', href: 'page://self/login', method: 'post')]
     #[Link(rel: 'goCustomerRegistration', href: 'page://self/entry')]
@@ -84,10 +93,10 @@ class Login extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/login',
             ],
-            'csrfToken' => null,
-            // Phase 3: an empty LoginForm for the HTML port to render
-            // via `{{ form.input(...) }}`. JSON contexts ignore it.
-            'form' => $this->formFactory->newInstance(LoginForm::class),
+            'csrfToken' => $this->csrf->getToken(),
+            // PoC fixture prefill for quick HTML-context verification.
+            // See prefilledLoginForm(); deliberately easy to remove.
+            'form' => $this->prefilledLoginForm(),
         ];
 
         return $this;
@@ -148,8 +157,18 @@ class Login extends ResourceObject
 
         assert($final instanceof CustomerAuthenticated);
 
+        if (getenv('APP_CONTEXT') === 'html' && session_status() === PHP_SESSION_ACTIVE) {
+            $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = $final->customerId;
+        }
+
+        // Post/Redirect/Get: a successful login redirects to My Page.
+        // EC-CUBE's doLogin redirects to the `mypage` route (`/mypage`) —
+        // My Page reads the authenticated customer from the session, so
+        // the customerId is NOT a URL segment (there is no
+        // `/mypage/{customerId}` route). JSON clients still read
+        // `customerId` off the body below.
         $this->code = Code::OK;
-        $this->headers['Location'] = sprintf('/mypage/%s', $final->customerId);
+        $this->headers['Location'] = '/mypage';
         $this->body = [
             'customerId' => $final->customerId,
             'email' => $final->email,
@@ -179,6 +198,19 @@ class Login extends ResourceObject
         $form->fillValues(['login_email' => $email]);
         // Bridge the Be-domain verdict onto the form's error state.
         $form->setDomainError('login_email', $message);
+
+        return $form;
+    }
+
+    private function prefilledLoginForm(): LoginForm
+    {
+        $form = $this->formFactory->newInstance(LoginForm::class);
+        assert($form instanceof LoginForm);
+
+        $form->fillValues([
+            'login_email' => self::POC_LOGIN_EMAIL,
+            'login_pass' => self::POC_LOGIN_PASSWORD,
+        ]);
 
         return $form;
     }

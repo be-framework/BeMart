@@ -70,7 +70,7 @@ final class RouterTest extends TestCase
         $matched = $this->router->match('GET', '/admin');
 
         $this->assertSame('admin_homepage', $matched->name);
-        $this->assertSame('page://self/admin', $matched->resource);
+        $this->assertSame('page://self/admin/index', $matched->resource);
     }
 
     public function testResolvesAdminProductListPath(): void

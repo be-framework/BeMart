@@ -100,8 +100,10 @@ final class AdminLoginHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('id="login_id"', $html);
         $this->assertStringContainsString('name="login_id"', $html);
+        $this->assertStringContainsString('value="test-admin"', $html);
         $this->assertStringContainsString('id="admin_login_password"', $html);
         $this->assertStringContainsString('type="password"', $html);
+        $this->assertStringContainsString('value="admin-test-password-2026"', $html);
         // Slice 9: path('admin_login') now resolves through RouteTable.
         $this->assertStringContainsString('action="/admin/login"', $html);
     }
@@ -147,6 +149,12 @@ final class AdminLoginHtmlRenderTest extends TestCase
 
         foreach ([
             '<title>',
+            // The hidden CSRF input: EC-CUBE renders a live per-request
+            // `csrf_token('authenticate')` value, BeMart renders the
+            // CsrfTokenInterface reference. The token VALUE can never
+            // match across the two runtimes — the line is residual by
+            // its `_csrf_token` field name regardless of the value.
+            'name="_csrf_token"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -173,6 +181,12 @@ final class AdminLoginHtmlRenderTest extends TestCase
         // real AdminLoginForm — the same form the BeMart port renders —
         // so the inputs are byte-identical and diff to zero.
         $form = (new FormFactory())->newInstance(AdminLoginForm::class);
+        if ($form instanceof AdminLoginForm) {
+            $form->fillValues([
+                'login_id' => 'test-admin',
+                'password' => 'admin-test-password-2026',
+            ]);
+        }
         $this->registerEcCubeStubs($twig, $form instanceof AdminLoginForm ? $form : null);
 
         return $twig->render('login.twig', [
