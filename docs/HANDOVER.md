@@ -2082,3 +2082,43 @@ Phase 3 の ALPS 監査（`8d93500`/`f01e1ae`）で追加した 5 遷移は当�
     （`customerStatus = 1`、`secretKey` 保持）を happy-path の仮会員ターゲット、
     `alice@example.com`（`customerStatus = 2`）を 409 ケースに使用。
 
+### Phase B — ハイパーメディア / HTTP テストフレーム整備
+
+`html` コンテキストでカート追加（`POST /products/add_cart` → 201）後の
+`GET /cart` が空になる不具合（`FakeCartStorage` がリクエスト毎のインメモリ
+Singleton で、別 PHP プロセスのリクエスト間でカートが永続しない）を契機に、
+テスト層の不備が判明した。BeMart は BEAR.Skeleton の 3 層テスト構造で
+scaffold されておらず、ワークフロー assertion が in-process でしか走らず、
+実 HTTP / Cookie 境界を一度も越えていなかった。
+
+- **カート修正**（`cb4739d`）— `FakeCartStorage` が `APP_CONTEXT=html` +
+  active session 時に fixture を `$_SESSION`（`bemart_html_carts` キー）へ
+  ミラー。`Cart` / `Cart\Item` は session prefix を `HtmlCartSession` 経由で
+  導出（ハードコード定数を廃止）。汎用 `RuntimeException` は
+  `FakeCartFixtureException` に置換。
+- **3 層テストフレーム**（`6b03171`）— `phpunit.xml` を
+  `resource` / `hypermedia` / `http` の 3 suite 構成に。
+  `tests/Hypermedia/WorkflowTest` が storefront 購入動線を `RoutedResource`
+  経由で in-process 駆動し、`tests/Http/WorkflowTest` はそれを継承して
+  `setUp()` で `HttpResource` に差し替えるだけ（同一 assertion を 2
+  トランスポートで実行）。`hypermedia` 層は 1 プロセス・1 injector で
+  workflow を通すため DI Singleton がテスト全体で生き続けるのに対し、
+  `http` 層は実 HTTP 経由で毎リクエスト injector を再構築し session
+  cookie のみを引き継ぐ — リクエストスコープの Singleton に状態を持つ
+  バグ（インメモリカート等）は `http` 層でしか捕捉できない。スタッシュ
+  証明で「カート修正を外すと `http` のみ赤・`hypermedia` は緑」を確認した。
+  詳細は `tests/README.md`。
+- **HttpResource を `koriym/php-server` ベースへ是正**（dev 依存追加）—
+  当初 `HttpResource` はリクエスト毎に `php-cgi` を `proc_open` する
+  383 行の自前実装だった。サーバライフサイクルを BEAR 自身のテスト基盤が
+  使う保守済みコンポーネント `koriym/php-server`（`php -S` 管理）へ委譲し、
+  curl の cookie jar で session を引き継ぐ薄い実装に置換。スケルトン標準の
+  `HttpResource` は stateless JSON API 向けで cookie を扱わないため、
+  cookie jar のみが BeMart 固有の追加点。`aura/installer-default`
+  （`aura/input` 経由の旧 Composer プラグイン）は `allow-plugins` で
+  明示的に無効化（`false`）して install ブロックを解消。
+- **暫定事項**（将来の整理候補）— `RoutedResource` は BEAR ネイティブの
+  `#[Link]` / `crawl` でなく自前 Router の shim、`canonicalizeFormFields` が
+  wire フィールド名（`_token` / `product_id`）をリソース引数名へ手で
+  詰め替えている。
+
