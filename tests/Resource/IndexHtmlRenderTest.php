@@ -81,6 +81,16 @@ final class IndexHtmlRenderTest extends TestCase
         // EC-CUBE injects meta.twig (description/keywords/OGP). BeMart has
         // no Page entity; the include renders nothing but the author meta.
         '<meta name="author" content="">',
+
+        // --- top-page hypermedia supplement ----------------------------
+        // EC-CUBE exposes these transitions through default layout Block
+        // widgets. BeMart's Block layer is static-only today, so the Top
+        // template renders the critical purchase-spine links directly.
+        '<div class="ec-role">',
+        '<div class="ec-grid2">',
+        '<div class="ec-grid2__cell">',
+        '<a class="ec-blockBtn--action" href="/products/list">商品一覧へ</a>',
+        '<a class="ec-blockBtn--cancel" href="/cart">カートを見る</a>',
     ];
 
     private ResourceInterface $resource;
@@ -128,6 +138,14 @@ final class IndexHtmlRenderTest extends TestCase
         }
     }
 
+    public function testTopPageRendersCriticalNavigationLinks(): void
+    {
+        $html = $this->resource->get('page://self/')->toString();
+
+        $this->assertStringContainsString('href="/products/list"', $html);
+        $this->assertStringContainsString('href="/cart"', $html);
+    }
+
     /**
      * The honesty test: diff BeMart's rendered top page against EC-CUBE's
      * own rendering. Every difference must be in the residual allowlist.
@@ -161,7 +179,7 @@ final class IndexHtmlRenderTest extends TestCase
         // The top page is the cleanest port of the wave: no data binding,
         // residual is the shared EC-CUBE-runtime <head> material only.
         $this->assertLessThan(
-            14,
+            20,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );

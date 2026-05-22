@@ -185,6 +185,7 @@
                         商品コード： <span class="product-code-default">{{ productCode }}</span>
                     </div>
                     <form action="{{ url('product_add_cart', {id: productCode}) }}" method="post" id="form1" name="form1">
+                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
                         {% if stockFind %}
                             <div class="ec-productRole__actions">
                                 <div class="ec-numberInput"><span>数量</span>

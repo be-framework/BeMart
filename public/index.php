@@ -64,6 +64,14 @@ if (! class_exists($moduleClass) || ! is_subclass_of($moduleClass, AbstractModul
     exit;
 }
 
+if ($context === 'html' && PHP_SAPI !== 'cli' && session_status() !== PHP_SESSION_ACTIVE && ! headers_sent()) {
+    session_start([
+        'use_strict_mode' => true,
+        'cookie_httponly' => true,
+        'cookie_samesite' => 'Lax',
+    ]);
+}
+
 /**
  * Emit a JSON error and stop. The `html` context renders pages through
  * Twig, but a routing failure has no resource to render — a small JSON
@@ -112,6 +120,34 @@ if ($method !== 'get') {
     $body = $_POST + $body;
 }
 
+// Normalize EC-CUBE form-field names onto the resource parameter names.
+// The ported templates keep EC-CUBE's wire conventions verbatim — the
+// CSRF hidden input is `_token` (storefront, Symfony default) or
+// `_csrf_token` (admin login), the admin login username field is
+// `login_id`, and the customer login fields are `login_email` /
+// `login_pass`. Product add-cart keeps EC-CUBE's hidden `product_id`
+// while the Cart/Item resource accepts `productCode`. The resources
+// expose the canonical camelCase params (`csrfToken`, `productCode`,
+// `loginId`, `email`, `password`); this is the
+// HTTP-boundary translation, the body-field counterpart to RouteTable's
+// path-param renaming. An alias is applied only when the canonical key
+// is absent, so an explicit JSON body still wins.
+$wireAliases = [
+    '_token' => 'csrfToken',
+    '_csrf_token' => 'csrfToken',
+    'product_id' => 'productCode',
+    'login_id' => 'loginId',
+    'login_email' => 'email',
+    'login_pass' => 'password',
+];
+foreach ($wireAliases as $wire => $canonical) {
+    if (array_key_exists($wire, $body) && ! array_key_exists($canonical, $body)) {
+        /** @psalm-suppress MixedAssignment — request body is mixed by nature */
+        $body[$canonical] = $body[$wire];
+        unset($body[$wire]);
+    }
+}
+
 // Path params win over query/body keys of the same name: the URL segment
 // is the more specific source for that identifier.
 $body = $matched->params + $body;
@@ -136,7 +172,13 @@ $ro = match ($method) {
     default => $fail(405, 'Method Not Allowed'),
 };
 
-$view = $context === 'html' ? $ro->toString() : null;
+// A resource that set a `Location` header is a redirect (Post/Redirect/Get):
+// the browser discards the body and follows the header, so there is nothing
+// to render. Skipping `toString()` here is also what lets redirect-only
+// resources — logout, which has no Twig template of its own — work in the
+// html context instead of dying in Twig's template loader.
+$isRedirect = isset($ro->headers['Location']);
+$view = $context === 'html' && ! $isRedirect ? $ro->toString() : null;
 
 ob_end_clean();
 
