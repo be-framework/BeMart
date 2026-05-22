@@ -5,14 +5,19 @@
          colors="true"
          cacheDirectory=".phpunit.cache">
     <testsuites>
-        <testsuite name="bemart">
-            <directory>tests</directory>
+        <testsuite name="resource">
+            <directory>tests/Resource</directory>
+            <directory>tests/Auth</directory>
+            <directory>tests/Module</directory>
+            <directory>tests/Router</directory>
+            <directory>tests/EntryPoint</directory>
+            <directory>be/tests</directory>
         </testsuite>
-        <testsuite name="bemart-be">
-            <directory>be/tests/Domain</directory>
+        <testsuite name="hypermedia">
+            <directory>tests/Hypermedia</directory>
         </testsuite>
-        <testsuite name="bemart-sql">
-            <directory>be/tests/Sql</directory>
+        <testsuite name="http">
+            <directory>tests/Http</directory>
         </testsuite>
     </testsuites>
     <php>
