@@ -9,60 +9,69 @@ use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use BEAR\Resource\Uri as ResourceUri;
+use Koriym\PhpServer\PhpServer;
 use MyVendor\BeMart\Tests\Support\UnsupportedResourceOperationException;
 use Override;
 
 use function array_key_exists;
-use function dirname;
+use function escapeshellarg;
 use function explode;
-use function fclose;
 use function file_exists;
 use function file_put_contents;
-use function fwrite;
 use function http_build_query;
 use function implode;
 use function is_array;
-use function is_executable;
-use function is_resource;
 use function is_string;
 use function json_decode;
 use function json_encode;
-use function parse_url;
 use function preg_match;
 use function preg_split;
-use function proc_close;
-use function proc_open;
+use function shell_exec;
 use function sprintf;
 use function str_contains;
-use function str_starts_with;
-use function stripos;
-use function stream_get_contents;
-use function strlen;
-use function substr;
+use function strtolower;
+use function sys_get_temp_dir;
+use function tempnam;
 use function trim;
 
 use const FILE_APPEND;
 use const JSON_THROW_ON_ERROR;
-use const PHP_BINARY;
 use const PHP_EOL;
-use const PHP_URL_HOST;
-use const PHP_URL_PORT;
-use const PHP_URL_QUERY;
 
+/**
+ * ResourceInterface backed by a real HTTP round-trip.
+ *
+ * The PHP built-in server is managed by koriym/php-server (the maintained
+ * component BEAR itself uses); requests are issued with curl against a
+ * per-instance cookie jar so the session survives across the workflow.
+ */
 final class HttpResource implements ResourceInterface
 {
-    /** @var array<string, string> */
-    private array $cookies = [];
+    private static PhpServer|null $server = null;
 
     private readonly string $baseUri;
+    private readonly string $cookieJar;
 
     public function __construct(
         string $host,
-        private readonly string $index,
+        string $index,
         private readonly string $logFile = 'php://stderr',
     ) {
         $this->baseUri = sprintf('http://%s', $host);
+        $this->cookieJar = (string) tempnam(sys_get_temp_dir(), 'bemart-http-cookie-');
+        $this->startServer($host, $index);
         $this->resetLog();
+    }
+
+    private function startServer(string $host, string $index): void
+    {
+        if (self::$server instanceof PhpServer) {
+            return;
+        }
+
+        $server = new PhpServer($host, $index);
+        $server->start();
+        self::$server = $server;
     }
 
     #[Override]
@@ -147,8 +156,8 @@ final class HttpResource implements ResourceInterface
     private function request(string $method, string $uri, array $query): ResourceObject
     {
         $url = $this->url($method, $uri, $query);
-        [$responseHeaders, $view] = $this->runCgi($method, $uri, $query);
-        $this->captureCookies($responseHeaders);
+        $raw = $this->runHttp($method, $url, $query);
+        [$responseHeaders, $view] = $this->splitResponse($raw);
 
         $ro = new HttpResponse();
         $resourceUri = new ResourceUri($url);
@@ -172,124 +181,54 @@ final class HttpResource implements ResourceInterface
 
         $separator = str_contains($uri, '?') ? '&' : '?';
 
-        return $this->baseUri . $uri . $separator . $this->queryString($query);
+        return $this->baseUri . $uri . $separator . http_build_query($query);
     }
 
-    /**
-     * @param array<string, mixed> $query
-     * @return array{0: list<string>, 1: string}
-     */
-    private function runCgi(string $method, string $uri, array $query): array
+    /** @param array<string, mixed> $query */
+    private function runHttp(string $method, string $url, array $query): string
     {
-        $content = $method === 'GET' ? '' : json_encode($query, JSON_THROW_ON_ERROR);
-        $requestUri = $method === 'GET' && $query !== [] ? $uri . '?' . $this->queryString($query) : $uri;
-        $env = [
-            'APP_CONTEXT' => 'html',
-            'DOCUMENT_ROOT' => dirname($this->index, 3) . '/public',
-            'GATEWAY_INTERFACE' => 'CGI/1.1',
-            'HTTP_ACCEPT' => 'text/html',
-            'HTTP_HOST' => (string) parse_url($this->baseUri, PHP_URL_HOST),
-            'QUERY_STRING' => (string) (parse_url($requestUri, PHP_URL_QUERY) ?? ''),
-            'REDIRECT_STATUS' => '1',
-            'REMOTE_ADDR' => '127.0.0.1',
-            'REQUEST_METHOD' => $method,
-            'REQUEST_URI' => $requestUri,
-            'SCRIPT_FILENAME' => $this->index,
-            'SCRIPT_NAME' => '/index.php',
-            'SERVER_NAME' => '127.0.0.1',
-            'SERVER_PORT' => (string) (parse_url($this->baseUri, PHP_URL_PORT) ?? '80'),
-            'SERVER_PROTOCOL' => 'HTTP/1.1',
-        ];
-
-        if ($this->cookies !== []) {
-            $env['HTTP_COOKIE'] = $this->cookieHeader();
-        }
-
+        $jar = escapeshellarg($this->cookieJar);
+        $curl = sprintf('curl -s -i -b %s -c %s', $jar, $jar);
         if ($method !== 'GET') {
-            $env['CONTENT_TYPE'] = 'application/json';
-            $env['CONTENT_LENGTH'] = (string) strlen($content);
+            $body = escapeshellarg(json_encode($query, JSON_THROW_ON_ERROR));
+            $curl .= sprintf(" -H 'Content-Type: application/json' -X %s -d %s", $method, $body);
         }
 
-        $descriptors = [
-            0 => ['pipe', 'r'],
-            1 => ['pipe', 'w'],
-            2 => ['pipe', 'w'],
-        ];
-        $process = proc_open([$this->phpCgiBinary()], $descriptors, $pipes, dirname($this->index, 3), $env);
-        if (! is_resource($process)) {
-            throw new HttpResourceServerStartException('Could not start php-cgi for HTTP workflow request.');
+        $curl .= ' ' . escapeshellarg($url);
+        $raw = shell_exec($curl);
+        if (! is_string($raw) || $raw === '') {
+            throw new HttpResourceRequestException(sprintf('curl produced no response for %s %s', $method, $url));
         }
 
-        fwrite($pipes[0], $content);
-        fclose($pipes[0]);
-        $raw = stream_get_contents($pipes[1]);
-        $error = stream_get_contents($pipes[2]);
-        fclose($pipes[1]);
-        fclose($pipes[2]);
-        $exitCode = proc_close($process);
-
-        if ($exitCode !== 0) {
-            throw new HttpResourceRequestException(sprintf('php-cgi failed: %s', trim((string) $error)));
-        }
-
-        if (! is_string($raw)) {
-            throw new HttpResourceRequestException('php-cgi returned no response.');
-        }
-
-        return $this->splitResponse($raw);
+        return $raw;
     }
 
-    /**
-     * @return array{0: list<string>, 1: string}
-     */
+    /** @return array{0: list<string>, 1: string} */
     private function splitResponse(string $raw): array
     {
         $parts = preg_split("/\r?\n\r?\n/", $raw, 2);
         if (! is_array($parts) || ! array_key_exists(1, $parts)) {
-            throw new HttpResourceRequestException('CGI response did not contain a header/body separator.');
+            throw new HttpResourceRequestException('HTTP response did not contain a header/body separator.');
         }
 
         $headers = preg_split("/\r?\n/", trim($parts[0]));
         if (! is_array($headers)) {
-            throw new HttpResourceRequestException('CGI response headers could not be parsed.');
+            throw new HttpResourceRequestException('HTTP response headers could not be parsed.');
         }
 
         return [$headers, $parts[1]];
-    }
-
-    /**
-     * @param array<string, mixed> $query
-     */
-    private function queryString(array $query): string
-    {
-        return http_build_query($query);
-    }
-
-    private function phpCgiBinary(): string
-    {
-        $candidate = dirname(PHP_BINARY) . '/php-cgi';
-        if (is_executable($candidate)) {
-            return $candidate;
-        }
-
-        $homebrew = '/opt/homebrew/opt/php@8.4/bin/php-cgi';
-        if (is_executable($homebrew)) {
-            return $homebrew;
-        }
-
-        throw new HttpResourceServerStartException('php-cgi binary is not available.');
     }
 
     /** @param list<string> $responseHeaders */
     private function statusCode(array $responseHeaders): int
     {
         foreach ($responseHeaders as $header) {
-            if (! str_starts_with($header, 'Status:')) {
+            if (! str_contains($header, 'HTTP/')) {
                 continue;
             }
 
-            if (preg_match('/\d{3}/', $header, $match) === 1) {
-                return (int) $match[0];
+            if (preg_match('/\s(\d{3})\s/', $header . ' ', $match) === 1) {
+                return (int) $match[1];
             }
         }
 
@@ -315,9 +254,7 @@ final class HttpResource implements ResourceInterface
         return $headers;
     }
 
-    /**
-     * @return array<string, mixed>
-     */
+    /** @return array<string, mixed> */
     private function body(string $view): array
     {
         /** @var mixed $decoded */
@@ -327,35 +264,6 @@ final class HttpResource implements ResourceInterface
         }
 
         return [];
-    }
-
-    /** @param list<string> $responseHeaders */
-    private function captureCookies(array $responseHeaders): void
-    {
-        foreach ($responseHeaders as $line) {
-            if (stripos($line, 'Set-Cookie:') !== 0) {
-                continue;
-            }
-
-            $cookie = trim(substr($line, 11));
-            [$pair] = explode(';', $cookie, 2);
-            if (! str_contains($pair, '=')) {
-                continue;
-            }
-
-            [$name, $value] = explode('=', $pair, 2);
-            $this->cookies[$name] = $value;
-        }
-    }
-
-    private function cookieHeader(): string
-    {
-        $pairs = [];
-        foreach ($this->cookies as $name => $value) {
-            $pairs[] = $name . '=' . $value;
-        }
-
-        return implode('; ', $pairs);
     }
 
     /** @param array<string, mixed> $query */
