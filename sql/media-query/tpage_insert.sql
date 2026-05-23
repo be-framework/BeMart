@@ -1,1 +1,0 @@
-INSERT INTO dtb_page (id, master_page_id, page_name, url, file_name, edit_type, author, description, keyword, create_date, update_date, meta_robots, meta_tags, discriminator_type) VALUES (:id, NULL, :pageName, :url, :fileName, :editType, NULL, NULL, NULL, NOW(), NOW(), NULL, NULL, 'page')

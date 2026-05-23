@@ -1,1 +1,0 @@
-UPDATE dtb_base_info SET shop_name = :shopName, shop_kana = :shopKana, shop_name_eng = :shopNameEng, company_name = :companyName, postal_code = :postalCode, pref_id = :pref, addr01 = :addr01, addr02 = :addr02, phone_number = :phoneNumber, business_hour = :businessHour, email01 = :shopEmail01, message = :shopMessage, update_date = NOW() WHERE id = 1

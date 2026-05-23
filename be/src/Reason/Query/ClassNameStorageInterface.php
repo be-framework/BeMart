@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Admin catalog class names (規格名) — unified Query + Command (Wave 7,
@@ -22,13 +23,18 @@ use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
 interface ClassNameStorageInterface
 {
     /** @return list<ClassNameEntity> */
+    #[DbQuery('tclass_name_list', factory: ClassNameEntity::class)]
     public function list(): array;
 
+    #[DbQuery('tclass_name_get', factory: ClassNameEntity::class)]
     public function getById(string $classNameId): ClassNameEntity|null;
 
+    #[DbQuery('tclass_name_put')]
     public function put(ClassNameEntity $className): void;
 
+    #[DbQuery('tclass_name_remove')]
     public function remove(string $classNameId): void;
 
+    #[DbQuery('tclass_name_reorder')]
     public function reorder(string $classNameId, int $sortNo): void;
 }

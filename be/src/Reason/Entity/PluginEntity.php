@@ -28,8 +28,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * the actual install logic by simply flipping `installed=true` on a
  * fixture record matching the pluginCode passed in.
  */
-final readonly class PluginEntity
+final readonly class PluginEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $pluginCode,
         public string $pluginName,

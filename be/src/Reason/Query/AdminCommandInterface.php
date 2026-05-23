@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Write-side Admin command — Wave 8 (admin member CRUD).
@@ -29,6 +30,7 @@ interface AdminCommandInterface
      * entity carries the already-hashed password and a freshly-generated
      * adminId; this method is pure persistence.
      */
+    #[DbQuery('admin_create')]
     public function create(AdminEntity $admin): void;
 
     /**
@@ -37,6 +39,7 @@ interface AdminCommandInterface
      * fields); preserving fields outside the update form (passwordHash
      * / authority / work) is the Final's responsibility.
      */
+    #[DbQuery('admin_update')]
     public function update(AdminEntity $admin): void;
 
     /**
@@ -44,6 +47,7 @@ interface AdminCommandInterface
      * EC-CUBE which keeps the row for audit / FK integrity and only
      * flips a flag. Wave 8 (doDeleteMember).
      */
+    #[DbQuery('admin_delete')]
     public function delete(string $adminId): void;
 
     /**
@@ -51,5 +55,6 @@ interface AdminCommandInterface
      * (doUpdateAuthorityRole). Smaller surface than `update` because
      * the role-flip path should not be able to reach other columns.
      */
+    #[DbQuery('admin_update_authority')]
     public function updateAuthority(string $adminId, int $newAuthority): void;
 }

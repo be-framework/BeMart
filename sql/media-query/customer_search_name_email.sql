@@ -1,1 +1,0 @@
-SELECT id, email, password, name01, name02, kana01, kana02, company_name, phone_number, postal_code, pref_id, addr01, addr02, birth, sex_id, job_id, customer_status_id, secret_key FROM dtb_customer WHERE (name01 LIKE :nameA OR name02 LIKE :nameB OR company_name LIKE :nameC) AND email LIKE :emailKeyword ORDER BY id ASC LIMIT :limit

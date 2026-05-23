@@ -6,28 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use Aura\Sql\DecoratedPdo;
 use Aura\Sql\ExtendedPdoInterface;
-use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
-use MyVendor\BeMart\Be\Reason\Query\InternalDbQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
+use MyVendor\BeMart\Module\MediaQueryRuntimeModule;
 use PDO;
 use PHPUnit\Framework\TestCase;
 use Ray\AuraSqlModule\AuraSqlBaseModule;
@@ -130,30 +109,7 @@ abstract class AbstractSqlTestCase extends TestCase
             {
                 $this->bind(ExtendedPdoInterface::class)->toInstance(new DecoratedPdo($this->pdo));
                 $this->install(new AuraSqlBaseModule('mysql:'));
-                $this->install(new MediaQueryBaseModule(Queries::fromClasses([
-                    CustomerQueryInterface::class,
-                    EmailUniquenessCheckerInterface::class,
-                    AdminQueryInterface::class,
-                    ProductClassQueryInterface::class,
-                    ProductQueryInterface::class,
-                    TemplateStorageInterface::class,
-                    CartQueryInterface::class,
-                    OrderQueryInterface::class,
-                    AddressIdGeneratorInterface::class,
-                    AdminIdGeneratorInterface::class,
-                    BlockIdGeneratorInterface::class,
-                    CategoryIdGeneratorInterface::class,
-                    ClassCategoryIdGeneratorInterface::class,
-                    ClassNameIdGeneratorInterface::class,
-                    CustomerIdGeneratorInterface::class,
-                    DeliveryIdGeneratorInterface::class,
-                    NewsIdGeneratorInterface::class,
-                    PageIdGeneratorInterface::class,
-                    PaymentMethodAdminIdGeneratorInterface::class,
-                    TagIdGeneratorInterface::class,
-                    TaxRuleIdGeneratorInterface::class,
-                    InternalDbQueryInterface::class,
-                ])));
+                $this->install(new MediaQueryBaseModule(Queries::fromClasses(MediaQueryRuntimeModule::queryClasses())));
                 $this->install(new MediaQueryDbModule(new DbQueryConfig($this->sqlDir)));
             }
         };

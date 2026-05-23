@@ -6,8 +6,8 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlCartCommand;
-use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
+use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use RuntimeException;
 
 final class SqlCartCommandTest extends AbstractSqlTestCase
@@ -17,7 +17,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'NEW-A', 'price02' => 100]);
         $this->insertProduct(['product_code' => 'NEW-B', 'price02' => 200]);
 
-        $command = $this->sql(SqlCartCommand::class);
+        $command = $this->sql(CartCommandInterface::class);
         $command->save(new CartEntity(
             cartKey: 'fresh-session_1',
             saleTypeId: 1,
@@ -32,7 +32,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
         ));
 
         // Read back via the query — round-trips through real schema.
-        $query = $this->sql(SqlCartQuery::class);
+        $query = $this->sql(CartQueryInterface::class);
         $cart = $query->byCartKey('fresh-session_1');
 
         $this->assertNotNull($cart);
@@ -51,7 +51,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'NEW-1', 'price02' => 250]);
         $this->insertProduct(['product_code' => 'NEW-2', 'price02' => 300]);
 
-        $command = $this->sql(SqlCartCommand::class);
+        $command = $this->sql(CartCommandInterface::class);
         // First save — old shape.
         $command->save(new CartEntity(
             cartKey: 'overwrite_1',
@@ -76,7 +76,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
             preOrderId: 'pre-new',
         ));
 
-        $query = $this->sql(SqlCartQuery::class);
+        $query = $this->sql(CartQueryInterface::class);
         $cart = $query->byCartKey('overwrite_1');
         $this->assertNotNull($cart);
         // Old item must NOT survive.
@@ -95,7 +95,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
 
     public function testSaveThrowsForUnknownProductCode(): void
     {
-        $command = $this->sql(SqlCartCommand::class);
+        $command = $this->sql(CartCommandInterface::class);
 
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('GHOST-PRODUCT');
@@ -119,10 +119,10 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
         ]);
         $this->insertCartItem($cart['id'], $this->defaultProductClassId($productId));
 
-        $command = $this->sql(SqlCartCommand::class);
+        $command = $this->sql(CartCommandInterface::class);
         $command->clearByPreOrderId('pre-clear-001');
 
-        $query = $this->sql(SqlCartQuery::class);
+        $query = $this->sql(CartQueryInterface::class);
         $this->assertNull($query->byCartKey('clear-by-pre_1'));
         // Items cascaded too.
         $countItems = $this->pdo->query('SELECT COUNT(*) FROM dtb_cart_item');
@@ -134,11 +134,11 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
     {
         $this->insertCart(['cart_key' => 'keep_1', 'pre_order_id' => 'keep-pre-1']);
 
-        $command = $this->sql(SqlCartCommand::class);
+        $command = $this->sql(CartCommandInterface::class);
         $command->clearByPreOrderId('does-not-exist');
 
         // The unrelated cart survives.
-        $query = $this->sql(SqlCartQuery::class);
+        $query = $this->sql(CartQueryInterface::class);
         $this->assertNotNull($query->byCartKey('keep_1'));
     }
 
@@ -152,10 +152,10 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
         // the underscore — must NOT match `drop`.
         $this->insertCart(['cart_key' => 'dropper_1']);
 
-        $command = $this->sql(SqlCartCommand::class);
+        $command = $this->sql(CartCommandInterface::class);
         $command->clearBySessionPrefix('drop');
 
-        $query = $this->sql(SqlCartQuery::class);
+        $query = $this->sql(CartQueryInterface::class);
         $this->assertSame([], $query->bySessionPrefix('drop'));
         $this->assertNotNull($query->byCartKey('keep_1'));
         $this->assertNotNull($query->byCartKey('dropper_1'));

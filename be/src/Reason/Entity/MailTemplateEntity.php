@@ -24,8 +24,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * The mailTemplateId is therefore required input and MUST match an
  * existing row.
  */
-final readonly class MailTemplateEntity
+final readonly class MailTemplateEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public int $mailTemplateId,
         public string $mailTemplateName,

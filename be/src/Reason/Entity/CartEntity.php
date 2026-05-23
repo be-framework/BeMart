@@ -11,8 +11,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * shopping session into N carts, one per sale type (通常/予約/DL).
  * `items` are the existing CartItemEntity rows under this cartKey.
  */
-final readonly class CartEntity
+final readonly class CartEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     /** @param list<CartItemEntity> $items */
     public function __construct(
         public string $cartKey,

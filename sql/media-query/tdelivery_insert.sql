@@ -1,1 +1,0 @@
-INSERT INTO dtb_delivery (id, creator_id, sale_type_id, name, service_name, description, confirm_url, sort_no, visible, create_date, update_date, discriminator_type) VALUES (:id, NULL, NULL, :name, NULL, NULL, NULL, NULL, :visible, NOW(), NOW(), 'delivery')

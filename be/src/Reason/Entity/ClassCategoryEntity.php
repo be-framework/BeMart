@@ -18,8 +18,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * ProductClass referential-integrity guards once a real consumer
  * shows up.
  */
-final readonly class ClassCategoryEntity
+final readonly class ClassCategoryEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $classCategoryId,
         public string $classNameId,

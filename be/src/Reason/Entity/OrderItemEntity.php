@@ -16,8 +16,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * extending price * quantity reproduces the line subtotal as printed on the
  * original confirmation mail.
  */
-final readonly class OrderItemEntity
+final readonly class OrderItemEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $orderNo,
         public string $productCode,
