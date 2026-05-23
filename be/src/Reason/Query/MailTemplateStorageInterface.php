@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
-use MyVendor\BeMart\Be\Reason\Query\Result\MailTemplateUpdateResult;
+use MyVendor\BeMart\Be\Reason\Query\Result\MailTemplateUpdate;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
@@ -31,5 +31,5 @@ interface MailTemplateStorageInterface
     public function findById(int $mailTemplateId): MailTemplateEntity|null;
 
     #[DbQuery('tmail_template_update')]
-    public function update(MailTemplateEntity $entity): MailTemplateUpdateResult;
+    public function update(MailTemplateEntity $entity): MailTemplateUpdate;
 }
