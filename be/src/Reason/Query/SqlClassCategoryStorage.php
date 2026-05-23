@@ -11,7 +11,7 @@ use function ctype_digit;
 
 final class SqlClassCategoryStorage implements ClassCategoryStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<ClassCategoryEntity> */
     #[Override]
@@ -20,14 +20,14 @@ final class SqlClassCategoryStorage implements ClassCategoryStorageInterface
         if (! ctype_digit($classNameId)) {
             return [];
         }
-        return array_map($this->hydrate(...), $this->db->rows('tclass_category_list_by_class_name', ['classNameId' => (int) $classNameId]));
+        return array_map($this->hydrate(...), $this->db->tclass_category_list_by_class_name(classNameId: (int) $classNameId));
     }
 
     /** @return list<ClassCategoryEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tclass_category_list'));
+        return array_map($this->hydrate(...), $this->db->tclass_category_list());
     }
 
     #[Override]
@@ -36,7 +36,7 @@ final class SqlClassCategoryStorage implements ClassCategoryStorageInterface
         if (! ctype_digit($classCategoryId)) {
             return null;
         }
-        $row = $this->db->row('tclass_category_get', ['id' => (int) $classCategoryId]);
+        $row = $this->db->tclass_category_get(id: (int) $classCategoryId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -48,21 +48,19 @@ final class SqlClassCategoryStorage implements ClassCategoryStorageInterface
         }
         $id = (int) $classCategory->classCategoryId;
         $classNameId = (int) $classCategory->classNameId;
-        $values = ['id' => $id, 'classNameId' => $classNameId, 'name' => $classCategory->name];
-        if ($this->db->row('tclass_category_exists', ['id' => $id]) !== null) {
-            $this->db->exec('tclass_category_update', $values);
+        if ($this->db->tclass_category_exists(id: $id) !== null) {
+            $this->db->tclass_category_update(id: $id, classNameId: $classNameId, name: $classCategory->name);
             return;
         }
-        $sort = (int) ($this->db->row('tclass_category_next_sort', ['classNameId' => $classNameId])['next_sort'] ?? 1);
-        $values['sortNo'] = $sort;
-        $this->db->exec('tclass_category_insert', $values);
+        $sort = (int) ($this->db->tclass_category_next_sort(classNameId: $classNameId)['next_sort'] ?? 1);
+        $this->db->tclass_category_insert(id: $id, classNameId: $classNameId, name: $classCategory->name, sortNo: $sort);
     }
 
     #[Override]
     public function remove(string $classCategoryId): void
     {
         if (ctype_digit($classCategoryId)) {
-            $this->db->exec('tclass_category_delete', ['id' => (int) $classCategoryId]);
+            $this->db->tclass_category_delete(id: (int) $classCategoryId);
         }
     }
 
@@ -70,7 +68,7 @@ final class SqlClassCategoryStorage implements ClassCategoryStorageInterface
     public function reorder(string $classCategoryId, int $sortNo): void
     {
         if (ctype_digit($classCategoryId)) {
-            $this->db->exec('tclass_category_reorder', ['id' => (int) $classCategoryId, 'sortNo' => $sortNo]);
+            $this->db->tclass_category_reorder(id: (int) $classCategoryId, sortNo: $sortNo);
         }
     }
 
@@ -78,7 +76,7 @@ final class SqlClassCategoryStorage implements ClassCategoryStorageInterface
     public function setVisible(string $classCategoryId, bool $visible): void
     {
         if (ctype_digit($classCategoryId)) {
-            $this->db->exec('tclass_category_visible', ['id' => (int) $classCategoryId, 'visible' => (int) $visible]);
+            $this->db->tclass_category_visible(id: (int) $classCategoryId, visible: (int) $visible);
         }
     }
 

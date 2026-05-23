@@ -51,7 +51,7 @@ use function is_string;
  *    so this suite needs no generator rebind. Earlier the forgot-password
  *    issuer {@see \MyVendor\BeMart\Be\Final\PasswordResetRequested} reused
  *    CustomerIdGeneratorInterface to mint the key; under SQL the
- *    `SqlCustomerIdGenerator` `MAX(id)+1` output is a 1-2 digit string,
+ *    `direct MediaQuery customer id proxy` `MAX(id)+1` output is a 1-2 digit string,
  *    far short of the ResetKey semantic floor of 16 chars, so the reset
  *    endpoint 400'd. The fix split the concern into its own generator;
  *    whichever customer-id generator is bound is now irrelevant to reset.

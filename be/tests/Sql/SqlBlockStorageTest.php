@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\BlockEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlBlockStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlBlockIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
 
 use function date;
 
@@ -103,8 +103,8 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(SqlBlockIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(BlockIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new BlockEntity(
             blockId: $newId,
@@ -134,8 +134,8 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         // System blocks (blockDeletable=false) round-trip the same as
         // user blocks — only BlockDeleted enforces the guard, not the
         // storage.
-        $generator = $this->sql(SqlBlockIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(BlockIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlBlockStorage::class);
 
         $storage->put(new BlockEntity(
@@ -284,16 +284,16 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlBlockIdGeneratorAllocatesIncrementingIds(): void
+    public function testBlockIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlBlockIdGenerator::class);
+        $generator = $this->sql(BlockIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertBlock();
         $secondId = $this->insertBlock();
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

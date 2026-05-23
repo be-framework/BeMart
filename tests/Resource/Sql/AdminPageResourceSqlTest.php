@@ -24,7 +24,7 @@ use function str_contains;
  * AUTHN / AUTHZ / CSRF branches. The only differences are:
  *
  *  - the storage binding (PageStorageInterface → SqlPageStorage) and
- *    id generator (PageIdGeneratorInterface → SqlPageIdGenerator) are
+ *    id generator (PageIdGeneratorInterface → direct MediaQuery page id proxy) are
  *    layered via the base class's sqlOverrideModule; persistence is
  *    against the real dtb_page table.
  *
@@ -91,7 +91,7 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
      * Seed a single user-editable page through the resource layer and
      * return the server-generated pageId — mirrors the Fake-backed
      * sibling's helper exactly. The POST drives the full Becoming
-     * chain (Input → Final → SqlPageIdGenerator → SqlPageStorage) so
+     * chain (Input → Final → direct MediaQuery page id proxy → SqlPageStorage) so
      * the row appears in the same transactional state every
      * subsequent assertion will see.
      */

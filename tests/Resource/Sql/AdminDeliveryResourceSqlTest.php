@@ -25,7 +25,7 @@ use function str_contains;
  *
  *  - the storage binding (DeliveryStorageInterface → SqlDeliveryStorage)
  *    and id generator (DeliveryIdGeneratorInterface →
- *    SqlDeliveryIdGenerator) are layered via the base class's
+ *    direct MediaQuery delivery id proxy) are layered via the base class's
  *    sqlOverrideModule; persistence is against the real dtb_delivery
  *    table.
  *
@@ -85,7 +85,7 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
      * Seed a single delivery method through the resource layer and
      * return the server-generated deliveryId — mirrors the Fake-backed
      * sibling's helper exactly. The POST drives the full Becoming chain
-     * (Input → Final → SqlDeliveryIdGenerator → SqlDeliveryStorage) so
+     * (Input → Final → direct MediaQuery delivery id proxy → SqlDeliveryStorage) so
      * the row appears in the same transactional state every subsequent
      * assertion will see.
      */

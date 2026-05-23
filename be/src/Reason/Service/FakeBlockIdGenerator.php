@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Service;
 
+use MyVendor\BeMart\Be\Reason\Query\Result\GeneratedId;
 use Override;
 
 use function bin2hex;
@@ -12,8 +13,8 @@ use function random_bytes;
 final class FakeBlockIdGenerator implements BlockIdGeneratorInterface
 {
     #[Override]
-    public function generate(): string
+    public function generate(): GeneratedId
     {
-        return 'bk-' . bin2hex(random_bytes(8));
+        return new GeneratedId('bk-' . bin2hex(random_bytes(8)));
     }
 }

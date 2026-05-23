@@ -12,7 +12,7 @@ final class SqlProductQuery implements ProductQueryInterface
 {
     private ProductFactory $factory;
 
-    public function __construct(private readonly MediaQueryExecutor $db)
+    public function __construct(private readonly InternalDbQueryInterface $db)
     {
         $this->factory = new ProductFactory();
     }
@@ -20,7 +20,7 @@ final class SqlProductQuery implements ProductQueryInterface
     #[Override]
     public function item(string $productCode): ProductEntity|null
     {
-        $row = $this->db->row('product_get', ['productCode' => $productCode]);
+        $row = $this->db->product_get(productCode: $productCode);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -28,21 +28,21 @@ final class SqlProductQuery implements ProductQueryInterface
     #[Override]
     public function listAll(int $limit, int $offset = 0): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('product_list', ['limit' => $limit, 'offset' => $offset]));
+        return array_map($this->hydrate(...), $this->db->product_list(limit: $limit, offset: $offset));
     }
 
     /** @return list<ProductEntity> */
     #[Override]
     public function search(?string $nameKeyword, int $limit = 50): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('product_search', ['nameKeyword' => $nameKeyword, 'limit' => $limit]));
+        return array_map($this->hydrate(...), $this->db->product_search(nameKeyword: $nameKeyword, limit: $limit));
     }
 
     /** @return list<ProductEntity> */
     #[Override]
     public function listForExport(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('product_export'));
+        return array_map($this->hydrate(...), $this->db->product_export());
     }
 
     /** @param array<string, mixed> $row */

@@ -12,7 +12,7 @@ use function ctype_digit;
 
 final class SqlFavoriteStorage implements FavoriteStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function add(FavoriteEntity $favorite): void
@@ -21,7 +21,7 @@ final class SqlFavoriteStorage implements FavoriteStorageInterface
         if ($productId === null || ! ctype_digit($favorite->customerId)) {
             return;
         }
-        $this->db->exec('favorite_add', ['customerId' => (int) $favorite->customerId, 'productId' => $productId]);
+        $this->db->favorite_add(customerId: (int) $favorite->customerId, productId: $productId);
     }
 
     #[Override]
@@ -31,7 +31,7 @@ final class SqlFavoriteStorage implements FavoriteStorageInterface
             return new FavoritePresence(false);
         }
 
-        return new FavoritePresence($this->db->row('favorite_has', ['customerId' => (int) $customerId, 'productCode' => $productCode]) !== null);
+        return new FavoritePresence($this->db->favorite_has(customerId: (int) $customerId, productCode: $productCode) !== null);
     }
 
     /** @return list<FavoriteEntity> */
@@ -49,7 +49,7 @@ final class SqlFavoriteStorage implements FavoriteStorageInterface
                 unitPrice: (int) $row['unit_price'],
                 fileName: $row['main_image'] !== null ? (string) $row['main_image'] : null,
             ),
-            $this->db->rows('favorite_list', ['customerId' => (int) $customerId]),
+            $this->db->favorite_list(customerId: (int) $customerId),
         );
     }
 
@@ -60,12 +60,12 @@ final class SqlFavoriteStorage implements FavoriteStorageInterface
         if ($productId === null || ! ctype_digit($customerId)) {
             return;
         }
-        $this->db->exec('favorite_remove', ['customerId' => (int) $customerId, 'productId' => $productId]);
+        $this->db->favorite_remove(customerId: (int) $customerId, productId: $productId);
     }
 
     private function resolveProductId(string $productCode): int|null
     {
-        $row = $this->db->row('favorite_resolve_product', ['productCode' => $productCode]);
+        $row = $this->db->favorite_resolve_product(productCode: $productCode);
         return $row === null ? null : (int) $row['product_id'];
     }
 }

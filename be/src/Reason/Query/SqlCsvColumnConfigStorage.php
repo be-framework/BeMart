@@ -4,13 +4,17 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Query;
 
+use Aura\Sql\ExtendedPdoInterface;
 use MyVendor\BeMart\Be\Reason\Entity\CsvColumnConfigEntity;
 use Override;
 use Throwable;
 
 final class SqlCsvColumnConfigStorage implements CsvColumnConfigStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(
+        private readonly InternalDbQueryInterface $db,
+        private readonly ExtendedPdoInterface $connection,
+    ) {}
 
     /** @return list<CsvColumnConfigEntity> sorted by sortNo */
     #[Override]
@@ -18,7 +22,7 @@ final class SqlCsvColumnConfigStorage implements CsvColumnConfigStorageInterface
     {
         return array_map(
             $this->hydrate(...),
-            $this->db->rows('csv_column_list_by_type', ['csvType' => $csvType]),
+            $this->db->csv_column_list_by_type(csvType: $csvType),
         );
     }
 
@@ -27,17 +31,17 @@ final class SqlCsvColumnConfigStorage implements CsvColumnConfigStorageInterface
     public function replaceType(int $csvType, array $entries): void
     {
         $this->withAtomic(function () use ($csvType, $entries): void {
-            $this->db->exec('csv_column_delete_by_type', ['csvType' => $csvType]);
+            $this->db->csv_column_delete_by_type(csvType: $csvType);
             foreach ($entries as $entry) {
-                $this->db->exec('csv_column_insert', [
-                    'csvType' => $entry->csvType,
-                    'entityName' => $entry->columnName,
-                    'fieldName' => $entry->columnName,
-                    'dispName' => $entry->columnName,
-                    'sortNo' => $entry->sortNo,
-                    'enabled' => $entry->enabled ? 1 : 0,
-                    'discriminator' => 'csv',
-                ]);
+                $this->db->csv_column_insert(
+                    csvType: $entry->csvType,
+                    entityName: $entry->columnName,
+                    fieldName: $entry->columnName,
+                    dispName: $entry->columnName,
+                    sortNo: $entry->sortNo,
+                    enabled: $entry->enabled ? 1 : 0,
+                    discriminator: 'csv',
+                );
             }
         });
     }
@@ -55,13 +59,13 @@ final class SqlCsvColumnConfigStorage implements CsvColumnConfigStorageInterface
 
     private function withAtomic(callable $work): void
     {
-        if ($this->db->inTransaction()) {
-            $this->db->exec('csv_column_savepoint');
+        if ($this->connection->inTransaction()) {
+            $this->db->csv_column_savepoint();
             try {
                 $work();
-                $this->db->exec('csv_column_release_savepoint');
+                $this->db->csv_column_release_savepoint();
             } catch (Throwable $e) {
-                $this->db->exec('csv_column_rollback_savepoint');
+                $this->db->csv_column_rollback_savepoint();
 
                 throw $e;
             }
@@ -69,12 +73,12 @@ final class SqlCsvColumnConfigStorage implements CsvColumnConfigStorageInterface
             return;
         }
 
-        $this->db->beginTransaction();
+        $this->connection->beginTransaction();
         try {
             $work();
-            $this->db->commit();
+            $this->connection->commit();
         } catch (Throwable $e) {
-            $this->db->rollBack();
+            $this->connection->rollBack();
 
             throw $e;
         }

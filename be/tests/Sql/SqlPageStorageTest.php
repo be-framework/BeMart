@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\PageEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlPageStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
 
 use function date;
 
@@ -109,8 +109,8 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(SqlPageIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(PageIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new PageEntity(
             pageId: $newId,
@@ -141,8 +141,8 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
     {
         // System pages (edit_type >= 2) round-trip the same as user
         // pages — only PageDeleted enforces the guard, not the storage.
-        $generator = $this->sql(SqlPageIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(PageIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlPageStorage::class);
 
         $storage->put(new PageEntity(
@@ -294,16 +294,16 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlPageIdGeneratorAllocatesIncrementingIds(): void
+    public function testPageIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlPageIdGenerator::class);
+        $generator = $this->sql(PageIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertPage();
         $secondId = $this->insertPage();
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

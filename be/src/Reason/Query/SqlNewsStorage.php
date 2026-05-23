@@ -11,13 +11,13 @@ use function ctype_digit;
 
 final class SqlNewsStorage implements NewsStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<NewsEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tnews_list'));
+        return array_map($this->hydrate(...), $this->db->tnews_list());
     }
 
     #[Override]
@@ -26,7 +26,7 @@ final class SqlNewsStorage implements NewsStorageInterface
         if (! ctype_digit($newsId)) {
             return null;
         }
-        $row = $this->db->row('tnews_get', ['id' => (int) $newsId]);
+        $row = $this->db->tnews_get(id: (int) $newsId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -37,22 +37,34 @@ final class SqlNewsStorage implements NewsStorageInterface
             return;
         }
         $id = (int) $news->newsId;
-        $values = [
-            'id' => $id,
-            'title' => $news->newsTitle,
-            'description' => $news->newsDescription,
-            'url' => $news->newsUrl,
-            'publishDate' => $news->publishDate,
-            'linkMethod' => (int) $news->linkMethod,
-        ];
-        $this->db->exec($this->db->row('tnews_exists', ['id' => $id]) === null ? 'tnews_insert' : 'tnews_update', $values);
+        if ($this->db->tnews_exists(id: $id) === null) {
+            $this->db->tnews_insert(
+                id: $id,
+                title: $news->newsTitle,
+                description: $news->newsDescription,
+                url: $news->newsUrl,
+                publishDate: $news->publishDate,
+                linkMethod: (int) $news->linkMethod,
+            );
+
+            return;
+        }
+
+        $this->db->tnews_update(
+            id: $id,
+            title: $news->newsTitle,
+            description: $news->newsDescription,
+            url: $news->newsUrl,
+            publishDate: $news->publishDate,
+            linkMethod: (int) $news->linkMethod,
+        );
     }
 
     #[Override]
     public function remove(string $newsId): void
     {
         if (ctype_digit($newsId)) {
-            $this->db->exec('tnews_delete', ['id' => (int) $newsId]);
+            $this->db->tnews_delete(id: (int) $newsId);
         }
     }
 
@@ -60,7 +72,7 @@ final class SqlNewsStorage implements NewsStorageInterface
     public function setVisible(string $newsId, bool $visible): void
     {
         if (ctype_digit($newsId)) {
-            $this->db->exec('tnews_visible', ['id' => (int) $newsId, 'visible' => (int) $visible]);
+            $this->db->tnews_visible(id: (int) $newsId, visible: (int) $visible);
         }
     }
 

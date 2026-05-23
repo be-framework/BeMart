@@ -9,10 +9,24 @@ use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\InternalDbQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
+use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use Override;
 use Ray\AuraSqlModule\AuraSqlBaseModule;
 use Ray\AuraSqlModule\AuraSqlModule;
@@ -45,6 +59,20 @@ final class MediaQueryRuntimeModule extends AbstractModule
             TemplateStorageInterface::class,
             CartQueryInterface::class,
             OrderQueryInterface::class,
+            AddressIdGeneratorInterface::class,
+            AdminIdGeneratorInterface::class,
+            BlockIdGeneratorInterface::class,
+            CategoryIdGeneratorInterface::class,
+            ClassCategoryIdGeneratorInterface::class,
+            ClassNameIdGeneratorInterface::class,
+            CustomerIdGeneratorInterface::class,
+            DeliveryIdGeneratorInterface::class,
+            NewsIdGeneratorInterface::class,
+            PageIdGeneratorInterface::class,
+            PaymentMethodAdminIdGeneratorInterface::class,
+            TagIdGeneratorInterface::class,
+            TaxRuleIdGeneratorInterface::class,
+            InternalDbQueryInterface::class,
         ]);
 
         /**

@@ -21,7 +21,7 @@ use Ray\Di\AbstractModule;
  *
  *  - the storage bindings (AdminQueryInterface → SqlAdminQuery,
  *    AdminCommandInterface → SqlAdminCommand, AdminIdGeneratorInterface
- *    → SqlAdminIdGenerator) are layered via the base class's
+ *    → direct MediaQuery admin id proxy) are layered via the base class's
  *    sqlOverrideModule; CRUD runs against real dtb_member rows.
  *
  *  - the three seed admins (test-admin / shop-owner / deputy) are

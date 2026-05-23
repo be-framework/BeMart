@@ -15,11 +15,6 @@
       <code><![CDATA[public function register(CustomerEntity $customer): void]]></code>
     </MissingOverrideAttribute>
   </file>
-  <file src="be/src/Reason/Service/FakeCustomerIdGenerator.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function generate(): string]]></code>
-    </MissingOverrideAttribute>
-  </file>
   <file src="be/src/Reason/Service/FakeCustomerInitialPoint.php">
     <MissingOverrideAttribute>
       <code><![CDATA[public function initial(): int]]></code>
