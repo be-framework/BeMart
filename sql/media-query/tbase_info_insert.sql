@@ -1,1 +1,0 @@
-INSERT INTO dtb_base_info (id, shop_name, shop_kana, shop_name_eng, company_name, postal_code, pref_id, addr01, addr02, phone_number, business_hour, email01, message, update_date, discriminator_type) VALUES (1, :shopName, :shopKana, :shopNameEng, :companyName, :postalCode, :pref, :addr01, :addr02, :phoneNumber, :businessHour, :shopEmail01, :shopMessage, NOW(), 'baseinfo')

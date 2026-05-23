@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\NewsEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Admin CMS news — unified Query + Command (Wave 9).
@@ -18,13 +19,18 @@ use MyVendor\BeMart\Be\Reason\Entity\NewsEntity;
 interface NewsStorageInterface
 {
     /** @return list<NewsEntity> */
+    #[DbQuery('tnews_list', factory: NewsEntity::class)]
     public function list(): array;
 
+    #[DbQuery('tnews_get', factory: NewsEntity::class)]
     public function getById(string $newsId): NewsEntity|null;
 
+    #[DbQuery('tnews_put')]
     public function put(NewsEntity $news): void;
 
+    #[DbQuery('tnews_delete')]
     public function remove(string $newsId): void;
 
+    #[DbQuery('tnews_visible')]
     public function setVisible(string $newsId, bool $visible): void;
 }

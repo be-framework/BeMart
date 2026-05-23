@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CsvColumnConfigEntity;
+use MyVendor\BeMart\Be\Reason\Query\Param\CsvColumnConfigList;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * CSV column configuration storage — unified Query + Command (Wave 9).
@@ -23,8 +25,9 @@ use MyVendor\BeMart\Be\Reason\Entity\CsvColumnConfigEntity;
 interface CsvColumnConfigStorageInterface
 {
     /** @return list<CsvColumnConfigEntity> sorted by sortNo */
+    #[DbQuery('csv_column_list_by_type', factory: CsvColumnConfigEntity::class)]
     public function listByType(int $csvType): array;
 
-    /** @param list<CsvColumnConfigEntity> $entries */
-    public function replaceType(int $csvType, array $entries): void;
+    #[DbQuery('csv_column_replace_type')]
+    public function replaceType(int $csvType, CsvColumnConfigList $entries): void;
 }

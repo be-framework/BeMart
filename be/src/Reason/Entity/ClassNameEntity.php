@@ -14,8 +14,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * "Color"). A future ProductClass row joins one ClassName + one
  * ClassCategory pair onto a Product to form a SKU.
  */
-final readonly class ClassNameEntity
+final readonly class ClassNameEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $classNameId,
         public string $name,

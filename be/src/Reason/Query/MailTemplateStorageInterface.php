@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\MailTemplateUpdateResult;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Mail template storage — unified Query + Command (Wave 8).
@@ -22,9 +24,12 @@ use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
 interface MailTemplateStorageInterface
 {
     /** @return list<MailTemplateEntity> */
+    #[DbQuery('tmail_template_list', factory: MailTemplateEntity::class)]
     public function list(): array;
 
+    #[DbQuery('tmail_template_get', factory: MailTemplateEntity::class)]
     public function findById(int $mailTemplateId): MailTemplateEntity|null;
 
-    public function update(MailTemplateEntity $entity): void;
+    #[DbQuery('tmail_template_update')]
+    public function update(MailTemplateEntity $entity): MailTemplateUpdateResult;
 }

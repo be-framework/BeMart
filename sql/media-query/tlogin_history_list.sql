@@ -1,1 +1,4 @@
-SELECT lh.create_date, lh.login_id, lhs.id AS status_id, lh.client_ip FROM dtb_login_history lh LEFT JOIN mtb_login_history_status lhs ON lhs.id = lh.login_history_status_id ORDER BY lh.create_date DESC, lh.id DESC LIMIT :limit
+SELECT lh.create_date, lh.login_id, (lh.login_history_status_id = 1) AS success, lh.client_ip
+FROM dtb_login_history lh
+ORDER BY lh.create_date DESC, lh.id DESC
+LIMIT :limit

@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
+use MyVendor\BeMart\Be\Reason\Query\Result\ProductCopyResult;
 use MyVendor\BeMart\Be\Reason\Query\Result\BulkStatusUpdateResult;
 use Override;
 use RuntimeException;
@@ -59,7 +61,7 @@ final class FakeProductCommand implements ProductCommandInterface
     }
 
     #[Override]
-    public function copy(string $sourceCode, string $newCode): ProductEntity
+    public function copy(string $sourceCode, string $newCode): ProductCopyResult
     {
         $source = $this->storage->getByCode($sourceCode);
         if ($source === null) {
@@ -82,17 +84,16 @@ final class FakeProductCommand implements ProductCommandInterface
         );
         $this->storage->put($copy);
 
-        return $copy;
+        return new ProductCopyResult($copy);
     }
 
     /**
-     * @param list<string> $productCodes
      */
     #[Override]
-    public function bulkUpdateStatus(array $productCodes, int $newStatus): BulkStatusUpdateResult
+    public function bulkUpdateStatus(ProductCodeList $productCodes, int $newStatus): BulkStatusUpdateResult
     {
         $changed = 0;
-        foreach ($productCodes as $code) {
+        foreach ($productCodes->values() as $code) {
             $current = $this->storage->getByCode($code);
             if ($current === null) {
                 continue;

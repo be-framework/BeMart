@@ -23,8 +23,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  *   - flesh out the column catalog (the available column names per
  *     csvType — Wave 9 just stores whatever the admin POSTs).
  */
-final readonly class CsvColumnConfigEntity
+final readonly class CsvColumnConfigEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public int $csvType,
         public string $columnName,

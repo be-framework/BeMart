@@ -16,8 +16,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * it carries the token that the activation flow validates. Default null
  * so existing call sites that build active customers need no change.
  */
-final readonly class CustomerEntity
+final readonly class CustomerEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $customerId,
         public string $email,

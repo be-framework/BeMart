@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CsvColumnConfigEntity;
+use MyVendor\BeMart\Be\Reason\Query\Param\CsvColumnConfigList;
 use Override;
 
 use function usort;
@@ -33,10 +34,9 @@ final class FakeCsvColumnConfigStorage implements CsvColumnConfigStorageInterfac
         return $rows;
     }
 
-    /** @param list<CsvColumnConfigEntity> $entries */
     #[Override]
-    public function replaceType(int $csvType, array $entries): void
+    public function replaceType(int $csvType, CsvColumnConfigList $entries): void
     {
-        $this->byType[$csvType] = $entries;
+        $this->byType[$csvType] = $entries->values();
     }
 }

@@ -8,7 +8,7 @@ use Aura\Sql\ExtendedPdoInterface;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\ProdModule;
@@ -69,12 +69,12 @@ final class ProdModuleSqlWiringTest extends TestCase
         // to a Fake must resolve to the MediaQuery proxy under prod, not
         // the old Sql* concrete locator implementation.
         $customerQuery = $injector->getInstance(CustomerQueryInterface::class);
-        $this->assertNotInstanceOf(
-            SqlCustomerQuery::class,
-            $customerQuery,
-            'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy, not SqlCustomerQuery.',
-        );
         $this->assertInstanceOf(CustomerQueryInterface::class, $customerQuery);
+        $this->assertNotInstanceOf(
+            FakeCustomerQuery::class,
+            $customerQuery,
+            'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy, not FakeCustomerQuery.',
+        );
 
         // IdGenerators are also part of the cutover — production customer
         // ids are direct MediaQuery BDR proxies, not Fake hex generators.
@@ -122,8 +122,8 @@ final class ProdModuleSqlWiringTest extends TestCase
         );
 
         $customerQuery = $injector->getInstance(CustomerQueryInterface::class);
-        $this->assertNotInstanceOf(
-            SqlCustomerQuery::class,
+        $this->assertInstanceOf(
+            FakeCustomerQuery::class,
             $customerQuery,
             'AppModule must keep the Fake binding — test/dev contexts stay DB-free.',
         );

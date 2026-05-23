@@ -15,8 +15,10 @@ use DateTimeImmutable;
  * dtb_customer; Phase 2 may collapse back to that shape. The
  * separation here keeps the Be Framework Final clean.
  */
-final readonly class PasswordResetTokenEntity
+final readonly class PasswordResetTokenEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $customerId,
         public string $resetKey,

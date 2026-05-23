@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\LoginHistoryEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Read/append store for admin login attempt audit rows — Wave 8
@@ -23,6 +24,7 @@ interface LoginHistoryStorageInterface
      *
      * @return list<LoginHistoryEntity>
      */
+    #[DbQuery('tlogin_history_list', factory: LoginHistoryEntity::class)]
     public function listRecent(int $limit = 50): array;
 
     /**
@@ -30,5 +32,6 @@ interface LoginHistoryStorageInterface
      * admin login flow. Wave 8 introduces the method on the interface
      * for completeness but does NOT yet call it from the Final.
      */
+    #[DbQuery('tlogin_history_insert')]
     public function append(LoginHistoryEntity $entry): void;
 }

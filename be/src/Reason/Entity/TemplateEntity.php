@@ -11,8 +11,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * list affordance. Create / update / delete (and the upload flow)
  * are Phase 2 scope.
  */
-final readonly class TemplateEntity
+final readonly class TemplateEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $templateId,
         public string $templateName,
