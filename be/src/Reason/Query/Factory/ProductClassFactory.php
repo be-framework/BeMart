@@ -20,15 +20,15 @@ final class ProductClassFactory
         string|null $saleTypeName,
     ): ProductClassEntity {
         return new ProductClassEntity(
-            productCode: (string) $productCode,
-            productName: (string) $productName,
-            stock: $stock === null ? null : (int) $stock,
-            stockUnlimited: (bool) $stockUnlimited,
-            saleLimit: $saleLimit === null ? null : (int) $saleLimit,
-            price02: (int) $price02,
-            deliveryFee: $deliveryFee === null ? 0 : (int) $deliveryFee,
-            saleTypeName: $saleTypeName ?? '',
-            saleTypeId: $saleTypeId === null ? 0 : (int) $saleTypeId,
+            (string) $productCode,
+            (string) $productName,
+            $stock === null ? null : (int) $stock,
+            (bool) $stockUnlimited,
+            $saleLimit === null ? null : (int) $saleLimit,
+            (int) $price02,
+            $deliveryFee === null ? 0 : (int) $deliveryFee,
+            $saleTypeName ?? '',
+            $saleTypeId === null ? 0 : (int) $saleTypeId,
         );
     }
 }

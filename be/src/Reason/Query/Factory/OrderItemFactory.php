@@ -15,12 +15,6 @@ final class OrderItemFactory
         int|string $quantity,
         int|string $price,
     ): OrderItemEntity {
-        return new OrderItemEntity(
-            orderNo: $orderNo,
-            productCode: $productCode ?? '',
-            productName: $productName,
-            quantity: (int) $quantity,
-            unitPrice: (int) $price,
-        );
+        return new OrderItemEntity($orderNo, $productCode ?? '', $productName, (int) $quantity, (int) $price);
     }
 }

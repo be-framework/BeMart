@@ -26,13 +26,13 @@ final class CartFactory
         string|null $preOrderId,
     ): CartEntity {
         return new CartEntity(
-            cartKey: $cartKey,
-            saleTypeId: $saleTypeId === null ? 0 : (int) $saleTypeId,
-            saleTypeName: $saleTypeName ?? '',
-            items: $this->items($itemsJson),
-            totalPrice: (int) $totalPrice,
-            deliveryFeeTotal: (int) $deliveryFeeTotal,
-            preOrderId: $preOrderId ?? '',
+            $cartKey,
+            $saleTypeId === null ? 0 : (int) $saleTypeId,
+            $saleTypeName ?? '',
+            $this->items($itemsJson),
+            (int) $totalPrice,
+            (int) $deliveryFeeTotal,
+            $preOrderId ?? '',
         );
     }
 
@@ -59,17 +59,17 @@ final class CartFactory
                 continue;
             }
             $items[] = new CartItemEntity(
-                productCode: (string) ($row['productCode'] ?? ''),
-                quantity: (int) ($row['quantity'] ?? 0),
-                price: (int) ($row['price'] ?? 0),
-                productClassId: (int) ($row['productClassId'] ?? 0),
-                productId: (int) ($row['productId'] ?? 0),
-                productName: (string) ($row['productName'] ?? ''),
-                mainImage: isset($row['mainImage']) ? (string) $row['mainImage'] : null,
-                classCategoryName1: isset($row['classCategoryName1']) ? (string) $row['classCategoryName1'] : null,
-                className1: isset($row['className1']) ? (string) $row['className1'] : null,
-                classCategoryName2: isset($row['classCategoryName2']) ? (string) $row['classCategoryName2'] : null,
-                className2: isset($row['className2']) ? (string) $row['className2'] : null,
+                (string) ($row['productCode'] ?? ''),
+                (int) ($row['quantity'] ?? 0),
+                (int) ($row['price'] ?? 0),
+                (int) ($row['productClassId'] ?? 0),
+                (int) ($row['productId'] ?? 0),
+                (string) ($row['productName'] ?? ''),
+                isset($row['mainImage']) ? (string) $row['mainImage'] : null,
+                isset($row['classCategoryName1']) ? (string) $row['classCategoryName1'] : null,
+                isset($row['className1']) ? (string) $row['className1'] : null,
+                isset($row['classCategoryName2']) ? (string) $row['classCategoryName2'] : null,
+                isset($row['className2']) ? (string) $row['className2'] : null,
             );
         }
 
