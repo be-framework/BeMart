@@ -1734,7 +1734,7 @@ trait SqlFixturesTrait
     }
 
     /**
-     * Seed dtb_plugin with the two demo plugins {@see \MyVendor\BeMart\Be\Reason\Query\FakePluginStorage}
+     * Seed dtb_plugin with the two demo plugins {@see \MyVendor\BeMart\Be\Reason\Fake\Query\FakePluginStorage}
      * carries, so a SQL-backed hypermedia test starts from the same
      * client-observable baseline as the Fake-backed contract test:
      *
