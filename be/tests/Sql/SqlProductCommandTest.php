@@ -199,7 +199,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             note: 'orig-note',
         ));
 
-        $copy = $command->copy('P-COPY-SRC', 'P-COPY-NEW')->product();
+        $copy = $command->copy('P-COPY-SRC', 'P-COPY-NEW')->product;
 
         $this->assertSame('P-COPY-NEW', $copy->productCode);
         $this->assertSame('(コピー) Original', $copy->productName);
@@ -227,7 +227,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         $command = $this->sql(ProductCommandInterface::class);
 
         $this->expectException(RuntimeException::class);
-        $command->copy('does-not-exist', 'P-COPY-FAIL')->product();
+        $command->copy('does-not-exist', 'P-COPY-FAIL')->product;
     }
 
     public function testBulkUpdateStatusFlipsStatusAndCountsChanges(): void
@@ -248,7 +248,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             ProductEntity::STATUS_WITHDRAWN,
         );
 
-        $this->assertSame(2, $changed->changedCount());
+        $this->assertSame(2, $changed->changedCount);
         $query = $this->sql(ProductQueryInterface::class);
         foreach (['P-BULK-001', 'P-BULK-002'] as $code) {
             $entity = $query->item($code);
@@ -274,7 +274,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         );
 
         // Only the known code is counted.
-        $this->assertSame(1, $changed->changedCount());
+        $this->assertSame(1, $changed->changedCount);
     }
 
     public function testBulkUpdateStatusDoesNotCountIdempotentReapplication(): void
@@ -295,7 +295,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             ProductEntity::STATUS_HIDDEN,
         );
 
-        $this->assertSame(0, $changed->changedCount());
+        $this->assertSame(0, $changed->changedCount);
     }
 
     private function countProductRows(string $productCode): int

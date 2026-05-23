@@ -9,9 +9,9 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final class EmailUniqueness implements PostQueryInterface
+final readonly class EmailUniqueness implements PostQueryInterface
 {
-    public function __construct(private readonly bool $unique) {}
+    public function __construct(public bool $unique) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static

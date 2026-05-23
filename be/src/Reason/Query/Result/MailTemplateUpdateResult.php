@@ -9,9 +9,9 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final class MailTemplateUpdateResult implements PostQueryInterface
+final readonly class MailTemplateUpdateResult implements PostQueryInterface
 {
-    public function __construct(private readonly bool $updated) {}
+    public function __construct(public bool $updated) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
@@ -23,10 +23,5 @@ final class MailTemplateUpdateResult implements PostQueryInterface
         }
 
         return new static(true);
-    }
-
-    public function updated(): bool
-    {
-        return $this->updated;
     }
 }
