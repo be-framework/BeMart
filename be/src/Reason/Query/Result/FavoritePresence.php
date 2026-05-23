@@ -8,18 +8,13 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final class FavoritePresence implements PostQueryInterface
+final readonly class FavoritePresence implements PostQueryInterface
 {
-    public function __construct(private readonly bool $exists) {}
+    public function __construct(public bool $exists) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
     {
         return new static($context->rows !== []);
-    }
-
-    public function exists(): bool
-    {
-        return $this->exists;
     }
 }

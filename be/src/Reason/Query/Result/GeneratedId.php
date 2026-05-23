@@ -8,9 +8,9 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final class GeneratedId implements PostQueryInterface
+final readonly class GeneratedId implements PostQueryInterface
 {
-    public function __construct(private readonly string $value) {}
+    public function __construct(public string $value) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
@@ -19,10 +19,5 @@ final class GeneratedId implements PostQueryInterface
         $value = is_array($row) ? (string) ($row['next_id'] ?? '1') : '1';
 
         return new static($value);
-    }
-
-    public function value(): string
-    {
-        return $this->value;
     }
 }

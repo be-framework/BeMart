@@ -10,9 +10,9 @@ use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 use RuntimeException;
 
-final class ProductCopyResult implements PostQueryInterface
+final readonly class ProductCopyResult implements PostQueryInterface
 {
-    public function __construct(private readonly ProductEntity $product) {}
+    public function __construct(public ProductEntity $product) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
@@ -24,10 +24,5 @@ final class ProductCopyResult implements PostQueryInterface
         }
 
         return new static($row);
-    }
-
-    public function product(): ProductEntity
-    {
-        return $this->product;
     }
 }

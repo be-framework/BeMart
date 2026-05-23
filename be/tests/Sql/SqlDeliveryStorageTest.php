@@ -95,7 +95,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new DeliveryEntity(
             deliveryId: $newId,
@@ -123,7 +123,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         // A soft-hidden delivery method (visible=false) round-trips the
         // bool ↔ tinyint coercion.
         $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(DeliveryStorageInterface::class);
 
         $storage->put(new DeliveryEntity(
@@ -152,7 +152,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         // sale_type_id = NULL so the FK to the (empty) mtb_sale_type
         // master never raises FK 1452.
         $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(DeliveryStorageInterface::class);
 
         $storage->put(new DeliveryEntity(
@@ -278,11 +278,11 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(DeliveryIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertDelivery();
         $secondId = $this->insertDelivery();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

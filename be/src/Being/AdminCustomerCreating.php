@@ -85,7 +85,7 @@ final readonly class AdminCustomerCreating
         /** @psalm-suppress InvalidDocblock Psalm treats assert* methods as assertion helpers. */
         $uniqueness->assertUnique();
 
-        $this->customerId = $idGenerator->generate()->value();
+        $this->customerId = $idGenerator->generate()->value;
         $this->passwordHash = $passwordHasher->hash($password);
         $this->initialPoint = $initialPointService->initial();
         $this->customerStatus = 2;
