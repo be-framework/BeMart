@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Domain;
 
 use BEAR\AppMeta\Meta;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
-use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
+use MyVendor\BeMart\Be\Reason\Fake\Query\FakeFinalizedOrderStorage;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;

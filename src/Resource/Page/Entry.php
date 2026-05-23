@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\EntryForm;
 use Ray\WebFormModule\FormFactory;
 
