@@ -42,13 +42,17 @@ class CustomerDeliveryEdit extends ResourceObject
      * @psalm-taint-source input $customerId
      */
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
-    public function onGet(string $customerId = ''): static
+    public function onGet(string $customerId = '', string $id = ''): static
     {
         if ($this->adminSession->adminId() === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 
             return $this;
+        }
+
+        if ($customerId === '' && $id !== '') {
+            $customerId = $id;
         }
 
         $form = $this->formFactory->newInstance(AdminCustomerDeliveryForm::class);

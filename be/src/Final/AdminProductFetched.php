@@ -51,6 +51,16 @@ final readonly class AdminProductFetched
     public string|null $description;
     public string|null $searchWord;
     public string|null $note;
+    public string|null $imagePath;
+
+    /** @var list<string> */
+    public array $categoryNames;
+
+    /** @var list<string> */
+    public array $tagNames;
+
+    /** @var list<string> */
+    public array $classNames;
 
     public function __construct(
         #[Input] string $productCode,
@@ -74,5 +84,9 @@ final readonly class AdminProductFetched
         $this->description = $entity->description;
         $this->searchWord = $entity->searchWord;
         $this->note = $entity->note;
+        $this->imagePath = $entity->imagePath;
+        $this->categoryNames = $entity->categoryNames;
+        $this->tagNames = $entity->tagNames;
+        $this->classNames = $entity->classNames;
     }
 }
