@@ -20,7 +20,7 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
         $checker = $this->sql(SqlEmailUniquenessChecker::class);
 
         // No row with this email — must return without raising.
-        $checker->ensureUnique('never-seen@example.com');
+        $checker->check('never-seen@example.com')->assertUnique();
         $this->addToAssertionCount(1);
     }
 
@@ -31,7 +31,7 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
         $checker = $this->sql(SqlEmailUniquenessChecker::class);
 
         $this->expectException(EmailAlreadyRegisteredException::class);
-        $checker->ensureUnique('taken@example.com');
+        $checker->check('taken@example.com')->assertUnique();
     }
 
     public function testEnsureUniqueRejectsProvisionalCustomerEmail(): void
@@ -49,7 +49,7 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
         $checker = $this->sql(SqlEmailUniquenessChecker::class);
 
         $this->expectException(EmailAlreadyRegisteredException::class);
-        $checker->ensureUnique('provisional@example.com');
+        $checker->check('provisional@example.com')->assertUnique();
     }
 
     public function testEnsureUniqueIsCaseSensitive(): void
@@ -61,7 +61,7 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
         $checker = $this->sql(SqlEmailUniquenessChecker::class);
 
         // Different case → not a collision.
-        $checker->ensureUnique('case@example.com');
+        $checker->check('case@example.com')->assertUnique();
         $this->addToAssertionCount(1);
     }
 }

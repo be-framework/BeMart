@@ -69,7 +69,9 @@ final readonly class CustomerUpdated
         }
 
         if ($email !== $current->email) {
-            $uniquenessChecker->ensureUnique($email);
+            $uniqueness = $uniquenessChecker->check($email);
+            /** @psalm-suppress InvalidDocblock Psalm treats assert* methods as assertion helpers. */
+            $uniqueness->assertUnique();
         }
 
         $merged = new CustomerEntity(

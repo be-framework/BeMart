@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
+use MyVendor\BeMart\Be\Reason\Query\Factory\AdminFactory;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Read-side Admin query — Wave 4 (doAdminLogin / doAdminLogout).
@@ -24,9 +26,11 @@ use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 interface AdminQueryInterface
 {
     /** @return AdminEntity|null  null when no admin has this loginId. */
+    #[DbQuery('admin_find_by_login', factory: AdminFactory::class)]
     public function findByLoginId(string $loginId): AdminEntity|null;
 
     /** @return AdminEntity|null  null when no admin has this id. */
+    #[DbQuery('admin_find_by_id', factory: AdminFactory::class)]
     public function findById(string $adminId): AdminEntity|null;
 
     /**
@@ -37,6 +41,7 @@ interface AdminQueryInterface
      *
      * @return list<AdminEntity>
      */
+    #[DbQuery('admin_list', factory: AdminFactory::class)]
     public function listAll(int $limit = 50, int $offset = 0): array;
 
     /**
@@ -46,5 +51,6 @@ interface AdminQueryInterface
      *
      * @return list<AdminEntity>
      */
+    #[DbQuery('admin_search', factory: AdminFactory::class)]
     public function search(string|null $nameKeyword): array;
 }
