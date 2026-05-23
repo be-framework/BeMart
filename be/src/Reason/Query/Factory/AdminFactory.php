@@ -16,13 +16,6 @@ final class AdminFactory
         int|string $authorityId,
         int|string $workId,
     ): AdminEntity {
-        return new AdminEntity(
-            adminId: (string) $id,
-            loginId: $loginId,
-            passwordHash: $password,
-            name: $name,
-            authority: (int) $authorityId,
-            work: (int) $workId,
-        );
+        return new AdminEntity((string) $id, $loginId, $password, $name, (int) $authorityId, (int) $workId);
     }
 }
