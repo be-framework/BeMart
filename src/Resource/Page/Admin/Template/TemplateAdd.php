@@ -14,11 +14,19 @@ use Ray\WebFormModule\FormFactory;
 use function assert;
 
 /**
- * EC-CUBE Store/template_add.twig — テンプレートアップロード form.
+ * EC-CUBE テンプレート登録 — Store Tier-2 (`admin/Store/template_add.twig`).
  *
- * Admin Tier-2 thin GET renderer. EC-CUBE's actual template install
- * pipeline validates and expands an archive; BeMart does not yet expose
- * that domain transition, so this resource renders the upload form only.
+ *   GET /admin/store/template/add → template-upload screen
+ *
+ * Thin GET renderer for EC-CUBE's design-template registration screen:
+ * a template code, a template name and a zip-archive file-upload form.
+ * The matching `doTemplateInstall` write transition is a Phase-A stub —
+ * this port renders the upload shell only, mirroring the Product
+ * CSV-upload Tier-2 wave ({@see \MyVendor\BeMart\Resource\Page\Admin\Product\AbstractCsvUpload}).
+ *
+ * AUTHZ is a direct admin-session check (Pattern B — no Be transition is
+ * invoked on the GET path; an anonymous admin → 403). The form renders
+ * blank against empty Fake storage — no storage is seeded.
  */
 class TemplateAdd extends ResourceObject
 {
@@ -42,18 +50,7 @@ class TemplateAdd extends ResourceObject
         assert($form instanceof AdminTemplateAddForm);
 
         $this->code = Code::OK;
-        $this->body = [
-            'transitionId' => 'goAdminTemplateAdd',
-            'fields' => ['code', 'name', 'file'],
-            'submitTo' => [
-                'method' => 'POST',
-                'href' => 'page://self/admin/template/template-add',
-            ],
-            'links' => [
-                'goTemplateList' => 'page://self/admin/template/template-list',
-            ],
-            'form' => $form,
-        ];
+        $this->body = ['form' => $form];
 
         return $this;
     }
