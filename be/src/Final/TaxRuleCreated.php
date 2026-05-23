@@ -38,7 +38,7 @@ final readonly class TaxRuleCreated
         }
 
         $entity = new TaxRuleEntity(
-            taxRuleId: $idGenerator->generate()->value(),
+            taxRuleId: $idGenerator->generate()->value,
             taxRate: $taxRate,
             roundingType: $roundingType,
             applyDate: $applyDate,

@@ -9,9 +9,9 @@ use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 use RuntimeException;
 
-final class CartSaveResult implements PostQueryInterface
+final readonly class CartSaveResult implements PostQueryInterface
 {
-    public function __construct(private readonly bool $saved) {}
+    public function __construct(public bool $saved) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
@@ -23,10 +23,5 @@ final class CartSaveResult implements PostQueryInterface
         }
 
         return new static(true);
-    }
-
-    public function saved(): bool
-    {
-        return $this->saved;
     }
 }

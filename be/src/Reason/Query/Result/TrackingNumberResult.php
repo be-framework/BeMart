@@ -8,9 +8,9 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final class TrackingNumberResult implements PostQueryInterface
+final readonly class TrackingNumberResult implements PostQueryInterface
 {
-    public function __construct(private readonly string|null $value) {}
+    public function __construct(public string|null $trackingNumber) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
@@ -19,10 +19,5 @@ final class TrackingNumberResult implements PostQueryInterface
         $value = is_array($row) && isset($row['tracking_number']) ? (string) $row['tracking_number'] : null;
 
         return new static($value);
-    }
-
-    public function valueOrNull(): string|null
-    {
-        return $this->value;
     }
 }

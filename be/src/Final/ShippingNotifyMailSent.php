@@ -56,7 +56,7 @@ final readonly class ShippingNotifyMailSent
             throw new OrderNotFoundException();
         }
 
-        $trackingNumber = $shippingAddresses->trackingNumberByOrderNo($order->orderNo)->valueOrNull();
+        $trackingNumber = $shippingAddresses->trackingNumberByOrderNo($order->orderNo)->trackingNumber;
         $mailer->sendShippingNotification($order, $trackingNumber);
 
         $this->orderNo = $order->orderNo;

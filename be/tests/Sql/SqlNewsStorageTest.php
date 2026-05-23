@@ -110,7 +110,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new NewsEntity(
             newsId: $newId,
@@ -142,7 +142,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     public function testPutSerialisesIsoDateToMysqlDatetime(): void
     {
         $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(NewsStorageInterface::class);
 
         $storage->put(new NewsEntity(
@@ -172,7 +172,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     public function testPutPersistsLinkMethodAsTinyint(): void
     {
         $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(NewsStorageInterface::class);
 
         $storage->put(new NewsEntity(
@@ -307,11 +307,11 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(NewsIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertNews();
         $secondId = $this->insertNews();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }
