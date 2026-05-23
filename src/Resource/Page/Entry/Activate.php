@@ -32,7 +32,7 @@ use function sprintf;
  *   - SecretKeyNotFoundException   → 404 (wrong key / expired / already used)
  *
  * Idempotent: re-activating a customer is a no-op on the storage side
- * but still returns 200 from this resource — the caller cannot tell
+ * but still redirects from this resource — the caller cannot tell
  * "first activate" from "second activate", which is correct.
  *
  * Phase 3 — `onGet` is the email-verification-complete LANDING SCREEN.
@@ -109,7 +109,7 @@ class Activate extends ResourceObject
 
         assert($final instanceof CustomerActivated);
 
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = sprintf('/customer/%s', $final->customerId);
         $this->body = [
             'customerId' => $final->customerId,
