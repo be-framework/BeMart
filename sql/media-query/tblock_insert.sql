@@ -1,0 +1,1 @@
+INSERT INTO dtb_block (id, device_type_id, block_name, file_name, use_controller, deletable, create_date, update_date, discriminator_type) VALUES (:id, NULL, :blockName, :fileName, 0, :deletable, NOW(), NOW(), 'block')

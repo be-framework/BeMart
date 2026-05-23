@@ -1,0 +1,1 @@
+INSERT INTO dtb_customer_address (id, customer_id, name01, name02, kana01, kana02, company_name, phone_number, postal_code, pref_id, addr01, addr02, create_date, update_date, discriminator_type) VALUES (:id, :customerId, :name01, :name02, :kana01, :kana02, :companyName, :phoneNumber, :postalCode, :prefId, :addr01, :addr02, NOW(), NOW(), 'customeraddress')

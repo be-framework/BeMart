@@ -34,7 +34,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
 {
     public function testItemReturnsNullWhenProductCodeUnknown(): void
     {
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $this->assertNull($query->item('no-such-code'));
     }
 
@@ -51,7 +51,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'delivery_fee' => 0,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-sql-001');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -75,7 +75,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'stock_unlimited' => 1,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-unlimited');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -93,7 +93,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'stock_unlimited' => 0,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-oos');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -108,7 +108,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'sale_limit' => 2,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-limited');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -125,7 +125,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'delivery_fee' => 200,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-money');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -142,7 +142,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'delivery_fee' => null,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-nofee');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -164,7 +164,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'sale_type_id' => null,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-nullsaletype');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -182,7 +182,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'sale_type_id' => 2,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-preorder');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -202,7 +202,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'class_category_id1' => $axisValue,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
 
         // The variation-only code does not resolve …
         $this->assertNull($query->item('pc-variation-red'));
@@ -230,7 +230,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'price02' => 1500,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(SqlProductClassQuery::class);
         $entity = $query->item('pc-with-variations');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);

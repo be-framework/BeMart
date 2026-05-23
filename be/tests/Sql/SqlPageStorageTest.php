@@ -28,7 +28,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         $secondId = $this->insertPage(['page_name' => 'About']);
         $thirdId = $this->insertPage(['page_name' => 'Contact']);
 
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $rows = $storage->list();
 
         $this->assertCount(3, $rows);
@@ -44,7 +44,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -57,7 +57,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
             'edit_type' => 0,
         ]);
 
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(PageEntity::class, $entity);
@@ -80,7 +80,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
             'url' => 'bare',
         ]);
 
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(PageEntity::class, $entity);
@@ -91,7 +91,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -101,7 +101,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         // can never match an int PK; surface as miss so PageDeleted /
         // PageUpdated / AdminPageFetched fire their 404 paths instead
         // of a PDO error.
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $this->assertNull($storage->getById('pg-homepage'));
         $this->assertNull($storage->getById('pg-deadbeefdeadbeef'));
         $this->assertNull($storage->getById('nonexistent-zzz'));
@@ -109,7 +109,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = new SqlPageIdGenerator($this->pdo);
+        $generator = $this->sql(SqlPageIdGenerator::class);
         $newId = $generator->generate(); // numeric string
 
         $entity = new PageEntity(
@@ -120,7 +120,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
             pageEditType: 0,
         );
 
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -141,9 +141,9 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
     {
         // System pages (edit_type >= 2) round-trip the same as user
         // pages — only PageDeleted enforces the guard, not the storage.
-        $generator = new SqlPageIdGenerator($this->pdo);
+        $generator = $this->sql(SqlPageIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
 
         $storage->put(new PageEntity(
             pageId: $newId,
@@ -169,7 +169,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testPutIsNoOpForNonNumericIds(): void
     {
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
 
         $storage->put(new PageEntity(
             pageId: 'pg-homepage',
@@ -210,7 +210,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
             pageEditType: 0,
         );
 
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -226,7 +226,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
     public function testRemoveDeletesExistingRow(): void
     {
         $id = $this->insertPage(['page_name' => 'doomed']);
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -271,7 +271,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
             ':discriminator' => 'pagelayout',
         ]);
 
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $storage->remove((string) $id);
 
         // Page is gone.
@@ -287,7 +287,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = new SqlPageStorage($this->pdo);
+        $storage = $this->sql(SqlPageStorage::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('pg-homepage'); // non-numeric, no exception
         $storage->remove('pg-deadbeefdeadbeef'); // hex, no exception
@@ -296,7 +296,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testSqlPageIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = new SqlPageIdGenerator($this->pdo);
+        $generator = $this->sql(SqlPageIdGenerator::class);
 
         // Empty table → starts at 1.
         $this->assertSame('1', $generator->generate());
