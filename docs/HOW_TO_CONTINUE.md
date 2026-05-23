@@ -2,7 +2,7 @@
 
 別マシン / 別セッションでこの **BeMart** プロジェクト（EC-CUBE 4.3 → BEAR.Sunday +
 Be Framework 移植）の作業を再開するための引き継ぎガイド。
-最終更新: 2026-05-21（Phase 3 admin Tier-1 完了直後）
+最終更新: 2026-05-23（EC-CUBE実サイト探索 / HTTP導線安定化 / Ray.MediaQuery境界ルール追加）
 
 ---
 
@@ -11,7 +11,7 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 - **ブランチ**: `be-first-migration-bootstrap`
 - **リモート**: `https://github.com/koriym/ec-cube-alps.git`
 - **PR**: #2（draft、`be-first-migration-bootstrap` → `1.x`）
-- **テスト**: `vendor/bin/phpunit` → 約 1734 tests / 5633 assertions, OK（deprecation 3 件のみ、failure なし）
+- **テスト**: `vendor/bin/phpunit` → `docs/migration-status.md` の現行ベースライン参照。HTTP hypermedia は `tests/Http/HttpHypermediaTest.php` で Resource + HTTP を同一テスト内で検証
 
 移植は ALPS を契約として 3 フェーズ進行している:
 
@@ -19,7 +19,7 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 |---|---|---|
 | **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了（139 transition、stub 7 件あり） |
 | **Phase 2** | 全 34 ストレージ Fake → SQL（MariaDB/MySQL）、本番カットオーバー | 完了 |
-| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | ストアフロント完了 / Admin **Tier-1 完了**（77 ページ中 34）/ Admin Tier-2（約 43）+ enrichment backlog 残 |
+| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | Storefrontは共有Block/商品一覧カート投入まで拡張。Adminは **56 page templates**（`/admin/product/new`, `/admin/order`, `/admin/customer?customerId=...`, category list/edit含む）。残りはProduct/Order/Customerの重い編集画面とContent/Setting補完。 |
 
 > **現在の移植ステータス（レイヤ別マトリクス・残作業 punch-list）の正は
 > [`docs/migration-status.md`](migration-status.md)**。本ファイルは「引き継いだ人が
@@ -63,6 +63,7 @@ composer install
 - `my-vendor/be-mart-be` — このリポジトリのドメイン層（`be/` サブツリーに同居、path repo 参照）
 - `madapaja/twig-module` — HTML context の Twig レンダリング（Phase 3）
 - `ray/web-form-module` — HTML フォームページ（Phase 3）
+- `ray/media-query` — 今後の新規SQL境界で使うinterface-driven SQL mapper（既存PDO実装の移行は別フェーズ）
 
 PHP 8.4 で開発・テストしている（8.5 でも問題なし）。
 
@@ -85,7 +86,8 @@ sudo mysql -e "FLUSH PRIVILEGES;"
 ### 1.4 動作確認
 
 ```bash
-vendor/bin/phpunit                          # 全テスト（約 1734、OK なら緑）
+vendor/bin/phpunit                          # 全テスト（OK なら緑）
+vendor/bin/phpunit tests/Http/HttpHypermediaTest.php  # Resource + HTTP の同一テスト内 hypermedia 検証
 vendor/bin/phpunit --testsuite bemart-sql   # SQL ストレージ + Final-direct（DATABASE_URL 要）
 composer psalm                              # 型解析
 composer psalm-taint                        # taint mode
@@ -102,7 +104,7 @@ composer psalm-taint                        # taint mode
 3. **`CLAUDE.md`** — プロジェクト規約（ALPS が source of truth、5 レイヤ構成、`/run migrate`）。
 4. **`alps.json`** — EC-CUBE 4.3 のセマンティクス定義。移植の契約。
 5. レイヤ別の詳細: `sql/README.md`（Phase 2）/ `var/templates/README.md`（Phase 3）/
-   `docs/phases/alps-audit-phase3.md`（ALPS 監査）/ `docs/skills/`（G-14 〜 G-23 の skill gap）。
+   `docs/phases/alps-audit-phase3.md`（ALPS 監査）/ `docs/skills/`（G-14 〜 G-24 の skill gap）。
 
 ---
 
@@ -111,29 +113,30 @@ composer psalm-taint                        # taint mode
 残作業の punch-list は `docs/migration-status.md` の「Outstanding work」が正。
 おおまかな優先度順:
 
-1. **Admin HTML Tier-2（約 43 テンプレート、最大の残作業）** — admin Tier-1（77 ページ中
-   34、list/data + 単純 CRUD）は 8 section-wave で完了。残る Tier-2 は性質が異なる:
-   - **重量エディタ** — `Order/edit`（約 1057 行）/ `Product/product`（約 932 行）/
-     `Product/product_class`（約 448 行）/ `Order/shipping`（約 709 行）
-   - **新規リソースが必要なページ** — action-only リソース（POST/CSV/PDF）に `onGet` が
-     無いページ群。`be/src` ドメイン層（Input/Final/body-shape）の追加を伴う
-   テンプレ移植 wave では片付かない別種の作業。section 別の defer リストは
-   `docs/phases/admin-fanout-plan.md` と `var/templates/README.md`「Fan-out status」。
-   admin ページ移植のレシピ（`admin-base.html.twig`・per-section ja-message・
-   render-diff テスト）は `var/templates/README.md`「Admin pages」節が正。
-2. **HTML enrichment backlog** — リソース本体が薄すぎて EC-CUBE テンプレートを
-   忠実 port できないデータページ。Cart / Mypage History はパイロット完了。
-   残: Shopping confirm/complete・Mypage ダッシュボード・Favorite・Address・Contact。
-   Cart スタイルの再導出（ALPS → Entity/SQL/Fake enrich → テンプレート配線）。
-3. **`Block/*` ウィジェット** — ヘッダ/フッタ等のブロック領域のレンダリングサブステップ。
-4. **5 ALPS-only 遷移のドメイン実装** — Phase 3 の ALPS 是正で追加された
-   `doSortNoMove` / `doToggleVisible` / `doUpdateTrackingNumber` /
-   `doSendShippingNotifyMail` / `doResendActivationMail` は `be/src` に実装が無い。
+1. **Product / Order / Customer の重い編集画面** — `/admin/product/new`、first-slice `/admin/order`、`/admin/customer?customerId=...` は接続済み。次はEC-CUBE実サイト探索で確認した商品規格行列・画像アップロード・受注新規/編集・会員新規/詳細検索を進める。
+   - Product: `Product/product`, `Product/product_class`, 画像、カテゴリ/タグ、在庫無制限、販売種別、通常価格、販売制限、発送日目安。
+   - Order: `Order/edit`, `Order/shipping`, 受注新規、検索条件、配送/明細/支払/対応状況/メール履歴。
+   - Customer: 管理会員新規、詳細検索、購入履歴、配送先一覧、お気に入り、ステータス操作。
+   - Content/Setting: ファイル管理、メンテナンス、特商法、定休日、ログイン履歴、ログ表示、システム情報、マスタデータ。
+   admin ページ移植のレシピは `var/templates/README.md`「Admin pages」節、最新の画面マトリクスは `docs/html-screen-migration-matrix.md` が正。
+2. **Storefront enrichment backlog** — 商品一覧はカテゴリ/表示件数/並び順/一覧カート投入まで接続済み。残: 商品詳細の規格選択/favorite、Shopping confirm/complete、Mypage dashboard、Favorite、Address、Contactのbody enrichment。
+3. **`Block/*` ウィジェット** — header/search/logo/login/cart/category-nav/footer first sliceは追加済み。残: cart totals/customer-auth/category-treeの動的化。
+4. **1 ALPS-only 遷移のドメイン実装** — Phase 3 の ALPS 是正で追加された 5 遷移のうち、`doSortNoMove` / `doToggleVisible` / `doUpdateTrackingNumber` / `doSendShippingNotifyMail` は実装済み。未実装は `doResendActivationMail` のみ。
 5. **Phase A の stub 7 件** — `doImportProductCsv` / `doImportCategoryCsv` /
    `doImportShippingCsv` / `doInstallPlugin` / `goExportOrderPdf` / `doCreateOrder` /
    `doUpdateCsv` の本物実装。
 
 各項目の詳細・コミット・unverified 注記は `docs/migration-status.md` を参照。
+
+### 3.1 Phase 3 の検証ゲート
+
+Admin Tier-2 以降は、ページ単位で次の4層を完了条件にする。
+
+1. **Resource hypermedia** — `tests/Resource/*ResourceTest.php` で `ResourceInterface` 経由の `page://self/...` 契約を検証。
+2. **HTML render-diff** — `tests/Resource/*HtmlRenderTest.php` で EC-CUBE 実テンプレートとの差分を residual allowlist で説明。
+3. **HTTP hypermedia** — `tests/Http/HttpHypermediaTest.php` の形に従い、1つの PHPUnit テスト内で **BEAR.Resource 直叩き + `public/index.php` 経由の実HTTP** を両方実行し、同じ resource 契約に到達することを検証。HTTP サーバはテスト内で `php -S` により起動する（手動起動しない）。POST 成功後に `Location` を返すものは `200 + Location` ではなく `303 See Other + Location` として固定する。
+4. **Browser smoke** — storefront は実ブラウザでトップ → 商品一覧 → 商品詳細 → カート/ログイン/問い合わせ導線を確認。現時点の `Products` は空リスト branch の thin renderer なので、商品詳細は `/product?productCode=sample-001` 直アクセスで確認する（ProductList enrichment 後に一覧→詳細クリックへ戻す）。Admin は HTTP 認証スタブ注入方針が固まるまで後続。
+
 
 **Admin section-wave を並列で回す場合** — per-section ja-message split（`1e91e92`）に
 より、admin の section 単位 wave は共有ファイル衝突なしで並列実行できる（各 wave が
@@ -143,6 +146,20 @@ composer psalm-taint                        # taint mode
 commit 済み分は失われない（バッチ 1 で 2 agent がカットオフされた実例あり。
 未 commit の WIP は手動 salvage で回収した。HANDOVER「Admin HTML — section-wave
 並列移植」参照）。
+
+---
+
+## 3.2 新規SQL境界のルール
+
+今後の新規 Query / Command は **Ray.MediaQuery** を使う。PHP実クラスにPDO prepared statementを直接書かない。
+
+- PHP側は `#[DbQuery('sql_id')]` 付きinterfaceを定義する。
+- SQLは `{sqlDir}/{sql_id}.sql` に置く。
+- メソッド引数名とSQLの `:named` placeholderを一致させる。
+- return typeでfetch/hydration/exec結果を決める。
+- 既存 `Sql*Query` / `Sql*Command` の移行は別フェーズでまとめて行い、今回の次作業では触らない。
+
+詳細は `docs/skills/G-24-ray-media-query-boundary.md`。
 
 ---
 
