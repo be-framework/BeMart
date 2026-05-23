@@ -19,13 +19,13 @@ use function ctype_digit;
  * sibling:
  *
  *  - the storage bindings (CustomerCommandInterface → SqlCustomerCommand,
- *    CustomerIdGeneratorInterface → SqlCustomerIdGenerator,
+ *    CustomerIdGeneratorInterface → direct MediaQuery customer id proxy,
  *    EmailUniquenessCheckerInterface → SqlEmailUniquenessChecker,
  *    CustomerQueryInterface → SqlCustomerQuery) are layered via the
  *    base class's sqlOverrideModule; registration writes a real
  *    dtb_customer row.
  *
- *  - `customerId` is a numeric dtb_customer.id (SqlCustomerIdGenerator
+ *  - `customerId` is a numeric dtb_customer.id (direct MediaQuery customer id proxy
  *    pre-allocates MAX(id)+1) — NOT the 32-char hex the Fake generator
  *    emits. The Fake test pins the hex shape; this sibling pins the
  *    numeric shape. Per G-23 the Fake-backed Resource test stays

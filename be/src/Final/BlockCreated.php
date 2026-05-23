@@ -35,7 +35,7 @@ final readonly class BlockCreated
         }
 
         $entity = new BlockEntity(
-            blockId: $idGenerator->generate(),
+            blockId: $idGenerator->generate()->value(),
             blockName: $blockName,
             blockFileName: $blockFileName,
             blockDeletable: true,

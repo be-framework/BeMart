@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\TagEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlTagStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
 
 /**
  * Storage-layer coverage for {@see SqlTagStorage} (Phase 2b).
@@ -74,8 +74,8 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(SqlTagIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(TagIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new TagEntity(tagId: $newId, tagName: '限定');
 
@@ -95,8 +95,8 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
 
     public function testPutSetsSortNoToZeroOnInsert(): void
     {
-        $generator = $this->sql(SqlTagIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(TagIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlTagStorage::class);
 
         $storage->put(new TagEntity(tagId: $newId, tagName: 'X'));
@@ -191,16 +191,16 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlTagIdGeneratorAllocatesIncrementingIds(): void
+    public function testTagIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlTagIdGenerator::class);
+        $generator = $this->sql(TagIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertTag();
         $secondId = $this->insertTag();
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

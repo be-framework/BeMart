@@ -26,7 +26,7 @@ use function str_contains;
  *
  *  - the storage binding (CategoryStorageInterface → SqlCategoryStorage)
  *    and id generator (CategoryIdGeneratorInterface →
- *    SqlCategoryIdGenerator) are layered via the base class's
+ *    direct MediaQuery category id proxy) are layered via the base class's
  *    sqlOverrideModule; persistence is against the real dtb_category
  *    table.
  *
@@ -93,7 +93,7 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
      * Seed a single category through the resource layer and return the
      * server-generated categoryId — mirrors the Fake-backed sibling's
      * helper exactly. The POST drives the full Becoming chain (Input →
-     * CategoryCreated → SqlCategoryIdGenerator → SqlCategoryStorage) so
+     * CategoryCreated → direct MediaQuery category id proxy → SqlCategoryStorage) so
      * the row appears in the same transactional state every subsequent
      * assertion will see.
      */

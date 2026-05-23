@@ -31,7 +31,7 @@ final readonly class TagCreated
         }
 
         $entity = new TagEntity(
-            tagId: $idGenerator->generate(),
+            tagId: $idGenerator->generate()->value(),
             tagName: $tagName,
         );
 

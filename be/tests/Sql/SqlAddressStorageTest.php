@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\AddressEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlAddressStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
 
 /**
  * Storage-layer coverage for {@see SqlAddressStorage} (Phase 2b).
@@ -156,8 +156,8 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
     {
         $customerId = $this->insertCustomer();
         $this->insertPref(13, 'Tokyo'); // FK target — mtb_pref empty by default
-        $generator = $this->sql(SqlAddressIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(AddressIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new AddressEntity(
             addressId: $newId,
@@ -281,17 +281,17 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlAddressIdGeneratorAllocatesIncrementingIds(): void
+    public function testAddressIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlAddressIdGenerator::class);
+        $generator = $this->sql(AddressIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $customerId = $this->insertCustomer();
         $firstId = $this->insertAddress(['customer_id' => $customerId]);
         $secondId = $this->insertAddress(['customer_id' => $customerId]);
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

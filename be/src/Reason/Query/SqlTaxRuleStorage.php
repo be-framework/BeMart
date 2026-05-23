@@ -13,13 +13,13 @@ use function strlen;
 
 final class SqlTaxRuleStorage implements TaxRuleStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<TaxRuleEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('ttax_rule_list'));
+        return array_map($this->hydrate(...), $this->db->ttax_rule_list());
     }
 
     #[Override]
@@ -28,7 +28,7 @@ final class SqlTaxRuleStorage implements TaxRuleStorageInterface
         if (! ctype_digit($taxRuleId)) {
             return null;
         }
-        $row = $this->db->row('ttax_rule_get', ['id' => (int) $taxRuleId]);
+        $row = $this->db->ttax_rule_get(id: (int) $taxRuleId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -39,19 +39,20 @@ final class SqlTaxRuleStorage implements TaxRuleStorageInterface
             return;
         }
         $id = (int) $taxRule->taxRuleId;
-        $values = [
-            'id' => $id,
-            'taxRate' => $taxRule->taxRate,
-            'applyDate' => $this->toMysqlDatetime($taxRule->applyDate),
-        ];
-        $this->db->exec($this->db->row('ttax_rule_exists', ['id' => $id]) === null ? 'ttax_rule_insert' : 'ttax_rule_update', $values);
+        if ($this->db->ttax_rule_exists(id: $id) === null) {
+            $this->db->ttax_rule_insert(id: $id, taxRate: $taxRule->taxRate, applyDate: $this->toMysqlDatetime($taxRule->applyDate));
+
+            return;
+        }
+
+        $this->db->ttax_rule_update(id: $id, taxRate: $taxRule->taxRate, applyDate: $this->toMysqlDatetime($taxRule->applyDate));
     }
 
     #[Override]
     public function remove(string $taxRuleId): void
     {
         if (ctype_digit($taxRuleId)) {
-            $this->db->exec('ttax_rule_delete', ['id' => (int) $taxRuleId]);
+            $this->db->ttax_rule_delete(id: (int) $taxRuleId);
         }
     }
 

@@ -4,11 +4,15 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Service;
 
+use MyVendor\BeMart\Be\Reason\Query\Result\GeneratedId;
+use Ray\MediaQuery\Annotation\DbQuery;
+
 /**
  * Generates opaque ClassName identifiers (Wave 7) — same shape as
  * {@see CategoryIdGeneratorInterface}.
  */
 interface ClassNameIdGeneratorInterface
 {
-    public function generate(): string;
+    #[DbQuery('className_next_id')]
+    public function generate(): GeneratedId;
 }
