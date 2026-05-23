@@ -2152,5 +2152,79 @@ scaffold されておらず、ワークフロー assertion が in-process でし
 
 - `asd --validate alps.json` OK。
 - Product/Customer/Order/Category/Template周辺のResource/HTML render testsを局所実行してOK。
-- `tests/Http/HttpHypermediaTest.php` はローカルHTTP bind不可環境ではskipするが、起動中の8080に対するHTTP smokeでは主要URLが200/303で応答した。
+- `tests/Http/WorkflowTest.php` は `koriym/php-server` で実HTTPサーバをテスト内起動し、`tests/Hypermedia/WorkflowTest.php` と同じ storefront purchase spine を Cookie 境界込みで検証する。起動中の8080に対するHTTP smokeでも主要URLが200/303で応答した。
 - Codex in-app browser自動操作APIは `No active Codex browser pane available` で取得不可だったため、スクリーンショット付き操作ではなく実HTTP探索で代替した。
+
+## 2026-05-23 — Session close: HTML migration save/rebase/push handover
+
+This section closes the long HTML-migration session and records the exact repository state to resume from.
+
+### Repository state
+
+- Working directory: `~/git/be-bemart`
+- Branch: `be-first-migration-bootstrap`
+- Remote: `origin https://github.com/koriym/ec-cube-alps.git`
+- Pushed head: `e651b5e Align template upload screen with upstream port`
+- Push completed: `origin/be-first-migration-bootstrap` is in sync with local `be-first-migration-bootstrap` at close time.
+
+### Commits added after rebasing onto origin
+
+The local save was first split into meaningful commits, then rebased over the upstream work that had landed during the side session. Static assets and the large test commit overlapped with upstream and were dropped/skipped where upstream already carried the better version. The final pushed delta is:
+
+- `d0a9587 Stabilize HTTP route dispatch and sessions`
+  - After rebase, this mostly contributes the shared unsupported-feature JS fallback because upstream already contains the shared `RouteTable`/`Router` front-controller implementation.
+- `bc7825e Improve storefront product and customer flows`
+  - Product list/detail enrichment, storefront blocks, images/categories/tags, cart/session fixes preserved where not already upstream.
+- `da5a2fd Add admin product customer order screen slices`
+  - Admin product/customer/order/category/template first-slice screens preserved where not already upstream.
+- `b121e62 Document Ray.MediaQuery boundary rule`
+  - New skill doc: `docs/skills/G-24-ray-media-query-boundary.md`.
+- `3f08bf1 Update migration status and handover docs`
+  - Exploration gaps, HTML screen matrix, link audit, state notes.
+- `11f0e5a Add malt local runtime config`
+  - `malt.json` + reusable `malt/conf/*`; runtime logs/tmp/DB files remain ignored.
+- `e651b5e Align template upload screen with upstream port`
+  - Post-rebase cleanup: kept upstream's EC-CUBE-faithful `Store/template_add.twig` port so tests and template cache agree.
+
+### Rebase notes
+
+- Before push, local was `ahead 9, behind 27` against `origin/be-first-migration-bootstrap`.
+- Rebased instead of force-pushing. No force push was used.
+- Upstream already contained EC-CUBE static assets, so the local static-asset commit was dropped as patch-equivalent.
+- The previous local `tests/Http/HttpHypermediaTest.php` commit conflicted with upstream's newer 3-tier test framework (`tests/Hypermedia/WorkflowTest.php` + `tests/Http/WorkflowTest.php`), so it was skipped in favor of upstream.
+- `composer install` was required locally after rebase because `composer.lock` already included `koriym/php-server`, but the local `vendor/` did not yet have it.
+
+### Verified before close
+
+```bash
+asd --validate alps.json
+rm -rf var/tmp/html
+./vendor/bin/phpunit \
+  tests/Resource/ProductsHtmlRenderTest.php \
+  tests/Resource/ProductHtmlRenderTest.php \
+  tests/Resource/AdminProductResourceTest.php \
+  tests/Resource/AdminTemplateAddHtmlRenderTest.php \
+  tests/Http/WorkflowTest.php \
+  --stop-on-failure
+```
+
+Result: ALPS valid; selected PHPUnit green — `23 tests / 114 assertions`, with expected deprecations/skips.
+
+### Non-negotiable next-session rules
+
+- New SQL Query/Command boundaries use **Ray.MediaQuery** (`#[DbQuery]` interface + SQL file). Do not add new concrete PHP PDO query classes.
+- Existing `Sql*Query` / `Sql*Command` implementations stay as-is until a dedicated batch migration.
+- Development order remains **Fake → EC-CUBE schema check → Ray.MediaQuery SQL → Resource/Form → Twig/Browser**.
+- JS alert is only a safety net for non-screen/unsupported actions. The main job remains EC-CUBE routable HTML screen migration and browser-flow parity.
+- Unsupported links/buttons must stay visible; they should fail safely via alert and `/__not-implemented?route=...`, not via hidden links, raw Fatal, or Unbound.
+
+### Recommended first prompt for the next session
+
+```text
+~/git/be-bemart で作業します。branch は be-first-migration-bootstrap です。
+前セッションは e651b5e まで push 済みです。
+まず docs/HANDOVER.md, docs/HOW_TO_CONTINUE.md, docs/migration-status.md,
+docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.md を読んで、
+残りHTML画面移植を進めてください。
+新規SQL境界は Ray.MediaQuery を使い、既存PDO実装は今すぐ移行しないでください。
+```

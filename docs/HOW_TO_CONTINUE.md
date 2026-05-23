@@ -11,7 +11,7 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 - **ブランチ**: `be-first-migration-bootstrap`
 - **リモート**: `https://github.com/koriym/ec-cube-alps.git`
 - **PR**: #2（draft、`be-first-migration-bootstrap` → `1.x`）
-- **テスト**: `vendor/bin/phpunit` → `docs/migration-status.md` の現行ベースライン参照。HTTP hypermedia は `tests/Http/HttpHypermediaTest.php` で Resource + HTTP を同一テスト内で検証
+- **テスト**: `vendor/bin/phpunit` → `docs/migration-status.md` の現行ベースライン参照。HTTP workflow は `tests/Hypermedia/WorkflowTest.php` と `tests/Http/WorkflowTest.php` で同一シナリオを in-process / 実HTTP の2トランスポートで検証
 
 移植は ALPS を契約として 3 フェーズ進行している:
 
@@ -19,7 +19,7 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 |---|---|---|
 | **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了（139 transition、stub 7 件あり） |
 | **Phase 2** | 全 34 ストレージ Fake → SQL（MariaDB/MySQL）、本番カットオーバー | 完了 |
-| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | Storefrontは共有Block/商品一覧カート投入まで拡張。Adminは **56 page templates**（`/admin/product/new`, `/admin/order`, `/admin/customer?customerId=...`, category list/edit含む）。残りはProduct/Order/Customerの重い編集画面とContent/Setting補完。 |
+| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | Storefrontは全ページ移植済みで、共有Block/商品一覧カート投入まで拡張。Adminは **63 of 77 page templates**（Tier-1 + in-scope Tier-2 editor waves）まで移植済み。残りは主に Store/Plugin install/search subtree（今回スコープ外）と、body enrichment が必要な周辺機能。 |
 
 > **現在の移植ステータス（レイヤ別マトリクス・残作業 punch-list）の正は
 > [`docs/migration-status.md`](migration-status.md)**。本ファイルは「引き継いだ人が
@@ -87,7 +87,7 @@ sudo mysql -e "FLUSH PRIVILEGES;"
 
 ```bash
 vendor/bin/phpunit                          # 全テスト（OK なら緑）
-vendor/bin/phpunit tests/Http/HttpHypermediaTest.php  # Resource + HTTP の同一テスト内 hypermedia 検証
+vendor/bin/phpunit tests/Hypermedia/WorkflowTest.php tests/Http/WorkflowTest.php  # 同一workflowをin-process/実HTTPで検証
 vendor/bin/phpunit --testsuite bemart-sql   # SQL ストレージ + Final-direct（DATABASE_URL 要）
 composer psalm                              # 型解析
 composer psalm-taint                        # taint mode
@@ -134,8 +134,8 @@ Admin Tier-2 以降は、ページ単位で次の4層を完了条件にする。
 
 1. **Resource hypermedia** — `tests/Resource/*ResourceTest.php` で `ResourceInterface` 経由の `page://self/...` 契約を検証。
 2. **HTML render-diff** — `tests/Resource/*HtmlRenderTest.php` で EC-CUBE 実テンプレートとの差分を residual allowlist で説明。
-3. **HTTP hypermedia** — `tests/Http/HttpHypermediaTest.php` の形に従い、1つの PHPUnit テスト内で **BEAR.Resource 直叩き + `public/index.php` 経由の実HTTP** を両方実行し、同じ resource 契約に到達することを検証。HTTP サーバはテスト内で `php -S` により起動する（手動起動しない）。POST 成功後に `Location` を返すものは `200 + Location` ではなく `303 See Other + Location` として固定する。
-4. **Browser smoke** — storefront は実ブラウザでトップ → 商品一覧 → 商品詳細 → カート/ログイン/問い合わせ導線を確認。現時点の `Products` は空リスト branch の thin renderer なので、商品詳細は `/product?productCode=sample-001` 直アクセスで確認する（ProductList enrichment 後に一覧→詳細クリックへ戻す）。Admin は HTTP 認証スタブ注入方針が固まるまで後続。
+3. **HTTP workflow** — `tests/Hypermedia/WorkflowTest.php` の同一 assertion を `tests/Http/WorkflowTest.php` が継承し、`HttpResource` 経由で実HTTP / Cookie境界を越えて検証する。HTTP サーバは `koriym/php-server` でテスト内起動する（手動起動しない）。POST成功後に `Location` を返すものは `303 See Other + Location` として固定する。
+4. **Browser smoke** — storefront は実ブラウザでトップ → 商品一覧 → 商品詳細 → カート/ログイン/問い合わせ導線を確認。商品一覧は populated branch / category / sort / list add-cart まで接続済み。Admin はログイン後に商品・受注・会員・カテゴリ・テンプレート周辺の主要導線を確認する。
 
 
 **Admin section-wave を並列で回す場合** — per-section ja-message split（`1e91e92`）に
