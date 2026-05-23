@@ -17,7 +17,9 @@ use MyVendor\BeMart\Be\Final\PageUpdated;
 use MyVendor\BeMart\Be\Input\DeletePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageInput;
 use MyVendor\BeMart\Be\Input\UpdatePageInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminPageForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -38,6 +40,7 @@ class Page extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -46,8 +49,33 @@ class Page extends ResourceObject
      * @psalm-taint-source input $pageId
      */
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
-    public function onGet(string $pageId): static
+    public function onGet(string|null $pageId = null): static
     {
+        if ($pageId === null || $pageId === '') {
+            if ($this->adminSession->adminId() === null) {
+                $this->code = Code::FORBIDDEN;
+                $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+                return $this;
+            }
+
+            $this->code = Code::OK;
+            $this->body = [
+                'pageId' => '',
+                'pageName' => '',
+                'pageUrl' => '',
+                'pageFileName' => '',
+                'pageEditType' => 1,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ];
+            $form = $this->formFactory->newInstance(AdminPageForm::class);
+            assert($form instanceof AdminPageForm);
+            $form->fillValues($this->body);
+            $this->body['form'] = $form;
+
+            return $this;
+        }
+
         try {
             $final = ($this->becoming)(new GetAdminPageInput(pageId: $pageId));
         } catch (UnauthorizedAdminAccessException) {

@@ -17,6 +17,9 @@ use MyVendor\BeMart\Form\AdminCustomerForm;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
+use function filter_var;
+
+use const FILTER_VALIDATE_EMAIL;
 
 /**
  * EC-CUBE goCustomer — 会員詳細を見る（管理画面）.
@@ -64,12 +67,38 @@ class Customer extends ResourceObject
      * customer-side LoginResource.
      *
      * @psalm-taint-source input $email
+     * @psalm-taint-source input $customerId
+     * @psalm-taint-source input $id
      */
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
-    public function onGet(string $email): static
+    public function onGet(
+        string|null $email = null,
+        string|null $customerId = null,
+        string|null $id = null,
+    ): static
     {
+        $customerId ??= $id;
+        $selector = $customerId !== null && $customerId !== '' ? $customerId : $email;
+        $selectorType = $customerId !== null && $customerId !== '' ? 'customerId' : 'email';
+        if ($selector === null || $selector === '') {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => '会員IDまたはメールアドレスを指定してください。'];
+
+            return $this;
+        }
+
+        if ($selectorType === 'email' && filter_var($selector, FILTER_VALIDATE_EMAIL) === false) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => 'メールアドレスの形式が不正です。'];
+
+            return $this;
+        }
+
         try {
-            $final = ($this->becoming)(new GetAdminCustomerInput(email: $email));
+            $final = ($this->becoming)(new GetAdminCustomerInput(
+                selector: $selector,
+                selectorType: $selectorType,
+            ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
             $this->body = [
