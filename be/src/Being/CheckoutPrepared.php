@@ -8,7 +8,7 @@ use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\PurchaseFlowResult;
+use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
@@ -53,7 +53,7 @@ use Ray\InputQuery\Attribute\Input;
 final readonly class CheckoutPrepared
 {
     public OrderEntity $order;
-    public PurchaseFlowResult $totals;
+    public PurchaseTotals $totals;
 
     public function __construct(
         #[Input] public string $preOrderId,
