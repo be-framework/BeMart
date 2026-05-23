@@ -75,7 +75,7 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(TagIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new TagEntity(tagId: $newId, tagName: '限定');
 
@@ -96,7 +96,7 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
     public function testPutSetsSortNoToZeroOnInsert(): void
     {
         $generator = $this->sql(TagIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(TagStorageInterface::class);
 
         $storage->put(new TagEntity(tagId: $newId, tagName: 'X'));
@@ -196,11 +196,11 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(TagIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertTag();
         $secondId = $this->insertTag();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

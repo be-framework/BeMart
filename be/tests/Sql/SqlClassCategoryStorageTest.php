@@ -136,7 +136,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $axis = $this->insertClassName(['name' => 'Color']);
 
         $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -167,7 +167,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $axis = $this->insertClassName(['name' => 'Size']);
 
         $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(ClassCategoryStorageInterface::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -187,7 +187,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // column directly. First INSERT on an empty table → 1.
         $axis = $this->insertClassName(['name' => 'Color']);
         $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(ClassCategoryStorageInterface::class);
 
         $storage->put(new ClassCategoryEntity(
@@ -208,7 +208,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // The admin slice has no show/hide UI — visible is always 1.
         $axis = $this->insertClassName(['name' => 'Color']);
         $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(ClassCategoryStorageInterface::class);
 
         $storage->put(new ClassCategoryEntity(
@@ -236,7 +236,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         ]);
 
         $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(ClassCategoryStorageInterface::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -428,12 +428,12 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $axis = $this->insertClassName(['name' => 'Color']);
         $firstId = $this->insertClassCategory(['class_name_id' => $axis]);
         $secondId = $this->insertClassCategory(['class_name_id' => $axis]);
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

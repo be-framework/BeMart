@@ -117,7 +117,7 @@ final class AdminShippingOrderTransitionsTest extends TestCase
         $shipping = $this->injector->getInstance(FakeShippingAddressStorage::class);
         $this->assertSame(
             'TRK-1234567890',
-            $shipping->trackingNumberByOrderNo(self::TARGET_ORDER_NO)->valueOrNull(),
+            $shipping->trackingNumberByOrderNo(self::TARGET_ORDER_NO)->trackingNumber,
         );
     }
 

@@ -104,7 +104,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(BlockIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new BlockEntity(
             blockId: $newId,
@@ -135,7 +135,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         // user blocks — only BlockDeleted enforces the guard, not the
         // storage.
         $generator = $this->sql(BlockIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(BlockStorageInterface::class);
 
         $storage->put(new BlockEntity(
@@ -289,11 +289,11 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(BlockIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertBlock();
         $secondId = $this->insertBlock();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }
