@@ -7,6 +7,8 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 | `flow-` | ワークフロー | flow-purchase, flow-manage-order |
 | `src-` | 情報源 | src-entity, src-router |
 | `actor-` | アクター | actor-admin, actor-customer |
+| `page` / `page-` | HTML画面状態 | page-admin, page-list, page-edit |
+| `route-` | 外部/EC-CUBEルート対応 | route-ec-cube |
 | （なし） | ドメイン | catalog, order, checkout |
 
 ## Workflow（`flow-*`）
@@ -66,3 +68,32 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 | src-router | Symfonyルーター由来の遷移アクション |
 | src-controller | コントローラ由来の処理アクション |
 | src-template | Twigテンプレート由来の画面構造 |
+
+### HTML画面状態（`page`, `page-*`）
+
+`src-template` は「Twigテンプレート由来」という出自を示すタグです。
+一方、`page` / `page-*` は **ブラウザで到達する画面状態** としての役割を明示します。
+エンティティ（例: `Order`, `Customer`）と、ルート・テンプレートに対応する画面（例: `AdminOrderEditPage`）を混同しないために使います。
+
+| タグ | 説明 |
+|------|------|
+| page | routable な HTML 画面状態。共有部品単体や純粋なデータ項目には付けない |
+| page-storefront | フロント画面 |
+| page-admin | 管理画面 |
+| page-mypage | 会員マイページ配下の画面 |
+| page-list | 一覧画面 |
+| page-detail | 詳細画面 |
+| page-edit | 編集画面 |
+| page-new | 新規作成画面 |
+| page-confirm | 確認画面 |
+| page-complete | 完了画面 |
+| page-login | ログイン画面 |
+| page-dashboard | トップ/ダッシュボード画面 |
+| page-error | 404/405/501 などのエラー画面 |
+
+### ルート対応（`route-*`）と移植管理
+
+| タグ | 説明 |
+|------|------|
+| route-ec-cube | EC-CUBE の具体的な route 名・テンプレートに対応する画面状態 |
+| migration-target | 移植対象として追跡するノード。未実装の場合も 404/Fatal ではなく 501 やドキュメント化された残差として扱う |
