@@ -188,6 +188,10 @@ final class SqlProductCommand implements ProductCommandInterface
             description: $source->description,
             searchWord: $source->searchWord,
             note: $source->note,
+            imagePath: $source->imagePath,
+            categoryNames: $source->categoryNames,
+            tagNames: $source->tagNames,
+            classNames: $source->classNames,
         );
 
         $this->withAtomic(function () use ($copy): void {

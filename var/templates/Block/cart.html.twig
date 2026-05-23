@@ -1,0 +1,22 @@
+{#
+  EC-CUBE default-theme Block/cart.twig static-empty port.
+
+  The frame does not yet receive cart totals, so render the empty-cart
+  display with a real link to the cart page. The full hover mini-cart is
+  a later shared-block enrichment.
+#}
+<div class="ec-cartNaviWrap">
+    <a class="ec-cartNavi" href="{{ url('cart') }}">
+        <i class="ec-cartNavi__icon fas fa-shopping-cart">
+            <span class="ec-cartNavi__badge">0</span>
+        </i>
+        <div class="ec-cartNavi__label">
+            <div class="ec-cartNavi__price">{{ 0|price }}</div>
+        </div>
+    </a>
+    <div class="ec-cartNaviNull">
+        <div class="ec-cartNaviNull__message">
+            <p>現在カート内に商品はございません。</p>
+        </div>
+    </div>
+</div>
