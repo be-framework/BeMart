@@ -8,7 +8,7 @@ use Aura\Sql\ExtendedPdoInterface;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeCustomerQuery;
+use MyVendor\BeMart\Be\Reason\Fake\Query\FakeCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\ProdModule;
