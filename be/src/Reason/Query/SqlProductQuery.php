@@ -82,7 +82,7 @@ final class SqlProductQuery implements ProductQueryInterface
      * the SELECT body lives in one place.
      */
     private const SELECT_COLUMNS =
-        'pc.product_code, p.name AS product_name, '
+        'p.id AS product_id, pc.product_code, p.name AS product_name, '
         . 'pc.price02, pc.stock, '
         . 'p.product_status_id, p.description_detail, '
         . 'p.search_word, p.note';
@@ -240,6 +240,81 @@ final class SqlProductQuery implements ProductQueryInterface
                 ? null
                 : (string) $row['search_word'],
             note: $row['note'] === null ? null : (string) $row['note'],
+            imagePath: $this->imagePath((int) $row['product_id']),
+            categoryNames: $this->categoryNames((int) $row['product_id']),
+            tagNames: $this->tagNames((int) $row['product_id']),
+            classNames: $this->classNames((int) $row['product_id']),
         );
+    }
+
+    private function imagePath(int $productId): string|null
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT file_name FROM dtb_product_image '
+            . 'WHERE product_id = :product_id '
+            . 'ORDER BY sort_no ASC, id ASC LIMIT 1',
+        );
+        $stmt->execute([':product_id' => $productId]);
+        $file = $stmt->fetchColumn();
+
+        return $file === false ? null : 'save_image/' . (string) $file;
+    }
+
+    /** @return list<string> */
+    private function categoryNames(int $productId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT c.category_name FROM dtb_product_category pc '
+            . 'INNER JOIN dtb_category c ON c.id = pc.category_id '
+            . 'WHERE pc.product_id = :product_id '
+            . 'ORDER BY c.hierarchy ASC, c.sort_no DESC, c.id ASC',
+        );
+        $stmt->execute([':product_id' => $productId]);
+
+        return $this->fetchStringColumn($stmt);
+    }
+
+    /** @return list<string> */
+    private function tagNames(int $productId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT t.name FROM dtb_product_tag pt '
+            . 'INNER JOIN dtb_tag t ON t.id = pt.tag_id '
+            . 'WHERE pt.product_id = :product_id '
+            . 'ORDER BY t.sort_no ASC, t.id ASC',
+        );
+        $stmt->execute([':product_id' => $productId]);
+
+        return $this->fetchStringColumn($stmt);
+    }
+
+    /** @return list<string> */
+    private function classNames(int $productId): array
+    {
+        $stmt = $this->pdo->prepare(
+            'SELECT DISTINCT cn.name FROM dtb_product_class pc '
+            . 'INNER JOIN dtb_class_category cc1 ON cc1.id = pc.class_category_id1 '
+            . 'INNER JOIN dtb_class_name cn ON cn.id = cc1.class_name_id '
+            . 'WHERE pc.product_id = :product_id1 '
+            . 'UNION '
+            . 'SELECT DISTINCT cn.name FROM dtb_product_class pc '
+            . 'INNER JOIN dtb_class_category cc2 ON cc2.id = pc.class_category_id2 '
+            . 'INNER JOIN dtb_class_name cn ON cn.id = cc2.class_name_id '
+            . 'WHERE pc.product_id = :product_id2',
+        );
+        $stmt->execute([':product_id1' => $productId, ':product_id2' => $productId]);
+
+        return $this->fetchStringColumn($stmt);
+    }
+
+    /** @return list<string> */
+    private function fetchStringColumn(PDOStatement $stmt): array
+    {
+        $values = [];
+        while (($value = $stmt->fetchColumn()) !== false) {
+            $values[] = (string) $value;
+        }
+
+        return $values;
     }
 }

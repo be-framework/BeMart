@@ -1,0 +1,26 @@
+{#
+  EC-CUBE default-theme Block/header.twig port.
+
+  This restores the default header sub-navigation structure:
+  search + mobile drawer button on the left, login/register + cart on
+  the right. The child blocks are static first slices but every link is
+  a real BeMart URL.
+#}
+<div class="ec-headerNaviRole">
+    <div class="ec-headerNaviRole__left">
+        <div class="ec-headerNaviRole__search">
+            {{ include('Block/search_product.html.twig') }}
+        </div>
+        <div class="ec-headerRole__navSP">
+            {{ include('Block/nav_sp.html.twig') }}
+        </div>
+    </div>
+    <div class="ec-headerNaviRole__right">
+        <div class="ec-headerNaviRole__nav">
+            {{ include('Block/login.html.twig') }}
+        </div>
+        <div class="ec-headerRole__cart">
+            {{ include('Block/cart.html.twig') }}
+        </div>
+    </div>
+</div>

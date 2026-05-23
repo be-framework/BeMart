@@ -35,19 +35,18 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `form._token` — Symfony CSRF widget; BeMart has no CSRF widget, the
-     hidden token is kept with the body's `csrfToken` (null in the html
-     context — the EventListener mirrors the live token in).
+   - `form._token` — Symfony CSRF widget; BeMart keeps the same hidden
+     `_token` field and fills it from the dev/html fake CSRF token so a
+     browser submit reaches the registration POST path.
    - The `{% for f in form|filter(f => f.vars.eccube_form_options
      .auto_render) %}` entity-extension auto-render loop is OMITTED — it
      iterates EC-CUBE plugin/Doctrine entity extensions, of which a core
      install has none, so it emits nothing on either side.
    - `has_errors(...)` — request-validation runtime; resolves false on a
      fresh form, so the conditional ` error` class never appears.
-   - `pref` / `birth_*` / `sex` / `job` widgets render as the bare
-     empty `<select>` / `<radio>`: their option sets are EC-CUBE master
-     data (`mtb_pref` / `mtb_sex` / `mtb_job`) the resource body does not
-     carry. Enumerated as an EC-CUBE-runtime residual family.
+   - `pref` / `birth_*` / `sex` / `job` widgets use local EC-CUBE-like
+     master-data options in `EntryForm`, because an empty browser control
+     is not a usable registration screen.
 #}
 {% extends 'base.html.twig' %}
 

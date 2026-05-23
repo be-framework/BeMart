@@ -50,6 +50,10 @@ final class FakeProductCommand implements ProductCommandInterface
             description: $current->description,
             searchWord: $current->searchWord,
             note: $current->note,
+            imagePath: $current->imagePath,
+            categoryNames: $current->categoryNames,
+            tagNames: $current->tagNames,
+            classNames: $current->classNames,
         ));
     }
 
@@ -70,6 +74,10 @@ final class FakeProductCommand implements ProductCommandInterface
             description: $source->description,
             searchWord: $source->searchWord,
             note: $source->note,
+            imagePath: $source->imagePath,
+            categoryNames: $source->categoryNames,
+            tagNames: $source->tagNames,
+            classNames: $source->classNames,
         );
         $this->storage->put($copy);
 
@@ -102,6 +110,10 @@ final class FakeProductCommand implements ProductCommandInterface
                 description: $current->description,
                 searchWord: $current->searchWord,
                 note: $current->note,
+                imagePath: $current->imagePath,
+                categoryNames: $current->categoryNames,
+                tagNames: $current->tagNames,
+                classNames: $current->classNames,
             ));
             $changed++;
         }
