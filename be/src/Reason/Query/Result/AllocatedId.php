@@ -8,16 +8,16 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final readonly class BulkStatusUpdateResult implements PostQueryInterface
+final readonly class AllocatedId implements PostQueryInterface
 {
-    public function __construct(public int $changedCount) {}
+    public function __construct(public string $value) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
     {
         $row = $context->rows[0] ?? [];
-        $changedCount = is_array($row) ? (int) ($row['changed_count'] ?? 0) : $context->statement->rowCount();
+        $value = is_array($row) ? (string) ($row['next_id'] ?? '1') : '1';
 
-        return new static($changedCount);
+        return new static($value);
     }
 }

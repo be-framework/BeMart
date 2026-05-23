@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
-use MyVendor\BeMart\Be\Reason\Query\Result\TrackingNumberResult;
+use MyVendor\BeMart\Be\Reason\Query\Result\ShippingTrackingNumber;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
@@ -57,5 +57,5 @@ interface ShippingAddressStorageInterface
      * persisted value.
      */
     #[DbQuery('shipping_tracking_by_order_no')]
-    public function trackingNumberByOrderNo(string $orderNo): TrackingNumberResult;
+    public function trackingNumberByOrderNo(string $orderNo): ShippingTrackingNumber;
 }

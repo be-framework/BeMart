@@ -8,16 +8,16 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final readonly class TrackingNumberResult implements PostQueryInterface
+final readonly class ProductStatusUpdate implements PostQueryInterface
 {
-    public function __construct(public string|null $trackingNumber) {}
+    public function __construct(public int $changedCount) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
     {
         $row = $context->rows[0] ?? [];
-        $value = is_array($row) && isset($row['tracking_number']) ? (string) $row['tracking_number'] : null;
+        $changedCount = is_array($row) ? (int) ($row['changed_count'] ?? 0) : $context->statement->rowCount();
 
-        return new static($value);
+        return new static($changedCount);
     }
 }

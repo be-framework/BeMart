@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Service;
 
-use MyVendor\BeMart\Be\Reason\Query\Result\GeneratedId;
+use MyVendor\BeMart\Be\Reason\Query\Result\AllocatedId;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
@@ -14,5 +14,5 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface PaymentMethodAdminIdGeneratorInterface
 {
     #[DbQuery('paymentMethodAdmin_next_id')]
-    public function generate(): GeneratedId;
+    public function generate(): AllocatedId;
 }
