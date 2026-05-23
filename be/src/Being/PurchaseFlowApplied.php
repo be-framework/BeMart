@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Being;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\PurchaseFlowResult;
+use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -24,7 +24,7 @@ use Ray\InputQuery\Attribute\Input;
 #[Be(PaymentVerified::class)]
 final readonly class PurchaseFlowApplied
 {
-    public PurchaseFlowResult $totals;
+    public PurchaseTotals $totals;
 
     public function __construct(
         #[Input] public string $preOrderId,

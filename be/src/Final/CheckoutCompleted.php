@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\PurchaseFlowResult;
+use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
@@ -53,7 +53,7 @@ final readonly class CheckoutCompleted
     public function __construct(
         #[Input] string $preOrderId,
         #[Input] OrderEntity $order,
-        #[Input] PurchaseFlowResult $totals,
+        #[Input] PurchaseTotals $totals,
         #[Input] string $orderNo,
         #[Input] string $orderDate,
         #[Input] string $paymentDate,
