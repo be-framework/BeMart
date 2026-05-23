@@ -21,6 +21,7 @@ use MyVendor\BeMart\Be\Input\AdminDeleteProductInput;
 use MyVendor\BeMart\Be\Input\AdminUpdateProductInput;
 use MyVendor\BeMart\Be\Input\GetAdminProductInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 
 use function assert;
 use function sprintf;
@@ -97,6 +98,16 @@ class Product extends ResourceObject
             'description' => $final->description,
             'searchWord' => $final->searchWord,
             'note' => $final->note,
+            'mainImage' => $final->imagePath,
+            'categoryNames' => $final->categoryNames,
+            'tagNames' => $final->tagNames,
+            'classNames' => $final->classNames,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+            'productStatusOptions' => [
+                1 => '公開',
+                2 => '非公開',
+                3 => '廃止',
+            ],
         ];
 
         return $this;
@@ -244,6 +255,7 @@ class Product extends ResourceObject
         assert($final instanceof AdminProductUpdated);
 
         $this->code = Code::OK;
+        $this->headers['Location'] = sprintf('/admin/product?productCode=%s', urlencode($final->productCode));
         $this->body = [
             'productCode' => $final->productCode,
             'productName' => $final->productName,

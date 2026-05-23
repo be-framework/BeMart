@@ -27,7 +27,7 @@ use function count;
  *
  * Aggregates three independent reads:
  *
- *   - `CustomerQuery::findByEmail`     → full profile (richer than the
+ *   - `CustomerQuery::findById` or `findByEmail` → full profile (richer than the
  *      customer's own goMypage projection — admins see birth, sex, job,
  *      full address, point balance, registrationDate analogue)
  *   - `OrderQuery::listByCustomer`     → full purchase history (capped
@@ -59,8 +59,9 @@ use function count;
  *
  * Mass-assignment safety: the adminId is read exclusively from the
  * AdminSession; it is NOT a constructor parameter. The only request-
- * controlled input is `$email` (the customer to inspect). A malicious
- * client cannot bypass admin firewall by tampering with body fields.
+ * controlled input is the customer selector (`customerId` preferred,
+ * legacy `email` accepted). A malicious client cannot bypass admin
+ * firewall by tampering with body fields.
  */
 final readonly class AdminCustomerFetched
 {
@@ -94,7 +95,8 @@ final readonly class AdminCustomerFetched
     public int $favoriteCount;
 
     public function __construct(
-        #[Input] string $email,
+        #[Input] string $selector,
+        #[Input] string $selectorType,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] OrderQueryInterface $orderQuery,
@@ -106,7 +108,9 @@ final readonly class AdminCustomerFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $customer = $customerQuery->findByEmail($email);
+        $customer = $selectorType === 'customerId'
+            ? $customerQuery->findById($selector)
+            : $customerQuery->findByEmail($selector);
         if ($customer === null) {
             throw new CustomerNotFoundException();
         }
