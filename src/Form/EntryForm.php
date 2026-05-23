@@ -49,7 +49,7 @@ use function range;
  */
 final class EntryForm extends AbstractForm
 {
-    /** @var array<string, string> */
+    /** @var array<int|string, string> */
     private const PREF_OPTIONS = [
         '' => '',
         '1' => '北海道',
@@ -101,13 +101,13 @@ final class EntryForm extends AbstractForm
         '47' => '沖縄県',
     ];
 
-    /** @var array<string, string> */
+    /** @var array<int|string, string> */
     private const SEX_OPTIONS = [
         '1' => '男性',
         '2' => '女性',
     ];
 
-    /** @var array<string, string> */
+    /** @var array<int|string, string> */
     private const JOB_OPTIONS = [
         '' => '',
         '1' => '公務員',

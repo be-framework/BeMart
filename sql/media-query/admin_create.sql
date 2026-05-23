@@ -1,0 +1,1 @@
+INSERT INTO dtb_member (id, creator_id, work_id, authority_id, name, department, login_id, password, salt, sort_no, two_factor_auth_key, two_factor_auth_enabled, create_date, update_date, login_date, discriminator_type) VALUES (:id, NULL, :work, :authority, :name, NULL, :loginId, :password, NULL, 0, NULL, 0, NOW(), NOW(), NULL, 'member')

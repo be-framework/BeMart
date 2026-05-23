@@ -30,7 +30,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $second = $this->insertClassCategory(['class_name_id' => $axis, 'name' => 'Blue']);
         $third = $this->insertClassCategory(['class_name_id' => $axis, 'name' => 'Green']);
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $rows = $storage->list();
 
         $this->assertCount(3, $rows);
@@ -45,7 +45,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -57,7 +57,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $this->insertClassCategory(['class_name_id' => $colorAxis, 'name' => 'Red']);
         $this->insertClassCategory(['class_name_id' => $sizeAxis, 'name' => 'Large']);
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $this->assertCount(2, $storage->list());
     }
 
@@ -70,7 +70,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $this->insertClassCategory(['class_name_id' => $colorAxis, 'name' => 'Blue']);
         $this->insertClassCategory(['class_name_id' => $sizeAxis, 'name' => 'Large']);
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $colorValues = $storage->listByClassName((string) $colorAxis);
 
         $this->assertCount(2, $colorValues);
@@ -84,7 +84,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         $emptyAxis = $this->insertClassName(['name' => 'Material']);
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $this->assertSame([], $storage->listByClassName((string) $emptyAxis));
     }
 
@@ -92,7 +92,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         // A non-numeric axis id can never match an int FK column —
         // surface as an empty scope, not a PDO error.
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $this->assertSame([], $storage->listByClassName('nonexistent-zzz'));
         $this->assertSame(
             [],
@@ -105,7 +105,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $axis = $this->insertClassName(['name' => 'カラー']);
         $id = $this->insertClassCategory(['class_name_id' => $axis, 'name' => '赤']);
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(ClassCategoryEntity::class, $entity);
@@ -116,7 +116,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -126,7 +126,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // like `nonexistent-zzz` can never match an int PK; surface as
         // miss so the ClassCategory Update / Delete Finals fire their
         // 404 paths instead of a PDO error.
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
         $this->assertNull($storage->getById('nonexistent-zzz'));
     }
@@ -135,7 +135,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         $axis = $this->insertClassName(['name' => 'Color']);
 
-        $generator = new SqlClassCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
         $newId = $generator->generate(); // numeric string
 
         $entity = new ClassCategoryEntity(
@@ -144,7 +144,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
             name: 'Red',
         );
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -166,9 +166,9 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // row scoped to that axis.
         $axis = $this->insertClassName(['name' => 'Size']);
 
-        $generator = new SqlClassCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
             classNameId: (string) $axis,
@@ -186,9 +186,9 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // a value. The projection never reads it, so probe the raw
         // column directly. First INSERT on an empty table → 1.
         $axis = $this->insertClassName(['name' => 'Color']);
-        $generator = new SqlClassCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
 
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -207,9 +207,9 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         // The admin slice has no show/hide UI — visible is always 1.
         $axis = $this->insertClassName(['name' => 'Color']);
-        $generator = new SqlClassCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
 
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -235,9 +235,9 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
             'sort_no' => 7,
         ]);
 
-        $generator = new SqlClassCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
             classNameId: (string) $axis,
@@ -254,7 +254,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     public function testPutIsNoOpForNonNumericId(): void
     {
         $axis = $this->insertClassName(['name' => 'Color']);
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
 
         $storage->put(new ClassCategoryEntity(
             classCategoryId: 'deadbeefdeadbeefdeadbeefdeadbeef',
@@ -283,7 +283,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
             name: 'Crimson',
         );
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -305,7 +305,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
             'sort_no' => 42,
         ]);
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: (string) $id,
             classNameId: (string) $axis,
@@ -329,7 +329,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
             'name' => 'Red',
         ]);
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: (string) $id,
             classNameId: (string) $axis,
@@ -345,7 +345,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         $axis = $this->insertClassName(['name' => 'Color']);
         $id = $this->insertClassCategory(['class_name_id' => $axis, 'name' => 'doomed']);
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -362,7 +362,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $doomed = $this->insertClassCategory(['class_name_id' => $axis, 'name' => 'Red']);
         $kept = $this->insertClassCategory(['class_name_id' => $axis, 'name' => 'Blue']);
 
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->remove((string) $doomed);
 
         $this->assertNull($storage->getById((string) $doomed));
@@ -372,7 +372,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric
         $storage->remove('nonexistent-zzz'); // non-numeric, no exception
@@ -383,7 +383,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         $axis = $this->insertClassName(['name' => 'Color']);
         $id = $this->insertClassCategory(['class_name_id' => $axis, 'sort_no' => 1]);
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
 
         $storage->reorder((string) $id, 88);
 
@@ -398,7 +398,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         $axis = $this->insertClassName(['name' => 'Size']);
         $id = $this->insertClassCategory(['class_name_id' => $axis, 'visible' => 1]);
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
 
         $storage->setVisible((string) $id, false);
 
@@ -417,7 +417,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
 
     public function testReorderAndSetVisibleAreSilentNoOpForNonNumericId(): void
     {
-        $storage = new SqlClassCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->reorder('nonexistent-zzz', 5);
         $storage->setVisible('nonexistent-zzz', false);
         $this->assertTrue(true);
@@ -425,7 +425,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
 
     public function testSqlClassCategoryIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = new SqlClassCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
 
         // Empty table → starts at 1.
         $this->assertSame('1', $generator->generate());

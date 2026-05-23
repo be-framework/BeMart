@@ -21,6 +21,7 @@
         "my-vendor/be-mart-be": "@dev",
         "ray/di": "^2.18",
         "ray/input-query": "^1.0",
+        "ray/media-query": "^1.1",
         "ray/web-form-module": "^1.0"
     },
     "require-dev": {

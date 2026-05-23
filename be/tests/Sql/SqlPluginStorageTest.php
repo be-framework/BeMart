@@ -37,7 +37,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
 {
     public function testListAllReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $this->assertSame([], $storage->listAll());
     }
 
@@ -49,7 +49,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $this->insertPlugin(['code' => 'Sample/DisabledPlugin', 'name' => 'Disabled']);
         $this->insertPlugin(['code' => 'Acme/FirstPlugin', 'name' => 'Acme']);
 
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $rows = $storage->listAll();
 
         $this->assertCount(3, $rows);
@@ -69,7 +69,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
             'enabled' => 1,
         ]);
 
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $rows = $storage->listAll();
 
         $this->assertCount(1, $rows);
@@ -91,7 +91,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
             'enabled' => 0,
         ]);
 
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $entity = $storage->findByCode('Vendor/Target');
 
         $this->assertInstanceOf(PluginEntity::class, $entity);
@@ -104,7 +104,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
 
     public function testFindByCodeReturnsNullForUnknownCode(): void
     {
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $this->assertNull($storage->findByCode('NoSuch/Plugin'));
     }
 
@@ -118,7 +118,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
             'enabled' => 0,
         ]);
 
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $entity = $storage->findByCode('Vendor/Registered');
 
         $this->assertInstanceOf(PluginEntity::class, $entity);
@@ -128,7 +128,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
 
     public function testInstallInsertsNewRowAsInstalledAndDisabled(): void
     {
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $storage->install('NewVendor/Plugin', '新規プラグイン', '1.0.0');
 
         $entity = $storage->findByCode('NewVendor/Plugin');
@@ -149,7 +149,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
     {
         // source is NOT NULL with no DEFAULT — the storage must supply
         // it. Raw column probe confirms the INSERT contract.
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $storage->install('Probe/Plugin', 'Probe', '1.0.0');
 
         $stmt = $this->pdo->prepare(
@@ -178,7 +178,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
             'enabled' => 1,
         ]);
 
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $storage->install('Sample/SamplePlugin', 'Whatever', '9.9.9');
 
         $entity = $storage->findByCode('Sample/SamplePlugin');
@@ -205,7 +205,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
             'enabled' => 0,
         ]);
 
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $before = $storage->findByCode('Vendor/Registered');
         $this->assertInstanceOf(PluginEntity::class, $before);
         $this->assertFalse($before->installed);
@@ -227,7 +227,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
     public function testUninstallRemovesInstalledRow(): void
     {
         $this->insertPlugin(['code' => 'Vendor/Doomed', 'initialized' => 1]);
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $this->assertNotNull($storage->findByCode('Vendor/Doomed'));
 
         $storage->uninstall('Vendor/Doomed');
@@ -240,7 +240,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
 
     public function testUninstallIsSilentNoOpForUnknownCode(): void
     {
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         // Idempotent: a DELETE matching zero rows raises nothing.
         $storage->uninstall('NoSuch/Plugin');
         $this->assertSame([], $storage->listAll());
@@ -249,7 +249,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
     public function testUninstallReplayIsIdempotent(): void
     {
         $this->insertPlugin(['code' => 'Vendor/Twice', 'initialized' => 1]);
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
 
         $storage->uninstall('Vendor/Twice');
         // Second call — already gone, still a silent no-op.
@@ -267,7 +267,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
             'initialized' => 1,
             'enabled' => 0,
         ]);
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
 
         $storage->setEnabled('Vendor/Toggle', true);
         $afterEnable = $storage->findByCode('Vendor/Toggle');
@@ -292,7 +292,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
             'initialized' => 1,
             'enabled' => 1,
         ]);
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
 
         $storage->setEnabled('Vendor/AlreadyOn', true);
 
@@ -303,7 +303,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
 
     public function testSetEnabledRaisesNotFoundForUnknownCode(): void
     {
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
         $this->expectException(PluginNotFoundException::class);
         $storage->setEnabled('NoSuch/Plugin', true);
     }
@@ -319,7 +319,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
             'initialized' => 0,
             'enabled' => 0,
         ]);
-        $storage = new SqlPluginStorage($this->pdo);
+        $storage = $this->sql(SqlPluginStorage::class);
 
         $this->expectException(PluginNotInstalledException::class);
         $storage->setEnabled('Partial/Plugin', true);

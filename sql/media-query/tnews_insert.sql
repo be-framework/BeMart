@@ -1,0 +1,1 @@
+INSERT INTO dtb_news (id, creator_id, title, description, url, link_method, publish_date, visible, create_date, update_date, discriminator_type) VALUES (:id, NULL, :title, :description, :url, :linkMethod, :publishDate, 1, NOW(), NOW(), 'news')
