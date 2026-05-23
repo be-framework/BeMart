@@ -9,7 +9,7 @@ use DateTimeImmutable;
 use DateTimeInterface;
 use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\PurchaseFlowResult;
+use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\OrderNumberGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
@@ -54,7 +54,7 @@ final readonly class CheckoutSettled
     public function __construct(
         #[Input] public string $preOrderId,
         #[Input] public OrderEntity $order,
-        #[Input] public PurchaseFlowResult $totals,
+        #[Input] public PurchaseTotals $totals,
         #[Inject] InventoryAllocatorInterface $inventory,
         #[Inject] PaymentGatewayInterface $gateway,
         #[Inject] OrderNumberGeneratorInterface $numbers,

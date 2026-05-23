@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Service;
 
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\PurchaseFlowResult;
+use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 
 /**
  * EC-CUBE PurchaseFlow (shopping flow) — tax / shipping / point aggregation.
@@ -17,5 +17,5 @@ use MyVendor\BeMart\Be\Reason\Entity\PurchaseFlowResult;
  */
 interface PurchaseFlowInterface
 {
-    public function apply(OrderEntity $preOrder): PurchaseFlowResult;
+    public function apply(OrderEntity $preOrder): PurchaseTotals;
 }
