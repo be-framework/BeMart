@@ -254,7 +254,7 @@ final class AppModule extends AbstractAppModule
         // Reason (Pilot 16 customer address book): unified Query+Command
         // for the address store + an opaque-id generator. Singleton on
         // storage so a request's POST is visible to the same request's
-        // GET / PUT / DELETE within a single test.
+        // GET / PUT / remove within a single test.
         $this->bind(AddressStorageInterface::class)->to(FakeAddressStorage::class)->in(Scope::SINGLETON);
         $this->bind(AddressIdGeneratorInterface::class)->to(FakeAddressIdGenerator::class);
 

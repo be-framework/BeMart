@@ -31,7 +31,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
 {
     public function testListByTypeReturnsEmptyWhenNoRows(): void
     {
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
         $this->assertSame([], $storage->listByType(3));
     }
 
@@ -43,7 +43,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
         $this->insertCsvColumn(['csv_type_id' => 3, 'field_name' => 'code', 'sort_no' => 1]);
         $this->insertCsvColumn(['csv_type_id' => 3, 'field_name' => 'name', 'sort_no' => 2]);
 
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
         $rows = $storage->listByType(3);
 
         $this->assertCount(3, $rows);
@@ -62,7 +62,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
             'enabled' => 0,
         ]);
 
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
         $rows = $storage->listByType(1);
 
         $this->assertCount(1, $rows);
@@ -79,7 +79,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
         $this->insertCsvColumn(['csv_type_id' => 3, 'field_name' => 'productCode']);
         $this->insertCsvColumn(['csv_type_id' => 1, 'field_name' => 'orderNo']);
 
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
         $product = $storage->listByType(3);
 
         $this->assertCount(1, $product);
@@ -89,7 +89,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
     public function testReplaceTypePersistsTheVector(): void
     {
         $this->seedCsvTypes();
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
 
         $storage->replaceType(3, [
             new CsvColumnConfigEntity(csvType: 3, columnName: 'productCode', enabled: true, sortNo: 1),
@@ -109,7 +109,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
     public function testReplaceTypeWithEmptyVectorClearsTheType(): void
     {
         $this->seedCsvTypes();
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
 
         $storage->replaceType(3, [
             new CsvColumnConfigEntity(csvType: 3, columnName: 'productCode', enabled: true, sortNo: 1),
@@ -125,7 +125,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
     public function testReplaceTypeRemovesOldRowsAndInsertsNewOnesAtomically(): void
     {
         $this->seedCsvTypes();
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
 
         // First write: 2 columns.
         $storage->replaceType(1, [
@@ -156,7 +156,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
     public function testReplaceTypeLeavesOtherCsvTypesUntouched(): void
     {
         $this->seedCsvTypes();
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
 
         // Populate two distinct csvTypes.
         $storage->replaceType(1, [
@@ -192,7 +192,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
         $this->insertCsvColumn(['csv_type_id' => 3, 'field_name' => 'legacyA', 'sort_no' => 1]);
         $this->insertCsvColumn(['csv_type_id' => 3, 'field_name' => 'legacyB', 'sort_no' => 2]);
 
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
         $this->assertCount(2, $storage->listByType(3));
 
         $storage->replaceType(3, [
@@ -209,7 +209,7 @@ final class SqlCsvColumnConfigStorageTest extends AbstractSqlTestCase
         // Replaying the same vector lands the same row set — the
         // doUpdateCsv idempotency contract.
         $this->seedCsvTypes();
-        $storage = new SqlCsvColumnConfigStorage($this->pdo);
+        $storage = $this->sql(SqlCsvColumnConfigStorage::class);
 
         $vector = [
             new CsvColumnConfigEntity(csvType: 2, columnName: 'email', enabled: true, sortNo: 1),

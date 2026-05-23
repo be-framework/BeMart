@@ -20,7 +20,7 @@ use function usort;
  * In-memory store for finalized Orders (orderStatus=NEW).
  *
  * Singleton-bound so OrderCommand writes and CheckoutCompletedTest reads
- * the same map. Phase 2 swaps for a Ray.MediaQuery UPDATE against
+ * the same map. Phase 2 swaps for a Ray.MediaQuery command against
  * dtb_order that flips the row from PROCESSING(8) to NEW(1).
  *
  * Order-item rows (dtb_order_item in EC-CUBE) live in a parallel map keyed

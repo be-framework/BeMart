@@ -1,0 +1,1 @@
+INSERT INTO dtb_payment (id, creator_id, payment_method, charge, rule_max, sort_no, fixed, payment_image, rule_min, method_class, visible, create_date, update_date, discriminator_type) VALUES (:id, NULL, :paymentMethod, :charge, :ruleMax, NULL, 1, NULL, :ruleMin, NULL, :visible, NOW(), NOW(), 'payment')

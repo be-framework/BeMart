@@ -17,7 +17,7 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
 {
     public function testEnsureUniquePassesForUnusedEmail(): void
     {
-        $checker = new SqlEmailUniquenessChecker($this->pdo);
+        $checker = $this->sql(SqlEmailUniquenessChecker::class);
 
         // No row with this email — must return without raising.
         $checker->ensureUnique('never-seen@example.com');
@@ -28,7 +28,7 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
     {
         $this->insertCustomer(['email' => 'taken@example.com']);
 
-        $checker = new SqlEmailUniquenessChecker($this->pdo);
+        $checker = $this->sql(SqlEmailUniquenessChecker::class);
 
         $this->expectException(EmailAlreadyRegisteredException::class);
         $checker->ensureUnique('taken@example.com');
@@ -46,7 +46,7 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
             'customer_status_id' => 1,
         ]);
 
-        $checker = new SqlEmailUniquenessChecker($this->pdo);
+        $checker = $this->sql(SqlEmailUniquenessChecker::class);
 
         $this->expectException(EmailAlreadyRegisteredException::class);
         $checker->ensureUnique('provisional@example.com');
@@ -58,7 +58,7 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
         // matching the Fake's array-key lookup.
         $this->insertCustomer(['email' => 'Case@example.com']);
 
-        $checker = new SqlEmailUniquenessChecker($this->pdo);
+        $checker = $this->sql(SqlEmailUniquenessChecker::class);
 
         // Different case → not a collision.
         $checker->ensureUnique('case@example.com');
