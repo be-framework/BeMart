@@ -33,7 +33,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
     public function testCreateInsertsRowWithProvidedId(): void
     {
         $generator = $this->sql(AdminIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
@@ -80,7 +80,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         // EC-CUBE seed value. We write NULL to satisfy the empty
         // mtb_authority FK constraint; hydrate coerces back to 0.
         $generator = $this->sql(AdminIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
 
         $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
@@ -241,11 +241,11 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $generator = $this->sql(AdminIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertAdmin(['login_id' => 'gen-1']);
         $secondId = $this->insertAdmin(['login_id' => 'gen-2']);
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

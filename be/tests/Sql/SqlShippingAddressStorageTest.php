@@ -317,7 +317,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
 
         $storage->updateTrackingNumber($order['orderNo'], 'TRK-12345');
 
-        $this->assertSame('TRK-12345', $storage->trackingNumberByOrderNo($order['orderNo'])->valueOrNull());
+        $this->assertSame('TRK-12345', $storage->trackingNumberByOrderNo($order['orderNo'])->trackingNumber);
         // The address fields are untouched by the tracking write.
         $address = $storage->getByOrderNo($order['orderNo']);
         $this->assertNotNull($address);
@@ -328,18 +328,18 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
     {
         $order = $this->insertOrder(['order_no' => 'SHIP-TRACK-INS']);
         $storage = $this->sql(ShippingAddressStorageInterface::class);
-        $this->assertNull($storage->trackingNumberByOrderNo($order['orderNo'])->valueOrNull());
+        $this->assertNull($storage->trackingNumberByOrderNo($order['orderNo'])->trackingNumber);
 
         $storage->updateTrackingNumber($order['orderNo'], 'TRK-99999');
 
-        $this->assertSame('TRK-99999', $storage->trackingNumberByOrderNo($order['orderNo'])->valueOrNull());
+        $this->assertSame('TRK-99999', $storage->trackingNumberByOrderNo($order['orderNo'])->trackingNumber);
     }
 
     public function testUpdateTrackingNumberIsSilentNoOpForUnknownOrder(): void
     {
         $storage = $this->sql(ShippingAddressStorageInterface::class);
         $storage->updateTrackingNumber('NO-SUCH-ORDER', 'TRK-1'); // no exception
-        $this->assertNull($storage->trackingNumberByOrderNo('NO-SUCH-ORDER')->valueOrNull());
+        $this->assertNull($storage->trackingNumberByOrderNo('NO-SUCH-ORDER')->trackingNumber);
     }
 
     public function testTrackingNumberByOrderNoIsNullWhenUnset(): void
@@ -349,6 +349,6 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
         // A shipping row exists but its tracking_number column is NULL.
         $storage->put($this->entity(['orderNo' => $order['orderNo']]));
 
-        $this->assertNull($storage->trackingNumberByOrderNo($order['orderNo'])->valueOrNull());
+        $this->assertNull($storage->trackingNumberByOrderNo($order['orderNo'])->trackingNumber);
     }
 }

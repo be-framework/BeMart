@@ -110,7 +110,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(PageIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new PageEntity(
             pageId: $newId,
@@ -142,7 +142,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         // System pages (edit_type >= 2) round-trip the same as user
         // pages — only PageDeleted enforces the guard, not the storage.
         $generator = $this->sql(PageIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(PageStorageInterface::class);
 
         $storage->put(new PageEntity(
@@ -299,11 +299,11 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(PageIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertPage();
         $secondId = $this->insertPage();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

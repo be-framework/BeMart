@@ -10,9 +10,9 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final class PluginEnablementResult implements PostQueryInterface
+final readonly class PluginEnablementResult implements PostQueryInterface
 {
-    public function __construct(private readonly bool $changed) {}
+    public function __construct(public bool $changed) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
@@ -27,10 +27,5 @@ final class PluginEnablementResult implements PostQueryInterface
         }
 
         return new static((int) ($row['changed'] ?? 0) === 1);
-    }
-
-    public function changed(): bool
-    {
-        return $this->changed;
     }
 }

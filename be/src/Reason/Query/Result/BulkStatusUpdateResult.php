@@ -8,9 +8,9 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final class BulkStatusUpdateResult implements PostQueryInterface
+final readonly class BulkStatusUpdateResult implements PostQueryInterface
 {
-    public function __construct(private readonly int $changedCount) {}
+    public function __construct(public int $changedCount) {}
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
@@ -19,10 +19,5 @@ final class BulkStatusUpdateResult implements PostQueryInterface
         $changedCount = is_array($row) ? (int) ($row['changed_count'] ?? 0) : $context->statement->rowCount();
 
         return new static($changedCount);
-    }
-
-    public function changedCount(): int
-    {
-        return $this->changedCount;
     }
 }

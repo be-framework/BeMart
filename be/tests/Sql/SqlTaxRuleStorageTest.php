@@ -88,7 +88,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new TaxRuleEntity(
             taxRuleId: $newId,
@@ -116,7 +116,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
     public function testPutSerialisesIsoDateToMysqlDatetime(): void
     {
         $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(TaxRuleStorageInterface::class);
 
         $storage->put(new TaxRuleEntity(
@@ -147,7 +147,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         // input is silently truncated by MariaDB at the column
         // boundary. Documented limitation of EC-CUBE 4.3's schema.
         $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(TaxRuleStorageInterface::class);
 
         $storage->put(new TaxRuleEntity(
@@ -235,11 +235,11 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertTaxRule();
         $secondId = $this->insertTaxRule();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

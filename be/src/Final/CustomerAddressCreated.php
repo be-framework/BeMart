@@ -64,7 +64,7 @@ final readonly class CustomerAddressCreated
             throw new UnauthenticatedException();
         }
 
-        $addressId = $idGenerator->generate()->value();
+        $addressId = $idGenerator->generate()->value;
 
         $entity = new AddressEntity(
             addressId: $addressId,

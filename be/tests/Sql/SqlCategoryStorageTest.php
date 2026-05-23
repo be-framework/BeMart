@@ -117,7 +117,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRootRowWithProvidedId(): void
     {
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new CategoryEntity(
             categoryId: $newId,
@@ -148,7 +148,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // write depth 1. The projection never reads it, so probe the
         // raw column directly.
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
@@ -174,7 +174,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(CategoryStorageInterface::class);
         $gen = $this->sql(CategoryIdGeneratorInterface::class);
 
-        $childId = $gen->generate()->value();
+        $childId = $gen->generate()->value;
         $storage->put(new CategoryEntity(
             categoryId: $childId,
             categoryName: 'Cookies',
@@ -182,7 +182,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 0,
         ));
 
-        $grandchildId = $gen->generate()->value();
+        $grandchildId = $gen->generate()->value;
         $storage->put(new CategoryEntity(
             categoryId: $grandchildId,
             categoryName: 'Chocolate',
@@ -223,7 +223,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // A non-numeric parentId can never reference a real int PK —
         // the storage stores it as NULL (root) rather than raising.
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
@@ -363,11 +363,11 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertCategory();
         $secondId = $this->insertCategory();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }
