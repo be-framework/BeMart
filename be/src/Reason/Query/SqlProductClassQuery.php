@@ -9,12 +9,12 @@ use Override;
 
 final class SqlProductClassQuery implements ProductClassQueryInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function item(string $productCode): ProductClassEntity|null
     {
-        $row = $this->db->row('product_class_get', ['productCode' => $productCode]);
+        $row = $this->db->product_class_get(productCode: $productCode);
         return $row === null ? null : new ProductClassEntity(
             productCode: (string) $row['product_code'],
             productName: (string) $row['product_name'],

@@ -11,33 +11,51 @@ final class SqlBaseInfoStorage implements BaseInfoStorageInterface
 {
     private const DEFAULT_SHOP_NAME = 'EC-CUBE SHOP';
 
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function get(): BaseInfoEntity
     {
-        $row = $this->db->row('tbase_info_get');
+        $row = $this->db->tbase_info_get();
         return $row === null ? $this->installerDefaults() : $this->hydrate($row);
     }
 
     #[Override]
     public function update(BaseInfoEntity $entity): void
     {
-        $values = [
-            'shopName' => $entity->shopName,
-            'shopKana' => $entity->shopKana,
-            'shopNameEng' => $entity->shopNameEng,
-            'companyName' => $entity->companyName,
-            'postalCode' => $entity->postalCode,
-            'pref' => $entity->pref,
-            'addr01' => $entity->addr01,
-            'addr02' => $entity->addr02,
-            'phoneNumber' => $entity->phoneNumber,
-            'businessHour' => $entity->businessHour,
-            'shopEmail01' => $entity->shopEmail01,
-            'shopMessage' => $entity->shopMessage,
-        ];
-        $this->db->exec($this->db->row('tbase_info_exists') === null ? 'tbase_info_insert' : 'tbase_info_update', $values);
+        if ($this->db->tbase_info_exists() === null) {
+            $this->db->tbase_info_insert(
+                shopName: $entity->shopName,
+                shopKana: $entity->shopKana,
+                shopNameEng: $entity->shopNameEng,
+                companyName: $entity->companyName,
+                postalCode: $entity->postalCode,
+                pref: $entity->pref,
+                addr01: $entity->addr01,
+                addr02: $entity->addr02,
+                phoneNumber: $entity->phoneNumber,
+                businessHour: $entity->businessHour,
+                shopEmail01: $entity->shopEmail01,
+                shopMessage: $entity->shopMessage,
+            );
+
+            return;
+        }
+
+        $this->db->tbase_info_update(
+            shopName: $entity->shopName,
+            shopKana: $entity->shopKana,
+            shopNameEng: $entity->shopNameEng,
+            companyName: $entity->companyName,
+            postalCode: $entity->postalCode,
+            pref: $entity->pref,
+            addr01: $entity->addr01,
+            addr02: $entity->addr02,
+            phoneNumber: $entity->phoneNumber,
+            businessHour: $entity->businessHour,
+            shopEmail01: $entity->shopEmail01,
+            shopMessage: $entity->shopMessage,
+        );
     }
 
     private function installerDefaults(): BaseInfoEntity

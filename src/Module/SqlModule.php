@@ -72,32 +72,6 @@ use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlAdminIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlBlockIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlCategoryIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlClassCategoryIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlClassNameIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlCustomerIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlDeliveryIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlPaymentMethodAdminIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlTaxRuleIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use Override;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
@@ -118,14 +92,12 @@ use Ray\Di\Scope;
  * the wiring that suite exercises:
  *
  *   - all 34 storage interfaces  → `Sql*` impl
- *   - the 13 `*IdGeneratorInterface`s → `Sql*IdGenerator` (the Fake
- *     generators emit hex / prefixed handles; the SQL impls require the
- *     numeric autoinc form that matches the real `dtb_*` int PKs)
+ *   - the 13 `*IdGeneratorInterface`s → direct Ray.MediaQuery BDR proxies
  *   - MediaQuery runtime is installed once and all query bodies are
  *     resolved from `sql/media-query`.
  *
- * `CustomerIdGeneratorInterface` is bound to `SqlCustomerIdGenerator`:
- * production customer ids must be the numeric autoinc form.
+ * `CustomerIdGeneratorInterface` is a direct MediaQuery BDR proxy;
+ * production customer ids are the numeric autoinc form from SQL.
  */
 final class SqlModule extends AbstractModule
 {
@@ -215,47 +187,6 @@ final class SqlModule extends AbstractModule
             ->to(SqlMailTemplateStorage::class)
             ->in(Scope::SINGLETON);
 
-        // Id generators — Fake -> Sql. The Fake generators emit hex /
-        // prefixed handles; production must use the autoinc-based ids
-        // that match the real dtb_* int PKs.
-        $this->bind(CustomerIdGeneratorInterface::class)
-            ->to(SqlCustomerIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(AddressIdGeneratorInterface::class)
-            ->to(SqlAddressIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(TagIdGeneratorInterface::class)
-            ->to(SqlTagIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(TaxRuleIdGeneratorInterface::class)
-            ->to(SqlTaxRuleIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(NewsIdGeneratorInterface::class)
-            ->to(SqlNewsIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(PageIdGeneratorInterface::class)
-            ->to(SqlPageIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(BlockIdGeneratorInterface::class)
-            ->to(SqlBlockIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(CategoryIdGeneratorInterface::class)
-            ->to(SqlCategoryIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(ClassNameIdGeneratorInterface::class)
-            ->to(SqlClassNameIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(ClassCategoryIdGeneratorInterface::class)
-            ->to(SqlClassCategoryIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(AdminIdGeneratorInterface::class)
-            ->to(SqlAdminIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(PaymentMethodAdminIdGeneratorInterface::class)
-            ->to(SqlPaymentMethodAdminIdGenerator::class)
-            ->in(Scope::SINGLETON);
-        $this->bind(DeliveryIdGeneratorInterface::class)
-            ->to(SqlDeliveryIdGenerator::class)
-            ->in(Scope::SINGLETON);
+        // Id generators are direct Ray.MediaQuery #[DbQuery] proxies.
     }
 }

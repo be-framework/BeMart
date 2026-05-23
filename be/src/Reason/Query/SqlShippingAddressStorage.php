@@ -12,7 +12,7 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
 {
     private const DISCRIMINATOR = 'shipping';
 
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function getByOrderNo(string $orderNo): ShippingAddressEntity|null
@@ -22,7 +22,7 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
             return null;
         }
 
-        $row = $this->db->row('shipping_get_by_order_id', ['orderId' => $orderId]);
+        $row = $this->db->shipping_get_by_order_id(orderId: $orderId);
 
         return $row === null ? null : $this->hydrate($orderNo, $row);
     }
@@ -37,15 +37,31 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
 
         $existingId = $this->firstShippingId($orderId);
         if ($existingId !== null) {
-            $this->db->exec('shipping_update', $this->addressValues($address) + ['id' => $existingId]);
+            $this->db->shipping_update(
+                id: $existingId,
+                prefId: $address->pref === 0 ? null : $address->pref,
+                name01: $address->name01,
+                name02: $address->name02,
+                postalCode: $address->postalCode,
+                addr01: $address->addr01,
+                addr02: $address->addr02,
+                phoneNumber: $address->phoneNumber,
+            );
 
             return;
         }
 
-        $this->db->exec('shipping_insert', $this->addressValues($address) + [
-            'orderId' => $orderId,
-            'discriminator' => self::DISCRIMINATOR,
-        ]);
+        $this->db->shipping_insert(
+            orderId: $orderId,
+            prefId: $address->pref === 0 ? null : $address->pref,
+            name01: $address->name01,
+            name02: $address->name02,
+            postalCode: $address->postalCode,
+            addr01: $address->addr01,
+            addr02: $address->addr02,
+            phoneNumber: $address->phoneNumber,
+            discriminator: self::DISCRIMINATOR,
+        );
     }
 
     /** @return list<ShippingAddressEntity> */
@@ -54,7 +70,7 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
     {
         return array_map(
             fn (array $row): ShippingAddressEntity => $this->hydrate((string) $row['order_no'], $row),
-            $this->db->rows('shipping_list_all'),
+            $this->db->shipping_list_all(),
         );
     }
 
@@ -68,21 +84,12 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
 
         $existingId = $this->firstShippingId($orderId);
         if ($existingId !== null) {
-            $this->db->exec('shipping_update_tracking', [
-                'id' => $existingId,
-                'trackingNumber' => $trackingNumber,
-            ]);
+            $this->db->shipping_update_tracking(id: $existingId, trackingNumber: $trackingNumber);
 
             return;
         }
 
-        $this->db->exec('shipping_insert_tracking', [
-            'orderId' => $orderId,
-            'name01' => '',
-            'name02' => '',
-            'trackingNumber' => $trackingNumber,
-            'discriminator' => self::DISCRIMINATOR,
-        ]);
+        $this->db->shipping_insert_tracking(orderId: $orderId, name01: '', name02: '', trackingNumber: $trackingNumber, discriminator: self::DISCRIMINATOR);
     }
 
     #[Override]
@@ -93,7 +100,7 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
             return new TrackingNumberResult(null);
         }
 
-        $row = $this->db->row('shipping_tracking_by_order_id', ['orderId' => $orderId]);
+        $row = $this->db->shipping_tracking_by_order_id(orderId: $orderId);
         if ($row === null || $row['tracking_number'] === null) {
             return new TrackingNumberResult(null);
         }
@@ -103,30 +110,16 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
 
     private function orderIdByOrderNo(string $orderNo): int|null
     {
-        $row = $this->db->row('shipping_order_id_by_order_no', ['orderNo' => $orderNo]);
+        $row = $this->db->shipping_order_id_by_order_no(orderNo: $orderNo);
 
         return $row === null ? null : (int) $row['id'];
     }
 
     private function firstShippingId(int $orderId): int|null
     {
-        $row = $this->db->row('shipping_first_id_by_order_id', ['orderId' => $orderId]);
+        $row = $this->db->shipping_first_id_by_order_id(orderId: $orderId);
 
         return $row === null ? null : (int) $row['id'];
-    }
-
-    /** @return array<string, mixed> */
-    private function addressValues(ShippingAddressEntity $address): array
-    {
-        return [
-            'prefId' => $address->pref === 0 ? null : $address->pref,
-            'name01' => $address->name01,
-            'name02' => $address->name02,
-            'postalCode' => $address->postalCode,
-            'addr01' => $address->addr01,
-            'addr02' => $address->addr02,
-            'phoneNumber' => $address->phoneNumber,
-        ];
     }
 
     /** @param array<string, mixed> $row */

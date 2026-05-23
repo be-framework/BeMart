@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlPaymentMethodAdminIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
 
 use function date;
 
@@ -126,8 +126,8 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(SqlPaymentMethodAdminIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new PaymentMethodAdminEntity(
             paymentId: $newId,
@@ -158,8 +158,8 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testPutPersistsNullRuleBoundsAndDefaults(): void
     {
-        $generator = $this->sql(SqlPaymentMethodAdminIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
 
         $storage->put(new PaymentMethodAdminEntity(
@@ -195,8 +195,8 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     {
         // A soft-hidden payment (visible=false) round-trips the same as
         // a visible one — only the Final layer interprets the flag.
-        $generator = $this->sql(SqlPaymentMethodAdminIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
 
         $storage->put(new PaymentMethodAdminEntity(
@@ -389,16 +389,16 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlPaymentMethodAdminIdGeneratorAllocatesIncrementingIds(): void
+    public function testPaymentMethodAdminIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlPaymentMethodAdminIdGenerator::class);
+        $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertPayment();
         $secondId = $this->insertPayment();
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

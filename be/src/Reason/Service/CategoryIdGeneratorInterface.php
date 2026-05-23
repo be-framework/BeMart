@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Service;
 
+use MyVendor\BeMart\Be\Reason\Query\Result\GeneratedId;
+use Ray\MediaQuery\Annotation\DbQuery;
+
 /**
  * Generates opaque category identifiers — mirrors
  * {@see AddressIdGeneratorInterface}. A dedicated interface lets tests
@@ -12,5 +15,6 @@ namespace MyVendor\BeMart\Be\Reason\Service;
  */
 interface CategoryIdGeneratorInterface
 {
-    public function generate(): string;
+    #[DbQuery('category_next_id')]
+    public function generate(): GeneratedId;
 }

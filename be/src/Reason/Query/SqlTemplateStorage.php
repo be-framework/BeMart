@@ -9,7 +9,7 @@ use Override;
 
 final class SqlTemplateStorage implements TemplateStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<TemplateEntity> */
     #[Override]
@@ -21,7 +21,7 @@ final class SqlTemplateStorage implements TemplateStorageInterface
                 (string) ($row['template_name'] ?? ''),
                 (int) $row['device_type_id'],
             ),
-            $this->db->rows('ttemplate_list'),
+            $this->db->ttemplate_list(),
         );
     }
 }

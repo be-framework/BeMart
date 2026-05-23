@@ -75,32 +75,6 @@ use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\SqlAddressIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlAdminIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlBlockIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlCategoryIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlClassCategoryIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlClassNameIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlCustomerIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlDeliveryIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlPageIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlPaymentMethodAdminIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlTagIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\SqlTaxRuleIdGenerator;
-use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use MyVendor\BeMart\Be\Tests\Sql\SqlFixturesTrait;
 use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\MediaQueryRuntimeModule;
@@ -147,7 +121,7 @@ use function dirname;
  *       so a read-after-write round-trips. secret_key is NOT NULL
  *       UNIQUE — register synthesises a unique token when the entity
  *       carries a null; activate keeps the key rather than nulling it)
- *   - CustomerIdGeneratorInterface → SqlCustomerIdGenerator (Phase 2b —
+ *   - CustomerIdGeneratorInterface → direct MediaQuery customer id proxy (Phase 2b —
  *       CustomerRegistering needs a numeric id pre-allocated so
  *       SqlCustomerCommand::register can persist with an explicit PK;
  *       the Fake generator emits 32-char hex that the SQL impl rejects
@@ -170,11 +144,11 @@ use function dirname;
  *   - CartQueryInterface           → SqlCartQuery
  *   - CartCommandInterface         → SqlCartCommand
  *   - AddressStorageInterface      → SqlAddressStorage  (Phase 2b)
- *   - AddressIdGeneratorInterface  → SqlAddressIdGenerator (Phase 2b —
+ *   - AddressIdGeneratorInterface  → direct MediaQuery address id proxy (Phase 2b —
  *       CustomerAddressCreated needs a numeric id pre-allocated so
  *       SqlAddressStorage can persist with that explicit PK)
  *   - TagStorageInterface          → SqlTagStorage  (Phase 2b)
- *   - TagIdGeneratorInterface      → SqlTagIdGenerator (Phase 2b —
+ *   - TagIdGeneratorInterface      → direct MediaQuery tag id proxy (Phase 2b —
  *       TagCreated needs a numeric id pre-allocated so SqlTagStorage
  *       can persist with that explicit PK; the Fake generator emits
  *       a `tg-` prefix that the SQL impl rejects as non-numeric)
@@ -184,31 +158,31 @@ use function dirname;
  *       identical to the Fake-backed baseline with no extra fixture
  *       setup required)
  *   - TaxRuleStorageInterface      → SqlTaxRuleStorage  (Phase 2b)
- *   - TaxRuleIdGeneratorInterface  → SqlTaxRuleIdGenerator (Phase 2b —
+ *   - TaxRuleIdGeneratorInterface  → direct MediaQuery tax-rule id proxy (Phase 2b —
  *       TaxRuleCreated needs a numeric id pre-allocated so
  *       SqlTaxRuleStorage can persist with that explicit PK; the
  *       Fake generator emits hex that the SQL impl rejects as
  *       non-numeric, same shape as the Tag generator pairing)
  *   - NewsStorageInterface         → SqlNewsStorage  (Phase 2b)
- *   - NewsIdGeneratorInterface     → SqlNewsIdGenerator (Phase 2b —
+ *   - NewsIdGeneratorInterface     → direct MediaQuery news id proxy (Phase 2b —
  *       NewsCreated needs a numeric id pre-allocated so SqlNewsStorage
  *       can persist with that explicit PK; the Fake generator emits an
  *       `nw-` prefix that the SQL impl rejects as non-numeric, same
  *       shape as the Tag / TaxRule generator pairings)
  *   - PageStorageInterface         → SqlPageStorage  (Phase 2b)
- *   - PageIdGeneratorInterface     → SqlPageIdGenerator (Phase 2b —
+ *   - PageIdGeneratorInterface     → direct MediaQuery page id proxy (Phase 2b —
  *       PageCreated needs a numeric id pre-allocated so SqlPageStorage
  *       can persist with that explicit PK; the Fake generator emits a
  *       `pg-` prefix that the SQL impl rejects as non-numeric, same
  *       shape as the Tag / News / TaxRule generator pairings)
  *   - BlockStorageInterface        → SqlBlockStorage  (Phase 2b)
- *   - BlockIdGeneratorInterface    → SqlBlockIdGenerator (Phase 2b —
+ *   - BlockIdGeneratorInterface    → direct MediaQuery block id proxy (Phase 2b —
  *       BlockCreated needs a numeric id pre-allocated so SqlBlockStorage
  *       can persist with that explicit PK; the Fake generator emits a
  *       `bk-` prefix that the SQL impl rejects as non-numeric, same
  *       shape as the Page / Tag / News / TaxRule generator pairings)
  *   - CategoryStorageInterface     → SqlCategoryStorage  (Phase 2b)
- *   - CategoryIdGeneratorInterface → SqlCategoryIdGenerator (Phase 2b —
+ *   - CategoryIdGeneratorInterface → direct MediaQuery category id proxy (Phase 2b —
  *       CategoryCreated needs a numeric id pre-allocated so
  *       SqlCategoryStorage can persist with that explicit PK; the Fake
  *       generator emits 32-char hex that the SQL impl rejects as
@@ -218,7 +192,7 @@ use function dirname;
  *       product-variation AXIS, dtb_class_name; remove pre-clears child
  *       dtb_class_category rows to avoid FK 1451, same shape as the
  *       Category → dtb_product_category cascade)
- *   - ClassNameIdGeneratorInterface → SqlClassNameIdGenerator (Phase 2b —
+ *   - ClassNameIdGeneratorInterface → direct MediaQuery class-name id proxy (Phase 2b —
  *       the ClassName-create Final needs a numeric id pre-allocated so
  *       SqlClassNameStorage can persist with that explicit PK; the Fake
  *       generator emits 32-char hex that the SQL impl rejects as
@@ -230,7 +204,7 @@ use function dirname;
  *       SqlClassNameStorage it does NOT pre-clear children: deleting a
  *       single variant value must not cascade-delete the dtb_product_class
  *       rows that use it)
- *   - ClassCategoryIdGeneratorInterface → SqlClassCategoryIdGenerator
+ *   - ClassCategoryIdGeneratorInterface → direct MediaQuery class-category id proxy
  *       (Phase 2b — the ClassCategory-create Final needs a numeric id
  *       pre-allocated so SqlClassCategoryStorage can persist with that
  *       explicit PK; the Fake generator emits 32-char hex that the SQL
@@ -264,7 +238,7 @@ use function dirname;
  *       dtb_payment. list / getById / put / remove; remove pre-clears
  *       child dtb_payment_option link rows to avoid FK 1451, same shape
  *       as the Block → dtb_block_position cascade)
- *   - PaymentMethodAdminIdGeneratorInterface → SqlPaymentMethodAdminIdGenerator
+ *   - PaymentMethodAdminIdGeneratorInterface → direct MediaQuery payment id proxy
  *       (Phase 2b — PaymentMethodAdminCreated needs a numeric id
  *       pre-allocated so SqlPaymentMethodAdminStorage can persist with
  *       that explicit PK; the Fake generator emits 32-char hex that the
@@ -373,7 +347,7 @@ use function dirname;
  *       DELETE: the BeMart slice never INSERTs child dtb_delivery_fee /
  *       dtb_delivery_time / dtb_payment_option rows so there is no
  *       cascade to pre-clear)
- *   - DeliveryIdGeneratorInterface → SqlDeliveryIdGenerator (Phase 2b —
+ *   - DeliveryIdGeneratorInterface → direct MediaQuery delivery id proxy (Phase 2b —
  *       DeliveryCreated needs a numeric id pre-allocated so
  *       SqlDeliveryStorage can persist with that explicit PK; the Fake
  *       generator emits 32-char hex that the SQL impl rejects as
@@ -396,7 +370,7 @@ use function dirname;
  *       full CRUD against dtb_member; soft-delete flips work_id to 0
  *       rather than DELETE so login_history FK survives and the admin
  *       grid can re-activate)
- *   - AdminIdGeneratorInterface    → SqlAdminIdGenerator (Admin auth
+ *   - AdminIdGeneratorInterface    → direct MediaQuery admin id proxy (Admin auth
  *       Phase B — MemberCreating needs a numeric id pre-allocated so
  *       SqlAdminCommand::create can persist with an explicit PK; the
  *       Fake generator emits a 32-char `ad…` hex that the SQL impl
@@ -519,9 +493,6 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                 $this->bind(CustomerCommandInterface::class)
                     ->to(SqlCustomerCommand::class)
                     ->in(Scope::SINGLETON);
-                $this->bind(CustomerIdGeneratorInterface::class)
-                    ->to(SqlCustomerIdGenerator::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(OrderCommandInterface::class)
                     ->to(SqlOrderCommand::class)
                     ->in(Scope::SINGLETON);
@@ -534,14 +505,8 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                 $this->bind(AddressStorageInterface::class)
                     ->to(SqlAddressStorage::class)
                     ->in(Scope::SINGLETON);
-                $this->bind(AddressIdGeneratorInterface::class)
-                    ->to(SqlAddressIdGenerator::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(TagStorageInterface::class)
                     ->to(SqlTagStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(TagIdGeneratorInterface::class)
-                    ->to(SqlTagIdGenerator::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(BaseInfoStorageInterface::class)
                     ->to(SqlBaseInfoStorage::class)
@@ -549,50 +514,26 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                 $this->bind(TaxRuleStorageInterface::class)
                     ->to(SqlTaxRuleStorage::class)
                     ->in(Scope::SINGLETON);
-                $this->bind(TaxRuleIdGeneratorInterface::class)
-                    ->to(SqlTaxRuleIdGenerator::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(NewsStorageInterface::class)
                     ->to(SqlNewsStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(NewsIdGeneratorInterface::class)
-                    ->to(SqlNewsIdGenerator::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(PageStorageInterface::class)
                     ->to(SqlPageStorage::class)
                     ->in(Scope::SINGLETON);
-                $this->bind(PageIdGeneratorInterface::class)
-                    ->to(SqlPageIdGenerator::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(BlockStorageInterface::class)
                     ->to(SqlBlockStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(BlockIdGeneratorInterface::class)
-                    ->to(SqlBlockIdGenerator::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(CategoryStorageInterface::class)
                     ->to(SqlCategoryStorage::class)
                     ->in(Scope::SINGLETON);
-                $this->bind(CategoryIdGeneratorInterface::class)
-                    ->to(SqlCategoryIdGenerator::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(ClassNameStorageInterface::class)
                     ->to(SqlClassNameStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(ClassNameIdGeneratorInterface::class)
-                    ->to(SqlClassNameIdGenerator::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(ClassCategoryStorageInterface::class)
                     ->to(SqlClassCategoryStorage::class)
                     ->in(Scope::SINGLETON);
-                $this->bind(ClassCategoryIdGeneratorInterface::class)
-                    ->to(SqlClassCategoryIdGenerator::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(AdminCommandInterface::class)
                     ->to(SqlAdminCommand::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(AdminIdGeneratorInterface::class)
-                    ->to(SqlAdminIdGenerator::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(LayoutStorageInterface::class)
                     ->to(SqlLayoutStorage::class)
@@ -602,9 +543,6 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(PaymentMethodAdminStorageInterface::class)
                     ->to(SqlPaymentMethodAdminStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(PaymentMethodAdminIdGeneratorInterface::class)
-                    ->to(SqlPaymentMethodAdminIdGenerator::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(TradeLawStorageInterface::class)
                     ->to(SqlTradeLawStorage::class)
@@ -626,9 +564,6 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(DeliveryStorageInterface::class)
                     ->to(SqlDeliveryStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(DeliveryIdGeneratorInterface::class)
-                    ->to(SqlDeliveryIdGenerator::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(MailTemplateStorageInterface::class)
                     ->to(SqlMailTemplateStorage::class)

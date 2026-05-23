@@ -23,7 +23,7 @@ use function is_string;
  * AUTHN / AUTHZ / CSRF branches. The only differences are:
  *
  *  - the storage binding (BlockStorageInterface → SqlBlockStorage) and
- *    id generator (BlockIdGeneratorInterface → SqlBlockIdGenerator) are
+ *    id generator (BlockIdGeneratorInterface → direct MediaQuery block id proxy) are
  *    layered via the base class's sqlOverrideModule; persistence is
  *    against the real dtb_block table.
  *
@@ -91,7 +91,7 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
      * Seed a single user-editable block through the resource layer and
      * return the server-generated blockId — mirrors the Fake-backed
      * sibling's helper exactly. The POST drives the full Becoming
-     * chain (Input → Final → SqlBlockIdGenerator → SqlBlockStorage) so
+     * chain (Input → Final → direct MediaQuery block id proxy → SqlBlockStorage) so
      * the row appears in the same transactional state every
      * subsequent assertion will see.
      */

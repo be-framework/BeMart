@@ -10,7 +10,6 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\SqlCustomerIdGenerator;
 use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\ProdModule;
 use PHPUnit\Framework\TestCase;
@@ -78,13 +77,13 @@ final class ProdModuleSqlWiringTest extends TestCase
         $this->assertInstanceOf(CustomerQueryInterface::class, $customerQuery);
 
         // IdGenerators are also part of the cutover — production customer
-        // ids must be the numeric autoinc form (SqlCustomerIdGenerator),
-        // not the Fake hex.
+        // ids are direct MediaQuery BDR proxies, not Fake hex generators.
         $customerIdGenerator = $injector->getInstance(CustomerIdGeneratorInterface::class);
-        $this->assertInstanceOf(
-            SqlCustomerIdGenerator::class,
-            $customerIdGenerator,
-            'ProdModule must override CustomerIdGeneratorInterface Fake -> SqlCustomerIdGenerator.',
+        $this->assertInstanceOf(CustomerIdGeneratorInterface::class, $customerIdGenerator);
+        $this->assertStringContainsString(
+            CustomerIdGeneratorInterface::class,
+            $customerIdGenerator::class,
+            'ProdModule must override CustomerIdGeneratorInterface Fake -> MediaQuery proxy.',
         );
 
         // MediaQuery runtime builds a real connection from DATABASE_URL.
