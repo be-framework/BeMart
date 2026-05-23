@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\TrackingNumberResult;
 use Override;
 
 final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
@@ -85,19 +86,19 @@ final class SqlShippingAddressStorage implements ShippingAddressStorageInterface
     }
 
     #[Override]
-    public function trackingNumberByOrderNo(string $orderNo): string|null
+    public function trackingNumberByOrderNo(string $orderNo): TrackingNumberResult
     {
         $orderId = $this->orderIdByOrderNo($orderNo);
         if ($orderId === null) {
-            return null;
+            return new TrackingNumberResult(null);
         }
 
         $row = $this->db->row('shipping_tracking_by_order_id', ['orderId' => $orderId]);
         if ($row === null || $row['tracking_number'] === null) {
-            return null;
+            return new TrackingNumberResult(null);
         }
 
-        return (string) $row['tracking_number'];
+        return new TrackingNumberResult((string) $row['tracking_number']);
     }
 
     private function orderIdByOrderNo(string $orderNo): int|null

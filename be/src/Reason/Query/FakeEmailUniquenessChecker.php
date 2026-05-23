@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Query;
 
-use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
+use MyVendor\BeMart\Be\Reason\Query\Result\EmailUniqueness;
+use Override;
 
 final class FakeEmailUniquenessChecker implements EmailUniquenessCheckerInterface
 {
@@ -13,10 +14,9 @@ final class FakeEmailUniquenessChecker implements EmailUniquenessCheckerInterfac
     ) {
     }
 
-    public function ensureUnique(string $email): void
+    #[Override]
+    public function check(string $email): EmailUniqueness
     {
-        if ($this->storage->existsByEmail($email)) {
-            throw new EmailAlreadyRegisteredException();
-        }
+        return new EmailUniqueness(! $this->storage->existsByEmail($email));
     }
 }

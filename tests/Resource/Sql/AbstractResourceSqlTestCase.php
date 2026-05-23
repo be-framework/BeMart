@@ -516,29 +516,17 @@ abstract class AbstractResourceSqlTestCase extends TestCase
 
                 // Phase 2a Sql impls. Linked bindings; Ray.Di will
                 // construct each Sql class on first request.
-                $this->bind(CustomerQueryInterface::class)
-                    ->to(SqlCustomerQuery::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(CustomerCommandInterface::class)
                     ->to(SqlCustomerCommand::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(CustomerIdGeneratorInterface::class)
                     ->to(SqlCustomerIdGenerator::class)
                     ->in(Scope::SINGLETON);
-                $this->bind(EmailUniquenessCheckerInterface::class)
-                    ->to(SqlEmailUniquenessChecker::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(OrderQueryInterface::class)
-                    ->to(SqlOrderQuery::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(OrderCommandInterface::class)
                     ->to(SqlOrderCommand::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(FavoriteStorageInterface::class)
                     ->to(SqlFavoriteStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(CartQueryInterface::class)
-                    ->to(SqlCartQuery::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(CartCommandInterface::class)
                     ->to(SqlCartCommand::class)
@@ -600,9 +588,6 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                 $this->bind(ClassCategoryIdGeneratorInterface::class)
                     ->to(SqlClassCategoryIdGenerator::class)
                     ->in(Scope::SINGLETON);
-                $this->bind(AdminQueryInterface::class)
-                    ->to(SqlAdminQuery::class)
-                    ->in(Scope::SINGLETON);
                 $this->bind(AdminCommandInterface::class)
                     ->to(SqlAdminCommand::class)
                     ->in(Scope::SINGLETON);
@@ -611,9 +596,6 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(LayoutStorageInterface::class)
                     ->to(SqlLayoutStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(TemplateStorageInterface::class)
-                    ->to(SqlTemplateStorage::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(LoginHistoryStorageInterface::class)
                     ->to(SqlLoginHistoryStorage::class)
@@ -629,12 +611,6 @@ abstract class AbstractResourceSqlTestCase extends TestCase
                     ->in(Scope::SINGLETON);
                 $this->bind(ShippingAddressStorageInterface::class)
                     ->to(SqlShippingAddressStorage::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(ProductClassQueryInterface::class)
-                    ->to(SqlProductClassQuery::class)
-                    ->in(Scope::SINGLETON);
-                $this->bind(ProductQueryInterface::class)
-                    ->to(SqlProductQuery::class)
                     ->in(Scope::SINGLETON);
                 $this->bind(ProductCommandInterface::class)
                     ->to(SqlProductCommand::class)

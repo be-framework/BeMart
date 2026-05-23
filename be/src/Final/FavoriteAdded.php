@@ -49,7 +49,7 @@ final readonly class FavoriteAdded
             throw new ProductNotFoundException();
         }
 
-        $this->alreadyExisted = $favorites->has($sessionCustomerId, $productCode);
+        $this->alreadyExisted = $favorites->has($sessionCustomerId, $productCode)->exists();
         if (! $this->alreadyExisted) {
             $favorites->add(new FavoriteEntity(
                 customerId: $sessionCustomerId,

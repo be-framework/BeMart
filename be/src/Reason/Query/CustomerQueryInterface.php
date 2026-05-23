@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
+use MyVendor\BeMart\Be\Reason\Query\Factory\CustomerFactory;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Read-side Customer query — Pilot 6 (doLogin).
@@ -17,6 +19,7 @@ use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 interface CustomerQueryInterface
 {
     /** @return CustomerEntity|null  null when no customer has this email. */
+    #[DbQuery('customer_find_by_email', factory: CustomerFactory::class)]
     public function findByEmail(string $email): CustomerEntity|null;
 
     /**
@@ -24,12 +27,14 @@ interface CustomerQueryInterface
      * (doActivateCustomer). Returns null on miss; callers MUST NOT
      * distinguish "wrong key" from "expired" at this layer.
      */
+    #[DbQuery('customer_find_by_secret_key', factory: CustomerFactory::class)]
     public function findBySecretKey(string $secretKey): CustomerEntity|null;
 
     /**
      * Look up a customer by their opaque id — Pilot 8 (doUpdateCustomer
      * and other "the logged-in customer is editing themselves" flows).
      */
+    #[DbQuery('customer_find_by_id', factory: CustomerFactory::class)]
     public function findById(string $customerId): CustomerEntity|null;
 
     /**
@@ -47,5 +52,6 @@ interface CustomerQueryInterface
      *
      * @return list<CustomerEntity>
      */
+    #[DbQuery('customer_search', factory: CustomerFactory::class)]
     public function search(?string $nameKeyword, ?string $emailKeyword, int $limit = 50): array;
 }

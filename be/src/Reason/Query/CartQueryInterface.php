@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
+use MyVendor\BeMart\Be\Reason\Query\Factory\CartFactory;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 interface CartQueryInterface
 {
+    #[DbQuery('cart_by_key', factory: CartFactory::class)]
     public function byCartKey(string $cartKey): CartEntity|null;
 
     /**
@@ -17,5 +20,6 @@ interface CartQueryInterface
      *
      * @return list<CartEntity>
      */
+    #[DbQuery('cart_by_session_prefix', factory: CartFactory::class)]
     public function bySessionPrefix(string $sessionPrefix): array;
 }

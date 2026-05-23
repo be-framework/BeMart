@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\FavoritePresence;
 use Override;
 
 use function ctype_digit;
@@ -24,12 +25,13 @@ final class SqlFavoriteStorage implements FavoriteStorageInterface
     }
 
     #[Override]
-    public function has(string $customerId, string $productCode): bool
+    public function has(string $customerId, string $productCode): FavoritePresence
     {
         if (! ctype_digit($customerId)) {
-            return false;
+            return new FavoritePresence(false);
         }
-        return $this->db->row('favorite_has', ['customerId' => (int) $customerId, 'productCode' => $productCode]) !== null;
+
+        return new FavoritePresence($this->db->row('favorite_has', ['customerId' => (int) $customerId, 'productCode' => $productCode]) !== null);
     }
 
     /** @return list<FavoriteEntity> */

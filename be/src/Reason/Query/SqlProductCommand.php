@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\BulkStatusUpdateResult;
 use Override;
 use RuntimeException;
 
@@ -71,7 +72,7 @@ final class SqlProductCommand implements ProductCommandInterface
 
     /** @param list<string> $productCodes */
     #[Override]
-    public function bulkUpdateStatus(array $productCodes, int $newStatus): int
+    public function bulkUpdateStatus(array $productCodes, int $newStatus): BulkStatusUpdateResult
     {
         $changed = 0;
         foreach ($productCodes as $code) {
@@ -81,7 +82,7 @@ final class SqlProductCommand implements ProductCommandInterface
             }
             $changed += $this->db->affected('product_status_update', ['id' => $productId, 'setStatus' => $newStatus, 'whereStatus' => $newStatus]);
         }
-        return $changed;
+        return new BulkStatusUpdateResult($changed);
     }
 
     private function findProductId(string $productCode): int|null

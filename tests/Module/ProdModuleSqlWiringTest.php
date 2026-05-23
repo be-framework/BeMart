@@ -54,7 +54,7 @@ final class ProdModuleSqlWiringTest extends TestCase
         }
     }
 
-    public function testProdContextResolvesSqlCustomerQueryNotFake(): void
+    public function testProdContextResolvesMediaQueryCustomerProxyNotFake(): void
     {
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
@@ -67,13 +67,15 @@ final class ProdModuleSqlWiringTest extends TestCase
         $this->assertInstanceOf(ResourceInterface::class, $resource);
 
         // The cutover assertion: a storage interface that AppModule binds
-        // to a Fake must resolve to its Sql* impl under prod.
+        // to a Fake must resolve to the MediaQuery proxy under prod, not
+        // the old Sql* concrete locator implementation.
         $customerQuery = $injector->getInstance(CustomerQueryInterface::class);
-        $this->assertInstanceOf(
+        $this->assertNotInstanceOf(
             SqlCustomerQuery::class,
             $customerQuery,
-            'ProdModule must override CustomerQueryInterface Fake -> SqlCustomerQuery.',
+            'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy, not SqlCustomerQuery.',
         );
+        $this->assertInstanceOf(CustomerQueryInterface::class, $customerQuery);
 
         // IdGenerators are also part of the cutover — production customer
         // ids must be the numeric autoinc form (SqlCustomerIdGenerator),
