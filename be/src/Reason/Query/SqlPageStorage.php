@@ -11,13 +11,13 @@ use function ctype_digit;
 
 final class SqlPageStorage implements PageStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<PageEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tpage_list'));
+        return array_map($this->hydrate(...), $this->db->tpage_list());
     }
 
     #[Override]
@@ -26,7 +26,7 @@ final class SqlPageStorage implements PageStorageInterface
         if (! ctype_digit($pageId)) {
             return null;
         }
-        $row = $this->db->row('tpage_get', ['id' => (int) $pageId]);
+        $row = $this->db->tpage_get(id: (int) $pageId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -37,14 +37,13 @@ final class SqlPageStorage implements PageStorageInterface
             return;
         }
         $id = (int) $page->pageId;
-        $values = [
-            'id' => $id,
-            'pageName' => $page->pageName,
-            'url' => $page->pageUrl,
-            'fileName' => $page->pageFileName,
-            'editType' => $page->pageEditType,
-        ];
-        $this->db->exec($this->db->row('tpage_exists', ['id' => $id]) === null ? 'tpage_insert' : 'tpage_update', $values);
+        if ($this->db->tpage_exists(id: $id) === null) {
+            $this->db->tpage_insert(id: $id, pageName: $page->pageName, url: $page->pageUrl, fileName: $page->pageFileName, editType: $page->pageEditType);
+
+            return;
+        }
+
+        $this->db->tpage_update(id: $id, pageName: $page->pageName, url: $page->pageUrl, fileName: $page->pageFileName, editType: $page->pageEditType);
     }
 
     #[Override]
@@ -54,8 +53,8 @@ final class SqlPageStorage implements PageStorageInterface
             return;
         }
         $id = (int) $pageId;
-        $this->db->exec('tpage_layout_delete', ['id' => $id]);
-        $this->db->exec('tpage_delete', ['id' => $id]);
+        $this->db->tpage_layout_delete(id: $id);
+        $this->db->tpage_delete(id: $id);
     }
 
     /** @param array<string, mixed> $row */

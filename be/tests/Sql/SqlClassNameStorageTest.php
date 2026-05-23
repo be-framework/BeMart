@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlClassNameStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlClassNameIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
 
 /**
  * Storage-layer coverage for {@see SqlClassNameStorage} (Phase 2b).
@@ -79,8 +79,8 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(SqlClassNameIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(ClassNameIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new ClassNameEntity(
             classNameId: $newId,
@@ -106,8 +106,8 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // sort_no is NOT NULL with no DEFAULT — a put INSERT must write
         // a value. The projection never reads it, so probe the raw
         // column directly. First INSERT on an empty table → 1.
-        $generator = $this->sql(SqlClassNameIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(ClassNameIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlClassNameStorage::class);
 
         $storage->put(new ClassNameEntity(classNameId: $newId, name: 'Color'));
@@ -125,8 +125,8 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // append to the end in a stable order.
         $this->insertClassName(['name' => 'Existing', 'sort_no' => 7]);
 
-        $generator = $this->sql(SqlClassNameIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(ClassNameIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlClassNameStorage::class);
         $storage->put(new ClassNameEntity(classNameId: $newId, name: 'Color'));
 
@@ -279,16 +279,16 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlClassNameIdGeneratorAllocatesIncrementingIds(): void
+    public function testClassNameIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlClassNameIdGenerator::class);
+        $generator = $this->sql(ClassNameIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertClassName();
         $secondId = $this->insertClassName();
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

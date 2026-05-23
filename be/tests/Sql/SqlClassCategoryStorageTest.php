@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlClassCategoryStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlClassCategoryIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
 
 /**
  * Storage-layer coverage for {@see SqlClassCategoryStorage} (Phase 2b).
@@ -135,8 +135,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         $axis = $this->insertClassName(['name' => 'Color']);
 
-        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -166,8 +166,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // row scoped to that axis.
         $axis = $this->insertClassName(['name' => 'Size']);
 
-        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -186,8 +186,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // a value. The projection never reads it, so probe the raw
         // column directly. First INSERT on an empty table → 1.
         $axis = $this->insertClassName(['name' => 'Color']);
-        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlClassCategoryStorage::class);
 
         $storage->put(new ClassCategoryEntity(
@@ -207,8 +207,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         // The admin slice has no show/hide UI — visible is always 1.
         $axis = $this->insertClassName(['name' => 'Color']);
-        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlClassCategoryStorage::class);
 
         $storage->put(new ClassCategoryEntity(
@@ -235,8 +235,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
             'sort_no' => 7,
         ]);
 
-        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlClassCategoryStorage::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -423,17 +423,17 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlClassCategoryIdGeneratorAllocatesIncrementingIds(): void
+    public function testClassCategoryIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlClassCategoryIdGenerator::class);
+        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $axis = $this->insertClassName(['name' => 'Color']);
         $firstId = $this->insertClassCategory(['class_name_id' => $axis]);
         $secondId = $this->insertClassCategory(['class_name_id' => $axis]);
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

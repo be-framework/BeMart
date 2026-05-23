@@ -11,13 +11,13 @@ use function ctype_digit;
 
 final class SqlPaymentMethodAdminStorage implements PaymentMethodAdminStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<PaymentMethodAdminEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tpayment_list'));
+        return array_map($this->hydrate(...), $this->db->tpayment_list());
     }
 
     #[Override]
@@ -26,7 +26,7 @@ final class SqlPaymentMethodAdminStorage implements PaymentMethodAdminStorageInt
         if (! ctype_digit($paymentId)) {
             return null;
         }
-        $row = $this->db->row('tpayment_get', ['id' => (int) $paymentId]);
+        $row = $this->db->tpayment_get(id: (int) $paymentId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -37,15 +37,27 @@ final class SqlPaymentMethodAdminStorage implements PaymentMethodAdminStorageInt
             return;
         }
         $id = (int) $payment->paymentId;
-        $values = [
-            'id' => $id,
-            'paymentMethod' => $payment->paymentMethodName,
-            'charge' => $payment->charge,
-            'ruleMin' => $payment->ruleMin,
-            'ruleMax' => $payment->ruleMax,
-            'visible' => (int) $payment->visible,
-        ];
-        $this->db->exec($this->db->row('tpayment_exists', ['id' => $id]) === null ? 'tpayment_insert' : 'tpayment_update', $values);
+        if ($this->db->tpayment_exists(id: $id) === null) {
+            $this->db->tpayment_insert(
+                id: $id,
+                paymentMethod: $payment->paymentMethodName,
+                charge: $payment->charge,
+                ruleMin: $payment->ruleMin,
+                ruleMax: $payment->ruleMax,
+                visible: (int) $payment->visible,
+            );
+
+            return;
+        }
+
+        $this->db->tpayment_update(
+            id: $id,
+            paymentMethod: $payment->paymentMethodName,
+            charge: $payment->charge,
+            ruleMin: $payment->ruleMin,
+            ruleMax: $payment->ruleMax,
+            visible: (int) $payment->visible,
+        );
     }
 
     #[Override]
@@ -55,15 +67,15 @@ final class SqlPaymentMethodAdminStorage implements PaymentMethodAdminStorageInt
             return;
         }
         $id = (int) $paymentId;
-        $this->db->exec('tpayment_option_delete', ['id' => $id]);
-        $this->db->exec('tpayment_delete', ['id' => $id]);
+        $this->db->tpayment_option_delete(id: $id);
+        $this->db->tpayment_delete(id: $id);
     }
 
     #[Override]
     public function reorder(string $paymentId, int $sortNo): void
     {
         if (ctype_digit($paymentId)) {
-            $this->db->exec('tpayment_reorder', ['id' => (int) $paymentId, 'sortNo' => $sortNo]);
+            $this->db->tpayment_reorder(id: (int) $paymentId, sortNo: $sortNo);
         }
     }
 
@@ -71,7 +83,7 @@ final class SqlPaymentMethodAdminStorage implements PaymentMethodAdminStorageInt
     public function setVisible(string $paymentId, bool $visible): void
     {
         if (ctype_digit($paymentId)) {
-            $this->db->exec('tpayment_visible', ['id' => (int) $paymentId, 'visible' => (int) $visible]);
+            $this->db->tpayment_visible(id: (int) $paymentId, visible: (int) $visible);
         }
     }
 

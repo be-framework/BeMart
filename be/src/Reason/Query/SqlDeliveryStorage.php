@@ -11,13 +11,13 @@ use function ctype_digit;
 
 final class SqlDeliveryStorage implements DeliveryStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<DeliveryEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tdelivery_list'));
+        return array_map($this->hydrate(...), $this->db->tdelivery_list());
     }
 
     #[Override]
@@ -26,7 +26,7 @@ final class SqlDeliveryStorage implements DeliveryStorageInterface
         if (! ctype_digit($deliveryId)) {
             return null;
         }
-        $row = $this->db->row('tdelivery_get', ['id' => (int) $deliveryId]);
+        $row = $this->db->tdelivery_get(id: (int) $deliveryId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -37,15 +37,20 @@ final class SqlDeliveryStorage implements DeliveryStorageInterface
             return;
         }
         $id = (int) $delivery->deliveryId;
-        $values = ['id' => $id, 'name' => $delivery->deliveryName, 'visible' => (int) $delivery->visible];
-        $this->db->exec($this->db->row('tdelivery_exists', ['id' => $id]) === null ? 'tdelivery_insert' : 'tdelivery_update', $values);
+        if ($this->db->tdelivery_exists(id: $id) === null) {
+            $this->db->tdelivery_insert(id: $id, name: $delivery->deliveryName, visible: (int) $delivery->visible);
+
+            return;
+        }
+
+        $this->db->tdelivery_update(id: $id, name: $delivery->deliveryName, visible: (int) $delivery->visible);
     }
 
     #[Override]
     public function remove(string $deliveryId): void
     {
         if (ctype_digit($deliveryId)) {
-            $this->db->exec('tdelivery_delete', ['id' => (int) $deliveryId]);
+            $this->db->tdelivery_delete(id: (int) $deliveryId);
         }
     }
 
@@ -53,7 +58,7 @@ final class SqlDeliveryStorage implements DeliveryStorageInterface
     public function reorder(string $deliveryId, int $sortNo): void
     {
         if (ctype_digit($deliveryId)) {
-            $this->db->exec('tdelivery_reorder', ['id' => (int) $deliveryId, 'sortNo' => $sortNo]);
+            $this->db->tdelivery_reorder(id: (int) $deliveryId, sortNo: $sortNo);
         }
     }
 
@@ -61,7 +66,7 @@ final class SqlDeliveryStorage implements DeliveryStorageInterface
     public function setVisible(string $deliveryId, bool $visible): void
     {
         if (ctype_digit($deliveryId)) {
-            $this->db->exec('tdelivery_visible', ['id' => (int) $deliveryId, 'visible' => (int) $visible]);
+            $this->db->tdelivery_visible(id: (int) $deliveryId, visible: (int) $visible);
         }
     }
 

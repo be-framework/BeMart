@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
-use MyVendor\BeMart\Be\Reason\Service\SqlCustomerIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 
 use function bin2hex;
 use function random_bytes;
@@ -105,8 +105,8 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         // the pref_id FK holds for this round-trip-every-field case.
         $this->insertPref(13, '東京都');
 
-        $generator = $this->sql(SqlCustomerIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(CustomerIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $command = $this->sql(SqlCustomerCommand::class);
         $command->register($this->entity([
@@ -133,8 +133,8 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         // CustomerRegistered builds a CustomerEntity with secretKey=null
         // (an active customer carries no token). secret_key is NOT NULL
         // UNIQUE — register() must supply one so the INSERT succeeds.
-        $generator = $this->sql(SqlCustomerIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(CustomerIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
 
         $command = $this->sql(SqlCustomerCommand::class);
         $command->register($this->entity([
@@ -156,8 +156,8 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         // A provisional (status-1) customer carries the activation
         // token; register() must persist it verbatim so the activation
         // flow can later look the customer up by it.
-        $generator = $this->sql(SqlCustomerIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(CustomerIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $token = bin2hex(random_bytes(16));
 
         $command = $this->sql(SqlCustomerCommand::class);
@@ -192,8 +192,8 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
 
     public function testRegisterPersistsInitialPointAsPoint(): void
     {
-        $generator = $this->sql(SqlCustomerIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(CustomerIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
 
         $command = $this->sql(SqlCustomerCommand::class);
         $command->register($this->entity([
@@ -403,16 +403,16 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $this->assertSame('$2y$12$untouched', $read->passwordHash);
     }
 
-    public function testSqlCustomerIdGeneratorAllocatesIncrementingIds(): void
+    public function testCustomerIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlCustomerIdGenerator::class);
+        $generator = $this->sql(CustomerIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertCustomer(['email' => 'gen-1@example.com']);
         $secondId = $this->insertCustomer(['email' => 'gen-2@example.com']);
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\DeliveryEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlDeliveryStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlDeliveryIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
 
 /**
  * Storage-layer coverage for {@see SqlDeliveryStorage} (Phase 2b).
@@ -94,8 +94,8 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(SqlDeliveryIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(DeliveryIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new DeliveryEntity(
             deliveryId: $newId,
@@ -122,8 +122,8 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
     {
         // A soft-hidden delivery method (visible=false) round-trips the
         // bool ↔ tinyint coercion.
-        $generator = $this->sql(SqlDeliveryIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(DeliveryIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlDeliveryStorage::class);
 
         $storage->put(new DeliveryEntity(
@@ -151,8 +151,8 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         // DeliveryEntity carries no sale-type axis; the INSERT writes
         // sale_type_id = NULL so the FK to the (empty) mtb_sale_type
         // master never raises FK 1452.
-        $generator = $this->sql(SqlDeliveryIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(DeliveryIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlDeliveryStorage::class);
 
         $storage->put(new DeliveryEntity(
@@ -273,16 +273,16 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlDeliveryIdGeneratorAllocatesIncrementingIds(): void
+    public function testDeliveryIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlDeliveryIdGenerator::class);
+        $generator = $this->sql(DeliveryIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertDelivery();
         $secondId = $this->insertDelivery();
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

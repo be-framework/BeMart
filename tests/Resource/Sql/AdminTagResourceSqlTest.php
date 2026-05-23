@@ -22,7 +22,7 @@ use function is_string;
  * branches. The only differences are:
  *
  *  - the storage binding (TagStorageInterface → SqlTagStorage, +
- *    TagIdGeneratorInterface → SqlTagIdGenerator) is layered via
+ *    TagIdGeneratorInterface → direct MediaQuery tag id proxy) is layered via
  *    the base class's sqlOverrideModule.
  *
  *  - tagIds are numeric strings drawn from dtb_tag.id, not the
@@ -87,7 +87,7 @@ final class AdminTagResourceSqlTest extends AbstractResourceSqlTestCase
      * Seed a single tag through the resource layer and return the
      * server-generated tagId — mirrors the Fake-backed sibling's
      * helper exactly. The POST drives the full Becoming chain
-     * (Input → Final → SqlTagIdGenerator → SqlTagStorage) so the row
+     * (Input → Final → direct MediaQuery tag id proxy → SqlTagStorage) so the row
      * appears in the same transactional state every subsequent
      * assertion will see.
      */

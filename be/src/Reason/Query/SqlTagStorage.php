@@ -11,13 +11,13 @@ use function ctype_digit;
 
 final class SqlTagStorage implements TagStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<TagEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tag_list'));
+        return array_map($this->hydrate(...), $this->db->tag_list());
     }
 
     #[Override]
@@ -27,7 +27,7 @@ final class SqlTagStorage implements TagStorageInterface
             return null;
         }
 
-        $row = $this->db->row('tag_get', ['id' => (int) $tagId]);
+        $row = $this->db->tag_get(id: (int) $tagId);
 
         return $row === null ? null : $this->hydrate($row);
     }
@@ -40,15 +40,20 @@ final class SqlTagStorage implements TagStorageInterface
         }
 
         $id = (int) $tag->tagId;
-        $values = ['id' => $id, 'name' => $tag->tagName, 'sortNo' => 0];
-        $this->db->exec($this->db->row('tag_exists', ['id' => $id]) === null ? 'tag_insert' : 'tag_update', $values);
+        if ($this->db->tag_exists(id: $id) === null) {
+            $this->db->tag_insert(id: $id, name: $tag->tagName, sortNo: 0);
+
+            return;
+        }
+
+        $this->db->tag_update(id: $id, name: $tag->tagName);
     }
 
     #[Override]
     public function remove(string $tagId): void
     {
         if (ctype_digit($tagId)) {
-            $this->db->exec('tag_delete', ['id' => (int) $tagId]);
+            $this->db->tag_delete(id: (int) $tagId);
         }
     }
 
@@ -56,7 +61,7 @@ final class SqlTagStorage implements TagStorageInterface
     public function reorder(string $tagId, int $sortNo): void
     {
         if (ctype_digit($tagId)) {
-            $this->db->exec('tag_reorder', ['id' => (int) $tagId, 'sortNo' => $sortNo]);
+            $this->db->tag_reorder(id: (int) $tagId, sortNo: $sortNo);
         }
     }
 

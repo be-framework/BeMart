@@ -17,14 +17,12 @@ use function ctype_digit;
 
 final class SqlOrderQuery implements OrderQueryInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function byPreOrderId(string $preOrderId): OrderEntity|null
     {
-        $row = $this->db->row('order_by_pre_order_id', [
-            'preOrderId' => $preOrderId,
-        ]);
+        $row = $this->db->order_by_pre_order_id(preOrderId: $preOrderId);
 
         return $row === null ? null : new OrderEntity(
             preOrderId: (string) $row['pre_order_id'],
@@ -38,9 +36,7 @@ final class SqlOrderQuery implements OrderQueryInterface
     #[Override]
     public function byOrderNo(string $orderNo): FinalizedOrderEntity|null
     {
-        $row = $this->db->row('order_by_order_no', [
-            'orderNo' => $orderNo,
-        ]);
+        $row = $this->db->order_by_order_no(orderNo: $orderNo);
 
         return $row === null ? null : $this->hydrateFinalized($row);
     }
@@ -48,10 +44,7 @@ final class SqlOrderQuery implements OrderQueryInterface
     #[Override]
     public function historyByOrderNo(string $orderNo): OrderHistoryEntity|null
     {
-        $row = $this->db->row('order_history_header', [
-            'orderNo' => $orderNo,
-            'processing' => FinalizedOrderEntity::STATUS_PROCESSING,
-        ]);
+        $row = $this->db->order_history_header(orderNo: $orderNo, processing: FinalizedOrderEntity::STATUS_PROCESSING);
         if ($row === null) {
             return null;
         }
@@ -92,7 +85,7 @@ final class SqlOrderQuery implements OrderQueryInterface
                 quantity: (int) $row['quantity'],
                 unitPrice: (int) $row['price'],
             ),
-            $this->db->rows('order_items_by_order_no', ['orderNo' => $orderNo]),
+            $this->db->order_items_by_order_no(orderNo: $orderNo),
         );
     }
 
@@ -104,28 +97,21 @@ final class SqlOrderQuery implements OrderQueryInterface
             return [];
         }
 
-        return array_map($this->hydrateFinalized(...), $this->db->rows('order_list_by_customer', [
-            'customerId' => $customerId,
-            'limit' => $limit,
-            'offset' => $offset,
-        ]));
+        return array_map($this->hydrateFinalized(...), $this->db->order_list_by_customer(customerId: $customerId, limit: $limit, offset: $offset));
     }
 
     /** @return list<FinalizedOrderEntity> */
     #[Override]
     public function listAll(int $limit = 50, int $offset = 0): array
     {
-        return array_map($this->hydrateFinalized(...), $this->db->rows('order_list_all', [
-            'limit' => $limit,
-            'offset' => $offset,
-        ]));
+        return array_map($this->hydrateFinalized(...), $this->db->order_list_all(limit: $limit, offset: $offset));
     }
 
     /** @return list<OrderHistoryShippingEntity> */
     private function shippingsForOrder(int $orderId): array
     {
         $out = [];
-        foreach ($this->db->rows('order_history_shippings', ['orderId' => $orderId]) as $row) {
+        foreach ($this->db->order_history_shippings(orderId: $orderId) as $row) {
             $out[] = new OrderHistoryShippingEntity(
                 name01: (string) ($row['name01'] ?? ''),
                 name02: (string) ($row['name02'] ?? ''),
@@ -156,7 +142,7 @@ final class SqlOrderQuery implements OrderQueryInterface
                 quantity: (int) $row['quantity'],
                 unitPrice: (int) $row['price'],
             ),
-            $this->db->rows('order_history_items', ['orderId' => $orderId, 'shippingId' => $shippingId]),
+            $this->db->order_history_items(orderId: $orderId, shippingId: $shippingId),
         );
     }
 
@@ -169,7 +155,7 @@ final class SqlOrderQuery implements OrderQueryInterface
                 mailSubject: (string) ($row['mail_subject'] ?? ''),
                 mailBody: (string) ($row['mail_body'] ?? ''),
             ),
-            $this->db->rows('order_history_mails', ['orderId' => $orderId]),
+            $this->db->order_history_mails(orderId: $orderId),
         );
     }
 

@@ -14,14 +14,24 @@ use function sprintf;
 final class SqlProductCommand implements ProductCommandInterface
 {
     public function __construct(
-        private readonly MediaQueryExecutor $db,
+        private readonly InternalDbQueryInterface $db,
         private readonly ProductQueryInterface $products,
     ) {}
 
     #[Override]
     public function create(ProductEntity $product): void
     {
-        $this->db->exec('product_create', $this->values($product));
+        $this->db->product_create(
+            productStatus: $product->productStatus,
+            name: $product->productName,
+            note: $product->note,
+            description: $product->description,
+            searchWord: $product->searchWord,
+            productCode: $product->productCode,
+            price02: $product->price02,
+            stock: $product->stock,
+            stockUnlimited: $product->stock === null ? 1 : 0,
+        );
     }
 
     #[Override]
@@ -31,9 +41,19 @@ final class SqlProductCommand implements ProductCommandInterface
         if ($productId === null) {
             return;
         }
-        $values = $this->values($product) + ['id' => $productId];
-        $this->db->exec('product_update_header', $values);
-        $this->db->exec('product_update_class', $values);
+        $this->db->product_update_header(
+            id: $productId,
+            name: $product->productName,
+            productStatus: $product->productStatus,
+            description: $product->description,
+            searchWord: $product->searchWord,
+            note: $product->note,
+        );
+        $this->db->product_update_class(
+            id: $productId,
+            price02: $product->price02,
+            stock: $product->stock,
+        );
     }
 
     #[Override]
@@ -41,7 +61,7 @@ final class SqlProductCommand implements ProductCommandInterface
     {
         $productId = $this->findProductId($productCode);
         if ($productId !== null) {
-            $this->db->exec('product_soft_delete', ['id' => $productId, 'setStatus' => ProductEntity::STATUS_WITHDRAWN, 'whereStatus' => ProductEntity::STATUS_WITHDRAWN]);
+            $this->db->product_soft_delete(id: $productId, setStatus: ProductEntity::STATUS_WITHDRAWN, whereStatus: ProductEntity::STATUS_WITHDRAWN);
         }
     }
 
@@ -80,30 +100,15 @@ final class SqlProductCommand implements ProductCommandInterface
             if ($productId === null) {
                 continue;
             }
-            $changed += $this->db->affected('product_status_update', ['id' => $productId, 'setStatus' => $newStatus, 'whereStatus' => $newStatus]);
+            $changed += $this->db->product_status_update(id: $productId, setStatus: $newStatus, whereStatus: $newStatus)->count;
         }
         return new BulkStatusUpdateResult($changed);
     }
 
     private function findProductId(string $productCode): int|null
     {
-        $row = $this->db->row('product_find_id', ['productCode' => $productCode]);
+        $row = $this->db->product_find_id(productCode: $productCode);
         return $row === null ? null : (int) $row['product_id'];
     }
 
-    /** @return array<string, mixed> */
-    private function values(ProductEntity $product): array
-    {
-        return [
-            'productCode' => $product->productCode,
-            'name' => $product->productName,
-            'price02' => $product->price02,
-            'stock' => $product->stock,
-            'stockUnlimited' => $product->stock === null ? 1 : 0,
-            'productStatus' => $product->productStatus,
-            'description' => $product->description,
-            'searchWord' => $product->searchWord,
-            'note' => $product->note,
-        ];
-    }
 }

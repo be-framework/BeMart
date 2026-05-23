@@ -13,7 +13,7 @@ use function str_replace;
 
 final class SqlCartCommand implements CartCommandInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function save(CartEntity $cart): void
@@ -26,34 +26,34 @@ final class SqlCartCommand implements CartCommandInterface
                 'price' => $item->price,
             ];
         }
-        $this->db->exec('cart_delete_by_key', ['cartKey' => $cart->cartKey]);
-        $this->db->exec('cart_insert', [
-            'cartKey' => $cart->cartKey,
-            'preOrderId' => $cart->preOrderId === '' ? null : $cart->preOrderId,
-            'totalPrice' => $cart->totalPrice,
-            'deliveryFeeTotal' => $cart->deliveryFeeTotal,
-        ]);
-        $cartId = (int) ($this->db->row('cart_last_id')['id'] ?? 0);
+        $this->db->cart_delete_by_key(cartKey: $cart->cartKey);
+        $this->db->cart_insert(
+            cartKey: $cart->cartKey,
+            preOrderId: $cart->preOrderId === '' ? null : $cart->preOrderId,
+            totalPrice: $cart->totalPrice,
+            deliveryFeeTotal: $cart->deliveryFeeTotal,
+        );
+        $cartId = (int) ($this->db->cart_last_id()['id'] ?? 0);
         foreach ($resolved as $item) {
-            $this->db->exec('cart_item_insert', $item + ['cartId' => $cartId]);
+            $this->db->cart_item_insert(productClassId: $item['productClassId'], cartId: $cartId, price: $item['price'], quantity: $item['quantity']);
         }
     }
 
     #[Override]
     public function clearByPreOrderId(string $preOrderId): void
     {
-        $this->db->exec('cart_clear_pre_order', ['preOrderId' => $preOrderId]);
+        $this->db->cart_clear_pre_order(preOrderId: $preOrderId);
     }
 
     #[Override]
     public function clearBySessionPrefix(string $sessionPrefix): void
     {
-        $this->db->exec('cart_clear_session_prefix', ['pattern' => $this->escapeLike($sessionPrefix) . '\\_%']);
+        $this->db->cart_clear_session_prefix(pattern: $this->escapeLike($sessionPrefix) . '\\_%');
     }
 
     private function resolveProductClassId(string $productCode): int
     {
-        $row = $this->db->row('cart_resolve_product_class', ['productCode' => $productCode]);
+        $row = $this->db->cart_resolve_product_class(productCode: $productCode);
         if ($row === null) {
             throw new RuntimeException(sprintf('SqlCartCommand: unknown productCode "%s".', $productCode));
         }

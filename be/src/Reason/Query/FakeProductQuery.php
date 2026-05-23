@@ -11,8 +11,8 @@ use Override;
  * Phase 1 (FakeQuery) implementation delegating to the shared
  * FakeProductStorage singleton.
  *
- * Production Phase 2 will swap this binding to a Ray.MediaQuery
- * `#[DbQuery('get_product')]` interface backed by var/db/sql/get_product.sql.
+ * Production Phase 2 swaps this binding to Ray.MediaQuery-backed
+ * ProductQueryInterface methods.
  *
  * Wave 8 split: list / search / export projections all delegate to
  * the Storage so the FakeProductCommand (Wave 8) and FakeProductQuery

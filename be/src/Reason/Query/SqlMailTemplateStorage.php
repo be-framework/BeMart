@@ -10,29 +10,29 @@ use Override;
 
 final class SqlMailTemplateStorage implements MailTemplateStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<MailTemplateEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tmail_template_list'));
+        return array_map($this->hydrate(...), $this->db->tmail_template_list());
     }
 
     #[Override]
     public function findById(int $mailTemplateId): MailTemplateEntity|null
     {
-        $row = $this->db->row('tmail_template_get', ['id' => $mailTemplateId]);
+        $row = $this->db->tmail_template_get(id: $mailTemplateId);
         return $row === null ? null : $this->hydrate($row);
     }
 
     #[Override]
     public function update(MailTemplateEntity $entity): void
     {
-        if ($this->db->row('tmail_template_exists', ['id' => $entity->mailTemplateId]) === null) {
+        if ($this->db->tmail_template_exists(id: $entity->mailTemplateId) === null) {
             throw new MailTemplateNotFoundException();
         }
-        $this->db->exec('tmail_template_update', ['id' => $entity->mailTemplateId, 'subject' => $entity->subject]);
+        $this->db->tmail_template_update(id: $entity->mailTemplateId, subject: $entity->subject);
     }
 
     /** @param array<string, mixed> $row */

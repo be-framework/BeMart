@@ -11,13 +11,13 @@ use function ctype_digit;
 
 final class SqlBlockStorage implements BlockStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<BlockEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tblock_list'));
+        return array_map($this->hydrate(...), $this->db->tblock_list());
     }
 
     #[Override]
@@ -26,7 +26,7 @@ final class SqlBlockStorage implements BlockStorageInterface
         if (! ctype_digit($blockId)) {
             return null;
         }
-        $row = $this->db->row('tblock_get', ['id' => (int) $blockId]);
+        $row = $this->db->tblock_get(id: (int) $blockId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -37,13 +37,13 @@ final class SqlBlockStorage implements BlockStorageInterface
             return;
         }
         $id = (int) $block->blockId;
-        $values = [
-            'id' => $id,
-            'blockName' => $block->blockName,
-            'fileName' => $block->blockFileName,
-            'deletable' => (int) $block->blockDeletable,
-        ];
-        $this->db->exec($this->db->row('tblock_exists', ['id' => $id]) === null ? 'tblock_insert' : 'tblock_update', $values);
+        if ($this->db->tblock_exists(id: $id) === null) {
+            $this->db->tblock_insert(id: $id, blockName: $block->blockName, fileName: $block->blockFileName, deletable: (int) $block->blockDeletable);
+
+            return;
+        }
+
+        $this->db->tblock_update(id: $id, blockName: $block->blockName, fileName: $block->blockFileName, deletable: (int) $block->blockDeletable);
     }
 
     #[Override]
@@ -53,8 +53,8 @@ final class SqlBlockStorage implements BlockStorageInterface
             return;
         }
         $id = (int) $blockId;
-        $this->db->exec('tblock_position_delete', ['id' => $id]);
-        $this->db->exec('tblock_delete', ['id' => $id]);
+        $this->db->tblock_position_delete(id: $id);
+        $this->db->tblock_delete(id: $id);
     }
 
     /** @param array<string, mixed> $row */
