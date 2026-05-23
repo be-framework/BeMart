@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Entity\AddressEntity;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Module\HtmlModule;
 use PHPUnit\Framework\TestCase;

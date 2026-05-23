@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\HtmlModule;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;

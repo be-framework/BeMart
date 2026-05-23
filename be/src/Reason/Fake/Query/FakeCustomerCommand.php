@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Be\Reason\Fake\Query;
+
+use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
+use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
+use Override;
+
+final class FakeCustomerCommand implements CustomerCommandInterface
+{
+    public function __construct(
+        private readonly FakeCustomerStorage $storage,
+    ) {
+    }
+
+    #[Override]
+    public function register(CustomerEntity $customer): void
+    {
+        $this->storage->put($customer);
+    }
+
+    #[Override]
+    public function activate(string $customerId): void
+    {
+        $this->storage->activate($customerId);
+    }
+
+    #[Override]
+    public function update(CustomerEntity $customer): void
+    {
+        $this->storage->replace($customer);
+    }
+
+    #[Override]
+    public function updatePassword(string $customerId, string $passwordHash): void
+    {
+        $this->storage->replacePassword($customerId, $passwordHash);
+    }
+}

@@ -9,7 +9,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;

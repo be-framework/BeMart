@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Exception\SecretKeyFormatException;
 use MyVendor\BeMart\Be\Exception\SecretKeyNotFoundException;
 use MyVendor\BeMart\Be\Final\CustomerActivated;
 use MyVendor\BeMart\Be\Input\ActivateCustomerInput;
-use MyVendor\BeMart\Be\Reason\Query\FakeCustomerStorage;
+use MyVendor\BeMart\Be\Reason\Fake\Query\FakeCustomerStorage;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
