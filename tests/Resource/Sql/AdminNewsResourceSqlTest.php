@@ -23,7 +23,7 @@ use function is_string;
  * AUTHN / AUTHZ / CSRF branches. The only differences are:
  *
  *  - the storage binding (NewsStorageInterface → SqlNewsStorage) and
- *    id generator (NewsIdGeneratorInterface → SqlNewsIdGenerator) are
+ *    id generator (NewsIdGeneratorInterface → direct MediaQuery news id proxy) are
  *    layered via the base class's sqlOverrideModule; persistence is
  *    against the real dtb_news table.
  *
@@ -88,7 +88,7 @@ final class AdminNewsResourceSqlTest extends AbstractResourceSqlTestCase
      * Seed a single news post through the resource layer and return
      * the server-generated newsId — mirrors the Fake-backed sibling's
      * helper exactly. The POST drives the full Becoming chain
-     * (Input → Final → SqlNewsIdGenerator → SqlNewsStorage) so the
+     * (Input → Final → direct MediaQuery news id proxy → SqlNewsStorage) so the
      * row appears in the same transactional state every subsequent
      * assertion will see.
      */

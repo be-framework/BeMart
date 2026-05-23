@@ -34,7 +34,7 @@ final readonly class ClassNameCreated
         }
 
         $entity = new ClassNameEntity(
-            classNameId: $idGenerator->generate(),
+            classNameId: $idGenerator->generate()->value(),
             name: $classNameLabel,
         );
 

@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\NewsEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlNewsStorage;
-use MyVendor\BeMart\Be\Reason\Service\SqlNewsIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
 
 use function str_contains;
 use function strlen;
@@ -109,8 +109,8 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(SqlNewsIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(NewsIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $entity = new NewsEntity(
             newsId: $newId,
@@ -141,8 +141,8 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
 
     public function testPutSerialisesIsoDateToMysqlDatetime(): void
     {
-        $generator = $this->sql(SqlNewsIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(NewsIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlNewsStorage::class);
 
         $storage->put(new NewsEntity(
@@ -171,8 +171,8 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
 
     public function testPutPersistsLinkMethodAsTinyint(): void
     {
-        $generator = $this->sql(SqlNewsIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(NewsIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
         $storage = $this->sql(SqlNewsStorage::class);
 
         $storage->put(new NewsEntity(
@@ -302,16 +302,16 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testSqlNewsIdGeneratorAllocatesIncrementingIds(): void
+    public function testNewsIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlNewsIdGenerator::class);
+        $generator = $this->sql(NewsIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertNews();
         $secondId = $this->insertNews();
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

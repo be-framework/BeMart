@@ -17,35 +17,83 @@ final class SqlOrderCommand implements OrderCommandInterface
     private const DISCRIMINATOR = 'order';
     private const PLACEHOLDER_NAME = '-';
 
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function register(FinalizedOrderEntity $order): void
     {
         if ($this->preOrderRowExists($order->preOrderId)) {
-            $this->db->exec('order_promote_pre_order', $this->orderValues($order));
+            $this->db->order_promote_pre_order(
+                orderNo: $order->orderNo,
+                preOrderId: $order->preOrderId === '' ? null : $order->preOrderId,
+                customerId: $this->customerId($order->customerId),
+                paymentId: $this->paymentId($order->paymentMethodId),
+                subtotal: $order->subtotal,
+                deliveryFeeTotal: $order->deliveryFeeTotal,
+                charge: $order->charge,
+                discount: $order->discount,
+                tax: $order->tax,
+                total: $order->total,
+                paymentTotal: $order->paymentTotal,
+                addPoint: $order->addPoint,
+                usePoint: $order->usePoint,
+                orderStatus: $order->orderStatus,
+                orderDate: $this->normalizeDateTime($order->orderDate),
+                paymentDate: $this->normalizeDateTime($order->paymentDate),
+            );
 
             return;
         }
 
-        $values = $this->orderValues($order) + [
-            'name01' => self::PLACEHOLDER_NAME,
-            'name02' => self::PLACEHOLDER_NAME,
-            'discriminator' => self::DISCRIMINATOR,
-        ];
-        $this->db->exec('order_insert', $values);
+        $this->db->order_insert(
+            orderNo: $order->orderNo,
+            preOrderId: $order->preOrderId === '' ? null : $order->preOrderId,
+            customerId: $this->customerId($order->customerId),
+            paymentId: $this->paymentId($order->paymentMethodId),
+            name01: self::PLACEHOLDER_NAME,
+            name02: self::PLACEHOLDER_NAME,
+            subtotal: $order->subtotal,
+            deliveryFeeTotal: $order->deliveryFeeTotal,
+            charge: $order->charge,
+            discount: $order->discount,
+            tax: $order->tax,
+            total: $order->total,
+            paymentTotal: $order->paymentTotal,
+            addPoint: $order->addPoint,
+            usePoint: $order->usePoint,
+            orderStatus: $order->orderStatus,
+            orderDate: $this->normalizeDateTime($order->orderDate),
+            paymentDate: $this->normalizeDateTime($order->paymentDate),
+            discriminator: self::DISCRIMINATOR,
+        );
     }
 
     #[Override]
     public function update(FinalizedOrderEntity $order): void
     {
-        $this->db->exec('order_update', $this->orderValues($order));
+        $this->db->order_update(
+            orderNo: $order->orderNo,
+            customerId: $this->customerId($order->customerId),
+            paymentId: $this->paymentId($order->paymentMethodId),
+            subtotal: $order->subtotal,
+            deliveryFeeTotal: $order->deliveryFeeTotal,
+            charge: $order->charge,
+            discount: $order->discount,
+            tax: $order->tax,
+            total: $order->total,
+            paymentTotal: $order->paymentTotal,
+            addPoint: $order->addPoint,
+            usePoint: $order->usePoint,
+            orderStatus: $order->orderStatus,
+            orderDate: $this->normalizeDateTime($order->orderDate),
+            paymentDate: $this->normalizeDateTime($order->paymentDate),
+        );
     }
 
     #[Override]
     public function updateStatus(string $orderNo, int $newStatus): void
     {
-        $this->db->exec('order_update_status', ['orderNo' => $orderNo, 'status' => $newStatus]);
+        $this->db->order_update_status(orderNo: $orderNo, status: $newStatus);
     }
 
     private function preOrderRowExists(string $preOrderId): bool
@@ -54,30 +102,7 @@ final class SqlOrderCommand implements OrderCommandInterface
             return false;
         }
 
-        return $this->db->row('order_pre_order_exists', ['preOrderId' => $preOrderId]) !== null;
-    }
-
-    /** @return array<string, mixed> */
-    private function orderValues(FinalizedOrderEntity $order): array
-    {
-        return [
-            'orderNo' => $order->orderNo,
-            'preOrderId' => $order->preOrderId === '' ? null : $order->preOrderId,
-            'customerId' => $this->customerId($order->customerId),
-            'paymentId' => $this->paymentId($order->paymentMethodId),
-            'subtotal' => $order->subtotal,
-            'deliveryFeeTotal' => $order->deliveryFeeTotal,
-            'charge' => $order->charge,
-            'discount' => $order->discount,
-            'tax' => $order->tax,
-            'total' => $order->total,
-            'paymentTotal' => $order->paymentTotal,
-            'addPoint' => $order->addPoint,
-            'usePoint' => $order->usePoint,
-            'orderStatus' => $order->orderStatus,
-            'orderDate' => $this->normalizeDateTime($order->orderDate),
-            'paymentDate' => $this->normalizeDateTime($order->paymentDate),
-        ];
+        return $this->db->order_pre_order_exists(preOrderId: $preOrderId) !== null;
     }
 
     private function customerId(string $customerId): int|null

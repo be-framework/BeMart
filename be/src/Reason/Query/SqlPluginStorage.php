@@ -14,19 +14,19 @@ final class SqlPluginStorage implements PluginStorageInterface
     private const DISCRIMINATOR = 'plugin';
     private const SOURCE_DEFAULT = 0;
 
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<PluginEntity> sorted by pluginCode ascending */
     #[Override]
     public function listAll(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('plugin_list_all'));
+        return array_map($this->hydrate(...), $this->db->plugin_list_all());
     }
 
     #[Override]
     public function findByCode(string $pluginCode): PluginEntity|null
     {
-        $row = $this->db->row('plugin_find_by_code', ['code' => $pluginCode]);
+        $row = $this->db->plugin_find_by_code(code: $pluginCode);
 
         return $row === null ? null : $this->hydrate($row);
     }
@@ -40,24 +40,18 @@ final class SqlPluginStorage implements PluginStorageInterface
         }
 
         if ($existing !== null) {
-            $this->db->exec('plugin_mark_installed', ['code' => $pluginCode]);
+            $this->db->plugin_mark_installed(code: $pluginCode);
 
             return;
         }
 
-        $this->db->exec('plugin_insert', [
-            'name' => $pluginName,
-            'code' => $pluginCode,
-            'version' => $version,
-            'source' => self::SOURCE_DEFAULT,
-            'discriminator' => self::DISCRIMINATOR,
-        ]);
+        $this->db->plugin_insert(name: $pluginName, code: $pluginCode, version: $version, source: self::SOURCE_DEFAULT, discriminator: self::DISCRIMINATOR);
     }
 
     #[Override]
     public function uninstall(string $pluginCode): void
     {
-        $this->db->exec('plugin_uninstall', ['code' => $pluginCode]);
+        $this->db->plugin_uninstall(code: $pluginCode);
     }
 
     #[Override]
@@ -76,10 +70,7 @@ final class SqlPluginStorage implements PluginStorageInterface
             return;
         }
 
-        $this->db->exec('plugin_set_enabled', [
-            'enabled' => $enabled ? 1 : 0,
-            'code' => $pluginCode,
-        ]);
+        $this->db->plugin_set_enabled(enabled: $enabled ? 1 : 0, code: $pluginCode);
     }
 
     /** @param array<string, mixed> $row */

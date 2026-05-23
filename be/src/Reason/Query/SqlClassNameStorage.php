@@ -11,13 +11,13 @@ use function ctype_digit;
 
 final class SqlClassNameStorage implements ClassNameStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<ClassNameEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tclass_name_list'));
+        return array_map($this->hydrate(...), $this->db->tclass_name_list());
     }
 
     #[Override]
@@ -26,7 +26,7 @@ final class SqlClassNameStorage implements ClassNameStorageInterface
         if (! ctype_digit($classNameId)) {
             return null;
         }
-        $row = $this->db->row('tclass_name_get', ['id' => (int) $classNameId]);
+        $row = $this->db->tclass_name_get(id: (int) $classNameId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -37,12 +37,12 @@ final class SqlClassNameStorage implements ClassNameStorageInterface
             return;
         }
         $id = (int) $className->classNameId;
-        if ($this->db->row('tclass_name_exists', ['id' => $id]) !== null) {
-            $this->db->exec('tclass_name_update', ['id' => $id, 'name' => $className->name]);
+        if ($this->db->tclass_name_exists(id: $id) !== null) {
+            $this->db->tclass_name_update(id: $id, name: $className->name);
             return;
         }
-        $sort = (int) ($this->db->row('tclass_name_next_sort')['next_sort'] ?? 1);
-        $this->db->exec('tclass_name_insert', ['id' => $id, 'name' => $className->name, 'sortNo' => $sort]);
+        $sort = (int) ($this->db->tclass_name_next_sort()['next_sort'] ?? 1);
+        $this->db->tclass_name_insert(id: $id, name: $className->name, sortNo: $sort);
     }
 
     #[Override]
@@ -52,15 +52,15 @@ final class SqlClassNameStorage implements ClassNameStorageInterface
             return;
         }
         $id = (int) $classNameId;
-        $this->db->exec('tclass_name_children_delete', ['id' => $id]);
-        $this->db->exec('tclass_name_delete', ['id' => $id]);
+        $this->db->tclass_name_children_delete(id: $id);
+        $this->db->tclass_name_delete(id: $id);
     }
 
     #[Override]
     public function reorder(string $classNameId, int $sortNo): void
     {
         if (ctype_digit($classNameId)) {
-            $this->db->exec('tclass_name_reorder', ['id' => (int) $classNameId, 'sortNo' => $sortNo]);
+            $this->db->tclass_name_reorder(id: (int) $classNameId, sortNo: $sortNo);
         }
     }
 

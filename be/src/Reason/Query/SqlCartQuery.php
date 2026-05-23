@@ -12,7 +12,7 @@ final class SqlCartQuery implements CartQueryInterface
 {
     private CartFactory $factory;
 
-    public function __construct(private readonly MediaQueryExecutor $db)
+    public function __construct(private readonly InternalDbQueryInterface $db)
     {
         $this->factory = new CartFactory();
     }
@@ -20,7 +20,7 @@ final class SqlCartQuery implements CartQueryInterface
     #[Override]
     public function byCartKey(string $cartKey): CartEntity|null
     {
-        $row = $this->db->row('cart_by_key', ['cartKey' => $cartKey]);
+        $row = $this->db->cart_by_key(cartKey: $cartKey);
         return $row === null ? null : $this->hydrateCart($row);
     }
 
@@ -28,7 +28,7 @@ final class SqlCartQuery implements CartQueryInterface
     #[Override]
     public function bySessionPrefix(string $sessionPrefix): array
     {
-        return array_map($this->hydrateCart(...), $this->db->rows('cart_by_session_prefix', ['sessionPrefix' => $sessionPrefix]));
+        return array_map($this->hydrateCart(...), $this->db->cart_by_session_prefix(sessionPrefix: $sessionPrefix));
     }
 
     /** @param array<string, mixed> $row */

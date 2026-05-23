@@ -77,7 +77,7 @@ final readonly class MemberCreating
             throw new LoginIdAlreadyTakenException();
         }
 
-        $this->adminId = $idGenerator->generate();
+        $this->adminId = $idGenerator->generate()->value();
         $this->passwordHash = $passwordHasher->hash($password);
         $this->work = 1;
     }

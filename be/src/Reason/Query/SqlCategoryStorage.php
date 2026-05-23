@@ -11,13 +11,13 @@ use function ctype_digit;
 
 final class SqlCategoryStorage implements CategoryStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<CategoryEntity> */
     #[Override]
     public function list(): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tcategory_list'));
+        return array_map($this->hydrate(...), $this->db->tcategory_list());
     }
 
     #[Override]
@@ -26,7 +26,7 @@ final class SqlCategoryStorage implements CategoryStorageInterface
         if (! ctype_digit($categoryId)) {
             return null;
         }
-        $row = $this->db->row('tcategory_get', ['id' => (int) $categoryId]);
+        $row = $this->db->tcategory_get(id: (int) $categoryId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -40,17 +40,16 @@ final class SqlCategoryStorage implements CategoryStorageInterface
         $parentId = ($category->parentId !== null && ctype_digit($category->parentId)) ? (int) $category->parentId : null;
         $hierarchy = 1;
         if ($parentId !== null) {
-            $parent = $this->db->row('tcategory_parent_hierarchy', ['id' => $parentId]);
+            $parent = $this->db->tcategory_parent_hierarchy(id: $parentId);
             $hierarchy = ((int) ($parent['hierarchy'] ?? 0)) + 1;
         }
-        $values = [
-            'id' => $id,
-            'categoryName' => $category->categoryName,
-            'parentId' => $parentId,
-            'sortNo' => $category->sortNo,
-            'hierarchy' => $hierarchy,
-        ];
-        $this->db->exec($this->db->row('tcategory_exists', ['id' => $id]) === null ? 'tcategory_insert' : 'tcategory_update', $values);
+        if ($this->db->tcategory_exists(id: $id) === null) {
+            $this->db->tcategory_insert(id: $id, categoryName: $category->categoryName, parentId: $parentId, sortNo: $category->sortNo, hierarchy: $hierarchy);
+
+            return;
+        }
+
+        $this->db->tcategory_update(id: $id, categoryName: $category->categoryName, parentId: $parentId, sortNo: $category->sortNo, hierarchy: $hierarchy);
     }
 
     #[Override]
@@ -60,8 +59,8 @@ final class SqlCategoryStorage implements CategoryStorageInterface
             return;
         }
         $id = (int) $categoryId;
-        $this->db->exec('tcategory_product_delete', ['id' => $id]);
-        $this->db->exec('tcategory_delete', ['id' => $id]);
+        $this->db->tcategory_product_delete(id: $id);
+        $this->db->tcategory_delete(id: $id);
     }
 
     /** @param array<string, mixed> $row */

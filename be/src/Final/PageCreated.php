@@ -40,7 +40,7 @@ final readonly class PageCreated
         }
 
         $entity = new PageEntity(
-            pageId: $idGenerator->generate(),
+            pageId: $idGenerator->generate()->value(),
             pageName: $pageName,
             pageUrl: $pageUrl,
             pageFileName: $pageFileName,

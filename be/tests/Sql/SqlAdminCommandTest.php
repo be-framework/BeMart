@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\SqlAdminCommand;
 use MyVendor\BeMart\Be\Reason\Query\SqlAdminQuery;
-use MyVendor\BeMart\Be\Reason\Service\SqlAdminIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
 
 /**
  * Storage-layer coverage for {@see SqlAdminCommand} (Admin auth Phase B).
@@ -32,8 +32,8 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
 
     public function testCreateInsertsRowWithProvidedId(): void
     {
-        $generator = $this->sql(SqlAdminIdGenerator::class);
-        $newId = $generator->generate(); // numeric string
+        $generator = $this->sql(AdminIdGeneratorInterface::class);
+        $newId = $generator->generate()->value(); // numeric string
 
         $command = $this->sql(SqlAdminCommand::class);
         $command->create(new AdminEntity(
@@ -79,8 +79,8 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         // authority=0 (system admin) is the most common case and the
         // EC-CUBE seed value. We write NULL to satisfy the empty
         // mtb_authority FK constraint; hydrate coerces back to 0.
-        $generator = $this->sql(SqlAdminIdGenerator::class);
-        $newId = $generator->generate();
+        $generator = $this->sql(AdminIdGeneratorInterface::class);
+        $newId = $generator->generate()->value();
 
         $command = $this->sql(SqlAdminCommand::class);
         $command->create(new AdminEntity(
@@ -236,16 +236,16 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $this->assertSame(1, $read->authority);
     }
 
-    public function testSqlAdminIdGeneratorAllocatesIncrementingIds(): void
+    public function testAdminIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(SqlAdminIdGenerator::class);
+        $generator = $this->sql(AdminIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate());
+        $this->assertSame('1', $generator->generate()->value());
 
         $firstId = $this->insertAdmin(['login_id' => 'gen-1']);
         $secondId = $this->insertAdmin(['login_id' => 'gen-2']);
-        $this->assertSame((string) ($secondId + 1), $generator->generate());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

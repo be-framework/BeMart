@@ -14,7 +14,7 @@ final class SqlPasswordResetTokenStorage implements PasswordResetTokenStorageInt
 {
     private const DATETIME_FORMAT = 'Y-m-d H:i:s';
 
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function put(PasswordResetTokenEntity $token): void
@@ -22,17 +22,13 @@ final class SqlPasswordResetTokenStorage implements PasswordResetTokenStorageInt
         if (! ctype_digit($token->customerId)) {
             return;
         }
-        $this->db->exec('password_reset_put', [
-            'id' => (int) $token->customerId,
-            'resetKey' => $token->resetKey,
-            'resetExpire' => $token->expiresAt->format(self::DATETIME_FORMAT),
-        ]);
+        $this->db->password_reset_put(id: (int) $token->customerId, resetKey: $token->resetKey, resetExpire: $token->expiresAt->format(self::DATETIME_FORMAT));
     }
 
     #[Override]
     public function getByResetKey(string $resetKey): PasswordResetTokenEntity|null
     {
-        $row = $this->db->row('password_reset_get', ['resetKey' => $resetKey]);
+        $row = $this->db->password_reset_get(resetKey: $resetKey);
         if ($row === null) {
             return null;
         }
@@ -43,6 +39,6 @@ final class SqlPasswordResetTokenStorage implements PasswordResetTokenStorageInt
     #[Override]
     public function delete(string $resetKey): void
     {
-        $this->db->exec('password_reset_delete', ['resetKey' => $resetKey]);
+        $this->db->password_reset_delete(resetKey: $resetKey);
     }
 }
