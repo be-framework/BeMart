@@ -11,7 +11,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * PurchaseFlowApplied Being holds an instance of this class as its
  * convergence output.
  */
-final readonly class PurchaseFlowResult
+final readonly class PurchaseTotals
 {
     public function __construct(
         public int $subtotal,
