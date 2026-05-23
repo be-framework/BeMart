@@ -43,7 +43,7 @@ final readonly class PaymentMethodAdminCreated
         }
 
         $entity = new PaymentMethodAdminEntity(
-            paymentId: $idGenerator->generate()->value(),
+            paymentId: $idGenerator->generate()->value,
             paymentMethodName: $paymentMethodName,
             charge: $charge,
             ruleMin: $ruleMin,

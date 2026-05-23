@@ -157,7 +157,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
         $customerId = $this->insertCustomer();
         $this->insertPref(13, 'Tokyo'); // FK target — mtb_pref empty by default
         $generator = $this->sql(AddressIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new AddressEntity(
             addressId: $newId,
@@ -286,12 +286,12 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(AddressIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $customerId = $this->insertCustomer();
         $firstId = $this->insertAddress(['customer_id' => $customerId]);
         $secondId = $this->insertAddress(['customer_id' => $customerId]);
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

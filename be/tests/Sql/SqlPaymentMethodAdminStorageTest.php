@@ -127,7 +127,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new PaymentMethodAdminEntity(
             paymentId: $newId,
@@ -159,7 +159,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     public function testPutPersistsNullRuleBoundsAndDefaults(): void
     {
         $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->put(new PaymentMethodAdminEntity(
@@ -196,7 +196,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         // A soft-hidden payment (visible=false) round-trips the same as
         // a visible one — only the Final layer interprets the flag.
         $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->put(new PaymentMethodAdminEntity(
@@ -394,11 +394,11 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertPayment();
         $secondId = $this->insertPayment();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

@@ -80,7 +80,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(ClassNameIdGeneratorInterface::class);
-        $newId = $generator->generate()->value(); // numeric string
+        $newId = $generator->generate()->value; // numeric string
 
         $entity = new ClassNameEntity(
             classNameId: $newId,
@@ -107,7 +107,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // a value. The projection never reads it, so probe the raw
         // column directly. First INSERT on an empty table → 1.
         $generator = $this->sql(ClassNameIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(ClassNameStorageInterface::class);
 
         $storage->put(new ClassNameEntity(classNameId: $newId, name: 'Color'));
@@ -126,7 +126,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $this->insertClassName(['name' => 'Existing', 'sort_no' => 7]);
 
         $generator = $this->sql(ClassNameIdGeneratorInterface::class);
-        $newId = $generator->generate()->value();
+        $newId = $generator->generate()->value;
         $storage = $this->sql(ClassNameStorageInterface::class);
         $storage->put(new ClassNameEntity(classNameId: $newId, name: 'Color'));
 
@@ -284,11 +284,11 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(ClassNameIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value());
+        $this->assertSame('1', $generator->generate()->value);
 
         $firstId = $this->insertClassName();
         $secondId = $this->insertClassName();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value());
+        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }
