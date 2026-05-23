@@ -17,7 +17,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
             'name02' => 'Anderson',
         ]);
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $customer = $query->findByEmail('alice@example.com');
 
         $this->assertInstanceOf(CustomerEntity::class, $customer);
@@ -31,7 +31,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
     {
         $this->insertCustomer(['email' => 'bob@example.com']);
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $this->assertNull($query->findByEmail('nobody@example.com'));
     }
 
@@ -39,7 +39,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
     {
         $id = $this->insertCustomer(['email' => 'carol@example.com']);
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $customer = $query->findById((string) $id);
 
         $this->assertNotNull($customer);
@@ -50,7 +50,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
     {
         $this->insertCustomer();
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $this->assertNull($query->findById('99999999'));
         // Non-numeric id is rejected early without hitting the DB.
         $this->assertNull($query->findById('not-an-int'));
@@ -64,7 +64,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
             'secret_key' => $secret,
         ]);
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $customer = $query->findBySecretKey($secret);
 
         $this->assertNotNull($customer);
@@ -77,7 +77,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
     {
         $this->insertCustomer();
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $this->assertNull($query->findBySecretKey('does-not-exist'));
     }
 
@@ -88,7 +88,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
         $this->insertCustomer(['name01' => 'Bob', 'name02' => 'Brown', 'email' => 'c@example.com']);
         $this->insertCustomer(['company_name' => 'Smithsonian Inc', 'email' => 'd@example.com']);
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $results = $query->search('Smith', null);
 
         // Hits "Smith" (name02) and "Smithsonian Inc" (company_name).
@@ -103,7 +103,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
         $this->insertCustomer(['email' => 'user@other.example.com']);
         $this->insertCustomer(['email' => 'admin2@shop.example.com']);
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $results = $query->search(null, 'shop.example');
 
         $this->assertCount(2, $results);
@@ -136,7 +136,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
             'email' => 'tanaka@target.example.com',
         ]);
 
-        $query = new SqlCustomerQuery($this->pdo);
+        $query = $this->sql(SqlCustomerQuery::class);
         $results = $query->search('Yamada', 'target.example.com', 2);
 
         $this->assertCount(2, $results, 'limit must cap the result set');

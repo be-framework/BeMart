@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
+use Aura\Sql\DecoratedPdo;
+use Aura\Sql\ExtendedPdoInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\SqlProductQuery;
 use PDO;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
+use Ray\Di\Injector;
+use Ray\Di\Scope;
+use Ray\MediaQuery\MediaQuerySqlModule;
 use RuntimeException;
+
+use function dirname;
 
 /**
  * Base class for SQL tests. Each test runs inside a transaction that
@@ -35,6 +45,7 @@ abstract class AbstractSqlTestCase extends TestCase
     use SqlFixturesTrait;
 
     protected PDO $pdo;
+    private Injector $sqlInjector;
 
     protected function setUp(): void
     {
@@ -58,6 +69,7 @@ abstract class AbstractSqlTestCase extends TestCase
 
         $this->pdo = $bootstrap['pdo'];
         $this->pdo->beginTransaction();
+        $this->sqlInjector = new Injector($this->mediaQueryTestModule(), __DIR__ . '/../../../var/tmp/sql');
     }
 
     protected function tearDown(): void
@@ -65,5 +77,42 @@ abstract class AbstractSqlTestCase extends TestCase
         if (isset($this->pdo) && $this->pdo->inTransaction()) {
             $this->pdo->rollBack();
         }
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $class
+     * @return T
+     */
+    protected function sql(string $class): object
+    {
+        return $this->sqlInjector->getInstance($class);
+    }
+
+    private function mediaQueryTestModule(): AbstractModule
+    {
+        $pdo = $this->pdo;
+        $interfaceDir = dirname(__DIR__, 2) . '/src/Reason/Query/MediaQuery';
+        $sqlDir = dirname(__DIR__, 3) . '/sql/media-query';
+
+        return new class ($pdo, $interfaceDir, $sqlDir) extends AbstractModule {
+            public function __construct(
+                private readonly PDO $pdo,
+                private readonly string $interfaceDir,
+                private readonly string $sqlDir,
+            )
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(ExtendedPdoInterface::class)->toInstance(new DecoratedPdo($this->pdo));
+                $this->install(new MediaQuerySqlModule($this->interfaceDir, $this->sqlDir));
+                $this->bind(ProductQueryInterface::class)
+                    ->to(SqlProductQuery::class)
+                    ->in(Scope::SINGLETON);
+            }
+        };
     }
 }

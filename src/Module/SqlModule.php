@@ -99,7 +99,6 @@ use MyVendor\BeMart\Be\Reason\Service\SqlTaxRuleIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use Override;
-use PDO;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
 
@@ -122,14 +121,8 @@ use Ray\Di\Scope;
  *   - the 13 `*IdGeneratorInterface`s → `Sql*IdGenerator` (the Fake
  *     generators emit hex / prefixed handles; the SQL impls require the
  *     numeric autoinc form that matches the real `dtb_*` int PKs)
- *   - `PDO::class` → {@see PdoProvider} (Singleton — one connection per
- *     request lifecycle, built from the runtime `DATABASE_URL`)
- *
- * The one difference from the test base: the test binds `PDO::class` to a
- * shared per-run test connection instance against `eccubedb_test`. Here
- * `PDO::class` is bound to {@see PdoProvider}, which constructs the
- * connection from the production `DATABASE_URL` environment variable at
- * runtime.
+ *   - MediaQuery runtime is installed once and all query bodies are
+ *     resolved from `sql/media-query`.
  *
  * `CustomerIdGeneratorInterface` is bound to `SqlCustomerIdGenerator`:
  * production customer ids must be the numeric autoinc form.
@@ -139,14 +132,10 @@ final class SqlModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
-        // PDO — one connection per request lifecycle, built from the
-        // runtime DATABASE_URL. Every Sql* class below is constructed
-        // against this same handle.
-        $this->bind(PDO::class)->toProvider(PdoProvider::class)->in(Scope::SINGLETON);
+        $this->install(new MediaQueryRuntimeModule());
 
         // Storage interfaces — Fake -> Sql. Linked bindings; Ray.Di
-        // constructs each Sql class on first request, injecting the PDO
-        // above via the constructor.
+        // constructs each Sql class on first request.
         $this->bind(CustomerQueryInterface::class)
             ->to(SqlCustomerQuery::class)
             ->in(Scope::SINGLETON);

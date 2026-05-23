@@ -30,7 +30,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $first = $this->insertCategory(['category_name' => 'Food', 'sort_no' => 10]);
         $second = $this->insertCategory(['category_name' => 'Snacks', 'sort_no' => 20]);
 
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $rows = $storage->list();
 
         $this->assertCount(3, $rows);
@@ -50,7 +50,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $a = $this->insertCategory(['category_name' => 'A', 'sort_no' => 5]);
         $b = $this->insertCategory(['category_name' => 'B', 'sort_no' => 5]);
 
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $rows = $storage->list();
 
         $this->assertSame((string) $a, $rows[0]->categoryId);
@@ -59,7 +59,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -70,7 +70,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             'sort_no' => 7,
         ]);
 
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(CategoryEntity::class, $entity);
@@ -90,7 +90,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             'hierarchy' => 2,
         ]);
 
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $entity = $storage->getById((string) $child);
 
         $this->assertInstanceOf(CategoryEntity::class, $entity);
@@ -99,7 +99,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -109,14 +109,14 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // `nonexistent-zzz` can never match an int PK; surface as miss
         // so CategoryUpdated / CategoryDeleted fire their 404 paths
         // instead of a PDO error.
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
         $this->assertNull($storage->getById('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRootRowWithProvidedId(): void
     {
-        $generator = new SqlCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlCategoryIdGenerator::class);
         $newId = $generator->generate(); // numeric string
 
         $entity = new CategoryEntity(
@@ -126,7 +126,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 10,
         );
 
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -147,9 +147,9 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // hierarchy is NOT NULL with no DEFAULT — a root INSERT must
         // write depth 1. The projection never reads it, so probe the
         // raw column directly.
-        $generator = new SqlCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlCategoryIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
 
         $storage->put(new CategoryEntity(
             categoryId: $newId,
@@ -171,8 +171,8 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // Build a three-level tree (root=1, child=2, grandchild=3) so
         // the cascade of derivation is observable.
         $rootId = $this->insertCategory(['category_name' => 'Food', 'hierarchy' => 1]);
-        $storage = new SqlCategoryStorage($this->pdo);
-        $gen = new SqlCategoryIdGenerator($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
+        $gen = $this->sql(SqlCategoryIdGenerator::class);
 
         $childId = $gen->generate();
         $storage->put(new CategoryEntity(
@@ -206,7 +206,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testPutIsNoOpForNonNumericId(): void
     {
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
 
         $storage->put(new CategoryEntity(
             categoryId: 'deadbeefdeadbeefdeadbeefdeadbeef',
@@ -222,9 +222,9 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     {
         // A non-numeric parentId can never reference a real int PK —
         // the storage stores it as NULL (root) rather than raising.
-        $generator = new SqlCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlCategoryIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
 
         $storage->put(new CategoryEntity(
             categoryId: $newId,
@@ -256,7 +256,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 25,
         );
 
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -276,7 +276,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $parentId = $this->insertCategory(['category_name' => 'Food', 'hierarchy' => 1]);
         $movingId = $this->insertCategory(['category_name' => 'Cookies', 'hierarchy' => 1]);
 
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $storage->put(new CategoryEntity(
             categoryId: (string) $movingId,
             categoryName: 'Cookies',
@@ -298,7 +298,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     public function testRemoveDeletesExistingRow(): void
     {
         $id = $this->insertCategory(['category_name' => 'doomed']);
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -328,7 +328,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             ':discriminator' => 'productcategory',
         ]);
 
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $storage->remove((string) $categoryId);
 
         // Category is gone.
@@ -351,7 +351,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = new SqlCategoryStorage($this->pdo);
+        $storage = $this->sql(SqlCategoryStorage::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric
         $storage->remove('nonexistent-zzz'); // non-numeric, no exception
@@ -360,7 +360,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testSqlCategoryIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = new SqlCategoryIdGenerator($this->pdo);
+        $generator = $this->sql(SqlCategoryIdGenerator::class);
 
         // Empty table → starts at 1.
         $this->assertSame('1', $generator->generate());

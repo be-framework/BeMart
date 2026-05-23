@@ -1,0 +1,1 @@
+SELECT p.id AS product_id, pc.product_code, p.name AS product_name, pc.price02, pc.stock, p.product_status_id, p.description_detail, p.search_word, p.note FROM dtb_product_class pc INNER JOIN dtb_product p ON p.id = pc.product_id WHERE pc.class_category_id1 IS NULL AND pc.class_category_id2 IS NULL ORDER BY pc.id ASC

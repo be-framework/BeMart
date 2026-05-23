@@ -25,7 +25,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_date' => '2026-05-11 10:00:00',
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $orders = $query->listByCustomer((string) $customerId);
 
         $this->assertCount(2, $orders);
@@ -43,7 +43,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         $otherCustomerId = $this->insertCustomer();
         $this->insertOrder(['customer_id' => $otherCustomerId]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $this->assertSame([], $query->listByCustomer((string) $customerId));
     }
 
@@ -66,7 +66,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_date' => '2026-05-01 10:00:00',
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $orders = $query->listByCustomer((string) $customerId);
 
         $orderNos = array_map(static fn (FinalizedOrderEntity $o) => $o->orderNo, $orders);
@@ -84,7 +84,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             ]);
         }
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         // Newest first → ORD-05, ORD-04, ORD-03, ORD-02, ORD-01.
         // Skip 2, take 2 → ORD-03, ORD-02.
         $page = $query->listByCustomer((string) $customerId, limit: 2, offset: 2);
@@ -110,7 +110,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $orders = $query->listByCustomer((string) $customerId);
         $this->assertCount(1, $orders);
         $this->assertSame('FINAL-1', $orders[0]->orderNo);
@@ -128,7 +128,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $orders = $query->listAll();
         $this->assertCount(2, $orders, 'pre-orders are excluded from listAll too');
     }
@@ -142,7 +142,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'total' => 4242,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $order = $query->byOrderNo('LOOKUP-001');
         $this->assertNotNull($order);
         $this->assertSame('LOOKUP-001', $order->orderNo);
@@ -153,7 +153,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
     public function testByOrderNoReturnsNullWhenMissing(): void
     {
         $this->insertOrder();
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $this->assertNull($query->byOrderNo('NOPE'));
     }
 
@@ -165,7 +165,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_no' => 'PROC-001',
             'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $this->assertNull($query->byOrderNo('PROC-001'));
     }
 
@@ -184,7 +184,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $order = $query->byPreOrderId('PRE-001');
         $this->assertInstanceOf(OrderEntity::class, $order);
         $this->assertSame('PRE-001', $order->preOrderId);
@@ -203,7 +203,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_status_id' => FinalizedOrderEntity::STATUS_NEW,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $this->assertNull($query->byPreOrderId('PRE-NEW'));
     }
 
@@ -223,7 +223,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'quantity' => 1,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $items = $query->itemsByOrderNo('ITEM-ORD-001');
 
         $this->assertCount(2, $items);
@@ -239,13 +239,13 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
     public function testItemsByOrderNoReturnsEmptyWhenNoItems(): void
     {
         $this->insertOrder(['order_no' => 'EMPTY-ORD']);
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $this->assertSame([], $query->itemsByOrderNo('EMPTY-ORD'));
     }
 
     public function testHistoryByOrderNoReturnsNullWhenMissing(): void
     {
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $this->assertNull($query->historyByOrderNo('NO-SUCH-ORDER'));
     }
 
@@ -255,7 +255,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_no' => 'HIST-PROC',
             'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $this->assertNull($query->historyByOrderNo('HIST-PROC'));
     }
 
@@ -273,7 +273,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'add_point' => 127,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $history = $query->historyByOrderNo('HIST-001');
 
         $this->assertNotNull($history);
@@ -295,7 +295,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'message' => null,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $history = $query->historyByOrderNo('HIST-NOPAY');
 
         $this->assertNotNull($history);
@@ -337,7 +337,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'quantity' => 1,
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $history = $query->historyByOrderNo('HIST-SHIP');
 
         $this->assertNotNull($history);
@@ -376,7 +376,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'mail_body' => 'ご注文を承りました。',
         ]);
 
-        $query = new SqlOrderQuery($this->pdo);
+        $query = $this->sql(SqlOrderQuery::class);
         $history = $query->historyByOrderNo('HIST-MAIL');
 
         $this->assertNotNull($history);
