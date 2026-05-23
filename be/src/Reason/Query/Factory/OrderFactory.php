@@ -15,11 +15,11 @@ final class OrderFactory
         int|string $deliveryFeeTotal,
     ): OrderEntity {
         return new OrderEntity(
-            preOrderId: $preOrderId ?? '',
-            customerId: (string) ($customerId ?? ''),
-            paymentMethodId: $paymentId === null ? 0 : (int) $paymentId,
-            items: [],
-            deliveryFeeTotal: (int) $deliveryFeeTotal,
+            $preOrderId ?? '',
+            (string) ($customerId ?? ''),
+            $paymentId === null ? 0 : (int) $paymentId,
+            [],
+            (int) $deliveryFeeTotal,
         );
     }
 }
