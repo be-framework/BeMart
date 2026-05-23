@@ -18,8 +18,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * shipping rows, order-item snapshots and tax-line breakdowns are deferred
  * to the production migration where they land in dedicated tables.
  */
-final readonly class FinalizedOrderEntity
+final readonly class FinalizedOrderEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     /**
      * EC-CUBE dtb_order.order_status_id values, mirrored verbatim from the
      * ALPS `orderStatus` descriptor:

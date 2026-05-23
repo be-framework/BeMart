@@ -27,8 +27,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * EC-CUBE logically deletes payment masters to preserve historical
  * order snapshots.
  */
-final readonly class PaymentMethodAdminEntity
+final readonly class PaymentMethodAdminEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $paymentId,
         public string $paymentMethodName,

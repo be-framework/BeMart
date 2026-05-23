@@ -19,7 +19,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * `Mypage/delivery.twig`) can render the prefecture name rather than the
  * bare integer `pref` master id. It is the LAST, OPTIONAL constructor
  * parameter: every existing construction site (the CustomerAddress
- * create / update write Finals, SqlAddressStorage / FakeAddressStorage
+ * create / update write Finals, AddressStorageInterface / FakeAddressStorage
  * reads, the tests) passes its arguments by name, so the trailing
  * nullable field adds no positional ripple. `null` means the prefecture
  * master was not resolvable (an unset `pref_id`, or the `mtb_pref`
@@ -30,8 +30,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * `AddressStorage::put`) persist only `pref` (the FK); they leave
  * `prefName` at its `null` default.
  */
-final readonly class AddressEntity
+final readonly class AddressEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $addressId,
         public string $customerId,

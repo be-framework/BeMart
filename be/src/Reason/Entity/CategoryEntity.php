@@ -15,8 +15,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * deliberately out of scope; Phase 2 can add a hierarchical builder
  * once a real consumer asks for it.
  */
-final readonly class CategoryEntity
+final readonly class CategoryEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $categoryId,
         public string $categoryName,

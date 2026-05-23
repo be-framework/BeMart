@@ -20,8 +20,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * remaining fields are Phase 2 scope — same incremental approach as
  * CustomerListFetched's filter scope.
  */
-final readonly class BaseInfoEntity
+final readonly class BaseInfoEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $shopName,
         public string|null $shopKana,

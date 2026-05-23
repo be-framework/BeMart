@@ -21,8 +21,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * phase (separate models). DeliveryTime slots and DeliveryDuration
  * estimates from the ALPS profile remain out of scope as well.
  */
-final readonly class DeliveryEntity
+final readonly class DeliveryEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $deliveryId,
         public string $deliveryName,
