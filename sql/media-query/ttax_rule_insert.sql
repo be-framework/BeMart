@@ -1,1 +1,0 @@
-INSERT INTO dtb_tax_rule (id, product_class_id, product_id, country_id, pref_id, creator_id, rounding_type_id, tax_rate, tax_adjust, apply_date, create_date, update_date, discriminator_type) VALUES (:id, NULL, NULL, NULL, NULL, NULL, NULL, :taxRate, 0, :applyDate, NOW(), NOW(), 'taxrule')

@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlOrderCommand;
-use MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery;
+use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 
 /**
- * Storage-layer coverage for {@see SqlOrderCommand} (Phase 2b).
+ * Storage-layer coverage for {@see OrderCommandInterface} (Phase 2b).
  *
  * Per G-23 the client-observable contract lives in the Resource-layer
  * siblings ({@see \MyVendor\BeMart\Tests\Resource\Sql\AdminOrderStatusResourceSqlTest}
  * / {@see \MyVendor\BeMart\Tests\Resource\Sql\CheckoutResourceSqlTest});
  * this file pins the per-method SQL paths against the SAME column↔field
- * projection {@see SqlOrderQuery} reads back, so a read-after-write
+ * projection {@see OrderQueryInterface} reads back, so a read-after-write
  * round-trips exactly.
  *
  * Surprises this suite locks in:
@@ -94,7 +94,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'total' => 0,
         ]);
 
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'PROMOTED-001',
             'preOrderId' => 'PRE-PROMOTE-1',
@@ -117,7 +117,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
         $stmt->execute([':no' => 'PROMOTED-001']);
         $this->assertSame($pre['id'], (int) $stmt->fetchColumn());
 
-        $query = $this->sql(SqlOrderQuery::class);
+        $query = $this->sql(OrderQueryInterface::class);
         $read = $query->byOrderNo('PROMOTED-001');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $read);
         $this->assertSame('PROMOTED-001', $read->orderNo);
@@ -139,7 +139,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
 
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'CONTACT-001',
             'preOrderId' => 'PRE-CONTACT',
@@ -160,7 +160,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
         // no prior pre-order row, so register must INSERT.
         $customerId = $this->insertCustomer();
 
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'ADMIN-NEW-001',
             'preOrderId' => 'ADMIN-NEW-001',
@@ -171,7 +171,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'paymentDate' => '',
         ]));
 
-        $query = $this->sql(SqlOrderQuery::class);
+        $query = $this->sql(OrderQueryInterface::class);
         $read = $query->byOrderNo('ADMIN-NEW-001');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $read);
         $this->assertSame('ADMIN-NEW-001', $read->orderNo);
@@ -186,7 +186,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
     {
         // The fresh-INSERT path must satisfy the NOT NULL name01 / name02
         // columns the entity does not model.
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'ADMIN-NAMES-001',
             'preOrderId' => 'ADMIN-NAMES-001',
@@ -206,7 +206,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
         // FakeSession emits handles like `customer-001`; dtb_order.customer_id
         // is an int FK — a non-numeric handle must write NULL rather than
         // tripping the FK.
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'NONNUMERIC-CUST',
             'preOrderId' => 'NONNUMERIC-CUST',
@@ -223,8 +223,8 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
     public function testRegisterRoundTripsMoneyAndPointColumns(): void
     {
         // Read-after-write parity across every money / point column the
-        // SqlOrderQuery projection models.
-        $command = $this->sql(SqlOrderCommand::class);
+        // OrderQueryInterface projection models.
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'MONEY-001',
             'preOrderId' => 'MONEY-001',
@@ -239,7 +239,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'usePoint' => 50,
         ]));
 
-        $read = ($this->sql(SqlOrderQuery::class))->byOrderNo('MONEY-001');
+        $read = ($this->sql(OrderQueryInterface::class))->byOrderNo('MONEY-001');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $read);
         $this->assertSame(12345, $read->subtotal);
         $this->assertSame(600, $read->deliveryFeeTotal);
@@ -254,10 +254,10 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
 
     public function testRegisterNormalizesAtomDatetimeForRoundTrip(): void
     {
-        // CheckoutCompleted stamps ATOM dates; SqlOrderQuery reads bare
+        // CheckoutCompleted stamps ATOM dates; OrderQueryInterface reads bare
         // `Y-m-d H:i:s`. The normalizer must coerce so a read-after-write
         // yields the same string the order pipeline uses.
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'ATOM-DATE-001',
             'preOrderId' => 'ATOM-DATE-001',
@@ -265,7 +265,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'paymentDate' => '2026-05-20T14:30:00+09:00',
         ]));
 
-        $read = ($this->sql(SqlOrderQuery::class))->byOrderNo('ATOM-DATE-001');
+        $read = ($this->sql(OrderQueryInterface::class))->byOrderNo('ATOM-DATE-001');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $read);
         $this->assertSame('2026-05-20 14:30:00', $read->orderDate);
         $this->assertSame('2026-05-20 14:30:00', $read->paymentDate);
@@ -275,14 +275,14 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
     {
         // A UTC-stamped ATOM value lands in the Asia/Tokyo wall clock
         // (+09:00) so the persisted column matches the pipeline's TZ.
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'TZ-DATE-001',
             'preOrderId' => 'TZ-DATE-001',
             'orderDate' => '2026-05-20T00:00:00+00:00',
         ]));
 
-        $read = ($this->sql(SqlOrderQuery::class))->byOrderNo('TZ-DATE-001');
+        $read = ($this->sql(OrderQueryInterface::class))->byOrderNo('TZ-DATE-001');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $read);
         // 00:00 UTC → 09:00 Asia/Tokyo.
         $this->assertSame('2026-05-20 09:00:00', $read->orderDate);
@@ -300,7 +300,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'use_point' => 0,
         ]);
 
-        $query = $this->sql(SqlOrderQuery::class);
+        $query = $this->sql(OrderQueryInterface::class);
         $current = $query->byOrderNo('UPD-001');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $current);
 
@@ -325,7 +325,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'paymentDate' => $current->paymentDate,
         ]);
 
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->update($merged);
 
         $read = $query->byOrderNo('UPD-001');
@@ -345,7 +345,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'name02' => 'Ichiro',
         ]);
 
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->update($this->entity([
             'orderNo' => 'UPD-CONTACT',
             'charge' => 777,
@@ -363,7 +363,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
     public function testUpdateIsNoOpForUnknownOrderNo(): void
     {
         // No row matches — WHERE order_no hits nothing, no row created.
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->update($this->entity(['orderNo' => 'GHOST-ORDER']));
 
         $stmt = $this->pdo->prepare(
@@ -380,10 +380,10 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'order_status_id' => FinalizedOrderEntity::STATUS_NEW,
         ]);
 
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->updateStatus('STATUS-001', FinalizedOrderEntity::STATUS_DELIVERED);
 
-        $read = ($this->sql(SqlOrderQuery::class))->byOrderNo('STATUS-001');
+        $read = ($this->sql(OrderQueryInterface::class))->byOrderNo('STATUS-001');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $read);
         $this->assertSame(FinalizedOrderEntity::STATUS_DELIVERED, $read->orderStatus);
     }
@@ -396,10 +396,10 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
             'total' => 4242,
         ]);
 
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->updateStatus('STATUS-NARROW', FinalizedOrderEntity::STATUS_CANCEL);
 
-        $read = ($this->sql(SqlOrderQuery::class))->byOrderNo('STATUS-NARROW');
+        $read = ($this->sql(OrderQueryInterface::class))->byOrderNo('STATUS-NARROW');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $read);
         $this->assertSame(FinalizedOrderEntity::STATUS_CANCEL, $read->orderStatus);
         // The narrow flip never touched the total column.
@@ -410,7 +410,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
     {
         // Concurrent-delete race: a missing row is a silent no-op, no
         // fabricated row, no exception (mirrors FakeOrderCommand).
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->updateStatus('VANISHED-ORDER', FinalizedOrderEntity::STATUS_CANCEL);
 
         $stmt = $this->pdo->prepare(
@@ -423,9 +423,9 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
     public function testRegisterThenUpdateStatusRoundTripsThroughQuery(): void
     {
         // End-to-end storage round-trip: register a fresh order, flip its
-        // status, confirm SqlOrderQuery sees the flipped value — proves
+        // status, confirm OrderQueryInterface sees the flipped value — proves
         // the write side and read side agree on the column mapping.
-        $command = $this->sql(SqlOrderCommand::class);
+        $command = $this->sql(OrderCommandInterface::class);
         $command->register($this->entity([
             'orderNo' => 'ROUNDTRIP-001',
             'preOrderId' => 'ROUNDTRIP-001',
@@ -433,7 +433,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
         ]));
         $command->updateStatus('ROUNDTRIP-001', FinalizedOrderEntity::STATUS_PAID);
 
-        $read = ($this->sql(SqlOrderQuery::class))->byOrderNo('ROUNDTRIP-001');
+        $read = ($this->sql(OrderQueryInterface::class))->byOrderNo('ROUNDTRIP-001');
         $this->assertInstanceOf(FinalizedOrderEntity::class, $read);
         $this->assertSame(FinalizedOrderEntity::STATUS_PAID, $read->orderStatus);
     }

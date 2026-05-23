@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlCategoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
 
 /**
- * Storage-layer coverage for {@see SqlCategoryStorage} (Phase 2b).
+ * Storage-layer coverage for {@see CategoryStorageInterface} (Phase 2b).
  *
- * Mirrors the shape of {@see SqlBlockStorageTest}. Per G-23 the
+ * Mirrors the shape of {@see BlockStorageInterfaceTest}. Per G-23 the
  * client-observable contract lives in
  * {@see \MyVendor\BeMart\Tests\Resource\Sql\AdminCategoryResourceSqlTest};
  * the cases below verify the per-method SQL paths in isolation —
@@ -30,7 +30,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $first = $this->insertCategory(['category_name' => 'Food', 'sort_no' => 10]);
         $second = $this->insertCategory(['category_name' => 'Snacks', 'sort_no' => 20]);
 
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertCount(3, $rows);
@@ -50,7 +50,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $a = $this->insertCategory(['category_name' => 'A', 'sort_no' => 5]);
         $b = $this->insertCategory(['category_name' => 'B', 'sort_no' => 5]);
 
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertSame((string) $a, $rows[0]->categoryId);
@@ -59,7 +59,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -70,7 +70,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             'sort_no' => 7,
         ]);
 
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(CategoryEntity::class, $entity);
@@ -90,7 +90,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             'hierarchy' => 2,
         ]);
 
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $entity = $storage->getById((string) $child);
 
         $this->assertInstanceOf(CategoryEntity::class, $entity);
@@ -99,7 +99,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -109,7 +109,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // `nonexistent-zzz` can never match an int PK; surface as miss
         // so CategoryUpdated / CategoryDeleted fire their 404 paths
         // instead of a PDO error.
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
         $this->assertNull($storage->getById('nonexistent-zzz'));
     }
@@ -126,7 +126,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 10,
         );
 
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -149,7 +149,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // raw column directly.
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
         $newId = $generator->generate()->value();
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
             categoryId: $newId,
@@ -171,7 +171,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // Build a three-level tree (root=1, child=2, grandchild=3) so
         // the cascade of derivation is observable.
         $rootId = $this->insertCategory(['category_name' => 'Food', 'hierarchy' => 1]);
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $gen = $this->sql(CategoryIdGeneratorInterface::class);
 
         $childId = $gen->generate()->value();
@@ -206,7 +206,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testPutIsNoOpForNonNumericId(): void
     {
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
             categoryId: 'deadbeefdeadbeefdeadbeefdeadbeef',
@@ -224,7 +224,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // the storage stores it as NULL (root) rather than raising.
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
         $newId = $generator->generate()->value();
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
             categoryId: $newId,
@@ -256,7 +256,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 25,
         );
 
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -276,7 +276,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $parentId = $this->insertCategory(['category_name' => 'Food', 'hierarchy' => 1]);
         $movingId = $this->insertCategory(['category_name' => 'Cookies', 'hierarchy' => 1]);
 
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $storage->put(new CategoryEntity(
             categoryId: (string) $movingId,
             categoryName: 'Cookies',
@@ -298,7 +298,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     public function testRemoveDeletesExistingRow(): void
     {
         $id = $this->insertCategory(['category_name' => 'doomed']);
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -311,7 +311,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     {
         // dtb_product_category's FK (category_id → dtb_category.id)
         // would otherwise raise FK 1451 on the category DELETE.
-        // SqlCategoryStorage::remove pre-DELETEs the assignment rows so
+        // CategoryStorageInterface::remove pre-DELETEs the assignment rows so
         // the category-level delete succeeds regardless of assignment
         // state.
         $categoryId = $this->insertCategory(['category_name' => 'Sale']);
@@ -328,7 +328,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             ':discriminator' => 'productcategory',
         ]);
 
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $storage->remove((string) $categoryId);
 
         // Category is gone.
@@ -351,7 +351,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = $this->sql(SqlCategoryStorage::class);
+        $storage = $this->sql(CategoryStorageInterface::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric
         $storage->remove('nonexistent-zzz'); // non-numeric, no exception

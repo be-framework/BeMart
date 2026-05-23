@@ -18,8 +18,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * shipping block has all items under that block; a multi-shipping order
  * fans them out.
  */
-final readonly class OrderHistoryItemEntity
+final readonly class OrderHistoryItemEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $productCode,
         public string $productName,

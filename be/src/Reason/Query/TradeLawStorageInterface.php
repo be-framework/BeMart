@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\TradeLawEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * TradeLaw storage — unified Query + Command (Wave 8).
@@ -18,7 +19,9 @@ use MyVendor\BeMart\Be\Reason\Entity\TradeLawEntity;
  */
 interface TradeLawStorageInterface
 {
+    #[DbQuery('ttrade_law_get', factory: TradeLawEntity::class)]
     public function get(): TradeLawEntity;
 
+    #[DbQuery('ttrade_law_put')]
     public function update(TradeLawEntity $entity): void;
 }

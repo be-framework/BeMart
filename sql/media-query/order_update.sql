@@ -1,17 +1,4 @@
 UPDATE dtb_order
-SET customer_id = :customerId,
-    payment_id = :paymentId,
-    subtotal = :subtotal,
-    delivery_fee_total = :deliveryFeeTotal,
-    charge = :charge,
-    discount = :discount,
-    tax = :tax,
-    total = :total,
-    payment_total = :paymentTotal,
-    add_point = :addPoint,
-    use_point = :usePoint,
-    order_status_id = :orderStatus,
-    order_date = :orderDate,
-    payment_date = :paymentDate,
-    update_date = NOW()
-WHERE order_no = :orderNo
+SET customer_id = CASE WHEN JSON_VALUE(:order, '$.customerId') REGEXP '^[0-9]+$' THEN CAST(JSON_VALUE(:order, '$.customerId') AS UNSIGNED) ELSE NULL END,
+    payment_id = NULLIF(CAST(JSON_VALUE(:order, '$.paymentMethodId') AS SIGNED), 0), subtotal = CAST(JSON_VALUE(:order, '$.subtotal') AS SIGNED), delivery_fee_total = CAST(JSON_VALUE(:order, '$.deliveryFeeTotal') AS SIGNED), charge = CAST(JSON_VALUE(:order, '$.charge') AS SIGNED), discount = CAST(JSON_VALUE(:order, '$.discount') AS SIGNED), tax = CAST(JSON_VALUE(:order, '$.tax') AS SIGNED), total = CAST(JSON_VALUE(:order, '$.total') AS SIGNED), payment_total = CAST(JSON_VALUE(:order, '$.paymentTotal') AS SIGNED), add_point = CAST(JSON_VALUE(:order, '$.addPoint') AS SIGNED), use_point = CAST(JSON_VALUE(:order, '$.usePoint') AS SIGNED), order_status_id = CAST(JSON_VALUE(:order, '$.orderStatus') AS SIGNED), order_date = NULLIF(REPLACE(JSON_VALUE(:order, '$.orderDate'), 'T', ' '), ''), payment_date = NULLIF(REPLACE(JSON_VALUE(:order, '$.paymentDate'), 'T', ' '), ''), update_date = NOW()
+WHERE order_no = JSON_VALUE(:order, '$.orderNo')

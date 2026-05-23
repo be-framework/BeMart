@@ -1,2 +1,5 @@
-INSERT INTO dtb_product (creator_id, product_status_id, name, note, description_list, description_detail, search_word, free_area, create_date, update_date, discriminator_type) VALUES (NULL, :productStatus, :name, :note, NULL, :description, :searchWord, NULL, NOW(), NOW(), 'product');
-INSERT INTO dtb_product_class (product_id, sale_type_id, class_category_id1, class_category_id2, creator_id, product_code, price02, stock, stock_unlimited, visible, create_date, update_date, discriminator_type) VALUES (LAST_INSERT_ID(), NULL, NULL, NULL, NULL, :productCode, :price02, :stock, :stockUnlimited, 1, NOW(), NOW(), 'productclass')
+INSERT INTO dtb_product (product_status_id, name, note, description_detail, search_word, create_date, update_date, discriminator_type)
+VALUES (CAST(JSON_VALUE(:product, '$.productStatus') AS UNSIGNED), JSON_VALUE(:product, '$.productName'), JSON_VALUE(:product, '$.note'), JSON_VALUE(:product, '$.description'), JSON_VALUE(:product, '$.searchWord'), NOW(), NOW(), 'product');
+SET @bemart_product_id = LAST_INSERT_ID();
+INSERT INTO dtb_product_class (product_id, product_code, price02, stock, stock_unlimited, visible, create_date, update_date, discriminator_type)
+VALUES (@bemart_product_id, JSON_VALUE(:product, '$.productCode'), CAST(JSON_VALUE(:product, '$.price02') AS SIGNED), CAST(JSON_VALUE(:product, '$.stock') AS SIGNED), CASE WHEN JSON_VALUE(:product, '$.stock') IS NULL THEN 1 ELSE 0 END, 1, NOW(), NOW(), 'productclass')

@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlCustomerCommand;
-use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
+use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 
 use function bin2hex;
 use function random_bytes;
 
 /**
- * Storage-layer coverage for {@see SqlCustomerCommand} (Phase 2b).
+ * Storage-layer coverage for {@see CustomerCommandInterface} (Phase 2b).
  *
- * Mirrors the shape of {@see SqlAdminCommandTest}'s write half. Per
+ * Mirrors the shape of {@see AdminCommandInterfaceTest}'s write half. Per
  * G-23 the client-observable contract lives in the Resource-layer
  * siblings ({@see \MyVendor\BeMart\Tests\Resource\Sql\EntryResourceSqlTest}
  * et al.); this file pins the per-method SQL paths against the same
- * column↔field projection {@see SqlCustomerQuery} reads back, so a
+ * column↔field projection {@see CustomerQueryInterface} reads back, so a
  * read-after-write round-trips exactly.
  *
  * Surprises this suite locks in:
@@ -108,14 +108,14 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $generator = $this->sql(CustomerIdGeneratorInterface::class);
         $newId = $generator->generate()->value(); // numeric string
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
             'customerId' => $newId,
             'email' => 'new-customer@example.com',
             'pref' => 13,
         ]));
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->findById($newId);
 
         $this->assertInstanceOf(CustomerEntity::class, $read);
@@ -136,7 +136,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $generator = $this->sql(CustomerIdGeneratorInterface::class);
         $newId = $generator->generate()->value();
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
             'customerId' => $newId,
             'email' => 'no-secret@example.com',
@@ -160,7 +160,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $newId = $generator->generate()->value();
         $token = bin2hex(random_bytes(16));
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
             'customerId' => $newId,
             'email' => 'provisional@example.com',
@@ -168,7 +168,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'secretKey' => $token,
         ]));
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->findBySecretKey($token);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('provisional@example.com', $read->email);
@@ -178,15 +178,15 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
 
     public function testRegisterIsNoOpForNonNumericId(): void
     {
-        // FakeCustomerIdGenerator emits 32-char hex; SqlCustomerCommand
+        // FakeCustomerIdGenerator emits 32-char hex; CustomerCommandInterface
         // must reject it silently rather than coerce it into an int PK.
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
             'customerId' => '0123456789abcdef0123456789abcdef',
             'email' => 'reject-me@example.com',
         ]));
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $this->assertNull($query->findByEmail('reject-me@example.com'));
     }
 
@@ -195,7 +195,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $generator = $this->sql(CustomerIdGeneratorInterface::class);
         $newId = $generator->generate()->value();
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
             'customerId' => $newId,
             'email' => 'points@example.com',
@@ -216,10 +216,10 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'secret_key' => $token,
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->activate((string) $id);
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame(2, $read->customerStatus);
@@ -237,7 +237,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'secret_key' => $token,
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->activate((string) $id);
 
         $stmt = $this->pdo->prepare('SELECT secret_key FROM dtb_customer WHERE id = :id');
@@ -253,11 +253,11 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'secret_key' => bin2hex(random_bytes(16)),
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->activate((string) $id);
         $command->activate((string) $id); // replay — must not raise
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame(2, $read->customerStatus);
@@ -270,10 +270,10 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'customer_status_id' => 1,
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->activate('0123456789abcdef0123456789abcdef');
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame(1, $read->customerStatus);
@@ -288,7 +288,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'customer_status_id' => 2,
         ]);
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $current = $query->findById((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $current);
 
@@ -303,7 +303,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'secretKey' => $current->secretKey,
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->update($merged);
 
         $read = $query->findById((string) $id);
@@ -321,7 +321,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'customer_status_id' => 2,
         ]);
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $current = $query->findById((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $current);
 
@@ -335,7 +335,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'secretKey' => $current->secretKey,
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->update($withdrawn);
 
         $read = $query->findById((string) $id);
@@ -353,14 +353,14 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'name01' => 'Original',
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->update($this->entity([
             'customerId' => '0123456789abcdef0123456789abcdef',
             'email' => 'hijacked@example.com',
             'name01' => 'Hijacked',
         ]));
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('safe@example.com', $read->email);
@@ -375,10 +375,10 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'password' => '$2y$12$oldhash',
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->updatePassword((string) $id, '$2y$12$newhash');
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('$2y$12$newhash', $read->passwordHash);
@@ -394,10 +394,10 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
             'password' => '$2y$12$untouched',
         ]);
 
-        $command = $this->sql(SqlCustomerCommand::class);
+        $command = $this->sql(CustomerCommandInterface::class);
         $command->updatePassword('0123456789abcdef0123456789abcdef', '$2y$12$hijacked');
 
-        $query = $this->sql(SqlCustomerQuery::class);
+        $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('$2y$12$untouched', $read->passwordHash);
