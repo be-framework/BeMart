@@ -16,8 +16,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * The first iteration projects the table as a flat list — full
  * sitemap / Twig regeneration semantics are deferred to Phase 2.
  */
-final readonly class PageEntity
+final readonly class PageEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $pageId,
         public string $pageName,

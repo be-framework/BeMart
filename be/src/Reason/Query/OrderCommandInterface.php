@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Persists the finalized Order (dtb_order with orderStatus=NEW(1)).
@@ -32,6 +33,7 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
  */
 interface OrderCommandInterface
 {
+    #[DbQuery('order_register')]
     public function register(FinalizedOrderEntity $order): void;
 
     /**
@@ -39,6 +41,7 @@ interface OrderCommandInterface
      * entity. Caller is responsible for merging editable fields onto the
      * current row and preserving non-editable fields verbatim.
      */
+    #[DbQuery('order_update')]
     public function update(FinalizedOrderEntity $order): void;
 
     /**
@@ -48,5 +51,6 @@ interface OrderCommandInterface
      * (the Final guards against that, so the storage-level miss is a
      * concurrent-delete race we treat as a no-op).
      */
+    #[DbQuery('order_update_status')]
     public function updateStatus(string $orderNo, int $newStatus): void;
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\TagEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Admin product tags — unified Query + Command (Wave 9).
@@ -20,13 +21,18 @@ use MyVendor\BeMart\Be\Reason\Entity\TagEntity;
 interface TagStorageInterface
 {
     /** @return list<TagEntity> */
+    #[DbQuery('tag_list', factory: TagEntity::class)]
     public function list(): array;
 
+    #[DbQuery('tag_get', factory: TagEntity::class)]
     public function getById(string $tagId): TagEntity|null;
 
+    #[DbQuery('tag_put')]
     public function put(TagEntity $tag): void;
 
+    #[DbQuery('tag_delete')]
     public function remove(string $tagId): void;
 
+    #[DbQuery('tag_reorder')]
     public function reorder(string $tagId, int $sortNo): void;
 }

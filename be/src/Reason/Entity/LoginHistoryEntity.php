@@ -15,8 +15,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * avoid coupling to a clock interface for Wave 8; Phase 2 will swap
  * for a DateTimeImmutable + ClockInterface.
  */
-final readonly class LoginHistoryEntity
+final readonly class LoginHistoryEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $timestamp,
         public string $loginId,

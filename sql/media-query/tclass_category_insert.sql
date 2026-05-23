@@ -1,1 +1,0 @@
-INSERT INTO dtb_class_category (id, class_name_id, creator_id, backend_name, name, sort_no, visible, create_date, update_date, discriminator_type) VALUES (:id, :classNameId, NULL, NULL, :name, :sortNo, 1, NOW(), NOW(), 'classcategory')

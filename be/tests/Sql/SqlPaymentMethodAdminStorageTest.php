@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlPaymentMethodAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
 
 use function date;
 
 /**
- * Storage-layer coverage for {@see SqlPaymentMethodAdminStorage}
+ * Storage-layer coverage for {@see PaymentMethodAdminStorageInterface}
  * (Phase 2b).
  *
- * Mirrors the shape of {@see SqlBlockStorageTest}. Per G-23 the
+ * Mirrors the shape of {@see BlockStorageInterfaceTest}. Per G-23 the
  * client-observable contract lives in
  * {@see \MyVendor\BeMart\Tests\Resource\Sql\AdminPaymentResourceSqlTest};
  * the cases below verify the per-method SQL paths in isolation —
@@ -29,7 +29,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         $secondId = $this->insertPayment(['payment_method' => 'クレジットカード']);
         $thirdId = $this->insertPayment(['payment_method' => '銀行振込']);
 
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertCount(3, $rows);
@@ -45,7 +45,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -59,7 +59,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
             'visible' => 0,
         ]);
 
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(PaymentMethodAdminEntity::class, $entity);
@@ -83,7 +83,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
             'rule_max' => null,
         ]);
 
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(PaymentMethodAdminEntity::class, $entity);
@@ -100,7 +100,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         // truncates to int.
         $id = $this->insertPayment(['charge' => '250.00']);
 
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(PaymentMethodAdminEntity::class, $entity);
@@ -109,7 +109,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -119,7 +119,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         // match an int PK; surface as miss so PaymentMethodAdminUpdated
         // / PaymentMethodAdminDeleted fire their 404 paths instead of a
         // PDO error.
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
         $this->assertNull($storage->getById('nonexistent-zzz'));
     }
@@ -138,7 +138,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
             visible: true,
         );
 
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -160,7 +160,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     {
         $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
         $newId = $generator->generate()->value();
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->put(new PaymentMethodAdminEntity(
             paymentId: $newId,
@@ -197,7 +197,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         // a visible one — only the Final layer interprets the flag.
         $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
         $newId = $generator->generate()->value();
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->put(new PaymentMethodAdminEntity(
             paymentId: $newId,
@@ -223,7 +223,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testPutIsNoOpForNonNumericIds(): void
     {
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->put(new PaymentMethodAdminEntity(
             paymentId: 'deadbeefdeadbeefdeadbeefdeadbeef',
@@ -260,7 +260,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
             visible: false,
         );
 
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -278,7 +278,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     public function testRemoveDeletesExistingRow(): void
     {
         $id = $this->insertPayment(['payment_method' => 'doomed']);
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -291,7 +291,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     {
         // dtb_payment_option's FK (payment_id → dtb_payment.id) would
         // otherwise raise FK 1451 on the payment DELETE.
-        // SqlPaymentMethodAdminStorage::remove pre-DELETEs the link rows
+        // PaymentMethodAdminStorageInterface::remove pre-DELETEs the link rows
         // so the payment-level delete succeeds regardless of link state.
         $id = $this->insertPayment(['payment_method' => 'linked']);
 
@@ -326,7 +326,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
             ':discriminator' => 'paymentoption',
         ]);
 
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $storage->remove((string) $id);
 
         // Payment is gone.
@@ -342,7 +342,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // hex, no exception
         $storage->remove('nonexistent-zzz'); // non-numeric, no exception
@@ -352,7 +352,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     public function testReorderRewritesSortNo(): void
     {
         $id = $this->insertPayment(['sort_no' => 6]);
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->reorder((string) $id, 23);
 
@@ -366,7 +366,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     public function testSetVisibleRewritesVisibleColumnAndIsReadBack(): void
     {
         $id = $this->insertPayment(['visible' => 1]);
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->setVisible((string) $id, false);
 
@@ -383,7 +383,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testReorderAndSetVisibleAreSilentNoOpForNonNumericId(): void
     {
-        $storage = $this->sql(SqlPaymentMethodAdminStorage::class);
+        $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $storage->reorder('nonexistent-zzz', 5);
         $storage->setVisible('nonexistent-zzz', false);
         $this->assertTrue(true);
