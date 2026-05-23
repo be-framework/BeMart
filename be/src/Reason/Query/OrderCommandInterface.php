@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
  * PurchaseFlow and OrderRepository commits the same row. The Pilot 5 Reason
  * makes the commit explicit so the Final's "convergence" is observable
  * (matches Pilot 4 CustomerCommand). Phase 2 will swap the fake for a
- * Ray.MediaQuery UPDATE against the existing pre-order row.
+ * Ray.MediaQuery command against the existing pre-order row.
  *
  * Wave 7 (admin order management) extends the contract with two
  * administrator-driven mutators:

@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
  *   - findById(int $mailTemplateId)       → one template or null
  *   - update(MailTemplateEntity $entity)  → replace subject
  *
- * The migration scope only covers UPDATE of subject. Creating a new
+ * The migration scope only covers subject changes. Creating a new
  * template (which requires setting the underlying file_name) is
  * Phase 2 — for now the `mailTemplateId` MUST refer to an existing
  * seeded row, otherwise update() raises

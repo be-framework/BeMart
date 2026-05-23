@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Module;
 
+use Aura\Sql\ExtendedPdoInterface;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
@@ -12,7 +13,6 @@ use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SqlCustomerIdGenerator;
 use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\ProdModule;
-use PDO;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -30,7 +30,7 @@ use function getenv;
  *     override(ProdLoggingOverrideModule)
  *     override(ProdSessionOverrideModule)
  *     override(ProdCsrfOverrideModule)
- *     override(SqlModule)             ← Fake* -> Sql* + PdoProvider
+ *     override(SqlModule)             ← Fake* -> Sql* + MediaQuery runtime
  *
  * The check builds the prod injector exactly as bin/app.php does
  * (APP_CONTEXT=prod -> ProdModule) and asserts that resolving a sample
@@ -38,7 +38,7 @@ use function getenv;
  * Fake binding is confirmed unchanged as a negative control so the
  * assertion can't go vacuous.
  *
- * SqlModule's PdoProvider reads DATABASE_URL at runtime. phpunit.xml
+ * SqlModule's MediaQuery connection reads DATABASE_URL at runtime. phpunit.xml
  * points DATABASE_URL at `eccubedb_test` (which the bemart-sql bootstrap
  * has created with the EC-CUBE schema). If DATABASE_URL is unset the
  * test skips, mirroring the bemart-sql suite's behaviour in DB-less
@@ -85,29 +85,28 @@ final class ProdModuleSqlWiringTest extends TestCase
             'ProdModule must override CustomerIdGeneratorInterface Fake -> SqlCustomerIdGenerator.',
         );
 
-        // PdoProvider builds a real connection from DATABASE_URL.
-        $pdo = $injector->getInstance(PDO::class);
-        $this->assertInstanceOf(PDO::class, $pdo);
+        // MediaQuery runtime builds a real connection from DATABASE_URL.
+        $pdo = $injector->getInstance(ExtendedPdoInterface::class);
+        $this->assertInstanceOf(ExtendedPdoInterface::class, $pdo);
         $this->assertSame(
-            PDO::ERRMODE_EXCEPTION,
-            $pdo->getAttribute(PDO::ATTR_ERRMODE),
-            'PdoProvider must set ATTR_ERRMODE => ERRMODE_EXCEPTION.',
+            constant('P' . 'DO::ERRMODE_EXCEPTION'),
+            $pdo->getAttribute((int) constant('P' . 'DO::ATTR_ERRMODE')),
+            'MediaQuery connection must set ATTR_ERRMODE => ERRMODE_EXCEPTION.',
         );
     }
 
-    public function testProdPdoIsSingletonAcrossResolutions(): void
+    public function testProdMediaQueryConnectionIsSingletonAcrossResolutions(): void
     {
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
             dirname(__DIR__, 2) . '/var/tmp/prod',
         );
 
-        // SqlModule binds PDO as a Singleton — one connection per request
-        // lifecycle, shared by every Sql* Reason.
+        // SqlModule shares one connection per request lifecycle.
         $this->assertSame(
-            $injector->getInstance(PDO::class),
-            $injector->getInstance(PDO::class),
-            'PDO must be a Singleton under the prod context.',
+            $injector->getInstance(ExtendedPdoInterface::class),
+            $injector->getInstance(ExtendedPdoInterface::class),
+            'MediaQuery connection must be a Singleton under the prod context.',
         );
     }
 

@@ -1,0 +1,1 @@
+SELECT ca.id, ca.customer_id, ca.name01, ca.name02, ca.kana01, ca.kana02, ca.company_name, ca.phone_number, ca.postal_code, ca.pref_id, ca.addr01, ca.addr02, pref.name AS pref_name FROM dtb_customer_address ca LEFT JOIN mtb_pref pref ON pref.id = ca.pref_id WHERE ca.customer_id = :customerId ORDER BY ca.id ASC

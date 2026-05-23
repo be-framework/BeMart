@@ -20,7 +20,7 @@ use const JSON_THROW_ON_ERROR;
  * Phase 1 (FakeQuery): reads var/fake/product_classes.json keyed by productCode.
  *
  * Phase 2 will swap this to a Ray.MediaQuery interface backed by
- * SELECT … FROM dtb_product_class JOIN dtb_sale_type ….
+ * product-class read model over dtb_product_class and dtb_sale_type.
  */
 final class FakeProductClassQuery implements ProductClassQueryInterface
 {

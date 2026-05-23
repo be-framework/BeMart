@@ -28,7 +28,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         $secondId = $this->insertBlock(['block_name' => 'Footer']);
         $thirdId = $this->insertBlock(['block_name' => 'Sidebar']);
 
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $rows = $storage->list();
 
         $this->assertCount(3, $rows);
@@ -44,7 +44,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -56,7 +56,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
             'deletable' => 0,
         ]);
 
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(BlockEntity::class, $entity);
@@ -76,7 +76,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
             'file_name' => 'bare',
         ]);
 
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(BlockEntity::class, $entity);
@@ -86,7 +86,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -95,7 +95,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         // The Fake seed `bk-header` and hex ids from FakeBlockIdGenerator
         // can never match an int PK; surface as miss so BlockDeleted /
         // BlockUpdated fire their 404 paths instead of a PDO error.
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $this->assertNull($storage->getById('bk-header'));
         $this->assertNull($storage->getById('bk-deadbeefdeadbeef'));
         $this->assertNull($storage->getById('nonexistent-zzz'));
@@ -103,7 +103,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = new SqlBlockIdGenerator($this->pdo);
+        $generator = $this->sql(SqlBlockIdGenerator::class);
         $newId = $generator->generate(); // numeric string
 
         $entity = new BlockEntity(
@@ -113,7 +113,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
             blockDeletable: true,
         );
 
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -134,9 +134,9 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         // System blocks (blockDeletable=false) round-trip the same as
         // user blocks — only BlockDeleted enforces the guard, not the
         // storage.
-        $generator = new SqlBlockIdGenerator($this->pdo);
+        $generator = $this->sql(SqlBlockIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
 
         $storage->put(new BlockEntity(
             blockId: $newId,
@@ -161,7 +161,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testPutIsNoOpForNonNumericIds(): void
     {
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
 
         $storage->put(new BlockEntity(
             blockId: 'bk-header',
@@ -198,7 +198,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
             blockDeletable: true,
         );
 
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -214,7 +214,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
     public function testRemoveDeletesExistingRow(): void
     {
         $id = $this->insertBlock(['block_name' => 'doomed']);
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -261,7 +261,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
             ':discriminator' => 'blockposition',
         ]);
 
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $storage->remove((string) $id);
 
         // Block is gone.
@@ -277,7 +277,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = new SqlBlockStorage($this->pdo);
+        $storage = $this->sql(SqlBlockStorage::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('bk-header'); // non-numeric, no exception
         $storage->remove('bk-deadbeefdeadbeef'); // hex, no exception
@@ -286,7 +286,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testSqlBlockIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = new SqlBlockIdGenerator($this->pdo);
+        $generator = $this->sql(SqlBlockIdGenerator::class);
 
         // Empty table → starts at 1.
         $this->assertSame('1', $generator->generate());

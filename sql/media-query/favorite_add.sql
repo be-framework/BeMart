@@ -1,0 +1,1 @@
+INSERT INTO dtb_customer_favorite_product (customer_id, product_id, create_date, update_date, discriminator_type) VALUES (:customerId, :productId, NOW(), NOW(), 'customerfavoriteproduct') ON DUPLICATE KEY UPDATE id = id

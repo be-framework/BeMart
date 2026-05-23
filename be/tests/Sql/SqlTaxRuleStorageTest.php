@@ -27,7 +27,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         $secondId = $this->insertTaxRule(['tax_rate' => 8]);
         $thirdId = $this->insertTaxRule(['tax_rate' => 5]);
 
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $rules = $storage->list();
 
         $this->assertCount(3, $rules);
@@ -43,7 +43,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -54,7 +54,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
             'apply_date' => '2024-04-01 00:00:00',
         ]);
 
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(TaxRuleEntity::class, $entity);
@@ -71,7 +71,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -80,14 +80,14 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         // Hex ids from FakeTaxRuleIdGenerator can never match an int
         // PK; surface as miss so TaxRuleDeleted's 404 path fires
         // instead of a PDO error.
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
         $this->assertNull($storage->getById('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = new SqlTaxRuleIdGenerator($this->pdo);
+        $generator = $this->sql(SqlTaxRuleIdGenerator::class);
         $newId = $generator->generate(); // numeric string
 
         $entity = new TaxRuleEntity(
@@ -97,7 +97,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
             applyDate: '2024-04-01T00:00:00+09:00',
         );
 
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -115,9 +115,9 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testPutSerialisesIsoDateToMysqlDatetime(): void
     {
-        $generator = new SqlTaxRuleIdGenerator($this->pdo);
+        $generator = $this->sql(SqlTaxRuleIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
 
         $storage->put(new TaxRuleEntity(
             taxRuleId: $newId,
@@ -146,9 +146,9 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         // dtb_tax_rule.tax_rate is `decimal(10,0) unsigned` — fractional
         // input is silently truncated by MariaDB at the column
         // boundary. Documented limitation of EC-CUBE 4.3's schema.
-        $generator = new SqlTaxRuleIdGenerator($this->pdo);
+        $generator = $this->sql(SqlTaxRuleIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
 
         $storage->put(new TaxRuleEntity(
             taxRuleId: $newId,
@@ -167,7 +167,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testPutIsNoOpForNonNumericIds(): void
     {
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
 
         $storage->put(new TaxRuleEntity(
             taxRuleId: 'deadbeefdeadbeefdeadbeefdeadbeef',
@@ -197,7 +197,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
             applyDate: '2025-04-01T00:00:00+09:00',
         );
 
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -212,7 +212,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
     public function testRemoveDeletesExistingRow(): void
     {
         $id = $this->insertTaxRule(['tax_rate' => 10]);
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -223,7 +223,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = new SqlTaxRuleStorage($this->pdo);
+        $storage = $this->sql(SqlTaxRuleStorage::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // hex, no exception
         $storage->remove('nonexistent-zzz'); // non-numeric, no exception
@@ -232,7 +232,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testSqlTaxRuleIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = new SqlTaxRuleIdGenerator($this->pdo);
+        $generator = $this->sql(SqlTaxRuleIdGenerator::class);
 
         // Empty table → starts at 1.
         $this->assertSame('1', $generator->generate());

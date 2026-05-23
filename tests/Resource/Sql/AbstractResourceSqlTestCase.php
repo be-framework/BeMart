@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
+use Aura\Sql\DecoratedPdo;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
@@ -102,6 +103,7 @@ use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use MyVendor\BeMart\Be\Tests\Sql\SqlFixturesTrait;
 use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\MediaQueryRuntimeModule;
 use PDO;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -510,14 +512,10 @@ abstract class AbstractResourceSqlTestCase extends TestCase
 
             protected function configure(): void
             {
-                // PDO is the shared test connection — bound by instance
-                // so every Sql class resolves the same handle (and thus
-                // the same per-test transaction).
-                $this->bind(PDO::class)->toInstance($this->pdo);
+                $this->install(new MediaQueryRuntimeModule(new DecoratedPdo($this->pdo)));
 
                 // Phase 2a Sql impls. Linked bindings; Ray.Di will
-                // construct each Sql class on first request, injecting
-                // the PDO above via the constructor.
+                // construct each Sql class on first request.
                 $this->bind(CustomerQueryInterface::class)
                     ->to(SqlCustomerQuery::class)
                     ->in(Scope::SINGLETON);
