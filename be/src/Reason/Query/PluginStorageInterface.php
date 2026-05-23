@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\PluginEntity;
-use MyVendor\BeMart\Be\Reason\Query\Result\PluginEnablementResult;
+use MyVendor\BeMart\Be\Reason\Query\Result\PluginEnablement;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
@@ -58,5 +58,5 @@ interface PluginStorageInterface
     public function uninstall(string $pluginCode): void;
 
     #[DbQuery('plugin_set_enabled')]
-    public function setEnabled(string $pluginCode, bool $enabled): PluginEnablementResult;
+    public function setEnabled(string $pluginCode, bool $enabled): PluginEnablement;
 }

@@ -12,7 +12,7 @@ use Override;
 use function array_values;
 use function strcmp;
 use function usort;
-use MyVendor\BeMart\Be\Reason\Query\Result\PluginEnablementResult;
+use MyVendor\BeMart\Be\Reason\Query\Result\PluginEnablement;
 
 /**
  * In-memory plugin store.
@@ -120,7 +120,7 @@ final class FakePluginStorage implements PluginStorageInterface
     }
 
     #[Override]
-    public function setEnabled(string $pluginCode, bool $enabled): PluginEnablementResult
+    public function setEnabled(string $pluginCode, bool $enabled): PluginEnablement
     {
         $existing = $this->byCode[$pluginCode] ?? null;
         if ($existing === null) {
@@ -135,7 +135,7 @@ final class FakePluginStorage implements PluginStorageInterface
 
         if ($existing->enabled === $enabled) {
             // Idempotent: no-op when the value already matches.
-            return new PluginEnablementResult(false);
+            return new PluginEnablement(false);
         }
 
         $this->byCode[$pluginCode] = new PluginEntity(
@@ -146,6 +146,6 @@ final class FakePluginStorage implements PluginStorageInterface
             enabled: $enabled,
         );
 
-        return new PluginEnablementResult(true);
+        return new PluginEnablement(true);
     }
 }

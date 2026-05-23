@@ -28,6 +28,9 @@ BeMartのEC-CUBE移植では、既存のPhase 2 SQL実装に `Sql*Query` / `Sql*
   - named argumentsは、順序を意図的に崩す／一部defaultを飛ばす／同型引数の取り違えを避ける必要がある時だけ使う。
   - `new CustomerEntity(customerId: ..., email: ...)` のような全項目列挙は、FactoryとEntity定義を二重管理にするため避ける。
 - `void`, `?Entity`, `array<Entity>`, `AffectedRows`, `InsertedRow`, `PostQueryInterface`, `Pages` を意図に応じて使い分ける。
+- `PostQueryInterface` の戻り値クラス名に、機械的な `Result` postfix や `Generated*` のような生成手段名を付けない。
+  - 良い例: `AllocatedId`, `CopiedProduct`, `ProductStatusUpdate`, `PluginEnablement`, `FavoritePresence`
+  - 避ける例: `GeneratedId`, `ProductCopyResult`, `BulkStatusUpdateResult`, `FooData`, `FooManager`
 
 ## Code example
 

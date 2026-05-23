@@ -10,7 +10,7 @@ use Override;
 use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 
-final readonly class PluginEnablementResult implements PostQueryInterface
+final readonly class PluginEnablement implements PostQueryInterface
 {
     public function __construct(public bool $changed) {}
 
