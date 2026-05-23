@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlFavoriteStorage;
+use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 
 final class SqlFavoriteStorageTest extends AbstractSqlTestCase
 {
@@ -25,7 +25,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $this->insertFavorite($customerId, $productA);
         $this->insertFavorite($customerId, $productB);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $favorites = $storage->listByCustomer((string) $customerId);
 
         $this->assertCount(2, $favorites);
@@ -54,7 +54,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
     /**
      * Phase 3 enrichment — listByCustomer JOINs dtb_product_image and
      * surfaces the lowest-sort_no image as `fileName`, the favorites-row
-     * thumbnail. Mirrors SqlCartQuery's main-image sub-select.
+     * thumbnail. Mirrors CartQueryInterface's main-image sub-select.
      */
     public function testListByCustomerSurfacesLowestSortNoProductImage(): void
     {
@@ -69,7 +69,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $this->insertProductImage($product, ['file_name' => 'cherry-1.jpg', 'sort_no' => 1]);
         $this->insertFavorite($customerId, $product);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $favorites = $storage->listByCustomer((string) $customerId);
 
         $this->assertCount(1, $favorites);
@@ -84,7 +84,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         // Favorite belongs to the OTHER customer — must not leak.
         $this->insertFavorite($otherCustomerId, $product);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $this->assertSame([], $storage->listByCustomer((string) $customerId));
     }
 
@@ -99,7 +99,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $this->insertFavorite($alice, $aliceOnly);
         $this->insertFavorite($bob, $shared);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $aliceCodes = array_map(
             static fn (FavoriteEntity $f) => $f->productCode,
             $storage->listByCustomer((string) $alice),
@@ -120,7 +120,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $product = $this->insertProduct(['product_code' => 'HAS-IT']);
         $this->insertFavorite($customerId, $product);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $this->assertTrue($storage->has((string) $customerId, 'HAS-IT')->exists());
     }
 
@@ -129,7 +129,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $customerId = $this->insertCustomer();
         $this->insertProduct(['product_code' => 'NOT-FAVORITED']);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $this->assertFalse($storage->has((string) $customerId, 'NOT-FAVORITED')->exists());
         $this->assertFalse($storage->has((string) $customerId, 'DOES-NOT-EXIST')->exists());
     }
@@ -139,7 +139,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $customerId = $this->insertCustomer();
         $this->insertProduct(['product_code' => 'NEW-FAV']);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $storage->add(new FavoriteEntity(
             customerId: (string) $customerId,
             productCode: 'NEW-FAV',
@@ -156,7 +156,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $customerId = $this->insertCustomer();
         $this->insertProduct(['product_code' => 'DUP-FAV']);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $favorite = new FavoriteEntity(
             customerId: (string) $customerId,
             productCode: 'DUP-FAV',
@@ -180,7 +180,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
     {
         $customerId = $this->insertCustomer();
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $storage->add(new FavoriteEntity(
             customerId: (string) $customerId,
             productCode: 'GHOST',
@@ -197,7 +197,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $product = $this->insertProduct(['product_code' => 'REM-FAV']);
         $this->insertFavorite($customerId, $product);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $this->assertTrue($storage->has((string) $customerId, 'REM-FAV')->exists());
 
         $storage->remove((string) $customerId, 'REM-FAV');
@@ -210,7 +210,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $product = $this->insertProduct(['product_code' => 'KEEP-ME']);
         $this->insertFavorite($customerId, $product);
 
-        $storage = $this->sql(SqlFavoriteStorage::class);
+        $storage = $this->sql(FavoriteStorageInterface::class);
         $storage->remove((string) $customerId, 'NOT-A-REAL-CODE');
         $this->assertTrue($storage->has((string) $customerId, 'KEEP-ME')->exists());
     }

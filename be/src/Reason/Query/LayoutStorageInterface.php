@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Admin CMS layouts — unified Query + Command (Wave 9).
@@ -16,9 +17,12 @@ use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
 interface LayoutStorageInterface
 {
     /** @return list<LayoutEntity> */
+    #[DbQuery('tlayout_list', factory: LayoutEntity::class)]
     public function list(): array;
 
+    #[DbQuery('tlayout_get', factory: LayoutEntity::class)]
     public function getById(string $layoutId): LayoutEntity|null;
 
+    #[DbQuery('tlayout_put')]
     public function put(LayoutEntity $layout): void;
 }

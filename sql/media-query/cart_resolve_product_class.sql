@@ -1,1 +1,0 @@
-SELECT pc.id FROM dtb_product_class pc INNER JOIN dtb_product p ON p.id = pc.product_id WHERE pc.product_code = :productCode AND pc.class_category_id1 IS NULL AND pc.class_category_id2 IS NULL LIMIT 1

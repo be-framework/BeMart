@@ -6,10 +6,10 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use DateTimeImmutable;
 use MyVendor\BeMart\Be\Reason\Entity\PasswordResetTokenEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlPasswordResetTokenStorage;
+use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 
 /**
- * Storage-layer coverage for {@see SqlPasswordResetTokenStorage}
+ * Storage-layer coverage for {@see PasswordResetTokenStorageInterface}
  * (Phase 2b).
  *
  * EC-CUBE 4.3 has no separate password-reset-token table — the token
@@ -38,7 +38,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
     {
         $customerId = $this->insertCustomer();
 
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
         $storage->put(new PasswordResetTokenEntity(
             customerId: (string) $customerId,
             resetKey: 'reset-key-issue-aaaa1111bbbb2222',
@@ -63,7 +63,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
             'reset_expire' => '2026-05-20 18:30:00',
         ]);
 
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
         $token = $storage->getByResetKey('reset-key-lookup-cccc3333dddd4444');
 
         $this->assertInstanceOf(PasswordResetTokenEntity::class, $token);
@@ -80,7 +80,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
         // A customer with no active token — reset_key NULL.
         $this->insertCustomer();
 
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
 
         $this->assertNull($storage->getByResetKey('no-such-key-eeee5555ffff6666'));
     }
@@ -95,7 +95,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
             'reset_expire' => '2020-01-01 00:00:00',
         ]);
 
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
         $token = $storage->getByResetKey('reset-key-expired-7777aaaa8888bbbb');
 
         $this->assertInstanceOf(PasswordResetTokenEntity::class, $token);
@@ -110,7 +110,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
     public function testPutReplacesPriorTokenLatestWins(): void
     {
         $customerId = $this->insertCustomer();
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
 
         $storage->put(new PasswordResetTokenEntity(
             customerId: (string) $customerId,
@@ -145,7 +145,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
             'reset_expire' => '2026-05-20 20:00:00',
         ]);
 
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
         $storage->delete('reset-key-consume-5555eeee6666ffff');
 
         // Both columns nulled — a re-lookup of the consumed key misses.
@@ -167,7 +167,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
     {
         // Idempotent under retries: deleting a never-issued key matches
         // no row and raises nothing — same as the Fake.
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
         $storage->delete('never-issued-key-9999aaaa0000bbbb');
         $this->addToAssertionCount(1);
     }
@@ -176,7 +176,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
     {
         // dtb_customer.id is an int PK — a non-numeric handle cannot
         // address a row. put() returns without raising.
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
         $storage->put(new PasswordResetTokenEntity(
             customerId: 'deadbeefdeadbeefdeadbeefdeadbeef',
             resetKey: 'reset-key-orphan-cccc7777dddd8888',
@@ -195,7 +195,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
         // empty-string probe. NULL never equals a value in SQL.
         $this->insertCustomer();
 
-        $storage = $this->sql(SqlPasswordResetTokenStorage::class);
+        $storage = $this->sql(PasswordResetTokenStorageInterface::class);
         $this->assertNull($storage->getByResetKey(''));
     }
 }

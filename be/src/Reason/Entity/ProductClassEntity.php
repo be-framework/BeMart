@@ -11,8 +11,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * in var/fake/product_classes.json; Phase 2 swap will back this with
  * Ray.MediaQuery against dtb_product_class + join dtb_sale_type.
  */
-final readonly class ProductClassEntity
+final readonly class ProductClassEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $productCode,
         public string $productName,

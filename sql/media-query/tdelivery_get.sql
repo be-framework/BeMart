@@ -1,1 +1,1 @@
-SELECT id, name, visible FROM dtb_delivery WHERE id = :id LIMIT 1
+SELECT id, name, visible FROM dtb_delivery WHERE :deliveryId REGEXP '^[0-9]+$' AND id = CAST(:deliveryId AS UNSIGNED) LIMIT 1

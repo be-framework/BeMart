@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlShippingAddressStorage;
+use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
 
 use function array_map;
 
 /**
- * Storage-layer coverage for {@see SqlShippingAddressStorage} (Phase 2b).
+ * Storage-layer coverage for {@see ShippingAddressStorageInterface} (Phase 2b).
  *
  * Per G-23 the client-observable contract lives in the Resource-layer
  * sibling ({@see \MyVendor\BeMart\Tests\Resource\Sql\AdminOrderExtrasResourceSqlTest});
@@ -64,7 +64,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
 
     public function testGetByOrderNoReturnsNullWhenOrderUnknown(): void
     {
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $this->assertNull($storage->getByOrderNo('NO-SUCH-ORDER'));
     }
 
@@ -73,7 +73,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
         // The order exists but no dtb_shipping row is attached.
         $order = $this->insertOrder(['order_no' => 'SHIP-GET-1']);
 
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $this->assertNull($storage->getByOrderNo($order['orderNo']));
     }
 
@@ -92,7 +92,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
             'phone_number' => '0398765432',
         ]);
 
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $entity = $storage->getByOrderNo($order['orderNo']);
 
         $this->assertInstanceOf(ShippingAddressEntity::class, $entity);
@@ -120,7 +120,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
             // all default to NULL in the fixture helper.
         ]);
 
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $entity = $storage->getByOrderNo($order['orderNo']);
 
         $this->assertInstanceOf(ShippingAddressEntity::class, $entity);
@@ -139,7 +139,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
         $this->insertShipping(['order_id' => $order['id'], 'name02' => 'First']);
         $this->insertShipping(['order_id' => $order['id'], 'name02' => 'Second']);
 
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $entity = $storage->getByOrderNo($order['orderNo']);
 
         $this->assertInstanceOf(ShippingAddressEntity::class, $entity);
@@ -151,7 +151,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
         $this->insertPref(13, 'Tokyo');
         $order = $this->insertOrder(['order_no' => 'SHIP-PUT-1']);
 
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $storage->put($this->entity([
             'orderNo' => $order['orderNo'],
             'name01' => '佐藤',
@@ -195,7 +195,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
             'phone_number' => '0311111111',
         ]);
 
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $storage->put($this->entity([
             'orderNo' => $order['orderNo'],
             'name01' => '田中',
@@ -225,7 +225,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
     {
         // No dtb_order row → put silently no-ops (the Finals gate on
         // OrderQuery first; this is defence-in-depth).
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $storage->put($this->entity(['orderNo' => 'NO-SUCH-ORDER']));
 
         $stmt = $this->pdo->query('SELECT COUNT(*) FROM dtb_shipping');
@@ -238,7 +238,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
         // stored as a real NULL so the FK → empty mtb_pref holds.
         $order = $this->insertOrder(['order_no' => 'SHIP-PREF-0']);
 
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $storage->put($this->entity(['orderNo' => $order['orderNo'], 'pref' => 0]));
 
         $stmt = $this->pdo->prepare(
@@ -258,7 +258,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
         // INSERT via put, then UPDATE via put — getByOrderNo reflects the
         // second write.
         $order = $this->insertOrder(['order_no' => 'SHIP-RT-1']);
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
 
         $storage->put($this->entity(['orderNo' => $order['orderNo'], 'name02' => 'V1']));
         $storage->put($this->entity(['orderNo' => $order['orderNo'], 'name02' => 'V2']));
@@ -270,7 +270,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
 
     public function testListAllReturnsEmptyWhenNoRows(): void
     {
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $this->assertSame([], $storage->listAll());
     }
 
@@ -281,7 +281,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
         $this->insertShipping(['order_id' => $orderA['id'], 'name02' => 'A-ship']);
         $this->insertShipping(['order_id' => $orderB['id'], 'name02' => 'B-ship']);
 
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $rows = $storage->listAll();
 
         $this->assertCount(2, $rows);
@@ -296,7 +296,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
     public function testListAllReflectsPutWrites(): void
     {
         $order = $this->insertOrder(['order_no' => 'SHIP-LIST-PUT']);
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
 
         $this->assertSame([], $storage->listAll());
 
@@ -311,7 +311,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
     public function testUpdateTrackingNumberUpdatesExistingShippingRow(): void
     {
         $order = $this->insertOrder(['order_no' => 'SHIP-TRACK-UPD']);
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         // A shipping row already exists for the order.
         $storage->put($this->entity(['orderNo' => $order['orderNo']]));
 
@@ -327,7 +327,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
     public function testUpdateTrackingNumberInsertsMinimalRowWhenNoneExists(): void
     {
         $order = $this->insertOrder(['order_no' => 'SHIP-TRACK-INS']);
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $this->assertNull($storage->trackingNumberByOrderNo($order['orderNo'])->valueOrNull());
 
         $storage->updateTrackingNumber($order['orderNo'], 'TRK-99999');
@@ -337,7 +337,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
 
     public function testUpdateTrackingNumberIsSilentNoOpForUnknownOrder(): void
     {
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         $storage->updateTrackingNumber('NO-SUCH-ORDER', 'TRK-1'); // no exception
         $this->assertNull($storage->trackingNumberByOrderNo('NO-SUCH-ORDER')->valueOrNull());
     }
@@ -345,7 +345,7 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
     public function testTrackingNumberByOrderNoIsNullWhenUnset(): void
     {
         $order = $this->insertOrder(['order_no' => 'SHIP-TRACK-NULL']);
-        $storage = $this->sql(SqlShippingAddressStorage::class);
+        $storage = $this->sql(ShippingAddressStorageInterface::class);
         // A shipping row exists but its tracking_number column is NULL.
         $storage->put($this->entity(['orderNo' => $order['orderNo']]));
 

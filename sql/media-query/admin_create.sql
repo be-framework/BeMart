@@ -1,1 +1,9 @@
-INSERT INTO dtb_member (id, creator_id, work_id, authority_id, name, department, login_id, password, salt, sort_no, two_factor_auth_key, two_factor_auth_enabled, create_date, update_date, login_date, discriminator_type) VALUES (:id, NULL, :work, :authority, :name, NULL, :loginId, :password, NULL, 0, NULL, 0, NOW(), NOW(), NULL, 'member')
+INSERT INTO dtb_member (id, work_id, authority_id, name, login_id, password, create_date, update_date, discriminator_type)
+SELECT CAST(JSON_VALUE(:admin, '$.adminId') AS UNSIGNED),
+       CAST(JSON_VALUE(:admin, '$.work') AS UNSIGNED),
+       CAST(JSON_VALUE(:admin, '$.authority') AS UNSIGNED),
+       JSON_VALUE(:admin, '$.name'),
+       JSON_VALUE(:admin, '$.loginId'),
+       JSON_VALUE(:admin, '$.passwordHash'),
+       NOW(), NOW(), 'member'
+WHERE JSON_VALUE(:admin, '$.adminId') REGEXP '^[0-9]+$'

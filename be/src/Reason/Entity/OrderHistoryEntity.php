@@ -20,7 +20,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * keeps a narrow column set. Enriching the history view via a dedicated
  * projection avoids rippling a constructor change across all of them.
  *
- * Mapping (read side — {@see \MyVendor\BeMart\Be\Reason\Query\SqlOrderQuery}):
+ * Mapping (read side — {@see \MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface}):
  *   - header / totals / points / status → `dtb_order`
  *   - `message`                         → `dtb_order.message`
  *   - `paymentMethod`                   → `dtb_payment.payment_method`
@@ -34,8 +34,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * `customerId` is carried so the Final can run the order-ownership AUTHZ
  * check directly off this projection (no second `byOrderNo` round-trip).
  */
-final readonly class OrderHistoryEntity
+final readonly class OrderHistoryEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     /**
      * @param list<OrderHistoryShippingEntity> $shippings
      * @param list<OrderHistoryMailEntity>     $mailHistories

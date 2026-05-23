@@ -1,1 +1,0 @@
-ROLLBACK TO SAVEPOINT sql_csv_column_config_replace

@@ -1,1 +1,0 @@
-INSERT INTO dtb_category (id, creator_id, parent_category_id, category_name, hierarchy, sort_no, create_date, update_date, discriminator_type) VALUES (:id, NULL, :parentId, :categoryName, :hierarchy, :sortNo, NOW(), NOW(), 'category')

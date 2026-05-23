@@ -11,8 +11,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * (the storage layer is opaque about timezone). `linkMethod` mirrors
  * EC-CUBE's boolean: false = same window, true = target="_blank".
  */
-final readonly class NewsEntity
+final readonly class NewsEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $newsId,
         public string $newsTitle,

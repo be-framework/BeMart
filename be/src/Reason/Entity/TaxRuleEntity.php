@@ -24,8 +24,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * delete-then-create. Phase 2 may add per-row updates once a
  * dependency-aware audit trail exists.
  */
-final readonly class TaxRuleEntity
+final readonly class TaxRuleEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $taxRuleId,
         public float $taxRate,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\BaseInfoEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * BaseInfo storage — unified Query + Command (Wave 8, doUpdateBaseInfo).
@@ -23,7 +24,9 @@ use MyVendor\BeMart\Be\Reason\Entity\BaseInfoEntity;
  */
 interface BaseInfoStorageInterface
 {
+    #[DbQuery('tbase_info_get', factory: BaseInfoEntity::class)]
     public function get(): BaseInfoEntity;
 
+    #[DbQuery('tbase_info_put')]
     public function update(BaseInfoEntity $entity): void;
 }

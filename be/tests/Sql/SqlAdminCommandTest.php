@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlAdminCommand;
-use MyVendor\BeMart\Be\Reason\Query\SqlAdminQuery;
+use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
 
 /**
- * Storage-layer coverage for {@see SqlAdminCommand} (Admin auth Phase B).
+ * Storage-layer coverage for {@see AdminCommandInterface} (Admin auth Phase B).
  *
- * Mirrors the shape of {@see SqlAddressStorageTest}'s write half. Per
+ * Mirrors the shape of {@see AddressStorageInterfaceTest}'s write half. Per
  * G-23 the client-observable contract lives in the Resource-layer
  * siblings; this file pins the per-method SQL paths (INSERT with
  * pre-allocated id, UPDATE on update, soft-delete flips work_id to 0,
@@ -35,7 +35,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $generator = $this->sql(AdminIdGeneratorInterface::class);
         $newId = $generator->generate()->value(); // numeric string
 
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
             adminId: $newId,
             loginId: 'fresh-1',
@@ -45,7 +45,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
             work: AdminEntity::WORK_ACTIVE,
         ));
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById($newId);
 
         $this->assertInstanceOf(AdminEntity::class, $read);
@@ -58,9 +58,9 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
 
     public function testCreateIsNoOpForNonNumericId(): void
     {
-        // FakeAdminIdGenerator emits `ad…` hex; SqlAdminCommand must
+        // FakeAdminIdGenerator emits `ad…` hex; AdminCommandInterface must
         // reject it silently rather than coerce it into an int PK.
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
             adminId: 'ad000000000000000000000000000001',
             loginId: 'reject-me',
@@ -70,7 +70,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
             work: AdminEntity::WORK_ACTIVE,
         ));
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $this->assertNull($query->findByLoginId('reject-me'));
     }
 
@@ -82,7 +82,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $generator = $this->sql(AdminIdGeneratorInterface::class);
         $newId = $generator->generate()->value();
 
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
             adminId: $newId,
             loginId: 'system-1',
@@ -92,7 +92,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
             work: AdminEntity::WORK_ACTIVE,
         ));
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById($newId);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(0, $read->authority);
@@ -116,10 +116,10 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
             work: AdminEntity::WORK_ACTIVE,
         );
 
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
         $command->update($merged);
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame('after', $read->loginId);
@@ -131,7 +131,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
     public function testUpdateIsNoOpForNonNumericId(): void
     {
         $id = $this->insertAdmin(['login_id' => 'untouched', 'name' => 'Original']);
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
 
         // Use a non-numeric id — the UPDATE must NOT run.
         $command->update(new AdminEntity(
@@ -143,7 +143,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
             work: AdminEntity::WORK_ACTIVE,
         ));
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame('untouched', $read->loginId);
@@ -154,11 +154,11 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
     {
         $id = $this->insertAdmin(['login_id' => 'soft-delete-target']);
 
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
         $command->delete((string) $id);
 
         // Row stays in the table — getById still resolves it.
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(AdminEntity::WORK_INACTIVE, $read->work);
@@ -176,12 +176,12 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
     public function testDeleteIsNoOpForNonNumericId(): void
     {
         $id = $this->insertAdmin(['login_id' => 'untouched']);
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
 
         // Hex id — no UPDATE should run.
         $command->delete('ad000000000000000000000000000001');
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(AdminEntity::WORK_ACTIVE, $read->work);
@@ -195,10 +195,10 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
             'authority_id' => 1, // shop owner
         ]);
 
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
         $command->updateAuthority((string) $id, 0); // promote to system admin
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(0, $read->authority);
@@ -214,10 +214,10 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
             'authority_id' => null, // system admin (0 after hydrate)
         ]);
 
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
         $command->updateAuthority((string) $id, 1);
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(1, $read->authority);
@@ -227,10 +227,10 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
     {
         $id = $this->insertAdmin(['login_id' => 'untouched', 'authority_id' => 1]);
 
-        $command = $this->sql(SqlAdminCommand::class);
+        $command = $this->sql(AdminCommandInterface::class);
         $command->updateAuthority('ad000000000000000000000000000001', 0);
 
-        $query = $this->sql(SqlAdminQuery::class);
+        $query = $this->sql(AdminQueryInterface::class);
         $read = $query->findById((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(1, $read->authority);

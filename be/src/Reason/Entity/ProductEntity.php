@@ -37,8 +37,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  *   2 = 非公開 (Hidden — admin only)
  *   3 = 廃止 (Withdrawn — soft delete, default-filtered from admin too)
  */
-final readonly class ProductEntity
+final readonly class ProductEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     /** Visible to front + admin. */
     public const int STATUS_VISIBLE = 1;
 
