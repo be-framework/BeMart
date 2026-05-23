@@ -10,7 +10,7 @@ use Ray\MediaQuery\Result\PostQueryContext;
 use Ray\MediaQuery\Result\PostQueryInterface;
 use RuntimeException;
 
-final readonly class ProductCopyResult implements PostQueryInterface
+final readonly class CopiedProduct implements PostQueryInterface
 {
     public function __construct(public ProductEntity $product) {}
 
