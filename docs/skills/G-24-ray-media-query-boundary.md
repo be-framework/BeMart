@@ -31,6 +31,7 @@ BeMartのEC-CUBE移植では、既存のPhase 2 SQL実装に `Sql*Query` / `Sql*
 - `PostQueryInterface` の戻り値クラス名に、機械的な `Result` postfix や `Generated*` のような生成手段名を付けない。
   - 良い例: `AllocatedId`, `CopiedProduct`, `ProductStatusUpdate`, `PluginEnablement`, `FavoritePresence`
   - 避ける例: `GeneratedId`, `ProductCopyResult`, `BulkStatusUpdateResult`, `FooData`, `FooManager`
+  - 詳細は G-25: BDRはdomain noun + readonly propertyで表す。
 
 ## Code example
 
@@ -101,4 +102,5 @@ final class SqlProductQuery implements ProductQueryInterface
 ## Related
 
 - G-23: Hypermedia tests are the storage-migration contract
+- G-25: BDRはdomain noun + readonly propertyで表す
 - Ray.MediaQuery official llms reference: `https://ray-di.github.io/Ray.MediaQuery/llms-full.txt`
