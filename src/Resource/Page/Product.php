@@ -13,6 +13,7 @@ use MyVendor\BeMart\Be\Final\ProductFetched;
 use MyVendor\BeMart\Be\Input\GetProductInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AddCartForm;
+use MyVendor\BeMart\Support\ProductImageCatalog;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
@@ -85,6 +86,11 @@ class Product extends ResourceObject
             // body has the raw `stock` count; `stockFind` is the derived
             // purchasable flag (null stock = 在庫無制限 -> always true).
             'stockFind' => $final->stock === null || $final->stock > 0,
+            'description' => $final->description,
+            'categoryNames' => $final->categoryNames,
+            'tagNames' => $final->tagNames,
+            'classNames' => $final->classNames,
+            'mainImage' => $final->imagePath ?? ProductImageCatalog::forProductCode($final->productCode),
             // Phase 3: the add-to-cart form. EC-CUBE renders the add-cart
             // quantity input through `AddCartType`; BeMart renders it
             // through this AddCartForm. The hidden `product_id` is seeded

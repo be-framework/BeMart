@@ -6,8 +6,9 @@
 
   The storefront top page. EC-CUBE's `index.twig` `block main` is a
   purely-static main-visual slider (three `asset()` image paths, no data
-  binding). The `block stylesheet` / `block javascript` slick styling +
-  init script are kept verbatim too.
+  binding) — there is no resource body field driving it, so the markup
+  is ported verbatim. The `block stylesheet` / `block javascript` slick
+  styling + init script are kept verbatim too.
 
   The Index resource body (src/Resource/Page/Index.php) carries only the
   hypermedia link surface and a `staticContent` = null stub; EC-CUBE's
@@ -16,13 +17,6 @@
   products / category nav are NOT part of EC-CUBE's `index.twig` itself
   (they are configurable layout blocks), so they are out of scope here
   the same way they are for EC-CUBE's `index.twig`.
-
-  Hypermedia supplement: EC-CUBE's default site exposes product-list and
-  cart navigation through layout Block widgets. BeMart's Block layer is
-  intentionally static-only today, so this page renders those two
-  critical `goProductList` / `goCart` transitions explicitly with
-  default-theme button classes. Remove this block when the header/cart
-  Block widgets are backed by real storefront data.
 
   See var/templates/README.md for the port + residual-diff method.
 #}
@@ -130,14 +124,9 @@
             <div class="item slick-slide"><img src="{{ asset('assets/img/top/img_hero_pc03.jpg') }}"></div>
         </div>
     </div>
-    <div class="ec-role">
-        <div class="ec-grid2">
-            <div class="ec-grid2__cell">
-                <a class="ec-blockBtn--action" href="{{ url('product_list') }}">商品一覧へ</a>
-            </div>
-            <div class="ec-grid2__cell">
-                <a class="ec-blockBtn--cancel" href="{{ url('cart') }}">カートを見る</a>
-            </div>
-        </div>
-    </div>
+    {{ include('Block/eyecatch.html.twig') }}
+    {{ include('Block/topic.html.twig') }}
+    {{ include('Block/new_item.html.twig') }}
+    {{ include('Block/category.html.twig') }}
+    {{ include('Block/news.html.twig') }}
 {% endblock %}

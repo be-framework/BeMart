@@ -13,12 +13,12 @@ use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\EntryForm;
 use Ray\WebFormModule\FormFactory;
 
 use function array_filter;
 use function assert;
-use function sprintf;
 
 /**
  * EC-CUBE doRegisterCustomer —会員登録 (Entry/Register).
@@ -61,9 +61,9 @@ class Entry extends ResourceObject
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
      * state). Fields mirror RegisterCustomerInput: 4 required + 11
-     * optional. `csrfToken` body field stays `null` for the same
-     * reason described on Login::onGet — EventListener mirrors the
-     * Symfony token into the session for the subsequent POST.
+     * optional. In the dev/html fake-CSRF environment we expose the fake
+     * token into the hidden `_token` input so a real browser form submit
+     * can exercise the POST path instead of failing at the boundary.
      */
     #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
     public function onGet(): static
@@ -93,7 +93,7 @@ class Entry extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/entry',
             ],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrfTokenForForm(),
             // Phase 3: an empty EntryForm for the HTML port to render via
             // `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(EntryForm::class),
@@ -146,7 +146,11 @@ class Entry extends ResourceObject
     ): static {
         if (! $this->csrf->isValid($csrfToken)) {
             $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+            $this->body = [
+                'message' => 'Invalid or missing CSRF token.',
+                'csrfToken' => $this->csrfTokenForForm(),
+                'form' => $this->failedForm($email, $name01, $name02, 'Invalid or missing CSRF token.'),
+            ];
 
             return $this;
         }
@@ -175,6 +179,7 @@ class Entry extends ResourceObject
             $this->body = [
                 'message' => $message,
                 'email' => $email,
+                'csrfToken' => $this->csrfTokenForForm(),
                 'form' => $this->failedForm($email, $name01, $name02, $message),
             ];
 
@@ -187,6 +192,7 @@ class Entry extends ResourceObject
             $this->body = [
                 'message' => $message,
                 'email' => $email,
+                'csrfToken' => $this->csrfTokenForForm(),
                 'form' => $this->failedForm($email, $name01, $name02, $message),
             ];
 
@@ -196,7 +202,7 @@ class Entry extends ResourceObject
         assert($final instanceof CustomerRegistered);
 
         $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/customer/%s', $final->customerId);
+        $this->headers['Location'] = '/entry/complete';
         $this->body = [
             'customerId' => $final->customerId,
             'email' => $final->email,
@@ -236,5 +242,10 @@ class Entry extends ResourceObject
         $form->setDomainError('email', $message);
 
         return $form;
+    }
+
+    private function csrfTokenForForm(): string|null
+    {
+        return $this->csrf instanceof FakeCsrfToken ? FakeCsrfToken::TOKEN : null;
     }
 }

@@ -1,0 +1,29 @@
+{#
+  EC-CUBE default-theme Block/login.twig static anonymous-state port.
+
+  BeMart's shared storefront frame does not yet carry customer auth
+  state, so this first slice renders the anonymous EC-CUBE branch.
+  EC-CUBE still exposes the お気に入り shortcut in anonymous state; it
+  will ask for login on the destination side. Keep that link here so the
+  header size/affordances match the reference storefront.
+#}
+<div class="ec-headerNav">
+    <div class="ec-headerNav__item">
+        <a href="{{ url('entry') }}">
+            <i class="ec-headerNav__itemIcon fas fa-user fa-fw"></i>
+            <span class="ec-headerNav__itemLink">新規会員登録</span>
+        </a>
+    </div>
+    <div class="ec-headerNav__item">
+        <a href="{{ url('mypage_favorite') }}">
+            <i class="ec-headerNav__itemIcon fas fa-heart fa-fw"></i>
+            <span class="ec-headerNav__itemLink">お気に入り</span>
+        </a>
+    </div>
+    <div class="ec-headerNav__item">
+        <a href="{{ url('mypage_login') }}">
+            <i class="ec-headerNav__itemIcon fas fa-lock fa-fw"></i>
+            <span class="ec-headerNav__itemLink">ログイン</span>
+        </a>
+    </div>
+</div>

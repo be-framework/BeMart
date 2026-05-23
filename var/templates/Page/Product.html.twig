@@ -8,7 +8,7 @@
   / `ec-price` / `ec-numberInput` / `ec-modal` classes and the block
   structure are kept verbatim from EC-CUBE. The dynamic bindings are
   rebound to the Product resource body (src/Resource/Page/Product.php):
-    productCode, productName, price02, stock, stockFind, form
+    productCode, productName, price02, stock, stockFind, mainImage, form
 
   FORM page (the add-to-cart action). EC-CUBE renders the add-cart
   quantity input through `AddCartType` + `form_widget(form.quantity)`;
@@ -31,10 +31,10 @@
   invented), each enumerated as an explained residual in
   tests/Resource/ProductHtmlRenderTest.php:
 
-   - `Product.ProductImage` — the `item_visual` / `item_nav` image
-     gallery. No image join in scope. The `ec-sliderItemRole` wrapper
-     is kept; EC-CUBE renders a `no_image_product` placeholder, BeMart
-     omits the gallery body.
+   - `Product.ProductImage` — BeMart does not yet have a product-image
+     table/join. The `item_visual` gallery therefore renders one
+     presentation-side `mainImage` from ProductImageCatalog, falling back
+     to EC-CUBE's `no_image_product` placeholder for image-less fixtures.
    - `Product.hasProductClass` / `getPrice01*` / `ProductClass` — the
      規格 (class) price ranges, the `classcategory_id1/2` selects.
      No ProductClass join in scope; the price renders as the single
@@ -159,6 +159,7 @@
                 <div class="ec-sliderItemRole">
 
                     <div class="item_visual">
+                        <div class="slide-item"><img src="{{ asset(mainImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ productName }}" width="550" height="550"></div>
                     </div>
                     <div class="item_nav">
                     </div>
@@ -172,6 +173,9 @@
                     </div>
                     {# タグ #}
                     <ul class="ec-productRole__tags">
+                        {% for tagName in tagNames|default([]) %}
+                            <li class="ec-productRole__tag tag_{{ loop.index }}">{{ tagName }}</li>
+                        {% endfor %}
                     </ul>
                     {# 販売価格 #}
                     <div class="ec-productRole__price">
@@ -184,6 +188,19 @@
                     <div class="ec-productRole__code">
                         商品コード： <span class="product-code-default">{{ productCode }}</span>
                     </div>
+                    {% if categoryNames|default([]) is not empty %}
+                        <div class="ec-productRole__category">
+                            カテゴリ：
+                            {% for categoryName in categoryNames %}
+                                <span>{{ categoryName }}</span>{% if not loop.last %} / {% endif %}
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    {% if classNames|default([]) is not empty %}
+                        <div class="ec-productRole__class">
+                            規格：{{ classNames|join(' / ') }}
+                        </div>
+                    {% endif %}
                     <form action="{{ url('product_add_cart', {id: productCode}) }}" method="post" id="form1" name="form1">
                         <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
                         {% if stockFind %}
@@ -207,6 +224,7 @@
                         {% endif %}
 
                         {{ form.input('product_id')|raw }}
+                        {{ form.input('csrfToken')|raw }}
                     </form>
                     <div class="ec-modal">
                         <div class="ec-modal-overlay">
@@ -223,6 +241,7 @@
                         </div>
                     </div>
                     <div class="ec-productRole__description">
+                        {{ description|default('')|nl2br }}
                     </div>
                 </div>
             </div>

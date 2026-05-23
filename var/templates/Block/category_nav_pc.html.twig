@@ -1,0 +1,33 @@
+{#
+  EC-CUBE default-theme Block/category_nav_pc.twig static first slice.
+
+  EC-CUBE normally renders this from the Category repository. Until the
+  category resource is wired into the shared frame, keep the EC-CUBE
+  default fixture categories as static links. The destination is still a
+  real BeMart product list URL; category_id is preserved as a harmless
+  query parameter and will become active when category filtering lands.
+#}
+<div class="ec-categoryNaviRole">
+    <div class="ec-itemNav">
+        <ul class="ec-itemNav__nav">
+            <li>
+                <a href="{{ url('product_list') }}?category_id=2">新入荷</a>
+            </li>
+            <li>
+                <a href="{{ url('product_list') }}?category_id=1">ジェラート</a>
+            </li>
+            <li>
+                <a href="{{ url('product_list') }}?category_id=3">彩のデザート</a>
+            </li>
+            <li>
+                <a href="{{ url('product_list') }}?category_id=4">CUBE</a>
+            </li>
+            <li>
+                <a href="{{ url('product_list') }}?category_id=5">アイスサンド</a>
+            </li>
+            <li>
+                <a href="{{ url('product_list') }}?category_id=6">フルーツ</a>
+            </li>
+        </ul>
+    </div>
+</div>
