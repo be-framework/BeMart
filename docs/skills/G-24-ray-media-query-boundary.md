@@ -24,6 +24,9 @@ BeMartのEC-CUBE移植では、既存のPhase 2 SQL実装に `Sql*Query` / `Sql*
 - メソッド引数名とSQLの `:named` placeholderを一致させる。
 - return typeでfetch/hydration/exec結果を決める。
 - Entity constructor hydrationを使う場合、`SELECT` のカラム順をconstructor引数順に合わせる。
+- FactoryでEntityを復元する場合も、SQLのSELECT順とEntity constructor順を合わせ、単純な橋渡しではnamed argumentsを使わない。
+  - named argumentsは、順序を意図的に崩す／一部defaultを飛ばす／同型引数の取り違えを避ける必要がある時だけ使う。
+  - `new CustomerEntity(customerId: ..., email: ...)` のような全項目列挙は、FactoryとEntity定義を二重管理にするため避ける。
 - `void`, `?Entity`, `array<Entity>`, `AffectedRows`, `InsertedRow`, `PostQueryInterface`, `Pages` を意図に応じて使い分ける。
 
 ## Code example
