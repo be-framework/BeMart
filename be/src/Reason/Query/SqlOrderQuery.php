@@ -24,7 +24,6 @@ final class SqlOrderQuery implements OrderQueryInterface
     {
         $row = $this->db->row('order_by_pre_order_id', [
             'preOrderId' => $preOrderId,
-            'status' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
 
         return $row === null ? null : new OrderEntity(
@@ -41,7 +40,6 @@ final class SqlOrderQuery implements OrderQueryInterface
     {
         $row = $this->db->row('order_by_order_no', [
             'orderNo' => $orderNo,
-            'processing' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
 
         return $row === null ? null : $this->hydrateFinalized($row);
@@ -107,8 +105,7 @@ final class SqlOrderQuery implements OrderQueryInterface
         }
 
         return array_map($this->hydrateFinalized(...), $this->db->rows('order_list_by_customer', [
-            'customerId' => (int) $customerId,
-            'processing' => FinalizedOrderEntity::STATUS_PROCESSING,
+            'customerId' => $customerId,
             'limit' => $limit,
             'offset' => $offset,
         ]));
@@ -119,7 +116,6 @@ final class SqlOrderQuery implements OrderQueryInterface
     public function listAll(int $limit = 50, int $offset = 0): array
     {
         return array_map($this->hydrateFinalized(...), $this->db->rows('order_list_all', [
-            'processing' => FinalizedOrderEntity::STATUS_PROCESSING,
             'limit' => $limit,
             'offset' => $offset,
         ]));

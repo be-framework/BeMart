@@ -43,7 +43,7 @@ final readonly class FavoriteRemoved
             throw new UnauthenticatedException();
         }
 
-        $this->alreadyAbsent = ! $favorites->has($sessionCustomerId, $productCode);
+        $this->alreadyAbsent = ! $favorites->has($sessionCustomerId, $productCode)->exists();
         $favorites->remove($sessionCustomerId, $productCode);
 
         $this->customerId = $sessionCustomerId;
