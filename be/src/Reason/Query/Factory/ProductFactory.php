@@ -31,18 +31,18 @@ final class ProductFactory
         string|null $classNamesJson,
     ): ProductEntity {
         return new ProductEntity(
-            productCode: (string) $productCode,
-            productName: (string) $productName,
-            price02: (int) $price02,
-            stock: $stock === null ? null : (int) $stock,
-            productStatus: $productStatusId === null ? ProductEntity::STATUS_VISIBLE : (int) $productStatusId,
-            description: $descriptionDetail,
-            searchWord: $searchWord,
-            note: $note,
-            imagePath: $imageFileName === null || $imageFileName === '' ? null : 'save_image/' . $imageFileName,
-            categoryNames: $this->stringList($categoryNamesJson),
-            tagNames: $this->stringList($tagNamesJson),
-            classNames: $this->stringList($classNamesJson),
+            (string) $productCode,
+            (string) $productName,
+            (int) $price02,
+            $stock === null ? null : (int) $stock,
+            $productStatusId === null ? ProductEntity::STATUS_VISIBLE : (int) $productStatusId,
+            $descriptionDetail,
+            $searchWord,
+            $note,
+            $imageFileName === null || $imageFileName === '' ? null : 'save_image/' . $imageFileName,
+            $this->stringList($categoryNamesJson),
+            $this->stringList($tagNamesJson),
+            $this->stringList($classNamesJson),
         );
     }
 

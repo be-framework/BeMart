@@ -39,24 +39,24 @@ final class OrderHistoryFactory
         string|null $mailHistoriesJson,
     ): OrderHistoryEntity {
         return new OrderHistoryEntity(
-            orderNo: $orderNo ?? '',
-            customerId: (string) ($customerId ?? ''),
-            message: $message ?? '',
-            paymentMethod: $paymentMethod ?? '',
-            subtotal: (int) $subtotal,
-            deliveryFeeTotal: (int) $deliveryFeeTotal,
-            charge: (int) $charge,
-            discount: (int) $discount,
-            tax: (int) $tax,
-            total: (int) $total,
-            paymentTotal: (int) $paymentTotal,
-            addPoint: (int) $addPoint,
-            usePoint: (int) $usePoint,
-            orderStatus: $orderStatusId === null ? 0 : (int) $orderStatusId,
-            orderDate: $orderDate ?? '',
-            paymentDate: $paymentDate ?? '',
-            shippings: $this->shippings($shippingsJson),
-            mailHistories: $this->mailHistories($mailHistoriesJson),
+            $orderNo ?? '',
+            (string) ($customerId ?? ''),
+            $message ?? '',
+            $paymentMethod ?? '',
+            (int) $subtotal,
+            (int) $deliveryFeeTotal,
+            (int) $charge,
+            (int) $discount,
+            (int) $tax,
+            (int) $total,
+            (int) $paymentTotal,
+            (int) $addPoint,
+            (int) $usePoint,
+            $orderStatusId === null ? 0 : (int) $orderStatusId,
+            $orderDate ?? '',
+            $paymentDate ?? '',
+            $this->shippings($shippingsJson),
+            $this->mailHistories($mailHistoriesJson),
         );
     }
 
@@ -70,19 +70,19 @@ final class OrderHistoryFactory
                 continue;
             }
             $out[] = new OrderHistoryShippingEntity(
-                name01: (string) ($row['name01'] ?? ''),
-                name02: (string) ($row['name02'] ?? ''),
-                kana01: (string) ($row['kana01'] ?? ''),
-                kana02: (string) ($row['kana02'] ?? ''),
-                postalCode: (string) ($row['postalCode'] ?? ''),
-                prefName: (string) ($row['prefName'] ?? ''),
-                addr01: (string) ($row['addr01'] ?? ''),
-                addr02: (string) ($row['addr02'] ?? ''),
-                phoneNumber: (string) ($row['phoneNumber'] ?? ''),
-                deliveryName: (string) ($row['deliveryName'] ?? ''),
-                deliveryDate: (string) ($row['deliveryDate'] ?? ''),
-                deliveryTime: (string) ($row['deliveryTime'] ?? ''),
-                items: $this->items(isset($row['items']) ? $row['items'] : []),
+                (string) ($row['name01'] ?? ''),
+                (string) ($row['name02'] ?? ''),
+                (string) ($row['kana01'] ?? ''),
+                (string) ($row['kana02'] ?? ''),
+                (string) ($row['postalCode'] ?? ''),
+                (string) ($row['prefName'] ?? ''),
+                (string) ($row['addr01'] ?? ''),
+                (string) ($row['addr02'] ?? ''),
+                (string) ($row['phoneNumber'] ?? ''),
+                (string) ($row['deliveryName'] ?? ''),
+                (string) ($row['deliveryDate'] ?? ''),
+                (string) ($row['deliveryTime'] ?? ''),
+                $this->items(isset($row['items']) ? $row['items'] : []),
             );
         }
 
@@ -104,10 +104,10 @@ final class OrderHistoryFactory
                 continue;
             }
             $out[] = new OrderHistoryItemEntity(
-                productCode: (string) ($row['productCode'] ?? ''),
-                productName: (string) ($row['productName'] ?? ''),
-                quantity: (int) ($row['quantity'] ?? 0),
-                unitPrice: (int) ($row['unitPrice'] ?? 0),
+                (string) ($row['productCode'] ?? ''),
+                (string) ($row['productName'] ?? ''),
+                (int) ($row['quantity'] ?? 0),
+                (int) ($row['unitPrice'] ?? 0),
             );
         }
 
@@ -123,9 +123,9 @@ final class OrderHistoryFactory
                 continue;
             }
             $out[] = new OrderHistoryMailEntity(
-                sendDate: (string) ($row['sendDate'] ?? ''),
-                mailSubject: (string) ($row['mailSubject'] ?? ''),
-                mailBody: (string) ($row['mailBody'] ?? ''),
+                (string) ($row['sendDate'] ?? ''),
+                (string) ($row['mailSubject'] ?? ''),
+                (string) ($row['mailBody'] ?? ''),
             );
         }
 
