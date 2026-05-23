@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Exception\Name01FormatException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
-use MyVendor\BeMart\Be\Reason\Query\FakeCustomerStorage;
+use MyVendor\BeMart\Be\Reason\Fake\Query\FakeCustomerStorage;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;

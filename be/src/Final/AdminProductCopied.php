@@ -34,7 +34,7 @@ use Ray\InputQuery\Attribute\Input;
  * customer-create flow).
  *
  * The "(コピー) " prefix discipline lives in
- * {@see \MyVendor\BeMart\Be\Reason\Query\FakeProductCommand::copy} so a
+ * {@see \MyVendor\BeMart\Be\Reason\Fake\Query\FakeProductCommand::copy} so a
  * future production binding can mirror the prefix verbatim. The copy
  * starts in STATUS_VISIBLE regardless of the source's status — the
  * admin convention is that a copied product is a fresh draft to be

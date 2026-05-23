@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Final\LoggedOut;
 use MyVendor\BeMart\Be\Input\LogoutInput;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;

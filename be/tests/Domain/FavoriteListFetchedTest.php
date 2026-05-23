@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Final\FavoriteListFetched;
 use MyVendor\BeMart\Be\Input\GetFavoriteListInput;
 use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
