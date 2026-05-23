@@ -8,19 +8,11 @@ use Override;
 use Ray\WebFormModule\AbstractForm;
 
 /**
- * EC-CUBE テンプレート登録フォーム — Store Tier-2.
+ * EC-CUBE テンプレートアップロードフォーム — Admin Store Tier-2.
  *
- * PORT of the form rendered by `admin/Store/template_add.twig` — the
- * テンプレート登録 (shop design-template upload) screen. EC-CUBE renders
- * it through `Form/Type/Admin/TemplateType` (`admin_template` block
- * prefix): a template code, a template name and a zip-archive file
- * `<input type="file">`.
- *
- * The `<input type="file">` ports as a plain static input — exactly as
- * the Product CSV-upload wave's {@see AdminCsvUploadForm}.
- *
- * VALIDATION AUTHORITY STAYS WITH the Be domain — this form is a
- * field-definition + renderer only (see var/templates/README.md).
+ * Thin renderer form for `admin/Store/template_add.twig`. The real
+ * template archive validation / install pipeline is outside this HTML
+ * port; validation authority stays with a future Be transition.
  */
 final class AdminTemplateAddForm extends AbstractForm
 {
@@ -28,17 +20,16 @@ final class AdminTemplateAddForm extends AbstractForm
     public function init(): void
     {
         $this->setField('code', 'text')
-            ->setAttribs(['id' => 'admin_template_code', 'class' => 'form-control', 'maxlength' => '255']);
+            ->setAttribs(['id' => 'form_code', 'class' => 'form-control']);
 
         $this->setField('name', 'text')
-            ->setAttribs(['id' => 'admin_template_name', 'class' => 'form-control', 'maxlength' => '255']);
+            ->setAttribs(['id' => 'form_name', 'class' => 'form-control']);
 
         $this->setField('file', 'file')
-            ->setAttribs(['id' => 'admin_template_file', 'class' => 'form-control']);
-
-        // Non-authoritative structural checks only — authority is the Be domain.
-        $this->filter->validate('code')->isNotBlank();
-        $this->filter->validate('name')->isNotBlank();
-        $this->filter->validate('file')->isNotBlank();
+            ->setAttribs([
+                'id' => 'form_file',
+                'class' => 'form-control',
+                'accept' => 'application/zip,application/x-tar,application/x-gzip',
+            ]);
     }
 }

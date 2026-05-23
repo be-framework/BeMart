@@ -25,10 +25,10 @@ use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
  *   we hide the customerId-of-the-viewer; here we hide the adminId-of-
  *   the-viewer and surface the customer-being-viewed.
  *
- * The descriptor uses `email` for lookup (ALPS profile carries `#email`
- * as the only descriptor), which matches EC-CUBE's admin customer-list
- * URL style — emails are unique among active customers (Pilot 4) so a
- * single record resolves per email.
+ * EC-CUBE's admin customer edit route is keyed by numeric/opaque customer
+ * id. The older BeMart slice accepted email only; this input now accepts
+ * both so existing API/tests stay compatible while browser links use
+ * `customerId` / `id` like EC-CUBE.
  *
  * @link https://schema.org/ViewAction
  */
@@ -36,14 +36,16 @@ use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
 final readonly class GetAdminCustomerInput
 {
     /**
-     * Wave 5: the email is user-controlled input from the admin UI
-     * (admin types it / clicks a row in the customer-list). Same
-     * taint discipline as the customer-side LoginInput's email.
+     * Wave 5: the selector is user-controlled input from the admin UI
+     * (admin types it / clicks a row in the customer-list). Same taint
+     * discipline as the customer-side LoginInput's email.
      *
-     * @psalm-taint-source input $email
+     * @psalm-taint-source input $selector
+     * @psalm-taint-source input $selectorType
      */
     public function __construct(
-        public string $email,
+        public string $selector,
+        public string $selectorType = 'email',
     ) {
     }
 }
