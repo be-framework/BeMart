@@ -27,7 +27,7 @@ final class SqlAdminQuery implements AdminQueryInterface
         if (! ctype_digit($adminId)) {
             return null;
         }
-        $row = $this->db->row('admin_find_by_id', ['id' => (int) $adminId]);
+        $row = $this->db->row('admin_find_by_id', ['adminId' => $adminId]);
         return $row === null ? null : $this->hydrate($row);
     }
 

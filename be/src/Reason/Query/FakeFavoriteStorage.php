@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\FavoritePresence;
 use Override;
 
 /**
@@ -29,9 +30,9 @@ final class FakeFavoriteStorage implements FavoriteStorageInterface
     }
 
     #[Override]
-    public function has(string $customerId, string $productCode): bool
+    public function has(string $customerId, string $productCode): FavoritePresence
     {
-        return isset($this->byKey[self::key($customerId, $productCode)]);
+        return new FavoritePresence(isset($this->byKey[self::key($customerId, $productCode)]));
     }
 
     /** @return list<FavoriteEntity> */

@@ -1,1 +1,5 @@
-SELECT id, email, password, name01, name02, kana01, kana02, company_name, phone_number, postal_code, pref_id, addr01, addr02, birth, sex_id, job_id, customer_status_id, secret_key FROM dtb_customer WHERE id = :id LIMIT 1
+SELECT id, email, password, name01, name02, kana01, kana02, company_name, phone_number, postal_code, pref_id, addr01, addr02, birth, sex_id, job_id, customer_status_id, secret_key
+FROM dtb_customer
+WHERE :customerId REGEXP '^[0-9]+$'
+  AND id = CAST(:customerId AS UNSIGNED)
+LIMIT 1

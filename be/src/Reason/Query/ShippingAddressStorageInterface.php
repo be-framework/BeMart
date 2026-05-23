@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\TrackingNumberResult;
 
 /**
  * Shipping-address persistence contract — Wave 9η.
@@ -50,5 +51,5 @@ interface ShippingAddressStorageInterface
      * number set. Lets the `doUpdateTrackingNumber` Final echo back the
      * persisted value.
      */
-    public function trackingNumberByOrderNo(string $orderNo): string|null;
+    public function trackingNumberByOrderNo(string $orderNo): TrackingNumberResult;
 }
