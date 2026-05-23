@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
-use MyVendor\BeMart\Be\Reason\Query\Result\BulkStatusUpdateResult;
+use MyVendor\BeMart\Be\Reason\Query\Result\ProductStatusUpdate;
 use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
-use MyVendor\BeMart\Be\Reason\Query\Result\ProductCopyResult;
+use MyVendor\BeMart\Be\Reason\Query\Result\CopiedProduct;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
@@ -61,7 +61,7 @@ interface ProductCommandInterface
      * newly-persisted entity.
      */
     #[DbQuery('product_copy', factory: \MyVendor\BeMart\Be\Reason\Query\Factory\ProductFactory::class)]
-    public function copy(string $sourceCode, string $newCode): ProductCopyResult;
+    public function copy(string $sourceCode, string $newCode): CopiedProduct;
 
     /**
      * Bulk flip productStatus across multiple products. Returns the
@@ -72,5 +72,5 @@ interface ProductCommandInterface
      *
      */
     #[DbQuery('product_status_bulk_update')]
-    public function bulkUpdateStatus(ProductCodeList $productCodes, int $newStatus): BulkStatusUpdateResult;
+    public function bulkUpdateStatus(ProductCodeList $productCodes, int $newStatus): ProductStatusUpdate;
 }

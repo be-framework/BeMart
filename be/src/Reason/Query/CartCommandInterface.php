@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
-use MyVendor\BeMart\Be\Reason\Query\Result\CartSaveResult;
+use MyVendor\BeMart\Be\Reason\Query\Result\SavedCart;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 interface CartCommandInterface
@@ -17,7 +17,7 @@ interface CartCommandInterface
      * a cart upsert against dtb_cart + dtb_cart_item.
      */
     #[DbQuery('cart_save')]
-    public function save(CartEntity $cart): CartSaveResult;
+    public function save(CartEntity $cart): SavedCart;
 
     /**
      * Remove the Cart whose preOrderId matches the finalized order.

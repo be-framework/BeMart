@@ -10,7 +10,7 @@ use Override;
 
 use function array_values;
 use function ksort;
-use MyVendor\BeMart\Be\Reason\Query\Result\MailTemplateUpdateResult;
+use MyVendor\BeMart\Be\Reason\Query\Result\MailTemplateUpdate;
 
 /**
  * In-memory MailTemplate store, seeded with the two highest-traffic
@@ -60,7 +60,7 @@ final class FakeMailTemplateStorage implements MailTemplateStorageInterface
     }
 
     #[Override]
-    public function update(MailTemplateEntity $entity): MailTemplateUpdateResult
+    public function update(MailTemplateEntity $entity): MailTemplateUpdate
     {
         if (! isset($this->byId[$entity->mailTemplateId])) {
             throw new MailTemplateNotFoundException();
@@ -68,6 +68,6 @@ final class FakeMailTemplateStorage implements MailTemplateStorageInterface
 
         $this->byId[$entity->mailTemplateId] = $entity;
 
-        return new MailTemplateUpdateResult(true);
+        return new MailTemplateUpdate(true);
     }
 }
