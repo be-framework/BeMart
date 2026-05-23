@@ -37,7 +37,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
             'addr02' => '新宿2-2-2',
         ]);
 
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $addresses = $storage->listByCustomer((string) $customerId);
 
         $this->assertCount(2, $addresses);
@@ -61,7 +61,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
         $this->insertAddress(['customer_id' => $alice, 'name02' => 'Alice-2']);
         $this->insertAddress(['customer_id' => $bob, 'name02' => 'Bob-1']);
 
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
 
         $this->assertCount(2, $storage->listByCustomer((string) $alice));
         $this->assertCount(1, $storage->listByCustomer((string) $bob));
@@ -73,7 +73,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
         $otherId = $this->insertCustomer();
         $this->insertAddress(['customer_id' => $otherId]);
 
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $this->assertSame([], $storage->listByCustomer((string) $customerId));
     }
 
@@ -92,7 +92,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
             'phone_number' => '0312345678',
         ]);
 
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(AddressEntity::class, $entity);
@@ -125,7 +125,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
             'pref_id' => 13,
         ]);
 
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
 
         $entity = $storage->getById((string) $id);
         $this->assertInstanceOf(AddressEntity::class, $entity);
@@ -139,7 +139,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -148,7 +148,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
         // A hex-shaped id (Fake convention) can never match an int PK;
         // surface as miss so the Final's 404 path fires instead of a
         // PDO error.
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
     }
 
@@ -156,7 +156,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
     {
         $customerId = $this->insertCustomer();
         $this->insertPref(13, 'Tokyo'); // FK target — mtb_pref empty by default
-        $generator = new SqlAddressIdGenerator($this->pdo);
+        $generator = $this->sql(SqlAddressIdGenerator::class);
         $newId = $generator->generate(); // numeric string
 
         $entity = new AddressEntity(
@@ -174,7 +174,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
             addr02: '東池袋4-4-4',
         );
 
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -223,7 +223,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
             addr02: '池袋1-1-1',
         );
 
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -240,7 +240,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
     public function testPutIsNoOpForNonNumericIds(): void
     {
         $customerId = $this->insertCustomer();
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
 
         $storage->put(new AddressEntity(
             addressId: 'deadbeefdeadbeefdeadbeefdeadbeef', // hex, not numeric
@@ -264,7 +264,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
     {
         $customerId = $this->insertCustomer();
         $id = $this->insertAddress(['customer_id' => $customerId]);
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -275,7 +275,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = new SqlAddressStorage($this->pdo);
+        $storage = $this->sql(SqlAddressStorage::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric, no exception
         $this->assertTrue(true);
@@ -283,7 +283,7 @@ final class SqlAddressStorageTest extends AbstractSqlTestCase
 
     public function testSqlAddressIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = new SqlAddressIdGenerator($this->pdo);
+        $generator = $this->sql(SqlAddressIdGenerator::class);
 
         // Empty table → starts at 1.
         $this->assertSame('1', $generator->generate());

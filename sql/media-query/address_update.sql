@@ -1,0 +1,1 @@
+UPDATE dtb_customer_address SET customer_id = :customerId, name01 = :name01, name02 = :name02, kana01 = :kana01, kana02 = :kana02, company_name = :companyName, phone_number = :phoneNumber, postal_code = :postalCode, pref_id = :prefId, addr01 = :addr01, addr02 = :addr02, update_date = NOW() WHERE id = :id

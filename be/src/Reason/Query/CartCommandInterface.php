@@ -12,7 +12,7 @@ interface CartCommandInterface
      * Persist (or overwrite) a Cart aggregate keyed by cartKey.
      *
      * Phase 1 stores into an in-memory map; Phase 2 swaps to an
-     * INSERT … ON DUPLICATE KEY UPDATE against dtb_cart + dtb_cart_item.
+     * a cart upsert against dtb_cart + dtb_cart_item.
      */
     public function save(CartEntity $cart): void;
 

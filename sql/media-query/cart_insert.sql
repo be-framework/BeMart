@@ -1,0 +1,1 @@
+INSERT INTO dtb_cart (cart_key, pre_order_id, total_price, delivery_fee_total, create_date, update_date, add_point, use_point, discriminator_type) VALUES (:cartKey, :preOrderId, :totalPrice, :deliveryFeeTotal, NOW(), NOW(), 0, 0, 'cart')

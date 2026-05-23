@@ -6,315 +6,86 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use Override;
-use PDO;
-use PDOStatement;
 
 use function str_replace;
 
-/**
- * Real PDO-backed Product query — Phase 2b.
- *
- * Mirrors {@see FakeProductQuery} / {@see FakeProductStorage} against
- * the live EC-CUBE 4.3 schema. Pure prepared statements: no Doctrine,
- * no ORM.
- *
- * The "flattened Product × default ProductClass" shape
- * ----------------------------------------------------
- * {@see ProductEntity} is NOT a 1:1 mirror of one table — it is a
- * flattened row joining `dtb_product` (the catalog header) with the
- * DEFAULT `dtb_product_class` row (the per-variation SKU). The split:
- *
- *   - `productName`   → dtb_product.name
- *   - `productStatus` → dtb_product.product_status_id
- *   - `description`   → dtb_product.description_detail
- *   - `searchWord`    → dtb_product.search_word
- *   - `note`          → dtb_product.note
- *   - `productCode`   → dtb_product_class.product_code
- *   - `price02`       → dtb_product_class.price02
- *   - `stock`         → dtb_product_class.stock
- *
- * `product_code` does NOT exist on `dtb_product` — it lives on
- * `dtb_product_class`. So the natural key the BeMart slice uses
- * (`productCode`, a caller-supplied string) is resolved through the
- * class table. The "default class" is the row whose two
- * `class_category_id*` axes are both NULL — EC-CUBE's convention for a
- * product with no variations. This is the SAME filter
- * {@see SqlProductClassQuery} (commit 19dbd0d), {@see SqlFavoriteStorage}
- * and {@see SqlCartCommand} pin product-code resolution to; this query
- * stays consistent.
- *
- * A productCode that ONLY appears on a non-default variation row never
- * resolves — an honest miss → null, exactly the Fake's "key absent"
- * shape.
- *
- * JOIN
- * ----
- *   - `dtb_product` (INNER) — the header row. A class row whose
- *     `product_id` does not resolve is dropped by the INNER JOIN (FK
- *     breakage → miss). Same id→header JOIN shape as
- *     {@see SqlProductClassQuery} / {@see SqlFavoriteStorage}.
- *
- * Column ↔ field coercions (hydrate)
- * ----------------------------------
- *   - `price02` — `decimal(12,2)` NOT NULL → `(int)` cast (JPY money,
- *     drops the always-`.00` minor unit, same as the rest of the slice).
- *   - `stock` — `decimal(10,0)` nullable → `int|null`; NULL stays NULL
- *     (unlimited-stock products).
- *   - `product_status_id` — `smallint unsigned` nullable FK to the
- *     empty `mtb_product_status` master. ProductEntity::productStatus
- *     is non-null `int` — NULL coalesces to STATUS_VISIBLE (1), the
- *     same default the Fake loader applies for a fixture row that omits
- *     `productStatus`.
- *   - `name` — `varchar(255)` NOT NULL → plain string.
- *   - `note` / `description_detail` / `search_word` — nullable
- *     `longtext` → `string|null`, NULL preserved.
- *
- * DI is intentionally NOT wired in production (FakeProductQuery remains
- * the bound implementation). The SQL impl is exercised via the
- * test-only override in AbstractResourceSqlTestCase.
- */
 final class SqlProductQuery implements ProductQueryInterface
 {
-    /**
-     * The flattened Product × default-ProductClass projection. Every
-     * read method ({@see item} / {@see listAll} / {@see search} /
-     * {@see listForExport}) hydrates from this exact column list, so
-     * the SELECT body lives in one place.
-     */
-    private const SELECT_COLUMNS =
-        'p.id AS product_id, pc.product_code, p.name AS product_name, '
-        . 'pc.price02, pc.stock, '
-        . 'p.product_status_id, p.description_detail, '
-        . 'p.search_word, p.note';
-
-    private const FROM_DEFAULT_CLASS =
-        'FROM dtb_product_class pc '
-        . 'INNER JOIN dtb_product p ON p.id = pc.product_id '
-        . 'WHERE pc.class_category_id1 IS NULL '
-        . 'AND pc.class_category_id2 IS NULL';
-
-    public function __construct(
-        private readonly PDO $pdo,
-    ) {
-    }
+    public function __construct(private readonly MediaQueryExecutor $db) {}
 
     #[Override]
     public function item(string $productCode): ProductEntity|null
     {
-        $sql = 'SELECT ' . self::SELECT_COLUMNS . ' '
-            . self::FROM_DEFAULT_CLASS . ' '
-            . 'AND pc.product_code = :product_code '
-            . 'ORDER BY pc.id ASC LIMIT 1';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute([':product_code' => $productCode]);
-        $row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $row === false ? null : $this->hydrate($row);
+        $row = $this->db->row('product_get', ['productCode' => $productCode]);
+        return $row === null ? null : $this->hydrate($row);
     }
 
-    /**
-     * Paginated dump of ALL products (every status). Walks the default
-     * class rows in `dtb_product_class.id` order — the contract test
-     * asserts count / presence, not order, same parity convention as
-     * the rest of the SQL slice.
-     *
-     * @return list<ProductEntity>
-     */
+    /** @return list<ProductEntity> */
     #[Override]
     public function listAll(int $limit, int $offset = 0): array
     {
-        // LIMIT / OFFSET are bound as integers — the Semantic\Limit +
-        // Semantic\Offset bounds on the Input keep tampered values from
-        // ever reaching here, but the explicit (int) cast keeps the
-        // query well-formed regardless.
-        $sql = 'SELECT ' . self::SELECT_COLUMNS . ' '
-            . self::FROM_DEFAULT_CLASS . ' '
-            . 'ORDER BY pc.id ASC '
-            . 'LIMIT :limit OFFSET :offset';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $this->hydrateAll($stmt);
+        return array_map($this->hydrate(...), $this->db->rows('product_list', ['limit' => $limit, 'offset' => $offset]));
     }
 
-    /**
-     * Substring filter scan on the product name. A null/empty keyword
-     * behaves like `listAll($limit, 0)` so the resource layer can use a
-     * single call. Scans all statuses (admin sees everything).
-     *
-     * @return list<ProductEntity>
-     */
+    /** @return list<ProductEntity> */
     #[Override]
     public function search(?string $nameKeyword, int $limit = 50): array
     {
         if ($nameKeyword === null || $nameKeyword === '') {
             return $this->listAll($limit, 0);
         }
-
-        $sql = 'SELECT ' . self::SELECT_COLUMNS . ' '
-            . self::FROM_DEFAULT_CLASS . ' '
-            . 'AND p.name LIKE :keyword '
-            . 'ORDER BY pc.id ASC '
-            . 'LIMIT :limit';
-        $stmt = $this->pdo->prepare($sql);
-        // Escape the LIKE metacharacters in the user keyword so a `%`
-        // or `_` in the search box matches literally — the keyword is a
-        // taint-sourced Input.
-        $escaped = $this->escapeLike($nameKeyword);
-        $stmt->bindValue(':keyword', '%' . $escaped . '%', PDO::PARAM_STR);
-        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return $this->hydrateAll($stmt);
+        return array_map($this->hydrate(...), $this->db->rows('product_search', ['keyword' => '%' . $this->escapeLike($nameKeyword) . '%', 'limit' => $limit]));
     }
 
-    /**
-     * Full unpaged dump for the CSV exporter. Walks every product
-     * regardless of status.
-     *
-     * @return list<ProductEntity>
-     */
+    /** @return list<ProductEntity> */
     #[Override]
     public function listForExport(): array
     {
-        $sql = 'SELECT ' . self::SELECT_COLUMNS . ' '
-            . self::FROM_DEFAULT_CLASS . ' '
-            . 'ORDER BY pc.id ASC';
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
-
-        return $this->hydrateAll($stmt);
+        return array_map($this->hydrate(...), $this->db->rows('product_export'));
     }
 
-    /**
-     * Escape `%`, `_` and the escape char itself so a user keyword is
-     * matched literally inside the `LIKE '%...%'` wrapper.
-     */
-    private function escapeLike(string $keyword): string
-    {
-        return str_replace(
-            ['\\', '%', '_'],
-            ['\\\\', '\\%', '\\_'],
-            $keyword,
-        );
-    }
-
-    /**
-     * Drain an executed statement into a hydrated entity list. The
-     * row-at-a-time `fetch()` loop keeps Psalm's array shape narrow
-     * (each row is `array<string, mixed>`) — same pattern as
-     * {@see SqlDeliveryStorage::list}.
-     *
-     * @return list<ProductEntity>
-     */
-    private function hydrateAll(PDOStatement $stmt): array
-    {
-        $out = [];
-        while (($row = $stmt->fetch(PDO::FETCH_ASSOC)) !== false) {
-            $out[] = $this->hydrate($row);
-        }
-
-        return $out;
-    }
-
-    /** @param array<string, mixed> $row dtb_product_class + joined dtb_product columns. */
+    /** @param array<string, mixed> $row */
     private function hydrate(array $row): ProductEntity
     {
+        $productId = (int) $row['product_id'];
         return new ProductEntity(
             productCode: (string) $row['product_code'],
             productName: (string) $row['product_name'],
             price02: (int) $row['price02'],
             stock: $row['stock'] === null ? null : (int) $row['stock'],
-            // product_status_id is a nullable FK to the empty
-            // mtb_product_status master — NULL coalesces to
-            // STATUS_VISIBLE (1), the Fake loader's default.
-            productStatus: $row['product_status_id'] === null
-                ? ProductEntity::STATUS_VISIBLE
-                : (int) $row['product_status_id'],
-            description: $row['description_detail'] === null
-                ? null
-                : (string) $row['description_detail'],
-            searchWord: $row['search_word'] === null
-                ? null
-                : (string) $row['search_word'],
+            productStatus: $row['product_status_id'] === null ? ProductEntity::STATUS_VISIBLE : (int) $row['product_status_id'],
+            description: $row['description_detail'] === null ? null : (string) $row['description_detail'],
+            searchWord: $row['search_word'] === null ? null : (string) $row['search_word'],
             note: $row['note'] === null ? null : (string) $row['note'],
-            imagePath: $this->imagePath((int) $row['product_id']),
-            categoryNames: $this->categoryNames((int) $row['product_id']),
-            tagNames: $this->tagNames((int) $row['product_id']),
-            classNames: $this->classNames((int) $row['product_id']),
+            imagePath: $this->imagePath($productId),
+            categoryNames: $this->stringColumn('product_categories', ['productId' => $productId], 'category_name'),
+            tagNames: $this->stringColumn('product_tags', ['productId' => $productId], 'name'),
+            classNames: $this->stringColumn('product_class_names', ['productId' => $productId], 'name'),
         );
     }
 
     private function imagePath(int $productId): string|null
     {
-        $stmt = $this->pdo->prepare(
-            'SELECT file_name FROM dtb_product_image '
-            . 'WHERE product_id = :product_id '
-            . 'ORDER BY sort_no ASC, id ASC LIMIT 1',
-        );
-        $stmt->execute([':product_id' => $productId]);
-        $file = $stmt->fetchColumn();
-
-        return $file === false ? null : 'save_image/' . (string) $file;
+        $row = $this->db->row('product_image', ['productId' => $productId]);
+        return $row === null ? null : 'save_image/' . (string) $row['file_name'];
     }
 
-    /** @return list<string> */
-    private function categoryNames(int $productId): array
+    /**
+     * @param array<string, mixed> $values
+     * @return list<string>
+     */
+    private function stringColumn(string $queryId, array $values, string $column): array
     {
-        $stmt = $this->pdo->prepare(
-            'SELECT c.category_name FROM dtb_product_category pc '
-            . 'INNER JOIN dtb_category c ON c.id = pc.category_id '
-            . 'WHERE pc.product_id = :product_id '
-            . 'ORDER BY c.hierarchy ASC, c.sort_no DESC, c.id ASC',
-        );
-        $stmt->execute([':product_id' => $productId]);
-
-        return $this->fetchStringColumn($stmt);
-    }
-
-    /** @return list<string> */
-    private function tagNames(int $productId): array
-    {
-        $stmt = $this->pdo->prepare(
-            'SELECT t.name FROM dtb_product_tag pt '
-            . 'INNER JOIN dtb_tag t ON t.id = pt.tag_id '
-            . 'WHERE pt.product_id = :product_id '
-            . 'ORDER BY t.sort_no ASC, t.id ASC',
-        );
-        $stmt->execute([':product_id' => $productId]);
-
-        return $this->fetchStringColumn($stmt);
-    }
-
-    /** @return list<string> */
-    private function classNames(int $productId): array
-    {
-        $stmt = $this->pdo->prepare(
-            'SELECT DISTINCT cn.name FROM dtb_product_class pc '
-            . 'INNER JOIN dtb_class_category cc1 ON cc1.id = pc.class_category_id1 '
-            . 'INNER JOIN dtb_class_name cn ON cn.id = cc1.class_name_id '
-            . 'WHERE pc.product_id = :product_id1 '
-            . 'UNION '
-            . 'SELECT DISTINCT cn.name FROM dtb_product_class pc '
-            . 'INNER JOIN dtb_class_category cc2 ON cc2.id = pc.class_category_id2 '
-            . 'INNER JOIN dtb_class_name cn ON cn.id = cc2.class_name_id '
-            . 'WHERE pc.product_id = :product_id2',
-        );
-        $stmt->execute([':product_id1' => $productId, ':product_id2' => $productId]);
-
-        return $this->fetchStringColumn($stmt);
-    }
-
-    /** @return list<string> */
-    private function fetchStringColumn(PDOStatement $stmt): array
-    {
-        $values = [];
-        while (($value = $stmt->fetchColumn()) !== false) {
-            $values[] = (string) $value;
+        $out = [];
+        foreach ($this->db->rows($queryId, $values) as $row) {
+            $out[] = (string) $row[$column];
         }
 
-        return $values;
+        return $out;
+    }
+
+    private function escapeLike(string $keyword): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $keyword);
     }
 }

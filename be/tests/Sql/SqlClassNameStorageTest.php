@@ -29,7 +29,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $second = $this->insertClassName(['name' => 'Size']);
         $third = $this->insertClassName(['name' => 'Material']);
 
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $rows = $storage->list();
 
         $this->assertCount(3, $rows);
@@ -44,7 +44,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -52,7 +52,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertClassName(['name' => 'カラー']);
 
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(ClassNameEntity::class, $entity);
@@ -62,7 +62,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -72,14 +72,14 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // `nonexistent-zzz` can never match an int PK; surface as miss
         // so the ClassName Update / Delete Finals fire their 404 paths
         // instead of a PDO error.
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
         $this->assertNull($storage->getById('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = new SqlClassNameIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassNameIdGenerator::class);
         $newId = $generator->generate(); // numeric string
 
         $entity = new ClassNameEntity(
@@ -87,7 +87,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
             name: 'Color',
         );
 
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $storage->put($entity);
 
         $read = $storage->getById($newId);
@@ -106,9 +106,9 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // sort_no is NOT NULL with no DEFAULT — a put INSERT must write
         // a value. The projection never reads it, so probe the raw
         // column directly. First INSERT on an empty table → 1.
-        $generator = new SqlClassNameIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassNameIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
 
         $storage->put(new ClassNameEntity(classNameId: $newId, name: 'Color'));
 
@@ -125,9 +125,9 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // append to the end in a stable order.
         $this->insertClassName(['name' => 'Existing', 'sort_no' => 7]);
 
-        $generator = new SqlClassNameIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassNameIdGenerator::class);
         $newId = $generator->generate();
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $storage->put(new ClassNameEntity(classNameId: $newId, name: 'Color'));
 
         $stmt = $this->pdo->prepare(
@@ -139,7 +139,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
 
     public function testPutIsNoOpForNonNumericId(): void
     {
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
 
         $storage->put(new ClassNameEntity(
             classNameId: 'deadbeefdeadbeefdeadbeefdeadbeef',
@@ -161,7 +161,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
             name: 'Colour',
         );
 
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -178,7 +178,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // never carries it, so the display slot is preserved.
         $id = $this->insertClassName(['name' => 'Color', 'sort_no' => 42]);
 
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $storage->put(new ClassNameEntity(classNameId: (string) $id, name: 'Colour'));
 
         $stmt = $this->pdo->prepare(
@@ -191,7 +191,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
     public function testRemoveDeletesExistingRow(): void
     {
         $id = $this->insertClassName(['name' => 'doomed']);
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $this->assertNotNull($storage->getById((string) $id));
 
         $storage->remove((string) $id);
@@ -212,7 +212,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $this->insertClassCategory(['class_name_id' => $classNameId, 'name' => 'Red']);
         $this->insertClassCategory(['class_name_id' => $classNameId, 'name' => 'Blue']);
 
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $storage->remove((string) $classNameId);
 
         // Axis is gone.
@@ -239,7 +239,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
             'name' => 'Large',
         ]);
 
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $storage->remove((string) $doomedAxis);
 
         $stmt = $this->pdo->prepare(
@@ -251,7 +251,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $storage->remove('99999999'); // no row, no exception
         $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric
         $storage->remove('nonexistent-zzz'); // non-numeric, no exception
@@ -261,7 +261,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
     public function testReorderRewritesSortNo(): void
     {
         $id = $this->insertClassName(['name' => 'Color', 'sort_no' => 2]);
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
 
         $storage->reorder((string) $id, 42);
 
@@ -274,14 +274,14 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
 
     public function testReorderIsSilentNoOpForNonNumericId(): void
     {
-        $storage = new SqlClassNameStorage($this->pdo);
+        $storage = $this->sql(SqlClassNameStorage::class);
         $storage->reorder('nonexistent-zzz', 5); // non-numeric, no exception
         $this->assertTrue(true);
     }
 
     public function testSqlClassNameIdGeneratorAllocatesIncrementingIds(): void
     {
-        $generator = new SqlClassNameIdGenerator($this->pdo);
+        $generator = $this->sql(SqlClassNameIdGenerator::class);
 
         // Empty table → starts at 1.
         $this->assertSame('1', $generator->generate());
