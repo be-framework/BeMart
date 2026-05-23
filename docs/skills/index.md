@@ -20,6 +20,7 @@ Every entry follows the same shape: **Context -> Problem -> Solution -> Code exa
 | [G-21](G-21-idempotent-delete-styles.md) | Idempotent DELETE has two styles — silent (200 + `alreadyAbsent`) vs 404-on-miss, route by caller expectation | REST API convention |
 | [G-22](G-22-context-specific-pagination-semantic.md) | Pagination Semantic is context-specific — `Limit` (admin) vs `OrderLimit` (dashboard) vs `HistoryLimit` (full history) | Semantic naming |
 | [G-23](G-23-hypermedia-test-is-migration-contract.md) | Hypermedia (Resource) tests are the storage-migration contract — never write Final-direct integration tests; ALPS gap-fill precedes SQL impl | Storage migration + test strategy |
+| [G-24](G-24-ray-media-query-boundary.md) | SQL境界はRay.MediaQuery interface + SQLファイルにする — 新規Query/CommandでPHP実クラスにPDOを書かない | Storage migration + Ray.MediaQuery |
 
 ## Contribution candidates
 
@@ -38,6 +39,7 @@ These are intended for upstream contribution to:
   - G-20 (cross-session test wiring; touches DI + AAA)
   - G-21 (idempotent DELETE; touches REST + ALPS unsafe/idempotent typing)
   - G-23 (hypermedia-as-contract + ALPS gap-fill; touches DI + Resource testing + ALPS descriptor structure)
+  - G-24 (Ray.MediaQuery boundary; touches storage, DI, SQL file layout)
 
 ## How these were discovered
 
