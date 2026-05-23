@@ -21,6 +21,7 @@ Every entry follows the same shape: **Context -> Problem -> Solution -> Code exa
 | [G-22](G-22-context-specific-pagination-semantic.md) | Pagination Semantic is context-specific — `Limit` (admin) vs `OrderLimit` (dashboard) vs `HistoryLimit` (full history) | Semantic naming |
 | [G-23](G-23-hypermedia-test-is-migration-contract.md) | Hypermedia (Resource) tests are the storage-migration contract — never write Final-direct integration tests; ALPS gap-fill precedes SQL impl | Storage migration + test strategy |
 | [G-24](G-24-ray-media-query-boundary.md) | SQL境界はRay.MediaQuery interface + SQLファイルにする — 新規Query/CommandでPHP実クラスにPDOを書かない | Storage migration + Ray.MediaQuery |
+| [G-25](G-25-bdr-domain-noun-values.md) | BDRはdomain noun + readonly propertyで表す — `Result` postfix / getter-only / `Generated*` を避ける | Ray.MediaQuery BDR + value naming |
 
 ## Contribution candidates
 
@@ -40,6 +41,7 @@ These are intended for upstream contribution to:
   - G-21 (idempotent DELETE; touches REST + ALPS unsafe/idempotent typing)
   - G-23 (hypermedia-as-contract + ALPS gap-fill; touches DI + Resource testing + ALPS descriptor structure)
   - G-24 (Ray.MediaQuery boundary; touches storage, DI, SQL file layout)
+  - G-25 (BDR naming and value shape; touches Ray.MediaQuery, Be composite values, and semantic vocabulary)
 
 ## How these were discovered
 
@@ -47,5 +49,6 @@ The migration ran across roughly two phases:
 
 1. **Pilots 1–15** — sequential, one-transition-at-a-time learning of patterns. G-14, G-15, G-16 surfaced in Pilot 5 (the first Complex-Convergence Final); G-17 surfaced in Pilot 10 (the first chain-divergence case).
 2. **Waves 1–6** — parallel multi-agent orchestration. G-18, G-19 surfaced in Wave 4 (admin AAA bootstrap, found ALPS-missing transitions). G-20, G-21, G-22 surfaced in Wave 6 (AUTHZ tests across sessions, two DELETE styles in close proximity, third pagination cap forcing the naming question).
+3. **Ray.MediaQuery cutover** — direct proxy / BDR migration. G-23 captured the test-contract lesson, G-24 captured the SQL boundary rule, and G-25 captured the BDR naming/value-shape cleanup after removing concrete SQL adapters.
 
 Each gap was promoted from "ad-hoc note in HANDOVER" to "named G-NN" once the same shape of problem showed up twice or once a single instance had clearly transferable lessons.
