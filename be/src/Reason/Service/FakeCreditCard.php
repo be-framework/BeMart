@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Service;
 
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\PaymentVerifyResult;
+use MyVendor\BeMart\Be\Reason\Entity\PaymentVerification;
 use Override;
 
 /**
@@ -15,8 +15,8 @@ use Override;
 final class FakeCreditCard implements PaymentMethodInterface
 {
     #[Override]
-    public function verify(OrderEntity $preOrder): PaymentVerifyResult
+    public function verify(OrderEntity $preOrder): PaymentVerification
     {
-        return new PaymentVerifyResult(success: true);
+        return new PaymentVerification(success: true);
     }
 }

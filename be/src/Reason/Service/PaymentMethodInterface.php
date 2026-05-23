@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Service;
 
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\PaymentVerifyResult;
+use MyVendor\BeMart\Be\Reason\Entity\PaymentVerification;
 
 /**
  * Payment plugin contract — EC-CUBE's PaymentMethodInterface narrowed to the
@@ -17,5 +17,5 @@ use MyVendor\BeMart\Be\Reason\Entity\PaymentVerifyResult;
  */
 interface PaymentMethodInterface
 {
-    public function verify(OrderEntity $preOrder): PaymentVerifyResult;
+    public function verify(OrderEntity $preOrder): PaymentVerification;
 }

@@ -14,7 +14,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * `errors` carries the human-readable reasons reported by the payment plugin
  * when success is false; empty otherwise.
  */
-final readonly class PaymentVerifyResult
+final readonly class PaymentVerification
 {
     /** @param list<string> $errors */
     public function __construct(
