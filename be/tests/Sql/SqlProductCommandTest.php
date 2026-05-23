@@ -247,7 +247,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             ProductEntity::STATUS_WITHDRAWN,
         );
 
-        $this->assertSame(2, $changed);
+        $this->assertSame(2, $changed->changedCount());
         $query = $this->sql(SqlProductQuery::class);
         foreach (['P-BULK-001', 'P-BULK-002'] as $code) {
             $entity = $query->item($code);
@@ -273,7 +273,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         );
 
         // Only the known code is counted.
-        $this->assertSame(1, $changed);
+        $this->assertSame(1, $changed->changedCount());
     }
 
     public function testBulkUpdateStatusDoesNotCountIdempotentReapplication(): void
@@ -294,7 +294,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             ProductEntity::STATUS_HIDDEN,
         );
 
-        $this->assertSame(0, $changed);
+        $this->assertSame(0, $changed->changedCount());
     }
 
     private function countProductRows(string $productCode): int

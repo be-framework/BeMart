@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Service;
 
 use MyVendor\BeMart\Be\Reason\Query\MediaQueryExecutor;
+use MyVendor\BeMart\Be\Reason\Query\Result\GeneratedId;
 use Override;
 
 final class SqlAdminIdGenerator implements AdminIdGeneratorInterface

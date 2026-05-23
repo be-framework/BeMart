@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\BulkStatusUpdateResult;
 
 /**
  * Write-side Product command — Wave 8 (admin product management).
@@ -64,5 +65,5 @@ interface ProductCommandInterface
      *
      * @param list<string> $productCodes
      */
-    public function bulkUpdateStatus(array $productCodes, int $newStatus): int;
+    public function bulkUpdateStatus(array $productCodes, int $newStatus): BulkStatusUpdateResult;
 }
