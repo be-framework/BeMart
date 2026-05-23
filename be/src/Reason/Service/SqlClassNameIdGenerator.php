@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Service;
 
 use MyVendor\BeMart\Be\Reason\Query\MediaQueryExecutor;
+use MyVendor\BeMart\Be\Reason\Query\Result\GeneratedId;
 use Override;
 
 final class SqlClassNameIdGenerator implements ClassNameIdGeneratorInterface
@@ -19,6 +20,6 @@ final class SqlClassNameIdGenerator implements ClassNameIdGeneratorInterface
     {
         $row = $this->db->row('className_next_id');
 
-        return (string) ($row['next_id'] ?? '1');
+        return (new GeneratedId((string) ($row['next_id'] ?? '1')))->value();
     }
 }

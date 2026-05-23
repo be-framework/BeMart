@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\FavoritePresence;
 
 /**
  * Customer favorites — unified Query + Command (Pilot 13 first
@@ -21,7 +22,7 @@ interface FavoriteStorageInterface
 {
     public function add(FavoriteEntity $favorite): void;
 
-    public function has(string $customerId, string $productCode): bool;
+    public function has(string $customerId, string $productCode): FavoritePresence;
 
     /** @return list<FavoriteEntity> */
     public function listByCustomer(string $customerId): array;

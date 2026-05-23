@@ -3,5 +3,5 @@ SELECT order_no, pre_order_id, customer_id, payment_id,
        add_point, use_point, order_status_id, order_date, payment_date
 FROM dtb_order
 WHERE order_no = :orderNo
-  AND order_status_id <> :processing
+  AND order_status_id <> 8
 LIMIT 1

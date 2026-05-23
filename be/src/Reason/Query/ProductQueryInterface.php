@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+use MyVendor\BeMart\Be\Reason\Query\Factory\ProductFactory;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Read-side Product query.
@@ -27,6 +29,7 @@ use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
  */
 interface ProductQueryInterface
 {
+    #[DbQuery('product_get', factory: ProductFactory::class)]
     public function item(string $productCode): ProductEntity|null;
 
     /**
@@ -37,6 +40,7 @@ interface ProductQueryInterface
      *
      * @return list<ProductEntity>
      */
+    #[DbQuery('product_list', factory: ProductFactory::class)]
     public function listAll(int $limit, int $offset = 0): array;
 
     /**
@@ -49,6 +53,7 @@ interface ProductQueryInterface
      *
      * @return list<ProductEntity>
      */
+    #[DbQuery('product_search', factory: ProductFactory::class)]
     public function search(?string $nameKeyword, int $limit = 50): array;
 
     /**
@@ -60,5 +65,6 @@ interface ProductQueryInterface
      *
      * @return list<ProductEntity>
      */
+    #[DbQuery('product_export', factory: ProductFactory::class)]
     public function listForExport(): array;
 }

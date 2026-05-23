@@ -34,7 +34,7 @@ final class SqlCustomerQuery implements CustomerQueryInterface
         if (! ctype_digit($customerId)) {
             return null;
         }
-        $row = $this->db->row('customer_find_by_id', ['id' => (int) $customerId]);
+        $row = $this->db->row('customer_find_by_id', ['customerId' => $customerId]);
         return $row === null ? null : $this->hydrate($row);
     }
 

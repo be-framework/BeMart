@@ -15,11 +15,6 @@
       <code><![CDATA[public function register(CustomerEntity $customer): void]]></code>
     </MissingOverrideAttribute>
   </file>
-  <file src="be/src/Reason/Query/FakeEmailUniquenessChecker.php">
-    <MissingOverrideAttribute>
-      <code><![CDATA[public function ensureUnique(string $email): void]]></code>
-    </MissingOverrideAttribute>
-  </file>
   <file src="be/src/Reason/Service/FakeCustomerIdGenerator.php">
     <MissingOverrideAttribute>
       <code><![CDATA[public function generate(): string]]></code>

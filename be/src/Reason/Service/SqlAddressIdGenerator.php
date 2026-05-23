@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Service;
 
 use MyVendor\BeMart\Be\Reason\Query\MediaQueryExecutor;
+use MyVendor\BeMart\Be\Reason\Query\Result\GeneratedId;
 use Override;
 
 final class SqlAddressIdGenerator implements AddressIdGeneratorInterface
@@ -19,6 +20,6 @@ final class SqlAddressIdGenerator implements AddressIdGeneratorInterface
     {
         $row = $this->db->row('address_next_id');
 
-        return (string) ($row['next_id'] ?? '1');
+        return (new GeneratedId((string) ($row['next_id'] ?? '1')))->value();
     }
 }

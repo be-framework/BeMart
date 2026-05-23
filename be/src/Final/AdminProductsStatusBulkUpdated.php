@@ -62,6 +62,6 @@ final readonly class AdminProductsStatusBulkUpdated
         $this->productCodes = $productCodes;
         $this->productStatus = $productStatus;
         $this->requestedCount = count($productCodes);
-        $this->changedCount = $changed;
+        $this->changedCount = $changed->changedCount();
     }
 }
