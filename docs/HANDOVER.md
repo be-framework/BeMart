@@ -2122,3 +2122,35 @@ scaffold されておらず、ワークフロー assertion が in-process でし
   wire フィールド名（`_token` / `product_id`）をリソース引数名へ手で
   詰め替えている。
 
+
+## 2026-05-23 — EC-CUBE実サイト探索とHTML導線安定化の保存前サマリ
+
+長いセッションで、コード上のRouteMap/Twig棚卸しだけでなく、起動中のEC-CUBE参照サイト `http://127.0.0.1:8081` とBeMart `http://127.0.0.1:8080` を実HTTPで探索した。詳細は `docs/ec-cube-site-exploration-gaps-2026-05-23.md` と `docs/html-screen-migration-matrix.md`。
+
+### 実施した主な変更
+
+- EC-CUBE由来のstorefront/admin静的アセットを `public/assets/**`, `public/bundle/**`, `public/template/admin/assets/**` に追加し、CSS未適用状態を解消する基盤を入れた。
+- `public/index.php` と `src/Http/EccubeRouteMap.php` で、EC-CUBE route名・friendly URL・未実装fallback・HTTPエラー処理を整理した。raw Fatal / Unbound はHTMLに漏らさず、未対応非画面アクションは `/__not-implemented?route=...` + shared JS alertへ流す。
+- HTTPセッションアダプタを追加し、管理ログインと会員ログインをブラウザセッションで扱えるようにした。
+- Storefrontは header/search/logo/login/cart/category-nav/footer の共有Block first sliceを追加し、商品一覧はカテゴリ/表示件数/並び順/一覧カート投入フォームまで拡張した。匿名MYページ系はEC-CUBE同様 `/login` へ誘導する。
+- Product bodyを画像・カテゴリ・タグ・規格名でenrichし、投入商品を `彩のジェラートセット` として画像付き表示にした。
+- Adminは `/admin/product/new`, `/admin/order?orderNo=...`, `/admin/customer?customerId=...`, category list/edit, template add first sliceを接続し、admin nav/submenuをEC-CUBE相当に寄せた。
+- ALPSに `page*` / `route-ec-cube` / `migration-target` taxonomyと `AdminOrderEditPage` / `AdminCustomerEditPage` を追加し、画面状態の追跡粒度を補強した。
+
+### 実サイト探索で確認した残差
+
+- Product: 商品規格行列、画像アップロード、カテゴリ/タグ実編集、在庫無制限、販売種別、通常価格、販売制限、発送日目安。
+- Order: 受注新規、詳細検索、購入者/配送先/明細/支払/対応状況/出荷通知/メール履歴。
+- Customer: 管理会員新規、詳細検索、購入履歴、配送先一覧、お気に入り、ステータス操作。
+- Content/Setting: ファイル管理、メンテナンス、特商法、定休日、ログイン履歴、ログ表示、システム情報、マスタデータ。
+
+### 新しいSQL境界ルール
+
+ユーザー指示により、今後の新規SQL Query/CommandではPHP実クラスにPDOクエリを書かず、Ray.MediaQueryを使う。開発順は **Fake → EC-CUBEスキーマ照合 → Ray.MediaQuery SQL → Resource/Form → Twig/Browser**。既存の `Sql*Query` / `Sql*Command` は今回は変更せず、後でまとめて移行する。詳細ルールは `docs/skills/G-24-ray-media-query-boundary.md`。
+
+### 検証メモ
+
+- `asd --validate alps.json` OK。
+- Product/Customer/Order/Category/Template周辺のResource/HTML render testsを局所実行してOK。
+- `tests/Http/HttpHypermediaTest.php` はローカルHTTP bind不可環境ではskipするが、起動中の8080に対するHTTP smokeでは主要URLが200/303で応答した。
+- Codex in-app browser自動操作APIは `No active Codex browser pane available` で取得不可だったため、スクリーンショット付き操作ではなく実HTTP探索で代替した。
