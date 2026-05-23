@@ -12,24 +12,19 @@ use function strtotime;
 
 final class SqlLoginHistoryStorage implements LoginHistoryStorageInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     /** @return list<LoginHistoryEntity> */
     #[Override]
     public function listRecent(int $limit = 50): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('tlogin_history_list', ['limit' => $limit]));
+        return array_map($this->hydrate(...), $this->db->tlogin_history_list(limit: $limit));
     }
 
     #[Override]
     public function append(LoginHistoryEntity $entry): void
     {
-        $this->db->exec('tlogin_history_insert', [
-            'statusId' => $entry->success ? 1 : 2,
-            'loginId' => $entry->loginId,
-            'clientIp' => $entry->clientIp,
-            'created' => $this->toMysqlDatetime($entry->timestamp),
-        ]);
+        $this->db->tlogin_history_insert(statusId: $entry->success ? 1 : 2, loginId: $entry->loginId, clientIp: $entry->clientIp, created: $this->toMysqlDatetime($entry->timestamp));
     }
 
     /** @param array<string, mixed> $row */

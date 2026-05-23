@@ -27,7 +27,7 @@ use function str_contains;
  *  - the storage binding (PaymentMethodAdminStorageInterface →
  *    SqlPaymentMethodAdminStorage) and id generator
  *    (PaymentMethodAdminIdGeneratorInterface →
- *    SqlPaymentMethodAdminIdGenerator) are layered via the base class's
+ *    direct MediaQuery payment id proxy) are layered via the base class's
  *    sqlOverrideModule; persistence is against the real dtb_payment
  *    table.
  *
@@ -42,7 +42,7 @@ use function str_contains;
  *    and seeds every row through the resource layer's POST affordance;
  *    dtb_payment is likewise empty on each test, so this sibling seeds
  *    the same way — the POST drives the full Becoming chain
- *    (Input → PaymentMethodAdminCreated → SqlPaymentMethodAdminIdGenerator
+ *    (Input → PaymentMethodAdminCreated → direct MediaQuery payment id proxy
  *    → SqlPaymentMethodAdminStorage). No direct fixture seeding is
  *    needed since the Payment resource exposes a create affordance.
  *

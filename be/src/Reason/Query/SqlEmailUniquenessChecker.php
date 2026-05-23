@@ -9,11 +9,11 @@ use Override;
 
 final class SqlEmailUniquenessChecker implements EmailUniquenessCheckerInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function check(string $email): EmailUniqueness
     {
-        return new EmailUniqueness($this->db->row('customer_email_exists', ['email' => $email]) === null);
+        return new EmailUniqueness($this->db->customer_email_exists(email: $email) === null);
     }
 }

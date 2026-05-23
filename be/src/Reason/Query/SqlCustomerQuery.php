@@ -8,23 +8,22 @@ use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use Override;
 
 use function ctype_digit;
-use function str_replace;
 
 final class SqlCustomerQuery implements CustomerQueryInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function findByEmail(string $email): CustomerEntity|null
     {
-        $row = $this->db->row('customer_find_by_email', ['email' => $email]);
+        $row = $this->db->customer_find_by_email(email: $email);
         return $row === null ? null : $this->hydrate($row);
     }
 
     #[Override]
     public function findBySecretKey(string $secretKey): CustomerEntity|null
     {
-        $row = $this->db->row('customer_find_by_secret_key', ['secretKey' => $secretKey]);
+        $row = $this->db->customer_find_by_secret_key(secretKey: $secretKey);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -34,7 +33,7 @@ final class SqlCustomerQuery implements CustomerQueryInterface
         if (! ctype_digit($customerId)) {
             return null;
         }
-        $row = $this->db->row('customer_find_by_id', ['customerId' => $customerId]);
+        $row = $this->db->customer_find_by_id(customerId: $customerId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -42,24 +41,11 @@ final class SqlCustomerQuery implements CustomerQueryInterface
     #[Override]
     public function search(?string $nameKeyword, ?string $emailKeyword, int $limit = 50): array
     {
-        $hasName = $nameKeyword !== null && $nameKeyword !== '';
-        $hasEmail = $emailKeyword !== null && $emailKeyword !== '';
-        $values = ['limit' => $limit];
-        if ($hasName) {
-            $pattern = '%' . $this->escapeLike($nameKeyword) . '%';
-            $values += ['nameA' => $pattern, 'nameB' => $pattern, 'nameC' => $pattern];
-        }
-        if ($hasEmail) {
-            $values['emailKeyword'] = '%' . $this->escapeLike($emailKeyword) . '%';
-        }
-        $query = match (true) {
-            $hasName && $hasEmail => 'customer_search_name_email',
-            $hasName => 'customer_search_name',
-            $hasEmail => 'customer_search_email',
-            default => 'customer_search_all',
-        };
-
-        return array_map($this->hydrate(...), $this->db->rows($query, $values));
+        return array_map($this->hydrate(...), $this->db->customer_search(
+            nameKeyword: $nameKeyword,
+            emailKeyword: $emailKeyword,
+            limit: $limit,
+        ));
     }
 
     /** @param array<string, mixed> $row */

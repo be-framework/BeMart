@@ -55,7 +55,7 @@ final readonly class CategoryCreated
         }
 
         $entity = new CategoryEntity(
-            categoryId: $idGenerator->generate(),
+            categoryId: $idGenerator->generate()->value(),
             categoryName: $categoryName,
             parentId: $parentId,
             sortNo: $sortNo,

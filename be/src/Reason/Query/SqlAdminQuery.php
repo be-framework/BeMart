@@ -8,16 +8,15 @@ use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 use Override;
 
 use function ctype_digit;
-use function str_replace;
 
 final class SqlAdminQuery implements AdminQueryInterface
 {
-    public function __construct(private readonly MediaQueryExecutor $db) {}
+    public function __construct(private readonly InternalDbQueryInterface $db) {}
 
     #[Override]
     public function findByLoginId(string $loginId): AdminEntity|null
     {
-        $row = $this->db->row('admin_find_by_login', ['loginId' => $loginId]);
+        $row = $this->db->admin_find_by_login(loginId: $loginId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -27,7 +26,7 @@ final class SqlAdminQuery implements AdminQueryInterface
         if (! ctype_digit($adminId)) {
             return null;
         }
-        $row = $this->db->row('admin_find_by_id', ['adminId' => $adminId]);
+        $row = $this->db->admin_find_by_id(adminId: $adminId);
         return $row === null ? null : $this->hydrate($row);
     }
 
@@ -35,16 +34,14 @@ final class SqlAdminQuery implements AdminQueryInterface
     #[Override]
     public function listAll(int $limit = 50, int $offset = 0): array
     {
-        return array_map($this->hydrate(...), $this->db->rows('admin_list', ['limit' => $limit, 'offset' => $offset]));
+        return array_map($this->hydrate(...), $this->db->admin_list(limit: $limit, offset: $offset));
     }
 
     /** @return list<AdminEntity> */
     #[Override]
     public function search(string|null $nameKeyword): array
     {
-        $query = $nameKeyword === null || $nameKeyword === '' ? 'admin_search_all' : 'admin_search_name';
-        $values = $query === 'admin_search_name' ? ['pattern' => '%' . $this->escapeLike((string) $nameKeyword) . '%'] : [];
-        return array_map($this->hydrate(...), $this->db->rows($query, $values));
+        return array_map($this->hydrate(...), $this->db->admin_search(nameKeyword: $nameKeyword));
     }
 
     /** @param array<string, mixed> $row */
