@@ -51,10 +51,10 @@ class WorkflowTest extends TestCase
     protected function setUp(): void
     {
         $this->appContextBefore = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html');
+        putenv('APP_CONTEXT=html-test-hal-api-app');
         $this->startActiveSession();
 
-        $resource = Injector::getInstance('html')->getInstance(ResourceInterface::class);
+        $resource = Injector::getInstance('html-test-hal-api-app')->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
 
         $this->resource = new RoutedResource($resource, new Router(RouteTable::default()));

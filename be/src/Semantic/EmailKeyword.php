@@ -13,7 +13,7 @@ use function mb_strlen;
  * Admin customer-list email keyword — Wave 5 (goCustomerList).
  *
  * Substring filter applied to the customer email column in
- * FakeCustomerStorage::search. Optional (null disables the filter).
+ * customer search. Optional (null disables the filter).
  * Length-bounded similar to the canonical Email semantic, though we
  * intentionally do NOT enforce the `local@domain` shape here — admins
  * commonly filter by a domain fragment ("example.com") or a name

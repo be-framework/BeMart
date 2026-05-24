@@ -49,7 +49,7 @@ final readonly class CustomerAddressDeleted
             throw new UnauthenticatedException();
         }
 
-        $current = $addresses->getById($addressId);
+        $current = $addresses->item($addressId);
         if (! $current instanceof AddressEntity) {
             throw new AddressNotFoundException();
         }
@@ -58,7 +58,7 @@ final readonly class CustomerAddressDeleted
             throw new UnauthorizedAddressAccessException();
         }
 
-        $addresses->remove($addressId);
+        $addresses->delete($addressId);
 
         $this->addressId = $addressId;
         $this->customerId = $sessionCustomerId;

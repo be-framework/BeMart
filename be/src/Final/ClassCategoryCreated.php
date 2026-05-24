@@ -44,12 +44,12 @@ final readonly class ClassCategoryCreated
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($classNames->getById($classNameId) === null) {
+        if ($classNames->item($classNameId) === null) {
             throw new ClassNameNotFoundException();
         }
 
         $entity = new ClassCategoryEntity(
-            classCategoryId: $idGenerator->generate()->value,
+            classCategoryId: $idGenerator->next()->value,
             classNameId: $classNameId,
             name: $classCategoryName,
         );

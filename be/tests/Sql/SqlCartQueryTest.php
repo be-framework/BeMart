@@ -26,7 +26,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCartItem($cart['id'], $classB, ['price' => 750, 'quantity' => 1]);
 
         $query = $this->sql(CartQueryInterface::class);
-        $result = $query->byCartKey('session-hit_3');
+        $result = $query->item('session-hit_3');
 
         $this->assertInstanceOf(CartEntity::class, $result);
         $this->assertSame('session-hit_3', $result->cartKey);
@@ -52,7 +52,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCart(['cart_key' => 'somebody-else_1']);
 
         $query = $this->sql(CartQueryInterface::class);
-        $this->assertNull($query->byCartKey('absent_1'));
+        $this->assertNull($query->item('absent_1'));
     }
 
     public function testBySessionPrefixReturnsCartsSortedBySaleTypeId(): void
@@ -66,7 +66,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCart(['cart_key' => 'multi-extra_1']); // prefix is "multi-extra", NOT "multi"
 
         $query = $this->sql(CartQueryInterface::class);
-        $carts = $query->bySessionPrefix('multi');
+        $carts = $query->listBySessionPrefix('multi');
 
         $this->assertCount(3, $carts);
         $saleTypeIds = array_map(static fn (CartEntity $c) => $c->saleTypeId, $carts);
@@ -81,7 +81,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCart(['cart_key' => 'unrelated_1']);
 
         $query = $this->sql(CartQueryInterface::class);
-        $this->assertSame([], $query->bySessionPrefix('ghost-session'));
+        $this->assertSame([], $query->listBySessionPrefix('ghost-session'));
     }
 
     public function testParsesMultiDigitSaleTypeIdFromCartKey(): void
@@ -92,7 +92,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCart(['cart_key' => 'sess_abc_xyz_127']);
 
         $query = $this->sql(CartQueryInterface::class);
-        $cart = $query->byCartKey('sess_abc_xyz_127');
+        $cart = $query->item('sess_abc_xyz_127');
 
         $this->assertNotNull($cart);
         $this->assertSame(127, $cart->saleTypeId);
@@ -112,7 +112,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCartItem($cart['id'], $this->defaultProductClassId($productB), ['price' => 200]);
 
         $query = $this->sql(CartQueryInterface::class);
-        $cart = $query->byCartKey('ordering_1');
+        $cart = $query->item('ordering_1');
 
         $this->assertNotNull($cart);
         $codes = array_map(
@@ -150,7 +150,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCartItem($cart['id'], $sku, ['price' => 2500, 'quantity' => 4]);
 
         $query = $this->sql(CartQueryInterface::class);
-        $result = $query->byCartKey('display_1');
+        $result = $query->item('display_1');
 
         $this->assertNotNull($result);
         $this->assertCount(1, $result->items);
@@ -185,7 +185,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         );
 
         $query = $this->sql(CartQueryInterface::class);
-        $result = $query->byCartKey('plain_1');
+        $result = $query->item('plain_1');
 
         $this->assertNotNull($result);
         $item = $result->items[0];

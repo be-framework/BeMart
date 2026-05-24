@@ -25,7 +25,7 @@ use function str_contains;
  * sqlOverrideModule; persistence is against the real dtb_mail_template
  * table.
  *
- * The Fake-backed sibling relies on FakeMailTemplateStorage's two
+ * The Fake-backed sibling relies on MailTemplateStorageInterface's two
  * built-in seed rows (SEED_ORDER_CONFIRM_ID = 1,
  * SEED_REGISTER_THANKS_ID = 2). The SQL side has no built-in seed —
  * dtb_mail_template is empty in the structure-only dump — so each test

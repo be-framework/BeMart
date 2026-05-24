@@ -37,11 +37,11 @@ final readonly class PaymentMethodAdminDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($payments->getById($paymentId) === null) {
+        if ($payments->item($paymentId) === null) {
             throw new PaymentMethodAdminNotFoundException();
         }
 
-        $payments->remove($paymentId);
+        $payments->delete($paymentId);
 
         $this->paymentId = $paymentId;
     }

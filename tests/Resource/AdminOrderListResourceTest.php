@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -20,7 +20,7 @@ use function dirname;
  * Wave 7 (goOrderList) — admin-side order grid Resource.
  *
  * Mirrors AdminCustomerListResourceTest's `rebindAdminSession` helper.
- * The seed past order in FakeFinalizedOrderStorage gives us a stable
+ * The seed past order in Ray.FakeQuery fixture JSON gives us a stable
  * row to assert against without seeding extra fixtures.
  */
 final class AdminOrderListResourceTest extends TestCase
@@ -37,7 +37,7 @@ final class AdminOrderListResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {

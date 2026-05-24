@@ -34,6 +34,6 @@ final readonly class TradeLawFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $this->tradeLawBody = $tradeLawStorage->get()->body;
+        $this->tradeLawBody = $tradeLawStorage->item()->body;
     }
 }

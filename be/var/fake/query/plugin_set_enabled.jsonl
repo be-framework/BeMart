@@ -1,0 +1,4 @@
+{"found":1,"installed":1,"changed":1,"_params":{"pluginCode":"Sample/SamplePlugin","enabled":true}}
+{"found":1,"installed":1,"changed":1,"_params":{"pluginCode":"Sample/DisabledPlugin","enabled":true}}
+{"found":1,"installed":1,"changed":1,"_params":{"pluginCode":"Sample/SamplePlugin","enabled":false}}
+{"found":1,"installed":1,"changed":1,"_params":{"pluginCode":"Sample/DisabledPlugin","enabled":false}}

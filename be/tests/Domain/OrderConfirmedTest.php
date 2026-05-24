@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -26,7 +26,7 @@ final class OrderConfirmedTest extends TestCase
     protected function setUp(): void
     {
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->becoming = $injector->getInstance(BecomingInterface::class);
@@ -116,7 +116,7 @@ final class OrderConfirmedTest extends TestCase
 
     public function testVerifyFailureBranchesToOrderConfirmFailed(): void
     {
-        // paymentMethodId=9 routes to FakeVerifyFailing.
+        // paymentMethodId=9 routes to the fake payment failure handler.
         $final = ($this->becoming)(new ConfirmOrderInput(
             preOrderId: 'deadbeefcafe1234567890abcdef01234567890c',
             paymentMethodId: 9,

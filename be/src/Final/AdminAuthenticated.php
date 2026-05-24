@@ -46,7 +46,7 @@ final readonly class AdminAuthenticated
         #[Inject] AdminQueryInterface $adminQuery,
         #[Inject] PasswordHasherInterface $passwordHasher,
     ) {
-        $admin = $adminQuery->findByLoginId($loginId);
+        $admin = $adminQuery->byLogin($loginId);
         if ($admin === null) {
             throw new AdminLoginFailedException();
         }

@@ -8,18 +8,15 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakeBlockStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
-use function is_string;
 
 /**
  * Wave 9 — resource-layer coverage for the admin Block endpoints.
@@ -27,52 +24,36 @@ use function is_string;
 final class AdminBlockResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const USER_BLOCK_ID = 'bk-user';
 
     private ResourceInterface $resource;
-    private FakeBlockStorage $storage;
+    private BlockStorageInterface $storage;
 
     protected function setUp(): void
     {
-        $this->storage = new FakeBlockStorage();
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session, $this->storage) extends AbstractModule {
-            public function __construct(
-                private readonly FakeAdminSession $session,
-                private readonly FakeBlockStorage $storage,
-            ) {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSessionInterface::class)->toInstance($this->session);
-                $this->bind(BlockStorageInterface::class)->toInstance($this->storage);
-                $this->bind(FakeBlockStorage::class)->toInstance($this->storage);
             }
         };
         $base->override($override);
 
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->resource = $injector->getInstance(ResourceInterface::class);
-    }
-
-    private function seed(string $name, string $file): string
-    {
-        $ro = $this->resource->post('page://self/admin/block/block-list', [
-            'blockName' => $name,
-            'blockFileName' => $file,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['blockId'];
-        assert(is_string($id));
-
-        return $id;
+        $this->storage = $injector->getInstance(BlockStorageInterface::class);
     }
 
     public function testListIncludesSeed(): void
@@ -114,7 +95,7 @@ final class AdminBlockResourceTest extends TestCase
 
     public function testUpdateMerges(): void
     {
-        $id = $this->seed('Old', 'old');
+        $id = self::USER_BLOCK_ID;
         $ro = $this->resource->put('page://self/admin/block/block', [
             'blockId' => $id,
             'blockName' => 'New',
@@ -126,7 +107,7 @@ final class AdminBlockResourceTest extends TestCase
 
     public function testDeleteUserBlockHappyPath(): void
     {
-        $id = $this->seed('Tmp', 'tmp');
+        $id = self::USER_BLOCK_ID;
         $ro = $this->resource->delete('page://self/admin/block/block', [
             'blockId' => $id,
             'csrfToken' => FakeCsrfToken::TOKEN,
@@ -137,7 +118,7 @@ final class AdminBlockResourceTest extends TestCase
     public function testDeleteSystemBlockIsRefused(): void
     {
         $ro = $this->resource->delete('page://self/admin/block/block', [
-            'blockId' => FakeBlockStorage::SEED_BLOCK_ID,
+            'blockId' => 'bk-header',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);

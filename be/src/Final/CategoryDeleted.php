@@ -42,11 +42,11 @@ final readonly class CategoryDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($categories->getById($categoryId) === null) {
+        if ($categories->item($categoryId) === null) {
             throw new CategoryNotFoundException();
         }
 
-        $categories->remove($categoryId);
+        $categories->delete($categoryId);
 
         $this->categoryId = $categoryId;
     }

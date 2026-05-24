@@ -34,7 +34,7 @@ use function is_string;
  *    SqlBlockStorage rejects it as non-numeric on lookup (the same 404
  *    path as any unknown id, by design).
  *
- *  - the Fake's testListIncludesSeed leans on the FakeBlockStorage
+ *  - the Fake's testListIncludesSeed leans on the BlockStorageInterface
  *    constructor seeding one undeletable system block (`bk-header`);
  *    dtb_block is empty on each test, so the SQL sibling seeds one
  *    user-block row through the resource layer first and asserts the
@@ -110,7 +110,7 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
 
     public function testListIncludesSeed(): void
     {
-        // FakeBlockStorage seeds `bk-header` in its constructor;
+        // BlockStorageInterface seeds `bk-header` in its constructor;
         // dtb_block is empty on each test, so seed an equivalent row
         // through the resource layer first. The assertion shape
         // matches the Fake-backed sibling.
@@ -178,7 +178,7 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
         // Mirror of the Fake-backed sibling's check: a block with
         // blockDeletable=false is system-managed and BlockDeleted maps
         // that to a 404 (masking system-block existence).
-        // FakeBlockStorage seeds `bk-header` with blockDeletable=false
+        // BlockStorageInterface seeds `bk-header` with blockDeletable=false
         // in its constructor; dtb_block is empty so we seed an
         // equivalent row directly via the fixture helper at
         // deletable = 0.

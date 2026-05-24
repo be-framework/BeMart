@@ -14,5 +14,5 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface ClassNameIdGeneratorInterface
 {
     #[DbQuery('className_next_id')]
-    public function generate(): AllocatedId;
+    public function next(): AllocatedId;
 }

@@ -1,0 +1,14 @@
+[
+  {
+    "mailTemplateId": 1,
+    "mailTemplateName": "注文完了メール",
+    "fileName": "Mail/order.twig",
+    "subject": "ご注文ありがとうございます"
+  },
+  {
+    "mailTemplateId": 2,
+    "mailTemplateName": "会員登録完了メール",
+    "fileName": "Mail/entry.twig",
+    "subject": "ご登録ありがとうございます"
+  }
+]

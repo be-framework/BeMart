@@ -11,7 +11,7 @@ use Be\Framework\Attribute\Validate;
  * (`doSortNoMove` / `doToggleVisible`).
  *
  * Each admin master keys its rows differently — dtb_payment / dtb_tag
- * use an int PK, the Fake stores use opaque string handles — so this
+ * use an int PK, the JSON-backed fake stores use opaque string handles — so this
  * Semantic is a type assertion only. The actual resolution (and the
  * 404 on a miss) happens in
  * {@see \MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface}.

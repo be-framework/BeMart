@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
 use MyVendor\BeMart\Tests\Resource\Admin\SystemJaMessages;
 use PHPUnit\Framework\TestCase;
@@ -84,7 +84,7 @@ final class AdminLoginHistoryHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
@@ -255,7 +255,7 @@ final class AdminLoginHistoryHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // The same logical login history as BeMart's FakeLoginHistoryStorage
+        // The same logical login history as BeMart's the JSON login-history corpus
         // seed. EC-CUBE's row uses `id` / `user_name` / `client_ip` /
         // `create_date` / `Status` — BeMart's projection carries
         // `loginId` / `clientIp` / `timestamp` / `success`. EC-CUBE

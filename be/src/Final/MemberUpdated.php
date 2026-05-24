@@ -55,7 +55,7 @@ final readonly class MemberUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $adminQuery->findByLoginId($loginId);
+        $current = $adminQuery->byLogin($loginId);
         if ($current === null) {
             throw new AdminNotFoundException();
         }

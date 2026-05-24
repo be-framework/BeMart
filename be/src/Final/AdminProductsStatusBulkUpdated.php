@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
-use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductStatusCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use Ray\Di\Di\Inject;
@@ -52,13 +52,13 @@ final readonly class AdminProductsStatusBulkUpdated
         #[Input] array $productCodes,
         #[Input] int $productStatus,
         #[Inject] AdminSessionInterface $adminSession,
-        #[Inject] ProductCommandInterface $productCommand,
+        #[Inject] ProductStatusCommandInterface $productStatusCommand,
     ) {
         if ($adminSession->adminId() === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
-        $changed = $productCommand->bulkUpdateStatus(ProductCodeList::fromArray($productCodes), $productStatus);
+        $changed = $productStatusCommand->update(ProductCodeList::fromArray($productCodes), $productStatus);
 
         $this->productCodes = $productCodes;
         $this->productStatus = $productStatus;

@@ -35,7 +35,7 @@ final readonly class CartsFetched
         #[Input] string $sessionPrefix,
         #[Inject] CartQueryInterface $cartQuery,
     ) {
-        $carts = $cartQuery->bySessionPrefix($sessionPrefix);
+        $carts = $cartQuery->listBySessionPrefix($sessionPrefix);
 
         $this->carts = $carts;
         $this->cartCount = count($carts);

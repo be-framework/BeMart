@@ -14,5 +14,5 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface PageIdGeneratorInterface
 {
     #[DbQuery('page_next_id')]
-    public function generate(): AllocatedId;
+    public function next(): AllocatedId;
 }

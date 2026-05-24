@@ -31,7 +31,7 @@ final readonly class LayoutUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $layouts->getById($layoutId);
+        $current = $layouts->item($layoutId);
         if ($current === null) {
             throw new LayoutNotFoundException();
         }

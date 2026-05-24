@@ -41,7 +41,7 @@ final readonly class CustomerAuthenticated
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] PasswordHasherInterface $passwordHasher,
     ) {
-        $customer = $customerQuery->findByEmail($email);
+        $customer = $customerQuery->byEmail($email);
         if ($customer === null) {
             throw new LoginFailedException();
         }

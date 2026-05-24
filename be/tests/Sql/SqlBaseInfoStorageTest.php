@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
  * the cases below verify the per-method SQL paths in isolation:
  *
  *   - get() on an empty table → installer-default Entity (matching
- *     FakeBaseInfoStorage's constructor seeds, so both backends
+ *     BaseInfoStorageInterface's constructor seeds, so both backends
  *     produce the IDENTICAL projection on a first read).
  *   - get() on a seeded id=1 row → hydrated Entity with the row's
  *     values, NULL columns coerced to null Entity fields.
@@ -34,9 +34,9 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
     public function testGetReturnsInstallerDefaultsWhenRowMissing(): void
     {
         $storage = $this->sql(BaseInfoStorageInterface::class);
-        $entity = $storage->get();
+        $entity = $storage->item();
 
-        // Mirrors FakeBaseInfoStorage's constructor seeds — the same
+        // Mirrors BaseInfoStorageInterface's constructor seeds — the same
         // contract both backends honour for a first read.
         $this->assertSame('EC-CUBE SHOP', $entity->shopName);
         $this->assertSame('イーシーキューブショップ', $entity->shopKana);
@@ -72,7 +72,7 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(BaseInfoStorageInterface::class);
-        $entity = $storage->get();
+        $entity = $storage->item();
 
         $this->assertSame('新ショップ', $entity->shopName);
         $this->assertSame('シンショップ', $entity->shopKana);
@@ -95,7 +95,7 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
         $this->insertBaseInfo(['shop_name' => 'Bare Shop']);
 
         $storage = $this->sql(BaseInfoStorageInterface::class);
-        $entity = $storage->get();
+        $entity = $storage->item();
 
         $this->assertSame('Bare Shop', $entity->shopName);
         $this->assertNull($entity->shopKana);
@@ -120,7 +120,7 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
         $this->insertBaseInfo(['shop_name' => null]);
 
         $storage = $this->sql(BaseInfoStorageInterface::class);
-        $entity = $storage->get();
+        $entity = $storage->item();
 
         $this->assertSame('EC-CUBE SHOP', $entity->shopName);
     }
@@ -144,9 +144,9 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
             shopMessage: 'いらっしゃいませ',
         );
 
-        $storage->update($entity);
+        $storage->put($entity);
 
-        $read = $storage->get();
+        $read = $storage->item();
         $this->assertSame('新ショップ', $read->shopName);
         $this->assertSame('シンショップ', $read->shopKana);
         $this->assertSame('New Shop', $read->shopNameEng);
@@ -187,9 +187,9 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
             shopMessage: null,
         );
 
-        $storage->update($entity);
+        $storage->put($entity);
 
-        $read = $storage->get();
+        $read = $storage->item();
         $this->assertSame('New', $read->shopName);
         $this->assertSame('ニュー', $read->shopKana);
         $this->assertSame('新会社', $read->companyName);
@@ -219,10 +219,10 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
         );
 
         // First call inserts.
-        $storage->update($entity);
+        $storage->put($entity);
         // Subsequent calls should UPDATE, never INSERT.
-        $storage->update($entity);
-        $storage->update($entity);
+        $storage->put($entity);
+        $storage->put($entity);
 
         $stmt = $this->pdo->query('SELECT COUNT(*) FROM dtb_base_info');
         $this->assertNotFalse($stmt);
@@ -249,7 +249,7 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
         $this->assertNotFalse($before);
 
         $storage = $this->sql(BaseInfoStorageInterface::class);
-        $storage->update(new BaseInfoEntity(
+        $storage->put(new BaseInfoEntity(
             shopName: 'Touched',
             shopKana: null,
             shopNameEng: null,
@@ -292,7 +292,7 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
 
         // All-null except shopName (the only non-null field on the
         // Entity). Round-trip must preserve each null.
-        $storage->update(new BaseInfoEntity(
+        $storage->put(new BaseInfoEntity(
             shopName: 'Just a name',
             shopKana: null,
             shopNameEng: null,
@@ -307,7 +307,7 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
             shopMessage: null,
         ));
 
-        $read = $storage->get();
+        $read = $storage->item();
         $this->assertSame('Just a name', $read->shopName);
         $this->assertNull($read->shopKana);
         $this->assertNull($read->shopNameEng);
@@ -330,7 +330,7 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
         $this->insertPref(13, 'Tokyo');
 
         $storage = $this->sql(BaseInfoStorageInterface::class);
-        $storage->update(new BaseInfoEntity(
+        $storage->put(new BaseInfoEntity(
             shopName: 'With pref',
             shopKana: null,
             shopNameEng: null,
@@ -345,7 +345,7 @@ final class SqlBaseInfoStorageTest extends AbstractSqlTestCase
             shopMessage: null,
         ));
 
-        $read = $storage->get();
+        $read = $storage->item();
         $this->assertSame(13, $read->pref);
     }
 }

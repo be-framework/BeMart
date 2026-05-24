@@ -58,7 +58,7 @@ final readonly class MemberDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        $target = $adminQuery->findByLoginId($loginId);
+        $target = $adminQuery->byLogin($loginId);
         if ($target === null) {
             throw new AdminNotFoundException();
         }

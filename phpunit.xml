@@ -5,19 +5,25 @@
          colors="true"
          cacheDirectory=".phpunit.cache">
     <testsuites>
-        <testsuite name="resource">
+        <testsuite name="fake">
             <directory>tests/Resource</directory>
+            <exclude>tests/Resource/Sql</exclude>
             <directory>tests/Auth</directory>
             <directory>tests/Module</directory>
             <directory>tests/Router</directory>
             <directory>tests/EntryPoint</directory>
-            <directory>be/tests</directory>
+            <directory>be/tests/Domain</directory>
         </testsuite>
-        <testsuite name="hypermedia">
-            <directory>tests/Hypermedia</directory>
+        <testsuite name="sql">
+            <directory>be/tests/Sql</directory>
+            <directory>tests/Resource/Sql</directory>
         </testsuite>
         <testsuite name="http">
+            <directory>tests/Hypermedia</directory>
             <directory>tests/Http</directory>
+        </testsuite>
+        <testsuite name="smoke">
+            <directory>tests/Smoke</directory>
         </testsuite>
     </testsuites>
     <php>

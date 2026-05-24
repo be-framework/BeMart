@@ -41,7 +41,7 @@ final readonly class PageUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $pages->getById($pageId);
+        $current = $pages->item($pageId);
         if ($current === null) {
             throw new PageNotFoundException();
         }

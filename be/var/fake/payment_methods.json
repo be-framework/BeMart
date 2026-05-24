@@ -1,0 +1,20 @@
+[
+  {
+    "paymentMethodId": 1,
+    "paymentMethodName": "代金引換",
+    "fakeHandler": "cash_on_delivery",
+    "available": true
+  },
+  {
+    "paymentMethodId": 2,
+    "paymentMethodName": "クレジットカード",
+    "fakeHandler": "credit_card",
+    "available": true
+  },
+  {
+    "paymentMethodId": 9,
+    "paymentMethodName": "検証失敗",
+    "fakeHandler": "verify_failing",
+    "available": false
+  }
+]

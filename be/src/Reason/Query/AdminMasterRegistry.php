@@ -131,12 +131,12 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
     public function rowExists(string $masterType, string $rowId): bool
     {
         return match ($masterType) {
-            'payment' => $this->payments->getById($rowId) !== null,
-            'delivery' => $this->deliveries->getById($rowId) !== null,
-            'tag' => $this->tags->getById($rowId) !== null,
-            'className' => $this->classNames->getById($rowId) !== null,
-            'classCategory' => $this->classCategories->getById($rowId) !== null,
-            'news' => $this->news->getById($rowId) !== null,
+            'payment' => $this->payments->item($rowId) !== null,
+            'delivery' => $this->deliveries->item($rowId) !== null,
+            'tag' => $this->tags->item($rowId) !== null,
+            'className' => $this->classNames->item($rowId) !== null,
+            'classCategory' => $this->classCategories->item($rowId) !== null,
+            'news' => $this->news->item($rowId) !== null,
             default => throw new MasterTypeFormatException(),
         };
     }
@@ -163,7 +163,7 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
     }
 
     #[Override]
-    public function setVisible(string $masterType, string $rowId, bool $visible): void
+    public function visible(string $masterType, string $rowId, bool $visible): void
     {
         if (! $this->supportsVisible($masterType)) {
             // Either an unknown master, or a known master with no
@@ -172,10 +172,10 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
         }
 
         match ($masterType) {
-            'payment' => $this->payments->setVisible($rowId, $visible),
-            'delivery' => $this->deliveries->setVisible($rowId, $visible),
-            'classCategory' => $this->classCategories->setVisible($rowId, $visible),
-            'news' => $this->news->setVisible($rowId, $visible),
+            'payment' => $this->payments->visible($rowId, $visible),
+            'delivery' => $this->deliveries->visible($rowId, $visible),
+            'classCategory' => $this->classCategories->visible($rowId, $visible),
+            'news' => $this->news->visible($rowId, $visible),
             default => throw new MasterTypeFormatException(),
         };
     }

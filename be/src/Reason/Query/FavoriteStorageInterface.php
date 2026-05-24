@@ -28,9 +28,9 @@ interface FavoriteStorageInterface
     public function has(string $customerId, string $productCode): FavoritePresence;
 
     /** @return list<FavoriteEntity> */
-    #[DbQuery('favorite_list', factory: FavoriteEntity::class)]
+    #[DbQuery('favorite_list')]
     public function listByCustomer(string $customerId): array;
 
     #[DbQuery('favorite_remove')]
-    public function remove(string $customerId, string $productCode): void;
+    public function delete(string $customerId, string $productCode): void;
 }

@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 use Twig\Environment;
@@ -97,7 +97,7 @@ final class ProductsHtmlRenderTest extends TestCase
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
         $injector = new Injector(
-            new HtmlModule($meta),
+            new HtmlTestModule($meta),
             dirname(__DIR__, 2) . '/var/tmp/html',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);
@@ -133,7 +133,7 @@ final class ProductsHtmlRenderTest extends TestCase
             'class="ec-searchnavRole__infos"',
             'class="ec-searchnavRole__counter"',
             // Populated branch — the storefront catalog query projects
-            // three STATUS_VISIBLE products.
+            // five STATUS_VISIBLE products.
             'の商品が見つかりました',
             '<div class="ec-shelfRole">',
             '<ul class="ec-shelfGrid">',
@@ -180,7 +180,7 @@ final class ProductsHtmlRenderTest extends TestCase
         // material plus the Grade-C catalog-row omissions (the per-item
         // add-cart <form>, the add-cart modal, the sort controls and the
         // pager — see isResidual()). The add-cart <form> repeats once per
-        // visible product, so the line count scales with the three-row
+        // visible product, so the line count scales with the five-row
         // fixture; if it balloons past this the port has drifted.
         $this->assertLessThan(
             48,
@@ -229,10 +229,10 @@ final class ProductsHtmlRenderTest extends TestCase
     }
 
     /**
-     * The same three STATUS_VISIBLE products the storefront catalog query
+     * The same five STATUS_VISIBLE products the storefront catalog query
      * ({@see \MyVendor\BeMart\Be\Final\StorefrontProductListFetched})
      * projects from the Fake corpus (`be/var/fake/products.json`):
-     * `sample-001`, `sample-002`, `admin-active-001`. Each carries the
+     * `sample-001`, `sample-002`, `admin-active-001`, `api-persist-20260522-001`, and `ui-create-20260522-001`. Each carries the
      * `{id, name, price02}` projection BeMart's resource body exposes;
      * EC-CUBE's `list.twig` reads `getPrice02IncTaxMin` for the
      * single-price (non-ProductClass) row, so it is set to the same
@@ -246,6 +246,8 @@ final class ProductsHtmlRenderTest extends TestCase
             ['id' => 'sample-001', 'name' => 'サンプル商品 A', 'price02' => 1200],
             ['id' => 'sample-002', 'name' => 'Sample Product B', 'price02' => 9800],
             ['id' => 'admin-active-001', 'name' => '管理画面用 商品A', 'price02' => 3500],
+            ['id' => 'api-persist-20260522-001', 'name' => '彩のジェラートセット', 'price02' => 2980],
+            ['id' => 'ui-create-20260522-001', 'name' => 'UI商品登録テスト', 'price02' => 1980],
         ];
 
         $products = [];
@@ -275,7 +277,7 @@ final class ProductsHtmlRenderTest extends TestCase
     /**
      * Render EC-CUBE 4.3's real Product/list.twig + default_frame.twig
      * from the gitignored clone, with EC-CUBE's Twig API stubbed. The
-     * pagination carries the same three visible products the storefront
+     * pagination carries the same five visible products the storefront
      * catalog query projects — the populated `ec-shelfGrid` branch.
      */
     private function renderEcCubeProductList(): string
@@ -295,7 +297,7 @@ final class ProductsHtmlRenderTest extends TestCase
         $products = self::visibleProductRows();
 
         return $twig->render('Product/list.twig', [
-            // Populated result: totalItemCount 3, three product rows.
+            // Populated result: totalItemCount 5, five product rows.
             // EC-CUBE iterates `pagination` itself for the product grid
             // (explicit iteration set) while its `.totalItemCount` /
             // `.paginationData` properties stay readable; `search_form`
@@ -303,7 +305,7 @@ final class ProductsHtmlRenderTest extends TestCase
             // form). category_id has no errors, so the normal (else)
             // branch renders.
             'pagination' => new EcCubeStub([
-                'totalItemCount' => 3,
+                'totalItemCount' => 5,
                 'paginationData' => [],
             ], $products),
             'search_form' => new EcCubeStub([

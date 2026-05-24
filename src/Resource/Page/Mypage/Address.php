@@ -99,7 +99,7 @@ class Address extends ResourceObject
 
         $address = null;
         if ($addressId !== null) {
-            $address = $this->addresses->getById($addressId);
+            $address = $this->addresses->item($addressId);
             if ($address === null) {
                 $this->code = Code::NOT_FOUND;
                 $this->body = ['message' => 'Address not found.', 'addressId' => $addressId];

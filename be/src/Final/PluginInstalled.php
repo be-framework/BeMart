@@ -55,12 +55,12 @@ final readonly class PluginInstalled
             throw new UnauthorizedAdminAccessException();
         }
 
-        $existing = $pluginStorage->findByCode($pluginCode);
+        $existing = $pluginStorage->item($pluginCode);
         $alreadyInstalled = $existing !== null && $existing->installed;
 
         $pluginStorage->install($pluginCode, $pluginName, $pluginVersion);
 
-        $after = $pluginStorage->findByCode($pluginCode);
+        $after = $pluginStorage->item($pluginCode);
         // After install the row MUST exist; the static analyzer needs
         // the explicit guard.
         if ($after === null) {
