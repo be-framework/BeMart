@@ -9,11 +9,9 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\FavoriteListFetched;
 use MyVendor\BeMart\Be\Input\GetFavoriteListInput;
-use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
-use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -32,9 +30,9 @@ use function dirname;
 final class FavoriteListFetchedTest extends TestCase
 {
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';
+    private const FAVORITE_LIST_CUSTOMER_ID = 'favorite-list-customer';
 
     private BecomingInterface $becoming;
-    private FavoriteStorageInterface $favorites;
 
     protected function setUp(): void
     {
@@ -44,7 +42,7 @@ final class FavoriteListFetchedTest extends TestCase
     private function rebindSession(string|null $customerId): void
     {
         $session = new FakeSession($customerId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {
@@ -60,7 +58,6 @@ final class FavoriteListFetchedTest extends TestCase
 
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->becoming = $injector->getInstance(BecomingInterface::class);
-        $this->favorites = $injector->getInstance(FavoriteStorageInterface::class);
     }
 
     public function testEmptyListHappyPath(): void
@@ -75,30 +72,12 @@ final class FavoriteListFetchedTest extends TestCase
 
     public function testSeededFavoritesAreReturned(): void
     {
-        $this->favorites->add(new FavoriteEntity(
-            customerId: self::ALICE_ID,
-            productCode: 'sample-001',
-            productName: 'サンプル商品 A',
-            unitPrice: 1200,
-        ));
-        $this->favorites->add(new FavoriteEntity(
-            customerId: self::ALICE_ID,
-            productCode: 'sample-002',
-            productName: 'サンプル商品 B',
-            unitPrice: 9800,
-        ));
-        // Another customer's favorite must not leak.
-        $this->favorites->add(new FavoriteEntity(
-            customerId: 'fedcba9876543210fedcba9876543210',
-            productCode: 'sample-003',
-            productName: 'サンプル商品 C',
-            unitPrice: 500,
-        ));
+        $this->rebindSession(self::FAVORITE_LIST_CUSTOMER_ID);
 
         $final = ($this->becoming)(new GetFavoriteListInput());
 
         $this->assertInstanceOf(FavoriteListFetched::class, $final);
-        $this->assertSame(self::ALICE_ID, $final->customerId);
+        $this->assertSame(self::FAVORITE_LIST_CUSTOMER_ID, $final->customerId);
         $this->assertSame(2, $final->favoriteCount);
 
         $byCode = [];

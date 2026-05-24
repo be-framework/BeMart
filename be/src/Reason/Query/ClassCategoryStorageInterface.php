@@ -26,25 +26,25 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface ClassCategoryStorageInterface
 {
     /** @return list<ClassCategoryEntity> */
-    #[DbQuery('tclass_category_list_by_class_name', factory: ClassCategoryEntity::class)]
+    #[DbQuery('tclass_category_list_by_class_name')]
     public function listByClassName(string $classNameId): array;
 
     /** @return list<ClassCategoryEntity> */
-    #[DbQuery('tclass_category_list', factory: ClassCategoryEntity::class)]
+    #[DbQuery('tclass_category_list')]
     public function list(): array;
 
-    #[DbQuery('tclass_category_get', factory: ClassCategoryEntity::class)]
-    public function getById(string $classCategoryId): ClassCategoryEntity|null;
+    #[DbQuery('tclass_category_get')]
+    public function item(string $classCategoryId): ClassCategoryEntity|null;
 
     #[DbQuery('tclass_category_put')]
     public function put(ClassCategoryEntity $classCategory): void;
 
     #[DbQuery('tclass_category_delete')]
-    public function remove(string $classCategoryId): void;
+    public function delete(string $classCategoryId): void;
 
     #[DbQuery('tclass_category_reorder')]
     public function reorder(string $classCategoryId, int $sortNo): void;
 
     #[DbQuery('tclass_category_visible')]
-    public function setVisible(string $classCategoryId, bool $visible): void;
+    public function visible(string $classCategoryId, bool $visible): void;
 }

@@ -108,7 +108,7 @@ final readonly class OrderConfirmed
             $paymentMethodId,
         );
 
-        $customer = $customerQuery->findById($order->customerId);
+        $customer = $customerQuery->item($order->customerId);
         $this->customer = [
             'name01' => $customer?->name01 ?? '',
             'name02' => $customer?->name02 ?? '',

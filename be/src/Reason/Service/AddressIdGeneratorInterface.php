@@ -16,5 +16,5 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface AddressIdGeneratorInterface
 {
     #[DbQuery('address_next_id')]
-    public function generate(): AllocatedId;
+    public function next(): AllocatedId;
 }

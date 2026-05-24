@@ -65,14 +65,14 @@ final readonly class AuthorityRoleUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $caller = $adminQuery->findById($callerId);
+        $caller = $adminQuery->item($callerId);
         if ($caller === null) {
             // Session id no longer resolves — treat same as no
             // session, do NOT leak which loginIds exist.
             throw new UnauthorizedAdminAccessException();
         }
 
-        $target = $adminQuery->findByLoginId($loginId);
+        $target = $adminQuery->byLogin($loginId);
         if ($target === null) {
             throw new AdminNotFoundException();
         }

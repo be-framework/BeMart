@@ -1,0 +1,14 @@
+{
+  "shopName": "EC-CUBE SHOP",
+  "shopKana": "イーシーキューブショップ",
+  "shopNameEng": "EC-CUBE SHOP",
+  "companyName": "株式会社EC-CUBE",
+  "postalCode": "5300001",
+  "pref": 27,
+  "addr01": "大阪市北区",
+  "addr02": "梅田1-1-1",
+  "phoneNumber": "0612345678",
+  "businessHour": "10:00-19:00",
+  "shopEmail01": "shop@example.com",
+  "shopMessage": "ようこそ、EC-CUBE SHOP へ。"
+}

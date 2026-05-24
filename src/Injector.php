@@ -5,9 +5,14 @@ declare(strict_types=1);
 namespace MyVendor\BeMart;
 
 use BEAR\AppMeta\Meta;
-use MyVendor\BeMart\Module\AppModule;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\DevFakeHalApiModule;
+use MyVendor\BeMart\Module\FakeHalApiModule;
+use MyVendor\BeMart\Module\HalApiModule;
+use MyVendor\BeMart\Module\HtmlHalModule;
+use MyVendor\BeMart\Module\HtmlProdModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Module\ProdModule;
+use MyVendor\BeMart\Module\TestModule;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector as RayInjector;
 use Ray\Di\InjectorInterface;
@@ -33,18 +38,16 @@ final class Injector
     /** @param non-empty-string $context */
     private static function module(string $context, Meta $meta): AbstractModule
     {
-        if ($context === 'app' || $context === 'test') {
-            return new AppModule($meta);
-        }
-
-        if ($context === 'html') {
-            return new HtmlModule($meta);
-        }
-
-        if ($context === 'prod') {
-            return new ProdModule($meta);
-        }
-
-        throw new AppContextModuleNotFoundException(sprintf('Unknown app context: %s', $context));
+        return match ($context) {
+            'hal-api-app', 'cli-hal-api-app' => new HalApiModule($meta),
+            'fake-hal-api-app', 'cli-fake-hal-api-app' => new FakeHalApiModule($meta),
+            'dev-fake-hal-api-app', 'cli-dev-fake-hal-api-app' => new DevFakeHalApiModule($meta),
+            'test-hal-api-app', 'cli-test-hal-api-app' => new TestModule($meta),
+            'html-hal-app', 'cli-html-hal-app' => new HtmlHalModule($meta),
+            'html-test-hal-api-app', 'cli-html-test-hal-api-app' => new HtmlTestModule($meta),
+            'prod-hal-api-app', 'cli-prod-hal-api-app' => new ProdModule($meta),
+            'html-prod-hal-api-app', 'cli-html-prod-hal-api-app' => new HtmlProdModule($meta),
+            default => throw new AppContextModuleNotFoundException(sprintf('Unknown app context: %s', $context)),
+        };
     }
 }

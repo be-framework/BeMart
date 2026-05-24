@@ -1,0 +1,2 @@
+{"paymentId":"pay-cod","paymentMethodName":"代金引換","charge":300,"ruleMin":null,"ruleMax":null,"visible":true,"_params":{"paymentId":"pay-cod"}}
+{"paymentId":"pay-credit","paymentMethodName":"クレジットカード","charge":200,"ruleMin":null,"ruleMax":null,"visible":true,"_params":{"paymentId":"pay-credit"}}

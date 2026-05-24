@@ -47,12 +47,12 @@ final readonly class CategoryUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $categories->getById($categoryId);
+        $current = $categories->item($categoryId);
         if ($current === null) {
             throw new CategoryNotFoundException();
         }
 
-        if ($parentId !== null && $categories->getById($parentId) === null) {
+        if ($parentId !== null && $categories->item($parentId) === null) {
             throw new CategoryNotFoundException();
         }
 

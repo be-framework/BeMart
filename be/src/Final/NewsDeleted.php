@@ -27,11 +27,11 @@ final readonly class NewsDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($news->getById($newsId) === null) {
+        if ($news->item($newsId) === null) {
             throw new NewsNotFoundException();
         }
 
-        $news->remove($newsId);
+        $news->delete($newsId);
 
         $this->newsId = $newsId;
     }

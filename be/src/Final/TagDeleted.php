@@ -28,11 +28,11 @@ final readonly class TagDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($tags->getById($tagId) === null) {
+        if ($tags->item($tagId) === null) {
             throw new TagNotFoundException();
         }
 
-        $tags->remove($tagId);
+        $tags->delete($tagId);
 
         $this->tagId = $tagId;
     }

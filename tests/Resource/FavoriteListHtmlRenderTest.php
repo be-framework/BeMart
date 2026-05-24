@@ -7,11 +7,9 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
-use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -49,7 +47,7 @@ use function trim;
  */
 final class FavoriteListHtmlRenderTest extends TestCase
 {
-    private const ALICE_ID = '0123456789abcdef0123456789abcdef';
+    private const ALICE_ID = 'favorite-html-customer';
 
     /**
      * EC-CUBE lines with no BeMart counterpart and vice versa.
@@ -86,7 +84,7 @@ final class FavoriteListHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeSession(self::ALICE_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
@@ -101,17 +99,9 @@ final class FavoriteListHtmlRenderTest extends TestCase
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');
 
-        // Seed one favorite for alice — fed identically to the EC-CUBE
-        // side below. Resolve the singleton via the interface (the
-        // concrete class is not separately scope-bound).
-        $storage = $injector->getInstance(FavoriteStorageInterface::class);
-        $storage->add(new FavoriteEntity(
-            customerId: self::ALICE_ID,
-            productCode: 'sample-001',
-            productName: 'サンプル商品 A',
-            unitPrice: 1200,
-            fileName: 'sample-a.jpg',
-        ));
+        // The favorite row is supplied by the Ray.FakeQuery fixture
+        // `favorite_list.jsonl`; fake context does not mutate query
+        // state during setup.
 
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }

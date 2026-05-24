@@ -409,7 +409,7 @@ final class SqlOrderCommandTest extends AbstractSqlTestCase
     public function testUpdateStatusIsNoOpForUnknownOrderNo(): void
     {
         // Concurrent-delete race: a missing row is a silent no-op, no
-        // fabricated row, no exception (mirrors FakeOrderCommand).
+        // fabricated row, no exception (mirrors the JSON-backed fake order handler).
         $command = $this->sql(OrderCommandInterface::class);
         $command->updateStatus('VANISHED-ORDER', FinalizedOrderEntity::STATUS_CANCEL);
 

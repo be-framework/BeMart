@@ -24,11 +24,11 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface MailTemplateStorageInterface
 {
     /** @return list<MailTemplateEntity> */
-    #[DbQuery('tmail_template_list', factory: MailTemplateEntity::class)]
+    #[DbQuery('tmail_template_list')]
     public function list(): array;
 
-    #[DbQuery('tmail_template_get', factory: MailTemplateEntity::class)]
-    public function findById(int $mailTemplateId): MailTemplateEntity|null;
+    #[DbQuery('tmail_template_get')]
+    public function item(int $mailTemplateId): MailTemplateEntity|null;
 
     #[DbQuery('tmail_template_update')]
     public function update(MailTemplateEntity $entity): MailTemplateUpdate;

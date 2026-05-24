@@ -102,7 +102,7 @@ final readonly class AdminCustomerDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $customerQuery->findById($customerId);
+        $current = $customerQuery->item($customerId);
         if ($current === null) {
             throw new CustomerNotFoundException();
         }

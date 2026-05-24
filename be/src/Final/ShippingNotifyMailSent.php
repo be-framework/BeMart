@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ShippingTrackingQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use Ray\Di\Di\Inject;
@@ -44,7 +44,7 @@ final readonly class ShippingNotifyMailSent
         #[Input] string $orderNo,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] OrderQueryInterface $orderQuery,
-        #[Inject] ShippingAddressStorageInterface $shippingAddresses,
+        #[Inject] ShippingTrackingQueryInterface $shippingTracking,
         #[Inject] MailerInterface $mailer,
     ) {
         if ($adminSession->adminId() === null) {
@@ -56,7 +56,7 @@ final readonly class ShippingNotifyMailSent
             throw new OrderNotFoundException();
         }
 
-        $trackingNumber = $shippingAddresses->trackingNumberByOrderNo($order->orderNo)->trackingNumber;
+        $trackingNumber = $shippingTracking->item($order->orderNo)->trackingNumber;
         $mailer->sendShippingNotification($order, $trackingNumber);
 
         $this->orderNo = $order->orderNo;

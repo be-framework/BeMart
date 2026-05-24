@@ -1,0 +1,4 @@
+{"timestamp":"2026-05-19T09:12:34+09:00","loginId":"test-admin","success":true,"clientIp":"192.0.2.10"}
+{"timestamp":"2026-05-18T22:08:01+09:00","loginId":"test-admin","success":false,"clientIp":"203.0.113.45"}
+{"timestamp":"2026-05-18T18:55:12+09:00","loginId":"shop-owner","success":true,"clientIp":"198.51.100.7"}
+{"timestamp":"2026-05-18T08:00:00+09:00","loginId":"unknown-user","success":false,"clientIp":"203.0.113.99"}

@@ -24,9 +24,9 @@ use Ray\MediaQuery\Annotation\DbQuery;
  */
 interface BaseInfoStorageInterface
 {
-    #[DbQuery('tbase_info_get', factory: BaseInfoEntity::class)]
-    public function get(): BaseInfoEntity;
+    #[DbQuery('tbase_info_get')]
+    public function item(): BaseInfoEntity;
 
     #[DbQuery('tbase_info_put')]
-    public function update(BaseInfoEntity $entity): void;
+    public function put(BaseInfoEntity $entity): void;
 }

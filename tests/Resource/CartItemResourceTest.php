@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -21,7 +21,7 @@ final class CartItemResourceTest extends TestCase
     protected function setUp(): void
     {
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);
@@ -38,7 +38,9 @@ final class CartItemResourceTest extends TestCase
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('sample-001', $ro->body['productCode']);
         $this->assertSame(2, $ro->body['adjustedQuantity']);
-        $this->assertSame(2400, $ro->body['totalPrice']);
+        // Static fake fixture already contains sample-001 x3 for the
+        // HTML cart scenario; adding 2 more yields 5 * 1200.
+        $this->assertSame(6000, $ro->body['totalPrice']);
         $this->assertSame('/cart', $ro->headers['Location']);
     }
 

@@ -23,17 +23,17 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface ClassNameStorageInterface
 {
     /** @return list<ClassNameEntity> */
-    #[DbQuery('tclass_name_list', factory: ClassNameEntity::class)]
+    #[DbQuery('tclass_name_list')]
     public function list(): array;
 
-    #[DbQuery('tclass_name_get', factory: ClassNameEntity::class)]
-    public function getById(string $classNameId): ClassNameEntity|null;
+    #[DbQuery('tclass_name_get')]
+    public function item(string $classNameId): ClassNameEntity|null;
 
     #[DbQuery('tclass_name_put')]
     public function put(ClassNameEntity $className): void;
 
     #[DbQuery('tclass_name_remove')]
-    public function remove(string $classNameId): void;
+    public function delete(string $classNameId): void;
 
     #[DbQuery('tclass_name_reorder')]
     public function reorder(string $classNameId, int $sortNo): void;

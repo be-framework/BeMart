@@ -25,7 +25,7 @@ use Ray\InputQuery\Attribute\Input;
  *
  * The order's existence is the gate (via {@see OrderQueryInterface});
  * the tracking number is then written onto the order's dtb_shipping row
- * by {@see ShippingAddressStorageInterface::updateTrackingNumber}. Only
+ * by {@see ShippingAddressStorageInterface::tracking}. Only
  * the `tracking_number` column is touched — the shipping address fields
  * are out of reach of this transition (mass-assignment discipline).
  *
@@ -53,7 +53,7 @@ final readonly class TrackingNumberUpdated
             throw new OrderNotFoundException();
         }
 
-        $shippingAddresses->updateTrackingNumber($order->orderNo, $trackingNumber);
+        $shippingAddresses->tracking($order->orderNo, $trackingNumber);
 
         $this->orderNo = $order->orderNo;
         $this->trackingNumber = $trackingNumber;

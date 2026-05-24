@@ -23,7 +23,7 @@ use function array_column;
  * layered via the base class's sqlOverrideModule; the list is read
  * from the real dtb_mail_template table.
  *
- * The Fake-backed sibling relies on FakeMailTemplateStorage's two
+ * The Fake-backed sibling relies on MailTemplateStorageInterface's two
  * built-in seed rows. The SQL side has no built-in seed — each test
  * seeds its own rows via {@see SqlFixturesTrait::insertMailTemplate}.
  *

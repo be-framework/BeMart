@@ -7,10 +7,10 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakePluginStorage;
+use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
 use MyVendor\BeMart\Tests\Resource\Admin\StoreJaMessages;
 use PHPUnit\Framework\TestCase;
@@ -92,7 +92,7 @@ final class AdminPluginListHtmlRenderTest extends TestCase
         // links to the marketplace search and whose body is
         // plugin_table_official.twig. BeMart has no owners-store
         // integration (the EC-CUBE.co API is out of scope — see
-        // FakePluginStorage), so the entire card is omitted. The card's
+        // PluginStorageInterface), so the entire card is omitted. The card's
         // wrapper + header lines:
         '<a href="/admin_store_plugin_owners_search"',
         'class="btn btn-ec-regular me-2 float-end">オーナーズストアから新規追加</a>',
@@ -107,7 +107,7 @@ final class AdminPluginListHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
@@ -317,7 +317,7 @@ final class AdminPluginListHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // The same logical plugin list as BeMart's FakePluginStorage seed:
+        // The same logical plugin list as BeMart's PluginStorageInterface seed:
         // two user plugins, one enabled + one disabled. EC-CUBE keys the
         // row by `Plugin.id`; BeMart keys by `pluginCode`, so the EC-CUBE
         // stub's `id` is fed the pluginCode to keep the action hrefs
@@ -326,18 +326,18 @@ final class AdminPluginListHtmlRenderTest extends TestCase
         // owners-store integration.
         $plugins = [
             new EcCubeStub([
-                'id' => FakePluginStorage::SEED_DISABLED_CODE,
+                'id' => 'Sample/DisabledPlugin',
                 'name' => 'Disabled Sample Plugin',
                 'version' => '1.0.0',
-                'code' => FakePluginStorage::SEED_DISABLED_CODE,
+                'code' => 'Sample/DisabledPlugin',
                 'enabled' => false,
                 'source' => 1,
             ]),
             new EcCubeStub([
-                'id' => FakePluginStorage::SEED_ENABLED_CODE,
+                'id' => 'Sample/SamplePlugin',
                 'name' => 'Sample Plugin',
                 'version' => '1.0.0',
-                'code' => FakePluginStorage::SEED_ENABLED_CODE,
+                'code' => 'Sample/SamplePlugin',
                 'enabled' => true,
                 'source' => 1,
             ]),

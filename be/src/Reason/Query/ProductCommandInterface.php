@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
-use MyVendor\BeMart\Be\Reason\Query\Result\ProductStatusUpdate;
-use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
 use MyVendor\BeMart\Be\Reason\Query\Result\CopiedProduct;
 use Ray\MediaQuery\Annotation\DbQuery;
 
@@ -27,7 +25,7 @@ interface ProductCommandInterface
 {
     /**
      * Persist a brand-new product. Caller MUST have verified the
-     * productCode is not already in use (FakeProductStorage::exists()
+     * productCode is not already in use (the product existence check
      * or equivalent). Replays with the same code overwrite — the
      * Final is responsible for the 409 guard.
      */
@@ -62,15 +60,4 @@ interface ProductCommandInterface
      */
     #[DbQuery('product_copy', factory: \MyVendor\BeMart\Be\Reason\Query\Factory\ProductFactory::class)]
     public function copy(string $sourceCode, string $newCode): CopiedProduct;
-
-    /**
-     * Bulk flip productStatus across multiple products. Returns the
-     * count of rows that were actually changed (i.e. whose
-     * productStatus differed from the new value at call-time —
-     * idempotent re-application of the same status is NOT counted).
-     * Unknown codes are silently skipped.
-     *
-     */
-    #[DbQuery('product_status_bulk_update')]
-    public function bulkUpdateStatus(ProductCodeList $productCodes, int $newStatus): ProductStatusUpdate;
 }

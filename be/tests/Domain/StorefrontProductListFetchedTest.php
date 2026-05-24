@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Final\StorefrontProductListFetched;
 use MyVendor\BeMart\Be\Input\GetStorefrontProductListInput;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -35,7 +35,7 @@ final class StorefrontProductListFetchedTest extends TestCase
     protected function setUp(): void
     {
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->becoming = $injector->getInstance(BecomingInterface::class);
@@ -68,8 +68,8 @@ final class StorefrontProductListFetchedTest extends TestCase
     {
         $final = ($this->becoming)(new GetStorefrontProductListInput());
 
-        $this->assertSame(3, $final->totalItemCount);
-        $this->assertCount(3, $final->products);
+        $this->assertSame(5, $final->totalItemCount);
+        $this->assertCount(5, $final->products);
     }
 
     public function testEachRowCarriesTheStorefrontProjectionShape(): void

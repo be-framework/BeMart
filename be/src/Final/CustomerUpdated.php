@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -53,14 +53,14 @@ final readonly class CustomerUpdated
         #[Inject] SessionInterface $session,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CustomerCommandInterface $customerCommand,
-        #[Inject] EmailUniquenessCheckerInterface $uniquenessChecker,
+        #[Inject] EmailUniquenessQueryInterface $uniquenessChecker,
     ) {
         $sessionCustomerId = $session->customerId();
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }
 
-        $current = $customerQuery->findById($sessionCustomerId);
+        $current = $customerQuery->item($sessionCustomerId);
         if ($current === null) {
             // Session points to a non-existent customer (deleted /
             // expired). Treat same as not-logged-in to avoid leaking
@@ -69,7 +69,7 @@ final readonly class CustomerUpdated
         }
 
         if ($email !== $current->email) {
-            $uniqueness = $uniquenessChecker->check($email);
+            $uniqueness = $uniquenessChecker->item($email);
             /** @psalm-suppress InvalidDocblock Psalm treats assert* methods as assertion helpers. */
             $uniqueness->assertUnique();
         }

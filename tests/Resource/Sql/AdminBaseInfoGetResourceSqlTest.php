@@ -24,7 +24,7 @@ use Ray\Di\AbstractModule;
  *  - dtb_base_info is empty on each test (structure-only schema dump),
  *    so {@see SqlBaseInfoStorage::get} returns its installer-default
  *    Entity. The defaults are intentionally identical to
- *    FakeBaseInfoStorage's constructor seeds, so the assertion shape
+ *    BaseInfoStorageInterface's constructor seeds, so the assertion shape
  *    (compare body fields to whatever the storage's `get()` returns)
  *    is identical to the Fake-backed sibling.
  *
@@ -81,9 +81,9 @@ final class AdminBaseInfoGetResourceSqlTest extends AbstractResourceSqlTestCase
 
         // dtb_base_info is empty in the structure-only dump — the
         // SqlBaseInfoStorage::get fall-through returns the same
-        // installer defaults FakeBaseInfoStorage's constructor encodes,
+        // installer defaults BaseInfoStorageInterface's constructor encodes,
         // so we can assert against the SAME constants the Fake-backed
-        // sibling sees via `$this->storage->get()`. The two suites
+        // sibling sees via `$this->storage->item()`. The two suites
         // therefore observe the same body shape on a first read.
         $this->assertSame('EC-CUBE SHOP', $ro->body['shopName']);
         $this->assertSame('株式会社EC-CUBE', $ro->body['companyName']);

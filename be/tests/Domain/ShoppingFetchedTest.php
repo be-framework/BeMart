@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -36,7 +36,7 @@ final class ShoppingFetchedTest extends TestCase
     private function rebindBecoming(string|null $customerId): void
     {
         $session = new FakeSession($customerId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {
@@ -71,10 +71,10 @@ final class ShoppingFetchedTest extends TestCase
         $this->assertSame('神宮前1-1-1', $final->defaultShippingAddress['addr02']);
         $this->assertSame('0312345678', $final->defaultShippingAddress['phoneNumber']);
 
-        // Fixture has session-prefix-1_1 + session-prefix-1_2 (both empty
-        // of items at startup), so cartCount=2 but totalPrice=0.
+        // Static FakeQuery fixture has session-prefix-1_1 with sample-001 × 3
+        // plus an empty preorder cart.
         $this->assertSame(2, $final->cartCount);
-        $this->assertSame(0, $final->totalPrice);
+        $this->assertSame(3600, $final->totalPrice);
         $this->assertSame(0, $final->deliveryFeeTotal);
         $this->assertCount(2, $final->carts);
         $this->assertSame('session-prefix-1_1', $final->carts[0]['cartKey']);

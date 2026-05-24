@@ -13,5 +13,5 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface NewsIdGeneratorInterface
 {
     #[DbQuery('news_next_id')]
-    public function generate(): AllocatedId;
+    public function next(): AllocatedId;
 }

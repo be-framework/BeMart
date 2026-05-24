@@ -33,7 +33,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
     public function testCreateInsertsRowWithProvidedId(): void
     {
         $generator = $this->sql(AdminIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
@@ -46,7 +46,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         ));
 
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById($newId);
+        $read = $query->item($newId);
 
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame($newId, $read->adminId);
@@ -71,7 +71,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         ));
 
         $query = $this->sql(AdminQueryInterface::class);
-        $this->assertNull($query->findByLoginId('reject-me'));
+        $this->assertNull($query->byLogin('reject-me'));
     }
 
     public function testCreateAcceptsSystemAdminAuthorityZero(): void
@@ -80,7 +80,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         // EC-CUBE seed value. We write NULL to satisfy the empty
         // mtb_authority FK constraint; hydrate coerces back to 0.
         $generator = $this->sql(AdminIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
 
         $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
@@ -93,7 +93,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         ));
 
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById($newId);
+        $read = $query->item($newId);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(0, $read->authority);
     }
@@ -120,7 +120,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $command->update($merged);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame('after', $read->loginId);
         $this->assertSame('新名', $read->name);
@@ -144,7 +144,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         ));
 
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame('untouched', $read->loginId);
         $this->assertSame('Original', $read->name);
@@ -159,12 +159,12 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
 
         // Row stays in the table — getById still resolves it.
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(AdminEntity::WORK_INACTIVE, $read->work);
 
         // listAll still surfaces it (audit-visible, re-activatable).
-        $all = $query->listAll();
+        $all = $query->list();
         $loginIds = [];
         foreach ($all as $row) {
             $loginIds[] = $row->loginId;
@@ -182,7 +182,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $command->delete('ad000000000000000000000000000001');
 
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(AdminEntity::WORK_ACTIVE, $read->work);
     }
@@ -199,7 +199,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $command->updateAuthority((string) $id, 0); // promote to system admin
 
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(0, $read->authority);
         // Unrelated fields preserved through the narrow update.
@@ -218,7 +218,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $command->updateAuthority((string) $id, 1);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(1, $read->authority);
     }
@@ -231,7 +231,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $command->updateAuthority('ad000000000000000000000000000001', 0);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(AdminEntity::class, $read);
         $this->assertSame(1, $read->authority);
     }
@@ -241,11 +241,11 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $generator = $this->sql(AdminIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertAdmin(['login_id' => 'gen-1']);
         $secondId = $this->insertAdmin(['login_id' => 'gen-2']);
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

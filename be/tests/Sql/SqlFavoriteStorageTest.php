@@ -200,7 +200,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(FavoriteStorageInterface::class);
         $this->assertTrue($storage->has((string) $customerId, 'REM-FAV')->exists);
 
-        $storage->remove((string) $customerId, 'REM-FAV');
+        $storage->delete((string) $customerId, 'REM-FAV');
         $this->assertFalse($storage->has((string) $customerId, 'REM-FAV')->exists);
     }
 
@@ -211,7 +211,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $this->insertFavorite($customerId, $product);
 
         $storage = $this->sql(FavoriteStorageInterface::class);
-        $storage->remove((string) $customerId, 'NOT-A-REAL-CODE');
+        $storage->delete((string) $customerId, 'NOT-A-REAL-CODE');
         $this->assertTrue($storage->has((string) $customerId, 'KEEP-ME')->exists);
     }
 }

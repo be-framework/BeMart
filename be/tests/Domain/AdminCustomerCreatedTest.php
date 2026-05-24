@@ -12,10 +12,9 @@ use MyVendor\BeMart\Be\Exception\EmailFormatException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerCreated;
 use MyVendor\BeMart\Be\Input\AdminCreateCustomerInput;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakeCustomerStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -27,7 +26,6 @@ final class AdminCustomerCreatedTest extends TestCase
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
 
     private BecomingInterface $becoming;
-    private FakeCustomerStorage $storage;
 
     protected function setUp(): void
     {
@@ -42,7 +40,7 @@ final class AdminCustomerCreatedTest extends TestCase
     private function build(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -58,7 +56,6 @@ final class AdminCustomerCreatedTest extends TestCase
 
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->becoming = $injector->getInstance(BecomingInterface::class);
-        $this->storage = $injector->getInstance(FakeCustomerStorage::class);
     }
 
     public function testHappyPathCreatesActiveCustomer(): void
@@ -78,7 +75,7 @@ final class AdminCustomerCreatedTest extends TestCase
         // ALPS doc: 仮会員フラグなしで即時本会員として登録 — status=2 (Active).
         $this->assertSame(2, $final->customerStatus);
         $this->assertMatchesRegularExpression('/\A[0-9a-f]{32}\z/', $final->customerId);
-        $this->assertTrue($this->storage->existsByEmail('admin-created@example.com'));
+        // FakeQuery fixtures are static; persistence readback is covered by the SQL suite.
     }
 
     public function testDuplicateEmailIsRejected(): void

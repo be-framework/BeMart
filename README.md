@@ -107,13 +107,18 @@ asd --validate alps.json
 asd -f html -o alps.json.html alps.json
 asd -f svg -o alps.svg alps.json
 
+# Serverless request runner (method + path/query)
+composer fake -- get '/products/list'
+composer dev -- post '/shopping/checkout?preOrderId=aaaa00000000000000000000000000000000aaaa&csrfToken=fake-csrf-token-bemart-2026'
+composer page -- get '/'
+
 # Run tests
 vendor/bin/phpunit
 vendor/bin/phpunit tests/Http/HttpHypermediaTest.php
 vendor/bin/phpunit tests/Resource/Sql
 ```
 
-SQL tests require a local MariaDB/MySQL database prepared from [`sql/`](sql/).
+Runtime entrypoints fix their default context (`bin/fake.php` → `cli-fake-hal-api-app`, `bin/page.php` → `cli-html-hal-app`). `APP_CONTEXT` is only an escape hatch for temporary overrides. SQL tests require a local MariaDB/MySQL database prepared from [`sql/`](sql/).
 
 ## References
 
