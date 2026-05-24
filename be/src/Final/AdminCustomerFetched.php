@@ -109,8 +109,8 @@ final readonly class AdminCustomerFetched
         }
 
         $customer = $selectorType === 'customerId'
-            ? $customerQuery->findById($selector)
-            : $customerQuery->findByEmail($selector);
+            ? $customerQuery->item($selector)
+            : $customerQuery->byEmail($selector);
         if ($customer === null) {
             throw new CustomerNotFoundException();
         }

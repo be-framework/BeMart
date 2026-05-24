@@ -120,6 +120,7 @@ class Product extends ResourceObject
 
         $form->fillValues([
             'product_id' => $productCode,
+            'csrfToken' => $this->csrf->getToken(),
             'quantity' => 1,
         ]);
 

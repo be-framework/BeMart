@@ -11,7 +11,7 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface CartQueryInterface
 {
     #[DbQuery('cart_by_key', factory: CartFactory::class)]
-    public function byCartKey(string $cartKey): CartEntity|null;
+    public function item(string $cartKey): CartEntity|null;
 
     /**
      * All carts for a given session prefix — one per saleType.
@@ -21,5 +21,5 @@ interface CartQueryInterface
      * @return list<CartEntity>
      */
     #[DbQuery('cart_by_session_prefix', factory: CartFactory::class)]
-    public function bySessionPrefix(string $sessionPrefix): array;
+    public function listBySessionPrefix(string $sessionPrefix): array;
 }

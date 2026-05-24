@@ -12,9 +12,8 @@ use Ray\Di\AbstractModule;
 /**
  * Production CSRF binding.
  *
- * AppModule (dev default) binds CsrfTokenInterface to FakeCsrfToken,
- * which validates against a known test reference so Pilot 2-5 resource
- * tests stay deterministic. In production we must instead validate
+ * Dev/test contexts bind CsrfTokenInterface to a deterministic test
+ * token through FakeModule. In production we must instead validate
  * against the trusted reference EC-CUBE writes to the shared PHP
  * session.
  *

@@ -71,7 +71,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(CategoryStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(CategoryEntity::class, $entity);
         $this->assertSame((string) $id, $entity->categoryId);
@@ -91,7 +91,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(CategoryStorageInterface::class);
-        $entity = $storage->getById((string) $child);
+        $entity = $storage->item((string) $child);
 
         $this->assertInstanceOf(CategoryEntity::class, $entity);
         $this->assertSame((string) $parent, $entity->parentId);
@@ -100,7 +100,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(CategoryStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -110,14 +110,14 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // so CategoryUpdated / CategoryDeleted fire their 404 paths
         // instead of a PDO error.
         $storage = $this->sql(CategoryStorageInterface::class);
-        $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
-        $this->assertNull($storage->getById('nonexistent-zzz'));
+        $this->assertNull($storage->item('deadbeefdeadbeefdeadbeefdeadbeef'));
+        $this->assertNull($storage->item('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRootRowWithProvidedId(): void
     {
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $entity = new CategoryEntity(
             categoryId: $newId,
@@ -129,7 +129,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(CategoryStorageInterface::class);
         $storage->put($entity);
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(CategoryEntity::class, $read);
         $this->assertSame($newId, $read->categoryId);
         $this->assertSame('Food', $read->categoryName);
@@ -148,7 +148,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // write depth 1. The projection never reads it, so probe the
         // raw column directly.
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
@@ -174,7 +174,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(CategoryStorageInterface::class);
         $gen = $this->sql(CategoryIdGeneratorInterface::class);
 
-        $childId = $gen->generate()->value;
+        $childId = $gen->next()->value;
         $storage->put(new CategoryEntity(
             categoryId: $childId,
             categoryName: 'Cookies',
@@ -182,7 +182,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 0,
         ));
 
-        $grandchildId = $gen->generate()->value;
+        $grandchildId = $gen->next()->value;
         $storage->put(new CategoryEntity(
             categoryId: $grandchildId,
             categoryName: 'Chocolate',
@@ -199,7 +199,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $this->assertSame(3, (int) $probe->fetchColumn());
 
         // The parentId round-trips through the projection too.
-        $read = $storage->getById($grandchildId);
+        $read = $storage->item($grandchildId);
         $this->assertInstanceOf(CategoryEntity::class, $read);
         $this->assertSame($childId, $read->parentId);
     }
@@ -223,7 +223,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // A non-numeric parentId can never reference a real int PK —
         // the storage stores it as NULL (root) rather than raising.
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
@@ -233,7 +233,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 0,
         ));
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(CategoryEntity::class, $read);
         $this->assertNull($read->parentId);
     }
@@ -259,7 +259,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(CategoryStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(CategoryEntity::class, $read);
         $this->assertSame('Foods', $read->categoryName);
         $this->assertSame(25, $read->sortNo);
@@ -284,7 +284,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 0,
         ));
 
-        $read = $storage->getById((string) $movingId);
+        $read = $storage->item((string) $movingId);
         $this->assertInstanceOf(CategoryEntity::class, $read);
         $this->assertSame((string) $parentId, $read->parentId);
 
@@ -299,11 +299,11 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertCategory(['category_name' => 'doomed']);
         $storage = $this->sql(CategoryStorageInterface::class);
-        $this->assertNotNull($storage->getById((string) $id));
+        $this->assertNotNull($storage->item((string) $id));
 
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
         $this->assertSame([], $storage->list());
     }
 
@@ -329,10 +329,10 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(CategoryStorageInterface::class);
-        $storage->remove((string) $categoryId);
+        $storage->delete((string) $categoryId);
 
         // Category is gone.
-        $this->assertNull($storage->getById((string) $categoryId));
+        $this->assertNull($storage->item((string) $categoryId));
 
         // Assignment row is also gone (cleanup, not just FK satisfaction).
         $stmt = $this->pdo->prepare(
@@ -352,9 +352,9 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
         $storage = $this->sql(CategoryStorageInterface::class);
-        $storage->remove('99999999'); // no row, no exception
-        $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric
-        $storage->remove('nonexistent-zzz'); // non-numeric, no exception
+        $storage->delete('99999999'); // no row, no exception
+        $storage->delete('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric
+        $storage->delete('nonexistent-zzz'); // non-numeric, no exception
         $this->assertTrue(true);
     }
 
@@ -363,11 +363,11 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(CategoryIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertCategory();
         $secondId = $this->insertCategory();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

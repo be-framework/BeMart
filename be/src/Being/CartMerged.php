@@ -64,7 +64,7 @@ final readonly class CartMerged
         $this->unitPrice = $unitPrice;
         $this->saleTypeName = $saleTypeName;
 
-        $existingCart = $cartQuery->byCartKey($cartKey)
+        $existingCart = $cartQuery->item($cartKey)
             ?? new CartEntity(
                 cartKey: $cartKey,
                 saleTypeId: $saleTypeId,

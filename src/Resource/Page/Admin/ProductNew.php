@@ -8,7 +8,7 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 /**
  * EC-CUBE admin Product/new — 商品登録フォーム。
@@ -22,6 +22,7 @@ final class ProductNew extends ResourceObject
 {
     public function __construct(
         private readonly AdminSessionInterface $adminSession,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -38,7 +39,7 @@ final class ProductNew extends ResourceObject
 
         $this->code = Code::OK;
         $this->body = [
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => $this->csrf->getToken(),
             'productStatusOptions' => [
                 1 => '公開',
                 2 => '非公開',

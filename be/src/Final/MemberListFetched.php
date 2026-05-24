@@ -58,7 +58,7 @@ final readonly class MemberListFetched
         }
 
         if ($nameKeyword === null || $nameKeyword === '') {
-            $rows = $adminQuery->listAll($limit, $offset);
+            $rows = $adminQuery->list($limit, $offset);
         } else {
             $matches = $adminQuery->search($nameKeyword);
             $rows = array_slice($matches, $offset, $limit);

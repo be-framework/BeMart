@@ -38,7 +38,7 @@ final readonly class NewsUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $news->getById($newsId);
+        $current = $news->item($newsId);
         if ($current === null) {
             throw new NewsNotFoundException();
         }

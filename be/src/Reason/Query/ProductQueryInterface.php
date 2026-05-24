@@ -41,7 +41,7 @@ interface ProductQueryInterface
      * @return list<ProductEntity>
      */
     #[DbQuery('product_list', factory: ProductFactory::class)]
-    public function listAll(int $limit, int $offset = 0): array;
+    public function list(int $limit, int $offset = 0): array;
 
     /**
      * Wave 8 (goProductList admin) — substring filter scan keyed on

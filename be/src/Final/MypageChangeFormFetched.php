@@ -53,7 +53,7 @@ final readonly class MypageChangeFormFetched
             throw new UnauthenticatedException();
         }
 
-        $customer = $customerQuery->findById($sessionCustomerId);
+        $customer = $customerQuery->item($sessionCustomerId);
         if ($customer === null) {
             // Session points to a non-existent customer (deleted /
             // expired). Treat same as not-logged-in to avoid leaking

@@ -24,8 +24,8 @@ interface LoginHistoryStorageInterface
      *
      * @return list<LoginHistoryEntity>
      */
-    #[DbQuery('tlogin_history_list', factory: LoginHistoryEntity::class)]
-    public function listRecent(int $limit = 50): array;
+    #[DbQuery('tlogin_history_list')]
+    public function list(int $limit = 50): array;
 
     /**
      * Append a new attempt — used by future Phase 2 wiring of the

@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Form\AddCartForm;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 use Ray\WebFormModule\FormFactory;
@@ -119,7 +119,7 @@ final class ProductHtmlRenderTest extends TestCase
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
         $injector = new Injector(
-            new HtmlModule($meta),
+            new HtmlTestModule($meta),
             dirname(__DIR__, 2) . '/var/tmp/html',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);

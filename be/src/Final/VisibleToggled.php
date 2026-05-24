@@ -51,7 +51,7 @@ final readonly class VisibleToggled
             throw new MasterRowNotFoundException();
         }
 
-        $masters->setVisible($masterType, $rowId, $visible);
+        $masters->visible($masterType, $rowId, $visible);
 
         $this->masterType = $masterType;
         $this->rowId = $rowId;

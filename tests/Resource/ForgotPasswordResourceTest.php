@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -23,7 +23,7 @@ final class ForgotPasswordResourceTest extends TestCase
     protected function setUp(): void
     {
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);

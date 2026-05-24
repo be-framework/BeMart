@@ -7,11 +7,11 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakeTradeLawStorage;
+use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -27,7 +27,7 @@ final class AdminTradeLawResourceTest extends TestCase
 
     private ResourceInterface $resource;
     private Injector $injector;
-    private FakeTradeLawStorage $storage;
+    private TradeLawStorageInterface $storage;
 
     protected function setUp(): void
     {
@@ -37,7 +37,7 @@ final class AdminTradeLawResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -53,7 +53,7 @@ final class AdminTradeLawResourceTest extends TestCase
 
         $this->injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->resource = $this->injector->getInstance(ResourceInterface::class);
-        $this->storage = $this->injector->getInstance(FakeTradeLawStorage::class);
+        $this->storage = $this->injector->getInstance(TradeLawStorageInterface::class);
     }
 
     public function testOnPostHappyPathUpdatesBody(): void
@@ -67,12 +67,13 @@ final class AdminTradeLawResourceTest extends TestCase
         $this->assertStringContainsString('新会社', $ro->body['tradeLawBody']);
         $this->assertTrue($ro->body['changed']);
 
-        $this->assertStringContainsString('新会社', $this->storage->get()->body);
+        // Persistence read-back belongs to the SQL suite. Fake context is
+        // static Ray.FakeQuery fixtures and does not mutate query state.
     }
 
     public function testOnPostIdempotentReplayReturnsChangedFalse(): void
     {
-        $current = $this->storage->get();
+        $current = $this->storage->item();
         $ro = $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => $current->body,
             'csrfToken' => FakeCsrfToken::TOKEN,

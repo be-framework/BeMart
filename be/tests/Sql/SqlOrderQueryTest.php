@@ -129,7 +129,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(OrderQueryInterface::class);
-        $orders = $query->listAll();
+        $orders = $query->list();
         $this->assertCount(2, $orders, 'pre-orders are excluded from listAll too');
     }
 
@@ -224,7 +224,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(OrderQueryInterface::class);
-        $items = $query->itemsByOrderNo('ITEM-ORD-001');
+        $items = $query->listByOrderNo('ITEM-ORD-001');
 
         $this->assertCount(2, $items);
         $this->assertContainsOnlyInstancesOf(OrderItemEntity::class, $items);
@@ -240,13 +240,13 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
     {
         $this->insertOrder(['order_no' => 'EMPTY-ORD']);
         $query = $this->sql(OrderQueryInterface::class);
-        $this->assertSame([], $query->itemsByOrderNo('EMPTY-ORD'));
+        $this->assertSame([], $query->listByOrderNo('EMPTY-ORD'));
     }
 
     public function testHistoryByOrderNoReturnsNullWhenMissing(): void
     {
         $query = $this->sql(OrderQueryInterface::class);
-        $this->assertNull($query->historyByOrderNo('NO-SUCH-ORDER'));
+        $this->assertNull($query->item('NO-SUCH-ORDER'));
     }
 
     public function testHistoryByOrderNoReturnsNullForPreOrders(): void
@@ -256,7 +256,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
             'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
         ]);
         $query = $this->sql(OrderQueryInterface::class);
-        $this->assertNull($query->historyByOrderNo('HIST-PROC'));
+        $this->assertNull($query->item('HIST-PROC'));
     }
 
     public function testHistoryByOrderNoJoinsHeaderMessageAndPaymentMethod(): void
@@ -274,7 +274,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(OrderQueryInterface::class);
-        $history = $query->historyByOrderNo('HIST-001');
+        $history = $query->item('HIST-001');
 
         $this->assertNotNull($history);
         $this->assertSame('HIST-001', $history->orderNo);
@@ -296,7 +296,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(OrderQueryInterface::class);
-        $history = $query->historyByOrderNo('HIST-NOPAY');
+        $history = $query->item('HIST-NOPAY');
 
         $this->assertNotNull($history);
         $this->assertSame('', $history->paymentMethod);
@@ -338,7 +338,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(OrderQueryInterface::class);
-        $history = $query->historyByOrderNo('HIST-SHIP');
+        $history = $query->item('HIST-SHIP');
 
         $this->assertNotNull($history);
         $this->assertCount(1, $history->shippings);
@@ -377,7 +377,7 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(OrderQueryInterface::class);
-        $history = $query->historyByOrderNo('HIST-MAIL');
+        $history = $query->item('HIST-MAIL');
 
         $this->assertNotNull($history);
         $this->assertCount(2, $history->mailHistories);

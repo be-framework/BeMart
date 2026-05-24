@@ -79,7 +79,7 @@ final readonly class Reordered
         $addedCount = 0;
         foreach ($bySaleType as $saleTypeId => $rows) {
             $cartKey = sprintf('%s_%d', $sessionPrefix, $saleTypeId);
-            $existing = $cartQuery->byCartKey($cartKey)
+            $existing = $cartQuery->item($cartKey)
                 ?? new CartEntity(
                     cartKey: $cartKey,
                     saleTypeId: $saleTypeId,

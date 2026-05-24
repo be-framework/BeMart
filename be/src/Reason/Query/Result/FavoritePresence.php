@@ -10,7 +10,18 @@ use Ray\MediaQuery\Result\PostQueryInterface;
 
 final readonly class FavoritePresence implements PostQueryInterface
 {
-    public function __construct(public bool $exists) {}
+    public bool $exists;
+
+    /** @param bool|array<int, self|array<string, mixed>> $exists */
+    public function __construct(bool|array $exists)
+    {
+        if (is_array($exists)) {
+            $row = $exists[0] ?? null;
+            $exists = $row instanceof self ? $row->exists : $exists !== [];
+        }
+
+        $this->exists = $exists;
+    }
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static

@@ -45,7 +45,7 @@ final readonly class BaseInfoFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $row = $baseInfoStorage->get();
+        $row = $baseInfoStorage->item();
         $this->shopName = $row->shopName;
         $this->shopKana = $row->shopKana;
         $this->shopNameEng = $row->shopNameEng;

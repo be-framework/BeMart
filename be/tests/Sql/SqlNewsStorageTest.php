@@ -59,7 +59,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(NewsStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(NewsEntity::class, $entity);
         $this->assertSame((string) $id, $entity->newsId);
@@ -82,7 +82,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(NewsStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(NewsEntity::class, $entity);
         $this->assertNull($entity->newsDescription);
@@ -93,7 +93,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(NewsStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -102,15 +102,15 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         // can never match an int PK; surface as miss so NewsDeleted's
         // 404 path fires instead of a PDO error.
         $storage = $this->sql(NewsStorageInterface::class);
-        $this->assertNull($storage->getById('nw-welcome'));
-        $this->assertNull($storage->getById('nw-deadbeefdeadbeef'));
-        $this->assertNull($storage->getById('nonexistent'));
+        $this->assertNull($storage->item('nw-welcome'));
+        $this->assertNull($storage->item('nw-deadbeefdeadbeef'));
+        $this->assertNull($storage->item('nonexistent'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $entity = new NewsEntity(
             newsId: $newId,
@@ -124,7 +124,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(NewsStorageInterface::class);
         $storage->put($entity);
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(NewsEntity::class, $read);
         $this->assertSame($newId, $read->newsId);
         $this->assertSame('Hello', $read->newsTitle);
@@ -142,7 +142,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     public function testPutSerialisesIsoDateToMysqlDatetime(): void
     {
         $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(NewsStorageInterface::class);
 
         $storage->put(new NewsEntity(
@@ -172,7 +172,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     public function testPutPersistsLinkMethodAsTinyint(): void
     {
         $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(NewsStorageInterface::class);
 
         $storage->put(new NewsEntity(
@@ -242,7 +242,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(NewsStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(NewsEntity::class, $read);
         $this->assertSame('New', $read->newsTitle);
         $this->assertSame('new body', $read->newsDescription);
@@ -258,20 +258,20 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertNews(['title' => 'doomed']);
         $storage = $this->sql(NewsStorageInterface::class);
-        $this->assertNotNull($storage->getById((string) $id));
+        $this->assertNotNull($storage->item((string) $id));
 
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
         $this->assertSame([], $storage->list());
     }
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
         $storage = $this->sql(NewsStorageInterface::class);
-        $storage->remove('99999999'); // no row, no exception
-        $storage->remove('nw-welcome'); // non-numeric, no exception
-        $storage->remove('nw-deadbeefdeadbeef'); // hex, no exception
+        $storage->delete('99999999'); // no row, no exception
+        $storage->delete('nw-welcome'); // non-numeric, no exception
+        $storage->delete('nw-deadbeefdeadbeef'); // hex, no exception
         $this->assertTrue(true);
     }
 
@@ -280,7 +280,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $id = $this->insertNews(['visible' => 1]);
         $storage = $this->sql(NewsStorageInterface::class);
 
-        $storage->setVisible((string) $id, false);
+        $storage->visible((string) $id, false);
 
         $stmt = $this->pdo->prepare('SELECT visible FROM dtb_news WHERE id = :id');
         $stmt->execute([':id' => $id]);
@@ -288,7 +288,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $this->assertNotFalse($row);
         $this->assertSame(0, (int) $row['visible']);
 
-        $storage->setVisible((string) $id, true);
+        $storage->visible((string) $id, true);
         $stmt->execute([':id' => $id]);
         $back = $stmt->fetch();
         $this->assertNotFalse($back);
@@ -298,7 +298,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     public function testSetVisibleIsSilentNoOpForNonNumericId(): void
     {
         $storage = $this->sql(NewsStorageInterface::class);
-        $storage->setVisible('nw-welcome', false); // non-numeric, no exception
+        $storage->visible('nw-welcome', false); // non-numeric, no exception
         $this->assertTrue(true);
     }
 
@@ -307,11 +307,11 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(NewsIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertNews();
         $secondId = $this->insertNews();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

@@ -19,7 +19,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * `Mypage/delivery.twig`) can render the prefecture name rather than the
  * bare integer `pref` master id. It is the LAST, OPTIONAL constructor
  * parameter: every existing construction site (the CustomerAddress
- * create / update write Finals, AddressStorageInterface / FakeAddressStorage
+ * create / update write Finals, AddressStorageInterface / JSON-backed fake address handler
  * reads, the tests) passes its arguments by name, so the trailing
  * nullable field adds no positional ripple. `null` means the prefecture
  * master was not resolvable (an unset `pref_id`, or the `mtb_pref`

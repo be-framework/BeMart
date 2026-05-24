@@ -50,12 +50,12 @@ final readonly class CategoryCreated
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($parentId !== null && $categories->getById($parentId) === null) {
+        if ($parentId !== null && $categories->item($parentId) === null) {
             throw new CategoryNotFoundException();
         }
 
         $entity = new CategoryEntity(
-            categoryId: $idGenerator->generate()->value,
+            categoryId: $idGenerator->next()->value,
             categoryName: $categoryName,
             parentId: $parentId,
             sortNo: $sortNo,

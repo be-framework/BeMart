@@ -49,7 +49,7 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         $id = $this->insertTag(['name' => '新商品']);
 
         $storage = $this->sql(TagStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(TagEntity::class, $entity);
         $this->assertSame((string) $id, $entity->tagId);
@@ -59,7 +59,7 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(TagStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -68,21 +68,21 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         // FakeTagIdGenerator can never match an int PK; surface as
         // miss so TagDeleted's 404 path fires instead of a PDO error.
         $storage = $this->sql(TagStorageInterface::class);
-        $this->assertNull($storage->getById('tg-new'));
-        $this->assertNull($storage->getById('tg-deadbeefdeadbeef'));
+        $this->assertNull($storage->item('tg-new'));
+        $this->assertNull($storage->item('tg-deadbeefdeadbeef'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(TagIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $entity = new TagEntity(tagId: $newId, tagName: '限定');
 
         $storage = $this->sql(TagStorageInterface::class);
         $storage->put($entity);
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(TagEntity::class, $read);
         $this->assertSame($newId, $read->tagId);
         $this->assertSame('限定', $read->tagName);
@@ -96,7 +96,7 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
     public function testPutSetsSortNoToZeroOnInsert(): void
     {
         $generator = $this->sql(TagIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(TagStorageInterface::class);
 
         $storage->put(new TagEntity(tagId: $newId, tagName: 'X'));
@@ -119,7 +119,7 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(TagStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(TagEntity::class, $read);
         $this->assertSame('new name', $read->tagName);
 
@@ -149,20 +149,20 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertTag(['name' => 'doomed']);
         $storage = $this->sql(TagStorageInterface::class);
-        $this->assertNotNull($storage->getById((string) $id));
+        $this->assertNotNull($storage->item((string) $id));
 
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
         $this->assertSame([], $storage->list());
     }
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
         $storage = $this->sql(TagStorageInterface::class);
-        $storage->remove('99999999'); // no row, no exception
-        $storage->remove('tg-new'); // non-numeric, no exception
-        $storage->remove('tg-deadbeefdeadbeef'); // hex, no exception
+        $storage->delete('99999999'); // no row, no exception
+        $storage->delete('tg-new'); // non-numeric, no exception
+        $storage->delete('tg-deadbeefdeadbeef'); // hex, no exception
         $this->assertTrue(true);
     }
 
@@ -179,7 +179,7 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         $this->assertNotFalse($row);
         $this->assertSame(17, (int) $row['sort_no']);
         // The projection is untouched (sort_no is storage-only).
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
         $this->assertInstanceOf(TagEntity::class, $entity);
         $this->assertSame('movable', $entity->tagName);
     }
@@ -196,11 +196,11 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(TagIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertTag();
         $secondId = $this->insertTag();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

@@ -58,7 +58,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(PageStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(PageEntity::class, $entity);
         $this->assertSame((string) $id, $entity->pageId);
@@ -81,7 +81,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(PageStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(PageEntity::class, $entity);
         $this->assertSame('', $entity->pageName);
@@ -92,7 +92,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(PageStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -102,15 +102,15 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         // PageUpdated / AdminPageFetched fire their 404 paths instead
         // of a PDO error.
         $storage = $this->sql(PageStorageInterface::class);
-        $this->assertNull($storage->getById('pg-homepage'));
-        $this->assertNull($storage->getById('pg-deadbeefdeadbeef'));
-        $this->assertNull($storage->getById('nonexistent-zzz'));
+        $this->assertNull($storage->item('pg-homepage'));
+        $this->assertNull($storage->item('pg-deadbeefdeadbeef'));
+        $this->assertNull($storage->item('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(PageIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $entity = new PageEntity(
             pageId: $newId,
@@ -123,7 +123,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(PageStorageInterface::class);
         $storage->put($entity);
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(PageEntity::class, $read);
         $this->assertSame($newId, $read->pageId);
         $this->assertSame('会社案内', $read->pageName);
@@ -142,7 +142,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         // System pages (edit_type >= 2) round-trip the same as user
         // pages — only PageDeleted enforces the guard, not the storage.
         $generator = $this->sql(PageIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(PageStorageInterface::class);
 
         $storage->put(new PageEntity(
@@ -153,7 +153,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
             pageEditType: 2, // EDIT_TYPE_DEFAULT
         ));
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(PageEntity::class, $read);
         $this->assertSame(2, $read->pageEditType);
 
@@ -213,7 +213,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(PageStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(PageEntity::class, $read);
         $this->assertSame('New', $read->pageName);
         $this->assertSame('new-url', $read->pageUrl);
@@ -227,11 +227,11 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertPage(['page_name' => 'doomed']);
         $storage = $this->sql(PageStorageInterface::class);
-        $this->assertNotNull($storage->getById((string) $id));
+        $this->assertNotNull($storage->item((string) $id));
 
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
         $this->assertSame([], $storage->list());
     }
 
@@ -272,10 +272,10 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(PageStorageInterface::class);
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
         // Page is gone.
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
 
         // Placement row is also gone (cleanup, not just FK satisfaction).
         $stmt = $this->pdo->prepare(
@@ -288,9 +288,9 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
         $storage = $this->sql(PageStorageInterface::class);
-        $storage->remove('99999999'); // no row, no exception
-        $storage->remove('pg-homepage'); // non-numeric, no exception
-        $storage->remove('pg-deadbeefdeadbeef'); // hex, no exception
+        $storage->delete('99999999'); // no row, no exception
+        $storage->delete('pg-homepage'); // non-numeric, no exception
+        $storage->delete('pg-deadbeefdeadbeef'); // hex, no exception
         $this->assertTrue(true);
     }
 
@@ -299,11 +299,11 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(PageIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertPage();
         $secondId = $this->insertPage();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

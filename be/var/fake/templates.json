@@ -1,0 +1,12 @@
+[
+  {
+    "templateId": "tp-default-pc",
+    "templateName": "デフォルト (PC)",
+    "deviceType": 10
+  },
+  {
+    "templateId": "tp-default-sp",
+    "templateName": "デフォルト (スマホ)",
+    "deviceType": 2
+  }
+]

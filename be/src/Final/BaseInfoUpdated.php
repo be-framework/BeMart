@@ -64,7 +64,7 @@ final readonly class BaseInfoUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $previous = $baseInfoStorage->get();
+        $previous = $baseInfoStorage->item();
         $next = new BaseInfoEntity(
             shopName: $shopName,
             shopKana: $shopKana,
@@ -83,7 +83,7 @@ final readonly class BaseInfoUpdated
         $changed = $previous != $next; // value-equality (readonly DTOs)
 
         if ($changed) {
-            $baseInfoStorage->update($next);
+            $baseInfoStorage->put($next);
         }
 
         $this->shopName = $next->shopName;

@@ -1,6 +1,5 @@
-{
-  "$comment": "Pre-registered Customer 一覧。FakeCustomerStorage が email をキーに indexing して保持。Pilot 4 の uniqueness テスト (重複登録は EmailAlreadyRegisteredException) と happy-path (空いている email で成功) のために用意。alice/bob/carol の passwordHash はダミー文字列 (Pilot 4 では検証しない)。Pilot 6 doLogin 用に login-test@example.com を追加 — こちらは password_hash('local-dev-member-password', PASSWORD_DEFAULT) の本物の bcrypt 出力。customerStatus=2 は Active。",
-  "alice@example.com": {
+[
+  {
     "customerId": "0123456789abcdef0123456789abcdef",
     "email": "alice@example.com",
     "passwordHash": "$2y$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123",
@@ -20,7 +19,7 @@
     "initialPoint": 100,
     "customerStatus": 2
   },
-  "bob@example.com": {
+  {
     "customerId": "fedcba9876543210fedcba9876543210",
     "email": "bob@example.com",
     "passwordHash": "$2y$10$zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876",
@@ -40,7 +39,7 @@
     "initialPoint": 100,
     "customerStatus": 2
   },
-  "carol@example.com": {
+  {
     "customerId": "aaaaaaaa00000000bbbbbbbb11111111",
     "email": "carol@example.com",
     "passwordHash": "$2y$10$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS",
@@ -60,7 +59,7 @@
     "initialPoint": 100,
     "customerStatus": 2
   },
-  "login-test@example.com": {
+  {
     "customerId": "10000000aaaa1111bbbb2222cccc3333",
     "email": "login-test@example.com",
     "passwordHash": "$2y$12$lbpzHVyv.ytzJju.4xk9Au5tPePdQe1WFH6sLWeWwcvIKbn0vMnE.",
@@ -80,7 +79,7 @@
     "initialPoint": 100,
     "customerStatus": 2
   },
-  "provisional@example.com": {
+  {
     "customerId": "20000000dddd2222eeee3333ffff4444",
     "email": "provisional@example.com",
     "passwordHash": "$2y$12$placeholder.hash.never.verified.never.0123456789abcde",
@@ -101,4 +100,4 @@
     "customerStatus": 1,
     "secretKey": "pending-secret-key-pilot7-2026abcd"
   }
-}
+]

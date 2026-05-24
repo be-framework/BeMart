@@ -20,6 +20,7 @@ use Ray\WebFormModule\FormFactory;
 use function assert;
 use function getenv;
 use function session_status;
+use function str_contains;
 
 use const PHP_SESSION_ACTIVE;
 
@@ -38,7 +39,7 @@ use const PHP_SESSION_ACTIVE;
  * In the html context, public/index.php starts a PHP session before
  * dispatch and this resource mirrors `customerId` into the flat session
  * key read by HtmlSessionAdapter. The write is guarded by
- * APP_CONTEXT=html and PHP_SESSION_ACTIVE so app/test/prod contexts
+ * an html APP_CONTEXT and PHP_SESSION_ACTIVE so app/test/prod contexts
  * keep their existing session behaviour and are not polluted by direct
  * `$_SESSION` writes.
  *
@@ -157,7 +158,7 @@ class Login extends ResourceObject
 
         assert($final instanceof CustomerAuthenticated);
 
-        if (getenv('APP_CONTEXT') === 'html' && session_status() === PHP_SESSION_ACTIVE) {
+        if (str_contains((string) getenv('APP_CONTEXT'), 'html') && session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = $final->customerId;
         }
 

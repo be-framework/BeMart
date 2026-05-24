@@ -37,20 +37,19 @@ This forces both lookups to return `===`-identical objects. Use this whenever:
 - the Fake/Impl holds in-memory state (captures, queues, counters, caches), AND
 - code resolves it via *both* the interface and the concrete class.
 
-If only the interface side is consulted (Storage classes used exclusively by Commands), the simple `bind(Iface)->to(Impl); bind(Impl)->in(SINGLETON)` pattern still works — because no other code reaches the Impl key.
+If only the interface side is consulted, the simple `bind(Iface)->to(Impl); bind(Impl)->in(SINGLETON)` pattern still works — because no other code reaches the Impl key.
 
-Keep Fake implementations out of the contract namespace:
+Keep service Fake implementations out of the contract namespace. Query/Command/Storage interfaces are not backed by app-local Fake concrete classes; fake DB reads use Ray.FakeQuery fixtures.
 
 ```txt
 Reason/
   Query/                 # interfaces, factories, BDR/Param types
   Service/               # interfaces and production-neutral services
   Fake/
-    Query/               # Fake* Query/Storage/Command implementations
     Service/             # Fake* service/generator implementations
 ```
 
-`Reason\Query` and `Reason\Service` should read as the domain/infra boundary. Concrete dev/test doubles belong under `Reason\Fake\Query` or `Reason\Fake\Service`, while remaining in `be/src` because the dev/test `AppModule` uses them as real application implementations.
+`Reason\Query` and `Reason\Service` should read as the domain/infra boundary. Concrete dev/test doubles belong under `Reason\Fake\Service`; Query/Command/Storage doubles are replaced by `Ray\FakeQuery\FakeQueryModule` + JSON/JSONL fixtures.
 
 ## Code example
 
@@ -71,9 +70,8 @@ $this->bind(PaymentGatewayInterface::class)->toInstance($gateway);
 $this->bind(FakeMailer::class)->toInstance($mailer);
 $this->bind(MailerInterface::class)->toInstance($mailer);
 
-// Stateless or Becoming-only references — singleton-on-Impl is enough.
-$this->bind(FakeFinalizedOrderStorage::class)->in(Scope::SINGLETON);
-$this->bind(OrderCommandInterface::class)->to(FakeOrderCommand::class);
+// Query/Command/Storage interfaces are handled by Ray.FakeQuery.
+$this->install(new FakeQueryModule($fakeDir, $queryClasses));
 ```
 
 ## Anti-pattern

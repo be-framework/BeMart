@@ -46,7 +46,7 @@ final readonly class AdminShippingCsvExported
             throw new UnauthorizedAdminAccessException();
         }
 
-        $rows = $shippingAddresses->listAll();
+        $rows = $shippingAddresses->list();
 
         $handle = fopen('php://temp', 'rb+');
         assert($handle !== false);

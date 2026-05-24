@@ -21,7 +21,7 @@ use MyVendor\BeMart\Be\Final\PluginInstalled;
  * scope STUBS this — the storage simply flips `installed=true` (or
  * creates a new row) for the given pluginCode. The pluginName +
  * version are taken from the admin form (in the real flow they come
- * from the plugin's manifest.json). See FakePluginStorage::install.
+ * from the plugin's manifest.json). See the PluginStorageInterface contract.
  *
  * Idempotency: ALPS marks this as `type=unsafe`, but the storage
  * contract is idempotent at the storage layer — a re-install on an

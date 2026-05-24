@@ -39,7 +39,7 @@ final readonly class PluginUninstalled
             throw new UnauthorizedAdminAccessException();
         }
 
-        $before = $pluginStorage->findByCode($pluginCode);
+        $before = $pluginStorage->item($pluginCode);
         $wasInstalled = $before !== null && $before->installed;
 
         $pluginStorage->uninstall($pluginCode);

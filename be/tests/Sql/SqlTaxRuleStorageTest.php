@@ -55,7 +55,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(TaxRuleStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(TaxRuleEntity::class, $entity);
         $this->assertSame((string) $id, $entity->taxRuleId);
@@ -72,7 +72,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(TaxRuleStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -81,14 +81,14 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         // PK; surface as miss so TaxRuleDeleted's 404 path fires
         // instead of a PDO error.
         $storage = $this->sql(TaxRuleStorageInterface::class);
-        $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
-        $this->assertNull($storage->getById('nonexistent-zzz'));
+        $this->assertNull($storage->item('deadbeefdeadbeefdeadbeefdeadbeef'));
+        $this->assertNull($storage->item('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $entity = new TaxRuleEntity(
             taxRuleId: $newId,
@@ -100,7 +100,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(TaxRuleStorageInterface::class);
         $storage->put($entity);
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(TaxRuleEntity::class, $read);
         $this->assertSame($newId, $read->taxRuleId);
         $this->assertSame(10.0, $read->taxRate);
@@ -116,7 +116,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
     public function testPutSerialisesIsoDateToMysqlDatetime(): void
     {
         $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(TaxRuleStorageInterface::class);
 
         $storage->put(new TaxRuleEntity(
@@ -147,7 +147,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         // input is silently truncated by MariaDB at the column
         // boundary. Documented limitation of EC-CUBE 4.3's schema.
         $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(TaxRuleStorageInterface::class);
 
         $storage->put(new TaxRuleEntity(
@@ -157,7 +157,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
             applyDate: '2024-04-01T00:00:00+09:00',
         ));
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(TaxRuleEntity::class, $read);
         // 8.5 → 8 (or 9, depending on MariaDB rounding mode — both are
         // schema-valid). The assertion captures "no fractional bit
@@ -200,7 +200,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(TaxRuleStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(TaxRuleEntity::class, $read);
         $this->assertSame(8.0, $read->taxRate);
         $this->assertSame('2025-04-01T00:00:00+09:00', $read->applyDate);
@@ -213,20 +213,20 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertTaxRule(['tax_rate' => 10]);
         $storage = $this->sql(TaxRuleStorageInterface::class);
-        $this->assertNotNull($storage->getById((string) $id));
+        $this->assertNotNull($storage->item((string) $id));
 
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
         $this->assertSame([], $storage->list());
     }
 
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
         $storage = $this->sql(TaxRuleStorageInterface::class);
-        $storage->remove('99999999'); // no row, no exception
-        $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // hex, no exception
-        $storage->remove('nonexistent-zzz'); // non-numeric, no exception
+        $storage->delete('99999999'); // no row, no exception
+        $storage->delete('deadbeefdeadbeefdeadbeefdeadbeef'); // hex, no exception
+        $storage->delete('nonexistent-zzz'); // non-numeric, no exception
         $this->assertTrue(true);
     }
 
@@ -235,11 +235,11 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertTaxRule();
         $secondId = $this->insertTaxRule();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

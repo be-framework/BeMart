@@ -338,7 +338,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 - `Reason/Entity/`: `OrderEntity`, `PurchaseTotals`, `PaymentVerification`
 - `Reason/Query/`: `OrderQueryInterface`, `FakeOrderQuery`
-- `Reason/Service/`: `PaymentMethodFactoryInterface`, `FakePaymentMethodFactory`, `PaymentMethodInterface`, `FakeCashOnDelivery`, `FakeCreditCard`, `FakeVerifyFailing`, `PurchaseFlowInterface`, `FakePurchaseFlow`
+- `Reason/Service/`: `PaymentMethodFactoryInterface`, `FakePaymentMethodFactory`, `PaymentMethodInterface`, `PurchaseFlowInterface`, `FakePurchaseFlow`
 - `Reason/`: `PaymentSuccessCase`, `PaymentFailureCase` (branching discriminator)
 - `Semantic/`: 14 件 (上記指標 #5)
 - `Exception/`: 14 件 (Semantic format 系 12 + `PreOrderNotFoundException`)

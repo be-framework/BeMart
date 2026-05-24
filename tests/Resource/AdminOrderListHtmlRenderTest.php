@@ -10,7 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminOrderSearchForm;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
 use MyVendor\BeMart\Tests\Resource\Admin\OrderJaMessages;
 use NumberFormatter;
@@ -104,7 +104,7 @@ final class AdminOrderListHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
@@ -310,7 +310,7 @@ final class AdminOrderListHtmlRenderTest extends TestCase
 
         $this->registerEcCubeStubs($twig, $searchForm instanceof AdminOrderSearchForm ? $searchForm : null);
 
-        // The same logical order list as BeMart's FakeOrderStorage seed,
+        // The same logical order list as BeMart's JSON order corpus seed,
         // projected onto the EC-CUBE row shape. EC-CUBE iterates one row
         // per shipment (`Order.Shippings`); the AdminOrderListFetched
         // projection has no nested shipments, so the EC-CUBE stub gives

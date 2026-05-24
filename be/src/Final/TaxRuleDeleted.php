@@ -36,11 +36,11 @@ final readonly class TaxRuleDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($taxRules->getById($taxRuleId) === null) {
+        if ($taxRules->item($taxRuleId) === null) {
             throw new TaxRuleNotFoundException();
         }
 
-        $taxRules->remove($taxRuleId);
+        $taxRules->delete($taxRuleId);
 
         $this->taxRuleId = $taxRuleId;
     }
