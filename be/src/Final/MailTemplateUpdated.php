@@ -51,7 +51,7 @@ final readonly class MailTemplateUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $existing = $mailTemplateStorage->findById($mailTemplateId);
+        $existing = $mailTemplateStorage->item($mailTemplateId);
         if ($existing === null) {
             throw new MailTemplateNotFoundException();
         }

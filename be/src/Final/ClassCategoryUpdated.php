@@ -35,7 +35,7 @@ final readonly class ClassCategoryUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $classCategories->getById($classCategoryId);
+        $current = $classCategories->item($classCategoryId);
         if ($current === null) {
             throw new ClassCategoryNotFoundException();
         }

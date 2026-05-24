@@ -42,7 +42,7 @@ use function str_contains;
  *  - dtb_category is empty on each test (the per-test transaction
  *    rolls back), so the list / get / put / delete cases seed their
  *    own rows through the resource layer first — same shape the Fake
- *    sibling uses (FakeCategoryStorage also starts empty).
+ *    sibling uses (CategoryStorageInterface also starts empty).
  *
  * Why mirror exactly: per G-23 the Resource-layer contract MUST stay
  * green for both Fake and SQL backings. If the SQL side passes but

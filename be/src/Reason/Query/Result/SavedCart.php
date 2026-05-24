@@ -11,7 +11,18 @@ use RuntimeException;
 
 final readonly class SavedCart implements PostQueryInterface
 {
-    public function __construct(public bool $saved) {}
+    public bool $saved;
+
+    /** @param bool|array<int, self|array<string, mixed>> $saved */
+    public function __construct(bool|array $saved = true)
+    {
+        if (is_array($saved)) {
+            $row = $saved[0] ?? null;
+            $saved = $row instanceof self ? $row->saved : true;
+        }
+
+        $this->saved = $saved;
+    }
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static

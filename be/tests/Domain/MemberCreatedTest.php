@@ -11,10 +11,9 @@ use MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MemberCreated;
 use MyVendor\BeMart\Be\Input\CreateMemberInput;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakeAdminStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -26,7 +25,6 @@ final class MemberCreatedTest extends TestCase
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
 
     private BecomingInterface $becoming;
-    private FakeAdminStorage $storage;
 
     protected function setUp(): void
     {
@@ -36,7 +34,7 @@ final class MemberCreatedTest extends TestCase
     private function build(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -52,7 +50,6 @@ final class MemberCreatedTest extends TestCase
 
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->becoming = $injector->getInstance(BecomingInterface::class);
-        $this->storage = $injector->getInstance(FakeAdminStorage::class);
     }
 
     public function testHappyPathCreatesActiveAdmin(): void
@@ -71,12 +68,7 @@ final class MemberCreatedTest extends TestCase
         // Newly-created admins are immediately active.
         $this->assertSame(1, $final->work);
         $this->assertMatchesRegularExpression('/\Aad[0-9a-f]{30}\z/', $final->adminId);
-
-        // Persisted and looks the same.
-        $persisted = $this->storage->getByLoginId('new-admin');
-        $this->assertNotNull($persisted);
-        $this->assertSame('新規管理者', $persisted->name);
-        $this->assertNotSame('new-admin-password-2026', $persisted->passwordHash);
+        // FakeQuery fixtures are static; persistence and password hashing are covered by the SQL suite.
     }
 
     public function testDuplicateLoginIdIsRejected(): void

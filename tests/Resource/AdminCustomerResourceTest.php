@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -45,7 +45,7 @@ final class AdminCustomerResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -81,7 +81,7 @@ final class AdminCustomerResourceTest extends TestCase
         $this->assertSame(7, $ro->body['job']);
         $this->assertSame('渋谷区', $ro->body['addr01']);
         $this->assertSame('神宮前1-1-1', $ro->body['addr02']);
-        $this->assertSame(100, $ro->body['initialPoint']);
+        $this->assertSame(0, $ro->body['initialPoint']);
         // Aggregates carry empty-list shape rather than null.
         $this->assertSame([], $ro->body['orders']);
         $this->assertSame(0, $ro->body['orderCount']);

@@ -21,7 +21,7 @@ use Ray\Di\AbstractModule;
  *
  *  - the storage bindings (CustomerCommandInterface → SqlCustomerCommand,
  *    CustomerQueryInterface → SqlCustomerQuery,
- *    EmailUniquenessCheckerInterface → SqlEmailUniquenessChecker) are
+ *    EmailUniquenessQueryInterface → SqlEmailUniquenessChecker) are
  *    layered via the base class's sqlOverrideModule; the profile edit
  *    runs against a real dtb_customer row.
  *

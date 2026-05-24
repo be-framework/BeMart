@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -35,7 +35,7 @@ final class AdminOrderPdfHtmlRenderTest extends TestCase
 
     protected function setUp(): void
     {
-        $module = new HtmlModule(new Meta('MyVendor\\BeMart', 'html'));
+        $module = new HtmlTestModule(new Meta('MyVendor\\BeMart', 'html'));
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)

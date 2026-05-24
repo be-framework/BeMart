@@ -83,12 +83,12 @@ abstract class AbstractSqlTestCase extends TestCase
 
     /**
      * @template T of object
-     * @param class-string<T> $class
+     * @param class-string<T> $type
      * @return T
      */
-    protected function sql(string $class): object
+    protected function sql(string $type): object
     {
-        return $this->sqlInjector->getInstance($class);
+        return $this->sqlInjector->getInstance($type);
     }
 
     private function mediaQueryTestModule(): AbstractModule

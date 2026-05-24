@@ -51,7 +51,7 @@ final readonly class AdminOrderCsvExported
 
         // listAll is capped — for Wave 9η we pull the head of the list.
         // Phase 2 will page through.
-        $rows = $orderQuery->listAll(1000, 0);
+        $rows = $orderQuery->list(1000, 0);
 
         $handle = fopen('php://temp', 'rb+');
         assert($handle !== false);

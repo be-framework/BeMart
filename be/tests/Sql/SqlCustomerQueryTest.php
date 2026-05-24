@@ -18,7 +18,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $customer = $query->findByEmail('alice@example.com');
+        $customer = $query->byEmail('alice@example.com');
 
         $this->assertInstanceOf(CustomerEntity::class, $customer);
         $this->assertSame((string) $id, $customer->customerId);
@@ -32,7 +32,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
         $this->insertCustomer(['email' => 'bob@example.com']);
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $this->assertNull($query->findByEmail('nobody@example.com'));
+        $this->assertNull($query->byEmail('nobody@example.com'));
     }
 
     public function testFindByIdReturnsCustomer(): void
@@ -40,7 +40,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
         $id = $this->insertCustomer(['email' => 'carol@example.com']);
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $customer = $query->findById((string) $id);
+        $customer = $query->item((string) $id);
 
         $this->assertNotNull($customer);
         $this->assertSame('carol@example.com', $customer->email);
@@ -51,9 +51,9 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
         $this->insertCustomer();
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $this->assertNull($query->findById('99999999'));
+        $this->assertNull($query->item('99999999'));
         // Non-numeric id is rejected early without hitting the DB.
-        $this->assertNull($query->findById('not-an-int'));
+        $this->assertNull($query->item('not-an-int'));
     }
 
     public function testFindBySecretKeyReturnsCustomer(): void
@@ -65,7 +65,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $customer = $query->findBySecretKey($secret);
+        $customer = $query->bySecretKey($secret);
 
         $this->assertNotNull($customer);
         $this->assertSame('dave@example.com', $customer->email);
@@ -78,7 +78,7 @@ final class SqlCustomerQueryTest extends AbstractSqlTestCase
         $this->insertCustomer();
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $this->assertNull($query->findBySecretKey('does-not-exist'));
+        $this->assertNull($query->bySecretKey('does-not-exist'));
     }
 
     public function testSearchByNameKeywordOnly(): void

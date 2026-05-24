@@ -54,7 +54,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(DeliveryStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(DeliveryEntity::class, $entity);
         $this->assertSame((string) $id, $entity->deliveryId);
@@ -70,7 +70,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $id = $this->insertDelivery(['name' => null]);
 
         $storage = $this->sql(DeliveryStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(DeliveryEntity::class, $entity);
         $this->assertSame('', $entity->deliveryName);
@@ -79,7 +79,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(DeliveryStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -88,14 +88,14 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         // int PK; surface as miss so DeliveryUpdated / DeliveryDeleted
         // fire their 404 paths instead of a PDO error.
         $storage = $this->sql(DeliveryStorageInterface::class);
-        $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
-        $this->assertNull($storage->getById('nonexistent-zzz'));
+        $this->assertNull($storage->item('deadbeefdeadbeefdeadbeefdeadbeef'));
+        $this->assertNull($storage->item('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $entity = new DeliveryEntity(
             deliveryId: $newId,
@@ -106,7 +106,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(DeliveryStorageInterface::class);
         $storage->put($entity);
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(DeliveryEntity::class, $read);
         $this->assertSame($newId, $read->deliveryId);
         $this->assertSame('クロネコDM便', $read->deliveryName);
@@ -123,7 +123,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         // A soft-hidden delivery method (visible=false) round-trips the
         // bool ↔ tinyint coercion.
         $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(DeliveryStorageInterface::class);
 
         $storage->put(new DeliveryEntity(
@@ -132,7 +132,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
             visible: false,
         ));
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(DeliveryEntity::class, $read);
         $this->assertFalse($read->visible);
 
@@ -152,7 +152,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         // sale_type_id = NULL so the FK to the (empty) mtb_sale_type
         // master never raises FK 1452.
         $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(DeliveryStorageInterface::class);
 
         $storage->put(new DeliveryEntity(
@@ -204,7 +204,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(DeliveryStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(DeliveryEntity::class, $read);
         $this->assertSame('ヤマト宅急便', $read->deliveryName);
         $this->assertFalse($read->visible);
@@ -217,19 +217,19 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertDelivery(['name' => 'doomed']);
         $storage = $this->sql(DeliveryStorageInterface::class);
-        $this->assertNotNull($storage->getById((string) $id));
+        $this->assertNotNull($storage->item((string) $id));
 
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
         $this->assertSame([], $storage->list());
     }
 
     public function testRemoveIsSilentNoOpForMissingOrNonNumericId(): void
     {
         $storage = $this->sql(DeliveryStorageInterface::class);
-        $storage->remove('99999999'); // no row, no exception
-        $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // hex, no exception
+        $storage->delete('99999999'); // no row, no exception
+        $storage->delete('deadbeefdeadbeefdeadbeefdeadbeef'); // hex, no exception
         $this->assertTrue(true);
     }
 
@@ -252,15 +252,15 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $id = $this->insertDelivery(['visible' => 1]);
         $storage = $this->sql(DeliveryStorageInterface::class);
 
-        $storage->setVisible((string) $id, false);
+        $storage->visible((string) $id, false);
 
         // `visible` IS part of the DeliveryEntity projection.
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
         $this->assertInstanceOf(DeliveryEntity::class, $entity);
         $this->assertFalse($entity->visible);
 
-        $storage->setVisible((string) $id, true);
-        $back = $storage->getById((string) $id);
+        $storage->visible((string) $id, true);
+        $back = $storage->item((string) $id);
         $this->assertInstanceOf(DeliveryEntity::class, $back);
         $this->assertTrue($back->visible);
     }
@@ -269,7 +269,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
     {
         $storage = $this->sql(DeliveryStorageInterface::class);
         $storage->reorder('deadbeefdeadbeefdeadbeefdeadbeef', 5);
-        $storage->setVisible('deadbeefdeadbeefdeadbeefdeadbeef', false);
+        $storage->visible('deadbeefdeadbeefdeadbeefdeadbeef', false);
         $this->assertTrue(true);
     }
 
@@ -278,11 +278,11 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(DeliveryIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertDelivery();
         $secondId = $this->insertDelivery();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

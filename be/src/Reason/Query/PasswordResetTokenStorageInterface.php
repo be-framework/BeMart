@@ -23,8 +23,8 @@ interface PasswordResetTokenStorageInterface
     public function put(PasswordResetTokenEntity $token): void;
 
     /** Look up by resetKey (used by doResetPassword consumer). */
-    #[DbQuery('password_reset_get', factory: PasswordResetTokenEntity::class)]
-    public function getByResetKey(string $resetKey): PasswordResetTokenEntity|null;
+    #[DbQuery('password_reset_get')]
+    public function byResetKey(string $resetKey): PasswordResetTokenEntity|null;
 
     /**
      * Consume the token — Pilot 15 (doResetPassword). Removes any

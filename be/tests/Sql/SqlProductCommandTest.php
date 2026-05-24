@@ -243,7 +243,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             ));
         }
 
-        $changed = $command->bulkUpdateStatus(
+        $changed = $command->update(
             ProductCodeList::fromArray(['P-BULK-001', 'P-BULK-002']),
             ProductEntity::STATUS_WITHDRAWN,
         );
@@ -268,7 +268,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             productStatus: ProductEntity::STATUS_VISIBLE,
         ));
 
-        $changed = $command->bulkUpdateStatus(
+        $changed = $command->update(
             ProductCodeList::fromArray(['P-BULK-PARTIAL', 'does-not-exist']),
             ProductEntity::STATUS_HIDDEN,
         );
@@ -290,7 +290,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
         // The product is already STATUS_HIDDEN — re-applying the same
         // status changes 0 rows.
-        $changed = $command->bulkUpdateStatus(
+        $changed = $command->update(
             ProductCodeList::fromArray(['P-BULK-IDEMP']),
             ProductEntity::STATUS_HIDDEN,
         );

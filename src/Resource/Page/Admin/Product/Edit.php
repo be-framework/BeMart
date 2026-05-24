@@ -32,7 +32,7 @@ use function assert;
  * `doDeleteProduct` writes; this resource is the HTML editor shell
  * only. An empty `$productCode` renders the blank editor (EC-CUBE's
  * "商品登録" path — the render-smoke test exercises this with empty
- * Fake storage); a known productCode pre-fills; an unknown productCode
+ * JSON-backed fake storage); a known productCode pre-fills; an unknown productCode
  * is 404.
  *
  * AUTHZ: the blank-editor path checks the admin session directly

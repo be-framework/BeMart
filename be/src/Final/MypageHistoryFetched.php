@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryItemEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryMailEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryShippingEntity;
-use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -90,14 +90,14 @@ final readonly class MypageHistoryFetched
     public function __construct(
         #[Input] string $orderNo,
         #[Inject] SessionInterface $session,
-        #[Inject] OrderQueryInterface $orderQuery,
+        #[Inject] OrderHistoryQueryInterface $orderQuery,
     ) {
         $sessionCustomerId = $session->customerId();
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }
 
-        $order = $orderQuery->historyByOrderNo($orderNo);
+        $order = $orderQuery->item($orderNo);
         if (! $order instanceof OrderHistoryEntity) {
             throw new OrderNotFoundException();
         }

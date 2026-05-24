@@ -17,11 +17,11 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface LayoutStorageInterface
 {
     /** @return list<LayoutEntity> */
-    #[DbQuery('tlayout_list', factory: LayoutEntity::class)]
+    #[DbQuery('tlayout_list')]
     public function list(): array;
 
-    #[DbQuery('tlayout_get', factory: LayoutEntity::class)]
-    public function getById(string $layoutId): LayoutEntity|null;
+    #[DbQuery('tlayout_get')]
+    public function item(string $layoutId): LayoutEntity|null;
 
     #[DbQuery('tlayout_put')]
     public function put(LayoutEntity $layout): void;

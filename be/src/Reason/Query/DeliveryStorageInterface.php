@@ -22,21 +22,21 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface DeliveryStorageInterface
 {
     /** @return list<DeliveryEntity> */
-    #[DbQuery('tdelivery_list', factory: DeliveryEntity::class)]
+    #[DbQuery('tdelivery_list')]
     public function list(): array;
 
-    #[DbQuery('tdelivery_get', factory: DeliveryEntity::class)]
-    public function getById(string $deliveryId): DeliveryEntity|null;
+    #[DbQuery('tdelivery_get')]
+    public function item(string $deliveryId): DeliveryEntity|null;
 
     #[DbQuery('tdelivery_put')]
     public function put(DeliveryEntity $delivery): void;
 
     #[DbQuery('tdelivery_delete')]
-    public function remove(string $deliveryId): void;
+    public function delete(string $deliveryId): void;
 
     #[DbQuery('tdelivery_reorder')]
     public function reorder(string $deliveryId, int $sortNo): void;
 
     #[DbQuery('tdelivery_visible')]
-    public function setVisible(string $deliveryId, bool $visible): void;
+    public function visible(string $deliveryId, bool $visible): void;
 }

@@ -7,11 +7,11 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakeMailTemplateStorage;
+use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminMailTemplateForm;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -37,7 +37,7 @@ final class AdminMailTemplateListResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -66,8 +66,8 @@ final class AdminMailTemplateListResourceTest extends TestCase
         $this->assertGreaterThanOrEqual(2, $ro->body['count']);
 
         $ids = array_column($ro->body['mailTemplates'], 'mailTemplateId');
-        $this->assertContains(FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID, $ids);
-        $this->assertContains(FakeMailTemplateStorage::SEED_REGISTER_THANKS_ID, $ids);
+        $this->assertContains(1, $ids);
+        $this->assertContains(2, $ids);
 
         // Shape check — required projection fields are present.
         foreach ($ro->body['mailTemplates'] as $row) {

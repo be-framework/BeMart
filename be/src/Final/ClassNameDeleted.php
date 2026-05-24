@@ -35,11 +35,11 @@ final readonly class ClassNameDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($classNames->getById($classNameId) === null) {
+        if ($classNames->item($classNameId) === null) {
             throw new ClassNameNotFoundException();
         }
 
-        $classNames->remove($classNameId);
+        $classNames->delete($classNameId);
 
         $this->classNameId = $classNameId;
     }

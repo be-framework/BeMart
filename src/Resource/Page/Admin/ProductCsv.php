@@ -24,7 +24,7 @@ use function assert;
  * shaped CSV rows with insert-or-update semantics + multi-column
  * uniqueness contracts + extended PurchaseFlow orchestration. That
  * depth doesn't fit a single-day migration and would force the
- * FakeProductStorage to grow a bulk-upsert surface that contradicts
+ * JSON-backed fake product handler to grow a bulk-upsert surface that contradicts
  * the CQRS split. Phase 2 will land it as a dedicated Cascade Diamond
  * pattern (`insurance-claim` demo). The ALPS id remains documented;
  * no Be Input or BEAR resource is shipped for it yet.

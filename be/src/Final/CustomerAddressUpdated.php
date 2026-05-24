@@ -69,7 +69,7 @@ final readonly class CustomerAddressUpdated
             throw new UnauthenticatedException();
         }
 
-        $current = $addresses->getById($addressId);
+        $current = $addresses->item($addressId);
         if (! $current instanceof AddressEntity) {
             throw new AddressNotFoundException();
         }

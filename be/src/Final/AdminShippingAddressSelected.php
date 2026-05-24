@@ -63,7 +63,7 @@ final readonly class AdminShippingAddressSelected
             throw new OrderNotFoundException();
         }
 
-        $address = $addressStorage->getById($addressId);
+        $address = $addressStorage->item($addressId);
         if ($address === null || $address->customerId !== $order->customerId) {
             throw new AddressNotFoundException();
         }

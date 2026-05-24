@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use function assert;
 use function getenv;
 use function session_status;
+use function str_contains;
 
 use const PHP_SESSION_ACTIVE;
 
@@ -42,7 +43,7 @@ use const PHP_SESSION_ACTIVE;
  *
  * In the html context this resource clears the flat admin session key
  * read by HtmlAdminSessionAdapter. The clear is guarded by
- * APP_CONTEXT=html and PHP_SESSION_ACTIVE so app/test/prod contexts keep
+ * an html APP_CONTEXT and PHP_SESSION_ACTIVE so app/test/prod contexts keep
  * their existing session behaviour.
  *
  * Source-of-truth gap: alps.json does not currently carry a
@@ -84,7 +85,7 @@ class Logout extends ResourceObject
 
         assert($final instanceof AdminLoggedOut);
 
-        if (getenv('APP_CONTEXT') === 'html' && session_status() === PHP_SESSION_ACTIVE) {
+        if (str_contains((string) getenv('APP_CONTEXT'), 'html') && session_status() === PHP_SESSION_ACTIVE) {
             unset($_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY]);
         }
 

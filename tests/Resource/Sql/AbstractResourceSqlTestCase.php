@@ -8,7 +8,7 @@ use Aura\Sql\DecoratedPdo;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Tests\Sql\SqlFixturesTrait;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Module\MediaQueryRuntimeModule;
 use PDO;
 use PHPUnit\Framework\TestCase;
@@ -57,7 +57,7 @@ use function dirname;
  *       CustomerCommandInterface::register can persist with an explicit PK;
  *       the Fake generator emits 32-char hex that the SQL impl rejects
  *       as non-numeric, same shape as the Admin generator pairing)
- *   - EmailUniquenessCheckerInterface → EmailUniquenessCheckerInterface
+ *   - EmailUniquenessQueryInterface → EmailUniquenessQueryInterface
  *       (Phase 2b — registration / profile-update duplicate-email
  *       guard, a trivial existence probe against dtb_customer.email,
  *       the natural read-guard companion of the customer write side)
@@ -182,7 +182,7 @@ use function dirname;
  *       the blob in ONE carrier row's description column at
  *       dtb_tradelaw.id=1, the same singleton-row shape BaseInfoStorageInterface
  *       uses for dtb_base_info.id=1. No generator: the row identity is
- *       fixed, never minted. get() falls back to FakeTradeLawStorage's
+ *       fixed, never minted. get() falls back to TradeLawStorageInterface's
  *       installer-default body when the carrier row is absent so the
  *       hypermedia contract is identical to the Fake-backed baseline
  *       with no extra fixture setup required)
@@ -372,7 +372,7 @@ abstract class AbstractResourceSqlTestCase extends TestCase
      */
     protected function buildResource(): ResourceInterface
     {
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $base->override($this->sqlOverrideModule());
 
         $extra = $this->extraOverride();

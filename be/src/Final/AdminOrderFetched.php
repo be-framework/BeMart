@@ -8,6 +8,7 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use Ray\Di\Di\Inject;
@@ -84,6 +85,7 @@ final readonly class AdminOrderFetched
         #[Input] string $orderNo,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] OrderQueryInterface $orderQuery,
+        #[Inject] OrderItemQueryInterface $orderItems,
         #[Inject] CustomerQueryInterface $customerQuery,
     ) {
         // AUTHZ cross-firewall first — refuse non-admin requests before
@@ -97,8 +99,8 @@ final readonly class AdminOrderFetched
             throw new OrderNotFoundException();
         }
 
-        $items = $orderQuery->itemsByOrderNo($orderNo);
-        $customer = $customerQuery->findById($order->customerId);
+        $items = $orderItems->listByOrderNo($orderNo);
+        $customer = $customerQuery->item($order->customerId);
 
         $this->orderNo = $order->orderNo;
         $this->preOrderId = $order->preOrderId;

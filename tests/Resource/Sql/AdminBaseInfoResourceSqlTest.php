@@ -30,7 +30,7 @@ use Ray\Di\AbstractModule;
  *    no such constraint and skips this seed.
  *
  *  - the idempotent-replay assertion needs the SAME defaults on both
- *    sides. SqlBaseInfoStorage returns FakeBaseInfoStorage's installer
+ *    sides. SqlBaseInfoStorage returns BaseInfoStorageInterface's installer
  *    defaults when dtb_base_info is empty (the first GET in the test
  *    triggers that fall-through). The replay then submits those exact
  *    fields back and the Final reports `changed=false` — same shape as

@@ -42,7 +42,7 @@ final readonly class PluginListFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $rows = $pluginStorage->listAll();
+        $rows = $pluginStorage->list();
 
         $this->plugins = array_map(
             static fn (PluginEntity $p): array => [

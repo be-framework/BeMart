@@ -20,15 +20,15 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface PageStorageInterface
 {
     /** @return list<PageEntity> */
-    #[DbQuery('tpage_list', factory: PageEntity::class)]
+    #[DbQuery('tpage_list')]
     public function list(): array;
 
-    #[DbQuery('tpage_get', factory: PageEntity::class)]
-    public function getById(string $pageId): PageEntity|null;
+    #[DbQuery('tpage_get')]
+    public function item(string $pageId): PageEntity|null;
 
     #[DbQuery('tpage_put')]
     public function put(PageEntity $page): void;
 
     #[DbQuery('tpage_remove')]
-    public function remove(string $pageId): void;
+    public function delete(string $pageId): void;
 }

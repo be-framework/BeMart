@@ -65,7 +65,7 @@ class Withdraw extends ResourceObject
             return $this;
         }
 
-        $customer = $this->customerQuery->findById($customerId);
+        $customer = $this->customerQuery->item($customerId);
         if ($customer === null) {
             // Stale session: the session points to a customerId that
             // no longer exists in the store (e.g. already withdrawn

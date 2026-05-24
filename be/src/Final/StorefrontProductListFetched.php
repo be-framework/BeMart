@@ -60,7 +60,7 @@ final readonly class StorefrontProductListFetched
         #[Inject] ProductQueryInterface $productQuery,
     ) {
         $visible = array_values(array_filter(
-            $productQuery->listAll(self::CATALOG_LIMIT),
+            $productQuery->list(self::CATALOG_LIMIT),
             static fn (ProductEntity $p): bool => $p->productStatus === ProductEntity::STATUS_VISIBLE,
         ));
 
