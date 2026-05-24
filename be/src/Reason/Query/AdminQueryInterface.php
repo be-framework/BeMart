@@ -27,11 +27,11 @@ interface AdminQueryInterface
 {
     /** @return AdminEntity|null  null when no admin has this loginId. */
     #[DbQuery('admin_find_by_login', factory: AdminFactory::class)]
-    public function findByLoginId(string $loginId): AdminEntity|null;
+    public function byLogin(string $loginId): AdminEntity|null;
 
     /** @return AdminEntity|null  null when no admin has this id. */
     #[DbQuery('admin_find_by_id', factory: AdminFactory::class)]
-    public function findById(string $adminId): AdminEntity|null;
+    public function item(string $adminId): AdminEntity|null;
 
     /**
      * List all admins (incl. soft-deleted) for the admin grid —
@@ -42,7 +42,7 @@ interface AdminQueryInterface
      * @return list<AdminEntity>
      */
     #[DbQuery('admin_list', factory: AdminFactory::class)]
-    public function listAll(int $limit = 50, int $offset = 0): array;
+    public function list(int $limit = 50, int $offset = 0): array;
 
     /**
      * Substring filter on `name` for the admin grid filter form —

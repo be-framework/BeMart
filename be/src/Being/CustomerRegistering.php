@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Being;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
-use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
@@ -21,7 +21,7 @@ use SensitiveParameter;
  * cooperate to derive server-owned scalars from the validated input,
  * without any of them forming a Diamond.
  *
- *   1. EmailUniquenessCheckerInterface — fail-fast on duplicate email
+ *   1. EmailUniquenessQueryInterface — fail-fast on duplicate email
  *   2. CustomerIdGeneratorInterface    — opaque 32-char hex id
  *   3. PasswordHasherInterface         — bcrypt hash of plaintext password
  *   4. CustomerInitialPointInterface   — registration bonus points
@@ -66,16 +66,16 @@ final readonly class CustomerRegistering
         #[Input] public string|null $birth,
         #[Input] public int|null $sex,
         #[Input] public int|null $job,
-        #[Inject] EmailUniquenessCheckerInterface $uniquenessChecker,
+        #[Inject] EmailUniquenessQueryInterface $uniquenessChecker,
         #[Inject] CustomerIdGeneratorInterface $idGenerator,
         #[Inject] PasswordHasherInterface $passwordHasher,
         #[Inject] CustomerInitialPointInterface $initialPointService,
     ) {
-        $uniqueness = $uniquenessChecker->check($email);
+        $uniqueness = $uniquenessChecker->item($email);
         /** @psalm-suppress InvalidDocblock Psalm treats assert* methods as assertion helpers. */
         $uniqueness->assertUnique();
 
-        $this->customerId = $idGenerator->generate()->value;
+        $this->customerId = $idGenerator->next()->value;
         $this->passwordHash = $passwordHasher->hash($password);
         $this->initialPoint = $initialPointService->initial();
         $this->customerStatus = 2;

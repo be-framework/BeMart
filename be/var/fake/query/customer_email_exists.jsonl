@@ -1,0 +1,5 @@
+{"exists":1,"_params":{"email":"alice@example.com"}}
+{"exists":1,"_params":{"email":"bob@example.com"}}
+{"exists":1,"_params":{"email":"carol@example.com"}}
+{"exists":1,"_params":{"email":"login-test@example.com"}}
+{"exists":1,"_params":{"email":"provisional@example.com"}}

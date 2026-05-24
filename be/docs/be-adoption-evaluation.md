@@ -307,7 +307,7 @@ Pilot 2 でも Final 内に `assert($adjustedQuantity >= 1 && $adjustedQuantity 
 Pilot 3 のテスト 6/6 で:
 
 - 支払い成功系 (CashOnDelivery / CreditCard) → `OrderConfirmed` に分岐
-- 支払い失敗系 (FakeVerifyFailing) → `OrderConfirmFailed` に分岐 (`errors: ['Card validation failed']` を Final が保持)
+- 支払い失敗系 (fake payment failure handler) → `OrderConfirmFailed` に分岐 (`errors: ['Card validation failed']` を Final が保持)
 - `instanceof` での Final 型判定で分岐が型レベルで証明される
 
 medical-triage demo の Case クラス委譲パターン (Final が `$being->totals` を読む) もそのまま流用でき、ALPS の `ShoppingConfirm` ↔ `ShoppingError` 状態分岐と 1:1 写像できた。

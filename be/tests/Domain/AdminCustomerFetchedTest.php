@@ -12,7 +12,7 @@ use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
 use MyVendor\BeMart\Be\Input\GetAdminCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -49,7 +49,7 @@ final class AdminCustomerFetchedTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -69,9 +69,7 @@ final class AdminCustomerFetchedTest extends TestCase
 
     public function testHappyPathReturnsCustomerProfile(): void
     {
-        $final = ($this->becoming)(new GetAdminCustomerInput(
-            email: 'alice@example.com',
-        ));
+        $final = ($this->becoming)(new GetAdminCustomerInput('alice@example.com'));
 
         $this->assertInstanceOf(AdminCustomerFetched::class, $final);
         $this->assertSame('0123456789abcdef0123456789abcdef', $final->customerId);
@@ -90,7 +88,7 @@ final class AdminCustomerFetchedTest extends TestCase
         $this->assertSame(2, $final->sex);
         $this->assertSame(7, $final->job);
         $this->assertSame(2, $final->customerStatus);
-        $this->assertSame(100, $final->initialPoint);
+        $this->assertSame(0, $final->initialPoint);
 
         // Alice has no seeded orders / favorites — the projection is a
         // valid empty list rather than null. Aggregate counters track
@@ -107,16 +105,12 @@ final class AdminCustomerFetchedTest extends TestCase
         $this->rebindAdminSession(null);
 
         $this->expectException(UnauthorizedAdminAccessException::class);
-        ($this->becoming)(new GetAdminCustomerInput(
-            email: 'alice@example.com',
-        ));
+        ($this->becoming)(new GetAdminCustomerInput('alice@example.com'));
     }
 
     public function testUnknownEmailRaisesCustomerNotFound(): void
     {
         $this->expectException(CustomerNotFoundException::class);
-        ($this->becoming)(new GetAdminCustomerInput(
-            email: 'nosuch@example.com',
-        ));
+        ($this->becoming)(new GetAdminCustomerInput('nosuch@example.com'));
     }
 }

@@ -33,7 +33,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
 
         // Read back via the query — round-trips through real schema.
         $query = $this->sql(CartQueryInterface::class);
-        $cart = $query->byCartKey('fresh-session_1');
+        $cart = $query->item('fresh-session_1');
 
         $this->assertNotNull($cart);
         $this->assertSame(800, $cart->totalPrice);
@@ -77,7 +77,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
         ));
 
         $query = $this->sql(CartQueryInterface::class);
-        $cart = $query->byCartKey('overwrite_1');
+        $cart = $query->item('overwrite_1');
         $this->assertNotNull($cart);
         // Old item must NOT survive.
         $codes = array_map(static fn ($i) => $i->productCode, $cart->items);
@@ -123,7 +123,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
         $command->clearByPreOrderId('pre-clear-001');
 
         $query = $this->sql(CartQueryInterface::class);
-        $this->assertNull($query->byCartKey('clear-by-pre_1'));
+        $this->assertNull($query->item('clear-by-pre_1'));
         // Items cascaded too.
         $countItems = $this->pdo->query('SELECT COUNT(*) FROM dtb_cart_item');
         $this->assertNotFalse($countItems);
@@ -139,7 +139,7 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
 
         // The unrelated cart survives.
         $query = $this->sql(CartQueryInterface::class);
-        $this->assertNotNull($query->byCartKey('keep_1'));
+        $this->assertNotNull($query->item('keep_1'));
     }
 
     public function testClearBySessionPrefixOnlyRemovesMatchingPrefix(): void
@@ -156,8 +156,8 @@ final class SqlCartCommandTest extends AbstractSqlTestCase
         $command->clearBySessionPrefix('drop');
 
         $query = $this->sql(CartQueryInterface::class);
-        $this->assertSame([], $query->bySessionPrefix('drop'));
-        $this->assertNotNull($query->byCartKey('keep_1'));
-        $this->assertNotNull($query->byCartKey('dropper_1'));
+        $this->assertSame([], $query->listBySessionPrefix('drop'));
+        $this->assertNotNull($query->item('keep_1'));
+        $this->assertNotNull($query->item('dropper_1'));
     }
 }

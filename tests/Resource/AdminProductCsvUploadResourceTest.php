@@ -10,7 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminCsvUploadForm;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -46,7 +46,7 @@ final class AdminProductCsvUploadResourceTest extends TestCase
     private function resource(string|null $adminId): ResourceInterface
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $base->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {

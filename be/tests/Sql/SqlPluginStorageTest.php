@@ -38,7 +38,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
     public function testListAllReturnsEmptyArrayOnEmptyTable(): void
     {
         $storage = $this->sql(PluginStorageInterface::class);
-        $this->assertSame([], $storage->listAll());
+        $this->assertSame([], $storage->list());
     }
 
     public function testListAllReturnsRowsSortedByPluginCode(): void
@@ -50,7 +50,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $this->insertPlugin(['code' => 'Acme/FirstPlugin', 'name' => 'Acme']);
 
         $storage = $this->sql(PluginStorageInterface::class);
-        $rows = $storage->listAll();
+        $rows = $storage->list();
 
         $this->assertCount(3, $rows);
         $this->assertContainsOnlyInstancesOf(PluginEntity::class, $rows);
@@ -70,7 +70,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(PluginStorageInterface::class);
-        $rows = $storage->listAll();
+        $rows = $storage->list();
 
         $this->assertCount(1, $rows);
         $this->assertInstanceOf(PluginEntity::class, $rows[0]);
@@ -92,7 +92,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(PluginStorageInterface::class);
-        $entity = $storage->findByCode('Vendor/Target');
+        $entity = $storage->item('Vendor/Target');
 
         $this->assertInstanceOf(PluginEntity::class, $entity);
         $this->assertSame('Vendor/Target', $entity->pluginCode);
@@ -105,7 +105,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
     public function testFindByCodeReturnsNullForUnknownCode(): void
     {
         $storage = $this->sql(PluginStorageInterface::class);
-        $this->assertNull($storage->findByCode('NoSuch/Plugin'));
+        $this->assertNull($storage->item('NoSuch/Plugin'));
     }
 
     public function testFindByCodeMapsInitializedZeroToInstalledFalse(): void
@@ -119,7 +119,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(PluginStorageInterface::class);
-        $entity = $storage->findByCode('Vendor/Registered');
+        $entity = $storage->item('Vendor/Registered');
 
         $this->assertInstanceOf(PluginEntity::class, $entity);
         $this->assertFalse($entity->installed);
@@ -131,7 +131,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(PluginStorageInterface::class);
         $storage->install('NewVendor/Plugin', '新規プラグイン', '1.0.0');
 
-        $entity = $storage->findByCode('NewVendor/Plugin');
+        $entity = $storage->item('NewVendor/Plugin');
         $this->assertInstanceOf(PluginEntity::class, $entity);
         $this->assertSame('NewVendor/Plugin', $entity->pluginCode);
         $this->assertSame('新規プラグイン', $entity->pluginName);
@@ -142,7 +142,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $this->assertFalse($entity->enabled);
 
         // listAll sees it too.
-        $this->assertCount(1, $storage->listAll());
+        $this->assertCount(1, $storage->list());
     }
 
     public function testInstallWritesSourceAndDiscriminatorColumns(): void
@@ -181,7 +181,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(PluginStorageInterface::class);
         $storage->install('Sample/SamplePlugin', 'Whatever', '9.9.9');
 
-        $entity = $storage->findByCode('Sample/SamplePlugin');
+        $entity = $storage->item('Sample/SamplePlugin');
         $this->assertInstanceOf(PluginEntity::class, $entity);
         // Original metadata preserved — re-install does NOT overwrite.
         $this->assertSame('Sample Plugin', $entity->pluginName);
@@ -190,7 +190,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $this->assertTrue($entity->enabled);
 
         // No duplicate row.
-        $this->assertCount(1, $storage->listAll());
+        $this->assertCount(1, $storage->list());
     }
 
     public function testInstallPromotesRegisteredButNotInstalledRow(): void
@@ -206,13 +206,13 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(PluginStorageInterface::class);
-        $before = $storage->findByCode('Vendor/Registered');
+        $before = $storage->item('Vendor/Registered');
         $this->assertInstanceOf(PluginEntity::class, $before);
         $this->assertFalse($before->installed);
 
         $storage->install('Vendor/Registered', 'Ignored', '2.0.0');
 
-        $after = $storage->findByCode('Vendor/Registered');
+        $after = $storage->item('Vendor/Registered');
         $this->assertInstanceOf(PluginEntity::class, $after);
         $this->assertTrue($after->installed);
         // The promote path keeps the existing name/version — it does not
@@ -221,21 +221,21 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $this->assertSame('1.0.0', $after->version);
 
         // Still exactly one row (UPDATE, not INSERT).
-        $this->assertCount(1, $storage->listAll());
+        $this->assertCount(1, $storage->list());
     }
 
     public function testUninstallRemovesInstalledRow(): void
     {
         $this->insertPlugin(['code' => 'Vendor/Doomed', 'initialized' => 1]);
         $storage = $this->sql(PluginStorageInterface::class);
-        $this->assertNotNull($storage->findByCode('Vendor/Doomed'));
+        $this->assertNotNull($storage->item('Vendor/Doomed'));
 
         $storage->uninstall('Vendor/Doomed');
 
         // Row is gone entirely — a subsequent listAll does not surface
         // the uninstalled stub.
-        $this->assertNull($storage->findByCode('Vendor/Doomed'));
-        $this->assertSame([], $storage->listAll());
+        $this->assertNull($storage->item('Vendor/Doomed'));
+        $this->assertSame([], $storage->list());
     }
 
     public function testUninstallIsSilentNoOpForUnknownCode(): void
@@ -243,7 +243,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(PluginStorageInterface::class);
         // Idempotent: a DELETE matching zero rows raises nothing.
         $storage->uninstall('NoSuch/Plugin');
-        $this->assertSame([], $storage->listAll());
+        $this->assertSame([], $storage->list());
     }
 
     public function testUninstallReplayIsIdempotent(): void
@@ -255,7 +255,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         // Second call — already gone, still a silent no-op.
         $storage->uninstall('Vendor/Twice');
 
-        $this->assertNull($storage->findByCode('Vendor/Twice'));
+        $this->assertNull($storage->item('Vendor/Twice'));
     }
 
     public function testSetEnabledEnablesAndDisablesRoundTrip(): void
@@ -270,12 +270,12 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(PluginStorageInterface::class);
 
         $storage->setEnabled('Vendor/Toggle', true);
-        $afterEnable = $storage->findByCode('Vendor/Toggle');
+        $afterEnable = $storage->item('Vendor/Toggle');
         $this->assertInstanceOf(PluginEntity::class, $afterEnable);
         $this->assertTrue($afterEnable->enabled);
 
         $storage->setEnabled('Vendor/Toggle', false);
-        $afterDisable = $storage->findByCode('Vendor/Toggle');
+        $afterDisable = $storage->item('Vendor/Toggle');
         $this->assertInstanceOf(PluginEntity::class, $afterDisable);
         $this->assertFalse($afterDisable->enabled);
 
@@ -296,7 +296,7 @@ final class SqlPluginStorageTest extends AbstractSqlTestCase
 
         $storage->setEnabled('Vendor/AlreadyOn', true);
 
-        $entity = $storage->findByCode('Vendor/AlreadyOn');
+        $entity = $storage->item('Vendor/AlreadyOn');
         $this->assertInstanceOf(PluginEntity::class, $entity);
         $this->assertTrue($entity->enabled);
     }

@@ -66,7 +66,7 @@ final readonly class ActivationMailResent
             throw new UnauthorizedAdminAccessException();
         }
 
-        $customer = $customerQuery->findByEmail($email);
+        $customer = $customerQuery->byEmail($email);
         if ($customer === null) {
             throw new CustomerNotFoundException();
         }

@@ -20,7 +20,7 @@ use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
  * the cases below verify the per-method SQL paths in isolation:
  *
  *   - get() on an empty table → installer-default body Entity
- *     (matching FakeTradeLawStorage's constructor seed, so both
+ *     (matching TradeLawStorageInterface's constructor seed, so both
  *     backends produce the IDENTICAL projection on a first read).
  *   - get() on a seeded id=1 row → hydrated Entity carrying that
  *     row's `description`.
@@ -46,9 +46,9 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
     public function testGetReturnsInstallerDefaultWhenRowMissing(): void
     {
         $storage = $this->sql(TradeLawStorageInterface::class);
-        $entity = $storage->get();
+        $entity = $storage->item();
 
-        // Mirrors FakeTradeLawStorage's constructor seed — the same
+        // Mirrors TradeLawStorageInterface's constructor seed — the same
         // contract both backends honour for a first read.
         $this->assertSame(self::DEFAULT_BODY, $entity->body);
     }
@@ -60,7 +60,7 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(TradeLawStorageInterface::class);
-        $entity = $storage->get();
+        $entity = $storage->item();
 
         $this->assertSame("販売業者: 既存会社\n所在地: 京都市", $entity->body);
     }
@@ -74,7 +74,7 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
         $this->insertTradeLaw(['description' => null]);
 
         $storage = $this->sql(TradeLawStorageInterface::class);
-        $entity = $storage->get();
+        $entity = $storage->item();
 
         $this->assertSame(self::DEFAULT_BODY, $entity->body);
     }
@@ -83,11 +83,11 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
     {
         $storage = $this->sql(TradeLawStorageInterface::class);
 
-        $storage->update(new TradeLawEntity(
+        $storage->put(new TradeLawEntity(
             body: "販売業者: 新会社\n所在地: 東京都\n連絡先: 03-1234-5678",
         ));
 
-        $read = $storage->get();
+        $read = $storage->item();
         $this->assertSame(
             "販売業者: 新会社\n所在地: 東京都\n連絡先: 03-1234-5678",
             $read->body,
@@ -97,7 +97,7 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
     public function testUpdateInsertsExactlyOneRowWithCarrierId(): void
     {
         $storage = $this->sql(TradeLawStorageInterface::class);
-        $storage->update(new TradeLawEntity(body: 'whatever'));
+        $storage->put(new TradeLawEntity(body: 'whatever'));
 
         $stmt = $this->pdo->query('SELECT id FROM dtb_tradelaw');
         $this->assertNotFalse($stmt);
@@ -111,9 +111,9 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
         $this->insertTradeLaw(['description' => '旧本文']);
 
         $storage = $this->sql(TradeLawStorageInterface::class);
-        $storage->update(new TradeLawEntity(body: '新本文'));
+        $storage->put(new TradeLawEntity(body: '新本文'));
 
-        $this->assertSame('新本文', $storage->get()->body);
+        $this->assertSame('新本文', $storage->item()->body);
     }
 
     public function testUpdatePreservesPerItemColumnsOnRewrite(): void
@@ -129,7 +129,7 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(TradeLawStorageInterface::class);
-        $storage->update(new TradeLawEntity(body: '新本文'));
+        $storage->put(new TradeLawEntity(body: '新本文'));
 
         $stmt = $this->pdo->query(
             'SELECT name, sort_no, display_order_screen '
@@ -149,15 +149,15 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(TradeLawStorageInterface::class);
 
         // First call inserts.
-        $storage->update(new TradeLawEntity(body: 'one'));
+        $storage->put(new TradeLawEntity(body: 'one'));
         // Subsequent calls should UPDATE, never INSERT.
-        $storage->update(new TradeLawEntity(body: 'two'));
-        $storage->update(new TradeLawEntity(body: 'three'));
+        $storage->put(new TradeLawEntity(body: 'two'));
+        $storage->put(new TradeLawEntity(body: 'three'));
 
         $stmt = $this->pdo->query('SELECT COUNT(*) FROM dtb_tradelaw');
         $this->assertNotFalse($stmt);
         $this->assertSame(1, (int) $stmt->fetchColumn());
-        $this->assertSame('three', $storage->get()->body);
+        $this->assertSame('three', $storage->item()->body);
     }
 
     public function testUpdateRoundTripsBodyWithNewlinesAndColonsLosslessly(): void
@@ -170,14 +170,14 @@ final class SqlTradeLawStorageTest extends AbstractSqlTestCase
         $body = "販売業者: A社: B事業部\n\n所在地: 大阪:梅田\n返品: 不可";
 
         $storage = $this->sql(TradeLawStorageInterface::class);
-        $storage->update(new TradeLawEntity(body: $body));
+        $storage->put(new TradeLawEntity(body: $body));
 
-        $this->assertSame($body, $storage->get()->body);
+        $this->assertSame($body, $storage->item()->body);
 
         // A second update with the identical body is a clean no-op
         // round-trip (the storage does the write unconditionally; the
         // Final is what short-circuits).
-        $storage->update(new TradeLawEntity(body: $body));
-        $this->assertSame($body, $storage->get()->body);
+        $storage->put(new TradeLawEntity(body: $body));
+        $this->assertSame($body, $storage->item()->body);
     }
 }

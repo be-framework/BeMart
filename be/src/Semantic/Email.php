@@ -13,7 +13,7 @@ use function str_contains;
 /**
  * Email — EC-CUBE 4.3 dtb_customer.email. Doubles as the customer's
  * login id (unique among active customers; dynamic uniqueness is
- * enforced by EmailUniquenessCheckerInterface, not by this Semantic).
+ * enforced by EmailUniquenessQueryInterface, not by this Semantic).
  *
  * Static constraints only — RFC 5322 contains-`@` + length cap 254.
  */

@@ -23,14 +23,14 @@ use Ray\Di\AbstractModule;
  *    against the real `dtb_tradelaw` carrier row id=1 (singleton blob).
  *
  *  - the Fake-backed sibling reads the Fake storage directly
- *    (`$this->storage->get()->body`) to confirm the write landed; the
+ *    (`$this->storage->item()->body`) to confirm the write landed; the
  *    SQL sibling instead reads back through the Resource layer (a
  *    follow-up GET) so the assertion exercises the full Becoming chain
  *    and proves persistence reached `dtb_tradelaw` — same pattern as
  *    {@see AdminBaseInfoResourceSqlTest}.
  *
  *  - the idempotent-replay assertion needs the SAME default on both
- *    sides. SqlTradeLawStorage::get returns FakeTradeLawStorage's
+ *    sides. SqlTradeLawStorage::get returns TradeLawStorageInterface's
  *    installer-default body when `dtb_tradelaw` is empty (the first
  *    submit in the test triggers that fall-through). Re-submitting that
  *    exact body makes the Final report `changed=false` — same shape as

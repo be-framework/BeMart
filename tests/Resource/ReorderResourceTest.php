@@ -7,11 +7,10 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakeFinalizedOrderStorage;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -36,7 +35,7 @@ final class ReorderResourceTest extends TestCase
     private function rebindSession(string|null $customerId): void
     {
         $session = new FakeSession($customerId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {
@@ -57,13 +56,13 @@ final class ReorderResourceTest extends TestCase
     public function testOnPostHappyPathReturns201(): void
     {
         $ro = $this->resource->post('page://self/mypage/reorder', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('customer-001', $ro->body['customerId']);
-        $this->assertSame(FakeFinalizedOrderStorage::SEED_ORDER_NO, $ro->body['orderNo']);
+        $this->assertSame('past0000000000000000000000000001', $ro->body['orderNo']);
         $this->assertSame(2, $ro->body['addedCount']);
         $this->assertSame(0, $ro->body['skippedCount']);
         $this->assertSame([], $ro->body['skippedProductCodes']);
@@ -77,12 +76,12 @@ final class ReorderResourceTest extends TestCase
         $this->rebindSession('customer-999');
 
         $ro = $this->resource->post('page://self/mypage/reorder', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertSame(FakeFinalizedOrderStorage::SEED_ORDER_NO, $ro->body['orderNo']);
+        $this->assertSame('past0000000000000000000000000001', $ro->body['orderNo']);
     }
 
     public function testOnPostUnknownOrderReturns404(): void
@@ -101,7 +100,7 @@ final class ReorderResourceTest extends TestCase
         $this->rebindSession(null);
 
         $ro = $this->resource->post('page://self/mypage/reorder', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
@@ -111,7 +110,7 @@ final class ReorderResourceTest extends TestCase
     public function testOnPostMissingCsrfReturns403(): void
     {
         $ro = $this->resource->post('page://self/mypage/reorder', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);

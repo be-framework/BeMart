@@ -25,7 +25,7 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface CsvColumnConfigStorageInterface
 {
     /** @return list<CsvColumnConfigEntity> sorted by sortNo */
-    #[DbQuery('csv_column_list_by_type', factory: CsvColumnConfigEntity::class)]
+    #[DbQuery('csv_column_list_by_type')]
     public function listByType(int $csvType): array;
 
     #[DbQuery('csv_column_replace_type')]

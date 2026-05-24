@@ -38,7 +38,7 @@ use function str_contains;
  *    on both backends (SqlPaymentMethodAdminStorage rejects a
  *    non-numeric id as a miss, the same 404 path as any unknown id).
  *
- *  - the Fake-backed sibling starts with an empty FakePaymentMethodAdminStorage
+ *  - the Fake-backed sibling starts with an empty PaymentMethodAdminStorageInterface
  *    and seeds every row through the resource layer's POST affordance;
  *    dtb_payment is likewise empty on each test, so this sibling seeds
  *    the same way — the POST drives the full Becoming chain

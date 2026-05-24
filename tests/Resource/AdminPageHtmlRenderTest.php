@@ -7,11 +7,11 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakePageStorage;
+use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminPageForm;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
 use MyVendor\BeMart\Tests\Resource\Admin\ContentJaMessages;
 use PHPUnit\Framework\TestCase;
@@ -75,7 +75,7 @@ final class AdminPageHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
@@ -95,7 +95,7 @@ final class AdminPageHtmlRenderTest extends TestCase
     public function testPageEditRendersAsHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/page/page', [
-            'pageId' => FakePageStorage::SEED_PAGE_ID,
+            'pageId' => 'pg-homepage',
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -113,7 +113,7 @@ final class AdminPageHtmlRenderTest extends TestCase
     public function testPageEditRendersRealFormInputs(): void
     {
         $html = $this->resource->get('page://self/admin/page/page', [
-            'pageId' => FakePageStorage::SEED_PAGE_ID,
+            'pageId' => 'pg-homepage',
         ])->toString();
 
         $this->assertStringContainsString('id="main_edit_name"', $html);
@@ -127,7 +127,7 @@ final class AdminPageHtmlRenderTest extends TestCase
     public function testPageEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/page/page', [
-            'pageId' => FakePageStorage::SEED_PAGE_ID,
+            'pageId' => 'pg-homepage',
         ])->toString();
         $ecCube = $this->renderEcCube();
 
@@ -216,7 +216,7 @@ final class AdminPageHtmlRenderTest extends TestCase
         $form = (new FormFactory())->newInstance(AdminPageForm::class);
         if ($form instanceof AdminPageForm) {
             $form->fillValues([
-                'pageId' => FakePageStorage::SEED_PAGE_ID,
+                'pageId' => 'pg-homepage',
                 'pageName' => 'ホームページ',
                 'pageUrl' => 'homepage',
                 'pageFileName' => 'index',
@@ -241,7 +241,7 @@ final class AdminPageHtmlRenderTest extends TestCase
                 'meta_robots' => 'meta_robots',
                 'meta_tags' => 'meta_tags',
             ]),
-            'page_id' => FakePageStorage::SEED_PAGE_ID,
+            'page_id' => 'pg-homepage',
             'is_user_data_page' => false,
             'is_confirm_page' => false,
             'url' => '/homepage',

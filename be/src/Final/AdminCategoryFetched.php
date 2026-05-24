@@ -40,7 +40,7 @@ final readonly class AdminCategoryFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $row = $categories->getById($categoryId);
+        $row = $categories->item($categoryId);
         if ($row === null) {
             throw new CategoryNotFoundException();
         }

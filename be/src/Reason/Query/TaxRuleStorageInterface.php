@@ -19,15 +19,15 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface TaxRuleStorageInterface
 {
     /** @return list<TaxRuleEntity> */
-    #[DbQuery('ttax_rule_list', factory: TaxRuleEntity::class)]
+    #[DbQuery('ttax_rule_list')]
     public function list(): array;
 
-    #[DbQuery('ttax_rule_get', factory: TaxRuleEntity::class)]
-    public function getById(string $taxRuleId): TaxRuleEntity|null;
+    #[DbQuery('ttax_rule_get')]
+    public function item(string $taxRuleId): TaxRuleEntity|null;
 
     #[DbQuery('ttax_rule_put')]
     public function put(TaxRuleEntity $taxRule): void;
 
     #[DbQuery('ttax_rule_delete')]
-    public function remove(string $taxRuleId): void;
+    public function delete(string $taxRuleId): void;
 }

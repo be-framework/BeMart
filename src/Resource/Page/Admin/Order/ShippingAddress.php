@@ -70,7 +70,7 @@ class ShippingAddress extends ResourceObject
      * keyed by the order being shipped. BeMart has no Be transition to
      * READ an order's current shipping target, so the editor renders a
      * blank shipping form — the render-smoke test exercises this with
-     * empty Fake storage. AUTHZ is a direct admin-session check
+     * empty JSON-backed fake storage. AUTHZ is a direct admin-session check
      * (Pattern B — no Be transition is invoked on the GET path).
      *
      * @psalm-taint-source input $orderNo

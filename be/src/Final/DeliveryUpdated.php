@@ -39,7 +39,7 @@ final readonly class DeliveryUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $deliveries->getById($deliveryId);
+        $current = $deliveries->item($deliveryId);
         if ($current === null) {
             throw new DeliveryNotFoundException();
         }

@@ -27,7 +27,7 @@ use function assert;
  * AUTHZ is a direct admin-session check (Pattern B — this GET serves
  * the form shell, no Be transition is invoked); a non-admin firewall
  * is refused with 403. The options form renders blank so the page is
- * faithful with empty Fake storage.
+ * faithful with empty JSON-backed fake storage.
  */
 class OrderPdf extends ResourceObject
 {

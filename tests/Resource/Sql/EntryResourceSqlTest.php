@@ -20,7 +20,7 @@ use function ctype_digit;
  *
  *  - the storage bindings (CustomerCommandInterface → SqlCustomerCommand,
  *    CustomerIdGeneratorInterface → direct MediaQuery customer id proxy,
- *    EmailUniquenessCheckerInterface → SqlEmailUniquenessChecker,
+ *    EmailUniquenessQueryInterface → SqlEmailUniquenessChecker,
  *    CustomerQueryInterface → SqlCustomerQuery) are layered via the
  *    base class's sqlOverrideModule; registration writes a real
  *    dtb_customer row.
