@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Exception\LimitFormatException;
  *
  * Positive integer; 1—50 mirrors OrderLimit's bound so the admin grid
  * cannot be widened by a tampered request parameter beyond what
- * FakeCustomerStorage::search already caps at the storage layer.
+ * the customer search implementation already caps at the storage layer.
  */
 final class Limit
 {

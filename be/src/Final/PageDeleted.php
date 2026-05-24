@@ -35,12 +35,12 @@ final readonly class PageDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        $row = $pages->getById($pageId);
+        $row = $pages->item($pageId);
         if ($row === null || $row->pageEditType >= 2) {
             throw new PageNotFoundException();
         }
 
-        $pages->remove($pageId);
+        $pages->delete($pageId);
 
         $this->pageId = $pageId;
     }

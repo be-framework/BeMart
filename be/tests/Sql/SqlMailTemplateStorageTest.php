@@ -55,7 +55,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(MailTemplateStorageInterface::class);
-        $entity = $storage->findById($id);
+        $entity = $storage->item($id);
 
         $this->assertInstanceOf(MailTemplateEntity::class, $entity);
         $this->assertSame($id, $entity->mailTemplateId);
@@ -77,7 +77,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(MailTemplateStorageInterface::class);
-        $entity = $storage->findById($id);
+        $entity = $storage->item($id);
 
         $this->assertInstanceOf(MailTemplateEntity::class, $entity);
         $this->assertSame('', $entity->mailTemplateName);
@@ -88,7 +88,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
     public function testFindByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(MailTemplateStorageInterface::class);
-        $this->assertNull($storage->findById(99999999));
+        $this->assertNull($storage->item(99999999));
     }
 
     public function testUpdateReplacesSubjectInPlace(): void
@@ -107,7 +107,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
             subject: '【更新】ご注文ありがとうございます',
         ));
 
-        $read = $storage->findById($id);
+        $read = $storage->item($id);
         $this->assertInstanceOf(MailTemplateEntity::class, $read);
         $this->assertSame('【更新】ご注文ありがとうございます', $read->subject);
 

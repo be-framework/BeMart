@@ -7,11 +7,9 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Entity\AddressEntity;
-use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -74,7 +72,7 @@ final class AddressListHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeSession(self::ALICE_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
@@ -89,26 +87,9 @@ final class AddressListHtmlRenderTest extends TestCase
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');
 
-        // Seed one address for alice — fed identically to the EC-CUBE
-        // side below. Resolved via the interface (the singleton seam).
-        // Phase 3 enrichment — the address carries `prefName` (東京都),
-        // the prefecture DISPLAY name the address line now renders.
-        $storage = $injector->getInstance(AddressStorageInterface::class);
-        $storage->put(new AddressEntity(
-            addressId: 'addr00000000000000000000000000a1',
-            customerId: self::ALICE_ID,
-            name01: '山田',
-            name02: 'アリス',
-            kana01: 'ヤマダ',
-            kana02: 'アリス',
-            companyName: null,
-            phoneNumber: '0312345678',
-            postalCode: '1500001',
-            pref: 13,
-            addr01: '渋谷区',
-            addr02: '神宮前1-1-1',
-            prefName: '東京都',
-        ));
+        // The address row is supplied by the Ray.FakeQuery fixture
+        // `address_list_by_customer.jsonl`; fake context does not mutate
+        // query state during setup.
 
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }

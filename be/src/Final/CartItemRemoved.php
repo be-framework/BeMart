@@ -47,7 +47,7 @@ final readonly class CartItemRemoved
         $found = false;
         $newCart = null;
 
-        foreach ($cartQuery->bySessionPrefix($sessionPrefix) as $cart) {
+        foreach ($cartQuery->listBySessionPrefix($sessionPrefix) as $cart) {
             $hasItem = false;
             foreach ($cart->items as $item) {
                 if ($item->productCode === $productCode) {

@@ -59,7 +59,7 @@ final readonly class AdminOrderListFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $rows = $orderQuery->listAll($limit, $offset);
+        $rows = $orderQuery->list($limit, $offset);
 
         $this->orders = array_map(
             static fn (FinalizedOrderEntity $order): array => [

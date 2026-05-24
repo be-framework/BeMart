@@ -1,0 +1,2 @@
+{"pluginCode":"Sample/DisabledPlugin","pluginName":"Disabled Sample Plugin","version":"1.0.0","installed":true,"enabled":false}
+{"pluginCode":"Sample/SamplePlugin","pluginName":"Sample Plugin","version":"1.0.0","installed":true,"enabled":true}

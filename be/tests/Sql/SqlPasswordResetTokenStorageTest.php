@@ -25,7 +25,7 @@ use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
  * Surprises this suite locks in:
  *  - getByResetKey returns the row REGARDLESS of expiry — the consumer
  *    (PasswordResetCompleted) does its own `expiresAt < now` check, and
- *    FakePasswordResetTokenStorage returns unfiltered too. The storage
+ *    PasswordResetTokenStorageInterface returns unfiltered too. The storage
  *    is a dumb column reader.
  *  - put is a column UPDATE, so issuing a new token for the same
  *    customer naturally replaces the prior one (latest-wins).
@@ -64,7 +64,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(PasswordResetTokenStorageInterface::class);
-        $token = $storage->getByResetKey('reset-key-lookup-cccc3333dddd4444');
+        $token = $storage->byResetKey('reset-key-lookup-cccc3333dddd4444');
 
         $this->assertInstanceOf(PasswordResetTokenEntity::class, $token);
         $this->assertSame((string) $customerId, $token->customerId);
@@ -82,21 +82,21 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
 
         $storage = $this->sql(PasswordResetTokenStorageInterface::class);
 
-        $this->assertNull($storage->getByResetKey('no-such-key-eeee5555ffff6666'));
+        $this->assertNull($storage->byResetKey('no-such-key-eeee5555ffff6666'));
     }
 
     public function testGetByResetKeyReturnsExpiredTokenUnfiltered(): void
     {
         // The storage does NOT filter on expiry — it returns the row and
         // lets the consumer (PasswordResetCompleted) reject it. This
-        // mirrors FakePasswordResetTokenStorage::getByResetKey exactly.
+        // mirrors PasswordResetTokenStorageInterface::getByResetKey exactly.
         $this->insertCustomer([
             'reset_key' => 'reset-key-expired-7777aaaa8888bbbb',
             'reset_expire' => '2020-01-01 00:00:00',
         ]);
 
         $storage = $this->sql(PasswordResetTokenStorageInterface::class);
-        $token = $storage->getByResetKey('reset-key-expired-7777aaaa8888bbbb');
+        $token = $storage->byResetKey('reset-key-expired-7777aaaa8888bbbb');
 
         $this->assertInstanceOf(PasswordResetTokenEntity::class, $token);
         $this->assertSame(
@@ -125,11 +125,11 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
 
         // Latest-wins: the first key no longer resolves.
         $this->assertNull(
-            $storage->getByResetKey('reset-key-first-1111aaaa2222bbbb'),
+            $storage->byResetKey('reset-key-first-1111aaaa2222bbbb'),
         );
 
         // The second key is the live token.
-        $live = $storage->getByResetKey('reset-key-second-3333cccc4444dddd');
+        $live = $storage->byResetKey('reset-key-second-3333cccc4444dddd');
         $this->assertInstanceOf(PasswordResetTokenEntity::class, $live);
         $this->assertSame((string) $customerId, $live->customerId);
         $this->assertSame(
@@ -150,7 +150,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
 
         // Both columns nulled — a re-lookup of the consumed key misses.
         $this->assertNull(
-            $storage->getByResetKey('reset-key-consume-5555eeee6666ffff'),
+            $storage->byResetKey('reset-key-consume-5555eeee6666ffff'),
         );
 
         $stmt = $this->pdo->prepare(
@@ -185,7 +185,7 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
 
         // Nothing was written — the orphan key resolves to nothing.
         $this->assertNull(
-            $storage->getByResetKey('reset-key-orphan-cccc7777dddd8888'),
+            $storage->byResetKey('reset-key-orphan-cccc7777dddd8888'),
         );
     }
 
@@ -196,6 +196,6 @@ final class SqlPasswordResetTokenStorageTest extends AbstractSqlTestCase
         $this->insertCustomer();
 
         $storage = $this->sql(PasswordResetTokenStorageInterface::class);
-        $this->assertNull($storage->getByResetKey(''));
+        $this->assertNull($storage->byResetKey(''));
     }
 }

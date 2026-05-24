@@ -34,7 +34,7 @@ use function is_string;
  *    rejects them as non-numeric on lookup (the same 404 path as any
  *    unknown id, by design).
  *
- *  - the Fake's testListIncludesSeed leans on the FakeNewsStorage
+ *  - the Fake's testListIncludesSeed leans on the NewsStorageInterface
  *    constructor seeding one row; dtb_news is empty on each test, so
  *    the SQL sibling seeds one news post through the resource layer
  *    first and asserts the same `count >= 1` shape afterwards.
@@ -107,7 +107,7 @@ final class AdminNewsResourceSqlTest extends AbstractResourceSqlTestCase
 
     public function testListIncludesSeed(): void
     {
-        // FakeNewsStorage seeds `nw-welcome` in its constructor;
+        // NewsStorageInterface seeds `nw-welcome` in its constructor;
         // dtb_news is empty on each test, so seed an equivalent row
         // through the resource layer first. The assertion shape
         // matches the Fake-backed sibling.

@@ -13,7 +13,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * list screen (EC-CUBE `Mypage/favorite.twig`) can render the product
  * thumbnail. It is the LAST, OPTIONAL constructor parameter: every
  * existing construction site (FavoriteAdded write, FavoriteStorageInterface /
- * FakeFavoriteStorage reads, the tests) passes its arguments by name, so
+ * JSON-backed fake favorite handler reads, the tests) passes its arguments by name, so
  * the trailing nullable field adds no positional ripple. `null` means
  * the product has no image — the screen falls back to the shared
  * `no_image_product` placeholder, mirroring CartItem's `mainImage`.

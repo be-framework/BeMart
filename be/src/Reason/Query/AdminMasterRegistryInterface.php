@@ -52,5 +52,5 @@ interface AdminMasterRegistryInterface
 
     public function reorder(string $masterType, string $rowId, int $sortNo): void;
 
-    public function setVisible(string $masterType, string $rowId, bool $visible): void;
+    public function visible(string $masterType, string $rowId, bool $visible): void;
 }

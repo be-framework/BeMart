@@ -44,7 +44,7 @@ final readonly class LoginHistoryListFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $rows = $history->listRecent($limit);
+        $rows = $history->list($limit);
 
         $this->entries = array_map(
             static fn (LoginHistoryEntity $e): array => [

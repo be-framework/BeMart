@@ -10,7 +10,18 @@ use Ray\MediaQuery\Result\PostQueryInterface;
 
 final readonly class ShippingTrackingNumber implements PostQueryInterface
 {
-    public function __construct(public string|null $trackingNumber) {}
+    public string|null $trackingNumber;
+
+    /** @param string|null|array<int, self|array<string, mixed>> $trackingNumber */
+    public function __construct(string|null|array $trackingNumber)
+    {
+        if (is_array($trackingNumber)) {
+            $row = $trackingNumber[0] ?? null;
+            $trackingNumber = $row instanceof self ? $row->trackingNumber : (is_array($row) && isset($row['tracking_number']) ? (string) $row['tracking_number'] : null);
+        }
+
+        $this->trackingNumber = $trackingNumber;
+    }
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static

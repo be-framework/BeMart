@@ -106,7 +106,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $this->insertPref(13, '東京都');
 
         $generator = $this->sql(CustomerIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
@@ -116,7 +116,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]));
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $read = $query->findById($newId);
+        $read = $query->item($newId);
 
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame($newId, $read->customerId);
@@ -134,7 +134,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         // (an active customer carries no token). secret_key is NOT NULL
         // UNIQUE — register() must supply one so the INSERT succeeds.
         $generator = $this->sql(CustomerIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
 
         $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
@@ -157,7 +157,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         // token; register() must persist it verbatim so the activation
         // flow can later look the customer up by it.
         $generator = $this->sql(CustomerIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $token = bin2hex(random_bytes(16));
 
         $command = $this->sql(CustomerCommandInterface::class);
@@ -169,7 +169,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]));
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $read = $query->findBySecretKey($token);
+        $read = $query->bySecretKey($token);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('provisional@example.com', $read->email);
         $this->assertSame(1, $read->customerStatus);
@@ -187,13 +187,13 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]));
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $this->assertNull($query->findByEmail('reject-me@example.com'));
+        $this->assertNull($query->byEmail('reject-me@example.com'));
     }
 
     public function testRegisterPersistsInitialPointAsPoint(): void
     {
         $generator = $this->sql(CustomerIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
 
         $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
@@ -220,7 +220,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $command->activate((string) $id);
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame(2, $read->customerStatus);
     }
@@ -258,7 +258,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $command->activate((string) $id); // replay — must not raise
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame(2, $read->customerStatus);
     }
@@ -274,7 +274,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $command->activate('0123456789abcdef0123456789abcdef');
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame(1, $read->customerStatus);
     }
@@ -289,7 +289,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $current = $query->findById((string) $id);
+        $current = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $current);
 
         // Merge the way CustomerUpdated does: persisted state + new fields.
@@ -306,7 +306,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $command = $this->sql(CustomerCommandInterface::class);
         $command->update($merged);
 
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('after@example.com', $read->email);
         $this->assertSame('新姓', $read->name01);
@@ -322,7 +322,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $current = $query->findById((string) $id);
+        $current = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $current);
 
         $withdrawn = $this->entity([
@@ -338,12 +338,12 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $command = $this->sql(CustomerCommandInterface::class);
         $command->update($withdrawn);
 
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('withdrawn-' . $id . '@example.invalid', $read->email);
         $this->assertSame(3, $read->customerStatus);
         // The original email slot is freed for re-registration.
-        $this->assertNull($query->findByEmail('leaving@example.com'));
+        $this->assertNull($query->byEmail('leaving@example.com'));
     }
 
     public function testUpdateIsNoOpForNonNumericId(): void
@@ -361,7 +361,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]));
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('safe@example.com', $read->email);
         $this->assertSame('Original', $read->name01);
@@ -376,10 +376,10 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]);
 
         $command = $this->sql(CustomerCommandInterface::class);
-        $command->updatePassword((string) $id, '$2y$12$newhash');
+        $command->password((string) $id, '$2y$12$newhash');
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('$2y$12$newhash', $read->passwordHash);
         // Unrelated fields untouched through the narrow update.
@@ -395,10 +395,10 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]);
 
         $command = $this->sql(CustomerCommandInterface::class);
-        $command->updatePassword('0123456789abcdef0123456789abcdef', '$2y$12$hijacked');
+        $command->password('0123456789abcdef0123456789abcdef', '$2y$12$hijacked');
 
         $query = $this->sql(CustomerQueryInterface::class);
-        $read = $query->findById((string) $id);
+        $read = $query->item((string) $id);
         $this->assertInstanceOf(CustomerEntity::class, $read);
         $this->assertSame('$2y$12$untouched', $read->passwordHash);
     }
@@ -408,11 +408,11 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $generator = $this->sql(CustomerIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertCustomer(['email' => 'gen-1@example.com']);
         $secondId = $this->insertCustomer(['email' => 'gen-2@example.com']);
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

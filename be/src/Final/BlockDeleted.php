@@ -31,12 +31,12 @@ final readonly class BlockDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        $row = $blocks->getById($blockId);
+        $row = $blocks->item($blockId);
         if ($row === null || ! $row->blockDeletable) {
             throw new BlockNotFoundException();
         }
 
-        $blocks->remove($blockId);
+        $blocks->delete($blockId);
 
         $this->blockId = $blockId;
     }

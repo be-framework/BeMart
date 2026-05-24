@@ -56,7 +56,7 @@ class SendMail extends ResourceObject
      * mail; this GET serves the composition form keyed by the order.
      * AUTHZ is a direct admin-session check (Pattern B — no Be
      * transition is invoked on the GET path). The composition fields
-     * render blank so the page is faithful with empty Fake storage.
+     * render blank so the page is faithful with empty JSON-backed fake storage.
      *
      * @psalm-taint-source input $orderNo
      */

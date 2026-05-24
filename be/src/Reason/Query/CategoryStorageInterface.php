@@ -21,15 +21,15 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface CategoryStorageInterface
 {
     /** @return list<CategoryEntity> */
-    #[DbQuery('tcategory_list', factory: CategoryEntity::class)]
+    #[DbQuery('tcategory_list')]
     public function list(): array;
 
-    #[DbQuery('tcategory_get', factory: CategoryEntity::class)]
-    public function getById(string $categoryId): CategoryEntity|null;
+    #[DbQuery('tcategory_get')]
+    public function item(string $categoryId): CategoryEntity|null;
 
     #[DbQuery('tcategory_put')]
     public function put(CategoryEntity $category): void;
 
     #[DbQuery('tcategory_remove')]
-    public function remove(string $categoryId): void;
+    public function delete(string $categoryId): void;
 }

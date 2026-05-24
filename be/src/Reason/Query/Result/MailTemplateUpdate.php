@@ -11,17 +11,29 @@ use Ray\MediaQuery\Result\PostQueryInterface;
 
 final readonly class MailTemplateUpdate implements PostQueryInterface
 {
-    public function __construct(public bool $updated) {}
+    public bool $updated;
+
+    /** @param bool|array<int, self|array<string, mixed>> $updated */
+    public function __construct(bool|array $updated)
+    {
+        if (is_array($updated)) {
+            $row = $updated[0] ?? null;
+            $updated = $row instanceof self ? $row->updated : $updated !== [];
+        }
+
+        if (! $updated) {
+            throw new MailTemplateNotFoundException();
+        }
+
+        $this->updated = true;
+    }
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static
     {
         $row = $context->rows[0] ?? [];
         $updated = is_array($row) && (int) ($row['updated'] ?? 0) === 1;
-        if (! $updated) {
-            throw new MailTemplateNotFoundException();
-        }
 
-        return new static(true);
+        return new static($updated);
     }
 }

@@ -25,7 +25,7 @@ use function assert;
  * controls. The Be domain has no transition to READ a product's
  * ProductClass matrix — the ProductClass join is Grade-C 厳密移植 scope
  * — so this resource renders a blank "新規規格" editor (the
- * render-smoke test exercises this with empty Fake storage), mirroring
+ * render-smoke test exercises this with empty JSON-backed fake storage), mirroring
  * the sibling {@see \MyVendor\BeMart\Resource\Page\Admin\Order\ShippingAddress}
  * GET renderer.
  *

@@ -34,11 +34,11 @@ final readonly class DeliveryDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($deliveries->getById($deliveryId) === null) {
+        if ($deliveries->item($deliveryId) === null) {
             throw new DeliveryNotFoundException();
         }
 
-        $deliveries->remove($deliveryId);
+        $deliveries->delete($deliveryId);
 
         $this->deliveryId = $deliveryId;
     }

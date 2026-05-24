@@ -44,7 +44,7 @@ final readonly class FavoriteRemoved
         }
 
         $this->alreadyAbsent = ! $favorites->has($sessionCustomerId, $productCode)->exists;
-        $favorites->remove($sessionCustomerId, $productCode);
+        $favorites->delete($sessionCustomerId, $productCode);
 
         $this->customerId = $sessionCustomerId;
         $this->productCode = $productCode;

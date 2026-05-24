@@ -26,7 +26,7 @@ use Ray\Di\AbstractModule;
  *  - Layout has NO create affordance (the interface is list / getById /
  *    put only — `goLayoutList` + `doUpdateLayout` in ALPS), so there is
  *    no resource-layer POST to seed rows with. The Fake-backed sibling
- *    relies on FakeLayoutStorage's two stock seed rows (lo-pc-default /
+ *    relies on the JSON layout corpus' two stock seed rows (lo-pc-default /
  *    lo-sp-default) being present on construction; the SQL table is
  *    empty on each test (the per-test transaction rolls back), so this
  *    test seeds the two equivalent rows directly via the insertLayout
@@ -85,7 +85,7 @@ final class AdminLayoutResourceSqlTest extends AbstractResourceSqlTestCase
 
     /**
      * Seed the two EC-CUBE stock layouts directly into dtb_layout —
-     * the SQL analogue of FakeLayoutStorage's PC + Mobile seed pair.
+     * the SQL analogue of the JSON layout corpus' PC + Mobile seed pair.
      * Layout has no create affordance so this cannot go through the
      * resource layer; the fixture INSERT writes the rows the same
      * transaction every subsequent assertion reads.

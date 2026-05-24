@@ -7,11 +7,11 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Fake\Query\FakeTradeLawStorage;
+use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminTradeLawForm;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -27,7 +27,7 @@ final class AdminTradeLawGetResourceTest extends TestCase
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
 
     private ResourceInterface $resource;
-    private FakeTradeLawStorage $storage;
+    private TradeLawStorageInterface $storage;
 
     protected function setUp(): void
     {
@@ -37,7 +37,7 @@ final class AdminTradeLawGetResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -53,7 +53,7 @@ final class AdminTradeLawGetResourceTest extends TestCase
 
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->resource = $injector->getInstance(ResourceInterface::class);
-        $this->storage = $injector->getInstance(FakeTradeLawStorage::class);
+        $this->storage = $injector->getInstance(TradeLawStorageInterface::class);
     }
 
     public function testOnGetReturnsSeedBody(): void
@@ -61,7 +61,7 @@ final class AdminTradeLawGetResourceTest extends TestCase
         $ro = $this->resource->get('page://self/admin/trade-law');
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame($this->storage->get()->body, $ro->body['tradeLawBody']);
+        $this->assertSame($this->storage->item()->body, $ro->body['tradeLawBody']);
         $this->assertStringContainsString('株式会社EC-CUBE', $ro->body['tradeLawBody']);
         $this->assertInstanceOf(AdminTradeLawForm::class, $ro->body['form']);
         $this->assertCount(3, $ro->body['tradeLawRows']);

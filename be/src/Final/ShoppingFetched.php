@@ -100,7 +100,7 @@ final readonly class ShoppingFetched
             throw new UnauthenticatedException();
         }
 
-        $customer = $customerQuery->findById($sessionCustomerId);
+        $customer = $customerQuery->item($sessionCustomerId);
         if ($customer === null) {
             // Session points to a non-existent customer (deleted /
             // expired). Treat same as not-logged-in to avoid leaking
@@ -108,7 +108,7 @@ final readonly class ShoppingFetched
             throw new UnauthenticatedException();
         }
 
-        $carts = $cartQuery->bySessionPrefix($sessionPrefix);
+        $carts = $cartQuery->listBySessionPrefix($sessionPrefix);
 
         $this->customerId = $customer->customerId;
         $this->email = $customer->email;

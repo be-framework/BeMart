@@ -32,7 +32,7 @@ final readonly class AdminNewsFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $row = $news->getById($newsId);
+        $row = $news->item($newsId);
         if ($row === null) {
             throw new NewsNotFoundException();
         }

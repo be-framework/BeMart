@@ -12,10 +12,9 @@ use Ray\Di\AbstractModule;
 /**
  * Production session binding.
  *
- * AppModule (dev default) binds SessionInterface to
- * FakeSession('customer-001'), which keeps Pilot 1-5 + Slice 6 tests
- * deterministic. In production we must instead derive customerId from
- * the actual HTTP session that EC-CUBE writes to.
+ * Dev/test contexts bind SessionInterface to a deterministic test
+ * session through FakeModule. In production we must instead derive
+ * customerId from the actual HTTP session that EC-CUBE writes to.
  *
  * Slice 7 binds SessionInterface → EccubeSharedSessionAdapter under
  * ProdModule. The adapter is request-scoped by default in Ray.Di

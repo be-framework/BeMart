@@ -33,7 +33,7 @@ use function is_string;
  *    rejects them as non-numeric on lookup (the same 404 path as
  *    any unknown id, by design).
  *
- *  - the Fake's testListIncludesSeed leans on the FakeTagStorage
+ *  - the Fake's testListIncludesSeed leans on the TagStorageInterface
  *    constructor seeding two rows; dtb_tag is empty on each test, so
  *    the SQL sibling seeds two tags through the resource layer first
  *    and asserts the same `count >= 2` shape afterwards.
@@ -105,7 +105,7 @@ final class AdminTagResourceSqlTest extends AbstractResourceSqlTestCase
 
     public function testListIncludesSeed(): void
     {
-        // FakeTagStorage seeds tg-new / tg-sale in its constructor;
+        // TagStorageInterface seeds tg-new / tg-sale in its constructor;
         // dtb_tag is empty on each test, so seed the equivalent two
         // rows through the resource layer first. The assertion shape
         // matches the Fake-backed sibling.

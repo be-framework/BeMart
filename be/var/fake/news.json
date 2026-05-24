@@ -1,0 +1,11 @@
+[
+  {
+    "newsId": "nw-welcome",
+    "newsTitle": "ようこそ",
+    "newsDescription": "EC-CUBE へようこそ。",
+    "newsUrl": null,
+    "publishDate": "2026-01-01T00:00:00+09:00",
+    "linkMethod": false,
+    "visible": true
+  }
+]
