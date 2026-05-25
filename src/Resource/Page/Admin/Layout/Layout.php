@@ -14,20 +14,53 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\LayoutUpdated;
 use MyVendor\BeMart\Be\Input\UpdateLayoutInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminLayoutForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
 /**
  * EC-CUBE doUpdateLayout — single-row endpoint (Wave 9 CMS). Only PUT
- * is exposed; layouts can be neither created nor deleted via the admin
- * UI (system-managed).
+ * is exposed to the domain; layouts can be neither created nor deleted
+ * via the admin UI (system-managed).
+ *
+ * Phase 3 — HTML FORM page. `onGet` exposes an {@see AdminLayoutForm}
+ * (Ray.WebFormModule AbstractForm) as `body['form']` so the admin layout
+ * editor (`Content/layout.twig` port) can render the real layout-name
+ * `<input>` via `{{ form.input(...) }}`.
+ *
+ * NOTE — single-row prefill: the Be domain exposes no
+ * `GetAdminLayoutInput` / `AdminLayoutFetched` (single-row fetch), so
+ * `onGet` renders the NEW-layout form (the `admin_content_layout_new`
+ * case — the layout designer with an empty block canvas). Pre-filling an
+ * existing layout + its block positions would need a Be fetch Input — a
+ * `be/src/` change out of this Phase 3 HTML wave's scope. FLAGGED:
+ * follow-up to add `GetAdminLayoutInput` for existing-layout edit prefill.
  */
 class Layout extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * Renders the layout editor form (new-layout case).
+     *
+     * The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
+     */
+    #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
+    public function onGet(): static
+    {
+        $form = $this->formFactory->newInstance(AdminLayoutForm::class);
+        assert($form instanceof AdminLayoutForm);
+
+        $this->code = Code::OK;
+        $this->body = ['form' => $form];
+
+        return $this;
     }
 
     /**

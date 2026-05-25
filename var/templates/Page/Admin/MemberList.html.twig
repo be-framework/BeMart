@@ -1,0 +1,205 @@
+{#
+  BeMart admin Member list — EC-CUBE goMemberList (メンバー管理).
+
+  PORT of EC-CUBE 4.3 admin-theme `Setting/System/member.twig`
+  (src/Eccube/Resource/template/admin/Setting/System/member.twig).
+
+  Setting/System section, DATA/LIST page. It extends the admin frame
+  (`admin-base.html.twig`, the port of EC-CUBE's admin `default_frame.twig`),
+  not the storefront `base.html.twig`. The markup skeleton + `c-*` / `ec-*`
+  / Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
+  bindings are rebound to the MemberList resource body
+  (src/Resource/Page/Admin/MemberList.php — body carries `count` +
+  `members`, a list of {adminId, loginId, name, authority, work}).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`
+     (`BeMartTwigExtension`).
+   - `{% for Member in Members %}` -> the resource body's `members` list.
+     EC-CUBE keys the per-row action `<a>`s by `Member.id` (dtb_member
+     primary key); the MemberListFetched projection does not surface the
+     numeric id, only `loginId`, so BeMart keys the row + actions by
+     `loginId`. Same anchors, same classes — only the id param differs.
+   - `Member.department` -> NOT carried by the MemberListFetched
+     projection (EC-CUBE's dtb_member.department was out of the Wave 8
+     admin-grid slice). The 所属 column cell renders empty, not invented.
+     FLAGGED missing-body-field — enumerated as residual.
+   - `Member.Authority.name` -> the projection carries `authority` only
+     as a bare int (mtb_authority id), with no joined master-data label.
+     The 権限 column cell renders empty. FLAGGED missing-body-field.
+   - `Member.Work.name` -> the projection carries `work` only as a bare
+     int (mtb_work id). The 稼働 column cell renders empty. FLAGGED.
+   - `Member.two_factor_auth_enabled` / `two_factor_auth_key` -> NOT
+     carried by the projection (2FA columns were out of the Wave 8
+     slice). The 2段階認証 column cell renders empty. FLAGGED.
+   - `Member.id == app.user.id` (self-row delete guard) -> BeMart's html
+     context has no operator entity, so the self-target branch is never
+     taken; every row renders the normal delete affordance.
+   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
+     CSRF widget. OMITTED exactly as the storefront ports omit it.
+     EC-CUBE-runtime only — enumerated as residual.
+   - The `<form name="form1">` wrapper carries no `_token` (the list page
+     posts nothing); kept verbatim.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_system_member' %}
+{% set title = 'メンバー管理' %}
+{% set sub_title = 'システム設定' %}
+
+{% block javascript %}
+    <script>
+        $('.action-down, .action-up').on('click', function(e) {
+            var self = $(this),
+                current = $(this).parents('tr');
+            $('body').append($('<div class="modal-backdrop show"></div>'));
+            $.ajax({
+                url: self.attr('href'),
+                method: self.data('method'),
+            }).done(function() {
+                if (self.hasClass('action-down')) {
+                    current.next().after(current);
+                } else {
+                    current.prev().before(current);
+                }
+            }).always(function() {
+                $('.modal-backdrop').remove();
+                $('.action-up, .action-down').removeClass('disabled');
+                $('.action-up').first().addClass('disabled');
+                $('.action-down').last().addClass('disabled');
+            });
+
+            return false;
+        });
+    </script>
+{% endblock %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div id="ex-member-new" class="d-block mb-3">
+                    <a class="btn btn-ec-regular" href="{{ url('admin_setting_system_member_new') }}">新規登録</a>
+                </div>
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-body p-0">
+                        <form name="form1" id="form1" method="post" action="">
+                            <table class="table table-sm">
+                                <thead>
+                                <tr>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">
+                                        名前
+                                    </th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">
+                                        所属
+                                    </th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">
+                                        権限
+                                    </th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">
+                                        稼働
+                                    </th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">
+                                        2段階認証
+                                    </th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center"></th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for Member in members %}
+                                    <tr id="ex-member-{{ Member.loginId }}">
+                                        <td class="align-middle text-center ps-3">
+                                            {{ Member.name }}
+                                        </td>
+                                        <td class="align-middle text-center">
+                                        </td>
+                                        <td class="align-middle text-center">
+                                        </td>
+                                        <td class="align-middle text-center">
+                                        </td>
+                                        <td class="align-middle text-center">
+                                        </td>
+                                        <td class="align-middle pe-3">
+                                            <div class="text-end">
+                                                <div class="px-1 d-inline-block">
+                                                    <a class="btn btn-ec-actionIcon action-edit"
+                                                       href="{{ url('admin_setting_system_member_edit', { 'id' : Member.loginId }) }}"
+                                                       data-bs-toggle="tooltip"
+                                                       data-bs-placement="top"
+                                                       title="編集">
+                                                        <i class="fa fa-pencil fa-lg text-secondary" aria-hidden="true"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="px-1 d-inline-block">
+                                                    <a class="btn btn-ec-actionIcon action-up {% if loop.first %} disabled {% endif %}"
+                                                       href="{{ url('admin_setting_system_member_up', {id: Member.loginId}) }}"
+                                                       data-bs-toggle="tooltip"
+                                                       data-method="put"
+                                                       data-bs-placement="top"
+                                                       title="上へ">
+                                                        <i class="fa fa-arrow-up fa-lg text-secondary" aria-hidden="true"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="px-1 d-inline-block">
+                                                    <a class="btn btn-ec-actionIcon action-down {% if loop.last %} disabled {% endif %}"
+                                                       href="{{ url('admin_setting_system_member_down', {id: Member.loginId}) }}"
+                                                       data-bs-toggle="tooltip"
+                                                       data-method="put"
+                                                       data-bs-placement="top"
+                                                       title="下へ">
+                                                        <i class="fa fa-arrow-down fa-lg text-secondary" aria-hidden="true"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="px-1 d-inline-block">
+                                                    <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top"
+                                                         title="削除">
+                                                        <a class="btn btn-ec-actionIcon action-delete"
+                                                           data-bs-toggle="modal"
+                                                           data-bs-target="#member_delete_{{ Member.loginId }}">
+                                                            <i class="fa fa-close fa-lg text-secondary" aria-hidden="true"></i>
+                                                        </a>
+                                                    </div>
+                                                    <div class="modal fade" id="member_delete_{{ Member.loginId }}" tabindex="-1"
+                                                         role="dialog"
+                                                         aria-labelledby="member_delete_{{ Member.loginId }}" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title fw-bold">
+                                                                        メンバーを削除します。</h5>
+                                                                    <button class="btn-close" type="button"
+                                                                            data-bs-dismiss="modal"
+                                                                            aria-label="Close">
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body text-start">
+                                                                    <p class="text-start">
+                                                                        メンバーを削除してよろしいですか？</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル
+                                                                    </button>
+                                                                    <a class="btn btn-ec-delete"
+                                                                       href="{{ url('admin_setting_system_member_delete', {id: Member.loginId}) }}"
+                                                                       data-method="delete" data-confirm="false">
+                                                                        削除
+                                                                    </a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

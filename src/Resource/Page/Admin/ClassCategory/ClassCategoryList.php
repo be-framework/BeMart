@@ -16,6 +16,8 @@ use MyVendor\BeMart\Be\Final\ClassCategoryCreated;
 use MyVendor\BeMart\Be\Input\CreateClassCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminClassCategoryListInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminClassCategoryForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 use function sprintf;
@@ -37,6 +39,7 @@ class ClassCategoryList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -65,6 +68,10 @@ class ClassCategoryList extends ResourceObject
             'count' => $final->count,
             'classCategories' => $final->classCategories,
         ];
+        // Phase 3: an empty AdminClassCategoryForm for the HTML list page
+        // to render the inline-create inputs via `{{ form.input(...) }}`.
+        // JSON contexts ignore `body.form`.
+        $this->body['form'] = $this->formFactory->newInstance(AdminClassCategoryForm::class);
 
         return $this;
     }

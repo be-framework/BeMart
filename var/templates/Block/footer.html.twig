@@ -1,0 +1,48 @@
+{#
+  BeMart storefront Block widget — footer.
+
+  PORT of EC-CUBE 4.3 default-theme `Block/footer.twig`
+  (src/Eccube/Resource/template/default/Block/footer.twig).
+
+  EC-CUBE composes the storefront frame's FOOTER region from operator-
+  configurable Block widgets (dtb_block / dtb_block_position). ALPS does
+  not model Block — it is pure presentation — so the honest reference is
+  EC-CUBE's own default-theme Block template. This file keeps EC-CUBE's
+  markup skeleton and `ec-*` class names verbatim.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'front.block.footer.*'|trans }}` -> the Japanese literal the key
+     resolves to in messages.ja.yaml (about_us / privacy_policy /
+     act_on_specified_commercial_transactions / inquiry).
+   - `url('help_about'|'help_privacy'|'help_tradelaw'|'contact'|'homepage')`
+     -> BeMartTwigExtension `url()`.
+   - `BaseInfo.shop_name` -> the frame's `shop_name` variable, defaulting
+     to `BeMart` (the storefront frame carries no BaseInfo entity).
+
+  This widget is PURELY STATIC — it needs no domain data, only the shop
+  name already available to the frame. It is therefore portable directly.
+#}
+<div class="ec-footerRole">
+    <div class="ec-footerRole__inner">
+        <ul class="ec-footerNavi">
+            <li class="ec-footerNavi__link">
+                <a href="{{ url('help_about') }}">当サイトについて</a>
+            </li>
+            <li class="ec-footerNavi__link">
+                <a href="{{ url('help_privacy') }}">プライバシーポリシー</a>
+            </li>
+            <li class="ec-footerNavi__link">
+                <a href="{{ url('help_tradelaw') }}">特定商取引法に基づく表記</a>
+            </li>
+            <li class="ec-footerNavi__link">
+                <a href="{{ url('contact') }}">お問い合わせ</a>
+            </li>
+        </ul>
+        <div class="ec-footerTitle">
+            <div class="ec-footerTitle__logo">
+                <a href="{{ url('homepage') }}">{{ shop_name|default('BeMart') }}</a>
+            </div>
+            <div class="ec-footerTitle__copyright">copyright (c) {{ shop_name|default('BeMart') }} all rights reserved.</div>
+        </div>
+    </div>
+</div>

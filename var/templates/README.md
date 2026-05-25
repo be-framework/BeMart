@@ -1,4 +1,4 @@
-# BeMart storefront templates — EC-CUBE template port
+# BeMart templates — EC-CUBE template port
 
 Phase 3 renders the BEAR.Sunday resources as HTML. The templates here are
 **ports of EC-CUBE 4.3's `default`-theme Twig templates**, not freshly
@@ -203,7 +203,188 @@ For Login this dropped the render-diff residual from wave-1's 15 lines
 (8 of which were the unverified form-widget family) to **11** — all
 shared `<head>` / inline-script frame residual, none form-related.
 
-## Per-page workflow for the remaining ~138 pages
+## Admin pages — the admin-theme port recipe
+
+Everything above describes the **storefront** port (~40 pages, all done).
+EC-CUBE also has an **admin** UI — 77 page templates under
+`tools/ec-cube-source/src/Eccube/Resource/template/admin/`. **Admin
+Tier-1 (34 pages) is done** — see "Fan-out status" below; the recipe in
+this section is the established, exercised one. Admin pages are ported
+with the SAME two recipes (data-page + form-page) and the SAME
+residual-diff verification standard; only two things differ.
+
+### Difference 1 — a different layout
+
+Storefront pages `{% extends 'base.html.twig' %}` (the port of EC-CUBE's
+default-theme `default_frame.twig`). **Admin pages
+`{% extends 'admin-base.html.twig' %}`** — `var/templates/admin-base.html.twig`
+is the port of EC-CUBE's *admin-theme* `default_frame.twig`
+(`template/admin/default_frame.twig`). The admin frame is structurally
+different: a left sidebar nav (`c-mainNavArea`), a top header bar
+(`c-headerBar`) with the logged-in operator's menu, and a
+`c-contentsArea` content region with a `c-pageTitle`. The admin pages
+set `title` / `sub_title` / `route` and fill `{% block main %}` /
+`{% block stylesheet %}` / `{% block javascript %}`.
+
+`admin-base.html.twig` keeps EC-CUBE's admin markup skeleton + `c-*`
+classes verbatim. The EC-CUBE-ism rebinding is the same as the
+storefront frame (`trans` → ja literal, `asset`/`url` →
+`BeMartTwigExtension`, the CSRF `<meta>` + `$.ajaxSetup` script →
+EC-CUBE-runtime-only residual), plus two admin-specific ones:
+
+- **operator header menu** (`app.user.*` — login date, name,
+  change-password / 2FA / logout links) → BeMart's html context has no
+  operator entity, so the `c-headerBar__userMenu` anchor shows a fixed
+  `管理者 様` label. Enumerated as residual.
+- **dynamic sidebar nav** (`@admin/nav.twig` loops `eccubeNav`, the menu
+  tree, with `active_menus()` state) → BeMart has no nav tree, so the
+  nav is inlined minimally: only the static ホーム / 情報 bookend `<li>`s
+  (EC-CUBE's `nav.twig` `{% for %}` over `eccubeNav` is dropped).
+  Enumerated as residual.
+
+The other admin frame includes (`@admin/alert.twig`, `info.twig`,
+`notice_debug_mode.twig`, `snippet.twig`, `pager.twig`,
+`search_items.twig`, `@common/lang.twig`) are flash / notice / plugin /
+pager / saved-search-chips / JS-i18n fragments with no BeMart equivalent
+— dropped, exactly as the storefront frame drops `meta.twig` /
+`block.twig`. `EcCubeAdminStubLoader::STUBBED_EMPTY` serves them empty so
+they contribute nothing to the render diff on either side.
+
+### Difference 2 — admin auth context
+
+Admin resources (`src/Resource/Page/Admin/...`) are authenticated at the
+resource layer via `AdminSessionInterface`. `AppModule` binds the
+**anonymous** `FakeAdminSession(null)` by default, so an admin page in
+the `html` context returns `403 FORBIDDEN` unless the test rebinds
+`AdminSessionInterface` to a seeded admin id (the render tests
+`override()` `HtmlModule` with `new FakeAdminSession('ad00…01')` — the
+same move the admin *resource* tests already make).
+
+### Otherwise the recipes transfer unchanged
+
+- **Data/list pages** — port the EC-CUBE admin template, rebind the
+  `{% for %}` loop to the resource body, render-diff against EC-CUBE's
+  real admin template via `EcCubeAdminStubLoader` (the admin counterpart
+  of `EcCubeStubLoader` — it serves `@admin/default_frame.twig` +
+  `@admin/nav.twig` for real, stubs the rest empty). Pilot:
+  `Page/Admin/News/NewsList.html.twig` + `AdminNewsListHtmlRenderTest`
+  (residual ~15 lines — the EC-CUBE-runtime `<head>` baseline + the
+  admin operator-menu / dynamic-nav families + the omitted
+  `News.visible` display-status column + the `csrf_token_for_anchor()`
+  on the delete link).
+- **Form/CRUD pages** — `ray/web-form-module`; `<Name>Form extends
+  AbstractForm` ports EC-CUBE's `Form/Type/Admin/...Type`, the resource
+  exposes `body['form']`, Twig renders `{{ form.input('x')|raw }}`, the
+  render-diff test stubs EC-CUBE's `form_widget` to delegate to the same
+  form object so the inputs diff to zero. Pilot:
+  `src/Form/AdminNewsForm.php` + `Page/Admin/News/News.html.twig` +
+  `AdminNewsHtmlRenderTest` (residual ~30 lines — the admin-frame
+  baseline + the form `_token` hidden CSRF input + the omitted `visible`
+  select). A section's admin `trans` keys live in a **per-section
+  ja-messages file** — see the next subsection.
+
+### The per-section ja-message mechanism — parallel-wave safety
+
+A render-diff test substitutes EC-CUBE's `{{ 'key'|trans }}` calls with
+the Japanese literal the key resolves to in EC-CUBE's
+`messages.ja.yaml`. The storefront ports keep that map in one shared
+method, `EcCubeStub::jaMessages()`. If every admin section-wave appended
+its keys there, that single method would be a **merge-conflict hotspot**
+— two waves editing the same lines block parallel work.
+
+The admin `trans` keys are therefore split **per section**, under
+`tests/Resource/Admin/`:
+
+- **`EcCubeStub::jaMessages()`** stays the FROZEN storefront baseline.
+  Admin section-waves NEVER touch it.
+- **`Admin/AdminJaMessages.php`** is the shared admin infra. Its
+  `chrome()` carries the keys EVERY admin page needs — the admin frame
+  (`default_frame.twig`) + sidebar (`nav.twig`) chrome + `admin.common.*`
+  action labels. Stable; edited only when the frame port itself changes.
+  Its `forSection(array $sectionKeys)` builds the full map for one
+  section's test: `jaMessages()` (storefront baseline) + `chrome()`
+  (admin chrome) + the section's own keys.
+- **`Admin/<Section>JaMessages.php`** — each section ships its OWN keys
+  in its own file: a class with a `public static function keys(): array`
+  returning `array<string,string>` copied verbatim from
+  `messages.ja.yaml`. `ContentJaMessages` (News pilot) and
+  `CustomerJaMessages` (Customer wave) are the worked examples.
+
+A section's render test then does:
+
+```php
+use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
+use MyVendor\BeMart\Tests\Resource\Admin\CustomerJaMessages;
+
+$messages = AdminJaMessages::forSection(CustomerJaMessages::keys());
+$trans = static fn (string $k, array $p = []): string => /* substitute */ ;
+```
+
+and feeds `$trans` to its `trans` Twig filter/function stub.
+
+**Why this makes the fan-out conflict-free:** adding a section-wave =
+adding exactly ONE new file (`Admin/<Section>JaMessages.php`) + that
+section's templates + tests. No wave touches `EcCubeStub.php`,
+`AdminJaMessages.php` or `EcCubeAdminStubLoader.php` — the three shared
+files. The remaining waves (Product / Order / Content / Setting/Shop /
+Setting/System / Store / Top-level) can run in parallel with zero
+cross-wave file contention.
+
+### Fan-out status — 8 section-waves, Tier-1 done
+
+The admin templates are organised by section directory under
+`template/admin/`; each section ran as an independent wave (clean
+file-path split, no cross-wave coupling — the per-section ja-message
+mechanism above is what keeps them parallel-safe). Each wave ported its
+**Tier-1** pages — list/data pages and simple CRUD whose BEAR resource
+already serves a GET — and deferred **Tier-2**: multi-panel editors and
+pages whose resource is action-only (POST/CSV/PDF) with no GET-serving
+`onGet`.
+
+| Section | Directory | Tier-1 done | Tier-2 deferred |
+|---|---|---|---|
+| Top-level | `admin/` | login, dashboard, change-password, 2FA verify/setup, empty placeholder — 6 | — |
+| Product | `admin/Product/` | list, tag, class-name, class-category — 4 | `product` (~932L editor), `product_class` (~448L matrix), `category`, 4× `csv_*` |
+| Order | `admin/Order/` | order list — 1 | `edit` (~1057L), `shipping` (~709L), `mail`, `mail_confirm`, `order_pdf`, `csv_shipping` |
+| Customer | `admin/Customer/` | list, edit — 2 · **Tier-2:** delivery-edit — 1 | — (Customer complete) |
+| Content | `admin/Content/` | news list/edit, page list/edit, layout list/edit, block list/edit, file, css, js, cache, maintenance — 13 | (essentially complete) |
+| Setting/Shop | `admin/Setting/shop/` | payment list, delivery list, tax-rule list — 3 · **Tier-2 wave:** calendar, csv, mail, order_status, tradelaw — 5 · **edit-page wave:** payment_edit, delivery_edit, shop_master — 3 | — (Setting/Shop complete) |
+| Setting/System | `admin/Setting/system/` | member list, member edit, login-history — 3 · **Tier-2 wave:** authority, system, log, masterdata, security, two_factor_auth_edit — 6 | — (Setting/System complete) |
+| Store/Plugin | `admin/Store/` | plugin list, template list — 2 | `plugin_install/search/confirm/confirm_uninstall/handler`, `authentication_setting`, `template_add` |
+
+**Tier-1 total: 34 of 77 admin page templates** — plus the
+**flow-manage-system Tier-2 wave** (6 pages: authority, system, log,
+masterdata, security, two_factor_auth_edit), the **Customer
+delivery-edit Tier-2 page** (1 page), the **Setting/Shop Tier-2
+wave** (5 pages: calendar, csv, mail, order_status, tradelaw), and the
+**Setting/Shop edit-page wave** (3 pages: payment_edit, delivery_edit,
+shop_master) → **49 of 77 ported.** Each
+Tier-1 wave followed the recipe page-for-page with no module/wiring
+change beyond its own `Admin/<Section>JaMessages.php` and `<Name>Form`
+classes; the four shared files (`admin-base.html.twig`,
+`EcCubeAdminStubLoader`, `EcCubeStub`, `AdminJaMessages`) stayed
+untouched — that is what kept the waves parallel-safe.
+
+**Tier-2 (~28 pages remaining) is a different kind of work.** It is not
+template porting — it needs new BEAR resources, `onGet` additions to
+action-only resources, and `be/src` domain body-shape work. Plan it as a
+resource-creation effort, section by section, NOT as another
+template-port fan-out. The flow-manage-system Tier-2 wave is the worked
+example: 5 new GET resources + `AuthorityRole::onGet()` + 3 `<Name>Form`
+classes + `AdminMasterRegistry` body-shape methods, each with a
+`*ResourceTest` and a `*HtmlRenderTest`. The Customer delivery-edit page
+is the smallest worked example: 1 new GET resource + 1 `<Name>Form`,
+completing its section. The Setting/Shop Tier-2 wave shows both patterns
+at once: 1 new GET resource (`Calendar`) + 4 `onGet` additions to the
+action-only `CsvConfig`/`MailTemplate`/`OrderStatus`/`TradeLaw`
+resources + 5 `<Name>Form` classes, each with a `*HtmlRenderTest`. The
+Setting/Shop edit-page wave then completed that section: 3 `onGet`
+editor additions to the action-only `Payment`/`Delivery` resources and
+`BaseInfo` + 3 `<Name>Form` classes, each with a `*HtmlRenderTest`.
+Per-section deferred lists are the table above;
+`docs/phases/admin-fanout-plan.md` carries the full per-page audit.
+
+## Per-page workflow (storefront data pages)
 
 Each page is mechanical and self-contained:
 

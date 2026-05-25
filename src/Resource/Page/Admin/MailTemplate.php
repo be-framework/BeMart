@@ -15,7 +15,10 @@ use MyVendor\BeMart\Be\Final\MailTemplateListFetched;
 use MyVendor\BeMart\Be\Final\MailTemplateUpdated;
 use MyVendor\BeMart\Be\Input\GetMailTemplateListInput;
 use MyVendor\BeMart\Be\Input\UpdateMailTemplateInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminMailTemplateForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -43,6 +46,8 @@ class MailTemplate extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -52,6 +57,13 @@ class MailTemplate extends ResourceObject
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
     public function onGet(): static
     {
+        if ($this->adminSession->adminId() === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
         try {
             $final = ($this->becoming)(new GetMailTemplateListInput());
         } catch (UnauthorizedAdminAccessException) {
@@ -63,8 +75,26 @@ class MailTemplate extends ResourceObject
 
         assert($final instanceof MailTemplateListFetched);
 
+        $form = $this->formFactory->newInstance(AdminMailTemplateForm::class);
+        assert($form instanceof AdminMailTemplateForm);
+        $form->fillValues([
+            'template' => '',
+            'name' => '',
+            'file_name' => '',
+            'mail_subject' => '',
+            'tpl_data' => '',
+            'html_tpl_data' => '',
+        ]);
+
         $this->code = Code::OK;
         $this->body = [
+            'form' => $form,
+            'id' => null,
+            'Mail' => [
+                'id' => null,
+                'file_name' => '',
+                'isDeletable' => false,
+            ],
             'mailTemplates' => $final->mailTemplates,
             'count' => $final->count,
         ];

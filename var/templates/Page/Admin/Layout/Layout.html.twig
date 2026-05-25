@@ -1,0 +1,310 @@
+{#
+  BeMart admin レイアウト編集 — EC-CUBE goLayout (レイアウトデザイナー).
+
+  PORT of EC-CUBE 4.3 admin-theme `Content/layout.twig`
+  (src/Eccube/Resource/template/admin/Content/layout.twig).
+
+  FORM/CRUD page (the drag-and-drop layout designer). Extends the admin
+  frame (`admin-base.html.twig`). The markup skeleton + `c-*` / `ec-*` /
+  Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
+  bindings are rebound.
+
+  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
+  Layout resource (src/Resource/Page/Admin/Layout/Layout.php — `onGet`
+  renders the NEW-layout case, see its port header) exposes an
+  {@see \MyVendor\BeMart\Form\AdminLayoutForm} as `body['form']`. The
+  layout-name input renders through that real form object:
+    {{ form.input('name')|raw }}     <- real <input> id `admin_layout_name`
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
+     hidden `_token` input is kept (structure) with an empty value;
+     EC-CUBE-runtime only — enumerated as residual.
+   - `form_widget(form.DeviceType)` -> the device-type select. The
+     AdminLayoutForm declares only `name` (the new-layout case renders a
+     select EC-CUBE builds from the DeviceType master, out of the Wave 9
+     CMS slice); the select cell renders empty. Enumerated as residual.
+   - `Layout.id` -> falsy here (the new-layout case): the preview-button
+     JS block and the page-preview select are gated on `Layout.id` and
+     are OMITTED. The conversion-area + designer canvas render with all
+     sections empty (drag-and-drop placeholders).
+   - `Layout.getBlockPositionsByTargetId(...)` / `UnusedBlocks` -> the
+     per-layout block-position join is out of the Wave 9 CMS slice; every
+     section loop falls through to its `{% else %}` placeholder, and the
+     unused-block panel renders empty. Enumerated as residual —
+     MISSING-BODY-FIELD: `Layout.blockPositions` / `unusedBlocks`.
+   - `constant('Eccube\\Entity\\Layout::TARGET_ID_*')` -> EC-CUBE's
+     section-id constants are inlined as their literal integer values
+     (HEAD 1, BODY_AFTER 2, HEADER 3, CONTENTS_TOP 4, SIDE_LEFT 5,
+     MAIN_TOP 6, MAIN_BOTTOM 7, SIDE_RIGHT 8, CONTENTS_BOTTOM 9,
+     FOOTER 10, DRAWER 11, CLOSE_BODY_BEFORE 12, UNUSED 13).
+   - the `layout_design.js` drag-drop runtime + the context-menu / modal
+     JS -> client-side designer runtime; the markup shells are kept, the
+     `{% block javascript %}` is reduced to the static section labels.
+   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
+     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_content_layout' %}
+{% set title = 'レイアウト管理' %}
+{% set sub_title = 'コンテンツ管理' %}
+
+{% block javascript %}
+    <script>
+        var sections = {
+            13 : '未使用ブロック',
+            1 : '<head></head>タグ内',
+            2 : '<body>タグ直後',
+            3 : '#header',
+            4 : '#contents_top',
+            5 : '#side_left',
+            6 : '#main_top',
+            7 : '#main_bottom',
+            8 : '#side_right',
+            9 : '#contents_bottom',
+            10 : '#footer',
+            11 : '#drawer',
+            12 : '</body>タグ直前'
+        };
+    </script>
+{% endblock javascript %}
+
+{% block main %}
+    <form name="form1" id="form1" method="post" action="{{ url('admin_content_layout_new') }}">
+        <input type="hidden" id="admin_layout__token" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8"><span class="card-title">レイアウト概要</span></div>
+                                <div class="col-4 text-end"><a data-bs-toggle="collapse" href="#layoutOverview" aria-expanded="false" aria-controls="layoutOverview"><i class="fa fa-angle-up fa-lg"></i></a></div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="layoutOverview">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-3 pe-0"><span>レイアウト名</span><span class="badge bg-primary ms-1">必須</span></div>
+                                    <div class="col">
+                                        {{ form.input('name')|raw }}
+                                        {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3 pe-0"><span>端末種別</span></div>
+                                    <div class="col">
+                                        <span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="テンプレートのセクションごとにブロックをドラッグ＆ドロップで配置することができます。"><span class="card-title">レイアウト編集</span><i class="fa fa-question-circle fa-lg ms-1"></i></div>
+                                </div>
+                                <div class="col-4 text-end"><a data-bs-toggle="collapse" href="#layoutBlockEdit" aria-expanded="false" aria-controls="layoutBlockEdit"><i class="fa fa-angle-up fa-lg"></i></a></div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="layoutBlockEdit">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col p-2">
+                                        <div class="d-block border border-ec-gray">
+                                            <div id="position_1"
+                                                 class="d-block p-3 border border-ec-gray border-top-0 border-end-0 border-start-0 ui-sortable">
+                                                <p class="fw-bold mb-2"><head></head>タグ内</p>
+                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                            </div>
+                                            <div id="position_2"
+                                                 class="d-block p-3 border border-ec-gray border-top-0 border-end-0 border-start-0 ui-sortable">
+                                                <p class="fw-bold mb-2"><body>タグ直後</p>
+                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                            </div>
+                                            <div id="position_3"
+                                                 class="d-block p-3 border border-ec-gray border-top-0 border-end-0 border-start-0 ui-sortable">
+                                                <p class="fw-bold mb-2">#header</p>
+                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                            </div>
+                                            <div id="position_4"
+                                                 class="d-block p-3 border border-ec-gray border-top-0 border-end-0 border-start-0 ui-sortable">
+                                                <p class="fw-bold mb-2">#contents_top</p>
+                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                            </div>
+                                            <div class="d-block ps-3 pe-3">
+                                                <div class="row">
+                                                    <div class="col align-items-start p-3 border border-ec-gray border-top-0 border-start-0">
+                                                        <div id="position_5"
+                                                             class="d-block ui-sortable">
+                                                            <p class="fw-bold mb-2">#side_left</p>
+                                                            <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col align-items-start ps-0 pe-0 border border-ec-gray border-top-0 border-start-0 border-bottom-0">
+                                                        <div class="d-block h-100">
+                                                            <div id="position_6"
+                                                                 class="d-block p-3 border border-ec-gray border-top-0 border-start-0 border-end-0 ui-sortable">
+                                                                <p class="fw-bold mb-2">#main_top</p>
+                                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                                            </div>
+                                                            <div class="d-block p-3 border border-ec-gray border-top-0 border-start-0 border-end-0 bg-ec-lightGray">
+                                                                <div class="d-block text-center p-3">
+                                                                    <p class="fw-bold mb-2">Main</p>
+                                                                </div>
+                                                            </div>
+                                                            <div id="position_7"
+                                                                 class="d-block p-3 border border-ec-gray border-top-0 border-start-0 border-end-0 ui-sortable">
+                                                                <p class="fw-bold mb-2">#main_bottom</p>
+                                                                <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col align-items-start ps-0 border border-ec-gray border-top-0 border-start-0 border-end-0">
+                                                        <div id="position_8"
+                                                             class="d-block p-3 h-100 ui-sortable">
+                                                            <p class="fw-bold mb-2">#side_right</p>
+                                                            <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="d-block border border-ec-gray border-top-0 border-end-0 border-start-0">
+                                                <div id="position_9"
+                                                     class="d-block p-3 ui-sortable">
+                                                    <p class="fw-bold mb-2">#contents_bottom</p>
+                                                    <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                                </div>
+                                            </div>
+                                            <div class="d-block border border-ec-gray border-top-0 border-end-0 border-start-0">
+                                                <div id="position_10"
+                                                     class="d-block p-3 ui-sortable">
+                                                    <p class="fw-bold mb-2">#footer</p>
+                                                    <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                                </div>
+                                            </div>
+                                            <div class="d-block border border-ec-gray border-top-0 border-end-0 border-start-0">
+                                                <div id="position_11"
+                                                     class="d-block p-3 ui-sortable">
+                                                    <p class="fw-bold mb-2">#drawer</p>
+                                                    <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                                </div>
+                                            </div>
+                                            <div class="d-block">
+                                                <div id="position_12"
+                                                     class="d-block p-3 border-top-0 border-end-0 border-start-0 ui-sortable">
+                                                    <p class="fw-bold mb-2"></body>タグ直前</p>
+                                                    <div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-3 p-2">
+                                        <div id="unused-block" class="d-block border border-ec-gray">
+                                            <div id="position_13" class="d-block p-3 ui-sortable">
+                                                <p class="fw-bold mb-2">未使用ブロック</p>
+                                                <div class="mb-3">
+                                                    <div class="row">
+                                                        <div class="col">
+                                                            <div class="input-group mb-3">
+                                                                <div class="input-group-text">
+                                                                    <span id="basic-addon1"><i class="fa fa-search"></i></span>
+                                                                </div>
+                                                                <input id="search-block" class="form-control" type="search" aria-label="Search">
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="clickStreamConfirm" tabindex="-1" role="dialog" aria-labelledby="clickStreamConfirm" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">ブロックを移動</h5>
+                                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>ブロックの移動先を選択してください</p>
+                                                <div>
+                                                    <select id="move-section" class="form-select">
+                                                    </select>
+                                                    <input type="hidden" id="target-block" />
+                                                </div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-ec-regular w-25" type="button" data-bs-dismiss="modal">キャンセル</button>
+                                                <button id="move-to-section" class="btn btn-ec-conversion w-25" type="button" data-bs-dismiss="modal">移動</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="modal fade" id="codePreview" tabindex="-1" role="dialog" aria-labelledby="codePreview" aria-hidden="true">
+                                    <div class="modal-dialog" role="document">
+                                        <div class="modal-content">
+                                            <div class="modal-header">
+                                                <h5 class="modal-title">ブロックのコードプレビュー</h5>
+                                                <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            </div>
+                                            <div class="modal-body">
+                                                <p>編集が必要な場合はブロック編集画面から編集してください（この時レイアウト設定は保存されません）</p>
+                                                <div id="block-source-code" class="d-block border bg-ec-lightGray p-2"></div>
+                                            </div>
+                                            <div class="modal-footer">
+                                                <button class="btn btn-ec-regular" type="button" data-bs-dismiss="modal">キャンセル</button>
+                                                <button id="block-edit" class="btn btn-ec-conversion w-25" type="button" data-bs-dismiss="modal">コードを編集</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="context-menu" style="display: none">
+                                    <div class='list-group'>
+                                        <a href='javascript:;' class='context-moveup list-group-item list-group-item-action border-0'>
+                                            <i class='fa fa-long-arrow-up me-1'></i>上に移動
+                                        </a>
+                                        <a href='javascript:;' class='context-movedown list-group-item list-group-item-action border-0'>
+                                            <i class='fa fa-long-arrow-down me-1'></i>下に移動
+                                        </a>
+                                        <a href='javascript:;' class='context-movesection list-group-item list-group-item-action border-0'>
+                                            <i class='fa fa-arrows me-1'></i>セクションに移動
+                                        </a>
+                                        <a href='javascript:;' class='context-preview list-group-item list-group-item-action border-0'>
+                                            <i class='fa fa-code me-1'></i>コードプレビュー
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="target-placeholder" style="display: none"><div class="target-placeholder d-block text-center border-ec-dashed p-3"><span class="text-ec-gray">ブロックをドラッグ＆ドロップ</span></div></div>
+            <div class="c-conversionArea">
+                <div class="c-conversionArea__container">
+                    <div class="row justify-content-between align-items-center">
+                        <div class="col-6">
+                            <div class="c-conversionArea__leftBlockItem">
+                                <a class="c-baseLink" href="{{ url('admin_content_layout') }}"><i class="fa fa-backward" aria-hidden="true"></i><span>レイアウト管理</span></a>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                                <div class="col-auto">
+                                    <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

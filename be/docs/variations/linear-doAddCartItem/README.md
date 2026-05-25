@@ -48,4 +48,4 @@ The current `be/src/Final/CartItemAdded.php` (~30 LoC for the class body) does o
 
 - Current Cascade implementation: `be/src/Being/QuantityAdjusted.php`, `be/src/Being/CartMerged.php`, `be/src/Final/CartItemAdded.php`
 - Evaluation of why Cascade is preferable: `be/docs/be-adoption-evaluation.md`
-- HANDOVER Pilot 2 改訂履歴: `HANDOVER.md` §Pilot 2
+- HANDOVER Pilot 2 改訂履歴: `docs/HANDOVER.md` §Pilot 2

@@ -12,6 +12,8 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ProductListFetched;
 use MyVendor\BeMart\Be\Input\GetProductListInput;
+use MyVendor\BeMart\Form\AdminProductSearchForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -36,6 +38,7 @@ class ProductList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -79,6 +82,13 @@ class ProductList extends ResourceObject
             'count' => $final->count,
             'filters' => $final->filters,
         ];
+        // Phase 3: an AdminProductSearchForm for the HTML list page to
+        // render the keyword box via `{{ searchForm.input(...) }}`,
+        // re-filled with the active filter. JSON contexts ignore it.
+        $searchForm = $this->formFactory->newInstance(AdminProductSearchForm::class);
+        assert($searchForm instanceof AdminProductSearchForm);
+        $searchForm->fillFilters($final->filters);
+        $this->body['searchForm'] = $searchForm;
 
         return $this;
     }

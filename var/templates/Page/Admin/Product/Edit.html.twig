@@ -1,0 +1,136 @@
+{#
+  BeMart admin product editor — EC-CUBE admin-theme `Product/product.twig`.
+
+  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Product/product.twig`
+  — the ~932-line multi-tab 商品登録 / 商品編集 screen. It extends the
+  admin frame (`admin-base.html.twig`), not the storefront frame.
+
+  Tier-2 port note: EC-CUBE's editor wires a product-image collection
+  (drag-drop upload), a category multi-select tree, a tag collection,
+  the class-category drag-drop matrix and a related-products panel.
+  The Be projection ({@see \MyVendor\BeMart\Be\Final\AdminProductFetched})
+  keeps a flat product header (the dtb_product columns the admin
+  product-management transitions exercise), so the port renders the
+  editable header panels — basic info, pricing/stock, the detail
+  description and the admin memo. The class-category matrix edits live
+  on the sibling `product_class` page; the image / category / tag
+  collections are EC-CUBE-runtime fragments dropped as enumerated
+  residuals.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
+     AdminProductEditForm leaf fields (Ray.WebFormModule).
+   - `price` filter -> JPY NumberFormatter.
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_product_product_edit' %}
+{% set title = productCode ? '商品編集' : '商品登録' %}
+{% set sub_title = '商品管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_product_product_edit') }}" id="product_form" name="form1" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">基本情報</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3"><span>商品名</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col">
+                                    {{ form.input('name')|raw }}
+                                    {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>商品コード</span></div>
+                                <div class="col">{{ form.input('product_code')|raw }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>公開ステータス</span></div>
+                                <div class="col">{{ form.input('status')|raw }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">商品説明</span>
+                        </div>
+                        <div class="card-body">
+                            {{ form.input('description_detail')|raw }}
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">検索ワード</span>
+                        </div>
+                        <div class="card-body">
+                            {{ form.input('search_word')|raw }}
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">管理用メモ</span>
+                        </div>
+                        <div class="card-body">
+                            {{ form.input('note')|raw }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="c-contentsArea__secondaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header">
+                        <span class="card-title">価格・在庫</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-5"><span>販売価格</span></div>
+                            <div class="col-7">{{ form.input('price02')|raw }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-5"><span>在庫数</span></div>
+                            <div class="col-7">{{ form.input('stock')|raw }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_product') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>商品一覧へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

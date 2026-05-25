@@ -9,11 +9,18 @@
   structure are kept verbatim from EC-CUBE. Only the dynamic bindings
   are rebound to the Mypage resource body (src/Resource/Page/Mypage.php):
     customerId, email, name01, name02,
-    recentOrders[] { orderNo, total, orderDate, orderStatus },
+    recentOrders[] { orderNo, total, orderDate, orderStatus,
+                     items[] { productCode, productName, quantity,
+                               unitPrice } },
     recentOrderCount, favoriteCount
 
   Mypage/navi.twig is included as the shared partial
   `Page/Mypage/navi.html.twig`; `mypageno` + name01/02 are passed in.
+
+  Phase 3 ENRICHMENT — each `recentOrders` row now carries an `items`
+  sub-array (MypageFetched reads it via OrderQuery::itemsByOrderNo).
+  The `ec-historyRole__detail` per-order line-item block — previously a
+  missing-body-field residual — is now wired to the present `items`.
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
@@ -25,12 +32,13 @@
    - `BaseInfo.option_mypage_order_status_display` — order-status row is
      a store option; the render-diff stub sets it truthy so both sides
      emit the row (BeMart's body always carries `orderStatus`).
-   - MISSING BODY FIELD — EC-CUBE's `ec-historyRole__detail` renders a
-     per-order product-thumbnail + line-item list
-     (`Order.MergedProductOrderItems`). BeMart's `recentOrders`
-     projection is a thin summary (no items array), so the detail block
-     is OMITTED and flagged as a follow-up (the dashboard projection
-     would need an `items` sub-array). Enumerated as residual.
+   - per-item product THUMBNAIL — EC-CUBE renders the no-image
+     placeholder when `OrderItem.Product is null`; BeMart's dashboard
+     `items` projection (OrderItemEntity) carries no Product entity, so
+     every row renders the same `no_image_product` placeholder, matching
+     EC-CUBE's null-product branch verbatim. The variation-axis
+     (`class_category_name1/2`) cells are empty on both sides — the
+     dashboard item projection has no variation fields.
 #}
 {% extends 'base.html.twig' %}
 
@@ -67,6 +75,20 @@
                                                                                href="{{ url('mypage_history', {'order_no': Order.orderNo}) }}">詳細を見る</a>
                                     </p>
                                 </div>
+                            </div>
+                            <div class="ec-historyRole__detail">
+                                {% for OrderItem in Order.items %}
+                                    <div class="ec-imageGrid">
+                                        <div class="ec-imageGrid__img">
+                                            <img src="{{ asset('assets/img/common/no_image_product.png', 'save_image') }}"/>
+                                        </div>
+                                        <div class="ec-imageGrid__content">
+                                            <p class="ec-historyRole__detailTitle">{{ OrderItem.productName }}</p>
+                                            <p class="ec-historyRole__detailPrice">{{ OrderItem.unitPrice|price }}
+                                                × {{ OrderItem.quantity }}</p>
+                                        </div>
+                                    </div>
+                                {% endfor %}
                             </div>
                         </div>
                     </div>

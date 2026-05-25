@@ -307,4 +307,48 @@ final class SqlShippingAddressStorageTest extends AbstractSqlTestCase
         $this->assertSame($order['orderNo'], $rows[0]->orderNo);
         $this->assertSame('Listed', $rows[0]->name02);
     }
+
+    public function testUpdateTrackingNumberUpdatesExistingShippingRow(): void
+    {
+        $order = $this->insertOrder(['order_no' => 'SHIP-TRACK-UPD']);
+        $storage = new SqlShippingAddressStorage($this->pdo);
+        // A shipping row already exists for the order.
+        $storage->put($this->entity(['orderNo' => $order['orderNo']]));
+
+        $storage->updateTrackingNumber($order['orderNo'], 'TRK-12345');
+
+        $this->assertSame('TRK-12345', $storage->trackingNumberByOrderNo($order['orderNo']));
+        // The address fields are untouched by the tracking write.
+        $address = $storage->getByOrderNo($order['orderNo']);
+        $this->assertNotNull($address);
+        $this->assertSame('山田', $address->name01);
+    }
+
+    public function testUpdateTrackingNumberInsertsMinimalRowWhenNoneExists(): void
+    {
+        $order = $this->insertOrder(['order_no' => 'SHIP-TRACK-INS']);
+        $storage = new SqlShippingAddressStorage($this->pdo);
+        $this->assertNull($storage->trackingNumberByOrderNo($order['orderNo']));
+
+        $storage->updateTrackingNumber($order['orderNo'], 'TRK-99999');
+
+        $this->assertSame('TRK-99999', $storage->trackingNumberByOrderNo($order['orderNo']));
+    }
+
+    public function testUpdateTrackingNumberIsSilentNoOpForUnknownOrder(): void
+    {
+        $storage = new SqlShippingAddressStorage($this->pdo);
+        $storage->updateTrackingNumber('NO-SUCH-ORDER', 'TRK-1'); // no exception
+        $this->assertNull($storage->trackingNumberByOrderNo('NO-SUCH-ORDER'));
+    }
+
+    public function testTrackingNumberByOrderNoIsNullWhenUnset(): void
+    {
+        $order = $this->insertOrder(['order_no' => 'SHIP-TRACK-NULL']);
+        $storage = new SqlShippingAddressStorage($this->pdo);
+        // A shipping row exists but its tracking_number column is NULL.
+        $storage->put($this->entity(['orderNo' => $order['orderNo']]));
+
+        $this->assertNull($storage->trackingNumberByOrderNo($order['orderNo']));
+    }
 }

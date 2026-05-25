@@ -8,6 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
 use MyVendor\BeMart\Be\Reason\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
@@ -44,10 +45,13 @@ use function trim;
  * session), so this test rebinds `SessionInterface` to a real fixture
  * customer (alice) in the `html` context before rendering.
  *
- * The dashboard surfaces the recent-orders SUMMARY; EC-CUBE's full
- * paged-history + per-order item thumbnails are a missing-body-field
- * residual (the recentOrders projection has no items array). See the
- * port header in var/templates/Page/Mypage.html.twig.
+ * The dashboard surfaces the recent-orders SUMMARY. Phase 3 enrichment
+ * — each recentOrders row now carries an `items` sub-array (read via
+ * OrderQuery::itemsByOrderNo), so the per-order `ec-historyRole__detail`
+ * line-item block is wired and diffs to zero against EC-CUBE. The only
+ * residual left is the EC-CUBE <head> furniture + the paged-history
+ * pager wrapper (BeMart's dashboard is not a paged view). See the port
+ * header in var/templates/Page/Mypage.html.twig.
  */
 final class MypageHtmlRenderTest extends TestCase
 {
@@ -75,17 +79,6 @@ final class MypageHtmlRenderTest extends TestCase
         '<title>EC-CUBE / マイページ</title>',
         '<meta name="author" content="">',
 
-        // --- dashboard: per-order item detail (missing body field) ------
-        // EC-CUBE's index.twig renders an `ec-historyRole__detail` block
-        // per order — a product-thumbnail + line-item list from
-        // `Order.MergedProductOrderItems`. BeMart's `recentOrders`
-        // projection is a thin summary (orderNo / date / status / total,
-        // NO items array), so the detail block is omitted. The EC-CUBE
-        // stub feeds an order with ZERO MergedProductOrderItems, so the
-        // detail <div> is emitted empty on the EC-CUBE side and the only
-        // residual is the empty wrapper element.
-        '<div class="ec-historyRole__detail">',
-        '</div>',
         // --- dashboard: pager (not a paged view in BeMart) --------------
         // EC-CUBE's index.twig is a paged history view — it wraps a
         // `pager.twig` include in `<div class="ec-pagerRole">`. BeMart's
@@ -141,6 +134,26 @@ final class MypageHtmlRenderTest extends TestCase
             orderDate: self::ALICE_ORDER_DATE,
             paymentDate: self::ALICE_ORDER_DATE,
         ));
+        // Phase 3 enrichment — the dashboard's recentOrders rows carry an
+        // `items` sub-array; seed two line items so the per-order
+        // `ec-historyRole__detail` block has content, fed identically to
+        // the EC-CUBE side below.
+        $storage->putItems(self::ALICE_ORDER_NO, [
+            new OrderItemEntity(
+                orderNo: self::ALICE_ORDER_NO,
+                productCode: 'sample-001',
+                productName: 'サンプル商品 A',
+                quantity: 2,
+                unitPrice: 1200,
+            ),
+            new OrderItemEntity(
+                orderNo: self::ALICE_ORDER_NO,
+                productCode: 'sample-002',
+                productName: 'Sample Product B',
+                quantity: 1,
+                unitPrice: 600,
+            ),
+        ]);
 
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
@@ -206,8 +219,13 @@ final class MypageHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
+        // Phase 3 enrichment shrank the residual: the per-order
+        // line-item detail block is now wired (the recentOrders `items`
+        // sub-array) and diffs to zero. The remaining ~12 lines are the
+        // EC-CUBE <head> furniture + the ec-pagerRole node (BeMart's
+        // dashboard is not a paged view).
         $this->assertLessThanOrEqual(
-            16,
+            13,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -246,17 +264,37 @@ final class MypageHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // One recent order, no item rows (BeMart's recentOrders summary
-        // projection has no items array — the per-order detail block is
-        // an enumerated missing-body-field residual). The order-status /
-        // date values are fed identically to BeMart's seed order so the
-        // dashboard rows diff to zero (BeMart projects orderStatus as the
-        // integer master id; the stub feeds that same integer).
+        // One recent order with two line items — fed identically to
+        // BeMart's seed (Phase 3 enrichment: the recentOrders projection
+        // now carries an `items` sub-array). The order-status / date
+        // values are fed identically so the dashboard rows diff to zero
+        // (BeMart projects orderStatus as the integer master id; the stub
+        // feeds that same integer). `Product` is null on each item so
+        // EC-CUBE's no-image-placeholder branch fires — matching BeMart's
+        // dashboard item projection, which carries no Product entity.
+        $items = [
+            new EcCubeStub([
+                'product_name' => 'サンプル商品 A',
+                'class_category_name1' => '',
+                'class_category_name2' => '',
+                'price_inc_tax' => 1200,
+                'quantity' => 2,
+                'Product' => null,
+            ]),
+            new EcCubeStub([
+                'product_name' => 'Sample Product B',
+                'class_category_name1' => '',
+                'class_category_name2' => '',
+                'price_inc_tax' => 600,
+                'quantity' => 1,
+                'Product' => null,
+            ]),
+        ];
         $order = new EcCubeStub([
             'order_date' => self::ALICE_ORDER_DATE,
             'order_no' => self::ALICE_ORDER_NO,
             'CustomerOrderStatus' => FinalizedOrderEntity::STATUS_NEW,
-            'MergedProductOrderItems' => [],
+            'MergedProductOrderItems' => $items,
         ]);
 
         return $twig->render('Mypage/index.twig', [
@@ -279,10 +317,10 @@ final class MypageHtmlRenderTest extends TestCase
                 'meta_robots' => '',
             ]),
             'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [0 => 'x'],
+                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
                 'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
                 'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [0 => 'x'], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
+                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
                 'ColumnNum' => 1,
             ]),
             'app' => new EcCubeStub([

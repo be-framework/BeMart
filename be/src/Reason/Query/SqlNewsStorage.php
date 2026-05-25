@@ -209,6 +209,28 @@ final class SqlNewsStorage implements NewsStorageInterface
         $stmt->execute([':id' => (int) $newsId]);
     }
 
+    #[Override]
+    public function setVisible(string $newsId, bool $visible): void
+    {
+        if (! ctype_digit($newsId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake.
+            return;
+        }
+
+        // Generic `doToggleVisible` — rewrite the `visible` column
+        // (tinyint(1) NOT NULL DEFAULT 1) directly. The column is
+        // outside the NewsEntity projection. dtb_news has NO `sort_no`
+        // column, so there is no sibling `reorder` here.
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_news SET visible = :visible, update_date = NOW() '
+            . 'WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $newsId,
+            ':visible' => (int) $visible,
+        ]);
+    }
+
     /**
      * @param array<string, mixed> $row
      */

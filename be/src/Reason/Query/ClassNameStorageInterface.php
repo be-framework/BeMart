@@ -14,6 +14,10 @@ use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
  *   - getById(classNameId): single-row lookup
  *   - put(className): upsert (create / replace)
  *   - remove(classNameId): drop (silent no-op on miss)
+ *   - reorder(classNameId, sortNo): generic `doSortNoMove` — rewrites
+ *     the storage-only `sort_no` column (not projected onto
+ *     {@see ClassNameEntity}). dtb_class_name has no `visible` column,
+ *     so the ClassName master carries no `setVisible`.
  */
 interface ClassNameStorageInterface
 {
@@ -25,4 +29,6 @@ interface ClassNameStorageInterface
     public function put(ClassNameEntity $className): void;
 
     public function remove(string $classNameId): void;
+
+    public function reorder(string $classNameId, int $sortNo): void;
 }
