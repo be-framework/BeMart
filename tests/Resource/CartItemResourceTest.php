@@ -39,7 +39,7 @@ final class CartItemResourceTest extends TestCase
         $this->assertSame('sample-001', $ro->body['productCode']);
         $this->assertSame(2, $ro->body['adjustedQuantity']);
         $this->assertSame(2400, $ro->body['totalPrice']);
-        $this->assertArrayHasKey('Location', $ro->headers);
+        $this->assertSame('/cart', $ro->headers['Location']);
     }
 
     public function testOnPostMissingProductReturns404(): void

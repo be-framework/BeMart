@@ -121,13 +121,13 @@
                                     </li>
                                     <li class="ec-cartRow__contentColumn">
                                         <div class="ec-cartRow__img">
-                                            <a target="_blank" href="{{ url('product_detail', {id: item.productId}) }}">
+                                            <a target="_blank" href="{{ url('product_detail', {id: item.productCode}) }}">
                                                 <img src="{{ asset(item.mainImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ item.productName }}"/>
                                             </a>
                                         </div>
                                         <div class="ec-cartRow__summary">
                                             <div class="ec-cartRow__name">
-                                                <a target="_blank" href="{{ url('product_detail', {id: item.productId}) }}">{{ item.productName }}</a>
+                                                <a target="_blank" href="{{ url('product_detail', {id: item.productCode}) }}">{{ item.productName }}</a>
                                                 {% if item.classCategoryName1 %}
                                                     <br>{{ item.className1 }}：{{ item.classCategoryName1 }}
                                                 {% endif %}

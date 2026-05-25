@@ -32,10 +32,9 @@
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
    - `csrf_token('authenticate')` — EC-CUBE per-request CSRF widget.
-     BeMart's CSRF is the existing CsrfTokenInterface (Slice 8); the
-     hidden `_csrf_token` input is kept (structure) with the body's
-     `csrfToken` (null in the html context — the EventListener mirrors
-     the live token in). EC-CUBE-runtime only.
+     BeMart keeps the hidden `_csrf_token` input and fills it from the
+     dev/html fake CSRF token so a browser submit reaches the login POST
+     path. EC-CUBE-runtime token generation remains a residual.
    - `app.session.flashBag.*`, `is_granted(...)`, `BaseInfo.*`
      — request-flash / auth-state / BaseInfo runtime. The remember-me
      checkbox depends on `BaseInfo.option_remember_me`; BeMart has no

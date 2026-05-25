@@ -170,7 +170,8 @@ final class ShoppingHtmlRenderTest extends TestCase
         foreach ([
             '<h1>ご注文手続き</h1>',
             '<ul class="ec-progress">',
-            '<form id="shopping-form" method="post" action="/shopping_confirm">',
+            // Slice 9: url('shopping_confirm') now resolves through RouteTable.
+            '<form id="shopping-form" method="post" action="/shopping/confirm">',
             '<div class="ec-orderRole">',
             '<div class="ec-orderAccount">',
             '<div class="ec-orderDelivery">',
@@ -376,13 +377,8 @@ final class ShoppingHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('trans', $trans));
         // Member checkout — matches the member-path port.
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => true));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p, $x = null): string => '/' . $p));
-        $twig->addFunction(new TwigFunction('url', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
-        $twig->addFunction(new TwigFunction('path', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
+        EcCubeAssetStub::register($twig);
+        EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));

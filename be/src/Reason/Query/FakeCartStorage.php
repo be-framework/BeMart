@@ -4,18 +4,22 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Query;
 
+use MyVendor\BeMart\Be\Exception\FakeCartFixtureException;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
-use RuntimeException;
 
 use function dirname;
 use function file_get_contents;
+use function getenv;
 use function is_array;
+use function is_string;
 use function json_decode;
 use function sprintf;
+use function session_status;
 use function str_starts_with;
 
 use const JSON_THROW_ON_ERROR;
+use const PHP_SESSION_ACTIVE;
 
 /**
  * In-memory Cart store shared by FakeCartQuery + FakeCartCommand.
@@ -25,6 +29,8 @@ use const JSON_THROW_ON_ERROR;
  */
 final class FakeCartStorage
 {
+    private const HTML_SESSION_CARTS_KEY = 'bemart_html_carts';
+
     /** @var array<string, CartEntity>|null */
     private array|null $carts = null;
 
@@ -37,6 +43,7 @@ final class FakeCartStorage
     {
         $this->load();
         $this->carts[$cart->cartKey] = $cart;
+        $this->persistHtmlSession();
     }
 
     public function removeByPreOrderId(string $preOrderId): void
@@ -47,6 +54,8 @@ final class FakeCartStorage
                 unset($this->carts[$cartKey]);
             }
         }
+
+        $this->persistHtmlSession();
     }
 
     /**
@@ -65,6 +74,7 @@ final class FakeCartStorage
         }
 
         $this->carts = $rows;
+        $this->persistHtmlSession();
     }
 
     public function getByPreOrderId(string $preOrderId): CartEntity|null
@@ -105,16 +115,20 @@ final class FakeCartStorage
             return $this->carts;
         }
 
+        if ($this->usesHtmlSession()) {
+            return $this->carts = $this->loadHtmlSession();
+        }
+
         $path = dirname(__DIR__, 3) . '/var/fake/carts.json';
         $json = file_get_contents($path);
         if ($json === false) {
-            throw new RuntimeException(sprintf('Fake fixture missing: %s', $path));
+            throw new FakeCartFixtureException(sprintf('Fake fixture missing: %s', $path));
         }
 
         /** @var array<string, array{cartKey: string, saleTypeId: int, saleTypeName: string, items: list<array{productCode: string, quantity: int, price: int, productClassId?: int, productId?: int, productName?: string, mainImage?: string|null, classCategoryName1?: string|null, className1?: string|null, classCategoryName2?: string|null, className2?: string|null}>, totalPrice: int, deliveryFeeTotal: int, preOrderId: string}|string> $rows */
         $rows = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         if (! is_array($rows)) {
-            throw new RuntimeException(sprintf('Fake fixture must be a JSON object: %s', $path));
+            throw new FakeCartFixtureException(sprintf('Fake fixture must be a JSON object: %s', $path));
         }
 
         $carts = [];
@@ -156,5 +170,54 @@ final class FakeCartStorage
         }
 
         return $this->carts = $carts;
+    }
+
+    private function usesHtmlSession(): bool
+    {
+        if (getenv('APP_CONTEXT') !== 'html') {
+            return false;
+        }
+
+        return session_status() === PHP_SESSION_ACTIVE;
+    }
+
+    /**
+     * @return array<string, CartEntity>
+     */
+    private function loadHtmlSession(): array
+    {
+        /** @var mixed $raw */
+        $raw = $_SESSION[self::HTML_SESSION_CARTS_KEY] ?? [];
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        $carts = [];
+        foreach ($raw as $cartKey => $cart) {
+            if (! $cart instanceof CartEntity) {
+                continue;
+            }
+
+            if (! is_string($cartKey)) {
+                continue;
+            }
+
+            $carts[$cartKey] = $cart;
+        }
+
+        return $carts;
+    }
+
+    private function persistHtmlSession(): void
+    {
+        if (! $this->usesHtmlSession()) {
+            return;
+        }
+
+        if ($this->carts === null) {
+            return;
+        }
+
+        $_SESSION[self::HTML_SESSION_CARTS_KEY] = $this->carts;
     }
 }

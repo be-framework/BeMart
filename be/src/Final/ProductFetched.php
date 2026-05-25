@@ -24,6 +24,17 @@ final readonly class ProductFetched
     public string $productName;
     public int $price02;
     public int|null $stock;
+    public string|null $description;
+    public string|null $imagePath;
+
+    /** @var list<string> */
+    public array $categoryNames;
+
+    /** @var list<string> */
+    public array $tagNames;
+
+    /** @var list<string> */
+    public array $classNames;
 
     public function __construct(
         #[Input] string $productCode,
@@ -38,5 +49,10 @@ final readonly class ProductFetched
         $this->productName = $entity->productName;
         $this->price02 = $entity->price02;
         $this->stock = $entity->stock;
+        $this->description = $entity->description;
+        $this->imagePath = $entity->imagePath;
+        $this->categoryNames = $entity->categoryNames;
+        $this->tagNames = $entity->tagNames;
+        $this->classNames = $entity->classNames;
     }
 }
