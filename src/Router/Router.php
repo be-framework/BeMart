@@ -66,6 +66,7 @@ final class Router
                     $route->name,
                     $route->resource,
                     $route->dispatchMethodFor($method),
+                    $route->alpsIdFor($method),
                     $params,
                     $route->queryParamMap,
                 );

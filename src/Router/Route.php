@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Router;
 
+use InvalidArgumentException;
+
 use function array_key_exists;
-use function count;
 use function explode;
 use function http_build_query;
 use function implode;
 use function in_array;
+use function is_array;
 use function is_string;
 use function preg_match;
 use function preg_quote;
@@ -39,6 +41,9 @@ use function strtoupper;
  */
 final class Route
 {
+    /** @var non-empty-string|array<string, non-empty-string> */
+    public readonly string|array $alpsId;
+
     /**
      * @param string               $name      EC-CUBE route name (e.g. `product_detail`).
      * @param list<string>          $methods   Upper-case HTTP verbs this route serves.
@@ -48,6 +53,7 @@ final class Route
      * @param string|null          $dispatchMethod Internal BEAR resource method, defaults to the HTTP method.
      * @param array<string,string> $defaults       Default params merged into a successful match.
      * @param array<string,string> $queryParamMap  EC-CUBE query/form param name => BEAR resource param name.
+     * @param non-empty-string|array<string, non-empty-string>|null $alpsId ALPS descriptor id or method => descriptor id map.
      */
     public function __construct(
         public readonly string $name,
@@ -58,7 +64,9 @@ final class Route
         public readonly string|null $dispatchMethod = null,
         public readonly array $defaults = [],
         public readonly array $queryParamMap = [],
+        string|array|null $alpsId = null,
     ) {
+        $this->alpsId = $alpsId ?? AlpsRouteMap::for($name, $methods, $dispatchMethod);
     }
 
     /** Does this route serve $method (case-insensitive)? */
@@ -71,6 +79,29 @@ final class Route
     public function dispatchMethodFor(string $method): string
     {
         return strtolower($this->dispatchMethod ?? $method);
+    }
+
+    /**
+     * The ALPS transition descriptor represented by this public route method.
+     *
+     * A route name can serve both a displayed state and a submitted action
+     * (for example GET contact form vs POST submit).  ALPS captures those as
+     * separate descriptors, so the router resolves the method-specific id.
+     *
+     * @return non-empty-string
+     */
+    public function alpsIdFor(string $method): string
+    {
+        if (! is_array($this->alpsId)) {
+            return $this->alpsId;
+        }
+
+        $method = strtoupper($method);
+        if (isset($this->alpsId[$method])) {
+            return $this->alpsId[$method];
+        }
+
+        throw new InvalidArgumentException('Route "' . $this->name . '" has no ALPS descriptor for ' . $method . '.');
     }
 
     /**

@@ -12,6 +12,10 @@ namespace MyVendor\BeMart\Router;
  * The front controller merges {@see $params} into the request query/body
  * so a path-segment id (`/products/detail/5`) reaches the resource the
  * same way a query param would.
+ *
+ * {@see $alpsId} is the semantic transition descriptor that this concrete
+ * route method represents.  It deliberately carries no URL or PHP class
+ * detail; those remain in {@see RouteTable}.
  */
 final class MatchedRoute
 {
@@ -23,6 +27,7 @@ final class MatchedRoute
         public readonly string $name,
         public readonly string $resource,
         public readonly string $dispatchMethod,
+        public readonly string $alpsId,
         public readonly array $params = [],
         public readonly array $queryParamMap = [],
     ) {
