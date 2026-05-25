@@ -1,0 +1,68 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Be\Reason\Query;
+
+use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+
+/**
+ * Write-side Product command — Wave 8 (admin product management).
+ *
+ * Split from ProductQueryInterface to keep CQRS boundaries explicit
+ * (mirrors CustomerCommandInterface). All methods expect entity
+ * arguments that have already been merged with the persisted state
+ * by the Final — this interface does NOT perform partial-merge.
+ *
+ * Deletion is logical: `delete($productCode)` flips
+ * `ProductEntity::productStatus` to `STATUS_WITHDRAWN` (=3) per the
+ * ALPS doc ("ステータス変更による論理削除"). Order-history snapshots
+ * reference frozen product copy data and are unaffected.
+ */
+interface ProductCommandInterface
+{
+    /**
+     * Persist a brand-new product. Caller MUST have verified the
+     * productCode is not already in use (FakeProductStorage::exists()
+     * or equivalent). Replays with the same code overwrite — the
+     * Final is responsible for the 409 guard.
+     */
+    public function create(ProductEntity $product): void;
+
+    /**
+     * Replace the persisted product with the supplied entity. Caller
+     * MUST construct the entity from the persisted current state
+     * merged with the validated update fields; this interface does
+     * not perform the merge itself.
+     */
+    public function update(ProductEntity $product): void;
+
+    /**
+     * Soft-delete: flip productStatus to STATUS_WITHDRAWN (=3).
+     * Idempotent — a second call against an already-withdrawn product
+     * is a no-op. Silently does nothing when productCode is not in
+     * the store.
+     */
+    public function delete(string $productCode): void;
+
+    /**
+     * Clone a product under a new productCode. The cloned row carries
+     * the source's price / stock / description / etc. with the
+     * productName prefixed by "(コピー) " per the ALPS doc, and is
+     * created in STATUS_VISIBLE regardless of the source's status
+     * (admin convention: the copy is a fresh draft). Returns the
+     * newly-persisted entity.
+     */
+    public function copy(string $sourceCode, string $newCode): ProductEntity;
+
+    /**
+     * Bulk flip productStatus across multiple products. Returns the
+     * count of rows that were actually changed (i.e. whose
+     * productStatus differed from the new value at call-time —
+     * idempotent re-application of the same status is NOT counted).
+     * Unknown codes are silently skipped.
+     *
+     * @param list<string> $productCodes
+     */
+    public function bulkUpdateStatus(array $productCodes, int $newStatus): int;
+}

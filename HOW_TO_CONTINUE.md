@@ -194,6 +194,9 @@ ec-cube-alps/
 | Wave 6Q | `bb9a328` | goFavoriteList — Direct safe-read | 完了 |
 | Wave 6R | `0f0ffe1` | goOrderHistory — Direct + pagination | 完了 |
 | Wave 6S | `b071142` | doDeleteCustomer — Direct + admin soft-delete | 完了 |
+| Wave 7X | `2241185` | SKILL bake (G-14 〜 G-22 as docs/skills/) — docs only | 完了 |
+| Wave 7Y | `a59485a` | admin order management (4 transition) — Direct + admin AUTHZ | 完了 |
+| Wave 7W | `f326e12` | guest checkout entry (2 transition) — Direct stub | 完了 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 | Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 

@@ -1,0 +1,45 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Be\Final;
+
+use MyVendor\BeMart\Be\Exception\DeliveryNotFoundException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use Ray\Di\Di\Inject;
+use Ray\InputQuery\Attribute\Input;
+
+/**
+ * Delivery method deleted — Final, proof one master row was removed
+ * (Wave 9θ).
+ *
+ *   DeleteDeliveryInput → DeliveryDeleted (Direct, idempotent)
+ *
+ * Same soft-delete caveat as {@see PaymentMethodAdminDeleted}: the
+ * in-memory store drops the row unconditionally; production parity
+ * (visible = false) is Phase 2.
+ */
+final readonly class DeliveryDeleted
+{
+    public string $deliveryId;
+
+    public function __construct(
+        #[Input] string $deliveryId,
+        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] DeliveryStorageInterface $deliveries,
+    ) {
+        if ($adminSession->adminId() === null) {
+            throw new UnauthorizedAdminAccessException();
+        }
+
+        if ($deliveries->getById($deliveryId) === null) {
+            throw new DeliveryNotFoundException();
+        }
+
+        $deliveries->remove($deliveryId);
+
+        $this->deliveryId = $deliveryId;
+    }
+}

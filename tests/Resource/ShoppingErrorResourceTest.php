@@ -1,0 +1,41 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Tests\Resource;
+
+use BEAR\AppMeta\Meta;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Module\AppModule;
+use PHPUnit\Framework\TestCase;
+use Ray\Di\Injector;
+
+use function dirname;
+
+final class ShoppingErrorResourceTest extends TestCase
+{
+    private ResourceInterface $resource;
+
+    protected function setUp(): void
+    {
+        $injector = new Injector(
+            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            dirname(__DIR__, 2) . '/var/tmp/test',
+        );
+        $this->resource = $injector->getInstance(ResourceInterface::class);
+    }
+
+    public function testOnGetReturnsExpectedShape(): void
+    {
+        $ro = $this->resource->get('page://self/shopping/error');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('goShoppingError', $ro->body['transitionId']);
+        $this->assertSame([], $ro->body['fields']);
+        $this->assertNull($ro->body['submitTo']);
+        $this->assertSame('shopping-error', $ro->body['staticContent']['page']);
+        // ALPS #ShoppingError declares a single outbound transition: goCart.
+        $this->assertSame('page://self/cart', $ro->body['links']['goCart']);
+    }
+}

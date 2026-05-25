@@ -11,16 +11,48 @@ use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Module\BeModule;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\FakeDeliveryStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakePaymentMethodAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeTaxRuleStorage;
+use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\FakeAdminCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeBlockStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeLayoutStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeNewsStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakePageStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeTagStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeTemplateStorage;
+use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeAddressStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeAdminStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeBaseInfoStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeCategoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeClassCategoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeClassNameStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeCsvColumnConfigStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeLoginHistoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
@@ -30,43 +62,76 @@ use MyVendor\BeMart\Be\Reason\Query\FakeCustomerStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeEmailUniquenessChecker;
 use MyVendor\BeMart\Be\Reason\Query\FakeFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeMailTemplateStorage;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakePasswordResetTokenStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakePluginStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductClassQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeProductCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeProductStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeShippingAddressStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeTradeLawStorage;
+use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
+use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAddressIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Service\FakeBlockIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeCategoryIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeClassCategoryIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeClassNameIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeNewsIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakePageIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeTagIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerInitialPoint;
+use MyVendor\BeMart\Be\Reason\Service\FakeDeliveryIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeInventoryAllocator;
 use MyVendor\BeMart\Be\Reason\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Service\FakeOrderNumberGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakePasswordHasher;
 use MyVendor\BeMart\Be\Reason\Service\FakePaymentGateway;
+use MyVendor\BeMart\Be\Reason\Service\FakePaymentMethodAdminIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakePaymentMethodFactory;
 use MyVendor\BeMart\Be\Reason\Service\FakePurchaseFlow;
 use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\FakeTaxRuleIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Be\Reason\Service\OrderNumberGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
+use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use Ray\Di\Scope;
 
 final class AppModule extends AbstractAppModule
@@ -200,5 +265,71 @@ final class AppModule extends AbstractAppModule
         $this->bind(FakeAdminStorage::class)->in(Scope::SINGLETON);
         $this->bind(AdminQueryInterface::class)->to(FakeAdminQuery::class);
         $this->bind(AdminSessionInterface::class)->toInstance(new FakeAdminSession(null));
+
+        // Wave 8α: admin product CRUD.
+        $this->bind(FakeProductStorage::class)->in(Scope::SINGLETON);
+        $this->bind(ProductCommandInterface::class)->to(FakeProductCommand::class);
+
+        // Wave 8β: admin catalog hierarchy (Category / ClassName / ClassCategory).
+        $this->bind(CategoryStorageInterface::class)->to(FakeCategoryStorage::class)->in(Scope::SINGLETON);
+        $this->bind(CategoryIdGeneratorInterface::class)->to(FakeCategoryIdGenerator::class);
+        $this->bind(ClassNameStorageInterface::class)->to(FakeClassNameStorage::class)->in(Scope::SINGLETON);
+        $this->bind(ClassNameIdGeneratorInterface::class)->to(FakeClassNameIdGenerator::class);
+        $this->bind(ClassCategoryStorageInterface::class)->to(FakeClassCategoryStorage::class)->in(Scope::SINGLETON);
+        $this->bind(ClassCategoryIdGeneratorInterface::class)->to(FakeClassCategoryIdGenerator::class);
+
+        // Wave 8γ: admin member CRUD + login history.
+        $this->bind(AdminCommandInterface::class)->to(FakeAdminCommand::class);
+        $this->bind(AdminIdGeneratorInterface::class)->to(FakeAdminIdGenerator::class);
+        $this->bind(LoginHistoryStorageInterface::class)
+            ->to(FakeLoginHistoryStorage::class)->in(Scope::SINGLETON);
+
+        // Wave 8ε: admin plugin lifecycle + simple settings. toInstance pattern (G-14).
+        $pluginStorage = new FakePluginStorage();
+        $baseInfoStorage = new FakeBaseInfoStorage();
+        $mailTemplateStorage = new FakeMailTemplateStorage();
+        $tradeLawStorage = new FakeTradeLawStorage();
+        $this->bind(FakePluginStorage::class)->toInstance($pluginStorage);
+        $this->bind(PluginStorageInterface::class)->toInstance($pluginStorage);
+        $this->bind(FakeBaseInfoStorage::class)->toInstance($baseInfoStorage);
+        $this->bind(BaseInfoStorageInterface::class)->toInstance($baseInfoStorage);
+        $this->bind(FakeMailTemplateStorage::class)->toInstance($mailTemplateStorage);
+        $this->bind(MailTemplateStorageInterface::class)->toInstance($mailTemplateStorage);
+        $this->bind(FakeTradeLawStorage::class)->toInstance($tradeLawStorage);
+        $this->bind(TradeLawStorageInterface::class)->toInstance($tradeLawStorage);
+
+        // Wave 9η: order extras — shipping-address storage.
+        $this->bind(ShippingAddressStorageInterface::class)
+            ->to(FakeShippingAddressStorage::class)->in(Scope::SINGLETON);
+
+        // Wave 9θ: payment/delivery/tax — admin shop-settings CRUD.
+        $this->bind(PaymentMethodAdminStorageInterface::class)
+            ->to(FakePaymentMethodAdminStorage::class)->in(Scope::SINGLETON);
+        $this->bind(PaymentMethodAdminIdGeneratorInterface::class)
+            ->to(FakePaymentMethodAdminIdGenerator::class);
+        $this->bind(DeliveryStorageInterface::class)
+            ->to(FakeDeliveryStorage::class)->in(Scope::SINGLETON);
+        $this->bind(DeliveryIdGeneratorInterface::class)
+            ->to(FakeDeliveryIdGenerator::class);
+        $this->bind(TaxRuleStorageInterface::class)
+            ->to(FakeTaxRuleStorage::class)->in(Scope::SINGLETON);
+        $this->bind(TaxRuleIdGeneratorInterface::class)
+            ->to(FakeTaxRuleIdGenerator::class);
+
+        // Wave 9ι: misc admin transitions.
+        $this->bind(CsvColumnConfigStorageInterface::class)
+            ->to(FakeCsvColumnConfigStorage::class)->in(Scope::SINGLETON);
+
+        // Wave 9ζ: CMS admin CRUD (Page / News / Block / Layout / Tag / Template).
+        $this->bind(PageStorageInterface::class)->to(FakePageStorage::class)->in(Scope::SINGLETON);
+        $this->bind(PageIdGeneratorInterface::class)->to(FakePageIdGenerator::class);
+        $this->bind(NewsStorageInterface::class)->to(FakeNewsStorage::class)->in(Scope::SINGLETON);
+        $this->bind(NewsIdGeneratorInterface::class)->to(FakeNewsIdGenerator::class);
+        $this->bind(BlockStorageInterface::class)->to(FakeBlockStorage::class)->in(Scope::SINGLETON);
+        $this->bind(BlockIdGeneratorInterface::class)->to(FakeBlockIdGenerator::class);
+        $this->bind(LayoutStorageInterface::class)->to(FakeLayoutStorage::class)->in(Scope::SINGLETON);
+        $this->bind(TagStorageInterface::class)->to(FakeTagStorage::class)->in(Scope::SINGLETON);
+        $this->bind(TagIdGeneratorInterface::class)->to(FakeTagIdGenerator::class);
+        $this->bind(TemplateStorageInterface::class)->to(FakeTemplateStorage::class)->in(Scope::SINGLETON);
     }
 }
