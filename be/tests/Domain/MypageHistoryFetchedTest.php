@@ -73,9 +73,10 @@ final class MypageHistoryFetchedTest extends TestCase
         $this->assertSame(0, $final->usePoint);
         $this->assertSame('2026-04-01 10:00:00', $final->orderDate);
 
-        $this->assertCount(2, $final->items);
+        // Phase 3 enrichment — line items are carried per shipping block.
+        $this->assertCount(1, $final->shippings);
         $codes = [];
-        foreach ($final->items as $item) {
+        foreach ($final->shippings[0]['items'] as $item) {
             $codes[$item['productCode']] = $item;
         }
 
@@ -86,6 +87,37 @@ final class MypageHistoryFetchedTest extends TestCase
 
         $this->assertArrayHasKey('sample-002', $codes);
         $this->assertSame(9800, $codes['sample-002']['unitPrice']);
+    }
+
+    public function testHappyPathComposesEnrichedHistoryProjection(): void
+    {
+        $final = ($this->becoming)(new GetMypageHistoryInput(
+            orderNo: FakeFinalizedOrderStorage::SEED_ORDER_NO,
+        ));
+
+        $this->assertInstanceOf(MypageHistoryFetched::class, $final);
+
+        // Order message + payment method.
+        $this->assertSame('配送は平日希望です。', $final->message);
+        $this->assertSame('銀行振込', $final->paymentMethod);
+
+        // Per-shipping address block.
+        $shipping = $final->shippings[0];
+        $this->assertSame('山田', $shipping['name01']);
+        $this->assertSame('太郎', $shipping['name02']);
+        $this->assertSame('ヤマダ', $shipping['kana01']);
+        $this->assertSame('530-0001', $shipping['postalCode']);
+        $this->assertSame('大阪府', $shipping['prefName']);
+        $this->assertSame('大阪市北区梅田', $shipping['addr01']);
+        $this->assertSame('サンプル宅配便', $shipping['deliveryName']);
+        $this->assertSame('2026-04-03', $shipping['deliveryDate']);
+        $this->assertSame('午前中', $shipping['deliveryTime']);
+
+        // Mail-delivery history.
+        $this->assertCount(1, $final->mailHistories);
+        $this->assertSame('2026-04-01 10:05:00', $final->mailHistories[0]['sendDate']);
+        $this->assertSame('ご注文ありがとうございます', $final->mailHistories[0]['mailSubject']);
+        $this->assertStringContainsString('ありがとうございます', $final->mailHistories[0]['mailBody']);
     }
 
     public function testUnknownOrderRaisesOrderNotFound(): void

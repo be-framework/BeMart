@@ -54,7 +54,15 @@ class Cart extends ResourceObject
                     'deliveryFeeTotal' => $cart->deliveryFeeTotal,
                     'items' => array_map(
                         static fn (CartItemEntity $item): array => [
+                            'productClassId' => $item->productClassId,
+                            'productId' => $item->productId,
                             'productCode' => $item->productCode,
+                            'productName' => $item->productName,
+                            'mainImage' => $item->mainImage,
+                            'classCategoryName1' => $item->classCategoryName1,
+                            'className1' => $item->className1,
+                            'classCategoryName2' => $item->classCategoryName2,
+                            'className2' => $item->className2,
                             'quantity' => $item->quantity,
                             'price' => $item->price,
                         ],

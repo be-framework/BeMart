@@ -111,7 +111,7 @@ final class FakeCartStorage
             throw new RuntimeException(sprintf('Fake fixture missing: %s', $path));
         }
 
-        /** @var array<string, array{cartKey: string, saleTypeId: int, saleTypeName: string, items: list<array{productCode: string, quantity: int, price: int}>, totalPrice: int, deliveryFeeTotal: int, preOrderId: string}|string> $rows */
+        /** @var array<string, array{cartKey: string, saleTypeId: int, saleTypeName: string, items: list<array{productCode: string, quantity: int, price: int, productClassId?: int, productId?: int, productName?: string, mainImage?: string|null, classCategoryName1?: string|null, className1?: string|null, classCategoryName2?: string|null, className2?: string|null}>, totalPrice: int, deliveryFeeTotal: int, preOrderId: string}|string> $rows */
         $rows = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         if (! is_array($rows)) {
             throw new RuntimeException(sprintf('Fake fixture must be a JSON object: %s', $path));
@@ -125,10 +125,22 @@ final class FakeCartStorage
 
             $items = [];
             foreach ($row['items'] as $item) {
+                // Display fields are optional in the fixture: a cart
+                // item only needs dtb_cart_item's real columns
+                // (productCode/quantity/price); FakeCartQuery re-derives
+                // the rest on read, mirroring SqlCartQuery's JOIN.
                 $items[] = new CartItemEntity(
                     productCode: $item['productCode'],
                     quantity: $item['quantity'],
                     price: $item['price'],
+                    productClassId: $item['productClassId'] ?? 0,
+                    productId: $item['productId'] ?? 0,
+                    productName: $item['productName'] ?? '',
+                    mainImage: $item['mainImage'] ?? null,
+                    classCategoryName1: $item['classCategoryName1'] ?? null,
+                    className1: $item['className1'] ?? null,
+                    classCategoryName2: $item['classCategoryName2'] ?? null,
+                    className2: $item['className2'] ?? null,
                 );
             }
 

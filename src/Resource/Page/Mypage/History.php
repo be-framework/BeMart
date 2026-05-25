@@ -83,6 +83,8 @@ class History extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'orderNo' => $final->orderNo,
+            'message' => $final->message,
+            'paymentMethod' => $final->paymentMethod,
             'subtotal' => $final->subtotal,
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
             'charge' => $final->charge,
@@ -95,7 +97,8 @@ class History extends ResourceObject
             'orderStatus' => $final->orderStatus,
             'orderDate' => $final->orderDate,
             'paymentDate' => $final->paymentDate,
-            'items' => $final->items,
+            'shippings' => $final->shippings,
+            'mailHistories' => $final->mailHistories,
         ];
 
         return $this;

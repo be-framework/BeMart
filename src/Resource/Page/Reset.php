@@ -13,6 +13,8 @@ use MyVendor\BeMart\Be\Exception\ResetKeyInvalidException;
 use MyVendor\BeMart\Be\Final\PasswordResetCompleted;
 use MyVendor\BeMart\Be\Input\ResetPasswordInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\ResetForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -38,7 +40,43 @@ class Reset extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * EC-CUBE goResetPassword — show the new-password form scaffolding
+     * (EC-CUBE `Forgot/reset.twig`).
+     *
+     * Pure form-info endpoint: no Be Framework, no domain logic.
+     * Anonymous-accessible (the reset-key check is the POST's job). The
+     * `resetKey` arrives as a query param on the emailed reset link and
+     * is carried into a hidden form field for the subsequent POST.
+     * `csrfToken` stays `null` — the EventListener mirrors the Symfony
+     * token into the session for the POST (same as Login).
+     *
+     * @psalm-taint-source input $resetKey
+     */
+    #[Link(rel: 'doResetPassword', href: 'page://self/reset', method: 'post')]
+    #[Link(rel: 'goLogin', href: 'page://self/login')]
+    public function onGet(string|null $resetKey = null): static
+    {
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'goResetPassword',
+            'fields' => ['resetKey', 'password', 'csrfToken'],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/reset',
+            ],
+            'resetKey' => $resetKey,
+            'csrfToken' => null,
+            // Phase 3: an empty ResetForm for the HTML port to render
+            // via `{{ form.input(...) }}`. JSON contexts ignore it.
+            'form' => $this->formFactory->newInstance(ResetForm::class),
+        ];
+
+        return $this;
     }
 
     /**

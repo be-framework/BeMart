@@ -1,0 +1,46 @@
+{#
+  BeMart Contact-complete page — EC-CUBE goContactComplete.
+
+  PORT of EC-CUBE 4.3 default-theme `Contact/complete.twig`
+  (src/Eccube/Resource/template/default/Contact/complete.twig).
+
+  DATA page (no form) — the data-page recipe (see var/templates/
+  README.md). EC-CUBE shows this static confirmation after a successful
+  `doSubmitContact`. Markup skeleton, `ec-role` / `ec-pageHeader` /
+  `ec-contactCompleteRole` / `ec-reportHeading` / `ec-off3Grid` /
+  `ec-text-ac` / `ec-reportDescription` / `ec-off4Grid` classes + the
+  block structure are kept verbatim from EC-CUBE.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml. The
+     `front.contact.complete_message__body` value is a single-line YAML
+     literal; EC-CUBE prints it raw (no `nl2br`), so the port substitutes
+     the literal verbatim.
+   - `url('homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'other_page' %}
+{% set route = 'contact_complete' %}
+{% set title = 'お問い合わせ(完了)' %}
+
+{% block main %}
+    <div class="ec-role">
+        <div class="ec-pageHeader">
+            <h1>お問い合わせ(完了)</h1>
+        </div>
+    </div>
+    <div class="ec-contactCompleteRole">
+        <div class="ec-reportHeading">
+            <h2>お問い合わせ内容の送信が完了いたしました</h2>
+        </div>
+        <div class="ec-off3Grid ec-text-ac">
+            <div class="ec-off3Grid__cell">
+                <p class="ec-reportDescription">万一、ご確認メールが届かない場合は、トラブルの可能性もありますので大変お手数ではございますがもう一度お問い合わせいただくか、お電話にてお問い合わせくださいませ。</p>
+            </div>
+        </div>
+        <div class="ec-off4Grid">
+            <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="{{ url('homepage') }}">トップページへ</a></div>
+        </div>
+    </div>
+{% endblock %}

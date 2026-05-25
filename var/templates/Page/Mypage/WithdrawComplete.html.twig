@@ -1,0 +1,58 @@
+{#
+  BeMart withdrawal-complete page — EC-CUBE goMypageWithdrawComplete
+  (mypage_withdraw_complete).
+
+  PORT of EC-CUBE 4.3 default-theme `Mypage/withdraw_complete.twig`
+  (src/Eccube/Resource/template/default/Mypage/withdraw_complete.twig).
+
+  DATA page (no form) — the data-page recipe (see var/templates/
+  README.md). EC-CUBE shows this static confirmation after a successful
+  `doWithdrawCustomer` (the customer is already withdrawn / logged out).
+  Markup skeleton, `ec-mypageRole` / `ec-pageHeader` /
+  `ec-withdrawCompleteRole` / `ec-reportHeading` / `ec-off3Grid` /
+  `ec-text-ac` / `ec-reportDescription` / `ec-off4Grid` classes + the
+  block structure are kept verbatim from EC-CUBE.
+
+  Unlike the other Mypage screens this page does NOT include
+  `Mypage/navi.twig` (the customer is already withdrawn), so the port
+  carries no navi partial either.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml. The
+     `front.mypage.withdraw_complete_message__body` value is a multi-line
+     YAML literal; EC-CUBE prints it through `nl2br`, so the port
+     substitutes the literal text verbatim and applies the same `nl2br`.
+   - `url('homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'mypage' %}
+{% set route = 'mypage_withdraw_complete' %}
+{% set title = 'マイページ' %}
+
+{% block main %}
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>マイページ/退会手続き</h1>
+            </div>
+        </div>
+        <div class="ec-mypageRole">
+            <div class="ec-withdrawCompleteRole">
+                <div class="ec-reportHeading">
+                    <h2>退会が完了いたしました</h2>
+                </div>
+                <div class="ec-off3Grid ec-text-ac">
+                    <div class="ec-off3Grid__cell">
+                        <p class="ec-reportDescription">{{ "ご利用いただき誠にありがとうございました。\nまたのご来店をお待ちしております。\n"|nl2br }}</p>
+                    </div>
+                </div>
+                <div class="ec-off4Grid">
+                    <div class="ec-off4Grid__cell">
+                        <a href="{{ url('homepage') }}" class="ec-blockBtn--cancel">トップページへ</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

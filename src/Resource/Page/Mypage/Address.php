@@ -16,8 +16,13 @@ use MyVendor\BeMart\Be\Final\CustomerAddressDeleted;
 use MyVendor\BeMart\Be\Final\CustomerAddressUpdated;
 use MyVendor\BeMart\Be\Input\DeleteCustomerAddressInput;
 use MyVendor\BeMart\Be\Input\UpdateCustomerAddressInput;
+use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Form\AddressForm;
+use Ray\WebFormModule\FormFactory;
 
+use function array_filter;
 use function assert;
 
 /**
@@ -48,7 +53,97 @@ class Address extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly SessionInterface $session,
+        private readonly AddressStorageInterface $addresses,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * EC-CUBE お届け先情報編集 — show the address add/edit form.
+     *
+     * Pure form-info endpoint: no Be Framework, no domain logic. Maps
+     * EC-CUBE's `mypage_delivery_new` (no `addressId`) and
+     * `mypage_delivery_edit` (`addressId` given) screens. AUTHN +
+     * ownership AUTHZ are enforced here directly (mirrors Withdraw::onGet
+     * — a Resource-level guard on a no-domain form page):
+     *
+     *   - no session                    → 401
+     *   - addressId of an unknown row    → 404
+     *   - addressId owned by another     → 403
+     *
+     * Phase 3 — HTML FORM page. The resource builds an {@see AddressForm}
+     * (Ray.WebFormModule AbstractForm) and exposes it as `body['form']`.
+     * For the edit screen the form is pre-populated from the stored
+     * address; for the new screen it is empty. VALIDATION AUTHORITY
+     * STAYS WITH the Be Framework Becoming chain (onPost). The JSON
+     * contexts ignore `body['form']`.
+     *
+     * @psalm-taint-source input $addressId
+     */
+    #[Link(rel: 'doCreateCustomerAddress', href: 'page://self/mypage/address-list', method: 'post')]
+    #[Link(rel: 'doUpdateCustomerAddress', href: 'page://self/mypage/address', method: 'put')]
+    #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
+    public function onGet(string|null $addressId = null): static
+    {
+        $customerId = $this->session->customerId();
+        if ($customerId === null) {
+            $this->code = Code::UNAUTHORIZED;
+            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
+
+            return $this;
+        }
+
+        $form = $this->formFactory->newInstance(AddressForm::class);
+        assert($form instanceof AddressForm);
+
+        $address = null;
+        if ($addressId !== null) {
+            $address = $this->addresses->getById($addressId);
+            if ($address === null) {
+                $this->code = Code::NOT_FOUND;
+                $this->body = ['message' => 'Address not found.', 'addressId' => $addressId];
+
+                return $this;
+            }
+
+            if ($address->customerId !== $customerId) {
+                $this->code = Code::FORBIDDEN;
+                $this->body = [
+                    'message' => 'この配送先へのアクセス権限がありません。',
+                    'addressId' => $addressId,
+                ];
+
+                return $this;
+            }
+
+            // Pre-populate the edit form with the stored address.
+            $form->fillValues(array_filter([
+                'name01' => $address->name01,
+                'name02' => $address->name02,
+                'kana01' => $address->kana01,
+                'kana02' => $address->kana02,
+                'companyName' => $address->companyName,
+                'postalCode' => $address->postalCode,
+                'pref' => $address->pref,
+                'addr01' => $address->addr01,
+                'addr02' => $address->addr02,
+                'phoneNumber' => $address->phoneNumber,
+            ], static fn (mixed $v): bool => $v !== null));
+        }
+
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => $addressId === null ? 'doCreateCustomerAddress' : 'doUpdateCustomerAddress',
+            'addressId' => $addressId,
+            'submitTo' => $addressId === null
+                ? ['method' => 'POST', 'href' => 'page://self/mypage/address-list']
+                : ['method' => 'PUT', 'href' => 'page://self/mypage/address'],
+            'csrfToken' => null,
+            'form' => $form,
+        ];
+
+        return $this;
     }
 
     /**

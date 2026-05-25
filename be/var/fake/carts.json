@@ -1,5 +1,5 @@
 {
-  "$comment": "Cart の初期状態。FakeCartQuery / FakeCartCommand が参照。cartKey をキーとして lookup。Pilot 2 の Diamond テスト (merge, 分離) のために最初は空 → テストで追加 → 状態を観察、という流れ。Pilot 5 の clearByPreOrderId テスト用に preOrderId='completed-pilot5-...' を持つカートを 1 件追加。",
+  "$comment": "Cart の初期状態。FakeCartQuery / FakeCartCommand が参照。cartKey をキーとして lookup。Pilot 2 の Diamond テスト (merge, 分離) のために最初は空 → テストで追加 → 状態を観察、という流れ。Pilot 5 の clearByPreOrderId テスト用に preOrderId='completed-pilot5-...' を持つカートを 1 件追加。items[] は dtb_cart_item の実カラム (productCode/quantity/price) のみ必須。表示用フィールド (productName/mainImage/classCategoryName1.. 等) は任意 — 省略時は FakeCartQuery が読み取り時に product_classes.json から再導出する (SqlCartQuery の JOIN と同形)。",
   "session-prefix-1_1": {
     "cartKey": "session-prefix-1_1",
     "saleTypeId": 1,

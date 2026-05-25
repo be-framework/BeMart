@@ -80,18 +80,30 @@ stateDiagram-v2
 | `tag.md` | タグ分類体系（ワークフロー・ドメイン・アクター・情報源の命名規則） |
 | `HANDOVER.md` | 構築プロセスの記録（カバレッジ、Pilot 1/2 完了報告、次の AI への助言） |
 
-## 移植検討用の補助資料
+## 移植プロジェクト（BeMart）
 
-このリポジトリの主目的は `alps.json` と公開ドキュメントの保守だが、EC-CUBE を Be / BEAR.Sunday へ移植するための補助資料と Claude Code ネイティブワークフローも同居している。
+このリポジトリの主目的は `alps.json` と公開ドキュメントの保守だが、EC-CUBE 4.3 を
+Be Framework + BEAR.Sunday へ移植する実装プロジェクト（**BeMart**）が同じ monorepo に
+同居している。移植は ALPS を契約として 3 フェーズ進行している:
+
+- **Phase A** — ALPS の状態遷移を Be Framework ドメイン層 + BEAR.Sunday JSON リソースへ移植（`HANDOVER.md`）
+- **Phase 2** — 全 34 ストレージインターフェースを Fake → SQL（MariaDB/MySQL）へ移植し、本番バインディングへ切替（`sql/`）
+- **Phase 3** — HTML プレゼンテーション層。EC-CUBE テンプレートの忠実移植 + レンダー差分テスト（`var/templates/`、進行中）
+
+**現在の移植ステータス（レイヤ別の at-a-glance マトリクス）→ [`docs/migration-status.md`](docs/migration-status.md)**。
+本 README はエントリポイントであり、ステータスログではない。最新の進捗・残作業はそちらを参照。
 
 | ファイル / ディレクトリ | 説明 |
 |---|---|
+| `docs/migration-status.md` | **移植ステータスの正**（レイヤ別マトリクス・残作業 punch-list） |
+| `HANDOVER.md` | 移植の構築プロセス記録（Phase A / Phase 2 / Phase 3 の決定ログ） |
+| `src/` | BEAR.Sunday アプリケーション層（`Resource/`, `Module/`, `Form/`） |
+| `be/` | Be Framework ドメイン層（`my-vendor/be-mart-be`、path repo として参照） |
+| `sql/` | EC-CUBE 4.3 スキーマダンプ・`mtb_*` マスタ seed・`setup-db.sh`（Phase 2 成果物） |
+| `var/templates/` | ストアフロント HTML テンプレート（EC-CUBE テンプレート移植、Phase 3 成果物） |
+| `docs/alps-audit-phase3.md` | Phase 3 準備の ALPS 監査記録 |
+| `docs/skills/` | 移植で発見した skill gap（G-14 〜 G-23）の外部化ドキュメント |
 | `ec-cube-bear-be-migration-plan.md` | 移植全体の段階計画 |
-| `be-first-migration-method.md` | 最初は Be-only で進める方針の共有用要約 |
-| `autonomous-execution-runbook.md` | 長時間作業の再開手順と停止条件 |
-| `day0-workflow.md` | 実移植 repo を立ち上げる初日手順 |
-| `skills-matrix.md` | 利用する skill の一覧と位置づけ |
-| `task_plan.md` / `findings.md` / `progress.md` | file-based planning 用の作業メモ |
 | `.claude/commands/run.md` | `/run <workflow> <args>` を解釈するコマンド |
 | `.claude/workflows/migrate.json` | ALPS 起点の 2 層移植ワークフロー定義 |
 | `.claude/workflows/workflow.schema.json` | ワークフロー定義の JSON Schema |
@@ -99,7 +111,7 @@ stateDiagram-v2
 
 `/run migrate <descriptor-id>` を実行すると、`alps-analyze → domain → domain-review → application → application-review → (security)` のステップが実行される。レビューステップはサブエージェント（独立コンテキスト）で走る。
 
-これらは ALPS 本体の公開成果物ではなく、移植検討と検証のための補助資料として扱う。
+`task_plan.md` / `findings.md` / `progress.md` は計画初期の作業メモで、現状とは乖離している（`docs/migration-status.md` を参照）。
 
 ## 使い方
 

@@ -1,0 +1,79 @@
+{#
+  BeMart Mypage dashboard — EC-CUBE goMypage.
+
+  PORT of EC-CUBE 4.3 default-theme `Mypage/index.twig`
+  (src/Eccube/Resource/template/default/Mypage/index.twig).
+
+  Markup skeleton, `ec-mypageRole` / `ec-pageHeader` / `ec-historyRole`
+  / `ec-historyListHeader` / `ec-definitions` classes and the block
+  structure are kept verbatim from EC-CUBE. Only the dynamic bindings
+  are rebound to the Mypage resource body (src/Resource/Page/Mypage.php):
+    customerId, email, name01, name02,
+    recentOrders[] { orderNo, total, orderDate, orderStatus },
+    recentOrderCount, favoriteCount
+
+  Mypage/navi.twig is included as the shared partial
+  `Page/Mypage/navi.html.twig`; `mypageno` + name01/02 are passed in.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `pagination` -> the resource body's flat `recentOrders` list; the
+     dashboard surfaces only the recent-orders SUMMARY (orderNo / date /
+     status / total), not the full paged history, so the EC-CUBE
+     `ec-pagerRole` + `pager.twig` include is OMITTED (the dashboard is
+     not a paged view in BeMart's projection).
+   - `BaseInfo.option_mypage_order_status_display` — order-status row is
+     a store option; the render-diff stub sets it truthy so both sides
+     emit the row (BeMart's body always carries `orderStatus`).
+   - MISSING BODY FIELD — EC-CUBE's `ec-historyRole__detail` renders a
+     per-order product-thumbnail + line-item list
+     (`Order.MergedProductOrderItems`). BeMart's `recentOrders`
+     projection is a thin summary (no items array), so the detail block
+     is OMITTED and flagged as a follow-up (the dashboard projection
+     would need an `items` sub-array). Enumerated as residual.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'mypage' %}
+{% set route = 'mypage' %}
+{% set title = 'マイページ' %}
+
+{% block main %}
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>マイページ/ご注文履歴</h1>
+            </div>
+            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'index', name01: name01, name02: name02 } %}
+        </div>
+        <div class="ec-mypageRole">
+            {% if recentOrderCount > 0 %}
+                <p class="ec-para-normal">{{ recentOrderCount }}件の履歴があります</p>
+                {% for Order in recentOrders %}
+                    <div class="ec-historyRole">
+                        <div class="ec-historyRole__contents">
+                            <div class="ec-historyRole__header">
+                                <div class="ec-historyListHeader">
+                                    <p class="ec-historyListHeader__date">{{ Order.orderDate }}</p>
+                                    <dl class="ec-definitions">
+                                        <dt>ご注文番号</dt>
+                                        <dd>{{ Order.orderNo }}</dd>
+                                    </dl>
+                                    <dl class="ec-definitions">
+                                        <dt>ご注文状況</dt>
+                                        <dd>{{ Order.orderStatus }}</dd>
+                                    </dl>
+                                    <p class="ec-historyListHeader__action"><a class="ec-inlineBtn"
+                                                                               href="{{ url('mypage_history', {'order_no': Order.orderNo}) }}">詳細を見る</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="ec-para-normal">ご注文履歴はありません。</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

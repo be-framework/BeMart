@@ -1,0 +1,128 @@
+{#
+  BeMart Shopping shipping-multiple page — EC-CUBE
+  goShoppingShippingMultiple.
+
+  PORT of EC-CUBE 4.3 default-theme `Shopping/shipping_multiple.twig`
+  (src/Eccube/Resource/template/default/Shopping/shipping_multiple.twig).
+
+  DATA page (per-item address-assignment list) — see
+  var/templates/README.md. Markup skeleton, the `ec-role` /
+  `ec-pageHeader` / `ec-AddAddress` / `ec-AddAddress__info` /
+  `ec-AddAddress__new` / `ec-AddAddress__add` / `ec-AddAddress__item` /
+  `ec-AddAddress__select` / `ec-AddAddress__actions` classes and the
+  block structure are kept verbatim from EC-CUBE.
+
+  The `{% block javascript %}` — the add-row / delete-row jQuery
+  cloning the multi-destination assignment UI — is ported verbatim
+  (static client-side behaviour, no data binding).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
+     input bound to the body's `csrfToken` (null in the html context).
+   - `price` filter — BeMartTwigExtension JPY filter.
+
+  MISSING BODY FIELD follow-up: the current pre-order's cart items
+  (`OrderItems`) and the customer's registered addresses. The body's
+  `cartItems` / `addresses` lists are empty (a Wave-future TODO — see
+  src/Resource/Page/Shopping/ShippingMultiple.php). With no items the
+  `{% for %}` loop emits nothing — exactly the empty `ec-AddAddress`
+  skeleton EC-CUBE renders for an empty order. Surfacing the
+  cart-item × address allocation is a dedicated vertical-slice, tracked
+  in the enrichment backlog.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'other_page' %}
+{% set route = 'shopping_shipping_multiple' %}
+{% set title = 'お届け先の複数指定' %}
+
+{% block javascript %}
+<script>
+$(function() {
+    $('.add').click(function() {
+        var data = $(this).data();
+        var idx = data.idx;
+        var itemIdx = 0;
+        var item = $('#item' + idx);
+        var row = $('#item' + idx + '-0');
+
+        // 既存のお届け先のrowをコピーして雛形とする
+        var addrow = $(row).clone();
+
+        // 追加する要素のIndexを決定
+        item.find('.shipping_item').each(function() {
+            itemIdx = $(this).attr('data-itemidx');
+        });
+        itemIdx = 1 + parseInt(itemIdx);
+
+        // 行のID設定
+        addrow.attr('id', 'item' + idx + '-' + itemIdx);
+        addrow.attr('data-itemidx', itemIdx);
+
+        // お届け先セレクトボックスのIDとNAME設定
+        addrow.find('select').attr('name', 'form[shipping_multiple][' + idx + '][shipping][' + itemIdx + '][customer_address]');
+        addrow.find('select').attr('id', 'form_shipping_multiple_' + idx + '_shipping_' + itemIdx + '_customer_address');
+
+        // 数量のINPUTのIDとNAME設定
+        addrow.find('input').attr('name', 'form[shipping_multiple][' + idx + '][shipping][' + itemIdx + '][quantity]');
+        addrow.find('input').attr('id', 'form_shipping_multiple_' + idx + '_shipping_' + itemIdx + '_quantity');
+
+        // その他、divやbuttonのID設定
+        addrow.find('[id*="multiple_list__shipping_address"]').attr('id', 'multiple_list__shipping_address--' + idx + '_' + itemIdx + '');
+        addrow.find('[id*="multiple_list__shipping_quantity"]').attr('id', 'multiple_list__shipping_quantity--' + idx + '_' + itemIdx + '');
+        addrow.find('button').each(function() {
+            $(this).attr('id', 'button__delete--' + idx + '_' + itemIdx + '');
+            $(this).attr('data-itemidx', idx + '-' + itemIdx);
+            $(this).data('itemidx', idx + '-' + itemIdx);
+            $(this).removeAttr('style');
+        });
+
+        $(item).append($(addrow));
+    });
+
+    $(document).on('click', '.delete', function() {
+        var data = $(this).data();
+        $('#item' + data.itemidx).remove();
+    });
+
+});
+</script>
+{% endblock javascript %}
+
+{% block main %}
+    <div class="ec-role">
+        <div class="ec-pageHeader">
+            <h1>お届け先の複数指定</h1>
+        </div>
+    </div>
+
+    <div class="ec-AddAddress">
+        <form id="shipping-multiple-form" method="post" action="{{ url('shopping_shipping_multiple') }}">
+            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+            <div class="ec-AddAddress__info">
+                <p>各商品のお届け先を選択してください。</p>
+            </div>
+
+            <div class="ec-AddAddress__new"><a href="{{ url('shopping_shipping_multiple_edit') }}" class="ec-inlineBtn">新規お届け先を追加する</a></div>
+
+            {% for orderItem in cartItems %}
+                {% set idx = loop.index0 %}
+                <div id="multiple_list__item_box--{{ idx }}" class="ec-AddAddress__add">
+                    <div class="ec-AddAddress__item">
+                        <div class="ec-AddAddress__itemtContent">
+                            <div class="ec-AddAddress__itemtTitle">{{ orderItem.productName }}
+                            </div>
+                            <div class="ec-AddAddress__itemtPrice">小計：{{ orderItem.totalPrice|price }}</div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="ec-AddAddress__actions">
+                <button id="button__confirm" type="submit" class="ec-blockBtn--action">選択したお届け先に送る</button>
+                <a class="ec-blockBtn--cancel" href="{{ url('shopping') }}">戻る</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

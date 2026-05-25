@@ -1,0 +1,230 @@
+{#
+  BeMart 商品詳細 — EC-CUBE goProduct.
+
+  PORT of EC-CUBE 4.3 default-theme `Product/detail.twig`
+  (src/Eccube/Resource/template/default/Product/detail.twig).
+
+  Markup skeleton, `ec-productRole` / `ec-grid2` / `ec-sliderItemRole`
+  / `ec-price` / `ec-numberInput` / `ec-modal` classes and the block
+  structure are kept verbatim from EC-CUBE. The dynamic bindings are
+  rebound to the Product resource body (src/Resource/Page/Product.php):
+    productCode, productName, price02, stock, stockFind, form
+
+  FORM page (the add-to-cart action). EC-CUBE renders the add-cart
+  quantity input through `AddCartType` + `form_widget(form.quantity)`;
+  BeMart renders it through a real `AddCartForm` (an AbstractForm),
+  exposed by the Product resource as `body.form`:
+
+    {{ form.input('product_id')|raw }}  <- hidden, seeded w/ productCode
+    {{ form.input('quantity')|raw }}    <- real number <input>, min=1
+
+  Validation authority stays with the Be Framework Becoming chain (the
+  Cart add-item Input) — the form is a field-definition + renderer.
+
+  The `{% block stylesheet %}` (the slick-slider CSS) is ported
+  verbatim — it is static markup with no data binding.
+
+  厳密移植 (Grade-C) SCOPE — BeMart's Product body is the thin
+  projection `productCode / productName / price02 / stock`. EC-CUBE's
+  detail.twig renders much more off the full `Product` entity; those
+  fields are genuinely absent from BeMart's data and are OMITTED (never
+  invented), each enumerated as an explained residual in
+  tests/Resource/ProductHtmlRenderTest.php:
+
+   - `Product.ProductImage` — the `item_visual` / `item_nav` image
+     gallery. No image join in scope. The `ec-sliderItemRole` wrapper
+     is kept; EC-CUBE renders a `no_image_product` placeholder, BeMart
+     omits the gallery body.
+   - `Product.hasProductClass` / `getPrice01*` / `ProductClass` — the
+     規格 (class) price ranges, the `classcategory_id1/2` selects.
+     No ProductClass join in scope; the price renders as the single
+     `price02` value and the class selects do not render.
+   - `Product.Tags` / `Product.ProductCategories` — tag chips and the
+     related-category breadcrumb. No tag / category join in scope.
+   - `Product.description_detail` / `description_list` / `freearea` —
+     the rich product description + free HTML area. No description
+     field in scope.
+   - `Product.code_min` / `code_max` — EC-CUBE shows a code RANGE for
+     class products; BeMart shows the single `productCode`.
+   - `BaseInfo.option_favorite_product` + `is_favorite` — the
+     favorite-product feature flag + per-customer favorite state.
+     BeMart has no BaseInfo / session-favorite aggregation, so the
+     add/remove-favorite control is OMITTED. The `#doAddFavorite` /
+     `#doRemoveFavorite` transitions ARE declared on the Product
+     resource (ALPS remediation f01e1ae); rendering the button needs a
+     Favorite vertical-slice enrichment — flagged as a follow-up.
+   - The `{% block javascript %}` — the slick-slider init, the
+     add-cart AJAX handler, the `eccube.classCategories` payload and
+     the schema.org JSON-LD. EC-CUBE client-side behavior + SEO
+     structured data: it depends on EC-CUBE's bundled `eccube.js` /
+     slick plugin / per-request CSRF / `Product` entity joins that
+     BeMart does not ship. Like the frame's `meta.twig` SEO fragment,
+     it is OMITTED as EC-CUBE-runtime-only and enumerated as residual.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `asset('x')` -> `/x`; `url(route, params)` -> `/{route}?{query}`.
+   - `price` filter -> JPY NumberFormatter.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'product_page' %}
+{% set route = 'product_detail' %}
+{% set title = productName %}
+
+{% block stylesheet %}
+    <style>
+
+        .slick-slider {
+            margin-bottom: 30px;
+        }
+
+        .slick-dots {
+            position: absolute;
+            bottom: -45px;
+            display: block;
+            width: 100%;
+            padding: 0;
+            list-style: none;
+            text-align: center;
+        }
+
+        .slick-dots li {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin: 0 5px;
+            padding: 0;
+
+            cursor: pointer;
+        }
+
+        .slick-dots li button {
+            font-size: 0;
+            line-height: 0;
+            display: block;
+            width: 20px;
+            height: 20px;
+            padding: 5px;
+            cursor: pointer;
+            color: transparent;
+            border: 0;
+            outline: none;
+            background: transparent;
+        }
+
+        .slick-dots li button:hover,
+        .slick-dots li button:focus {
+            outline: none;
+        }
+
+        .slick-dots li button:hover:before,
+        .slick-dots li button:focus:before {
+            opacity: 1;
+        }
+
+        .slick-dots li button:before {
+            content: " ";
+            line-height: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            text-align: center;
+            opacity: .25;
+            background-color: black;
+            border-radius: 50%;
+
+        }
+
+        .slick-dots li.slick-active button:before {
+            opacity: .75;
+            background-color: black;
+        }
+
+        .slick-dots li button.thumbnail img {
+            width: 0;
+            height: 0;
+        }
+
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="ec-productRole">
+        <div class="ec-grid2">
+            <div class="ec-grid2__cell">
+                <div class="ec-sliderItemRole">
+
+                    <div class="item_visual">
+                    </div>
+                    <div class="item_nav">
+                    </div>
+                </div>
+            </div>
+            <div class="ec-grid2__cell">
+                <div class="ec-productRole__profile">
+                    {# 商品名 #}
+                    <div class="ec-productRole__title">
+                        <h2 class="ec-headingTitle">{{ productName }}</h2>
+                    </div>
+                    {# タグ #}
+                    <ul class="ec-productRole__tags">
+                    </ul>
+                    {# 販売価格 #}
+                    <div class="ec-productRole__price">
+                        <div class="ec-price">
+                            <span class="ec-price__price">{{ price02|price }}</span>
+                            <span class="ec-price__tax">税込</span>
+                        </div>
+                    </div>
+                    {# 商品コード #}
+                    <div class="ec-productRole__code">
+                        商品コード： <span class="product-code-default">{{ productCode }}</span>
+                    </div>
+                    <form action="{{ url('product_add_cart', {id: productCode}) }}" method="post" id="form1" name="form1">
+                        {% if stockFind %}
+                            <div class="ec-productRole__actions">
+                                <div class="ec-numberInput"><span>数量</span>
+                                    {{ form.input('quantity')|raw }}
+                                    {{ form.error('quantity') }}
+                                </div>
+                            </div>
+                            <div class="ec-productRole__btn">
+                                <button type="submit" class="ec-blockBtn--action add-cart">
+                                    カートに入れる
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="ec-productRole__btn">
+                                <button type="button" class="ec-blockBtn--action" disabled="disabled">
+                                    ただいま品切れ中です。
+                                </button>
+                            </div>
+                        {% endif %}
+
+                        {{ form.input('product_id')|raw }}
+                    </form>
+                    <div class="ec-modal">
+                        <div class="ec-modal-overlay">
+                            <div class="ec-modal-wrap">
+                                <span class="ec-modal-close"><span class="ec-icon"><img src="{{ asset('assets/icon/cross-dark.svg') }}" alt=""/></span></span>
+                                <div id="ec-modal-header" class="text-center">カートに追加しました。</div>
+                                <div class="ec-modal-box">
+                                    <div class="ec-role">
+                                        <span class="ec-inlineBtn--cancel">お買い物を続ける</span>
+                                        <a href="{{ url('cart') }}" class="ec-inlineBtn--action">カートへ進む</a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ec-productRole__description">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
