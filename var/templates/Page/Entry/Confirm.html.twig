@@ -1,0 +1,175 @@
+{#
+  BeMart Customer-registration-confirm page — EC-CUBE
+  goCustomerRegistrationConfirm.
+
+  PORT of EC-CUBE 4.3 default-theme `Entry/confirm.twig`
+  (src/Eccube/Resource/template/default/Entry/confirm.twig).
+
+  FORM page (Ray.WebFormModule — the form-page recipe, see
+  var/templates/README.md). The registration-confirm screen re-shows the
+  entered values as plain text AND carries them forward as HIDDEN inputs
+  so the final "会員登録をする" submit re-posts the full payload to
+  `doRegisterCustomer`. Markup skeleton, `ec-registerRole` /
+  `ec-pageHeader` / `ec-off1Grid` / `ec-borderedDefs` /
+  `ec-registerRole__actions` / `ec-off4Grid` classes + the <dl>/<dt>/<dd>
+  definition-list structure are kept verbatim from EC-CUBE.
+
+  The hidden carriers are rendered through a real `EntryConfirmForm` (an
+  AbstractForm whose every field is declared `hidden`) exposed by the
+  Confirm resource as `body.form`:
+
+    {{ form.input('name01')|raw }}   <- real <input type="hidden" ...>
+
+  EC-CUBE renders the same hidden inputs through the Symfony FormView
+  (`form_widget(form.name.name01, { type : 'hidden' })`); the render-diff
+  test stubs EC-CUBE's `form_widget` to delegate to the SAME
+  EntryConfirmForm, so the hidden inputs diff to ZERO.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `form_label` — Symfony FormView <label>; BeMart authors the plain
+     `<label class="ec-label">ja</label>` carrying the same label text.
+   - `form.<field>.vars.data` — the entered value re-shown as plain text.
+     The Confirm resource is a thin pure renderer with no submitted
+     payload, so the body carries no field values and the value cells
+     render empty. MISSING BODY FIELD residual — flagged for a follow-up
+     vertical slice (a `mode=confirm` POST handler that threads the
+     submitted payload into the confirm step).
+   - `form._token` — Symfony CSRF widget; kept as a hidden input with an
+     empty value (BeMart's html context has no CSRF widget).
+   - the entity-extension `{% for f in form|filter(...) %}` loop is
+     OMITTED (a core install has no entity extensions — emits nothing).
+   - the `********` password mask is kept verbatim — EC-CUBE never
+     re-shows the password, only the mask + the hidden carriers.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'registration_page' %}
+{% set route = 'entry_confirm' %}
+{% set title = '新規会員登録(確認)' %}
+
+{% block main %}
+    <div class="ec-registerRole">
+        <div class="ec-pageHeader">
+            <h1>新規会員登録(確認)</h1>
+        </div>
+        <div class="ec-off1Grid">
+            <div class="ec-off1Grid__cell">
+                <form method="post" action="{{ url('entry') }}">
+                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <p>{{ "下記の内容で登録してもよろしいでしょうか？\nよろしければ、一番下の「会員登録をする」ボタンをクリックしてください。\n"|nl2br }}</p>
+                    <div class="ec-borderedDefs">
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前</label>
+                            </dt>
+                            <dd>
+                                {{ name01|default('') }} {{ name02|default('') }}
+                                {{ form.input('name01')|raw }}
+                                {{ form.input('name02')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前(カナ)</label>
+                            </dt>
+                            <dd>
+                                {{ kana01|default('') }} {{ kana02|default('') }}
+                                {{ form.input('kana01')|raw }}
+                                {{ form.input('kana02')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">会社名</label>
+                            </dt>
+                            <dd>
+                                {{ companyName|default('') }}
+                                {{ form.input('companyName')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">住所</label>
+                            </dt>
+                            <dd>
+                                <span>〒</span>{{ postalCode|default('') }}
+                                {{ form.input('postalCode')|raw }}
+                                {{ pref|default('') }} {{ addr01|default('') }} {{ addr02|default('') }}
+                                {{ form.input('pref')|raw }}
+                                {{ form.input('addr01')|raw }}
+                                {{ form.input('addr02')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">電話番号</label>
+                            </dt>
+                            <dd>{{ phoneNumber|default('') }}
+                                {{ form.input('phoneNumber')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">メールアドレス</label>
+                            </dt>
+                            <dd>
+                                {{ email|default('') }}
+                                {{ form.input('email')|raw }}
+                                {{ form.input('email_confirm')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">パスワード</label>
+                            </dt>
+                            <dd>
+                                ********
+                                {{ form.input('password')|raw }}
+                                {{ form.input('password_confirm')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">生年月日</label>
+                            </dt>
+                            <dd>
+                                {{ birth|default('') }}
+                                {{ form.input('birth_year')|raw }}
+                                {{ form.input('birth_month')|raw }}
+                                {{ form.input('birth_day')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">性別</label>
+                            </dt>
+                            <dd>
+                                {{ sex|default('') }}
+                                {{ form.input('sex')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">職業</label>
+                            </dt>
+                            <dd>{{ job|default('') }}
+                                {{ form.input('job')|raw }}
+                            </dd>
+                        </dl>
+
+                        {{ form.input('user_policy_check')|raw }}
+                    </div>
+                    <div class="ec-registerRole__actions">
+                        <div class="ec-off4Grid">
+                            <div class="ec-off4Grid__cell">
+                                <button class="ec-blockBtn--action" type="submit" name="mode" value="complete">会員登録をする</button>
+                                <button class="ec-blockBtn--cancel" type="submit" name="mode" value="back">戻る</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

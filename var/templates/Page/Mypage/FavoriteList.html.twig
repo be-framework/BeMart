@@ -1,0 +1,88 @@
+{#
+  BeMart favorites list — EC-CUBE goFavoriteList.
+
+  PORT of EC-CUBE 4.3 default-theme `Mypage/favorite.twig`
+  (src/Eccube/Resource/template/default/Mypage/favorite.twig).
+
+  Markup skeleton, `ec-mypageRole` / `ec-favoriteRole` /
+  `ec-favoriteRole__itemList` / `ec-favoriteRole__item` classes and the
+  block structure are kept verbatim from EC-CUBE. Only the dynamic
+  bindings are rebound to the FavoriteList resource body
+  (src/Resource/Page/Mypage/FavoriteList.php):
+    customerId, favorites[] { productCode, productName, unitPrice },
+    favoriteCount
+
+  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
+
+  Per the Phase 3 ALPS audit, `Favorite` was re-tagged `src-template`:
+  the favorite row composes productName / unitPrice, and FavoriteEntity
+  / SqlFavoriteStorage carry these, so the resource body is sufficient
+  for the row content.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `pagination` -> the resource body's flat `favorites` list; BeMart's
+     FavoriteList is not a paged view, so the `ec-pagerRole` +
+     `pager.twig` include is OMITTED.
+   - `csrf_token_for_anchor()` — EC-CUBE per-request CSRF widget on the
+     delete anchor; BeMart's html context has no CSRF widget, so the
+     attribute is absent. EC-CUBE-runtime only — enumerated as residual.
+   - MISSING BODY FIELDS — EC-CUBE's favorite.twig renders the product
+     THUMBNAIL (`Product.main_list_image`) and a price RANGE
+     (`price02_inc_tax_min`～`price02_inc_tax_max`). BeMart's
+     FavoriteEntity carries only `productCode` (no surrogate product id,
+     no image) and a single `unitPrice`, so the thumbnail `<img>` and
+     the min/max range are OMITTED; the row links by `productCode` and
+     shows the single price. Enumerated as residual.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'mypage' %}
+{% set route = 'mypage_favorite' %}
+{% set title = 'マイページ' %}
+
+{% block main %}
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>マイページ/お気に入り一覧</h1>
+            </div>
+            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'favorite', name01: name01|default(''), name02: name02|default('') } %}
+        </div>
+
+        <div class="ec-mypageRole">
+            <div class="ec-favoriteRole">
+                {% if favoriteCount > 0 %}
+                    <div class="ec-favoriteRole__header">
+                        <p>{{ favoriteCount }}件のお気に入りがあります</p>
+                    </div>
+                    <div class="ec-favoriteRole__detail">
+                        <ul class="ec-favoriteRole__itemList">
+                            {% for FavoriteProduct in favorites %}
+                                <li class="ec-favoriteRole__item">
+                                    <a class="ec-closeBtn--circle"
+                                       href="{{ url('mypage_favorite_delete', { id : FavoriteProduct.productCode }) }}"
+                                       data-method="delete">
+                                        <div class="ec-icon">
+                                            <img src="{{ asset('assets/icon/cross-white.svg') }}" alt="close">
+                                        </div>
+                                    </a>
+                                    <a class="ec-favoriteRole__itemThumb" href="{{ url('product_detail', {'id': FavoriteProduct.productCode}) }}">
+                                        <p class="ec-favoriteRole__item-image">
+                                        </p>
+                                    </a>
+                                    <p class="ec-favoriteRole__itemTitle">{{ FavoriteProduct.productName }}</p>
+                                    <p class="ec-favoriteRole__itemPrice">
+                                        {{ FavoriteProduct.unitPrice|price }}
+                                    </p>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% else %}
+                    <div class="ec-favoriteRole__header">お気に入りは登録されていません。</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

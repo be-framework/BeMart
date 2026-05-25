@@ -64,8 +64,36 @@ final class MypageHistoryResourceTest extends TestCase
         $this->assertSame(FakeFinalizedOrderStorage::SEED_ORDER_NO, $ro->body['orderNo']);
         $this->assertSame(12700, $ro->body['total']);
         $this->assertSame(127, $ro->body['addPoint']);
-        $this->assertCount(2, $ro->body['items']);
-        $this->assertSame('sample-001', $ro->body['items'][0]['productCode']);
+    }
+
+    public function testOnGetHappyPathSurfacesEnrichedProjection(): void
+    {
+        $ro = $this->resource->get('page://self/mypage/history', [
+            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+
+        // Phase 3 enrichment — message + payment method.
+        $this->assertSame('配送は平日希望です。', $ro->body['message']);
+        $this->assertSame('銀行振込', $ro->body['paymentMethod']);
+
+        // Per-shipping address block carrying its line items.
+        $this->assertCount(1, $ro->body['shippings']);
+        $shipping = $ro->body['shippings'][0];
+        $this->assertSame('山田', $shipping['name01']);
+        $this->assertSame('太郎', $shipping['name02']);
+        $this->assertSame('530-0001', $shipping['postalCode']);
+        $this->assertSame('大阪府', $shipping['prefName']);
+        $this->assertSame('サンプル宅配便', $shipping['deliveryName']);
+        $this->assertCount(2, $shipping['items']);
+        $this->assertSame('sample-001', $shipping['items'][0]['productCode']);
+        $this->assertSame('サンプル商品 A', $shipping['items'][0]['productName']);
+        $this->assertSame(9800, $shipping['items'][1]['unitPrice']);
+
+        // Mail-delivery history.
+        $this->assertCount(1, $ro->body['mailHistories']);
+        $this->assertSame('ご注文ありがとうございます', $ro->body['mailHistories'][0]['mailSubject']);
     }
 
     public function testOnGetUnknownOrderReturns404(): void

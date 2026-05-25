@@ -1877,3 +1877,81 @@ Wave 9 net: 601 → 709 (+108 tests), 94 → 139 transitions。
 
 **1 session で** 134 transition 移植 + 9 + 2 (G-23/24) skill gap 発見 + 10 docs externalized + 9 wave parallel orchestration を達成。orchestrator + worktree-isolated parallel subagent pattern が大量並列実装の standard workflow として定着した。
 
+
+## Phase 2 — Fake → SQL persistence (Fake ストレージの本番 DB 化)
+
+Phase A は全ストレージを `Fake*Storage`（in-memory）で実装していた。Phase 2 は
+全 34 ストレージインターフェースを **SQL 実装（MariaDB / MySQL）へ移植**し、
+本番 context のバインディングを Sql 側へ切り替えた。サブフェーズ 2a / 2b / 2c で進行。
+
+> 移植の現状（レイヤ別マトリクス）は `docs/migration-status.md` が正。本セクションは構築プロセスの記録。
+
+### スコープと成果
+
+- **2a — SQL スモーク + フレームワーク確立**（`b5eb4e5` 〜 `fd96242`）
+  - EC-CUBE 4.3 の MySQL スキーマを `sql/schema/ec-cube-4.3-mysql-mysqldump.sql`（65 テーブル）にダンプ
+  - BeMart Entity ↔ EC-CUBE テーブルの差分レポート `sql/diff/entity-vs-eccube.md` を作成（8 grade-A 1:1 / 8 grade-B JOIN / 5 grade-C スキーマ差）
+  - 最初の Sql 実装 `SqlCustomerQuery` + SQL テストフレームワーク（`be/tests/Sql/`）を確立
+  - goCustomer end-to-end・Cart family（`SqlCartQuery` / `SqlCartCommand`）まで縦に通す
+  - Step 5 で ALPS-first ワークフローへ retrofit（SQL 実装から逆に始めていた初期順序を是正）
+- **2b — 本体移植（約 28 ストレージ）**（`f6f22ee` 〜 `9a9c89b`）
+  - 各ストレージを **Phase A（厳密移植の field alignment）+ Phase B（Sql\* 実装 + hypermedia テスト）** のペアで移植
+  - Address / Tag / BaseInfo / TaxRule / News / Page / Block / ClassName / ClassCategory / Category / Layout / Template / LoginHistory / PaymentMethodAdmin / TradeLaw / CustomerCommand / OrderCommand / ShippingAddress / ProductClassQuery / CsvColumnConfig / Plugin / PasswordResetToken / Delivery / MailTemplate / Product 等
+- **2c — 本番カットオーバー**（`f128ba6`, `6ed334d`）
+  - `src/Module/SqlModule.php` が prod context で SQL Reason をバインド（Fake → SQL の本番切替）
+  - 再現可能な本番 DB セットアップ: `mtb_*` マスタ seed（22 テーブル / 395 行、`sql/seed/mtb-master.sql`）+ `sql/setup-db.sh`
+
+### 主要な決定
+
+- **G-23 スキル — hypermedia テストが移植契約**（`a9dcdd7`、`docs/skills/G-23-*.md`）。ストレージを差し替えても、`ResourceInterface::get(...)` end-to-end の hypermedia テストが「同じ表現が出る」ことを保証する。Fake → SQL 移植の合否はこのテストで判定する、というのが Phase 2 全体の運用契約。原則エッセイ `docs/hypermedia-test-principle.md` も併設。
+- **厳密移植の field alignment** — Sql 化の前段（Phase A）で、BeMart Entity が EC-CUBE スキーマに無いフィールド（`sortNo`, `feeBase`, `body`/`htmlBody`, `mailAddress` 等）を持っている箇所を**先に削る**。EC-CUBE 完全移植を優先し、Entity をスキーマに合わせる。
+- **SQL 実装は素の prepared statement** — `be/src/Reason/Query/Sql*.php` は Doctrine を使わず PDO の prepared statement のみ。Be の Reason 層の framework-agnostic 性を保つ。
+- **テストは 3 面**（`sql/README.md` 参照）— storage unit（Injector 無し）/ Final-direct integration / Resource hypermedia。`bemart-sql` テストスイートは毎回 `eccubedb_test` を drop + 再作成し、各テストはトランザクション内で rollback。`DATABASE_URL` 未設定なら clean skip。
+- **スキーマロードの FK 回避** — ダンプは bare `CREATE TABLE` + 跨テーブル FK を持つが pragma が無いため、`SET FOREIGN_KEY_CHECKS=0/1` でラップしてロードする（`setup-db.sh` と `be/tests/Sql/bootstrap.php` で共通）。
+
+### 積み残し
+
+- `dtb_*` 運用データ（実顧客 / 注文 / 商品）の本番移行は `setup-db.sh` の対象外 — 別の運用作業
+- Phase A の stub 7 件（`doImportProductCsv` 等）は Phase 2 では未解消のまま Phase 3 以降へ持ち越し
+- セッション / CSRF アダプタは本番 cookie/JWT 化を deferred（テストでは Fake セッションのまま）
+
+
+## Phase 3 — HTML presentation layer (HTML プレゼンテーション層)
+
+Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEAR.Sunday リソースを
+**HTML としてレンダリング**し、EC-CUBE のストアフロント画面を再現するフェーズ。
+
+> 移植の現状・残作業 punch-list は `docs/migration-status.md` が正。本セクションは構築プロセスの記録。
+
+### スコープと成果
+
+- **Twig レンダリングの配線**（`762a739` 〜）
+  - `madapaja/twig-module` を導入、`src/Module/HtmlModule.php` で `APP_CONTEXT=html` の HTML context を定義
+  - `BeMartTwigExtension`（`asset` / `url` / `path` / `price` 等 EC-CUBE Twig ヘルパの再実装）
+- **ストアフロント全テンプレート移植（7 wave、約 40 画面）**（`1507dc2` 〜 `46b2a08`）
+  - `var/templates/` に EC-CUBE 4.3 `default` テーマ Twig の**忠実な移植**を配置（新規マークアップではなく port）
+  - Top / ProductList / Product detail / Cart / Mypage クラスタ 9 画面 / Shopping（checkout）クラスタ 9 画面 / Entry / Contact / Forgot / Help 5 画面 等
+  - 共有レイアウト `base.html.twig` は EC-CUBE `default_frame.twig` の port
+- **レンダー差分忠実性テスト** — 各ページに `tests/Resource/<Page>HtmlRenderTest.php`。EC-CUBE の**実テンプレート**（gitignore された 4.3 クローン）をスタブ Twig env でレンダリングし、BeMart の移植テンプレートと同じ論理データで差分を取る。差分行は**説明付き residual allowlist** に限る（allowlist が honesty metric）。
+- **フォームページ — `ray/web-form-module` 採用**（`5a95435` Login pilot）。読み取り専用データページとは別に、`<input>` を持ち POST を受けるページ（Login / Entry / Contact / Forgot）用のレシピを確立。
+- **ALPS 監査 + 是正**（`8d93500`, `f01e1ae`、`docs/alps-audit-phase3.md`）。Phase 2b で多くのディスクリプタが BeMart 実装 Entity から逆生成（back-form）された疑いを 2 軸で監査し、Favorite の再タグ + 5 遷移の追加を実施。
+
+### 主要な決定
+
+- **HTML は EC-CUBE テンプレートの port であって新規マークアップではない** — ALPS は意図的にプレゼンテーションを持たない。HTML を ALPS で採点すると、プレゼンテーションについて沈黙している spec で採点することになる。よって忠実性の基準は EC-CUBE 自身の `default` テーマテンプレート。詳細は `var/templates/README.md`。
+- **バリデーション権限は Be Framework に残す** — `ray/web-form-module` の役割はフォーム定義 + HTML レンダリング + 再表示（repopulation）に厳密に限定。業務ルールを Aura.Filter に複製しない（spec から drift する）。`#[FormValidation]` アスペクトは不使用 — Becoming chain が verdict を持つ。
+- **enrichment backlog** — データページの中に、リソース本体（`$ro->body`）が薄すぎて EC-CUBE テンプレートを忠実に port できないものがある。これらは Cart スタイルの再導出（ALPS から再導出 → Entity/SQL/Fake を enrich → テンプレート配線）が必要。Cart はパイロットとして完了（`a44f296`/`9d06ec3`）、Mypage History もパイロット完了（`a31f8d8`/`3c1b03d`）。残: Shopping confirm/complete・Mypage ダッシュボード・Favorite・Address・Contact。
+- **Twig コンパイルキャッシュ** — TwigModule は `var/tmp/<context>/twig` にコンパイル結果を残し `auto_reload` off。テンプレート編集後は `rm -rf var/tmp/html/twig` で clear が必要。
+
+### 積み残し
+
+- **Admin HTML（約 100 テンプレート）が未着手** — EC-CUBE admin テーマの全テンプレートが未 port。`docs/alps-audit-phase3.md` は admin を約 14 件サンプリングしただけで、残り ~50+ は未監査。
+- **enrichment backlog の残 5 件**（上記）
+- **`Block/*` ウィジェットテンプレート** — ヘッダ/フッタ/カート/ログイン/検索のブロック領域は今は EC-CUBE ランタイム residual のまま。ウィジェットレンダリングのサブステップが必要（Block は ALPS で意図的に未モデル化）。
+- Phase 3 中の ALPS 是正で追加した 5 遷移（`doSortNoMove` 等）は `be/src` にドメイン実装が無い（domain coverage が 139/144 である理由）
+
+### Phase 3 末のテスト規模
+
+`vendor/bin/phpunit` → **約 1574 tests / 5006 assertions, OK**（deprecation 3 件のみ、failure なし）。
+正確な現在値は `docs/migration-status.md` を参照。
+

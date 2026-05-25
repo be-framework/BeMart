@@ -13,6 +13,8 @@ use MyVendor\BeMart\Be\Exception\LoginFailedException;
 use MyVendor\BeMart\Be\Final\CustomerAuthenticated;
 use MyVendor\BeMart\Be\Input\LoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\LoginForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 use function sprintf;
@@ -35,12 +37,27 @@ use function sprintf;
  * downstream requests through the session is the EventListener's
  * responsibility once Phase B Slice 7.x lands. For test purposes,
  * AppModule binds a fixed-customer FakeSession.
+ *
+ * Phase 3 — HTML FORM page. The resource builds a {@see LoginForm}
+ * (Ray.WebFormModule AbstractForm) and exposes it as `body['form']` so
+ * the HTML port can render real `<input>`s via `{{ form.input(...) }}`.
+ * The form is a field-definition + renderer only — VALIDATION AUTHORITY
+ * STAYS WITH the Be Framework Becoming chain. On a domain rejection the
+ * resource bridges the verdict onto the form (repopulated email + inline
+ * error) so the Login page re-renders with EC-CUBE's exact form UX. The
+ * JSON contexts (`app`, `prod`, `test`) ignore `body['form']`; the 1445
+ * JSON-context tests assert key-wise on `body` and are unaffected.
+ *
+ * FormFactory is self-sufficient (no Ray.Di bindings needed), so the
+ * resource builds the form in every context cheaply; only the `html`
+ * context's TwigRenderer actually renders it.
  */
 class Login extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -68,6 +85,9 @@ class Login extends ResourceObject
                 'href' => 'page://self/login',
             ],
             'csrfToken' => null,
+            // Phase 3: an empty LoginForm for the HTML port to render
+            // via `{{ form.input(...) }}`. JSON contexts ignore it.
+            'form' => $this->formFactory->newInstance(LoginForm::class),
         ];
 
         return $this;
@@ -96,16 +116,32 @@ class Login extends ResourceObject
                 password: $password,
             ));
         } catch (SemanticVariableException $e) {
+            // Be Framework Semantics rejected the input shape (malformed
+            // email / out-of-range password). Bridge the domain verdict
+            // onto the form: repopulate the email, attach the ja message
+            // as an inline field error. EC-CUBE shows this in
+            // `ec-errorMessage`.
+            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
             $this->code = Code::BAD_REQUEST;
             $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
+                'message' => $message,
                 'email' => $email,
+                'form' => $this->failedForm($email, $message),
             ];
 
             return $this;
         } catch (LoginFailedException) {
+            // Wrong credentials. The top-level body deliberately does NOT
+            // echo the email — that would leak user-enumeration signal.
+            // The repopulated email lives INSIDE `body['form']` only, so
+            // the HTML page re-shows it (EC-CUBE's getLastUsername UX)
+            // while the JSON body stays enumeration-safe.
+            $message = 'メールアドレスまたはパスワードが正しくありません。';
             $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'メールアドレスまたはパスワードが正しくありません。'];
+            $this->body = [
+                'message' => $message,
+                'form' => $this->failedForm($email, $message),
+            ];
 
             return $this;
         }
@@ -123,5 +159,27 @@ class Login extends ResourceObject
         ];
 
         return $this;
+    }
+
+    /**
+     * Builds a LoginForm reflecting a rejected POST.
+     *
+     * The Becoming chain has already reached the verdict; this only
+     * transports it onto the form so the HTML page re-renders with the
+     * entered email and the inline error. Validation authority remains
+     * with Be — the form is a renderer here, never a validator.
+     */
+    private function failedForm(string $email, string $message): LoginForm
+    {
+        $form = $this->formFactory->newInstance(LoginForm::class);
+        assert($form instanceof LoginForm);
+
+        // Repopulate the email (EC-CUBE getLastUsername UX). The password
+        // is deliberately not repopulated.
+        $form->fillValues(['login_email' => $email]);
+        // Bridge the Be-domain verdict onto the form's error state.
+        $form->setDomainError('login_email', $message);
+
+        return $form;
     }
 }

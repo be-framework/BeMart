@@ -4,10 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-EC-CUBE 4.3 の ALPS プロファイル (`alps.json`, 403 descriptors) と、EC-CUBE → BEAR.Sunday + Be Framework への移植を駆動する Claude Code ネイティブワークフローの 2 つで構成される。
+EC-CUBE 4.3 の ALPS プロファイル (`alps.json`) と、それを契約として EC-CUBE を BEAR.Sunday + Be Framework へ移植する実装プロジェクト（**BeMart**）で構成される。
 
-- **主成果物**: `alps.json` — EC-CUBE 4.3 のセマンティクス（データ語彙 266 + 状態遷移 137）を機械可読に定義
+- **ALPS プロファイル**: `alps.json` — EC-CUBE 4.3 のセマンティクス（データ語彙 + 状態遷移）を機械可読に定義
+- **BeMart 移植**: Be ドメイン層 (`be/`) + BEAR.Sunday アプリ層 (`src/`) + SQL 永続化 (`sql/`) + HTML 層 (`var/templates/`)
 - **移植ワークフロー**: `.claude/` 以下の `/run` コマンド + JSON workflow + prompts
+
+移植の現状（レイヤ別ステータスマトリクス・残作業）は `docs/migration-status.md` が正。構築プロセスの決定ログは `HANDOVER.md`。
 
 ## Commands
 
@@ -40,6 +43,23 @@ HTML / SVG 再生成時は `docs/` 配下のコピーも同期すること。
 
 1. **ALPS 層** — `alps.json` が正（source of truth）。`openapi.yaml`, HTML は生成物。`tag.md` がタグ分類体系、`HANDOVER.md` が構築プロセス記録（Pilot 1/2 完了報告含む）
 2. **ワークフロー層** — `.claude/` 配下に、Claude Code のネイティブ機能（custom command + subagent + prompts）でワークフローを定義
+
+### BeMart 実装レイヤ（ALPS を実装する側）
+
+`alps.json` を契約として、以下の 5 レイヤで EC-CUBE を移植する（詳細ステータスは `docs/migration-status.md`）:
+
+```text
+be/src/             Be Framework ドメイン層（Input / Semantic / Final / Reason / Being / Entity）
+src/Resource/       BEAR.Sunday リソース層（page://*, app://* — JSON 表現）
+src/Module/         Ray.Di Module（AppModule / SqlModule / HtmlModule で context 別バインド）
+src/Form/           Ray.WebFormModule のフォーム定義（HTML フォームページ用）
+be/src/Reason/Query/Sql*.php  SQL 永続化（Phase 2 — 全 34 ストレージの Fake → SQL 移植）
+var/templates/      HTML テンプレート（Phase 3 — EC-CUBE テンプレートの忠実移植）
+sql/                EC-CUBE 4.3 スキーマダンプ・mtb_* マスタ seed・setup-db.sh（Phase 2）
+```
+
+context は `APP_CONTEXT` 環境変数で切替（`app`/`prod` は JSON、`html` は Twig レンダリング）。
+`sql/README.md` が SQL テストフレームワーク、`var/templates/README.md` が HTML 移植手順を記述する。
 
 ### `.claude/` の構成
 

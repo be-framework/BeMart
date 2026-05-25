@@ -135,6 +135,7 @@ use MyVendor\BeMart\Be\Reason\Service\ResetKeyGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
 use Ray\Di\Scope;
+use Ray\WebFormModule\FormFactory;
 
 final class AppModule extends AbstractAppModule
 {
@@ -231,6 +232,17 @@ final class AppModule extends AbstractAppModule
         // `csrfToken` body field; tests that need to exercise rejection
         // simply omit it or pass a mismatch.
         $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class)->in(Scope::SINGLETON);
+
+        // Phase 3 — HTML form pages (Ray.WebFormModule). FormFactory builds
+        // AbstractForm instances (LoginForm) with their Aura.Input /
+        // Aura.Filter / Aura.Html dependencies fully self-contained — it
+        // needs no Ray.Di bindings of its own. Bound here (the base module
+        // every context installs) because the shared Login resource
+        // constructor-depends on it; in JSON contexts the built form is an
+        // unused `body['form']` value, so the 1445 JSON-context tests are
+        // unaffected. The form library proper (WebFormModule) is installed
+        // only in HtmlModule.
+        $this->bind(FormFactory::class);
 
         // Reason (Pilot 13 doAddFavorite): unified Query+Command for the
         // customer favorites list. Singleton so adds within a request

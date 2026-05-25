@@ -7,6 +7,8 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Form\ShoppingShippingEditForm;
+use Ray\WebFormModule\FormFactory;
 
 /**
  * EC-CUBE goShoppingShippingEdit — お届け先変更フォーム (Wave 3H pure renderer).
@@ -19,9 +21,20 @@ use BEAR\Resource\ResourceObject;
  * address form (10 fields). Production EC-CUBE prepopulates with the
  * current shipping selection; Wave 3H exposes the empty form shape
  * only — prefill is left as TODO.
+ *
+ * Phase 3 — HTML FORM page. `Shopping/shipping_edit.twig` renders the
+ * address inputs through the Symfony FormView; BeMart exposes a {@see
+ * ShoppingShippingEditForm} (Ray.WebFormModule AbstractForm) as
+ * `body['form']` so the HTML port renders real `<input>`s via
+ * `{{ form.input(...) }}`. JSON contexts ignore `body['form']`.
  */
 class ShippingEdit extends ResourceObject
 {
+    public function __construct(
+        private readonly FormFactory $formFactory,
+    ) {
+    }
+
     /**
      * @todo Wave-future: prefill the form fields with the currently
      *     selected shipping address (member's chosen address book entry
@@ -57,6 +70,9 @@ class ShippingEdit extends ResourceObject
                 'goShoppingShipping' => 'page://self/shopping/shipping',
             ],
             'csrfToken' => null,
+            // Phase 3: an empty ShoppingShippingEditForm for the HTML
+            // port to render the address inputs. JSON contexts ignore it.
+            'form' => $this->formFactory->newInstance(ShoppingShippingEditForm::class),
         ];
 
         return $this;

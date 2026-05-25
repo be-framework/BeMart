@@ -1,0 +1,45 @@
+{#
+  BeMart Password-reset-mail-sent page — EC-CUBE goForgotComplete.
+
+  PORT of EC-CUBE 4.3 default-theme `Forgot/complete.twig`
+  (src/Eccube/Resource/template/default/Forgot/complete.twig).
+
+  DATA page (no form) — the data-page recipe (see var/templates/
+  README.md). EC-CUBE shows this static confirmation after a successful
+  `doRequestPasswordReset`. Markup skeleton, `ec-role` / `ec-pageHeader`
+  / `ec-forgetCompleteRole` / `ec-off3Grid` / `ec-text-ac` /
+  `ec-reportHeading` / `ec-reportDescription` classes are kept verbatim
+  from EC-CUBE.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml. The
+     `front.forgot.complete_message__body` value is a multi-line YAML
+     literal; EC-CUBE prints it raw (the template has no `nl2br`), so
+     the port substitutes the literal text verbatim.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'other_page' %}
+{% set route = 'forgot_complete' %}
+{% set title = 'パスワードの再発行(メール送信)' %}
+
+{% block main %}
+    <div class="ec-role">
+        <div class="ec-pageHeader">
+            <h1>パスワードの再発行(メール送信)</h1>
+        </div>
+    </div>
+    <div class="ec-forgetCompleteRole">
+        <div class="ec-off3Grid ec-text-ac">
+            <div class="ec-off3Grid__cell">
+                <div class="ec-reportHeading">
+                    <h2>パスワード再発行メールの送信が完了しました。</h2>
+                </div>
+                <p class="ec-reportDescription">ご登録メールアドレスにパスワードを再発行するためのメールを送信いたしました。
+メールの内容をご確認いただきますよう、お願いいたします。
+※メールが届かない場合はメールアドレスをご確認の上、再度お試しください。
+</p>
+            </div>
+        </div>
+    </div>
+{% endblock %}
