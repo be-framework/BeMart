@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\ShippingTrackingNumber;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Shipping-address persistence contract — Wave 9η.
@@ -25,8 +27,10 @@ use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
  */
 interface ShippingAddressStorageInterface
 {
+    #[DbQuery('shipping_get_by_order_no', factory: ShippingAddressEntity::class)]
     public function getByOrderNo(string $orderNo): ShippingAddressEntity|null;
 
+    #[DbQuery('shipping_put')]
     public function put(ShippingAddressEntity $address): void;
 
     /**
@@ -35,6 +39,7 @@ interface ShippingAddressStorageInterface
      *
      * @return list<ShippingAddressEntity>
      */
+    #[DbQuery('shipping_list_all', factory: ShippingAddressEntity::class)]
     public function listAll(): array;
 
     /**
@@ -42,6 +47,7 @@ interface ShippingAddressStorageInterface
      * the order's dtb_shipping row. A miss (no shipping row for the
      * orderNo) is a silent no-op, same shape as `put`.
      */
+    #[DbQuery('shipping_update_tracking')]
     public function updateTrackingNumber(string $orderNo, string $trackingNumber): void;
 
     /**
@@ -50,5 +56,6 @@ interface ShippingAddressStorageInterface
      * number set. Lets the `doUpdateTrackingNumber` Final echo back the
      * persisted value.
      */
-    public function trackingNumberByOrderNo(string $orderNo): string|null;
+    #[DbQuery('shipping_tracking_by_order_no')]
+    public function trackingNumberByOrderNo(string $orderNo): ShippingTrackingNumber;
 }

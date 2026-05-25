@@ -6,12 +6,12 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Exception\MailTemplateNotFoundException;
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlMailTemplateStorage;
+use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 
 /**
- * Storage-layer coverage for {@see SqlMailTemplateStorage} (Phase 2b).
+ * Storage-layer coverage for {@see MailTemplateStorageInterface} (Phase 2b).
  *
- * Mirrors the shape of {@see SqlDeliveryStorageTest}. Per G-23 the
+ * Mirrors the shape of {@see DeliveryStorageInterfaceTest}. Per G-23 the
  * client-observable contract lives in
  * {@see \MyVendor\BeMart\Tests\Resource\Sql\AdminMailTemplateResourceSqlTest};
  * the cases below verify the per-method SQL paths in isolation —
@@ -26,7 +26,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
         $secondId = $this->insertMailTemplate(['name' => '会員登録完了メール']);
         $thirdId = $this->insertMailTemplate(['name' => 'パスワード再発行メール']);
 
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertCount(3, $rows);
@@ -42,7 +42,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -54,7 +54,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
             'mail_subject' => 'ご注文ありがとうございます',
         ]);
 
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
         $entity = $storage->findById($id);
 
         $this->assertInstanceOf(MailTemplateEntity::class, $entity);
@@ -76,7 +76,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
             'mail_subject' => null,
         ]);
 
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
         $entity = $storage->findById($id);
 
         $this->assertInstanceOf(MailTemplateEntity::class, $entity);
@@ -87,7 +87,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
 
     public function testFindByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
         $this->assertNull($storage->findById(99999999));
     }
 
@@ -99,7 +99,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
             'mail_subject' => '旧件名',
         ]);
 
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
         $storage->update(new MailTemplateEntity(
             mailTemplateId: $id,
             mailTemplateName: '注文完了メール',
@@ -125,7 +125,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
             'mail_subject' => '旧件名',
         ]);
 
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
         $storage->update(new MailTemplateEntity(
             mailTemplateId: $id,
             mailTemplateName: 'whatever',
@@ -153,7 +153,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
             'deletable' => 1,
         ]);
 
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
         $storage->update(new MailTemplateEntity(
             mailTemplateId: $id,
             mailTemplateName: 'whatever',
@@ -178,7 +178,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
         // Update-only contract — an unknown id is a 404, never an
         // INSERT. The Final's failure ladder maps this exception to
         // Code::NOT_FOUND.
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
 
         $this->expectException(MailTemplateNotFoundException::class);
         $storage->update(new MailTemplateEntity(
@@ -191,7 +191,7 @@ final class SqlMailTemplateStorageTest extends AbstractSqlTestCase
 
     public function testUpdateUnknownIdDoesNotInsert(): void
     {
-        $storage = new SqlMailTemplateStorage($this->pdo);
+        $storage = $this->sql(MailTemplateStorageInterface::class);
 
         try {
             $storage->update(new MailTemplateEntity(

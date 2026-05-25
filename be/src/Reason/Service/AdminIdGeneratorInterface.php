@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Service;
 
+use MyVendor\BeMart\Be\Reason\Query\Result\AllocatedId;
+use Ray\MediaQuery\Annotation\DbQuery;
+
 /**
  * Generates an opaque adminId for a newly-created admin — Wave 8
  * (doCreateMember). Distinct from {@see CustomerIdGeneratorInterface}
@@ -12,6 +15,6 @@ namespace MyVendor\BeMart\Be\Reason\Service;
  */
 interface AdminIdGeneratorInterface
 {
-    /** @return non-empty-string */
-    public function generate(): string;
+    #[DbQuery('admin_next_id')]
+    public function generate(): AllocatedId;
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\PasswordResetTokenEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Storage for password-reset tokens — Pilot 14 issues, Pilot 15 consumes.
@@ -18,9 +19,11 @@ use MyVendor\BeMart\Be\Reason\Entity\PasswordResetTokenEntity;
  */
 interface PasswordResetTokenStorageInterface
 {
+    #[DbQuery('password_reset_put')]
     public function put(PasswordResetTokenEntity $token): void;
 
     /** Look up by resetKey (used by doResetPassword consumer). */
+    #[DbQuery('password_reset_get', factory: PasswordResetTokenEntity::class)]
     public function getByResetKey(string $resetKey): PasswordResetTokenEntity|null;
 
     /**
@@ -28,5 +31,6 @@ interface PasswordResetTokenStorageInterface
      * entry whose resetKey matches. Silently no-op when the key is
      * unknown so the method is idempotent under retries.
      */
+    #[DbQuery('password_reset_delete')]
     public function delete(string $resetKey): void;
 }

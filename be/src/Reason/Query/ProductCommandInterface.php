@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\ProductStatusUpdate;
+use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
+use MyVendor\BeMart\Be\Reason\Query\Result\CopiedProduct;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Write-side Product command — Wave 8 (admin product management).
@@ -27,6 +31,7 @@ interface ProductCommandInterface
      * or equivalent). Replays with the same code overwrite — the
      * Final is responsible for the 409 guard.
      */
+    #[DbQuery('product_create')]
     public function create(ProductEntity $product): void;
 
     /**
@@ -35,6 +40,7 @@ interface ProductCommandInterface
      * merged with the validated update fields; this interface does
      * not perform the merge itself.
      */
+    #[DbQuery('product_update')]
     public function update(ProductEntity $product): void;
 
     /**
@@ -43,6 +49,7 @@ interface ProductCommandInterface
      * is a no-op. Silently does nothing when productCode is not in
      * the store.
      */
+    #[DbQuery('product_soft_delete')]
     public function delete(string $productCode): void;
 
     /**
@@ -53,7 +60,8 @@ interface ProductCommandInterface
      * (admin convention: the copy is a fresh draft). Returns the
      * newly-persisted entity.
      */
-    public function copy(string $sourceCode, string $newCode): ProductEntity;
+    #[DbQuery('product_copy', factory: \MyVendor\BeMart\Be\Reason\Query\Factory\ProductFactory::class)]
+    public function copy(string $sourceCode, string $newCode): CopiedProduct;
 
     /**
      * Bulk flip productStatus across multiple products. Returns the
@@ -62,7 +70,7 @@ interface ProductCommandInterface
      * idempotent re-application of the same status is NOT counted).
      * Unknown codes are silently skipped.
      *
-     * @param list<string> $productCodes
      */
-    public function bulkUpdateStatus(array $productCodes, int $newStatus): int;
+    #[DbQuery('product_status_bulk_update')]
+    public function bulkUpdateStatus(ProductCodeList $productCodes, int $newStatus): ProductStatusUpdate;
 }

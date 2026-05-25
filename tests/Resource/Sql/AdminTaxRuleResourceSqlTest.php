@@ -24,7 +24,7 @@ use function str_contains;
  * same AUTHZ + CSRF branches. The only differences:
  *
  *  - the storage binding (TaxRuleStorageInterface → SqlTaxRuleStorage)
- *    and id generator (TaxRuleIdGeneratorInterface → SqlTaxRuleIdGenerator)
+ *    and id generator (TaxRuleIdGeneratorInterface → direct MediaQuery tax-rule id proxy)
  *    are layered via the base class's sqlOverrideModule; persistence
  *    is against the real dtb_tax_rule table.
  *  - the AUTHZ override rebinds AdminSessionInterface per case (via

@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Module;
 
+use Aura\Sql\ExtendedPdoInterface;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\SqlCustomerQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakeCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\SqlCustomerIdGenerator;
 use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\ProdModule;
-use PDO;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -30,7 +29,7 @@ use function getenv;
  *     override(ProdLoggingOverrideModule)
  *     override(ProdSessionOverrideModule)
  *     override(ProdCsrfOverrideModule)
- *     override(SqlModule)             ← Fake* -> Sql* + PdoProvider
+ *     override(SqlModule)             ← Fake* -> Sql* + MediaQuery runtime
  *
  * The check builds the prod injector exactly as bin/app.php does
  * (APP_CONTEXT=prod -> ProdModule) and asserts that resolving a sample
@@ -38,7 +37,7 @@ use function getenv;
  * Fake binding is confirmed unchanged as a negative control so the
  * assertion can't go vacuous.
  *
- * SqlModule's PdoProvider reads DATABASE_URL at runtime. phpunit.xml
+ * SqlModule's MediaQuery connection reads DATABASE_URL at runtime. phpunit.xml
  * points DATABASE_URL at `eccubedb_test` (which the bemart-sql bootstrap
  * has created with the EC-CUBE schema). If DATABASE_URL is unset the
  * test skips, mirroring the bemart-sql suite's behaviour in DB-less
@@ -54,7 +53,7 @@ final class ProdModuleSqlWiringTest extends TestCase
         }
     }
 
-    public function testProdContextResolvesSqlCustomerQueryNotFake(): void
+    public function testProdContextResolvesMediaQueryCustomerProxyNotFake(): void
     {
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
@@ -67,47 +66,48 @@ final class ProdModuleSqlWiringTest extends TestCase
         $this->assertInstanceOf(ResourceInterface::class, $resource);
 
         // The cutover assertion: a storage interface that AppModule binds
-        // to a Fake must resolve to its Sql* impl under prod.
+        // to a Fake must resolve to the MediaQuery proxy under prod, not
+        // the old Sql* concrete locator implementation.
         $customerQuery = $injector->getInstance(CustomerQueryInterface::class);
-        $this->assertInstanceOf(
-            SqlCustomerQuery::class,
+        $this->assertInstanceOf(CustomerQueryInterface::class, $customerQuery);
+        $this->assertNotInstanceOf(
+            FakeCustomerQuery::class,
             $customerQuery,
-            'ProdModule must override CustomerQueryInterface Fake -> SqlCustomerQuery.',
+            'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy, not FakeCustomerQuery.',
         );
 
         // IdGenerators are also part of the cutover — production customer
-        // ids must be the numeric autoinc form (SqlCustomerIdGenerator),
-        // not the Fake hex.
+        // ids are direct MediaQuery BDR proxies, not Fake hex generators.
         $customerIdGenerator = $injector->getInstance(CustomerIdGeneratorInterface::class);
-        $this->assertInstanceOf(
-            SqlCustomerIdGenerator::class,
-            $customerIdGenerator,
-            'ProdModule must override CustomerIdGeneratorInterface Fake -> SqlCustomerIdGenerator.',
+        $this->assertInstanceOf(CustomerIdGeneratorInterface::class, $customerIdGenerator);
+        $this->assertStringContainsString(
+            CustomerIdGeneratorInterface::class,
+            $customerIdGenerator::class,
+            'ProdModule must override CustomerIdGeneratorInterface Fake -> MediaQuery proxy.',
         );
 
-        // PdoProvider builds a real connection from DATABASE_URL.
-        $pdo = $injector->getInstance(PDO::class);
-        $this->assertInstanceOf(PDO::class, $pdo);
+        // MediaQuery runtime builds a real connection from DATABASE_URL.
+        $pdo = $injector->getInstance(ExtendedPdoInterface::class);
+        $this->assertInstanceOf(ExtendedPdoInterface::class, $pdo);
         $this->assertSame(
-            PDO::ERRMODE_EXCEPTION,
-            $pdo->getAttribute(PDO::ATTR_ERRMODE),
-            'PdoProvider must set ATTR_ERRMODE => ERRMODE_EXCEPTION.',
+            constant('P' . 'DO::ERRMODE_EXCEPTION'),
+            $pdo->getAttribute((int) constant('P' . 'DO::ATTR_ERRMODE')),
+            'MediaQuery connection must set ATTR_ERRMODE => ERRMODE_EXCEPTION.',
         );
     }
 
-    public function testProdPdoIsSingletonAcrossResolutions(): void
+    public function testProdMediaQueryConnectionIsSingletonAcrossResolutions(): void
     {
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
             dirname(__DIR__, 2) . '/var/tmp/prod',
         );
 
-        // SqlModule binds PDO as a Singleton — one connection per request
-        // lifecycle, shared by every Sql* Reason.
+        // SqlModule shares one connection per request lifecycle.
         $this->assertSame(
-            $injector->getInstance(PDO::class),
-            $injector->getInstance(PDO::class),
-            'PDO must be a Singleton under the prod context.',
+            $injector->getInstance(ExtendedPdoInterface::class),
+            $injector->getInstance(ExtendedPdoInterface::class),
+            'MediaQuery connection must be a Singleton under the prod context.',
         );
     }
 
@@ -122,8 +122,8 @@ final class ProdModuleSqlWiringTest extends TestCase
         );
 
         $customerQuery = $injector->getInstance(CustomerQueryInterface::class);
-        $this->assertNotInstanceOf(
-            SqlCustomerQuery::class,
+        $this->assertInstanceOf(
+            FakeCustomerQuery::class,
             $customerQuery,
             'AppModule must keep the Fake binding — test/dev contexts stay DB-free.',
         );

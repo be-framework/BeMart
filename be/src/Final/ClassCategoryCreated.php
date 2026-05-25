@@ -49,7 +49,7 @@ final readonly class ClassCategoryCreated
         }
 
         $entity = new ClassCategoryEntity(
-            classCategoryId: $idGenerator->generate(),
+            classCategoryId: $idGenerator->generate()->value,
             classNameId: $classNameId,
             name: $classCategoryName,
         );

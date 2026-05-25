@@ -30,8 +30,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * Be foundation; the ALPS profile is expected to gain matching
  * descriptors in a follow-up sweep.
  */
-final readonly class AdminEntity
+final readonly class AdminEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     /** Active admin — can log in. Mirrors EC-CUBE mtb_work=1. */
     public const int WORK_ACTIVE = 1;
 

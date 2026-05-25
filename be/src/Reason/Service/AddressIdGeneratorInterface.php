@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Service;
 
+use MyVendor\BeMart\Be\Reason\Query\Result\AllocatedId;
+use Ray\MediaQuery\Annotation\DbQuery;
+
 /**
  * Generates opaque address identifiers — mirrors
  * CustomerIdGeneratorInterface (Pilot 4). A dedicated interface lets
@@ -12,5 +15,6 @@ namespace MyVendor\BeMart\Be\Reason\Service;
  */
 interface AddressIdGeneratorInterface
 {
-    public function generate(): string;
+    #[DbQuery('address_next_id')]
+    public function generate(): AllocatedId;
 }

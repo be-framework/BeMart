@@ -12,8 +12,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * Cascade Diamond actually reads (preOrderId, paymentMethodId, customerId)
  * plus the source items needed to recompute totals.
  */
-final readonly class OrderEntity
+final readonly class OrderEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     /** @param list<CartItemEntity> $items */
     public function __construct(
         public string $preOrderId,

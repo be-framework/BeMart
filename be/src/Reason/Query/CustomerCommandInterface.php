@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 interface CustomerCommandInterface
 {
+    #[DbQuery('customer_register')]
     public function register(CustomerEntity $customer): void;
 
     /**
@@ -17,6 +19,7 @@ interface CustomerCommandInterface
      * is a no-op (the ALPS descriptor type for this transition is
      * `idempotent`).
      */
+    #[DbQuery('customer_activate')]
     public function activate(string $customerId): void;
 
     /**
@@ -25,6 +28,7 @@ interface CustomerCommandInterface
      * persisted current state merged with the validated update fields;
      * this interface does not perform the merge itself.
      */
+    #[DbQuery('customer_update')]
     public function update(CustomerEntity $customer): void;
 
     /**
@@ -34,5 +38,6 @@ interface CustomerCommandInterface
      * interface does NOT accept plaintext: plaintext-handling is the
      * Final's job, persistence is this command's job.
      */
+    #[DbQuery('customer_update_password')]
     public function updatePassword(string $customerId, string $passwordHash): void;
 }

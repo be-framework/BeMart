@@ -129,7 +129,7 @@ class Products extends ResourceObject
             'price02' => $product->price02,
             'stock' => $product->stock,
             'stockFind' => $product->stock === null || $product->stock > 0,
-            'descriptionList' => $product->description,
+            'descriptionList' => $product->description ?? '',
             'mainListImage' => $product->imagePath ?? ProductImageCatalog::forProductCode($product->productCode),
             'categoryNames' => $product->categoryNames,
             'tagNames' => $product->tagNames,

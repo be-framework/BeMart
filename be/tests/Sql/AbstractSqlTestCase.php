@@ -4,9 +4,21 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
+use Aura\Sql\DecoratedPdo;
+use Aura\Sql\ExtendedPdoInterface;
+use MyVendor\BeMart\Module\MediaQueryRuntimeModule;
 use PDO;
 use PHPUnit\Framework\TestCase;
+use Ray\AuraSqlModule\AuraSqlBaseModule;
+use Ray\Di\AbstractModule;
+use Ray\Di\Injector;
+use Ray\MediaQuery\DbQueryConfig;
+use Ray\MediaQuery\MediaQueryBaseModule;
+use Ray\MediaQuery\MediaQueryDbModule;
+use Ray\MediaQuery\Queries;
 use RuntimeException;
+
+use function dirname;
 
 /**
  * Base class for SQL tests. Each test runs inside a transaction that
@@ -35,6 +47,7 @@ abstract class AbstractSqlTestCase extends TestCase
     use SqlFixturesTrait;
 
     protected PDO $pdo;
+    private Injector $sqlInjector;
 
     protected function setUp(): void
     {
@@ -58,6 +71,7 @@ abstract class AbstractSqlTestCase extends TestCase
 
         $this->pdo = $bootstrap['pdo'];
         $this->pdo->beginTransaction();
+        $this->sqlInjector = new Injector($this->mediaQueryTestModule(), __DIR__ . '/../../../var/tmp/sql');
     }
 
     protected function tearDown(): void
@@ -65,5 +79,39 @@ abstract class AbstractSqlTestCase extends TestCase
         if (isset($this->pdo) && $this->pdo->inTransaction()) {
             $this->pdo->rollBack();
         }
+    }
+
+    /**
+     * @template T of object
+     * @param class-string<T> $class
+     * @return T
+     */
+    protected function sql(string $class): object
+    {
+        return $this->sqlInjector->getInstance($class);
+    }
+
+    private function mediaQueryTestModule(): AbstractModule
+    {
+        $pdo = $this->pdo;
+        $sqlDir = dirname(__DIR__, 3) . '/sql/media-query';
+
+        return new class ($pdo, $sqlDir) extends AbstractModule {
+            public function __construct(
+                private readonly PDO $pdo,
+                private readonly string $sqlDir,
+            )
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(ExtendedPdoInterface::class)->toInstance(new DecoratedPdo($this->pdo));
+                $this->install(new AuraSqlBaseModule('mysql:'));
+                $this->install(new MediaQueryBaseModule(Queries::fromClasses(MediaQueryRuntimeModule::queryClasses())));
+                $this->install(new MediaQueryDbModule(new DbQueryConfig($this->sqlDir)));
+            }
+        };
     }
 }

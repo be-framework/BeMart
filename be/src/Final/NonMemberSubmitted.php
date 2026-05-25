@@ -64,7 +64,7 @@ final readonly class NonMemberSubmitted
     ) {
         // Wave 7W: synthesise a preOrderId. Persistence is deliberately
         // omitted — see the class-level docblock's "Phase 2 gap" note.
-        $this->preOrderId = $idGenerator->generate();
+        $this->preOrderId = $idGenerator->generate()->value;
         $this->name01 = $name01;
         $this->name02 = $name02;
         $this->email = $email;

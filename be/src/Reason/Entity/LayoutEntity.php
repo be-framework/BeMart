@@ -12,8 +12,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * deferred to Phase 2 — the first iteration treats layouts as opaque
  * named containers.
  */
-final readonly class LayoutEntity
+final readonly class LayoutEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $layoutId,
         public string $layoutName,

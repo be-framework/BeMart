@@ -11,8 +11,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * filtering. ALPS exposes only list / create / delete affordances —
  * no rename.
  */
-final readonly class TagEntity
+final readonly class TagEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $tagId,
         public string $tagName,

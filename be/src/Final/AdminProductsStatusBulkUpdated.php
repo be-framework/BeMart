@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -57,11 +58,11 @@ final readonly class AdminProductsStatusBulkUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $changed = $productCommand->bulkUpdateStatus($productCodes, $productStatus);
+        $changed = $productCommand->bulkUpdateStatus(ProductCodeList::fromArray($productCodes), $productStatus);
 
         $this->productCodes = $productCodes;
         $this->productStatus = $productStatus;
         $this->requestedCount = count($productCodes);
-        $this->changedCount = $changed;
+        $this->changedCount = $changed->changedCount;
     }
 }

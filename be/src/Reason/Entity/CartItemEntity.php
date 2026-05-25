@@ -35,11 +35,13 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * The display fields are nullable / default-empty: a write-side caller
  * (cart merge / quantity replace / reorder) constructs a CartItemEntity
  * only to persist dtb_cart_item's real columns and supplies none of
- * them; a read-side query (SqlCartQuery / FakeCartQuery) populates them
+ * them; a read-side query (CartQueryInterface / FakeCartQuery) populates them
  * from the joins.
  */
-final readonly class CartItemEntity
+final readonly class CartItemEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $productCode,
         public int $quantity,

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlCartQuery;
+use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 
 final class SqlCartQueryTest extends AbstractSqlTestCase
 {
@@ -25,7 +25,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCartItem($cart['id'], $classA, ['price' => 500, 'quantity' => 2]);
         $this->insertCartItem($cart['id'], $classB, ['price' => 750, 'quantity' => 1]);
 
-        $query = new SqlCartQuery($this->pdo);
+        $query = $this->sql(CartQueryInterface::class);
         $result = $query->byCartKey('session-hit_3');
 
         $this->assertInstanceOf(CartEntity::class, $result);
@@ -51,7 +51,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
     {
         $this->insertCart(['cart_key' => 'somebody-else_1']);
 
-        $query = new SqlCartQuery($this->pdo);
+        $query = $this->sql(CartQueryInterface::class);
         $this->assertNull($query->byCartKey('absent_1'));
     }
 
@@ -65,7 +65,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCart(['cart_key' => 'other_1']);
         $this->insertCart(['cart_key' => 'multi-extra_1']); // prefix is "multi-extra", NOT "multi"
 
-        $query = new SqlCartQuery($this->pdo);
+        $query = $this->sql(CartQueryInterface::class);
         $carts = $query->bySessionPrefix('multi');
 
         $this->assertCount(3, $carts);
@@ -80,7 +80,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         // Seed an unrelated cart so the filter is doing real work.
         $this->insertCart(['cart_key' => 'unrelated_1']);
 
-        $query = new SqlCartQuery($this->pdo);
+        $query = $this->sql(CartQueryInterface::class);
         $this->assertSame([], $query->bySessionPrefix('ghost-session'));
     }
 
@@ -91,7 +91,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         // underscores — parser must split on the LAST `_`.
         $this->insertCart(['cart_key' => 'sess_abc_xyz_127']);
 
-        $query = new SqlCartQuery($this->pdo);
+        $query = $this->sql(CartQueryInterface::class);
         $cart = $query->byCartKey('sess_abc_xyz_127');
 
         $this->assertNotNull($cart);
@@ -111,7 +111,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         $this->insertCartItem($cart['id'], $this->defaultProductClassId($productA), ['price' => 100]);
         $this->insertCartItem($cart['id'], $this->defaultProductClassId($productB), ['price' => 200]);
 
-        $query = new SqlCartQuery($this->pdo);
+        $query = $this->sql(CartQueryInterface::class);
         $cart = $query->byCartKey('ordering_1');
 
         $this->assertNotNull($cart);
@@ -149,7 +149,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         // The cart item references the SPECIFIC variation SKU.
         $this->insertCartItem($cart['id'], $sku, ['price' => 2500, 'quantity' => 4]);
 
-        $query = new SqlCartQuery($this->pdo);
+        $query = $this->sql(CartQueryInterface::class);
         $result = $query->byCartKey('display_1');
 
         $this->assertNotNull($result);
@@ -184,7 +184,7 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
             ['price' => 600, 'quantity' => 1],
         );
 
-        $query = new SqlCartQuery($this->pdo);
+        $query = $this->sql(CartQueryInterface::class);
         $result = $query->byCartKey('plain_1');
 
         $this->assertNotNull($result);

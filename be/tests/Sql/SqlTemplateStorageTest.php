@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\TemplateEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlTemplateStorage;
+use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 
 /**
- * Storage-layer coverage for {@see SqlTemplateStorage} (Phase 2b).
+ * Storage-layer coverage for {@see TemplateStorageInterface} (Phase 2b).
  *
  * Per G-23 the client-observable contract lives in
  * {@see \MyVendor\BeMart\Tests\Resource\Sql\AdminTemplateResourceSqlTest};
@@ -27,7 +27,7 @@ final class SqlTemplateStorageTest extends AbstractSqlTestCase
         $first = $this->insertTemplate(['template_name' => 'デフォルト (PC)', 'device_type_id' => 10]);
         $second = $this->insertTemplate(['template_name' => 'デフォルト (スマホ)', 'device_type_id' => 2]);
 
-        $storage = new SqlTemplateStorage($this->pdo);
+        $storage = $this->sql(TemplateStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertCount(2, $rows);
@@ -40,7 +40,7 @@ final class SqlTemplateStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlTemplateStorage($this->pdo);
+        $storage = $this->sql(TemplateStorageInterface::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -53,7 +53,7 @@ final class SqlTemplateStorageTest extends AbstractSqlTestCase
         $this->insertTemplate(['device_type_id' => 10]);
         $this->insertTemplate(['device_type_id' => 2]);
 
-        $storage = new SqlTemplateStorage($this->pdo);
+        $storage = $this->sql(TemplateStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertSame(10, $rows[0]->deviceType);
@@ -67,7 +67,7 @@ final class SqlTemplateStorageTest extends AbstractSqlTestCase
         // mtb_device_type seed is required for a NULL FK value.
         $this->insertTemplate(['device_type_id' => null]);
 
-        $storage = new SqlTemplateStorage($this->pdo);
+        $storage = $this->sql(TemplateStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertCount(1, $rows);
@@ -81,7 +81,7 @@ final class SqlTemplateStorageTest extends AbstractSqlTestCase
         $this->seedDeviceTypes();
         $id = $this->insertTemplate(['template_name' => 'デフォルト (PC)']);
 
-        $storage = new SqlTemplateStorage($this->pdo);
+        $storage = $this->sql(TemplateStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertCount(1, $rows);
@@ -99,7 +99,7 @@ final class SqlTemplateStorageTest extends AbstractSqlTestCase
         $this->insertTemplate(['device_type_id' => 10]);
         $this->insertTemplate(['device_type_id' => 2]);
 
-        $storage = new SqlTemplateStorage($this->pdo);
+        $storage = $this->sql(TemplateStorageInterface::class);
         $this->assertCount(3, $storage->list());
     }
 }

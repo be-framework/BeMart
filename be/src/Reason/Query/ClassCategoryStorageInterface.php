@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Admin catalog class categories (規格分類) — unified Query + Command
@@ -25,18 +26,25 @@ use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
 interface ClassCategoryStorageInterface
 {
     /** @return list<ClassCategoryEntity> */
+    #[DbQuery('tclass_category_list_by_class_name', factory: ClassCategoryEntity::class)]
     public function listByClassName(string $classNameId): array;
 
     /** @return list<ClassCategoryEntity> */
+    #[DbQuery('tclass_category_list', factory: ClassCategoryEntity::class)]
     public function list(): array;
 
+    #[DbQuery('tclass_category_get', factory: ClassCategoryEntity::class)]
     public function getById(string $classCategoryId): ClassCategoryEntity|null;
 
+    #[DbQuery('tclass_category_put')]
     public function put(ClassCategoryEntity $classCategory): void;
 
+    #[DbQuery('tclass_category_delete')]
     public function remove(string $classCategoryId): void;
 
+    #[DbQuery('tclass_category_reorder')]
     public function reorder(string $classCategoryId, int $sortNo): void;
 
+    #[DbQuery('tclass_category_visible')]
     public function setVisible(string $classCategoryId, bool $visible): void;
 }

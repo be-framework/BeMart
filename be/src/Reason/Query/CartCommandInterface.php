@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\SavedCart;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 interface CartCommandInterface
 {
@@ -12,9 +14,10 @@ interface CartCommandInterface
      * Persist (or overwrite) a Cart aggregate keyed by cartKey.
      *
      * Phase 1 stores into an in-memory map; Phase 2 swaps to an
-     * INSERT … ON DUPLICATE KEY UPDATE against dtb_cart + dtb_cart_item.
+     * a cart upsert against dtb_cart + dtb_cart_item.
      */
-    public function save(CartEntity $cart): void;
+    #[DbQuery('cart_save')]
+    public function save(CartEntity $cart): SavedCart;
 
     /**
      * Remove the Cart whose preOrderId matches the finalized order.
@@ -25,6 +28,7 @@ interface CartCommandInterface
      * (shopping flow). A missing cart is a no-op — the checkout already
      * succeeded and a stale fixture should not break the Final.
      */
+    #[DbQuery('cart_clear_pre_order')]
     public function clearByPreOrderId(string $preOrderId): void;
 
     /**
@@ -35,5 +39,6 @@ interface CartCommandInterface
      * the leaving customer's entire cart footprint in one call. A
      * sessionPrefix with no matching carts is a no-op.
      */
+    #[DbQuery('cart_clear_session_prefix')]
     public function clearBySessionPrefix(string $sessionPrefix): void;
 }

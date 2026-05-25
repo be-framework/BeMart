@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CsvColumnConfigEntity;
 use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\Param\CsvColumnConfigList;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -61,7 +62,7 @@ final readonly class CsvConfigUpdated
             );
         }
 
-        $csvColumnConfigStorage->replaceType($csvType, $entries);
+        $csvColumnConfigStorage->replaceType($csvType, CsvColumnConfigList::fromArray($entries));
 
         $this->csvType = $csvType;
         $this->columns = $columns;

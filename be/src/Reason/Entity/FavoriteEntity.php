@@ -12,7 +12,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * name (the lowest-`sort_no` `dtb_product_image` row), so the favorites
  * list screen (EC-CUBE `Mypage/favorite.twig`) can render the product
  * thumbnail. It is the LAST, OPTIONAL constructor parameter: every
- * existing construction site (FavoriteAdded write, SqlFavoriteStorage /
+ * existing construction site (FavoriteAdded write, FavoriteStorageInterface /
  * FakeFavoriteStorage reads, the tests) passes its arguments by name, so
  * the trailing nullable field adds no positional ripple. `null` means
  * the product has no image — the screen falls back to the shared
@@ -22,8 +22,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * does not need the image — it is a display-only field re-derived on
  * read — so adds default to `null`.
  */
-final readonly class FavoriteEntity
+final readonly class FavoriteEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $customerId,
         public string $productCode,

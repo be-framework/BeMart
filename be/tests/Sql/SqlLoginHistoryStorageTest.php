@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\LoginHistoryEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlLoginHistoryStorage;
+use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 
 use function str_contains;
 use function strlen;
 
 /**
- * Storage-layer coverage for {@see SqlLoginHistoryStorage} (Phase 2b).
+ * Storage-layer coverage for {@see LoginHistoryStorageInterface} (Phase 2b).
  *
- * Mirrors the shape of {@see SqlNewsStorageTest}. Per G-23 the
+ * Mirrors the shape of {@see NewsStorageInterfaceTest}. Per G-23 the
  * client-observable contract lives in
  * {@see \MyVendor\BeMart\Tests\Resource\Sql\AdminLoginHistoryResourceSqlTest};
  * the cases below verify the per-method SQL paths in isolation —
@@ -28,7 +28,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
 {
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
         $this->assertSame([], $storage->listRecent());
     }
 
@@ -48,7 +48,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
             'create_date' => '2026-05-18 22:08:01',
         ]);
 
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
         $rows = $storage->listRecent();
 
         $this->assertCount(3, $rows);
@@ -66,7 +66,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
             $this->insertLoginHistory();
         }
 
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
         $this->assertCount(2, $storage->listRecent(2));
         $this->assertCount(5, $storage->listRecent(50));
     }
@@ -74,12 +74,12 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
     public function testListWithNonPositiveLimitReturnsNothing(): void
     {
         // The Fake's array_slice treats a non-positive length as
-        // "nothing"; SqlLoginHistoryStorage clamps to LIMIT 0 rather
+        // "nothing"; LoginHistoryStorageInterface clamps to LIMIT 0 rather
         // than emitting a negative LIMIT (a parse error).
         $this->seedLoginHistoryStatus();
         $this->insertLoginHistory();
 
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
         $this->assertSame([], $storage->listRecent(0));
         $this->assertSame([], $storage->listRecent(-1));
     }
@@ -98,7 +98,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
             'create_date' => '2026-05-19 09:00:00',
         ]);
 
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
         $rows = $storage->listRecent();
 
         $this->assertSame('won', $rows[0]->loginId);
@@ -115,7 +115,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
             'create_date' => '2026-05-19 09:12:34',
         ]);
 
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
         $rows = $storage->listRecent();
 
         // MySQL `Y-m-d H:i:s` re-emitted as ISO-8601 with the JST
@@ -126,7 +126,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
     public function testAppendInsertsRow(): void
     {
         $this->seedLoginHistoryStatus();
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
 
         $storage->append(new LoginHistoryEntity(
             timestamp: '2026-05-20T14:30:00+09:00',
@@ -146,7 +146,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
     public function testAppendPersistsFailureAsStatusZero(): void
     {
         $this->seedLoginHistoryStatus();
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
 
         $storage->append(new LoginHistoryEntity(
             timestamp: '2026-05-20T14:30:00+09:00',
@@ -175,7 +175,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
     public function testAppendSerialisesIsoDateToMysqlDatetime(): void
     {
         $this->seedLoginHistoryStatus();
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
 
         $storage->append(new LoginHistoryEntity(
             timestamp: '2026-05-20T14:30:00+09:00',
@@ -204,7 +204,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
     public function testAppendThenListRoundTripsNewestFirst(): void
     {
         $this->seedLoginHistoryStatus();
-        $storage = new SqlLoginHistoryStorage($this->pdo);
+        $storage = $this->sql(LoginHistoryStorageInterface::class);
 
         $storage->append(new LoginHistoryEntity(
             timestamp: '2026-05-18T08:00:00+09:00',
