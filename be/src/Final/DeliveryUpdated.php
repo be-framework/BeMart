@@ -26,15 +26,11 @@ final readonly class DeliveryUpdated
 {
     public string $deliveryId;
     public string $deliveryName;
-    public int $feeBase;
-    public int|null $freeAmount;
     public bool $visible;
 
     public function __construct(
         #[Input] string $deliveryId,
         #[Input] string|null $deliveryName,
-        #[Input] int|null $feeBase,
-        #[Input] int|null $freeAmount,
         #[Input] bool|null $visible,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] DeliveryStorageInterface $deliveries,
@@ -51,8 +47,6 @@ final readonly class DeliveryUpdated
         $merged = new DeliveryEntity(
             deliveryId: $current->deliveryId,
             deliveryName: $deliveryName ?? $current->deliveryName,
-            feeBase: $feeBase ?? $current->feeBase,
-            freeAmount: $freeAmount ?? $current->freeAmount,
             visible: $visible ?? $current->visible,
         );
 
@@ -60,8 +54,6 @@ final readonly class DeliveryUpdated
 
         $this->deliveryId = $merged->deliveryId;
         $this->deliveryName = $merged->deliveryName;
-        $this->feeBase = $merged->feeBase;
-        $this->freeAmount = $merged->freeAmount;
         $this->visible = $merged->visible;
     }
 }

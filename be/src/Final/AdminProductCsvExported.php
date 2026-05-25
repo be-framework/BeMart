@@ -41,7 +41,7 @@ use function stream_get_contents;
  *
  * Column order (matches the import shape stub when it lands):
  *   productCode, productName, price02, stock, productStatus,
- *   description, searchWord, note, sortNo
+ *   description, searchWord, note
  *
  * `null` is emitted as an empty cell (EC-CUBE convention).
  */
@@ -80,7 +80,6 @@ final readonly class AdminProductCsvExported
             'description',
             'searchWord',
             'note',
-            'sortNo',
         ], ',', '"', '\\');
 
         foreach ($rows as $row) {
@@ -109,7 +108,6 @@ final readonly class AdminProductCsvExported
             $row->description ?? '',
             $row->searchWord ?? '',
             $row->note ?? '',
-            $row->sortNo ?? '',
         ];
     }
 }

@@ -10,24 +10,22 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  *
  *   - deliveryId   : opaque server-generated identifier
  *   - deliveryName : display name (e.g. "ヤマト宅急便")
- *   - feeBase      : default base fee in JPY (>= 0). The per-prefecture
- *                    DeliveryFee table refines this, but for Phase 1 the
- *                    admin master only carries the base.
- *   - freeAmount   : order-total threshold above which delivery becomes
- *                    free; null = never free.
  *   - visible      : true = surfaced at checkout, false = soft hidden
  *
- * Per-prefecture DeliveryFee rows, DeliveryTime slots and
- * DeliveryDuration estimates from the ALPS profile are deliberately
- * deferred — Phase 2 will model them when a real consumer needs them.
+ * 厳密移植 alignment: dtb_delivery has NO fee columns. The base fee is
+ * per-prefecture data in dtb_delivery_fee and the free-shipping
+ * threshold is the global dtb_base_info.delivery_free_amount value.
+ * Both `feeBase` and `freeAmount` were BeMart Phase-1 simplifications
+ * that drifted from the schema and have been dropped; per-prefecture
+ * DeliveryFee rows and the global threshold are deferred to a later
+ * phase (separate models). DeliveryTime slots and DeliveryDuration
+ * estimates from the ALPS profile remain out of scope as well.
  */
 final readonly class DeliveryEntity
 {
     public function __construct(
         public string $deliveryId,
         public string $deliveryName,
-        public int $feeBase,
-        public int|null $freeAmount,
         public bool $visible,
     ) {
     }

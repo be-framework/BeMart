@@ -22,14 +22,10 @@ final readonly class DeliveryCreated
 {
     public string $deliveryId;
     public string $deliveryName;
-    public int $feeBase;
-    public int|null $freeAmount;
     public bool $visible;
 
     public function __construct(
         #[Input] string $deliveryName,
-        #[Input] int $feeBase,
-        #[Input] int|null $freeAmount,
         #[Input] bool $visible,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] DeliveryStorageInterface $deliveries,
@@ -42,8 +38,6 @@ final readonly class DeliveryCreated
         $entity = new DeliveryEntity(
             deliveryId: $idGenerator->generate(),
             deliveryName: $deliveryName,
-            feeBase: $feeBase,
-            freeAmount: $freeAmount,
             visible: $visible,
         );
 
@@ -51,8 +45,6 @@ final readonly class DeliveryCreated
 
         $this->deliveryId = $entity->deliveryId;
         $this->deliveryName = $entity->deliveryName;
-        $this->feeBase = $entity->feeBase;
-        $this->freeAmount = $entity->freeAmount;
         $this->visible = $entity->visible;
     }
 }

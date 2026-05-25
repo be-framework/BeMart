@@ -103,7 +103,6 @@ class Member extends ResourceObject
             'adminId' => $final->adminId,
             'loginId' => $final->loginId,
             'name' => $final->name,
-            'mailAddress' => $final->mailAddress,
             'authority' => $final->authority,
             'work' => $final->work,
         ];
@@ -120,7 +119,6 @@ class Member extends ResourceObject
      * @psalm-taint-source input $password
      * @psalm-taint-source input $name
      * @psalm-taint-source input $authority
-     * @psalm-taint-source input $mailAddress
      * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
@@ -129,7 +127,6 @@ class Member extends ResourceObject
         string $password,
         string $name,
         int $authority,
-        string|null $mailAddress = null,
         string|null $csrfToken = null,
     ): static {
         if (! $this->csrf->isValid($csrfToken)) {
@@ -145,7 +142,6 @@ class Member extends ResourceObject
                 password: $password,
                 name: $name,
                 authority: $authority,
-                mailAddress: $mailAddress ?? 'admin-no-mail@example.invalid',
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
@@ -178,7 +174,6 @@ class Member extends ResourceObject
             'adminId' => $final->adminId,
             'loginId' => $final->loginId,
             'name' => $final->name,
-            'mailAddress' => $final->mailAddress,
             'authority' => $final->authority,
             'work' => $final->work,
         ];
@@ -187,20 +182,20 @@ class Member extends ResourceObject
     }
 
     /**
-     * Wave 8: doUpdateMember — edits `name` + `mailAddress` only. The
-     * other admin fields (authority, work, passwordHash) have their
-     * own dedicated transitions / are out of scope for Phase 1.
+     * Wave 8: doUpdateMember — edits `name` only. The other admin
+     * fields (authority, work, passwordHash) have their own dedicated
+     * transitions / are out of scope for Phase 1. EC-CUBE 4.3
+     * dtb_member has no email column, so no mailAddress field is
+     * accepted.
      *
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $name
-     * @psalm-taint-source input $mailAddress
      * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
     public function onPut(
         string $loginId,
         string|null $name = null,
-        string|null $mailAddress = null,
         string|null $csrfToken = null,
     ): static {
         if (! $this->csrf->isValid($csrfToken)) {
@@ -214,7 +209,6 @@ class Member extends ResourceObject
             $final = ($this->becoming)(new UpdateMemberInput(
                 loginId: $loginId,
                 name: $name,
-                mailAddress: $mailAddress,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
@@ -242,7 +236,6 @@ class Member extends ResourceObject
             'adminId' => $final->adminId,
             'loginId' => $final->loginId,
             'name' => $final->name,
-            'mailAddress' => $final->mailAddress,
             'authority' => $final->authority,
             'work' => $final->work,
         ];
