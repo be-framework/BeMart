@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassName;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\AdminClassNameListFetched;
 use MyVendor\BeMart\Be\Final\ClassNameCreated;
 use MyVendor\BeMart\Be\Input\CreateClassNameInput;
 use MyVendor\BeMart\Be\Input\GetAdminClassNameListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminClassNameForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -37,7 +37,6 @@ class ClassNameList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -73,18 +72,11 @@ class ClassNameList extends ResourceObject
 
     /**
      * @psalm-taint-source input $classNameLabel
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
-    public function onPost(string $classNameLabel, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onPost(string $classNameLabel): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreateClassNameInput(classNameLabel: $classNameLabel));
         } catch (SemanticVariableException $e) {

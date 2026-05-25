@@ -13,13 +13,13 @@ use Ray\MediaQuery\Annotation\DbQuery;
  *
  * Split from the AdminCommand surface to keep CQRS boundaries explicit,
  * matching the customer-side {@see CustomerQueryInterface} convention.
- * The admin login flow needs `findByLoginId`; AUTHZ flows (Wave 5+) need
- * `findById` to map a session adminId back to a full Admin record.
+ * The admin login flow needs `byLogin`; AUTHZ flows (Wave 5+) need
+ * `item` to map a session adminId back to a full Admin record.
  *
  * Wave 8 (admin member CRUD) extends the contract with list/search
  * primitives so the admin grid + filter form can drive over the same
- * Storage that backs `findByLoginId` / `findById`. Soft-deleted admins
- * (work=0) MUST stay visible to listAll/search/findById — the grid
+ * Storage that backs `byLogin` / `item`. Soft-deleted admins
+ * (work=0) MUST stay visible to list/search/item — the grid
  * surfaces them so a system admin can re-activate. The login flow has
  * its own filter (it rejects work=0 before issuing a session).
  */

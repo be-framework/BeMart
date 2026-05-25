@@ -40,7 +40,7 @@ final class ForgotPasswordResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertStringContainsString('メール', $ro->body['message']);
 
-        $sent = $this->mailer->passwordResets();
+        $sent = $this->mailer->passwordResets;
         $this->assertCount(1, $sent);
         $this->assertSame('alice@example.com', $sent[0]['email']);
         $this->assertMatchesRegularExpression('/\A[0-9a-f]{32}\z/', $sent[0]['resetKey']);
@@ -58,7 +58,7 @@ final class ForgotPasswordResourceTest extends TestCase
         $this->assertStringContainsString('メール', $ro->body['message']);
 
         // But no mail dispatched.
-        $this->assertCount(0, $this->mailer->passwordResets());
+        $this->assertCount(0, $this->mailer->passwordResets);
     }
 
     public function testOnPostInvalidEmailReturns400(): void

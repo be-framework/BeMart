@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Final\AdminProductUpdated;
  *   AdminUpdateProductInput → AdminProductUpdated  (Direct, idempotent)
  *
  * ALPS `doUpdateProduct.type=idempotent`. The Final pulls AUTHZ from
- * AdminSessionInterface (no session → 403) and existence from
+ * AdminSession (no session → 403) and existence from
  * ProductQueryInterface (unknown productCode → 404).
  *
  * Mass-assignment safety (Pilot 5 F-2 lesson) — productCode is the

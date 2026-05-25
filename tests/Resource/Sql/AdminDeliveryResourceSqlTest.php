@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -24,13 +24,13 @@ use function str_contains;
  * same AUTHN / AUTHZ / CSRF branches. The only differences are:
  *
  *  - the storage binding (DeliveryStorageInterface → SqlDeliveryStorage)
- *    and id generator (DeliveryIdGeneratorInterface →
+ *    and id query (DeliveryIdQueryInterface →
  *    direct MediaQuery delivery id proxy) are layered via the base class's
  *    sqlOverrideModule; persistence is against the real dtb_delivery
  *    table.
  *
  *  - deliveryIds are numeric strings drawn from dtb_delivery.id, not the
- *    32-char hex the FakeDeliveryIdGenerator emits. Both suites assert
+ *    32-char hex the FakeDeliveryIdProvider emits. Both suites assert
  *    "the response carries a deliveryId" but only the Fake side ever
  *    observes the hex handle — SqlDeliveryStorage rejects it as
  *    non-numeric on lookup (the same 404 path as any unknown id, by
@@ -62,7 +62,7 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

@@ -47,6 +47,7 @@ final class Route
      * @param array<string,string> $paramMap       EC-CUBE placeholder name => BEAR resource param name.
      * @param string|null          $dispatchMethod Internal BEAR resource method, defaults to the HTTP method.
      * @param array<string,string> $defaults       Default params merged into a successful match.
+     * @param array<string,string> $queryParamMap  EC-CUBE query/form param name => BEAR resource param name.
      */
     public function __construct(
         public readonly string $name,
@@ -56,6 +57,7 @@ final class Route
         public readonly array $paramMap = [],
         public readonly string|null $dispatchMethod = null,
         public readonly array $defaults = [],
+        public readonly array $queryParamMap = [],
     ) {
     }
 

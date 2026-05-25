@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\DeliveryEntity;
 use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\DeliveryIdQueryInterface;
 
 /**
  * Storage-layer coverage for {@see DeliveryStorageInterface} (Phase 2b).
@@ -84,7 +84,7 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
-        // 32-char hex from FakeDeliveryIdGenerator can never match an
+        // 32-char hex from FakeDeliveryIdProvider can never match an
         // int PK; surface as miss so DeliveryUpdated / DeliveryDeleted
         // fire their 404 paths instead of a PDO error.
         $storage = $this->sql(DeliveryStorageInterface::class);
@@ -94,8 +94,8 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(DeliveryIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new DeliveryEntity(
             deliveryId: $newId,
@@ -122,8 +122,8 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
     {
         // A soft-hidden delivery method (visible=false) round-trips the
         // bool ↔ tinyint coercion.
-        $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(DeliveryIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(DeliveryStorageInterface::class);
 
         $storage->put(new DeliveryEntity(
@@ -151,8 +151,8 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         // DeliveryEntity carries no sale-type axis; the INSERT writes
         // sale_type_id = NULL so the FK to the (empty) mtb_sale_type
         // master never raises FK 1452.
-        $generator = $this->sql(DeliveryIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(DeliveryIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(DeliveryStorageInterface::class);
 
         $storage->put(new DeliveryEntity(
@@ -252,14 +252,14 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $id = $this->insertDelivery(['visible' => 1]);
         $storage = $this->sql(DeliveryStorageInterface::class);
 
-        $storage->visible((string) $id, false);
+        $storage->setVisible((string) $id, false);
 
         // `visible` IS part of the DeliveryEntity projection.
         $entity = $storage->item((string) $id);
         $this->assertInstanceOf(DeliveryEntity::class, $entity);
         $this->assertFalse($entity->visible);
 
-        $storage->visible((string) $id, true);
+        $storage->setVisible((string) $id, true);
         $back = $storage->item((string) $id);
         $this->assertInstanceOf(DeliveryEntity::class, $back);
         $this->assertTrue($back->visible);
@@ -269,20 +269,20 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
     {
         $storage = $this->sql(DeliveryStorageInterface::class);
         $storage->reorder('deadbeefdeadbeefdeadbeefdeadbeef', 5);
-        $storage->visible('deadbeefdeadbeefdeadbeefdeadbeef', false);
+        $storage->setVisible('deadbeefdeadbeefdeadbeefdeadbeef', false);
         $this->assertTrue(true);
     }
 
-    public function testDeliveryIdGeneratorAllocatesIncrementingIds(): void
+    public function testDeliveryIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(DeliveryIdGeneratorInterface::class);
+        $ids = $this->sql(DeliveryIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertDelivery();
         $secondId = $this->insertDelivery();
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

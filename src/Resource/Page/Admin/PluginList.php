@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\PluginInstalled;
 use MyVendor\BeMart\Be\Final\PluginListFetched;
 use MyVendor\BeMart\Be\Input\GetPluginListInput;
 use MyVendor\BeMart\Be\Input\InstallPluginInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -45,7 +45,6 @@ class PluginList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -80,22 +79,14 @@ class PluginList extends ResourceObject
      * @psalm-taint-source input $pluginCode
      * @psalm-taint-source input $pluginName
      * @psalm-taint-source input $pluginVersion
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goPluginList', href: 'page://self/admin/plugin-list', method: 'get')]
+    #[CsrfProtected]
     public function onPost(
         string $pluginCode,
         string $pluginName,
         string $pluginVersion,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new InstallPluginInput(
                 pluginCode: $pluginCode,

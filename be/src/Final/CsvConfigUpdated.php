@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CsvColumnConfigEntity;
 use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\Param\CsvColumnConfigList;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -21,7 +21,7 @@ use function count;
  *   UpdateCsvInput → CsvConfigUpdated  (Direct, idempotent)
  *
  * AUTHZ — admin firewall:
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess
  *
  * Public surface mirrors the input shape so the admin form's "saved
  * what?" confirmation is a straight echo. `count` reports how many
@@ -45,10 +45,10 @@ final readonly class CsvConfigUpdated
     public function __construct(
         #[Input] int $csvType,
         #[Input] array $columns,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] CsvColumnConfigStorageInterface $csvColumnConfigStorage,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

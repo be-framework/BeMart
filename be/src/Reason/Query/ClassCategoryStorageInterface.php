@@ -13,9 +13,9 @@ use Ray\MediaQuery\Annotation\DbQuery;
  *
  *   - listByClassName(classNameId): scoped to one axis (UI default view)
  *   - list(): every row regardless of axis (admin grid)
- *   - getById(classCategoryId): single-row lookup
+ *   - item(classCategoryId): single-row lookup
  *   - put(classCategory): upsert
- *   - remove(classCategoryId): drop (silent no-op on miss)
+ *   - delete(classCategoryId): drop (silent no-op on miss)
  *   - reorder(classCategoryId, sortNo): generic `doSortNoMove` —
  *     rewrites the storage-only `sort_no` column.
  *   - setVisible(classCategoryId, visible): generic `doToggleVisible`
@@ -46,5 +46,5 @@ interface ClassCategoryStorageInterface
     public function reorder(string $classCategoryId, int $sortNo): void;
 
     #[DbQuery('tclass_category_visible')]
-    public function visible(string $classCategoryId, bool $visible): void;
+    public function setVisible(string $classCategoryId, bool $visible): void;
 }

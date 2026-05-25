@@ -9,7 +9,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -47,11 +47,11 @@ final readonly class MemberUpdated
     public function __construct(
         #[Input] string $loginId,
         #[Input] string|null $name,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] AdminQueryInterface $adminQuery,
         #[Inject] AdminCommandInterface $adminCommand,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

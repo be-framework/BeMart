@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -40,11 +40,11 @@ final readonly class TrackingNumberUpdated
     public function __construct(
         #[Input] string $orderNo,
         #[Input] string $trackingNumber,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] OrderQueryInterface $orderQuery,
         #[Inject] ShippingAddressStorageInterface $shippingAddresses,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
@@ -53,7 +53,7 @@ final readonly class TrackingNumberUpdated
             throw new OrderNotFoundException();
         }
 
-        $shippingAddresses->tracking($order->orderNo, $trackingNumber);
+        $shippingAddresses->updateTrackingNumber($order->orderNo, $trackingNumber);
 
         $this->orderNo = $order->orderNo;
         $this->trackingNumber = $trackingNumber;

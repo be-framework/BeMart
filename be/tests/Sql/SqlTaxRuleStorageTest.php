@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\TaxRuleEntity;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\TaxRuleIdQueryInterface;
 
 use function str_contains;
 
@@ -77,7 +77,7 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
-        // Hex ids from FakeTaxRuleIdGenerator can never match an int
+        // Hex ids from FakeTaxRuleIdProvider can never match an int
         // PK; surface as miss so TaxRuleDeleted's 404 path fires
         // instead of a PDO error.
         $storage = $this->sql(TaxRuleStorageInterface::class);
@@ -87,8 +87,8 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(TaxRuleIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new TaxRuleEntity(
             taxRuleId: $newId,
@@ -115,8 +115,8 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
 
     public function testPutSerialisesIsoDateToMysqlDatetime(): void
     {
-        $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(TaxRuleIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(TaxRuleStorageInterface::class);
 
         $storage->put(new TaxRuleEntity(
@@ -146,8 +146,8 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         // dtb_tax_rule.tax_rate is `decimal(10,0) unsigned` — fractional
         // input is silently truncated by MariaDB at the column
         // boundary. Documented limitation of EC-CUBE 4.3's schema.
-        $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(TaxRuleIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(TaxRuleStorageInterface::class);
 
         $storage->put(new TaxRuleEntity(
@@ -230,16 +230,16 @@ final class SqlTaxRuleStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testTaxRuleIdGeneratorAllocatesIncrementingIds(): void
+    public function testTaxRuleIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(TaxRuleIdGeneratorInterface::class);
+        $ids = $this->sql(TaxRuleIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertTaxRule();
         $secondId = $this->insertTaxRule();
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

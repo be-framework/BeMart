@@ -31,6 +31,6 @@ final class MediaQueryProxyModule extends AbstractModule
          * @psalm-suppress InternalClass
          * @psalm-suppress InternalMethod
          */
-        $this->install(new MediaQueryDbModule(new DbQueryConfig($root . '/sql/media-query')));
+        $this->install(new MediaQueryDbModule(new DbQueryConfig($root . '/var/sql')));
     }
 }

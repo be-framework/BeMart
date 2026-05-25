@@ -21,7 +21,7 @@ use function assert;
  *
  * Safe read. No CSRF (read-only). AUTHN is enforced in the Be layer:
  * the customer can only see their own favorites — the customerId
- * comes from SessionInterface, never the request body (Pilot 5 F-2
+ * comes from CustomerSession, never the request body (Pilot 5 F-2
  * lesson).
  *
  * Failure mapping:

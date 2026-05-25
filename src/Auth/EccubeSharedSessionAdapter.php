@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Auth;
 
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use Override;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 
 use function getenv;
 use function headers_sent;
@@ -18,7 +17,7 @@ use const PHP_SAPI;
 use const PHP_SESSION_ACTIVE;
 
 /**
- * Production SessionInterface adapter — reads PHP's `$_SESSION` using
+ * Production CustomerSession adapter — reads PHP's `$_SESSION` using
  * EC-CUBE's cookie name and a documented flat customer-id key.
  *
  * Phase B Slice 7 (Pilot 5 F-1 production binding, BEAR side only). The
@@ -58,9 +57,9 @@ use const PHP_SESSION_ACTIVE;
  *
  * Headers-sent safety: if `session_start()` cannot run (output already
  * flushed), we treat the request as anonymous. Domain code already
- * handles `customerId() === null` correctly.
+ * handles `customerId === null` correctly.
  */
-final class EccubeSharedSessionAdapter implements SessionInterface
+final readonly class EccubeSharedSessionAdapter extends CustomerSession
 {
     /**
      * EC-CUBE 4.x cookie name. Override via constructor if a deployment
@@ -85,14 +84,15 @@ final class EccubeSharedSessionAdapter implements SessionInterface
     public const CLI_ENV_VAR = 'BEMART_CLI_CUSTOMER_ID';
 
     public function __construct(
-        private readonly string $cookieName = self::COOKIE_NAME,
-        private readonly string $sessionKey = self::CUSTOMER_ID_KEY,
+        private string $cookieName = self::COOKIE_NAME,
+        private string $sessionKey = self::CUSTOMER_ID_KEY,
     ) {
         $this->ensureSessionStarted();
+        parent::__construct($this->readCustomerId());
     }
 
-    #[Override]
-    public function customerId(): string|null
+    /** @return non-empty-string|null */
+    private function readCustomerId(): string|null
     {
         // Prefer the live session value when present. Works for HTTP
         // (session_start populates $_SESSION) and for tests that poke

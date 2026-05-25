@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Payment;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\AdminPaymentListFetched;
 use MyVendor\BeMart\Be\Final\PaymentMethodAdminCreated;
 use MyVendor\BeMart\Be\Input\CreatePaymentMethodAdminInput;
 use MyVendor\BeMart\Be\Input\GetAdminPaymentListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -34,7 +34,6 @@ class PaymentList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -69,24 +68,16 @@ class PaymentList extends ResourceObject
      * @psalm-taint-source input $ruleMin
      * @psalm-taint-source input $ruleMax
      * @psalm-taint-source input $visible
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
+    #[CsrfProtected]
     public function onPost(
         string $paymentMethodName,
         int $charge = 0,
         int|null $ruleMin = null,
         int|null $ruleMax = null,
         bool $visible = true,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreatePaymentMethodAdminInput(
                 paymentMethodName: $paymentMethodName,

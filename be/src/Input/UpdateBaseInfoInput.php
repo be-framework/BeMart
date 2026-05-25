@@ -19,7 +19,7 @@ use MyVendor\BeMart\Be\Final\BaseInfoUpdated;
  * field empty on the new row (this is NOT a sparse merge — null
  * means "clear the value").
  *
- * AUTHZ in the Final (AdminSessionInterface). Mass-assignment safety:
+ * AUTHZ in the Final (AdminSession). Mass-assignment safety:
  * only the shop-info columns are accepted; no path here reaches the
  * non-shop-info dtb_base_info columns (point rate, tax settings, …)
  * which are Phase 2 scope.

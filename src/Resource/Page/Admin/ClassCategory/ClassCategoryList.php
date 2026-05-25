@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassCategory;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Final\AdminClassCategoryListFetched;
 use MyVendor\BeMart\Be\Final\ClassCategoryCreated;
 use MyVendor\BeMart\Be\Input\CreateClassCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminClassCategoryListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminClassCategoryForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -38,7 +38,6 @@ class ClassCategoryList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -79,21 +78,13 @@ class ClassCategoryList extends ResourceObject
     /**
      * @psalm-taint-source input $classNameId
      * @psalm-taint-source input $classCategoryName
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
+    #[CsrfProtected]
     public function onPost(
         string $classNameId,
         string $classCategoryName,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreateClassCategoryInput(
                 classNameId: $classNameId,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,7 +14,6 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\TrackingNumberUpdated;
 use MyVendor\BeMart\Be\Input\UpdateTrackingNumberInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -37,28 +37,19 @@ class TrackingNumber extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     /**
      * @psalm-taint-source input $orderNo
      * @psalm-taint-source input $trackingNumber
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[CsrfProtected]
     public function onPut(
         string $orderNo,
         string $trackingNumber,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateTrackingNumberInput(
                 orderNo: $orderNo,

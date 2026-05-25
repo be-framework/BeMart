@@ -32,5 +32,5 @@ interface NewsStorageInterface
     public function delete(string $newsId): void;
 
     #[DbQuery('tnews_visible')]
-    public function visible(string $newsId, bool $visible): void;
+    public function setVisible(string $newsId, bool $visible): void;
 }

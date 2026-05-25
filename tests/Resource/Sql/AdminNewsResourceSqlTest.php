@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -23,12 +23,12 @@ use function is_string;
  * AUTHN / AUTHZ / CSRF branches. The only differences are:
  *
  *  - the storage binding (NewsStorageInterface → SqlNewsStorage) and
- *    id generator (NewsIdGeneratorInterface → direct MediaQuery news id proxy) are
+ *    id query (NewsIdQueryInterface → direct MediaQuery news id proxy) are
  *    layered via the base class's sqlOverrideModule; persistence is
  *    against the real dtb_news table.
  *
  *  - newsIds are numeric strings drawn from dtb_news.id, not the
- *    `nw-` prefixed hex the FakeNewsIdGenerator emits. Both suites
+ *    `nw-` prefixed hex the FakeNewsIdProvider emits. Both suites
  *    assert "the response carries a newsId" but only the Fake side
  *    ever observes literal seed handles (`nw-welcome`) — SqlNewsStorage
  *    rejects them as non-numeric on lookup (the same 404 path as any
@@ -65,7 +65,7 @@ final class AdminNewsResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\MailTemplateNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -44,10 +44,10 @@ final readonly class MailTemplateUpdated
     public function __construct(
         #[Input] int $mailTemplateId,
         #[Input] string $mailSubject,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] MailTemplateStorageInterface $mailTemplateStorage,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

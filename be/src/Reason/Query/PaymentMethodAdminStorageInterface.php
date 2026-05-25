@@ -12,9 +12,9 @@ use Ray\MediaQuery\Annotation\DbQuery;
  *
  * Same convention as {@see ClassNameStorageInterface}:
  *   - list(): every master row, sorted by id for stable display
- *   - getById(paymentId): single-row lookup
+ *   - item(paymentId): single-row lookup
  *   - put(payment): upsert (create / replace)
- *   - remove(paymentId): drop (silent no-op on miss)
+ *   - delete(paymentId): drop (silent no-op on miss)
  *
  * NOTE: the customer-side
  * {@see \MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface}
@@ -42,7 +42,7 @@ interface PaymentMethodAdminStorageInterface
      * Generic `doSortNoMove` — rewrites the storage-only `sort_no`
      * column of dtb_payment. sort_no is NOT part of the 6-field
      * PaymentMethodAdminEntity projection; this edits the column
-     * directly. A miss is a silent no-op (same shape as `remove`).
+     * directly. A miss is a silent no-op (same shape as `delete`).
      */
     #[DbQuery('tpayment_reorder')]
     public function reorder(string $paymentId, int $sortNo): void;
@@ -54,5 +54,5 @@ interface PaymentMethodAdminStorageInterface
      * cached entity so its `list()` projection stays consistent.
      */
     #[DbQuery('tpayment_visible')]
-    public function visible(string $paymentId, bool $visible): void;
+    public function setVisible(string $paymentId, bool $visible): void;
 }

@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\PluginEntity;
 use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 
 use function array_map;
@@ -18,7 +18,7 @@ use function count;
  *
  *   GetPluginListInput → PluginListFetched (Direct, safe read)
  *
- * AUTHZ — admin firewall (Wave 4 contract): AdminSession::adminId() ===
+ * AUTHZ — admin firewall (Wave 4 contract): AdminSession::$adminId ===
  * null raises UnauthorizedAdminAccessException, which the BEAR layer
  * maps to 403.
  *
@@ -35,10 +35,10 @@ final readonly class PluginListFetched
     public int $count;
 
     public function __construct(
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] PluginStorageInterface $pluginStorage,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

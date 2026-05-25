@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassCategory;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Final\ClassCategoryDeleted;
 use MyVendor\BeMart\Be\Final\ClassCategoryUpdated;
 use MyVendor\BeMart\Be\Input\DeleteClassCategoryInput;
 use MyVendor\BeMart\Be\Input\UpdateClassCategoryInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -32,28 +32,19 @@ class ClassCategory extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     /**
      * @psalm-taint-source input $classCategoryId
      * @psalm-taint-source input $classCategoryName
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
+    #[CsrfProtected]
     public function onPut(
         string $classCategoryId,
         string|null $classCategoryName = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateClassCategoryInput(
                 classCategoryId: $classCategoryId,
@@ -90,18 +81,11 @@ class ClassCategory extends ResourceObject
 
     /**
      * @psalm-taint-source input $classCategoryId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
-    public function onDelete(string $classCategoryId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $classCategoryId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeleteClassCategoryInput(classCategoryId: $classCategoryId));
         } catch (UnauthorizedAdminAccessException) {

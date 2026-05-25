@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 
 /**
@@ -25,7 +25,7 @@ use Ray\Di\Di\Inject;
  * `$_SESSION['customer_id']`. This mirrors Pilot 6's doLogin, where the
  * Be layer returns the proof of authentication and the EventListener
  * writes the session afterwards. Keeping the Be layer session-immutable
- * is the rule established in Slice 6 (SessionInterface is read-only by
+ * is the rule established in Slice 6 (CustomerSession is read-only by
  * design — do not mutate it from here).
  */
 final readonly class LoggedOut
@@ -36,9 +36,9 @@ final readonly class LoggedOut
     public string|null $customerId;
 
     public function __construct(
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
     ) {
-        $customerId = $session->customerId();
+        $customerId = $session->customerId;
         $this->customerId = $customerId;
         $this->wasLoggedIn = $customerId !== null;
     }

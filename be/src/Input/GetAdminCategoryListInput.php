@@ -12,7 +12,7 @@ use MyVendor\BeMart\Be\Final\AdminCategoryListFetched;
  * (Wave 7).
  *
  * Direct pattern: no inputs other than the implicit admin session,
- * which the Final pulls from {@see \MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface}.
+ * which the Final pulls from {@see \MyVendor\BeMart\Be\Reason\Service\AdminSession}.
  * The first iteration returns a flat list; nested-children projection
  * is deferred to Phase 2.
  *

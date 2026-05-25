@@ -8,7 +8,7 @@ use Aura\Sql\ExtendedPdoInterface;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerIdQueryInterface;
 use MyVendor\BeMart\Module\ProdModule;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -61,14 +61,14 @@ final class ProdModuleSqlWiringTest extends TestCase
             'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy.',
         );
 
-        // IdGenerators are also part of the cutover — production customer
-        // ids are direct MediaQuery BDR proxies, not Fake hex generators.
-        $customerIdGenerator = $injector->getInstance(CustomerIdGeneratorInterface::class);
-        $this->assertInstanceOf(CustomerIdGeneratorInterface::class, $customerIdGenerator);
+        // IdQueries are also part of the cutover — production customer
+        // ids are direct MediaQuery BDR proxies, not FakeQuery hex fixtures.
+        $customerIdProvider = $injector->getInstance(CustomerIdQueryInterface::class);
+        $this->assertInstanceOf(CustomerIdQueryInterface::class, $customerIdProvider);
         $this->assertStringContainsString(
-            CustomerIdGeneratorInterface::class,
-            $customerIdGenerator::class,
-            'ProdModule must override CustomerIdGeneratorInterface Fake -> MediaQuery proxy.',
+            CustomerIdQueryInterface::class,
+            $customerIdProvider::class,
+            'ProdModule must override CustomerIdQueryInterface Fake -> MediaQuery proxy.',
         );
 
         // MediaQuery runtime builds a real connection from DATABASE_URL.
@@ -123,7 +123,32 @@ final class ProdModuleSqlWiringTest extends TestCase
     {
         $databaseUrl = getenv('DATABASE_URL');
         if ($databaseUrl === false || $databaseUrl === '') {
-            $this->markTestSkipped('DATABASE_URL not set — prod SQL wiring requires a DB.');
+            $this->markTestSkipped('DATABASE_URL not set — prod context requires SQL wiring.');
+        }
+
+        $parts = \parse_url($databaseUrl);
+        if ($parts === false || ! isset($parts['scheme'], $parts['host'], $parts['user'], $parts['path'])) {
+            $this->markTestSkipped('DATABASE_URL malformed — prod context requires SQL wiring.');
+        }
+
+        $serverDsn = \sprintf(
+            'mysql:host=%s;port=%d;charset=utf8mb4',
+            $parts['host'],
+            $parts['port'] ?? 3306,
+        );
+
+        try {
+            $pdo = new \PDO($serverDsn, $parts['user'], $parts['pass'] ?? '', [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            ]);
+            $version = (string) $pdo->query('SELECT VERSION()')->fetchColumn();
+        } catch (\PDOException $e) {
+            $this->markTestSkipped('DATABASE_URL unreachable — prod context requires SQL wiring: ' . $e->getMessage());
+        }
+
+        if (! \str_contains(\strtolower($version), 'mariadb')) {
+            $this->markTestSkipped('DATABASE_URL is not MariaDB — prod SQL wiring baseline targets MariaDB: ' . $version);
         }
     }
+
 }

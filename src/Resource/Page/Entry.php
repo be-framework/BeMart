@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -12,7 +13,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\EntryForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -48,7 +49,7 @@ class Entry extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
+        private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -122,9 +123,9 @@ class Entry extends ResourceObject
      * @psalm-taint-source input $birth
      * @psalm-taint-source input $sex
      * @psalm-taint-source input $job
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTop', href: 'page://self/')]
+    #[CsrfProtected]
     public function onPost(
         string $email,
         string $password,
@@ -141,19 +142,7 @@ class Entry extends ResourceObject
         string|null $birth = null,
         int|null $sex = null,
         int|null $job = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = [
-                'message' => 'Invalid or missing CSRF token.',
-                'csrfToken' => $this->csrfTokenForForm(),
-                'form' => $this->failedForm($email, $name01, $name02, 'Invalid or missing CSRF token.'),
-            ];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new RegisterCustomerInput(
                 email: $email,
@@ -245,6 +234,6 @@ class Entry extends ResourceObject
 
     private function csrfTokenForForm(): string
     {
-        return $this->csrf->getToken();
+        return $this->csrf->token;
     }
 }

@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Final\AdminLoggedOut;
  * Input for doAdminLogout — back-office admin logout.
  *
  * Direct pattern (hello-world demo): Input → Final, no intermediate
- * Being. The Final consults AdminSessionInterface to capture which
+ * Being. The Final consults AdminSession to capture which
  * admin (if any) was logged in and emits a proof that the logout
  * request was processed.
  *

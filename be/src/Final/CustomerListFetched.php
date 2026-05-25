@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -20,7 +20,7 @@ use function count;
  *   GetCustomerListInput → CustomerListFetched  (Direct, safe read)
  *
  * AUTHZ — admin firewall (Wave 4 contract):
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess
  *
  * Admin-only endpoint. Unlike the customer dashboard (which carries 401
  * for "no session"), this is a cross-firewall check: a logged-in
@@ -55,10 +55,10 @@ final readonly class CustomerListFetched
         #[Input] string|null $nameKeyword,
         #[Input] string|null $emailKeyword,
         #[Input] int $limit,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] CustomerQueryInterface $customerQuery,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

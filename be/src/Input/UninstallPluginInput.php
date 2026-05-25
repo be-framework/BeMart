@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Final\PluginUninstalled;
  * surfaces `wasInstalled` so the response distinguishes the no-op
  * branch from a real teardown.
  *
- * AUTHZ in the Final (AdminSessionInterface). Mass-assignment safety:
+ * AUTHZ in the Final (AdminSession). Mass-assignment safety:
  * only pluginCode is accepted.
  *
  * @link https://schema.org/DeleteAction

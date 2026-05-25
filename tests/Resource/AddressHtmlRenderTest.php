@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Form\AddressForm;
 use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
@@ -54,7 +54,7 @@ use function trim;
  * `<head>` frame material + the empty CSRF hidden value.
  *
  * The Address::onGet form-info endpoint requires AUTHN, so the `html`
- * context's `SessionInterface` is rebound to a fixture customer.
+ * context's `CustomerSession` is rebound to a fixture customer.
  */
 final class AddressHtmlRenderTest extends TestCase
 {
@@ -101,7 +101,7 @@ final class AddressHtmlRenderTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)->toInstance($this->session);
+                $this->bind(CustomerSession::class)->toInstance($this->session);
             }
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');

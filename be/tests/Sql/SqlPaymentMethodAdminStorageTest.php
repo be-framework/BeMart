@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminIdQueryInterface;
 
 use function date;
 
@@ -115,7 +115,7 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
-        // 32-char hex from FakePaymentMethodAdminIdGenerator can never
+        // 32-char hex from FakePaymentMethodAdminIdProvider can never
         // match an int PK; surface as miss so PaymentMethodAdminUpdated
         // / PaymentMethodAdminDeleted fire their 404 paths instead of a
         // PDO error.
@@ -126,8 +126,8 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(PaymentMethodAdminIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new PaymentMethodAdminEntity(
             paymentId: $newId,
@@ -158,8 +158,8 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
 
     public function testPutPersistsNullRuleBoundsAndDefaults(): void
     {
-        $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(PaymentMethodAdminIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->put(new PaymentMethodAdminEntity(
@@ -195,8 +195,8 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     {
         // A soft-hidden payment (visible=false) round-trips the same as
         // a visible one — only the Final layer interprets the flag.
-        $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(PaymentMethodAdminIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
         $storage->put(new PaymentMethodAdminEntity(
@@ -368,14 +368,14 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
         $id = $this->insertPayment(['visible' => 1]);
         $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
 
-        $storage->visible((string) $id, false);
+        $storage->setVisible((string) $id, false);
 
         // `visible` IS part of the PaymentMethodAdminEntity projection.
         $entity = $storage->item((string) $id);
         $this->assertInstanceOf(PaymentMethodAdminEntity::class, $entity);
         $this->assertFalse($entity->visible);
 
-        $storage->visible((string) $id, true);
+        $storage->setVisible((string) $id, true);
         $back = $storage->item((string) $id);
         $this->assertInstanceOf(PaymentMethodAdminEntity::class, $back);
         $this->assertTrue($back->visible);
@@ -385,20 +385,20 @@ final class SqlPaymentMethodAdminStorageTest extends AbstractSqlTestCase
     {
         $storage = $this->sql(PaymentMethodAdminStorageInterface::class);
         $storage->reorder('nonexistent-zzz', 5);
-        $storage->visible('nonexistent-zzz', false);
+        $storage->setVisible('nonexistent-zzz', false);
         $this->assertTrue(true);
     }
 
-    public function testPaymentMethodAdminIdGeneratorAllocatesIncrementingIds(): void
+    public function testPaymentMethodAdminIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(PaymentMethodAdminIdGeneratorInterface::class);
+        $ids = $this->sql(PaymentMethodAdminIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertPayment();
         $secondId = $this->insertPayment();
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

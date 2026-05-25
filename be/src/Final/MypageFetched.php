@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -32,7 +32,7 @@ use function count;
  *      list belongs to a dedicated favorites resource, not the
  *      dashboard — keep this projection shallow)
  *
- * AUTHN: the customerId comes from SessionInterface. A null session
+ * AUTHN: the customerId comes from CustomerSession. A null session
  * raises UnauthenticatedException — the BEAR layer maps this to 401.
  * If the session points to a non-existent customer (deleted /
  * expired), we likewise raise UnauthenticatedException rather than
@@ -75,13 +75,13 @@ final readonly class MypageFetched
 
     public function __construct(
         #[Input] int $orderLimit,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] OrderQueryInterface $orderQuery,
         #[Inject] OrderItemQueryInterface $orderItems,
         #[Inject] FavoriteStorageInterface $favorites,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

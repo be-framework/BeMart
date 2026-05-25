@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Final\CustomerListFetched;
  *   GetCustomerListInput → CustomerListFetched (Final — Direct, safe read)
  *
  * Admin-only endpoint. AUTHN/AUTHZ live in the Final via the Wave 4
- * AdminSessionInterface — a null admin session raises
+ * AdminSession — a null admin session raises
  * UnauthorizedAdminAccessException, which the BEAR layer maps to 403
  * ("admin login required"). Distinct from the customer-side
  * UnauthenticatedException (Pilot 8 lesson: admin and customer are

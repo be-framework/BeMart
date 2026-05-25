@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Final\BaseInfoFetched;
  * current row for the admin form to render. No filter / paging because
  * dtb_base_info is a single-row table.
  *
- * AUTHZ in the Final (AdminSessionInterface); the customer-side
+ * AUTHZ in the Final (AdminSession); the customer-side
  * BaseInfo display surface lives behind a separate help page (Wave 3H
  * `goHelpAbout`).
  *

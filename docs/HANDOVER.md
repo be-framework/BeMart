@@ -272,7 +272,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 - **Pilot 1 完了** (`BeMart` (旧 MyVendor.EcCube), `goProduct` 1 件): Be + BEAR.Sunday 統合の初参照実装が動作確認済み。意味ログ自動記録 100%、i18n 例外 100%、composer test 8/8 pass。次は (1) workflow prompt 改修 PR で Pilot で発見した穴を埋める、(2) Pilot 2 として `doAddCartItem` (Diamond パターン) を別タスクで実装、(3) 残り 135 transition を `/run migrate <id>` で自走移植。詳細指標は「Pilot 1」セクション参照
 - **Pilot 2 完了** (`BeMart`, `doAddCartItem` 1 件): **Cascade** パターンの参照実装。`AddCartItemInput → QuantityAdjusted (Being) → CartMerged (Being) → CartItemAdded (Final)` の **3 段 cascade**。Final は `CartCommand` 1 件のみ `#[Inject]` で受け取り永続化に専念、Read 系 Reason は上流 Being に分散。改訂履歴: 初版「Cascade Diamond」分類 → Linear/Minimal に訂正 → 2 段 Cascade refactor → 3 段 Cascade refactor (`CartMerged` 抽出で Final から in-memory merge / totalPrice / deliveryFeeTotal 計算を引き剥がした、2026-05-18)。composer test 21/21 pass, 51 assertions, **0 notices** (Cascade refactor で導入された 13 件の Semantic 変数を全登録: `SessionPrefix` / `RequestedQuantity` / `AdjustedQuantity` / `UnitPrice` / `SaleTypeId` / `SaleTypeName` / `DeliveryFee` / `StockUnlimited` / `SaleLimit` / `CartKey` / `TotalPrice` / `DeliveryFeeTotal` / `MergedCart`)。Linear 版 snapshot は `be/docs/variations/linear-doAddCartItem/` に保存 (educational comparison 用)。Pilot 1+2 を通じた **Be 採用評価** は `be/docs/be-adoption-evaluation.md` に詳述 (基層効力 4 軸 = Pilot 1 から効く / 上層効力 4 軸 = Pilot 2 で爆発)。Query/Command 共有時は Singleton ストア必須、`SemanticVariableException` は Resource で明示 catch (Pilot 段階)、`BEAR\Resource\Code` は CONFLICT 未定義で整数リテラル運用、いずれも Cascade 実装でも有効。skill `~/.claude/skills/alps-to-be-bear/` に昇格済み (SKILL.md / decision-matrix.md は 3 段 Cascade refactor の読み替え注記が必要)。**Pilot 2 末尾の「次は Cascade Diamond を別 Pilot で」という想定は Pilot 3 で部分的に覆った — `#[Input]` 依存の Being を `#[Inject]` で apex に持つ Cascade Diamond は be-framework のメカニクス上不成立 (詳細は Pilot 3 セクション / `be/docs/be-adoption-evaluation.md §6`)。EC-CUBE の典型的な `#[Input]` 依存遷移は Linear Cascade に縮退する**
 - **Pilot 3 完了** (`BeMart`, `doConfirmOrder` 1 件): **Branching** パターンの参照実装 + **Cascade Diamond 不成立の構造的発見**。`ConfirmOrderInput → PreOrderResolved (Being) → PurchaseFlowApplied (Being) → PaymentVerified (Being) → OrderConfirming (Being, 分岐点) → OrderConfirmed | OrderConfirmFailed (Branching Final)` の **4 段 Linear Cascade + 1 段 Branching**。`OrderConfirming` の `public PaymentSuccessCase|PaymentFailureCase $being` 型 discriminator により `BecomingType::match()` が Final を選択 (be-patterns `medical-triage` デモ準拠)。composer test 27/27 pass (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 新規 6), 79 assertions, **0 notices** (Pilot 3 で 14 件の Semantic 変数を新規登録: `PreOrderId` / `PaymentMethodId` / `Subtotal` / `Tax` / `Total` / `Discount` / `Charge` / `DeliveryFee`(既存) / `AddPoint` / `UsePoint` / `PaymentTotal` / `Order` / `Totals` / `PaymentVerification` / `Being`)。改訂履歴: 初版 Cascade Diamond 想定で `OrderConfirming` を apex (`#[Inject] PreOrderResolved $preOrder` 等) → Ray.Di `NoHint($preOrderId)` で全テスト失敗 → `#[Input]` 依存 Being を `#[Inject]` 経由でインスタンス化できないと判明 (Ray.Di は `#[Input]` 属性を理解しない) → 4 段 Linear Cascade に再構成。**構造的発見**: Cascade Diamond は「apex Moment が `#[Input]` を一切持たない」場合のみ成立する。EC-CUBE の典型的フロー (Input scalar から DB 引き当て → 並列に Service 呼び出し) は全て Linear Cascade に縮退する。Pilot 3 の Branching パターンは clean に動作し、be-framework の Branching 機構 (`BecomingType::match()` による型ベース選択) は実用検証済み。Skill 配置: `~/.claude/skills/alps-to-be-bear/` の `SKILL.md` / `decision-matrix.md` には「Cascade Diamond の成立条件 (apex が `#[Input]` 不要) と Linear Cascade への縮退ルール」追記が必要
-- **Pilot 4 完了** (`BeMart`, `doRegisterCustomer` 1 件): **Multi-Reason Being** パターンの参照実装。`RegisterCustomerInput → CustomerRegistering (Being: 4 つの独立 Reason `EmailUniquenessChecker` / `CustomerIdGenerator` / `PasswordHasher` / `CustomerInitialPoint` を並列 `#[Inject]`) → CustomerRegistered (Final: 永続化のみ)` の **1 段 Multi-Reason Being + Final**。Diamond と区別される構造的特徴は「各 Reason の結果が他の Reason の入力にならない (互いに独立)」こと。Pilot 4 では fail-fast query (uniqueness check) + 3 つの pure derivation (id / hash / point) が同じ Being に同居しても Diamond にはならず、blog-publishing デモのバリエーションとして成立した。composer test 39/39 pass, 111 assertions, **0 notices** (Pilot 4 で 19 件の Semantic 変数を新規登録: client-input 15 件 `Email` / `Password` / `Name01` / `Name02` / `Kana01` / `Kana02` / `CompanyName` / `PhoneNumber` / `PostalCode` / `Pref` / `Addr01` / `Addr02` / `Birth` / `Sex` / `Job` + server-derived 4 件 `CustomerId` / `PasswordHash` / `InitialPoint` / `CustomerStatus`)。スコープ決定: email 検証 OFF 経路のみ (`customerStatus = 2` 固定)。検証 ON は将来の Branching pilot に譲る (Branching 機構自体は Pilot 3 で検証済み)。security レビュー反映: plaintext password を Being の non-public parameter + `#[SensitiveParameter]` で受ける (stack trace redact + 下流 public surface 不在) / `CustomerId` は `bin2hex(random_bytes(16))` (128-bit CSPRNG)。**次は (1) Complex Convergence (`insurance-claim` のような多分岐 + 多経路収束)、(2) admin 系の本番移植 (10 件規模) で skill を bake、(3) `~/.claude/skills/alps-to-be-bear/` の plugin marketplace 昇格判断**
+- **Pilot 4 完了** (`BeMart`, `doRegisterCustomer` 1 件): **Multi-Reason Being** パターンの参照実装。`RegisterCustomerInput → CustomerRegistering (Being: 4 つの独立 Reason `EmailUniquenessChecker` / `CustomerIdProvider` / `PasswordHasher` / `CustomerInitialPoint` を並列 `#[Inject]`) → CustomerRegistered (Final: 永続化のみ)` の **1 段 Multi-Reason Being + Final**。Diamond と区別される構造的特徴は「各 Reason の結果が他の Reason の入力にならない (互いに独立)」こと。Pilot 4 では fail-fast query (uniqueness check) + 3 つの pure derivation (id / hash / point) が同じ Being に同居しても Diamond にはならず、blog-publishing デモのバリエーションとして成立した。composer test 39/39 pass, 111 assertions, **0 notices** (Pilot 4 で 19 件の Semantic 変数を新規登録: client-input 15 件 `Email` / `Password` / `Name01` / `Name02` / `Kana01` / `Kana02` / `CompanyName` / `PhoneNumber` / `PostalCode` / `Pref` / `Addr01` / `Addr02` / `Birth` / `Sex` / `Job` + server-derived 4 件 `CustomerId` / `PasswordHash` / `InitialPoint` / `CustomerStatus`)。スコープ決定: email 検証 OFF 経路のみ (`customerStatus = 2` 固定)。検証 ON は将来の Branching pilot に譲る (Branching 機構自体は Pilot 3 で検証済み)。security レビュー反映: plaintext password を Being の non-public parameter + `#[SensitiveParameter]` で受ける (stack trace redact + 下流 public surface 不在) / `CustomerId` は `bin2hex(random_bytes(16))` (128-bit CSPRNG)。**次は (1) Complex Convergence (`insurance-claim` のような多分岐 + 多経路収束)、(2) admin 系の本番移植 (10 件規模) で skill を bake、(3) `~/.claude/skills/alps-to-be-bear/` の plugin marketplace 昇格判断**
 - **Pilot 5 完了** (`BeMart`, `doCheckout` 1 件): **Complex Convergence / Multi-side-effect Final** パターンの参照実装。`CheckoutInput → CheckoutPrepared (Being: 値集約のみ) → CheckoutSettled (Being: payment 副作用 + 番号採番) → CheckoutCompleted (Final: 永続化 + メール送信 + cart-clear の 3 副作用を strict order で並走)` の **2 段 Being + Multi-side-effect Final**。loan-application デモ準拠。composer test 52/52 pass, 149 assertions, **0 notices** (Pilot 5 で server-derived Semantic 3 件 `OrderNo` / `OrderDate` / `PaymentDate` を MergedCart パターン (空 `#[Validate]` body) で追加。client-input 側は Pilot 3 の `PreOrderId` / `PaymentMethodId` を再利用)。skill gap: **G-14 (Ray.Di binding gotcha)** — `bind(Iface)->to(Impl)` は `bind(Impl)->in(SINGLETON)` を consult しない。state を hold する Fake (`FakeMailer` / `FakePaymentGateway` 等) は `$obj = new Fake(); bind(Iface)->toInstance($obj); bind(Impl)->toInstance($obj);` で両 binding を同一インスタンスに束ねる必要がある。AppModule.php に commented warning として記録。**G-15 (Multi-side-effect Final 判定基準)** / **G-16 (server-derived Semantic 登録漏れ)** も発見。スコープ決定: happy-path + 失敗時 422/404 のみ。Branching Final と補償処理 (Refund / InventoryRelease) は Phase B へ deferred。**次は Phase B (CSRF / rate-limit / bear-security / Psalm taint / env-gated ProdModule)、または admin 系の本番移植 10 件で skill を bake**
 
 ### 振り返り方
@@ -365,7 +365,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 | 項目 | 値 |
 |---|---|
 | リポジトリ | `/Users/akihito/git/ec-cube-alps` |
-| パターン | **Multi-Reason Being (1 段) + Final (永続化)**。`RegisterCustomerInput → CustomerRegistering (Being: 4 つの独立 Reason 並列起動) → CustomerRegistered (Final: 永続化のみ)`。Being は (1) `EmailUniquenessCheckerInterface` (uniqueness fail-fast), (2) `CustomerIdGeneratorInterface` (32-char opaque hex), (3) `PasswordHasherInterface` (bcrypt), (4) `CustomerInitialPointInterface` (welcome bonus) を `#[Inject]` で並列に呼ぶ。各 Reason の結果 (customerId / passwordHash / initialPoint / customerStatus=2 固定) は Being 自身の readonly プロパティに格納され、`#[Input]` 経由で Final に forward |
+| パターン | **Multi-Reason Being (1 段) + Final (永続化)**。`RegisterCustomerInput → CustomerRegistering (Being: 4 つの独立 Reason 並列起動) → CustomerRegistered (Final: 永続化のみ)`。Being は (1) `EmailUniquenessCheckerInterface` (uniqueness fail-fast), (2) `CustomerIdQueryInterface` (32-char opaque hex), (3) `PasswordHasherInterface` (bcrypt), (4) `CustomerInitialPointInterface` (welcome bonus) を `#[Inject]` で並列に呼ぶ。各 Reason の結果 (customerId / passwordHash / initialPoint / customerStatus=2 固定) は Being 自身の readonly プロパティに格納され、`#[Input]` 経由で Final に forward |
 | テスト | 39 passed (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 既存 6 + Pilot 4 新規 12), 111 assertions, **0 notices** (Pilot 4 で 19 件の Semantic 変数を新規登録: client-input 15 件 `Email` / `Password` / `Name01` / `Name02` / `Kana01` / `Kana02` / `CompanyName` / `PhoneNumber` / `PostalCode` / `Pref` / `Addr01` / `Addr02` / `Birth` / `Sex` / `Job` + server-derived 4 件 `CustomerId` / `PasswordHash` / `InitialPoint` / `CustomerStatus` を MergedCart パターン (空 `#[Validate]` body) で登録) |
 | Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (Multi-Reason Being テンプレ追加が必要) |
 | スコープ決定 | **email 検証 OFF 経路のみ実装** (`customerStatus = 2` 固定)。検証 ON (provisional → email confirm → activate) は将来の Branching pilot で実装。理由: Branching 機構自体は Pilot 3 で検証済みのため、ここで再検証しても新たな知見は得られない |
@@ -407,7 +407,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 **`src/Module/AppModule.php`:**
 
-- Pilot 4 用 6 件の bind 追加 (`FakeCustomerStorage` Singleton, `EmailUniquenessCheckerInterface`, `CustomerCommandInterface`, `PasswordHasherInterface`, `CustomerIdGeneratorInterface`, `CustomerInitialPointInterface`)
+- Pilot 4 用 6 件の bind 追加 (`FakeCustomerStorage` Singleton, `EmailUniquenessCheckerInterface`, `CustomerCommandInterface`, `PasswordHasherInterface`, `CustomerIdQueryInterface`, `CustomerInitialPointInterface`)
 
 **Pilot 4 で新規追加した Be 層 (`be/src/`):**
 
@@ -416,7 +416,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 - `Final/`: `CustomerRegistered.php`
 - `Reason/Entity/`: `CustomerEntity.php`
 - `Reason/Query/`: `CustomerCommandInterface.php`, `EmailUniquenessCheckerInterface.php`, `FakeCustomerStorage.php` (Singleton), `FakeCustomerCommand.php`, `FakeEmailUniquenessChecker.php`
-- `Reason/Service/`: `PasswordHasherInterface.php` + `FakePasswordHasher.php`, `CustomerIdGeneratorInterface.php` + `FakeCustomerIdGenerator.php`, `CustomerInitialPointInterface.php` + `FakeCustomerInitialPoint.php`
+- `Reason/Service/`: `PasswordHasherInterface.php` + `NativePasswordHasher.php`, `CustomerIdQueryInterface.php` + `FakeCustomerIdProvider.php`, `CustomerInitialPointInterface.php` + `FakeCustomerInitialPoint.php`
 - `Semantic/`: 19 件 (指標 #5)
 - `Exception/`: 16 件 (15 FormatException + `EmailAlreadyRegisteredException`)
 - `var/fake/customers.json` — 3 件の seed (alice / bob / carol。passwordHash は文法上 valid だが `password_verify` を通らないダミー文字列。`$comment` でダミーである旨を明記)
@@ -482,7 +482,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 | 4 | 自己証明 assert | ≥1 | ≥1 | `Resource/Page/Shopping/Checkout.php` で `assert($final instanceof CheckoutCompleted)`。CheckoutSettled の existence proof は「stock allocated AND payment captured AND order number issued」、CheckoutCompleted の existence proof は「persisted AND mail sent AND cart cleared」 |
 | 5 | Semantic クラス数 | 0 (新規) | 0 | Pilot 3 の `PreOrderId` / `PaymentMethodId` を共有。重複作成を避けた |
 | 6 | Reason 層共有ストア | toInstance 必須 | 該当 | `FakeInventoryAllocator` / `FakePaymentGateway` / `FakeMailer` を `toInstance($obj)` で Iface + Impl の両 binding に固定 (`AppModule:121-129`)。`FakeFinalizedOrderStorage` は Becoming chain から直接見られないため通常の `in(SINGLETON)` で十分 (Pilot 4 の FakeCustomerStorage と同パターン) |
-| 7 | client-input / server-fetched / side-effect 分離 | 3 シート | 3 シート | client-input (preOrderId / paymentMethodId), server-fetched (OrderEntity from OrderQuery, PurchaseTotals totals from PurchaseFlow), side-effect (InventoryAllocator / PaymentGateway / OrderNumberGenerator / OrderCommand / Mailer / CartCommand) を 3 段階に明確分離 |
+| 7 | client-input / server-fetched / side-effect 分離 | 3 シート | 3 シート | client-input (preOrderId / paymentMethodId), server-fetched (OrderEntity from OrderQuery, PurchaseTotals totals from PurchaseFlow), side-effect (InventoryAllocator / PaymentGateway / OrderNoProvider / OrderCommand / Mailer / CartCommand) を 3 段階に明確分離 |
 | 8 | LoC (Pilot 5 新規分) | 実測のみ | src 約 670 + tests 約 240 | Input 1 件 (29 LoC) + Being 2 件 (71 + 71 LoC) + Final 1 件 (98 LoC) + Resource 1 件 (95 LoC) + Exception 2 件 (約 40 LoC) + Reason Entity 1 件 (61 LoC) + Reason Service Iface 4 + Fake 4 (約 260 LoC) + Reason Query Iface 1 + Fake 2 (約 110 LoC) + Test Domain 154 LoC + Resource 87 LoC |
 | 9 | Multi-side-effect Final テスト | pass | pass | `testPersistsFinalizedOrder` + `testSendsExactlyOneConfirmationMail` + `testCapturesPaymentExactlyOnceWithCorrectAmount` + `testClearsSourceCart` で 4 副作用 (persist / mail / payment capture / cart clear) を独立検証。Final の 3 Reason すべてが期待回数だけ呼ばれたことを保証 |
 | 10 | DomainException → HTTP 422/404 マッピング | pass | pass | `testUnknownPreOrderRejected` (Domain `PreOrderNotFoundException`) + `testOnPostUnknownPreOrderReturns404` (Resource 404), `testInsufficientStockRejected` (Domain) + `testOnPostInsufficientStockReturns422` (Resource 422), `testPaymentDeclinedRejected` (Domain) + `testOnPostPaymentDeclinedReturns422` (Resource 422) で 3 失敗経路を Domain + Resource 両層で検証 |
@@ -496,13 +496,13 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 |---|---|---|
 | G-14 | **Ray.Di `bind(Iface)->to(Impl)` は `bind(Impl)->in(SINGLETON)` を consult しない** — Iface 経由の resolution と Impl 経由の resolution が独立した instance を作る。Pilot 5 の `FakeMailer` / `FakePaymentGateway` (state を hold する Fake) は Becoming chain が `MailerInterface` で resolve、test introspection が `FakeMailer` で resolve するため、両 binding が同一 instance を返す必要がある。Solution: `$obj = new Fake(); $this->bind(Iface)->toInstance($obj); $this->bind(Impl)->toInstance($obj);` (Storage 経由で state を分離するパターンも可だが、refactor 量が大きい) | `SKILL.md` の「Ray.Di binding patterns for Fakes」セクション新規追加 (TODO)。Pilot 1-4 で使ってきた `bind(Iface)->to(Impl); bind(Impl)->in(SINGLETON)` パターンは「Impl が state-less で test が直接参照しない」場合に限る旨を明記 |
 | G-15 | **Multi-side-effect Final (Complex Convergence) の判定基準** — Pilot 4 までの Final は単一 Command のみ呼んだが、Pilot 5 の Final は OrderCommand + Mailer + CartCommand の 3 副作用を 1 constructor で並走させる。判定基準: 「副作用同士に順序依存があり (record of truth が先 / cleanup が後)、互いの結果に依存しない」場合は Multi-side-effect Final として 1 つの Final で収束させて良い。3 副作用以上で各副作用が他の副作用の結果を要する場合は Cascade Final (中間 Final を挟む) を検討 | `SKILL.md` の「パターン判定フロー」に Multi-side-effect Final の項目追加 (TODO) |
-| G-16 | **Failure mode: side-effect ordering と partial-commit window** — Pilot 5 で `gateway.checkout()` が成功した後に `numbers.generate()` が throw (現状の Fake では起きないが Phase 2 で起きうる) すると、顧客は課金されたが orderNo 未発番 → FinalizedOrder 未永続化 → カートも残る状態に陥る。同様に Final で `orderCommand.register()` が成功して `mailer.send()` が throw すると永続化 + 課金完了 + メール無し + カート残存。Solution (Phase B): (a) Final の Mailer は契約上 non-throwing (失敗時は internal log + swallow)、(b) CartCommand 失敗も swallow (注文は durable なので stale cart は許容)、(c) CheckoutSettled は Phase 2 で DB transaction + register_shutdown_function gateway hook に書き換え | `SKILL.md` の「side-effect ordering と例外契約」セクション (TODO) |
+| G-16 | **Failure mode: side-effect ordering と partial-commit window** — Pilot 5 で `gateway.checkout()` が成功した後に `numbers.get()` が throw (現状の Fake では起きないが Phase 2 で起きうる) すると、顧客は課金されたが orderNo 未発番 → FinalizedOrder 未永続化 → カートも残る状態に陥る。同様に Final で `orderCommand.register()` が成功して `mailer.send()` が throw すると永続化 + 課金完了 + メール無し + カート残存。Solution (Phase B): (a) Final の Mailer は契約上 non-throwing (失敗時は internal log + swallow)、(b) CartCommand 失敗も swallow (注文は durable なので stale cart は許容)、(c) CheckoutSettled は Phase 2 で DB transaction + register_shutdown_function gateway hook に書き換え | `SKILL.md` の「side-effect ordering と例外契約」セクション (TODO) |
 
 ### Pilot 5 で更新したファイル
 
 **`src/Module/AppModule.php`:**
 
-- Pilot 5 用 9 件の bind 追加: `FakeFinalizedOrderStorage` Singleton, `FakeInventoryAllocator` / `FakePaymentGateway` / `FakeMailer` の **toInstance による Iface + Impl 両 binding**, `OrderNumberGeneratorInterface` / `OrderCommandInterface` の通常 link binding
+- Pilot 5 用 9 件の bind 追加: `FakeFinalizedOrderStorage` Singleton, `FakeInventoryAllocator` / `FakePaymentGateway` / `FakeMailer` の **toInstance による Iface + Impl 両 binding**, `OrderNoProvider` / `OrderCommandInterface` の通常 link binding
 - 11-19 行のコメントブロックで Ray.Di toInstance パターンを文書化 (将来 pilot 用の breadcrumb)
 
 **Pilot 5 で新規追加した Be 層 (`be/src/`):**
@@ -512,7 +512,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 - `Final/`: `CheckoutCompleted.php`
 - `Exception/`: `InsufficientStockException.php`, `PaymentDeclinedException.php` (`PreOrderNotFoundException` は Pilot 3 既存)
 - `Reason/Entity/`: `FinalizedOrderEntity.php` (16 fields + STATUS_NEW=1 constant)
-- `Reason/Service/`: `InventoryAllocatorInterface.php` + `FakeInventoryAllocator.php` (inventory.json 読み + atomic 引当), `PaymentGatewayInterface.php` + `FakePaymentGateway.php` (paymentMethodId===9 で決済失敗シミュレーション), `OrderNumberGeneratorInterface.php` + `FakeOrderNumberGenerator.php` (`bin2hex(random_bytes(16))` で 32-hex), `MailerInterface.php` + `FakeMailer.php` (sent 配列で送信記録 / non-throwing 契約)
+- `Reason/Service/`: `InventoryAllocatorInterface.php` + `FakeInventoryAllocator.php` (inventory.json 読み + atomic 引当), `PaymentGatewayInterface.php` + `FakePaymentGateway.php` (paymentMethodId===9 で決済失敗シミュレーション), `OrderNoProvider.php` + `OrderNoProvider.php` (`bin2hex(random_bytes(16))` で 32-hex), `MailerInterface.php` + `FakeMailer.php` (sent 配列で送信記録 / non-throwing 契約)
 - `Reason/Query/`: `OrderCommandInterface.php` + `FakeOrderCommand.php` (FakeFinalizedOrderStorage delegate), `FakeFinalizedOrderStorage.php` (Singleton, orderNo + preOrderId 両ルックアップ)
 - `Reason/Query/CartCommandInterface.php` — **既存に `clearByPreOrderId(string $preOrderId): void` 追加**
 - `Reason/Query/FakeCartCommand.php` — 同上 implementation
@@ -537,7 +537,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 - **IDEMPOTENCY**: pre-order row を「消費済み」状態に遷移させていない。同じ preOrderId の double-submit で **二重課金 + 二重 FinalizedOrder + 在庫二重引当** が発生しうる。現状唯一の緩和策は最後の `clearByPreOrderId` だが redirect を follow しない並列 / replay 攻撃には無力。Phase B fix: 実 DB では `OrderCommand.register()` を `SELECT FOR UPDATE` または `dtb_order.pre_order_id` UNIQUE 制約 + `INSERT ON CONFLICT` で atomic にする
 - **PARTIAL-COMMIT WINDOW**: gateway.checkout 成功後の throw / orderCommand.register 後の mailer throw / cartCommand throw で各種の partial state が発生しうる。Phase B fix: Mailer / CartCommand を契約上 non-throwing にして Final 側で try/catch + log + swallow。CheckoutSettled は Phase 2 で DB transaction + `register_shutdown_function` 化
 - **PAYMENT-FIRST ORDERING 正しい**: inventory.allocate → gateway.checkout の順を守っているため OOS 時に課金しない設計は OK (no action required)
-- **PRE-ORDER ID ENTROPY (cross-pilot)**: Pilot 5 では mint しないが、将来の `doShopping` pilot で実装する `PreOrderIdGenerator` は **必ず `bin2hex(random_bytes(20))` CSPRNG** にすること (上記 AUTHZ 欠如と組み合わさると enumeration 攻撃が成立する)
+- **PRE-ORDER ID ENTROPY (cross-pilot)**: Pilot 5 では mint しないが、将来の `doShopping` pilot で実装する `PreOrderIdProvider` は **必ず `bin2hex(random_bytes(20))` CSPRNG** にすること (上記 AUTHZ 欠如と組み合わさると enumeration 攻撃が成立する)
 - **EXCEPTION MESSAGE 漏洩**: `InsufficientStockException` (productCode + counts), `PaymentDeclinedException` (preOrderId + paymentMethodId + amount) が SemanticLogger 経由でログに残る。Resource は固定文字列を返すので HTTP body には漏れない。Phase B fix: preOrderId はログでは前 8 桁に redact、または sensitive channel に分離
 - **RESPONSE BODY 漏洩**: success body に `customerId` (32-hex opaque) が含まれる。session で既知のため client 側で必要ない。Phase B fix: response body から `customerId` を drop
 - **INPUT VALIDATION 完全**: `onPost(string $preOrderId, int $paymentMethodId)` 以外の body フィールドは BEAR が signature reject。over-posting 不可
@@ -1067,15 +1067,15 @@ Slice 7 で確立した「BEAR 側のみ実装 + EC-CUBE 側 EventListener は P
 
 新規:
 
-- `be/src/Reason/Service/CsrfTokenInterface.php` — `isValid(string|null): bool` だけを公開する domain-facing interface。token 発行は対象外。
+- `be/src/Reason/Service/CsrfToken.php` — `isValid(string|null): bool` だけを公開する domain-facing interface。token 発行は対象外。
 - `be/src/Reason/Service/FakeCsrfToken.php` — dev/test、固定 token (`FakeCsrfToken::TOKEN`) と `hash_equals` 比較。
 - `src/Auth/EccubeSharedCsrfTokenAdapter.php` — prod、`$_SESSION['_csrf_token']` を読む。CLI fallback は `BEMART_CLI_CSRF_TOKEN` env var (Slice 7 と同じ pattern)。
-- `src/Module/ProdCsrfOverrideModule.php` — prod 専用 `CsrfTokenInterface → EccubeSharedCsrfTokenAdapter` binding。
+- `src/Module/ProdCsrfOverrideModule.php` — prod 専用 `CsrfToken → EccubeSharedCsrfTokenAdapter` binding。
 - `tests/Auth/EccubeSharedCsrfTokenAdapterTest.php` — 11 ケースの unit test。
 
 変更:
 
-- `src/Module/AppModule.php` — `CsrfTokenInterface → FakeCsrfToken` (Singleton)。
+- `src/Module/AppModule.php` — `CsrfToken → FakeCsrfToken` (Singleton)。
 - `src/Module/ProdModule.php` — `ProdCsrfOverrideModule` install + Slice 7.1 で古い名前のまま残っていた "SymfonySessionAdapter" doc 参照を `EccubeSharedSessionAdapter` に修正。
 - `src/Resource/Page/Cart/Item.php` — `csrfToken` 引数を受け取り、`onPost` 先頭で `$csrf->isValid()` 検証、失敗時 403。
 - `src/Resource/Page/Entry.php` — 同上。
@@ -1148,7 +1148,7 @@ CSRF は HTTP boundary concern であり、Be domain は HTTP origin を知ら�
 - AUTHZ: 「この customer がこの order を所有しているか」 ← business rule
 - CSRF: 「この POST が我々のフォーム由来か」 ← transport rule
 
-そのため CSRF check は Resource の `onPost` 先頭、Becoming 呼び出しより前に置いた。Be domain は `CsrfTokenInterface` を see できるが consult しない (Reason interface としては定義したが、actual call site は BEAR Resource 側のみ)。
+そのため CSRF check は Resource の `onPost` 先頭、Becoming 呼び出しより前に置いた。Be domain は `CsrfToken` を see できるが consult しない (Reason interface としては定義したが、actual call site は BEAR Resource 側のみ)。
 
 #### Failure response: 403 (`Code::FORBIDDEN`)
 
@@ -1160,7 +1160,7 @@ CSRF は HTTP boundary concern であり、Be domain は HTTP origin を知ら�
 
 #### Token issuance を interface に含めない
 
-`CsrfTokenInterface::isValid()` のみ。`current()` / `generate()` は持たない。理由:
+`CsrfToken::isValid()` のみ。`current()` / `get()` は持たない。理由:
 
 - Slice 8 のスコープは「validation only」 — token 発行は form-render 時の責務であり、resource boundary では発生しない
 - EC-CUBE 側で既に Symfony Forms が token を発行しているので、BEAR 側は読むだけ
@@ -1263,9 +1263,9 @@ Slice 9 で Input class の property にも source annotation を足したが、
 
 Psalm 組み込みの taint type には「外部サービスへの出口」 を直接表すものがない (`header` は HTTP response header、`ldap` は LDAP query 等)。`network` を custom type として採用し、PaymentGateway の sink に使う。本コードベース内で意味が閉じていれば custom type も Psalm は track する。
 
-#### CsrfTokenInterface には taint marker を付けない
+#### CsrfToken には taint marker を付けない
 
-Slice 8 の `CsrfTokenInterface::isValid($token)` は `$token` を比較するだけで、それ以上どこへも流さない。Psalm の sink としては「validate 後の比較対象が leak しないか」 が論点になり得るが、`hash_equals` で局所利用されるだけなので flow が成立しない。annotation を付けても情報量がゼロのため省略。
+Slice 8 の `CsrfToken::isValid($token)` は `$token` を比較するだけで、それ以上どこへも流さない。Psalm の sink としては「validate 後の比較対象が leak しないか」 が論点になり得るが、`hash_equals` で局所利用されるだけなので flow が成立しない。annotation を付けても情報量がゼロのため省略。
 
 ### Slice 9 の振り返り (決定的/非決定的)
 
@@ -1443,7 +1443,7 @@ Pilot 10 は本来 Pilot 2 の `QuantityAdjusted` Being を再利用したかっ
 
 - Be flow: `RequestPasswordResetInput → PasswordResetRequested`
 - **Anti-enumeration**: 登録済み email / 未登録 email の双方で identical 200 + identical body shape を返す。`issued` flag は Final 内部にのみ存在 (mail 送信を制御)、resource は client に echo しない
-- Token: 32-char hex (`CustomerIdGenerator` を re-purpose)、TTL 1 hour (EC-CUBE デフォルト準拠)、latest-wins
+- Token: 32-char hex (`CustomerIdProvider` を re-purpose)、TTL 1 hour (EC-CUBE デフォルト準拠)、latest-wins
 - 新規: `PasswordResetTokenEntity` + `PasswordResetTokenStorageInterface` + `FakePasswordResetTokenStorage`
 - `MailerInterface::sendPasswordReset(email, resetKey)` を追加 (email が html sink)
 - **設計判断**: token を `CustomerEntity` に持たせず別 storage に分離 — expiry 管理が cleaner
@@ -1756,8 +1756,8 @@ Wave 7 net: 306 → 350 (+44 tests)、新 transition 6 件、新 docs 10 件。
 
 #### W (guest checkout) のスコープ判断
 - ALPS の `goShoppingNonMember` / `doSubmitNonMember` は **form entry only として実装**、guest checkout の AUTHZ 緩和 (Pilot 5 doCheckout を session-less で通す) は Phase 2 として明示 defer
-- `doSubmitNonMember` Final は `preOrderId` を `CustomerIdGenerator` (32-char hex) で synthesize して返すが、**Cart や PreOrder には書かない** stub。Final docblock で Phase 2 gap を明文化
-- 32-char hex (CustomerIdGenerator) vs 40-char hex (`PreOrderId` Semantic) の format 不一致も docblock で記録 — Phase 2 で `PreOrderIdGenerator` を独立 interface 化する余地
+- `doSubmitNonMember` Final は `preOrderId` を `CustomerIdProvider` (32-char hex) で synthesize して返すが、**Cart や PreOrder には書かない** stub。Final docblock で Phase 2 gap を明文化
+- 32-char hex (CustomerIdProvider) vs 40-char hex (`PreOrderId` Semantic) の format 不一致も docblock で記録 — Phase 2 で `PreOrderIdProvider` を独立 interface 化する余地
 
 #### X (SKILL bake) の構造
 - 10 ファイル (`index.md` + G-14 〜 G-22) を `docs/skills/` 配下に配置

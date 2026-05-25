@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -50,7 +50,7 @@ use function trim;
  *
  * The Withdraw::onGet form-info endpoint requires AUTHN against a real
  * customer (it surfaces the customer's email + name), so the `html`
- * context's `SessionInterface` is rebound to the fixture customer alice.
+ * context's `CustomerSession` is rebound to the fixture customer alice.
  */
 final class WithdrawHtmlRenderTest extends TestCase
 {
@@ -98,7 +98,7 @@ final class WithdrawHtmlRenderTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)->toInstance($this->session);
+                $this->bind(CustomerSession::class)->toInstance($this->session);
             }
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');

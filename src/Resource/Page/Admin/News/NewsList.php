@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\News;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\AdminNewsListFetched;
 use MyVendor\BeMart\Be\Final\NewsCreated;
 use MyVendor\BeMart\Be\Input\CreateNewsInput;
 use MyVendor\BeMart\Be\Input\GetAdminNewsListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -27,7 +27,6 @@ class NewsList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -63,24 +62,16 @@ class NewsList extends ResourceObject
      * @psalm-taint-source input $newsDescription
      * @psalm-taint-source input $newsUrl
      * @psalm-taint-source input $linkMethod
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
+    #[CsrfProtected]
     public function onPost(
         string $newsTitle,
         string $publishDate,
         string|null $newsDescription = null,
         string|null $newsUrl = null,
         bool $linkMethod = false,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreateNewsInput(
                 newsTitle: $newsTitle,

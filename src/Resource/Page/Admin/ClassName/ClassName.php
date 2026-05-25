@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassName;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Final\ClassNameDeleted;
 use MyVendor\BeMart\Be\Final\ClassNameUpdated;
 use MyVendor\BeMart\Be\Input\DeleteClassNameInput;
 use MyVendor\BeMart\Be\Input\UpdateClassNameInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -30,28 +30,19 @@ class ClassName extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     /**
      * @psalm-taint-source input $classNameId
      * @psalm-taint-source input $classNameLabel
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
+    #[CsrfProtected]
     public function onPut(
         string $classNameId,
         string|null $classNameLabel = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateClassNameInput(
                 classNameId: $classNameId,
@@ -87,18 +78,11 @@ class ClassName extends ResourceObject
 
     /**
      * @psalm-taint-source input $classNameId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
-    public function onDelete(string $classNameId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $classNameId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeleteClassNameInput(classNameId: $classNameId));
         } catch (UnauthorizedAdminAccessException) {

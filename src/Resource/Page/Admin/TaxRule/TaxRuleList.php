@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\AdminTaxRuleListFetched;
 use MyVendor\BeMart\Be\Final\TaxRuleCreated;
 use MyVendor\BeMart\Be\Input\CreateTaxRuleInput;
 use MyVendor\BeMart\Be\Input\GetAdminTaxRuleListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminTaxRuleForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -38,7 +38,6 @@ class TaxRuleList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -79,22 +78,14 @@ class TaxRuleList extends ResourceObject
      * @psalm-taint-source input $taxRate
      * @psalm-taint-source input $applyDate
      * @psalm-taint-source input $roundingType
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
+    #[CsrfProtected]
     public function onPost(
         float $taxRate,
         string $applyDate,
         int $roundingType = 1,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreateTaxRuleInput(
                 taxRate: $taxRate,

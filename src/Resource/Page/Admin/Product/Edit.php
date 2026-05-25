@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminProductFetched;
 use MyVendor\BeMart\Be\Input\GetAdminProductInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminProductEditForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -45,7 +45,7 @@ class Edit extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -58,7 +58,7 @@ class Edit extends ResourceObject
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     public function onGet(string $productCode = ''): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 

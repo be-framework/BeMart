@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Payment;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +18,6 @@ use MyVendor\BeMart\Be\Final\PaymentMethodAdminUpdated;
 use MyVendor\BeMart\Be\Input\DeletePaymentMethodAdminInput;
 use MyVendor\BeMart\Be\Input\GetAdminPaymentListInput;
 use MyVendor\BeMart\Be\Input\UpdatePaymentMethodAdminInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -35,7 +35,6 @@ class Payment extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -109,9 +108,9 @@ class Payment extends ResourceObject
      * @psalm-taint-source input $ruleMin
      * @psalm-taint-source input $ruleMax
      * @psalm-taint-source input $visible
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
+    #[CsrfProtected]
     public function onPut(
         string $paymentId,
         string|null $paymentMethodName = null,
@@ -119,15 +118,7 @@ class Payment extends ResourceObject
         int|null $ruleMin = null,
         int|null $ruleMax = null,
         bool|null $visible = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdatePaymentMethodAdminInput(
                 paymentId: $paymentId,
@@ -171,18 +162,11 @@ class Payment extends ResourceObject
 
     /**
      * @psalm-taint-source input $paymentId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
-    public function onDelete(string $paymentId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $paymentId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeletePaymentMethodAdminInput(paymentId: $paymentId));
         } catch (UnauthorizedAdminAccessException) {

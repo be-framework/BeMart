@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
 
 /**
@@ -17,9 +17,9 @@ use Ray\Di\AbstractModule;
  * via `ResourceInterface::get('page://self/mypage/favorite-list')` after
  * seeding rows through SQL fixture helpers.
  *
- * customerId comes from {@see SessionInterface} (Pilot 5 F-2 lesson — the
+ * customerId comes from {@see CustomerSession} (Pilot 5 F-2 lesson — the
  * actor is read from the session, never from the request body). The
- * test rebinds SessionInterface to a {@see FakeSession} carrying the
+ * test rebinds CustomerSession to a {@see FakeSession} carrying the
  * inserted customer's id (which must be numeric — dtb_customer.id is
  * `int unsigned` and the SQL impls reject non-numeric ids).
  */
@@ -41,7 +41,7 @@ final class FavoriteListResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)
+                $this->bind(CustomerSession::class)
                     ->toInstance(new FakeSession($this->customerId));
             }
         };
