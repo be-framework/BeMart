@@ -1052,6 +1052,41 @@ trait SqlFixturesTrait
     }
 
     /**
+     * Insert a dtb_product_image row (a product photo). Returns the
+     * inserted id.
+     *
+     * Used to exercise the cart-row main-image join in
+     * {@see \MyVendor\BeMart\Be\Reason\Query\SqlCartQuery}, which picks
+     * the lowest-`sort_no` image for a product. dtb_product_image's
+     * NOT NULL columns are file_name, sort_no, create_date,
+     * discriminator_type — note there is NO update_date column.
+     * `creator_id` is a nullable FK to the (empty) dtb_member master,
+     * so it defaults to NULL.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     *   Recognised keys: `file_name`, `sort_no`.
+     */
+    protected function insertProductImage(int $productId, array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'product_id' => $productId,
+            'creator_id' => null,
+            'file_name' => sprintf('product-image-%d.jpg', $counter),
+            'sort_no' => 0,
+            'create_date' => $now,
+            'discriminator_type' => 'productimage',
+        ], $overrides);
+
+        $this->executeInsert('dtb_product_image', $row);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
      * Insert (idempotently) an mtb_device_type row so the FK from
      * dtb_layout.device_type_id → mtb_device_type.id can be satisfied.
      *
@@ -1752,6 +1787,41 @@ trait SqlFixturesTrait
             ':updated' => $now,
             ':discriminator' => 'customerfavoriteproduct',
         ]);
+
+        return (int) $this->pdo->lastInsertId();
+    }
+
+    /**
+     * Insert a dtb_mail_history row (one sent-mail audit entry per
+     * order). Returns the inserted id.
+     *
+     * dtb_mail_history has no NOT NULL business columns — `order_id` and
+     * `creator_id` are nullable FKs (creator_id → dtb_member, empty in
+     * the structure-only dump → always NULL), `send_date` /
+     * `mail_subject` / `mail_body` / `mail_html_body` are all nullable.
+     * Only `discriminator_type` is NOT NULL. Callers pass `order_id` (the
+     * FK SqlOrderQuery::historyByOrderNo joins on) plus the mail fields
+     * under assertion.
+     *
+     * @param array<string, mixed> $overrides Per-column overrides.
+     */
+    protected function insertMailHistory(int $orderId, array $overrides = []): int
+    {
+        static $counter = 0;
+        $counter++;
+
+        $now = date('Y-m-d H:i:s');
+        $row = array_merge([
+            'order_id' => $orderId,
+            'creator_id' => null,
+            'send_date' => $now,
+            'mail_subject' => sprintf('Test Mail %d', $counter),
+            'mail_body' => sprintf('Test mail body %d', $counter),
+            'mail_html_body' => null,
+            'discriminator_type' => 'mailhistory',
+        ], $overrides);
+
+        $this->executeInsert('dtb_mail_history', $row);
 
         return (int) $this->pdo->lastInsertId();
     }

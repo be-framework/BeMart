@@ -1,0 +1,124 @@
+{#
+  BeMart Contact form page — EC-CUBE goContactForm.
+
+  PORT of EC-CUBE 4.3 default-theme `Contact/index.twig`
+  (src/Eccube/Resource/template/default/Contact/index.twig).
+
+  Markup skeleton, `ec-contactRole` / `ec-pageHeader` / `ec-off1Grid` /
+  `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` / `ec-select` /
+  `ec-input` / `ec-telInput` / `ec-RegisterRole__actions` / `ec-off4Grid`
+  classes + the <dl>/<dt>/<dd> definition-list structure are kept
+  verbatim from EC-CUBE.
+
+  Phase 3 — FORM page (Ray.WebFormModule). Wave 1 authored static
+  `<input>`s (residual 46 lines). This rework adopts the form-page
+  recipe: the Contact resource exposes a real `ContactForm` (an
+  AbstractForm) as `body.form`, and the modelled inputs are rendered
+  through it:
+
+    {{ form.input('contactEmail')|raw }}   <- real <input> w/ name/attrs
+    {{ form.error('contactEmail') }}       <- inline Be-domain error
+
+  Validation authority stays with the Be Framework Becoming chain.
+
+  MISSING-FIELD NOTE — EC-CUBE's contact form collects MORE fields than
+  BeMart's Contact resource carries. EC-CUBE's `ContactType` has name /
+  kana / address (postal_code / pref / addr01 / addr02) / phone_number /
+  email / contents; BeMart's `SubmitContactInput` (and the ALPS
+  `ContactForm` descriptor) model ONLY contactName01 / contactName02 /
+  contactEmail / contactContents. Per the Phase-3 recipe a template wave
+  does NOT enrich the Input/ALPS — the kana / address / phone <dl> rows
+  are therefore OMITTED from this port (never invented; the resource has
+  no body field behind them). They are enumerated as an EC-CUBE-only
+  missing-body-field residual family in the render test, and the Contact
+  page is FLAGGED for a follow-up vertical-slice enrichment.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `form_label` / `form_widget` / `form_errors` — Symfony FormView;
+     `form.input(...)` / `form.error(...)` (Ray.WebFormModule) is
+     BeMart's equivalent. The render-diff test stubs EC-CUBE's
+     `form_widget` to delegate to the same ContactForm.
+   - `form._token` — Symfony CSRF widget; kept as a hidden input with an
+     empty value (BeMart's html context has no CSRF widget).
+   - the entity-extension `{% for f in form|filter(...) %}` loop is
+     OMITTED (a core install has no entity extensions — emits nothing).
+   - `has_errors(...)` — request-validation runtime; false on a fresh
+     form, so the conditional ` error` class never appears.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'other_page' %}
+{% set route = 'contact' %}
+{% set title = 'お問い合わせ' %}
+
+{% block javascript %}
+    <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+{% endblock javascript %}
+
+{% block main %}
+
+    <div class="ec-contactRole">
+        <div class="ec-pageHeader">
+            <h1>お問い合わせ</h1>
+        </div>
+        <div class="ec-off1Grid">
+            <div class="ec-off1Grid__cell">
+                <form method="post" action="{{ url('contact') }}" class="h-adr" novalidate>
+                    <span class="p-country-name" style="display:none;">Japan</span>
+                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <p class="ec-para-normal">内容によっては回答をさしあげるのにお時間をいただくこともございます。<br />
+また、休業日は翌営業日以降の対応となりますのでご了承ください。<br />
+</p>
+                    <div class="ec-borderedDefs">
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-halfInput">
+                                    {{ form.input('contactName01')|raw }}
+                                    {{ form.input('contactName02')|raw }}
+                                    {{ form.error('contactName01') }}
+                                    {{ form.error('contactName02') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">メールアドレス</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-input">
+                                    {{ form.input('contactEmail')|raw }}
+                                    {{ form.error('contactEmail') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お問い合わせ内容</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-input">
+                                    {{ form.input('contactContents')|raw }}
+                                    {{ form.error('contactContents') }}
+                                </div>
+                                <p>ご注文に関するお問い合わせには、必ず「ご注文番号」をご記入くださいますようお願いいたします。</p>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="ec-RegisterRole__actions">
+                        <div class="ec-off4Grid">
+                            <div class="ec-off4Grid__cell">
+                                <button type="submit" class="ec-blockBtn--action" name="mode" value="confirm">確認ページへ
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

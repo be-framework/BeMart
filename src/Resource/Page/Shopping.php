@@ -12,6 +12,8 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
+use MyVendor\BeMart\Form\ShoppingOrderForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -35,11 +37,22 @@ use function assert;
  * Coexists with `Resource\Page\Shopping\` directory (which holds
  * Checkout.php from Pilot 5) — the same file-plus-sibling-directory
  * pattern as Mypage.
+ *
+ * Phase 3 — HTML FORM page. `Shopping/index.twig` is form-heavy: the
+ * checkout page carries the order message textarea + the delivery /
+ * payment selection controls. The resource builds a {@see
+ * ShoppingOrderForm} (Ray.WebFormModule AbstractForm) and exposes it as
+ * `body['form']` so the HTML port renders real `<input>` / `<select>`
+ * markup via `{{ form.input(...) }}`. The form is a field-definition +
+ * renderer only — VALIDATION AUTHORITY STAYS WITH the Be Becoming chain
+ * (doCheckout / CheckoutInput). The JSON contexts ignore `body['form']`;
+ * the JSON-context tests assert key-wise on `body` and are unaffected.
  */
 class Shopping extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -79,6 +92,10 @@ class Shopping extends ResourceObject
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
             'paymentMethods' => $final->paymentMethods,
             'canCheckout' => $final->canCheckout,
+            // Phase 3: an empty ShoppingOrderForm for the HTML port to
+            // render the message textarea + delivery / payment controls.
+            // JSON contexts ignore it.
+            'form' => $this->formFactory->newInstance(ShoppingOrderForm::class),
         ];
 
         return $this;

@@ -1,0 +1,56 @@
+{#
+  BeMart profile-change-complete page — EC-CUBE
+  goMypageChangeComplete (mypage_change_complete).
+
+  PORT of EC-CUBE 4.3 default-theme `Mypage/change_complete.twig`
+  (src/Eccube/Resource/template/default/Mypage/change_complete.twig).
+
+  DATA page (no form) — the data-page recipe (see var/templates/
+  README.md). EC-CUBE shows this static confirmation after a successful
+  `doUpdateCustomer` (mypage_change). Markup skeleton, `ec-mypageRole` /
+  `ec-pageHeader` / `ec-registerCompleteRole` / `ec-reportHeading` /
+  `ec-off2Grid` / `ec-text-ac` / `ec-reportDescription` / `ec-off4Grid`
+  classes + the block structure are kept verbatim from EC-CUBE.
+
+  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `url('homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
+   - The Mypage navi welcome line reads `name01`/`name02`; the
+     ChangeComplete resource is a thin pure renderer with no
+     session-bound customer context, so the name is a MISSING BODY FIELD
+     follow-up — the welcome renders the empty name, exactly as EC-CUBE
+     renders for a missing `app.user`.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'mypage' %}
+{% set route = 'mypage_change_complete' %}
+{% set title = 'マイページ' %}
+
+{% block main %}
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>マイページ/会員情報編集(完了)</h1>
+            </div>
+            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'change', name01: name01|default(''), name02: name02|default('') } %}
+        </div>
+        <div class="ec-registerCompleteRole">
+            <div class="ec-reportHeading">
+                <h2>会員登録内容の変更が完了いたしました</h2>
+            </div>
+            <div class="ec-off2Grid ec-text-ac">
+                <div class="ec-off2Grid__cell">
+                    <p class="ec-reportDescription">それでは、引き続きショッピングをお楽しみください。</p>
+                </div>
+            </div>
+            <div class="ec-off4Grid">
+                <div class="ec-off4Grid__cell">
+                    <a class="ec-blockBtn--cancel" href="{{ url('homepage') }}">戻る</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

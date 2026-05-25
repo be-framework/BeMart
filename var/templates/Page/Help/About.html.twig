@@ -1,0 +1,61 @@
+{#
+  BeMart Help — 当サイトについて (EC-CUBE goHelpAbout).
+
+  PORT of EC-CUBE 4.3 default-theme `Help/about.twig`
+  (src/Eccube/Resource/template/default/Help/about.twig).
+
+  Markup skeleton, `ec-role` / `ec-pageHeader` / `ec-off1Grid` /
+  `ec-borderedDefs` / `ec-label` classes and the `<dl>`/`<dt>`/`<dd>`
+  block structure are kept verbatim from EC-CUBE. The dynamic bindings
+  are rebound to the Help/About resource body
+  (src/Resource/Page/Help/About.php):
+    staticContent.sections[] { id, label, value }
+
+  EC-CUBE's `about.twig` reads each row off `BaseInfo` (shop_name,
+  company_name, postal_code/pref/addr, phone_number, business_hour,
+  good_traded, message), each wrapped in `{% if ... is not empty %}`.
+  BeMart has no BaseInfo aggregation yet (Help/About is a Wave 3H pure
+  renderer), so the resource body carries an EMPTY `staticContent.sections`
+  list. With no sections the `{% for %}` emits no `<dl>` — exactly the
+  empty `ec-borderedDefs` skeleton EC-CUBE renders when every BaseInfo
+  field is empty. The populated rows are flagged as a MISSING BODY FIELD
+  follow-up: a BaseInfo aggregation must surface shop/company/address
+  facts into `staticContent.sections`. Enumerated as residual in
+  tests/Resource/HelpAboutHtmlRenderTest.php.
+
+  Each section's `<dd>` may carry newline-bearing prose (good_traded /
+  message in EC-CUBE go through `|nl2br`); the port applies `|nl2br`
+  uniformly so multi-line section values render the same.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'front.about.title'|trans }}` -> the ja literal "当サイトについて".
+#}
+{% extends 'base.html.twig' %}
+
+{% set route = 'help_about' %}
+{% set title = '当サイトについて' %}
+
+{% block main %}
+
+<div class="ec-role">
+    <div class="ec-pageHeader">
+        <h1>当サイトについて</h1>
+    </div>
+    <div class="ec-off1Grid">
+        <div class="ec-off1Grid__cell">
+            <div class="ec-borderedDefs">
+                {% for section in staticContent.sections %}
+                    <dl id="help_about_box__{{ section.id }}">
+                        <dt>
+                            <label class="ec-label">{{ section.label }}</label>
+                        </dt>
+                        <dd>{{ section.value|nl2br }}</dd>
+                    </dl>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -12,6 +12,8 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Final\PasswordResetRequested;
 use MyVendor\BeMart\Be\Input\RequestPasswordResetInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\ForgotForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -27,13 +29,50 @@ use function assert;
  * for both branches; callers that need to programmatically check
  * delivery must reach into the test-only FakeMailer (which records
  * actual dispatches).
+ *
+ * Phase 3 — HTML FORM page. `onGet` renders the password-reset-request
+ * form (EC-CUBE `Forgot/index.twig`): the resource builds a
+ * {@see ForgotForm} (Ray.WebFormModule AbstractForm) and exposes it as
+ * `body['form']`. VALIDATION AUTHORITY STAYS WITH the Be Framework
+ * Becoming chain. The JSON contexts ignore `body['form']`.
  */
 class ForgotPassword extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * EC-CUBE goRequestPasswordReset — show the password-reset-request
+     * form scaffolding.
+     *
+     * Pure form-info endpoint: no Be Framework, no domain logic.
+     * Anonymous-accessible (returns 200 regardless of session state).
+     * `csrfToken` stays `null` — the EventListener mirrors the Symfony
+     * token into the session for the subsequent POST (same as Login).
+     */
+    #[Link(rel: 'doRequestPasswordReset', href: 'page://self/forgot-password', method: 'post')]
+    #[Link(rel: 'goLogin', href: 'page://self/login')]
+    public function onGet(): static
+    {
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'goRequestPasswordReset',
+            'fields' => ['email', 'csrfToken'],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/forgot-password',
+            ],
+            'csrfToken' => null,
+            // Phase 3: an empty ForgotForm for the HTML port to render
+            // via `{{ form.input(...) }}`. JSON contexts ignore it.
+            'form' => $this->formFactory->newInstance(ForgotForm::class),
+        ];
+
+        return $this;
     }
 
     /**

@@ -34,6 +34,17 @@ use function sprintf;
  * Idempotent: re-activating a customer is a no-op on the storage side
  * but still returns 200 from this resource — the caller cannot tell
  * "first activate" from "second activate", which is correct.
+ *
+ * Phase 3 — `onGet` is the email-verification-complete LANDING SCREEN.
+ * EC-CUBE's `doActivateCustomer` controller renders `Entry/activate.twig`
+ * (the "本登録が完了しました" page) after the status flip; `onPost`
+ * performs the flip. The `onGet` here is a THIN PURE RENDERER for that
+ * landing screen — no Be Framework, no domain logic — added so Phase 3
+ * has a page to render `Entry/activate.twig` against. The template's
+ * optional `{% if qtyInCart %}` cart button is gated behind a cart-state
+ * field the thin-renderer body does not carry; the common case (no
+ * pending cart) renders only the top-page button, recorded as a residual
+ * in the render test.
  */
 class Activate extends ResourceObject
 {
@@ -41,6 +52,31 @@ class Activate extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
     ) {
+    }
+
+    /**
+     * EC-CUBE doActivateCustomer landing — the email-verification-complete
+     * screen. Pure renderer: the body surfaces only the screen shape + the
+     * outbound `goTop` transition (ALPS `#CustomerActivationComplete`).
+     */
+    #[Link(rel: 'goTop', href: 'page://self/')]
+    public function onGet(): static
+    {
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'goCustomerActivationComplete',
+            'fields' => [],
+            'submitTo' => null,
+            'staticContent' => [
+                'page' => 'entry-activate',
+                'title' => '新規会員登録(完了)',
+            ],
+            'links' => [
+                'goTop' => 'page://self/',
+            ],
+        ];
+
+        return $this;
     }
 
     /**

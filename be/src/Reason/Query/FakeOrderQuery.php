@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use Override;
 use RuntimeException;
@@ -51,6 +52,12 @@ final class FakeOrderQuery implements OrderQueryInterface
     public function byOrderNo(string $orderNo): FinalizedOrderEntity|null
     {
         return $this->finalizedOrderStorage->getByOrderNo($orderNo);
+    }
+
+    #[Override]
+    public function historyByOrderNo(string $orderNo): OrderHistoryEntity|null
+    {
+        return $this->finalizedOrderStorage->historyByOrderNo($orderNo);
     }
 
     /** @return list<OrderItemEntity> */

@@ -1,0 +1,237 @@
+{#
+  BeMart Customer Registration page — EC-CUBE goCustomerRegistration.
+
+  PORT of EC-CUBE 4.3 default-theme `Entry/index.twig`
+  (src/Eccube/Resource/template/default/Entry/index.twig).
+
+  Markup skeleton, `ec-registerRole` / `ec-pageHeader` / `ec-off1Grid` /
+  `ec-borderedDefs` / `ec-halfInput` / `ec-zipInput` / `ec-select` /
+  `ec-input` / `ec-birth` / `ec-radio` / `ec-telInput` /
+  `ec-registerRole__actions` / `ec-off4Grid` classes + the <dl>/<dt>/<dd>
+  definition-list structure are kept verbatim from EC-CUBE.
+
+  Phase 3 — FORM page (Ray.WebFormModule). Wave 1 authored static
+  `<input>`s with no value/error binding, which left every one of the
+  16 registration inputs unverifiable against EC-CUBE and inflated the
+  render-diff residual to 73 lines. This rework adopts the form-page
+  recipe: the Entry resource exposes a real `EntryForm` (an AbstractForm)
+  as `body.form`, and the inputs are now rendered through it:
+
+    {{ form.input('name01')|raw }}   <- real <input> w/ name/attrs/value
+    {{ form.error('name01') }}       <- inline Be-domain error, if any
+
+  EC-CUBE renders the same inputs through the Symfony FormView
+  (`form_widget(form.name.name01)`); Ray.WebFormModule is BeMart's
+  BEAR-idiomatic equivalent. The field names / placeholders in
+  EntryForm::init() are ported from EC-CUBE's `EntryType` leaf fields +
+  the template's `form_widget` `attr` options. The render-diff test
+  stubs EC-CUBE's `form_widget` to delegate to the SAME EntryForm, so
+  the inputs diff to ZERO.
+
+  Validation authority stays with the Be Framework Becoming chain — the
+  form is a field-definition + renderer. On a domain rejection the Entry
+  resource repopulates `form` and the resource body carries the
+  form-level `message`.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `form._token` — Symfony CSRF widget; BeMart has no CSRF widget, the
+     hidden token is kept with the body's `csrfToken` (null in the html
+     context — the EventListener mirrors the live token in).
+   - The `{% for f in form|filter(f => f.vars.eccube_form_options
+     .auto_render) %}` entity-extension auto-render loop is OMITTED — it
+     iterates EC-CUBE plugin/Doctrine entity extensions, of which a core
+     install has none, so it emits nothing on either side.
+   - `has_errors(...)` — request-validation runtime; resolves false on a
+     fresh form, so the conditional ` error` class never appears.
+   - `pref` / `birth_*` / `sex` / `job` widgets render as the bare
+     empty `<select>` / `<radio>`: their option sets are EC-CUBE master
+     data (`mtb_pref` / `mtb_sex` / `mtb_job`) the resource body does not
+     carry. Enumerated as an EC-CUBE-runtime residual family.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'registration_page' %}
+{% set route = 'entry' %}
+{% set title = '新規会員登録' %}
+
+{% block javascript %}
+    <script src="//yubinbango.github.io/yubinbango/yubinbango.js" charset="UTF-8"></script>
+{% endblock javascript %}
+
+{% block main %}
+    <div class="ec-registerRole">
+        <div class="ec-pageHeader">
+            <h1>新規会員登録</h1>
+        </div>
+        <div class="ec-off1Grid">
+            <div class="ec-off1Grid__cell">
+                <form method="post" action="{{ url('entry') }}" novalidate class="h-adr">
+                    <span class="p-country-name" style="display:none;">Japan</span>
+                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <div class="ec-borderedDefs">
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-halfInput">
+                                    {{ form.input('name01')|raw }}
+                                    {{ form.input('name02')|raw }}
+                                    {{ form.error('name01') }}
+                                    {{ form.error('name02') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前(カナ)</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-halfInput">
+                                    {{ form.input('kana01')|raw }}
+                                    {{ form.input('kana02')|raw }}
+                                    {{ form.error('kana01') }}
+                                    {{ form.error('kana02') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">会社名</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-halfInput">
+                                    {{ form.input('companyName')|raw }}
+                                    {{ form.error('companyName') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">住所</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-zipInput"><span>〒</span>
+                                    {{ form.input('postalCode')|raw }}
+                                    <div class="ec-zipInputHelp">
+                                        <div class="ec-zipInputHelp__icon">
+                                            <div class="ec-icon"><img
+                                                        src="{{ asset('assets/icon/question-white.svg') }}" alt="">
+                                            </div>
+                                        </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>
+                                    </div>
+                                    {{ form.error('postalCode') }}
+                                </div>
+
+                                <div class="ec-select">
+                                    {{ form.input('pref')|raw }}
+                                    {{ form.error('pref') }}
+                                </div>
+                                <div class="ec-input">
+                                    {{ form.input('addr01')|raw }}
+                                    {{ form.error('addr01') }}
+                                </div>
+                                <div class="ec-input">
+                                    {{ form.input('addr02')|raw }}
+                                    {{ form.error('addr02') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">電話番号</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-telInput">
+                                    {{ form.input('phoneNumber')|raw }}
+                                    {{ form.error('phoneNumber') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">メールアドレス</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-input">
+                                    {{ form.input('email')|raw }}
+                                    {{ form.error('email') }}
+                                </div>
+                                <div class="ec-input">
+                                    {{ form.input('email_confirm')|raw }}
+                                    {{ form.error('email_confirm') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">パスワード</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-input">
+                                    {{ form.input('password')|raw }}
+                                    {{ form.error('password') }}
+                                </div>
+                                <div class="ec-input">
+                                    {{ form.input('password_confirm')|raw }}
+                                    {{ form.error('password_confirm') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">生年月日</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-birth">
+                                    {{ form.input('birth_year')|raw }}<span>/</span>
+                                    {{ form.input('birth_month')|raw }}<span>/</span>
+                                    {{ form.input('birth_day')|raw }}
+                                    {{ form.error('birth_year') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">性別</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-radio">
+                                    {{ form.input('sex')|raw }}
+                                    {{ form.error('sex') }}
+                                </div>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">職業</label>
+                            </dt>
+                            <dd>
+                                <div class="ec-select">
+                                    {{ form.input('job')|raw }}
+                                    {{ form.error('job') }}
+                                </div>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="ec-registerRole__actions">
+                        <div class="ec-checkbox">
+                            <label>
+                                {{ form.input('user_policy_check')|raw }}
+                                <a class="ec-link" href="{{ url('help_agreement') }}" target="_blank">利用規約</a>に同意してお進みください
+                            </label>
+                            {{ form.error('user_policy_check') }}
+                        </div>
+                        <div class="ec-off4Grid">
+                            <div class="ec-off4Grid__cell">
+                                <button class="ec-blockBtn--action" type="submit" name="mode" value="confirm">同意する</button>
+                                <a class="ec-blockBtn--cancel" href="{{ url('homepage') }}">同意しない</a>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}
