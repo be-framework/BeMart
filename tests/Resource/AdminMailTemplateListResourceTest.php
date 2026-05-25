@@ -71,7 +71,6 @@ final class AdminMailTemplateListResourceTest extends TestCase
             $this->assertArrayHasKey('mailTemplateName', $row);
             $this->assertArrayHasKey('fileName', $row);
             $this->assertArrayHasKey('mailSubject', $row);
-            $this->assertArrayHasKey('mailBody', $row);
         }
     }
 

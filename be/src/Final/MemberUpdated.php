@@ -24,11 +24,12 @@ use Ray\InputQuery\Attribute\Input;
  *   1. No admin session     → UnauthorizedAdminAccessException  (403)
  *   2. Unknown loginId      → AdminNotFoundException            (404)
  *
- * Merge semantics: only `name` and `mailAddress` are part of this
- * transition's scope. Null leaves the existing value untouched.
- * loginId / authority / work / passwordHash are preserved verbatim
- * — those go through their own dedicated transitions
- * (doUpdateAuthorityRole / doDeleteMember / future password-change).
+ * Merge semantics: only `name` is part of this transition's scope.
+ * Null leaves the existing value untouched. loginId / authority / work
+ * / passwordHash are preserved verbatim — those go through their own
+ * dedicated transitions (doUpdateAuthorityRole / doDeleteMember /
+ * future password-change). EC-CUBE 4.3 dtb_member has no email column,
+ * so no mailAddress field is part of the projection.
  *
  * Mass-assignment safety (Pilot 5 F-2 lesson): the target is selected
  * by loginId (a non-secret identifier) but the path only touches the
@@ -40,14 +41,12 @@ final readonly class MemberUpdated
     public string $adminId;
     public string $loginId;
     public string $name;
-    public string $mailAddress;
     public int $authority;
     public int $work;
 
     public function __construct(
         #[Input] string $loginId,
         #[Input] string|null $name,
-        #[Input] string|null $mailAddress,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] AdminQueryInterface $adminQuery,
         #[Inject] AdminCommandInterface $adminCommand,
@@ -66,7 +65,6 @@ final readonly class MemberUpdated
             loginId: $current->loginId,
             passwordHash: $current->passwordHash,
             name: $name ?? $current->name,
-            mailAddress: $mailAddress ?? $current->mailAddress,
             authority: $current->authority,
             work: $current->work,
         );
@@ -76,7 +74,6 @@ final readonly class MemberUpdated
         $this->adminId = $merged->adminId;
         $this->loginId = $merged->loginId;
         $this->name = $merged->name;
-        $this->mailAddress = $merged->mailAddress;
         $this->authority = $merged->authority;
         $this->work = $merged->work;
     }

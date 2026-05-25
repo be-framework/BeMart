@@ -56,18 +56,16 @@ final class AdminMailTemplateResourceTest extends TestCase
         $this->storage = $this->injector->getInstance(FakeMailTemplateStorage::class);
     }
 
-    public function testOnPostHappyPathUpdatesBodyAndSubject(): void
+    public function testOnPostHappyPathUpdatesSubject(): void
     {
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID,
             'mailSubject' => '【更新】ご注文ありがとうございます',
-            'mailBody' => "{{ name }} 様\nご注文内容を確認しました。",
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('【更新】ご注文ありがとうございます', $ro->body['mailSubject']);
-        $this->assertStringContainsString('注文内容を確認', $ro->body['mailBody']);
         $this->assertTrue($ro->body['changed']);
         // fileName and mailTemplateName are preserved from the seed.
         $this->assertSame('Mail/order.twig', $ro->body['fileName']);
@@ -86,8 +84,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => $seed->mailTemplateId,
             'mailSubject' => $seed->subject,
-            'mailBody' => $seed->body,
-            'mailHtmlBody' => $seed->htmlBody,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
@@ -100,7 +96,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 999,
             'mailSubject' => 'whatever',
-            'mailBody' => 'whatever',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
@@ -112,7 +107,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID,
             'mailSubject' => '   ',
-            'mailBody' => 'body',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
@@ -124,7 +118,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID,
             'mailSubject' => 'whatever',
-            'mailBody' => 'body',
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -138,7 +131,6 @@ final class AdminMailTemplateResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID,
             'mailSubject' => 'whatever',
-            'mailBody' => 'body',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
