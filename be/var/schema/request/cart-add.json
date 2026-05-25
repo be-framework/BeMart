@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "$id": "https://my-vendor.example/ec-cube/schema/request/cart-add.json",
+  "title": "Cart Add Request",
+  "description": "doAddCartItem の client-input パラメータ。Phase 2 観察 (var/fake/doAddCartItem/client-input.json, 50 件) に基づく制約。",
+  "type": "object",
+  "required": ["productCode", "quantity"],
+  "additionalProperties": false,
+  "properties": {
+    "productCode": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[a-zA-Z0-9-]+$",
+      "$comment": "観察された範囲: 1〜65 文字 (very-long-product-code 例)。64 を上限とした (ASCII 英数 + ハイフンのみ、Pilot 1 ProductCode を拡張)。"
+    },
+    "quantity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 999,
+      "$comment": "観察された範囲: 1〜99。EC-CUBE 管理画面の慣例により上限 999 に拡張。multipleOf は使わない (浮動小数の罠回避、ここは int なので元々無関係)。"
+    }
+  }
+}
