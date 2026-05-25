@@ -24,6 +24,7 @@
         "ray/web-form-module": "^1.0"
     },
     "require-dev": {
+        "koriym/php-server": "^1.0",
         "phpunit/phpunit": "^10.0",
         "vimeo/psalm": "^6.16"
     },
@@ -45,6 +46,9 @@
         "stree": "ls -t var/log/*.json | head -1 | xargs -I{} vendor/bin/stree {}"
     },
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "aura/installer-default": false
+        }
     }
 }

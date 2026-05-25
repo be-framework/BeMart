@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderInput;
 use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 
 use function assert;
 
@@ -111,6 +112,15 @@ class Order extends ResourceObject
             'items' => $final->items,
             'itemCount' => $final->itemCount,
             'customer' => $final->customer,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+            'orderStatusOptions' => [
+                1 => '新規受付',
+                3 => '注文取消',
+                4 => '対応中',
+                5 => '発送済み',
+                6 => '入金済み',
+                9 => '返品',
+            ],
         ];
 
         return $this;

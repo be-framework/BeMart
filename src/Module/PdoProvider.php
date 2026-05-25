@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use Override;
 use PDO;
 use Ray\Di\ProviderInterface;
 use RuntimeException;
@@ -43,6 +44,7 @@ use function sprintf;
  */
 final class PdoProvider implements ProviderInterface
 {
+    #[Override]
     public function get(): PDO
     {
         $databaseUrl = getenv('DATABASE_URL');

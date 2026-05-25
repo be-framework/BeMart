@@ -96,6 +96,85 @@
                         <span>ホーム</span>
                     </a>
                 </li>
+                <!-- EC-CUBE 管理ナビ静的移植 -->
+                <li class="c-mainNavArea__navItem">
+                    <a class="c-mainNavArea__navItemTitle collapsed" data-bs-toggle="collapse" href="#nav-product" aria-expanded="false" aria-controls="nav-product">
+                        <i class="fa fa-cube fa-fw" aria-hidden="true"></i>
+                        <span>商品管理</span>
+                    </a>
+                    <ul class="collapse" id="nav-product">
+                        <li><a href="{{ url('admin_product') }}"><span>商品一覧</span></a></li>
+                        <li><a href="{{ url('admin_product_product_new') }}"><span>商品登録</span></a></li>
+                        <li><a href="{{ url('admin_product_class_name') }}"><span>規格管理</span></a></li>
+                        <li><a href="{{ url('admin_product_class_category') }}"><span>規格分類管理</span></a></li>
+                        <li><a href="{{ url('admin_product_category') }}"><span>カテゴリ管理</span></a></li>
+                        <li><a href="{{ url('admin_product_tag') }}"><span>タグ管理</span></a></li>
+                    </ul>
+                </li>
+                <li class="c-mainNavArea__navItem">
+                    <a class="c-mainNavArea__navItemTitle collapsed" data-bs-toggle="collapse" href="#nav-order" aria-expanded="false" aria-controls="nav-order">
+                        <i class="fa fa-shopping-cart fa-fw" aria-hidden="true"></i>
+                        <span>受注管理</span>
+                    </a>
+                    <ul class="collapse" id="nav-order">
+                        <li><a href="{{ url('admin_order') }}"><span>受注一覧</span></a></li>
+                        <li><a href="{{ url('admin_setting_shop_order_status') }}"><span>対応状況管理</span></a></li>
+                        <li><a href="{{ url('admin_order_export_order') }}"><span>受注CSV出力</span></a></li>
+                        <li><a href="{{ url('admin_order_export_shipping') }}"><span>出荷CSV出力</span></a></li>
+                    </ul>
+                </li>
+                <li class="c-mainNavArea__navItem">
+                    <a class="c-mainNavArea__navItemTitle collapsed" data-bs-toggle="collapse" href="#nav-customer" aria-expanded="false" aria-controls="nav-customer">
+                        <i class="fa fa-users fa-fw" aria-hidden="true"></i>
+                        <span>会員管理</span>
+                    </a>
+                    <ul class="collapse" id="nav-customer">
+                        <li><a href="{{ url('admin_customer') }}"><span>会員一覧</span></a></li>
+                        <li><a href="{{ url('admin_customer_export') }}"><span>会員CSV出力</span></a></li>
+                    </ul>
+                </li>
+                <li class="c-mainNavArea__navItem">
+                    <a class="c-mainNavArea__navItemTitle collapsed" data-bs-toggle="collapse" href="#nav-content" aria-expanded="false" aria-controls="nav-content">
+                        <i class="fa fa-file-text-o fa-fw" aria-hidden="true"></i>
+                        <span>コンテンツ管理</span>
+                    </a>
+                    <ul class="collapse" id="nav-content">
+                        <li><a href="{{ url('admin_content_news') }}"><span>新着情報管理</span></a></li>
+                        <li><a href="{{ url('admin_content_page') }}"><span>ページ管理</span></a></li>
+                        <li><a href="{{ url('admin_content_layout') }}"><span>レイアウト管理</span></a></li>
+                        <li><a href="{{ url('admin_content_block') }}"><span>ブロック管理</span></a></li>
+                        <li><a href="{{ url('admin_content_css') }}"><span>CSS管理</span></a></li>
+                        <li><a href="{{ url('admin_content_js') }}"><span>JavaScript管理</span></a></li>
+                        <li><a href="{{ url('admin_content_cache') }}"><span>キャッシュ管理</span></a></li>
+                    </ul>
+                </li>
+                <li class="c-mainNavArea__navItem">
+                    <a class="c-mainNavArea__navItemTitle collapsed" data-bs-toggle="collapse" href="#nav-setting" aria-expanded="false" aria-controls="nav-setting">
+                        <i class="fa fa-cog fa-fw" aria-hidden="true"></i>
+                        <span>設定</span>
+                    </a>
+                    <ul class="collapse" id="nav-setting">
+                        <li><a href="{{ url('admin_setting_shop') }}"><span>基本設定</span></a></li>
+                        <li><a href="{{ url('admin_setting_shop_delivery') }}"><span>配送方法設定</span></a></li>
+                        <li><a href="{{ url('admin_setting_shop_payment') }}"><span>支払方法設定</span></a></li>
+                        <li><a href="{{ url('admin_setting_shop_tax') }}"><span>税率設定</span></a></li>
+                        <li><a href="{{ url('admin_setting_shop_csv') }}"><span>CSV出力項目設定</span></a></li>
+                        <li><a href="{{ url('admin_setting_system_member') }}"><span>メンバー管理</span></a></li>
+                        <li><a href="{{ url('admin_setting_system_authority') }}"><span>権限管理</span></a></li>
+                        <li><a href="{{ url('admin_setting_system_security') }}"><span>セキュリティ管理</span></a></li>
+                    </ul>
+                </li>
+                <li class="c-mainNavArea__navItem">
+                    <a class="c-mainNavArea__navItemTitle collapsed" data-bs-toggle="collapse" href="#nav-store" aria-expanded="false" aria-controls="nav-store">
+                        <i class="fa fa-plug fa-fw" aria-hidden="true"></i>
+                        <span>オーナーズストア</span>
+                    </a>
+                    <ul class="collapse" id="nav-store">
+                        <li><a href="{{ url('admin_store_plugin_owners_search_page') }}"><span>プラグイン一覧</span></a></li>
+                        <li><a href="{{ url('admin_store_template') }}"><span>テンプレート一覧</span></a></li>
+                        <li><a href="{{ url('admin_store_template_install') }}"><span>テンプレートアップロード</span></a></li>
+                    </ul>
+                </li>
                 <!-- 情報 -->
                 <li class="c-mainNavArea__navItem">
                     <a class="c-mainNavArea__navItemTitle collapsed" data-bs-toggle="collapse" href="#others" aria-expanded="false"
@@ -142,6 +221,7 @@
     </div>
 </div>
 <script src="{{ asset('assets/js/function.js', 'admin') }}"></script>
+<script src="{{ asset('assets/js/bemart-unsupported.js') }}"></script>
 {% block javascript %}{% endblock %}
 </body>
 </html>

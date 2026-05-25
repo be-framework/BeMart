@@ -6,6 +6,10 @@ namespace MyVendor\BeMart\Module;
 
 use BEAR\Package\AbstractAppModule;
 use Madapaja\TwigModule\TwigModule;
+use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Auth\HtmlSessionAdapter;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use Override;
 use Ray\WebFormModule\WebFormModule;
 use Twig\Environment;
@@ -39,6 +43,11 @@ use Twig\Environment;
  * default-theme Twig file into `var/templates/<path>.html.twig`, no
  * module or wiring changes. See var/templates/README.md for the port
  * method + residual-diff verification standard.
+ *
+ * HtmlModule also swaps AppModule's Fake session bindings for
+ * cookie-backed PHP session adapters. This is intentionally html-only:
+ * app/test keep FakeSession('customer-001') and FakeAdminSession(null),
+ * while prod keeps the EC-CUBE shared-session adapter.
  */
 final class HtmlModule extends AbstractAppModule
 {
@@ -51,6 +60,8 @@ final class HtmlModule extends AbstractAppModule
         // makes it win over the JSON renderer that PackageModule installed
         // through AppModule.
         $this->override(new TwigModule());
+        $this->bind(SessionInterface::class)->to(HtmlSessionAdapter::class);
+        $this->bind(AdminSessionInterface::class)->to(HtmlAdminSessionAdapter::class);
 
         // The storefront templates are ports of EC-CUBE's default-theme
         // Twig, which call `price` / `asset` / `url` / `path`. Decorate

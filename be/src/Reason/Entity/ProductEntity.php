@@ -25,9 +25,12 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * shape can omit the trailing arguments. New admin-side call sites
  * (Wave 8 create / update / copy) always populate the full surface.
  *
- * Mirrors what get_product.sql would return in Phase 2 once
- * Ray.MediaQuery + a real DSN replace FakeProductQuery: a Product
- * joined with one representative ProductClass.
+ * The optional presentation fields at the tail (`imagePath`,
+ * `categoryNames`, `tagNames`, `classNames`) are the HTML-screen
+ * enrichment slice: they mirror EC-CUBE's `dtb_product_image`,
+ * `dtb_product_category`, `dtb_product_tag` and class-category joins
+ * without changing the existing create/update contract. Fake fixtures
+ * can carry them; SQL reads them from the real EC-CUBE schema.
  *
  * Status enum (matches `productStatus` ALPS descriptor):
  *   1 = 公開 (Visible — front + admin)
@@ -54,6 +57,13 @@ final readonly class ProductEntity
         public string|null $description = null,
         public string|null $searchWord = null,
         public string|null $note = null,
+        public string|null $imagePath = null,
+        /** @var list<string> */
+        public array $categoryNames = [],
+        /** @var list<string> */
+        public array $tagNames = [],
+        /** @var list<string> */
+        public array $classNames = [],
     ) {
     }
 }

@@ -265,6 +265,14 @@
     <div class="c-contentsArea__cols">
         <div class="c-contentsArea__primaryCol">
             <div class="c-primaryCol">
+                <div class="row justify-content-end mb-3">
+                    <div class="col-auto">
+                        <a class="btn btn-ec-conversion" href="{{ url('admin_product_product_new') }}">
+                            <i class="fa fa-plus me-1" aria-hidden="true"></i>
+                            <span>商品登録</span>
+                        </a>
+                    </div>
+                </div>
                 {% if count %}
                     <form id="form_bulk" method="POST" action="">
                         <div class="row justify-content-between mb-2">
@@ -327,6 +335,8 @@
                                             <td class="align-middle">{{ Product.productCode }}</td>
                                             <td class="align-middle">
                                                 <a href="{{ url('admin_product_product_edit', { id : Product.productCode }) }}">
+                                                    <img src="{{ asset(Product.imagePath|default('assets/img/common/no_image_product.png'), 'save_image') }}"
+                                                         alt="{{ Product.productName }}" style="width: 64px; height: 64px; object-fit: cover;">
                                                 </a>
                                             </td>
                                             <td class="align-middle"><a

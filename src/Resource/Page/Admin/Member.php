@@ -21,7 +21,9 @@ use MyVendor\BeMart\Be\Input\CreateMemberInput;
 use MyVendor\BeMart\Be\Input\DeleteMemberInput;
 use MyVendor\BeMart\Be\Input\GetMemberInput;
 use MyVendor\BeMart\Be\Input\UpdateMemberInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminMemberForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -65,6 +67,7 @@ class Member extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -76,8 +79,32 @@ class Member extends ResourceObject
      * @psalm-taint-source input $loginId
      */
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
-    public function onGet(string $loginId): static
+    public function onGet(string|null $loginId = null): static
     {
+        if ($loginId === null || $loginId === '') {
+            if ($this->adminSession->adminId() === null) {
+                $this->code = Code::FORBIDDEN;
+                $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+                return $this;
+            }
+
+            $form = $this->formFactory->newInstance(AdminMemberForm::class);
+            assert($form instanceof AdminMemberForm);
+            $this->code = Code::OK;
+            $this->body = [
+                'adminId' => '',
+                'loginId' => '',
+                'name' => '',
+                'authority' => 0,
+                'work' => 0,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+                'form' => $form,
+            ];
+
+            return $this;
+        }
+
         try {
             $final = ($this->becoming)(new GetMemberInput(loginId: $loginId));
         } catch (SemanticVariableException $e) {

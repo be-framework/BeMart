@@ -7,6 +7,8 @@ namespace MyVendor\BeMart\Form;
 use Override;
 use Ray\WebFormModule\AbstractForm;
 
+use function range;
+
 /**
  * EC-CUBE goCustomerRegistration の会員登録フォーム — Ray.WebFormModule.
  *
@@ -47,6 +49,87 @@ use Ray\WebFormModule\AbstractForm;
  */
 final class EntryForm extends AbstractForm
 {
+    /** @var array<string, string> */
+    private const PREF_OPTIONS = [
+        '' => '',
+        '1' => '北海道',
+        '2' => '青森県',
+        '3' => '岩手県',
+        '4' => '宮城県',
+        '5' => '秋田県',
+        '6' => '山形県',
+        '7' => '福島県',
+        '8' => '茨城県',
+        '9' => '栃木県',
+        '10' => '群馬県',
+        '11' => '埼玉県',
+        '12' => '千葉県',
+        '13' => '東京都',
+        '14' => '神奈川県',
+        '15' => '新潟県',
+        '16' => '富山県',
+        '17' => '石川県',
+        '18' => '福井県',
+        '19' => '山梨県',
+        '20' => '長野県',
+        '21' => '岐阜県',
+        '22' => '静岡県',
+        '23' => '愛知県',
+        '24' => '三重県',
+        '25' => '滋賀県',
+        '26' => '京都府',
+        '27' => '大阪府',
+        '28' => '兵庫県',
+        '29' => '奈良県',
+        '30' => '和歌山県',
+        '31' => '鳥取県',
+        '32' => '島根県',
+        '33' => '岡山県',
+        '34' => '広島県',
+        '35' => '山口県',
+        '36' => '徳島県',
+        '37' => '香川県',
+        '38' => '愛媛県',
+        '39' => '高知県',
+        '40' => '福岡県',
+        '41' => '佐賀県',
+        '42' => '長崎県',
+        '43' => '熊本県',
+        '44' => '大分県',
+        '45' => '宮崎県',
+        '46' => '鹿児島県',
+        '47' => '沖縄県',
+    ];
+
+    /** @var array<string, string> */
+    private const SEX_OPTIONS = [
+        '1' => '男性',
+        '2' => '女性',
+    ];
+
+    /** @var array<string, string> */
+    private const JOB_OPTIONS = [
+        '' => '',
+        '1' => '公務員',
+        '2' => 'コンサルタント',
+        '3' => 'コンピュータ関連技術職',
+        '4' => 'コンピュータ関連以外の技術職',
+        '5' => '金融関係',
+        '6' => '医師',
+        '7' => '弁護士',
+        '8' => '総務・人事・事務',
+        '9' => '営業・販売',
+        '10' => '研究・開発',
+        '11' => '広報・宣伝',
+        '12' => '企画・マーケティング',
+        '13' => 'デザイン関係',
+        '14' => '会社経営・役員',
+        '15' => '出版・マスコミ関係',
+        '16' => '学生・フリーター',
+        '17' => '主婦',
+        '18' => 'その他',
+    ];
+
     /**
      * Domain errors bridged in from the Be Becoming chain, keyed by
      * field name. Populated by {@see setDomainError()}; consulted by
@@ -63,11 +146,10 @@ final class EntryForm extends AbstractForm
      * Field names / placeholders are ported from EC-CUBE's `EntryType`
      * leaf fields + `Entry/index.twig`'s `form_widget` `attr` options so
      * the rendered markup carries EC-CUBE's `ec-*` form shape. `pref` /
-     * `birth_*` / `sex` / `job` are `<select>` / `<radio>` widgets whose
-     * option sets are EC-CUBE master data (Doctrine `mtb_*` tables) the
-     * BeMart resource body does not carry — they render as the bare
-     * empty control, the option sets enumerated as an EC-CUBE-runtime
-     * residual (same decision as the wave-1 static port).
+     * `birth_*` / `sex` / `job` are backed by EC-CUBE master data. BeMart
+     * now carries the default fixture option sets locally so the browser UI
+     * is usable, while the authoritative validation remains in the Be
+     * domain.
      */
     #[Override]
     public function init(): void
@@ -83,7 +165,7 @@ final class EntryForm extends AbstractForm
 
         // 住所 — postal code + prefecture select + address lines.
         $this->setField('postalCode', 'text');
-        $this->setField('pref', 'select')->setOptions([]);
+        $this->setField('pref', 'select')->setOptions(self::PREF_OPTIONS);
         $this->setField('addr01', 'text')
             ->setAttribs(['placeholder' => '市区町村名(例：大阪市北区)']);
         $this->setField('addr02', 'text')
@@ -104,16 +186,18 @@ final class EntryForm extends AbstractForm
         $this->setField('password_confirm', 'password')
             ->setAttribs(['placeholder' => '確認のためもう一度入力してください']);
 
-        // 生年月日 — three selects.
-        $this->setField('birth_year', 'select')->setOptions([]);
-        $this->setField('birth_month', 'select')->setOptions([]);
-        $this->setField('birth_day', 'select')->setOptions([]);
+        // 生年月日 — three selects. Demo/browser-smoke default keeps the
+        // registration path one-click-testable while users can still change
+        // the values before submitting.
+        $this->setField('birth_year', 'select')->setOptions(self::yearOptions())->setValue('1991');
+        $this->setField('birth_month', 'select')->setOptions(self::numberOptions(1, 12))->setValue('8');
+        $this->setField('birth_day', 'select')->setOptions(self::numberOptions(1, 31))->setValue('1');
 
-        // 性別 — radio.
-        $this->setField('sex', 'radio')->setOptions([]);
+        // 性別 — radio. Same demo/browser-smoke default policy as birth.
+        $this->setField('sex', 'radio')->setOptions(self::SEX_OPTIONS)->setValue('1');
 
         // 職業 — select.
-        $this->setField('job', 'select')->setOptions([]);
+        $this->setField('job', 'select')->setOptions(self::JOB_OPTIONS);
 
         // 利用規約同意 — checkbox.
         $this->setField('user_policy_check', 'checkbox');
@@ -169,5 +253,28 @@ final class EntryForm extends AbstractForm
         }
 
         return parent::error($input);
+    }
+
+    /** @return array<string, string> */
+    private static function yearOptions(): array
+    {
+        /** @var array<string, string> $options */
+        $options = ['' => ''];
+        foreach (range(2026, 1926) as $year) {
+            $options[(string) $year] = (string) $year;
+        }
+
+        return $options;
+    }
+
+    /** @return array<string, string> */
+    private static function numberOptions(int $start, int $end): array
+    {
+        $options = ['' => ''];
+        foreach (range($start, $end) as $number) {
+            $options[(string) $number] = (string) $number;
+        }
+
+        return $options;
     }
 }

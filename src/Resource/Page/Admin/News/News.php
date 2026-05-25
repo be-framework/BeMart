@@ -17,7 +17,9 @@ use MyVendor\BeMart\Be\Final\NewsUpdated;
 use MyVendor\BeMart\Be\Input\DeleteNewsInput;
 use MyVendor\BeMart\Be\Input\GetAdminNewsInput;
 use MyVendor\BeMart\Be\Input\UpdateNewsInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminNewsForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -42,6 +44,7 @@ class News extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -50,8 +53,31 @@ class News extends ResourceObject
      * @psalm-taint-source input $newsId
      */
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
-    public function onGet(string $newsId): static
+    public function onGet(string|null $newsId = null): static
     {
+        if ($newsId === null || $newsId === '') {
+            if ($this->adminSession->adminId() === null) {
+                $this->code = Code::FORBIDDEN;
+                $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+                return $this;
+            }
+
+            $this->code = Code::OK;
+            $this->body = [
+                'newsId' => '',
+                'newsTitle' => '',
+                'newsDescription' => '',
+                'newsUrl' => '',
+                'publishDate' => '2026-05-23 00:00:00',
+                'linkMethod' => false,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ];
+            $this->body['form'] = $this->editForm($this->body);
+
+            return $this;
+        }
+
         try {
             $final = ($this->becoming)(new GetAdminNewsInput(newsId: $newsId));
         } catch (UnauthorizedAdminAccessException) {
