@@ -45,16 +45,57 @@
     },
     "scripts": {
         "test": "./vendor/bin/phpunit",
+        "test:fake": "./vendor/bin/phpunit --testsuite fake",
+        "test:sql": "./vendor/bin/phpunit --testsuite sql",
+        "test:http": "./vendor/bin/phpunit --testsuite http",
+        "test:smoke": "./vendor/bin/phpunit --testsuite smoke",
+        "tests": [
+            "@sa",
+            "@test"
+        ],
+        "sa": [
+            "@psalm"
+        ],
         "psalm": "./vendor/bin/psalm --no-cache --no-progress",
         "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
+        "coverage": "php -dzend_extension=xdebug.so -dxdebug.mode=coverage ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage",
+        "pcov": "php -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage --coverage-clover=coverage.xml",
+        "clean": [
+            "./vendor/bin/psalm --clear-cache",
+            "rm -rf .phpunit.cache var/tmp/*/*.php"
+        ],
+        "build": [
+            "@clean",
+            "@sa",
+            "@test"
+        ],
         "stree": "ls -t var/log/*.json | head -1 | xargs -I{} vendor/bin/stree {}",
         "app": "php bin/app.php",
         "fake": "php bin/fake.php",
         "dev": "php bin/dev.php",
         "page": "php bin/page.php",
         "prod": "php bin/prod.php",
+        "serve": "@serve:api",
         "serve:api": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8080 -t public public/index.php",
         "serve:page": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php"
+    },
+    "scripts-descriptions": {
+        "test": "Run the default PHPUnit suite.",
+        "tests": "Run static analysis and the default PHPUnit suite.",
+        "test:fake": "Run the fake-context PHPUnit suite.",
+        "test:sql": "Run the SQL PHPUnit suite.",
+        "test:http": "Run the HTTP PHPUnit suite.",
+        "test:smoke": "Run smoke tests.",
+        "sa": "Run static analysis.",
+        "psalm": "Run Psalm without cache/progress output.",
+        "psalm-taint": "Run Psalm taint analysis.",
+        "coverage": "Run PHPUnit with Xdebug coverage output.",
+        "pcov": "Run PHPUnit with PCOV coverage output.",
+        "clean": "Clear analysis and generated test caches.",
+        "build": "Clean, run static analysis, and run tests.",
+        "serve": "Serve the API entrypoint.",
+        "serve:api": "Serve the API entrypoint on 127.0.0.1:8080.",
+        "serve:page": "Serve the page entrypoint on 127.0.0.1:8081."
     },
     "config": {
         "sort-packages": true,
