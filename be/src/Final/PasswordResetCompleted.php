@@ -50,7 +50,7 @@ final readonly class PasswordResetCompleted
         #[Inject] CustomerCommandInterface $customerCommand,
         #[Inject] PasswordHasherInterface $passwordHasher,
     ) {
-        $token = $tokenStorage->getByResetKey($resetKey);
+        $token = $tokenStorage->byResetKey($resetKey);
         if ($token === null) {
             throw new ResetKeyInvalidException();
         }
@@ -60,7 +60,7 @@ final readonly class PasswordResetCompleted
         }
 
         $hash = $passwordHasher->hash($password);
-        $customerCommand->updatePassword($token->customerId, $hash);
+        $customerCommand->password($token->customerId, $hash);
 
         // Single-use: consume the token immediately. A subsequent attempt
         // with the same resetKey will miss on getByResetKey() above and

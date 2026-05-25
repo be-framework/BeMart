@@ -110,7 +110,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'P-LIST-003']);
 
         $query = $this->sql(ProductQueryInterface::class);
-        $rows = $query->listAll(50, 0);
+        $rows = $query->list(50, 0);
 
         $this->assertCount(3, $rows);
         $this->assertContainsOnlyInstancesOf(ProductEntity::class, $rows);
@@ -119,7 +119,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
     public function testListAllReturnsEmptyArrayOnEmptyTable(): void
     {
         $query = $this->sql(ProductQueryInterface::class);
-        $this->assertSame([], $query->listAll(50, 0));
+        $this->assertSame([], $query->list(50, 0));
     }
 
     public function testListAllRespectsLimitAndOffset(): void
@@ -130,10 +130,10 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
 
         $query = $this->sql(ProductQueryInterface::class);
 
-        $firstPage = $query->listAll(2, 0);
+        $firstPage = $query->list(2, 0);
         $this->assertCount(2, $firstPage);
 
-        $secondPage = $query->listAll(2, 2);
+        $secondPage = $query->list(2, 2);
         $this->assertCount(1, $secondPage);
 
         // No overlap between pages (ORDER BY pc.id ASC).
@@ -148,7 +148,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'P-OFFSET-001']);
 
         $query = $this->sql(ProductQueryInterface::class);
-        $this->assertSame([], $query->listAll(50, 100));
+        $this->assertSame([], $query->list(50, 100));
     }
 
     public function testSearchFiltersByNameSubstring(): void

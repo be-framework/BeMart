@@ -9,8 +9,8 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Final\AdminLoggedOut;
 use MyVendor\BeMart\Be\Input\AdminLogoutInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -24,7 +24,7 @@ final class AdminLoggedOutTest extends TestCase
     private function buildBecoming(string|null $sessionAdminId): BecomingInterface
     {
         $session = new FakeAdminSession($sessionAdminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {

@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use Ray\Di\AbstractModule;
 
@@ -21,7 +21,7 @@ use Ray\Di\AbstractModule;
  *
  *  - the storage bindings (CustomerCommandInterface → SqlCustomerCommand,
  *    CustomerQueryInterface → SqlCustomerQuery,
- *    EmailUniquenessCheckerInterface → SqlEmailUniquenessChecker) are
+ *    EmailUniquenessQueryInterface → SqlEmailUniquenessChecker) are
  *    layered via the base class's sqlOverrideModule; the profile edit
  *    runs against a real dtb_customer row.
  *

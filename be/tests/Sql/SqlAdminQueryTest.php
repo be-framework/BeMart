@@ -39,7 +39,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
         ]);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $admin = $query->findByLoginId('sql-admin-1');
+        $admin = $query->byLogin('sql-admin-1');
 
         $this->assertInstanceOf(AdminEntity::class, $admin);
         $this->assertSame((string) $id, $admin->adminId);
@@ -52,7 +52,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
     public function testFindByLoginIdReturnsNullForMissing(): void
     {
         $query = $this->sql(AdminQueryInterface::class);
-        $this->assertNull($query->findByLoginId('no-such-admin'));
+        $this->assertNull($query->byLogin('no-such-admin'));
     }
 
     public function testFindByLoginIdProjectsNullNameAsEmptyString(): void
@@ -62,7 +62,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
         $this->insertAdmin(['login_id' => 'no-name-admin', 'name' => null]);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $admin = $query->findByLoginId('no-name-admin');
+        $admin = $query->byLogin('no-name-admin');
 
         $this->assertInstanceOf(AdminEntity::class, $admin);
         $this->assertSame('', $admin->name);
@@ -73,7 +73,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
         $id = $this->insertAdmin(['login_id' => 'find-by-id']);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $admin = $query->findById((string) $id);
+        $admin = $query->item((string) $id);
 
         $this->assertInstanceOf(AdminEntity::class, $admin);
         $this->assertSame((string) $id, $admin->adminId);
@@ -83,7 +83,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
     public function testFindByIdReturnsNullForMissingNumericId(): void
     {
         $query = $this->sql(AdminQueryInterface::class);
-        $this->assertNull($query->findById('99999999'));
+        $this->assertNull($query->item('99999999'));
     }
 
     public function testFindByIdReturnsNullForNonNumericId(): void
@@ -92,7 +92,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
         // int PK — surface as miss so the Final's 404 path fires
         // instead of a PDO error.
         $query = $this->sql(AdminQueryInterface::class);
-        $this->assertNull($query->findById('ad000000000000000000000000000001'));
+        $this->assertNull($query->item('ad000000000000000000000000000001'));
     }
 
     public function testListAllSortedByLoginIdAscending(): void
@@ -102,7 +102,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
         $this->insertAdmin(['login_id' => 'bob']);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $rows = $query->listAll();
+        $rows = $query->list();
 
         $this->assertCount(3, $rows);
         $this->assertSame('alice', $rows[0]->loginId);
@@ -118,7 +118,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
         $this->insertAdmin(['login_id' => 'd']);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $rows = $query->listAll(limit: 2, offset: 1);
+        $rows = $query->list(limit: 2, offset: 1);
 
         $this->assertCount(2, $rows);
         $this->assertSame('b', $rows[0]->loginId);
@@ -134,7 +134,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
         $this->insertAdmin(['login_id' => 'inactive', 'work_id' => 0]);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $rows = $query->listAll();
+        $rows = $query->list();
 
         $this->assertCount(2, $rows);
         $loginIds = [];
@@ -197,7 +197,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
         $this->insertAdmin(['login_id' => 'sys', 'authority_id' => null]);
 
         $query = $this->sql(AdminQueryInterface::class);
-        $admin = $query->findByLoginId('sys');
+        $admin = $query->byLogin('sys');
         $this->assertInstanceOf(AdminEntity::class, $admin);
         $this->assertSame(0, $admin->authority);
     }

@@ -8,8 +8,8 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
@@ -98,7 +98,7 @@ final class HtmlSessionAdapterTest extends TestCase
     public function testHtmlContextLoginWritesCustomerIdToSession(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html');
+        putenv('APP_CONTEXT=html-test-hal-api-app');
 
         $ro = $this->htmlResource()->post('page://self/login', [
             'email' => 'login-test@example.com',
@@ -115,7 +115,7 @@ final class HtmlSessionAdapterTest extends TestCase
     public function testHtmlContextLogoutClearsCustomerIdAndRedirectsHome(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html');
+        putenv('APP_CONTEXT=html-test-hal-api-app');
         $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = '10000000aaaa1111bbbb2222cccc3333';
 
         $ro = $this->htmlResource()->post('page://self/logout', [
@@ -131,7 +131,7 @@ final class HtmlSessionAdapterTest extends TestCase
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
         $injector = new Injector(
-            new HtmlModule($meta),
+            new HtmlTestModule($meta),
             dirname(__DIR__, 2) . '/var/tmp/html',
         );
 

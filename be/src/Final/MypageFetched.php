@@ -9,6 +9,7 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use Ray\Di\Di\Inject;
@@ -77,6 +78,7 @@ final readonly class MypageFetched
         #[Inject] SessionInterface $session,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] OrderQueryInterface $orderQuery,
+        #[Inject] OrderItemQueryInterface $orderItems,
         #[Inject] FavoriteStorageInterface $favorites,
     ) {
         $sessionCustomerId = $session->customerId();
@@ -84,7 +86,7 @@ final readonly class MypageFetched
             throw new UnauthenticatedException();
         }
 
-        $customer = $customerQuery->findById($sessionCustomerId);
+        $customer = $customerQuery->item($sessionCustomerId);
         if ($customer === null) {
             // Session points to a non-existent customer (deleted /
             // expired). Treat same as not-logged-in to avoid leaking
@@ -112,7 +114,7 @@ final readonly class MypageFetched
                         'quantity' => $item->quantity,
                         'unitPrice' => $item->unitPrice,
                     ],
-                    $orderQuery->itemsByOrderNo($order->orderNo),
+                    $orderItems->listByOrderNo($order->orderNo),
                 ),
             ],
             $orders,

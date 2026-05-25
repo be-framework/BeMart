@@ -7,10 +7,9 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -38,7 +37,7 @@ final class FavoriteListResourceTest extends TestCase
     private function rebindSession(string|null $customerId): void
     {
         $session = new FakeSession($customerId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {
@@ -66,17 +65,16 @@ final class FavoriteListResourceTest extends TestCase
         $this->assertSame(0, $ro->body['favoriteCount']);
     }
 
-    public function testOnGetAfterAddReturnsTheFavorite(): void
+    public function testOnGetWithFixtureFavoriteReturnsTheFavorite(): void
     {
-        $this->resource->post('page://self/mypage/favorite', [
-            'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
+        // Fake context is static-fixture based; write-then-read is covered
+        // by the SQL suite. This customer has one favorite fixture row.
+        $this->rebindSession('favorite-html-customer');
 
         $ro = $this->resource->get('page://self/mypage/favorite-list');
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertSame('favorite-html-customer', $ro->body['customerId']);
         $this->assertSame(1, $ro->body['favoriteCount']);
         $this->assertCount(1, $ro->body['favorites']);
         $this->assertSame('sample-001', $ro->body['favorites'][0]['productCode']);

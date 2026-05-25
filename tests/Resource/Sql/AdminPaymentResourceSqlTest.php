@@ -6,8 +6,8 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -38,7 +38,7 @@ use function str_contains;
  *    on both backends (SqlPaymentMethodAdminStorage rejects a
  *    non-numeric id as a miss, the same 404 path as any unknown id).
  *
- *  - the Fake-backed sibling starts with an empty FakePaymentMethodAdminStorage
+ *  - the Fake-backed sibling starts with an empty PaymentMethodAdminStorageInterface
  *    and seeds every row through the resource layer's POST affordance;
  *    dtb_payment is likewise empty on each test, so this sibling seeds
  *    the same way — the POST drives the full Becoming chain

@@ -26,7 +26,7 @@ use function assert;
  *
  * AUTHZ is a direct admin-session check (Pattern B — no Be transition is
  * invoked on the GET path; an anonymous admin → 403). The form renders
- * blank against empty Fake storage — no storage is seeded.
+ * blank against empty JSON-backed fake storage — no storage is seeded.
  */
 class TemplateAdd extends ResourceObject
 {

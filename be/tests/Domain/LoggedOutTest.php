@@ -8,9 +8,9 @@ use BEAR\AppMeta\Meta;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Final\LoggedOut;
 use MyVendor\BeMart\Be\Input\LogoutInput;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -24,7 +24,7 @@ final class LoggedOutTest extends TestCase
     private function buildBecoming(string|null $sessionCustomerId): BecomingInterface
     {
         $session = new FakeSession($sessionCustomerId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {

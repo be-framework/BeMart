@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use Ray\Di\AbstractModule;
 
 /**
@@ -24,7 +24,7 @@ use Ray\Di\AbstractModule;
  *  - `dtb_tradelaw` is empty on each test (structure-only schema dump),
  *    so {@see SqlTradeLawStorage::get} returns its installer-default
  *    body. That default is intentionally identical to
- *    FakeTradeLawStorage's constructor seed (contains 株式会社EC-CUBE),
+ *    TradeLawStorageInterface's constructor seed (contains 株式会社EC-CUBE),
  *    so the assertion shape is identical to the Fake-backed sibling.
  *
  * Why mirror exactly: per G-23 the Resource-layer contract MUST stay
@@ -80,7 +80,7 @@ final class AdminTradeLawGetResourceSqlTest extends AbstractResourceSqlTestCase
 
         // dtb_tradelaw is empty in the structure-only dump — the
         // SqlTradeLawStorage::get fall-through returns the same
-        // installer-default body FakeTradeLawStorage's constructor
+        // installer-default body TradeLawStorageInterface's constructor
         // encodes, so we observe the same body shape as the Fake-backed
         // sibling on a first read.
         $this->assertStringContainsString('株式会社EC-CUBE', $ro->body['tradeLawBody']);

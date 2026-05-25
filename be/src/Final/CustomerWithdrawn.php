@@ -83,7 +83,7 @@ final readonly class CustomerWithdrawn
             throw new UnauthenticatedException();
         }
 
-        $current = $customerQuery->findById($sessionCustomerId);
+        $current = $customerQuery->item($sessionCustomerId);
         if ($current === null) {
             // Session points to a non-existent customer (deleted /
             // expired). Mirror Pilot 8: treat as not-logged-in to

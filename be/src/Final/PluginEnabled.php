@@ -43,7 +43,7 @@ final readonly class PluginEnabled
             throw new UnauthorizedAdminAccessException();
         }
 
-        $existing = $pluginStorage->findByCode($pluginCode);
+        $existing = $pluginStorage->item($pluginCode);
         if ($existing === null) {
             throw new PluginNotFoundException();
         }

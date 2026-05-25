@@ -57,7 +57,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(BlockStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(BlockEntity::class, $entity);
         $this->assertSame((string) $id, $entity->blockId);
@@ -77,7 +77,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(BlockStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(BlockEntity::class, $entity);
         $this->assertSame('', $entity->blockName);
@@ -87,7 +87,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(BlockStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -96,15 +96,15 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         // can never match an int PK; surface as miss so BlockDeleted /
         // BlockUpdated fire their 404 paths instead of a PDO error.
         $storage = $this->sql(BlockStorageInterface::class);
-        $this->assertNull($storage->getById('bk-header'));
-        $this->assertNull($storage->getById('bk-deadbeefdeadbeef'));
-        $this->assertNull($storage->getById('nonexistent-zzz'));
+        $this->assertNull($storage->item('bk-header'));
+        $this->assertNull($storage->item('bk-deadbeefdeadbeef'));
+        $this->assertNull($storage->item('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(BlockIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $entity = new BlockEntity(
             blockId: $newId,
@@ -116,7 +116,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(BlockStorageInterface::class);
         $storage->put($entity);
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(BlockEntity::class, $read);
         $this->assertSame($newId, $read->blockId);
         $this->assertSame('バナー', $read->blockName);
@@ -135,7 +135,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         // user blocks — only BlockDeleted enforces the guard, not the
         // storage.
         $generator = $this->sql(BlockIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(BlockStorageInterface::class);
 
         $storage->put(new BlockEntity(
@@ -145,7 +145,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
             blockDeletable: false,
         ));
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(BlockEntity::class, $read);
         $this->assertFalse($read->blockDeletable);
 
@@ -201,7 +201,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(BlockStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(BlockEntity::class, $read);
         $this->assertSame('New', $read->blockName);
         $this->assertSame('new_file', $read->blockFileName);
@@ -215,11 +215,11 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertBlock(['block_name' => 'doomed']);
         $storage = $this->sql(BlockStorageInterface::class);
-        $this->assertNotNull($storage->getById((string) $id));
+        $this->assertNotNull($storage->item((string) $id));
 
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
         $this->assertSame([], $storage->list());
     }
 
@@ -262,10 +262,10 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(BlockStorageInterface::class);
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
         // Block is gone.
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
 
         // Placement row is also gone (cleanup, not just FK satisfaction).
         $stmt = $this->pdo->prepare(
@@ -278,9 +278,9 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
         $storage = $this->sql(BlockStorageInterface::class);
-        $storage->remove('99999999'); // no row, no exception
-        $storage->remove('bk-header'); // non-numeric, no exception
-        $storage->remove('bk-deadbeefdeadbeef'); // hex, no exception
+        $storage->delete('99999999'); // no row, no exception
+        $storage->delete('bk-header'); // non-numeric, no exception
+        $storage->delete('bk-deadbeefdeadbeef'); // hex, no exception
         $this->assertTrue(true);
     }
 
@@ -289,11 +289,11 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(BlockIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertBlock();
         $secondId = $this->insertBlock();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

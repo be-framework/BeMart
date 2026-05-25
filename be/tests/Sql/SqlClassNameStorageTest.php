@@ -53,7 +53,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $id = $this->insertClassName(['name' => 'カラー']);
 
         $storage = $this->sql(ClassNameStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(ClassNameEntity::class, $entity);
         $this->assertSame((string) $id, $entity->classNameId);
@@ -63,7 +63,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(ClassNameStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -73,14 +73,14 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // so the ClassName Update / Delete Finals fire their 404 paths
         // instead of a PDO error.
         $storage = $this->sql(ClassNameStorageInterface::class);
-        $this->assertNull($storage->getById('deadbeefdeadbeefdeadbeefdeadbeef'));
-        $this->assertNull($storage->getById('nonexistent-zzz'));
+        $this->assertNull($storage->item('deadbeefdeadbeefdeadbeefdeadbeef'));
+        $this->assertNull($storage->item('nonexistent-zzz'));
     }
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
         $generator = $this->sql(ClassNameIdGeneratorInterface::class);
-        $newId = $generator->generate()->value; // numeric string
+        $newId = $generator->next()->value; // numeric string
 
         $entity = new ClassNameEntity(
             classNameId: $newId,
@@ -90,7 +90,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(ClassNameStorageInterface::class);
         $storage->put($entity);
 
-        $read = $storage->getById($newId);
+        $read = $storage->item($newId);
         $this->assertInstanceOf(ClassNameEntity::class, $read);
         $this->assertSame($newId, $read->classNameId);
         $this->assertSame('Color', $read->name);
@@ -107,7 +107,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         // a value. The projection never reads it, so probe the raw
         // column directly. First INSERT on an empty table → 1.
         $generator = $this->sql(ClassNameIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(ClassNameStorageInterface::class);
 
         $storage->put(new ClassNameEntity(classNameId: $newId, name: 'Color'));
@@ -126,7 +126,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $this->insertClassName(['name' => 'Existing', 'sort_no' => 7]);
 
         $generator = $this->sql(ClassNameIdGeneratorInterface::class);
-        $newId = $generator->generate()->value;
+        $newId = $generator->next()->value;
         $storage = $this->sql(ClassNameStorageInterface::class);
         $storage->put(new ClassNameEntity(classNameId: $newId, name: 'Color'));
 
@@ -164,7 +164,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(ClassNameStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(ClassNameEntity::class, $read);
         $this->assertSame('Colour', $read->name);
 
@@ -192,11 +192,11 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
     {
         $id = $this->insertClassName(['name' => 'doomed']);
         $storage = $this->sql(ClassNameStorageInterface::class);
-        $this->assertNotNull($storage->getById((string) $id));
+        $this->assertNotNull($storage->item((string) $id));
 
-        $storage->remove((string) $id);
+        $storage->delete((string) $id);
 
-        $this->assertNull($storage->getById((string) $id));
+        $this->assertNull($storage->item((string) $id));
         $this->assertSame([], $storage->list());
     }
 
@@ -213,10 +213,10 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $this->insertClassCategory(['class_name_id' => $classNameId, 'name' => 'Blue']);
 
         $storage = $this->sql(ClassNameStorageInterface::class);
-        $storage->remove((string) $classNameId);
+        $storage->delete((string) $classNameId);
 
         // Axis is gone.
-        $this->assertNull($storage->getById((string) $classNameId));
+        $this->assertNull($storage->item((string) $classNameId));
 
         // Child axis-value rows are also gone (cleanup, not just FK
         // satisfaction).
@@ -240,7 +240,7 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(ClassNameStorageInterface::class);
-        $storage->remove((string) $doomedAxis);
+        $storage->delete((string) $doomedAxis);
 
         $stmt = $this->pdo->prepare(
             'SELECT COUNT(*) FROM dtb_class_category WHERE id = :id',
@@ -252,9 +252,9 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
     public function testRemoveIsSilentNoOpForMissingId(): void
     {
         $storage = $this->sql(ClassNameStorageInterface::class);
-        $storage->remove('99999999'); // no row, no exception
-        $storage->remove('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric
-        $storage->remove('nonexistent-zzz'); // non-numeric, no exception
+        $storage->delete('99999999'); // no row, no exception
+        $storage->delete('deadbeefdeadbeefdeadbeefdeadbeef'); // non-numeric
+        $storage->delete('nonexistent-zzz'); // non-numeric, no exception
         $this->assertTrue(true);
     }
 
@@ -284,11 +284,11 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $generator = $this->sql(ClassNameIdGeneratorInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->generate()->value);
+        $this->assertSame('1', $generator->next()->value);
 
         $firstId = $this->insertClassName();
         $secondId = $this->insertClassName();
-        $this->assertSame((string) ($secondId + 1), $generator->generate()->value);
+        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

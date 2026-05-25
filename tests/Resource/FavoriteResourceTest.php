@@ -7,10 +7,10 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -31,7 +31,7 @@ final class FavoriteResourceTest extends TestCase
     private function rebindSession(string|null $customerId): void
     {
         $session = new FakeSession($customerId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {
@@ -62,13 +62,12 @@ final class FavoriteResourceTest extends TestCase
         $this->assertFalse($ro->body['alreadyExisted']);
     }
 
-    public function testOnPostDuplicateReturns200WithAlreadyExisted(): void
+    public function testOnPostExistingFavoriteReturns200WithAlreadyExisted(): void
     {
-        // Add once, then add again.
-        $this->resource->post('page://self/mypage/favorite', [
-            'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
+        // Fake context is static-fixture based; duplicate-after-mutation is
+        // covered by the SQL suite. This customer already has the favorite.
+        $this->rebindSession('favorite-html-customer');
+
         $ro = $this->resource->post('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
             'csrfToken' => FakeCsrfToken::TOKEN,
@@ -109,13 +108,12 @@ final class FavoriteResourceTest extends TestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
-    public function testOnDeleteRemovesAndReturns200(): void
+    public function testOnDeleteExistingFavoriteReturns200(): void
     {
-        // Add, then delete.
-        $this->resource->post('page://self/mypage/favorite', [
-            'productCode' => 'sample-001',
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
+        // Fake context is static-fixture based; add-then-delete is covered
+        // by the SQL suite. This customer already has the favorite.
+        $this->rebindSession('favorite-html-customer');
+
         $ro = $this->resource->delete('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
             'csrfToken' => FakeCsrfToken::TOKEN,
@@ -123,7 +121,7 @@ final class FavoriteResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('sample-001', $ro->body['productCode']);
-        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertSame('favorite-html-customer', $ro->body['customerId']);
         $this->assertFalse($ro->body['alreadyAbsent']);
     }
 

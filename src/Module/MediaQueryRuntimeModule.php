@@ -19,7 +19,7 @@ use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
@@ -27,14 +27,18 @@ use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductStatusCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\ShippingTrackingQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
@@ -56,12 +60,6 @@ use Override;
 use Ray\AuraSqlModule\AuraSqlBaseModule;
 use Ray\AuraSqlModule\AuraSqlModule;
 use Ray\Di\AbstractModule;
-use Ray\MediaQuery\DbQueryConfig;
-use Ray\MediaQuery\MediaQueryBaseModule;
-use Ray\MediaQuery\MediaQueryDbModule;
-use Ray\MediaQuery\Queries;
-
-use function dirname;
 
 final class MediaQueryRuntimeModule extends AbstractModule
 {
@@ -74,19 +72,7 @@ final class MediaQueryRuntimeModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
-        $root = dirname(__DIR__, 2);
-        $queries = Queries::fromClasses(self::queryClasses());
-
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
-        $this->install(new MediaQueryBaseModule($queries));
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
-        $this->install(new MediaQueryDbModule(new DbQueryConfig($root . '/sql/media-query')));
+        $this->install(new MediaQueryProxyModule());
 
         if ($this->connection !== null) {
             $this->bind(ExtendedPdoInterface::class)->toInstance($this->connection);
@@ -123,13 +109,15 @@ final class MediaQueryRuntimeModule extends AbstractModule
             CustomerCommandInterface::class,
             CustomerQueryInterface::class,
             DeliveryStorageInterface::class,
-            EmailUniquenessCheckerInterface::class,
+            EmailUniquenessQueryInterface::class,
             FavoriteStorageInterface::class,
             LayoutStorageInterface::class,
             LoginHistoryStorageInterface::class,
             MailTemplateStorageInterface::class,
             NewsStorageInterface::class,
             OrderCommandInterface::class,
+            OrderHistoryQueryInterface::class,
+            OrderItemQueryInterface::class,
             OrderQueryInterface::class,
             PageStorageInterface::class,
             PasswordResetTokenStorageInterface::class,
@@ -137,8 +125,10 @@ final class MediaQueryRuntimeModule extends AbstractModule
             PluginStorageInterface::class,
             ProductClassQueryInterface::class,
             ProductCommandInterface::class,
+            ProductStatusCommandInterface::class,
             ProductQueryInterface::class,
             ShippingAddressStorageInterface::class,
+            ShippingTrackingQueryInterface::class,
             TagStorageInterface::class,
             TaxRuleStorageInterface::class,
             TemplateStorageInterface::class,

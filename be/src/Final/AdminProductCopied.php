@@ -33,9 +33,9 @@ use Ray\InputQuery\Attribute\Input;
  * doCreateProduct's collision branch (Wave 5O parity with the
  * customer-create flow).
  *
- * The "(コピー) " prefix discipline lives in
- * {@see \MyVendor\BeMart\Be\Reason\Query\FakeProductCommand::copy} so a
- * future production binding can mirror the prefix verbatim. The copy
+ * The "(コピー) " prefix discipline lives behind
+ * ProductCommandInterface::copy(), so every context mirrors the prefix
+ * verbatim. The copy
  * starts in STATUS_VISIBLE regardless of the source's status — the
  * admin convention is that a copied product is a fresh draft to be
  * reviewed before publishing/hiding.

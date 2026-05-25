@@ -46,7 +46,7 @@ final readonly class MemberFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $admin = $adminQuery->findByLoginId($loginId);
+        $admin = $adminQuery->byLogin($loginId);
         if ($admin === null) {
             throw new AdminNotFoundException();
         }

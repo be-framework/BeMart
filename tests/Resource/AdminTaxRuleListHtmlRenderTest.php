@@ -8,9 +8,9 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminTaxRuleForm;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
 use MyVendor\BeMart\Tests\Resource\Admin\ShopJaMessages;
 use PHPUnit\Framework\TestCase;
@@ -49,7 +49,7 @@ use function trim;
  * test renders EC-CUBE's `form_widget` calls through the SAME form
  * instance so the `tax_rate` / `apply_date` inputs diff to ZERO.
  *
- * The FakeTaxRuleStorage starts empty, so the `{% for TaxRule %}` loop
+ * The TaxRuleStorageInterface starts empty, so the `{% for TaxRule %}` loop
  * is skipped on both sides; the test focuses on the page skeleton +
  * the inline-create form row.
  */
@@ -84,7 +84,7 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
@@ -220,7 +220,7 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
 
         $this->registerEcCubeStubs($twig, $form instanceof AdminTaxRuleForm ? $form : null);
 
-        // The FakeTaxRuleStorage starts empty; feed EC-CUBE the same empty
+        // The TaxRuleStorageInterface starts empty; feed EC-CUBE the same empty
         // list so the per-row `{% for %}` loop is skipped on both sides.
         return $twig->render('Setting/Shop/tax_rule.twig', [
             'TaxRules' => [],

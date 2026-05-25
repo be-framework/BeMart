@@ -36,11 +36,11 @@ final readonly class ClassCategoryDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($classCategories->getById($classCategoryId) === null) {
+        if ($classCategories->item($classCategoryId) === null) {
             throw new ClassCategoryNotFoundException();
         }
 
-        $classCategories->remove($classCategoryId);
+        $classCategories->delete($classCategoryId);
 
         $this->classCategoryId = $classCategoryId;
     }

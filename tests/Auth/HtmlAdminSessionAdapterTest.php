@@ -8,8 +8,8 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
@@ -98,7 +98,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     public function testHtmlContextAdminLoginWritesAdminIdToSession(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html');
+        putenv('APP_CONTEXT=html-test-hal-api-app');
 
         $ro = $this->htmlResource()->post('page://self/admin/login', [
             'loginId' => 'test-admin',
@@ -115,7 +115,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     public function testHtmlContextAdminLogoutClearsAdminIdAndRedirectsToLogin(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html');
+        putenv('APP_CONTEXT=html-test-hal-api-app');
         $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = 'ad000000000000000000000000000001';
 
         $ro = $this->htmlResource()->post('page://self/admin/logout', [
@@ -131,7 +131,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
         $injector = new Injector(
-            new HtmlModule($meta),
+            new HtmlTestModule($meta),
             dirname(__DIR__, 2) . '/var/tmp/html',
         );
 

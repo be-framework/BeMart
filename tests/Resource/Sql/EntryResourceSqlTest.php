@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 
 use function ctype_digit;
 
@@ -20,7 +20,7 @@ use function ctype_digit;
  *
  *  - the storage bindings (CustomerCommandInterface → SqlCustomerCommand,
  *    CustomerIdGeneratorInterface → direct MediaQuery customer id proxy,
- *    EmailUniquenessCheckerInterface → SqlEmailUniquenessChecker,
+ *    EmailUniquenessQueryInterface → SqlEmailUniquenessChecker,
  *    CustomerQueryInterface → SqlCustomerQuery) are layered via the
  *    base class's sqlOverrideModule; registration writes a real
  *    dtb_customer row.

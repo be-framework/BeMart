@@ -36,7 +36,7 @@ final readonly class CustomerActivated
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CustomerCommandInterface $customerCommand,
     ) {
-        $customer = $customerQuery->findBySecretKey($secretKey);
+        $customer = $customerQuery->bySecretKey($secretKey);
         if ($customer === null) {
             throw new SecretKeyNotFoundException();
         }

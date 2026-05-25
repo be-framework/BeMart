@@ -21,17 +21,17 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface TagStorageInterface
 {
     /** @return list<TagEntity> */
-    #[DbQuery('tag_list', factory: TagEntity::class)]
+    #[DbQuery('tag_list')]
     public function list(): array;
 
-    #[DbQuery('tag_get', factory: TagEntity::class)]
-    public function getById(string $tagId): TagEntity|null;
+    #[DbQuery('tag_get')]
+    public function item(string $tagId): TagEntity|null;
 
     #[DbQuery('tag_put')]
     public function put(TagEntity $tag): void;
 
     #[DbQuery('tag_delete')]
-    public function remove(string $tagId): void;
+    public function delete(string $tagId): void;
 
     #[DbQuery('tag_reorder')]
     public function reorder(string $tagId, int $sortNo): void;

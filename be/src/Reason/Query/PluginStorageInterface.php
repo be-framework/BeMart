@@ -28,7 +28,7 @@ use Ray\MediaQuery\Annotation\DbQuery;
  *         scope this is STUBBED — we simply flip `installed=true` on
  *         the matching fixture record (or create a new row if there
  *         is no record yet for the code). The stub is intentional and
- *         documented on FakePluginStorage::install.
+ *         documented by the PluginStorageInterface contract.
  *   - uninstall(string $code): void
  *         Silently no-op when the plugin is not installed (idempotent
  *         per ALPS `type=idempotent`). Removes the row entirely so a
@@ -45,11 +45,11 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface PluginStorageInterface
 {
     /** @return list<PluginEntity> */
-    #[DbQuery('plugin_list_all', factory: PluginEntity::class)]
-    public function listAll(): array;
+    #[DbQuery('plugin_list_all')]
+    public function list(): array;
 
-    #[DbQuery('plugin_find_by_code', factory: PluginEntity::class)]
-    public function findByCode(string $pluginCode): PluginEntity|null;
+    #[DbQuery('plugin_find_by_code')]
+    public function item(string $pluginCode): PluginEntity|null;
 
     #[DbQuery('plugin_install')]
     public function install(string $pluginCode, string $pluginName, string $version): void;

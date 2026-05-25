@@ -69,7 +69,7 @@ final readonly class ProductListFetched
         // null we use listAll() so the offset cursor works.
         $rows = $nameKeyword !== null && $nameKeyword !== ''
             ? $productQuery->search($nameKeyword, $limit)
-            : $productQuery->listAll($limit, $offset);
+            : $productQuery->list($limit, $offset);
 
         $this->products = array_map(
             static fn (ProductEntity $p): array => [

@@ -35,7 +35,7 @@ final readonly class AdminPageFetched
             throw new UnauthorizedAdminAccessException();
         }
 
-        $row = $pages->getById($pageId);
+        $row = $pages->item($pageId);
         if ($row === null) {
             throw new PageNotFoundException();
         }

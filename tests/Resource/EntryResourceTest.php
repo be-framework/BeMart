@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -21,7 +21,7 @@ final class EntryResourceTest extends TestCase
     protected function setUp(): void
     {
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);
@@ -42,7 +42,7 @@ final class EntryResourceTest extends TestCase
         $this->assertContains('csrfToken', $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/entry', $ro->body['submitTo']['href']);
-        $this->assertNull($ro->body['csrfToken']);
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnPostRegistersAndReturns201(): void

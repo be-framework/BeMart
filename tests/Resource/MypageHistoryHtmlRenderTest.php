@@ -7,10 +7,9 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -99,7 +98,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeSession('customer-001');
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
@@ -119,7 +118,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
     public function testHistoryRendersAsHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/mypage/history', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -137,7 +136,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
     public function testHistoryPreservesEcCubeMarkupStructure(): void
     {
         $html = $this->resource->get('page://self/mypage/history', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
         ])->toString();
 
         foreach ([
@@ -159,7 +158,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
     public function testHistoryHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/mypage/history', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
         ])->toString();
         $ecCube = $this->renderEcCube();
 
@@ -237,7 +236,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // The same logical order as BeMart's FakeFinalizedOrderStorage
+        // The same logical order as BeMart's Ray.FakeQuery fixture JSON
         // seed (SEED_ORDER_NO): subtotal 11000 / delivery 600 / tax 1100
         // / total 12700 / addPoint 127, two product items
         // (`サンプル商品 A` x1 @￥1,200, `Sample Product B` x1 @￥9,800).
@@ -289,7 +288,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
         ]);
         $order = new EcCubeStub([
             'order_date' => '2026-04-01 10:00:00',
-            'order_no' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'order_no' => 'past0000000000000000000000000001',
             'CustomerOrderStatus' => 1,
             'usePoint' => 0,
             'addPoint' => 127,

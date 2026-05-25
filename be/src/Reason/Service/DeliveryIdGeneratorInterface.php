@@ -13,5 +13,5 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface DeliveryIdGeneratorInterface
 {
     #[DbQuery('delivery_next_id')]
-    public function generate(): AllocatedId;
+    public function next(): AllocatedId;
 }

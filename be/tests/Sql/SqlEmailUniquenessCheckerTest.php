@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
-use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface;
 
 /**
- * Storage-layer coverage for {@see EmailUniquenessCheckerInterface} (Phase
+ * Storage-layer coverage for {@see EmailUniquenessQueryInterface} (Phase
  * 2b) — bundled with {@see CustomerCommandInterfaceTest} because the checker
  * is the read-guard companion of the customer write side, a trivial
  * existence probe against the same `dtb_customer` table.
@@ -17,10 +17,10 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
 {
     public function testEnsureUniquePassesForUnusedEmail(): void
     {
-        $checker = $this->sql(EmailUniquenessCheckerInterface::class);
+        $checker = $this->sql(EmailUniquenessQueryInterface::class);
 
         // No row with this email — must return without raising.
-        $checker->check('never-seen@example.com')->assertUnique();
+        $checker->item('never-seen@example.com')->assertUnique();
         $this->addToAssertionCount(1);
     }
 
@@ -28,10 +28,10 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
     {
         $this->insertCustomer(['email' => 'taken@example.com']);
 
-        $checker = $this->sql(EmailUniquenessCheckerInterface::class);
+        $checker = $this->sql(EmailUniquenessQueryInterface::class);
 
         $this->expectException(EmailAlreadyRegisteredException::class);
-        $checker->check('taken@example.com')->assertUnique();
+        $checker->item('taken@example.com')->assertUnique();
     }
 
     public function testEnsureUniqueRejectsProvisionalCustomerEmail(): void
@@ -46,10 +46,10 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
             'customer_status_id' => 1,
         ]);
 
-        $checker = $this->sql(EmailUniquenessCheckerInterface::class);
+        $checker = $this->sql(EmailUniquenessQueryInterface::class);
 
         $this->expectException(EmailAlreadyRegisteredException::class);
-        $checker->check('provisional@example.com')->assertUnique();
+        $checker->item('provisional@example.com')->assertUnique();
     }
 
     public function testEnsureUniqueIsCaseSensitive(): void
@@ -58,10 +58,10 @@ final class SqlEmailUniquenessCheckerTest extends AbstractSqlTestCase
         // matching the Fake's array-key lookup.
         $this->insertCustomer(['email' => 'Case@example.com']);
 
-        $checker = $this->sql(EmailUniquenessCheckerInterface::class);
+        $checker = $this->sql(EmailUniquenessQueryInterface::class);
 
         // Different case → not a collision.
-        $checker->check('case@example.com')->assertUnique();
+        $checker->item('case@example.com')->assertUnique();
         $this->addToAssertionCount(1);
     }
 }

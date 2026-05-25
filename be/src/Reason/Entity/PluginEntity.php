@@ -24,7 +24,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * migrations → cache clear), and enable/disable triggers
  * container/routes regeneration. The migration scope only requires
  * the BEAR layer to be able to *call into* that pipeline; the Be
- * domain models the state surface, and the FakePluginStorage stubs
+ * domain models the state surface, and the JSON-backed fake plugin handler stubs
  * the actual install logic by simply flipping `installed=true` on a
  * fixture record matching the pluginCode passed in.
  */

@@ -12,6 +12,7 @@ use MyVendor\BeMart\Be\Final\Reordered;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use MyVendor\BeMart\Be\Reason\Entity\ProductClassEntity;
+use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
@@ -91,6 +92,7 @@ final readonly class ReorderResolving
         #[Input] string $sessionPrefix,
         #[Inject] SessionInterface $session,
         #[Inject] OrderQueryInterface $orderQuery,
+        #[Inject] OrderItemQueryInterface $orderItems,
         #[Inject] ProductClassQueryInterface $productClassQuery,
     ) {
         $sessionCustomerId = $session->customerId();
@@ -109,7 +111,7 @@ final readonly class ReorderResolving
 
         $included = [];
         $skipped = [];
-        foreach ($orderQuery->itemsByOrderNo($orderNo) as $pastItem) {
+        foreach ($orderItems->listByOrderNo($orderNo) as $pastItem) {
             $this->classify($pastItem, $productClassQuery, $included, $skipped);
         }
 

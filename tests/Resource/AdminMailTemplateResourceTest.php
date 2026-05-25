@@ -7,11 +7,11 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeMailTemplateStorage;
+use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -27,7 +27,7 @@ final class AdminMailTemplateResourceTest extends TestCase
 
     private ResourceInterface $resource;
     private Injector $injector;
-    private FakeMailTemplateStorage $storage;
+    private MailTemplateStorageInterface $storage;
 
     protected function setUp(): void
     {
@@ -37,7 +37,7 @@ final class AdminMailTemplateResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -53,13 +53,13 @@ final class AdminMailTemplateResourceTest extends TestCase
 
         $this->injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->resource = $this->injector->getInstance(ResourceInterface::class);
-        $this->storage = $this->injector->getInstance(FakeMailTemplateStorage::class);
+        $this->storage = $this->injector->getInstance(MailTemplateStorageInterface::class);
     }
 
     public function testOnPostHappyPathUpdatesSubject(): void
     {
         $ro = $this->resource->post('page://self/admin/mail-template', [
-            'mailTemplateId' => FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID,
+            'mailTemplateId' => 1,
             'mailSubject' => '【更新】ご注文ありがとうございます',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
@@ -71,14 +71,13 @@ final class AdminMailTemplateResourceTest extends TestCase
         $this->assertSame('Mail/order.twig', $ro->body['fileName']);
         $this->assertSame('注文完了メール', $ro->body['mailTemplateName']);
 
-        $persisted = $this->storage->findById(FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID);
-        $this->assertNotNull($persisted);
-        $this->assertSame('【更新】ご注文ありがとうございます', $persisted->subject);
+        // Persistence read-back belongs to the SQL suite. Fake context is
+        // static Ray.FakeQuery fixtures and does not mutate query state.
     }
 
     public function testOnPostIdempotentReplayReturnsChangedFalse(): void
     {
-        $seed = $this->storage->findById(FakeMailTemplateStorage::SEED_REGISTER_THANKS_ID);
+        $seed = $this->storage->item(2);
         $this->assertNotNull($seed);
 
         $ro = $this->resource->post('page://self/admin/mail-template', [
@@ -105,7 +104,7 @@ final class AdminMailTemplateResourceTest extends TestCase
     public function testOnPostEmptySubjectReturns400(): void
     {
         $ro = $this->resource->post('page://self/admin/mail-template', [
-            'mailTemplateId' => FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID,
+            'mailTemplateId' => 1,
             'mailSubject' => '   ',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
@@ -116,7 +115,7 @@ final class AdminMailTemplateResourceTest extends TestCase
     public function testOnPostMissingCsrfReturns403(): void
     {
         $ro = $this->resource->post('page://self/admin/mail-template', [
-            'mailTemplateId' => FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID,
+            'mailTemplateId' => 1,
             'mailSubject' => 'whatever',
         ]);
 
@@ -129,7 +128,7 @@ final class AdminMailTemplateResourceTest extends TestCase
         $this->rebindAdminSession(null);
 
         $ro = $this->resource->post('page://self/admin/mail-template', [
-            'mailTemplateId' => FakeMailTemplateStorage::SEED_ORDER_CONFIRM_ID,
+            'mailTemplateId' => 1,
             'mailSubject' => 'whatever',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);

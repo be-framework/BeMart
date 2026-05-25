@@ -7,19 +7,15 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakePageStorage;
-use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
-use function is_string;
 use function str_contains;
 
 /**
@@ -29,33 +25,29 @@ use function str_contains;
 final class AdminPageResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const COMPANY_PAGE_ID = 'pg-company';
+    private const FOO_PAGE_ID = 'pg-foo';
 
     private ResourceInterface $resource;
-    private FakePageStorage $storage;
 
     protected function setUp(): void
     {
-        $this->storage = new FakePageStorage();
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session, $this->storage) extends AbstractModule {
-            public function __construct(
-                private readonly FakeAdminSession $session,
-                private readonly FakePageStorage $storage,
-            ) {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSessionInterface::class)->toInstance($this->session);
-                $this->bind(PageStorageInterface::class)->toInstance($this->storage);
-                $this->bind(FakePageStorage::class)->toInstance($this->storage);
             }
         };
         $base->override($override);
@@ -66,16 +58,10 @@ final class AdminPageResourceTest extends TestCase
 
     private function seed(string $name, string $url, string $file): string
     {
-        $ro = $this->resource->post('page://self/admin/page/page-list', [
-            'pageName' => $name,
-            'pageUrl' => $url,
-            'pageFileName' => $file,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['pageId'];
-        assert(is_string($id));
+        // Static Ray.FakeQuery fixture, not a mutable seed.
+        unset($url, $file);
 
-        return $id;
+        return $name === '会社案内' ? self::COMPANY_PAGE_ID : self::FOO_PAGE_ID;
     }
 
     public function testListIncludesSeed(): void
@@ -172,7 +158,7 @@ final class AdminPageResourceTest extends TestCase
     public function testDeleteSystemPageIsRefused(): void
     {
         $ro = $this->resource->delete('page://self/admin/page/page', [
-            'pageId' => FakePageStorage::SEED_PAGE_ID,
+            'pageId' => 'pg-homepage',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);

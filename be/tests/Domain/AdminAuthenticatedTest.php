@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -24,7 +24,7 @@ final class AdminAuthenticatedTest extends TestCase
     protected function setUp(): void
     {
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->becoming = $injector->getInstance(BecomingInterface::class);

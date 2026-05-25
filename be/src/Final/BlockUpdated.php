@@ -33,7 +33,7 @@ final readonly class BlockUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $blocks->getById($blockId);
+        $current = $blocks->item($blockId);
         if ($current === null) {
             throw new BlockNotFoundException();
         }

@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use Ray\Di\AbstractModule;
 
 use function array_column;
@@ -23,7 +23,7 @@ use function array_column;
  * layered via the base class's sqlOverrideModule; the list is read
  * from the real dtb_mail_template table.
  *
- * The Fake-backed sibling relies on FakeMailTemplateStorage's two
+ * The Fake-backed sibling relies on MailTemplateStorageInterface's two
  * built-in seed rows. The SQL side has no built-in seed — each test
  * seeds its own rows via {@see SqlFixturesTrait::insertMailTemplate}.
  *

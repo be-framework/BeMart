@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 use Twig\Environment;
@@ -42,7 +42,7 @@ use function trim;
  * deliberately-thin Entity. `CartItem` has since been re-derived from
  * EC-CUBE's cart screen — it composes productName / mainImage /
  * classCategoryName / productId / productClassId — and CartItemEntity,
- * SqlCartQuery's JOIN and FakeCartQuery's read-side enrichment carry the
+ * the SQL JOIN and JSON-backed fake read-side enrichment carry the
  * fields through. The render-diff residual fell from ~16 lines to 11,
  * all of which are now genuinely EC-CUBE-runtime-only.
  *
@@ -122,7 +122,7 @@ final class CartHtmlRenderTest extends TestCase
         // EC-CUBE's Cart/index.twig, no longer back-formed from the thin
         // Entity) composes productName / mainImage / classCategoryName /
         // productId / productClassId; CartItemEntity, SqlCartQuery's JOIN
-        // and FakeCartQuery's read-side enrichment carry them through, so
+        // and JSON-backed fake read-side enrichment carry them through, so
         // the product thumbnail, the product-detail link, the linked
         // product name and the variation axes are all reproduced. The
         // former image / product_detail / ClassCategory / ec-cartRow__name
@@ -135,7 +135,7 @@ final class CartHtmlRenderTest extends TestCase
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
         $injector = new Injector(
-            new HtmlModule($meta),
+            new HtmlTestModule($meta),
             dirname(__DIR__, 2) . '/var/tmp/html',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);

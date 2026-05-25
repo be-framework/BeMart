@@ -19,9 +19,9 @@ use Ray\MediaQuery\Annotation\DbQuery;
  */
 interface TradeLawStorageInterface
 {
-    #[DbQuery('ttrade_law_get', factory: TradeLawEntity::class)]
-    public function get(): TradeLawEntity;
+    #[DbQuery('ttrade_law_get')]
+    public function item(): TradeLawEntity;
 
     #[DbQuery('ttrade_law_put')]
-    public function update(TradeLawEntity $entity): void;
+    public function put(TradeLawEntity $entity): void;
 }

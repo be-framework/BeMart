@@ -19,10 +19,15 @@ final readonly class PasswordResetTokenEntity implements \Ray\MediaQuery\ToScala
 {
     use MediaQueryJsonEntityTrait;
 
+    public DateTimeImmutable $expiresAt;
+
     public function __construct(
         public string $customerId,
         public string $resetKey,
-        public DateTimeImmutable $expiresAt,
+        DateTimeImmutable|string $expiresAt,
     ) {
+        $this->expiresAt = $expiresAt instanceof DateTimeImmutable
+            ? $expiresAt
+            : new DateTimeImmutable($expiresAt);
     }
 }

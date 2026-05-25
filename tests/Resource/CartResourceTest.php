@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -21,7 +21,7 @@ final class CartResourceTest extends TestCase
     protected function setUp(): void
     {
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);
@@ -34,9 +34,9 @@ final class CartResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
-        // fixture has session-prefix-1_1 + session-prefix-1_2, both empty.
+        // fixture has session-prefix-1_1 with sample-001 x3 and an empty reservation cart.
         $this->assertSame(2, $ro->body['cartCount']);
-        $this->assertSame(0, $ro->body['totalPrice']);
+        $this->assertSame(3600, $ro->body['totalPrice']);
         $this->assertCount(2, $ro->body['carts']);
         $this->assertSame('session-prefix-1_1', $ro->body['carts'][0]['cartKey']);
         $this->assertSame(1, $ro->body['carts'][0]['saleTypeId']);
@@ -65,7 +65,7 @@ final class CartResourceTest extends TestCase
      * After adding an item, the cart-row body carries the display
      * fields the re-derived ALPS `CartItem` descriptor composes — so
      * the Cart HTML port can render a faithful EC-CUBE cart row.
-     * FakeCartQuery re-derives `productName` from the product-class
+     * The JSON-backed fake cart handler re-derives `productName` from the product-class
      * Fake on read, mirroring SqlCartQuery's JOIN.
      */
     public function testOnGetItemBodyCarriesCartRowDisplayFields(): void

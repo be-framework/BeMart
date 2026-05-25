@@ -66,7 +66,7 @@ final readonly class CartItemQuantityReplacing
         }
 
         $cartKey = sprintf('%s_%d', $sessionPrefix, $productClass->saleTypeId);
-        $existingCart = $cartQuery->byCartKey($cartKey);
+        $existingCart = $cartQuery->item($cartKey);
         if ($existingCart === null) {
             throw new CartItemNotInCartException();
         }

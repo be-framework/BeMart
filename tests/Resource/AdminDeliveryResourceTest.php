@@ -7,20 +7,16 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeDeliveryStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminDeliveryForm;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
-use function is_string;
 use function str_contains;
 
 /**
@@ -29,33 +25,29 @@ use function str_contains;
 final class AdminDeliveryResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const YAMATO_DELIVERY_ID = 'del-yamato';
+    private const YUPACK_DELIVERY_ID = 'del-yupack';
 
     private ResourceInterface $resource;
-    private FakeDeliveryStorage $storage;
 
     protected function setUp(): void
     {
-        $this->storage = new FakeDeliveryStorage();
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session, $this->storage) extends AbstractModule {
-            public function __construct(
-                private readonly FakeAdminSession $session,
-                private readonly FakeDeliveryStorage $storage,
-            ) {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSessionInterface::class)->toInstance($this->session);
-                $this->bind(DeliveryStorageInterface::class)->toInstance($this->storage);
-                $this->bind(FakeDeliveryStorage::class)->toInstance($this->storage);
             }
         };
         $base->override($override);
@@ -66,14 +58,8 @@ final class AdminDeliveryResourceTest extends TestCase
 
     private function seed(string $name): string
     {
-        $ro = $this->resource->post('page://self/admin/delivery/delivery-list', [
-            'deliveryName' => $name,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['deliveryId'];
-        assert(is_string($id));
-
-        return $id;
+        // Static Ray.FakeQuery fixture, not a mutable seed.
+        return $name === 'ゆうパック' ? self::YUPACK_DELIVERY_ID : self::YAMATO_DELIVERY_ID;
     }
 
     public function testCreateReturns201(): void

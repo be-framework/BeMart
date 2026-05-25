@@ -67,7 +67,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $id = $this->insertLayout(['layout_name' => 'PC標準', 'device_type_id' => 10]);
 
         $storage = $this->sql(LayoutStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(LayoutEntity::class, $entity);
         $this->assertSame((string) $id, $entity->layoutId);
@@ -78,7 +78,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForMissingRow(): void
     {
         $storage = $this->sql(LayoutStorageInterface::class);
-        $this->assertNull($storage->getById('99999999'));
+        $this->assertNull($storage->item('99999999'));
     }
 
     public function testGetByIdReturnsNullForNonNumericId(): void
@@ -88,8 +88,8 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         // PK; surface as miss so the LayoutUpdated Final fires its 404
         // path instead of a PDO error.
         $storage = $this->sql(LayoutStorageInterface::class);
-        $this->assertNull($storage->getById('lo-pc-default'));
-        $this->assertNull($storage->getById('nonexistent'));
+        $this->assertNull($storage->item('lo-pc-default'));
+        $this->assertNull($storage->item('nonexistent'));
     }
 
     public function testGetByIdCoercesNullLayoutNameToEmptyString(): void
@@ -101,7 +101,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $id = $this->insertLayout(['layout_name' => null]);
 
         $storage = $this->sql(LayoutStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(LayoutEntity::class, $entity);
         $this->assertSame('', $entity->layoutName);
@@ -114,7 +114,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $id = $this->insertLayout(['device_type_id' => null]);
 
         $storage = $this->sql(LayoutStorageInterface::class);
-        $entity = $storage->getById((string) $id);
+        $entity = $storage->item((string) $id);
 
         $this->assertInstanceOf(LayoutEntity::class, $entity);
         $this->assertSame(0, $entity->deviceType);
@@ -138,7 +138,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $storage = $this->sql(LayoutStorageInterface::class);
         $storage->put($merged);
 
-        $read = $storage->getById((string) $id);
+        $read = $storage->item((string) $id);
         $this->assertInstanceOf(LayoutEntity::class, $read);
         $this->assertSame('PC Refreshed', $read->layoutName);
 
@@ -184,7 +184,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
             deviceType: 10,
         ));
 
-        $read = $storage->getById('777');
+        $read = $storage->item('777');
         $this->assertInstanceOf(LayoutEntity::class, $read);
         $this->assertSame('777', $read->layoutId);
         $this->assertSame('Fresh Layout', $read->layoutName);

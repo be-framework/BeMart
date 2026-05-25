@@ -12,14 +12,15 @@ use Be\Framework\BecomingInterface;
 use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Module\ProdModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
 use function dirname;
 use function file_exists;
+use function getenv;
 use function unlink;
 
 final class ProdModuleTest extends TestCase
@@ -33,6 +34,8 @@ final class ProdModuleTest extends TestCase
 
     public function testProdContextBindsBecomingInterfaceToPlainBecoming(): void
     {
+        $this->skipWithoutDatabaseUrl();
+
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
             dirname(__DIR__, 2) . '/var/tmp/prod',
@@ -45,6 +48,8 @@ final class ProdModuleTest extends TestCase
 
     public function testProdContextBindsSemanticLoggerInterfaceToPlainSemanticLogger(): void
     {
+        $this->skipWithoutDatabaseUrl();
+
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
             dirname(__DIR__, 2) . '/var/tmp/prod',
@@ -57,6 +62,8 @@ final class ProdModuleTest extends TestCase
 
     public function testProdContextDoesNotWriteLogFileOnBecoming(): void
     {
+        $this->skipWithoutDatabaseUrl();
+
         // Establish a known "before" timestamp by touching the file (or
         // confirming it doesn't exist). DevBecoming would overwrite this.
         if (file_exists($this->logFile)) {
@@ -105,6 +112,8 @@ final class ProdModuleTest extends TestCase
 
     public function testProdContextRejectsMissingCsrfToken(): void
     {
+        $this->skipWithoutDatabaseUrl();
+
         // Slice 8: even with a valid session customerId, a state-changing
         // request without a CSRF token is rejected at the resource boundary.
         $_SESSION['customer_id'] = 'customer-001';
@@ -126,14 +135,15 @@ final class ProdModuleTest extends TestCase
 
     public function testDevContextDoesWriteLogFileOnBecoming(): void
     {
-        // Negative control: confirm AppModule (dev default) still writes
-        // the log. If this stops being true the test above becomes vacuous.
+        // Negative control: confirm TestModule (dev logging + FakeModule)
+        // still writes the log. If this stops being true the test above
+        // becomes vacuous.
         if (file_exists($this->logFile)) {
             unlink($this->logFile);
         }
 
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
 
@@ -144,6 +154,14 @@ final class ProdModuleTest extends TestCase
         ]);
 
         $this->assertFileExists($this->logFile);
+    }
+
+    private function skipWithoutDatabaseUrl(): void
+    {
+        $databaseUrl = getenv('DATABASE_URL');
+        if ($databaseUrl === false || $databaseUrl === '') {
+            $this->markTestSkipped('DATABASE_URL not set — prod context requires SQL wiring.');
+        }
     }
 
     protected function tearDown(): void

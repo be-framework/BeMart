@@ -6,8 +6,8 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -40,7 +40,7 @@ use function str_contains;
  *  - dtb_class_name is empty on each test (the per-test transaction
  *    rolls back), so the list / put / delete cases seed their own rows
  *    through the resource layer first — same shape the Fake sibling
- *    uses (FakeClassNameStorage also starts empty).
+ *    uses (ClassNameStorageInterface also starts empty).
  *
  * Why mirror exactly: per G-23 the Resource-layer contract MUST stay
  * green for both Fake and SQL backings. If the SQL side passes but the
