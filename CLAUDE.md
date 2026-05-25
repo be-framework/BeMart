@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-EC-CUBE 4.3 の ALPS プロファイル (`alps.json`, 413 descriptors) と、EC-CUBE → BEAR.Sunday + Be Framework への移植を駆動する Claude Code ネイティブワークフローの 2 つで構成される。
+EC-CUBE 4.3 の ALPS プロファイル (`alps.json`, 403 descriptors) と、EC-CUBE → BEAR.Sunday + Be Framework への移植を駆動する Claude Code ネイティブワークフローの 2 つで構成される。
 
-- **主成果物**: `alps.json` — EC-CUBE 4.3 のセマンティクス（データ語彙 276 + 状態遷移 137）を機械可読に定義
+- **主成果物**: `alps.json` — EC-CUBE 4.3 のセマンティクス（データ語彙 266 + 状態遷移 137）を機械可読に定義
 - **移植ワークフロー**: `.claude/` 以下の `/run` コマンド + JSON workflow + prompts
 
 ## Commands
@@ -68,7 +68,7 @@ HTML / SVG 再生成時は `docs/` 配下のコピーも同期すること。
 3. **domain-review** — subagent が Be 原則違反をチェック（不合格 → domain に差し戻し、最大 3 回）
 4. **application** — BEAR.Sunday でアプリケーション層（Resource）を実装
 5. **application-review** — subagent が 2 層境界違反をチェック（不合格 → application に差し戻し）
-6. **security** — 変更ファイルに `(Auth|Payment|Checkout|Order|Customer)` がマッチした場合のみ発火
+6. **security** — 変更ファイルに認証・セッション・CSRF・決済・注文・顧客・管理系の語がマッチした場合のみ発火
 
 レビューの subagent は `{ "verdict": "pass"|"fail", "findings": [...], "blocking": [...] }` の JSON を返す。`blocking` が空なら pass、1 件以上で fail。
 

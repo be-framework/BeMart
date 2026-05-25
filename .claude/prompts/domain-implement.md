@@ -33,11 +33,11 @@
 
 前ステップ `alps-analyze` の出力。**末尾の `json handover` fenced ブロックを最初に読む**:
 
-```text
+````markdown
 ```json handover
 { ... }
 ```
-```
+````
 
 このブロックから以下を抽出して実装に使う:
 

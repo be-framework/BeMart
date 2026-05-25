@@ -75,6 +75,7 @@ Phase 7
 4. storefront inventory を `/run migrate <descriptor>` 群へどう分解するか
 
 ## Decisions Made
+
 | Decision | Rationale |
 |----------|-----------|
 | ALPS を移植契約として扱う | 既に状態遷移と語彙が整理されており、機能退行の比較基準になるため |
@@ -89,6 +90,7 @@ Phase 7
 | 実行基盤は Claude Code native（custom command + subagent + prompt file）で駆動する | 実装と review の context を subagent で分離でき、`/run migrate <descriptor>` 一行で 2 層移植 step 列が走るため |
 
 ## Errors Encountered
+
 | Error | Attempt | Resolution |
 |-------|---------|------------|
 | なし | 1 | 調査のみで完了 |
