@@ -89,7 +89,6 @@ final class AdminMemberResourceTest extends TestCase
             'password' => 'fresh-admin-password-2026',
             'name' => '新人管理者',
             'authority' => 1,
-            'mailAddress' => 'fresh-admin@example.com',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
@@ -97,6 +96,7 @@ final class AdminMemberResourceTest extends TestCase
         $this->assertSame('fresh-admin', $ro->body['loginId']);
         $this->assertSame(1, $ro->body['authority']);
         $this->assertSame(1, $ro->body['work']);
+        $this->assertArrayNotHasKey('mailAddress', $ro->body);
         $this->assertArrayHasKey('Location', $ro->headers);
         $this->assertStringContainsString('loginId=fresh-admin', $ro->headers['Location']);
     }
@@ -132,13 +132,12 @@ final class AdminMemberResourceTest extends TestCase
         $ro = $this->resource->put('page://self/admin/member', [
             'loginId' => 'shop-owner',
             'name' => '新店舗オーナー',
-            'mailAddress' => 'new-shop-owner@example.com',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('新店舗オーナー', $ro->body['name']);
-        $this->assertSame('new-shop-owner@example.com', $ro->body['mailAddress']);
+        $this->assertArrayNotHasKey('mailAddress', $ro->body);
     }
 
     public function testOnPutUnknownLoginIdReturns404(): void

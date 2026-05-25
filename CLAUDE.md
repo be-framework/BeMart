@@ -13,13 +13,15 @@ EC-CUBE 4.3 の ALPS プロファイル (`alps.json`, 413 descriptors) と、EC-
 
 ### ALPS プロファイル
 
+`asd` は npm 版 (`npm install -g @alps-asd/app-state-diagram`, v2.0.0+)。
+
 ```bash
-asd --lint alps.json        # バリデーション
-asd -e alps.json            # HTML ドキュメント再生成
-asd -s alps.json            # SVG 状態遷移図生成
+asd --validate alps.json                  # バリデーション
+asd -f html -o alps.json.html alps.json   # HTML ドキュメント再生成
+asd -f svg -o alps.svg alps.json          # SVG 状態遷移図生成
 ```
 
-HTML 再生成時は `docs/` 配下のコピーも同期すること。
+HTML / SVG 再生成時は `docs/` 配下のコピーも同期すること。
 
 ### 移植ワークフロー
 

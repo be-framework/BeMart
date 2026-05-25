@@ -57,7 +57,6 @@ final readonly class AdminProductCreating
         #[Input] public string|null $description,
         #[Input] public string|null $searchWord,
         #[Input] public string|null $note,
-        #[Input] public int|null $sortNo,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] ProductQueryInterface $productQuery,
     ) {

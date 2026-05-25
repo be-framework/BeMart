@@ -64,16 +64,12 @@ class DeliveryList extends ResourceObject
 
     /**
      * @psalm-taint-source input $deliveryName
-     * @psalm-taint-source input $feeBase
-     * @psalm-taint-source input $freeAmount
      * @psalm-taint-source input $visible
      * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     public function onPost(
         string $deliveryName,
-        int $feeBase = 0,
-        int|null $freeAmount = null,
         bool $visible = true,
         string|null $csrfToken = null,
     ): static {
@@ -87,8 +83,6 @@ class DeliveryList extends ResourceObject
         try {
             $final = ($this->becoming)(new CreateDeliveryInput(
                 deliveryName: $deliveryName,
-                feeBase: $feeBase,
-                freeAmount: $freeAmount,
                 visible: $visible,
             ));
         } catch (SemanticVariableException $e) {
@@ -110,8 +104,6 @@ class DeliveryList extends ResourceObject
         $this->body = [
             'deliveryId' => $final->deliveryId,
             'deliveryName' => $final->deliveryName,
-            'feeBase' => $final->feeBase,
-            'freeAmount' => $final->freeAmount,
             'visible' => $final->visible,
         ];
 

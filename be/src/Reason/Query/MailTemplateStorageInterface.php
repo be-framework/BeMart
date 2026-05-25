@@ -11,12 +11,12 @@ use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
  *
  *   - list()                              → every template, sorted by id
  *   - findById(int $mailTemplateId)       → one template or null
- *   - update(MailTemplateEntity $entity)  → replace subject / body / htmlBody
+ *   - update(MailTemplateEntity $entity)  → replace subject
  *
- * The migration scope only covers UPDATE of subject + body + htmlBody.
- * Creating a new template (which requires setting the underlying
- * file_name) is Phase 2 — for now the `mailTemplateId` MUST refer to
- * an existing seeded row, otherwise update() raises
+ * The migration scope only covers UPDATE of subject. Creating a new
+ * template (which requires setting the underlying file_name) is
+ * Phase 2 — for now the `mailTemplateId` MUST refer to an existing
+ * seeded row, otherwise update() raises
  * {@see \MyVendor\BeMart\Be\Exception\MailTemplateNotFoundException}.
  */
 interface MailTemplateStorageInterface

@@ -31,7 +31,6 @@ final readonly class MemberCreated
     public string $adminId;
     public string $loginId;
     public string $name;
-    public string $mailAddress;
     public int $authority;
     public int $work;
 
@@ -40,7 +39,6 @@ final readonly class MemberCreated
         #[Input] string $loginId,
         #[Input] string $passwordHash,
         #[Input] string $name,
-        #[Input] string $mailAddress,
         #[Input] int $authority,
         #[Input] int $work,
         #[Inject] AdminCommandInterface $command,
@@ -50,7 +48,6 @@ final readonly class MemberCreated
             loginId: $loginId,
             passwordHash: $passwordHash,
             name: $name,
-            mailAddress: $mailAddress,
             authority: $authority,
             work: $work,
         ));
@@ -58,7 +55,6 @@ final readonly class MemberCreated
         $this->adminId = $adminId;
         $this->loginId = $loginId;
         $this->name = $name;
-        $this->mailAddress = $mailAddress;
         $this->authority = $authority;
         $this->work = $work;
     }

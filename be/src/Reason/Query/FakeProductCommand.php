@@ -50,7 +50,6 @@ final class FakeProductCommand implements ProductCommandInterface
             description: $current->description,
             searchWord: $current->searchWord,
             note: $current->note,
-            sortNo: $current->sortNo,
         ));
     }
 
@@ -71,7 +70,6 @@ final class FakeProductCommand implements ProductCommandInterface
             description: $source->description,
             searchWord: $source->searchWord,
             note: $source->note,
-            sortNo: $source->sortNo,
         );
         $this->storage->put($copy);
 
@@ -104,7 +102,6 @@ final class FakeProductCommand implements ProductCommandInterface
                 description: $current->description,
                 searchWord: $current->searchWord,
                 note: $current->note,
-                sortNo: $current->sortNo,
             ));
             $changed++;
         }

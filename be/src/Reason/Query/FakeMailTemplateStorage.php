@@ -33,16 +33,12 @@ final class FakeMailTemplateStorage implements MailTemplateStorageInterface
             mailTemplateName: '注文完了メール',
             fileName: 'Mail/order.twig',
             subject: 'ご注文ありがとうございます',
-            body: "ご注文を承りました。\n注文番号: {{ orderNo }}",
-            htmlBody: null,
         );
         $this->byId[self::SEED_REGISTER_THANKS_ID] = new MailTemplateEntity(
             mailTemplateId: self::SEED_REGISTER_THANKS_ID,
             mailTemplateName: '会員登録完了メール',
             fileName: 'Mail/entry.twig',
             subject: 'ご登録ありがとうございます',
-            body: "会員登録が完了しました。\n{{ name }} 様",
-            htmlBody: null,
         );
     }
 

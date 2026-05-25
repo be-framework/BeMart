@@ -20,14 +20,10 @@ final readonly class CreateDeliveryInput
 {
     /**
      * @psalm-taint-source input $deliveryName
-     * @psalm-taint-source input $feeBase
-     * @psalm-taint-source input $freeAmount
      * @psalm-taint-source input $visible
      */
     public function __construct(
         public string $deliveryName,
-        public int $feeBase = 0,
-        public int|null $freeAmount = null,
         public bool $visible = true,
     ) {
     }

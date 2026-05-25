@@ -64,7 +64,6 @@ final readonly class MemberCreating
         #[Input] #[SensitiveParameter] string $password,
         #[Input] public string $name,
         #[Input] public int $authority,
-        #[Input] public string $mailAddress,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] AdminQueryInterface $adminQuery,
         #[Inject] AdminIdGeneratorInterface $idGenerator,

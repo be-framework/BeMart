@@ -54,18 +54,16 @@ final class MemberUpdatedTest extends TestCase
         $this->storage = $injector->getInstance(FakeAdminStorage::class);
     }
 
-    public function testHappyPathUpdatesNameAndMail(): void
+    public function testHappyPathUpdatesName(): void
     {
         $final = ($this->becoming)(new UpdateMemberInput(
             loginId: 'shop-owner',
             name: '改名後オーナー',
-            mailAddress: 'new-owner@example.com',
         ));
 
         $this->assertInstanceOf(MemberUpdated::class, $final);
         $this->assertSame('shop-owner', $final->loginId);
         $this->assertSame('改名後オーナー', $final->name);
-        $this->assertSame('new-owner@example.com', $final->mailAddress);
         // Authority and work are preserved (no role-flip via this path).
         $this->assertSame(1, $final->authority);
         $this->assertSame(1, $final->work);
@@ -74,19 +72,21 @@ final class MemberUpdatedTest extends TestCase
         $persisted = $this->storage->getByLoginId('shop-owner');
         $this->assertNotNull($persisted);
         $this->assertSame('改名後オーナー', $persisted->name);
-        $this->assertSame('new-owner@example.com', $persisted->mailAddress);
     }
 
     public function testPartialUpdateLeavesUnchangedFieldsAlone(): void
     {
+        // Null name leaves the existing value untouched — verifies the
+        // merge-semantics for omitted optional fields stays intact.
         $final = ($this->becoming)(new UpdateMemberInput(
             loginId: 'deputy',
-            name: '副管理者（改）',
-            // mailAddress omitted — keep existing.
+            // name omitted — keep existing.
         ));
 
-        $this->assertSame('副管理者（改）', $final->name);
-        $this->assertSame('deputy@example.com', $final->mailAddress);
+        $this->assertSame('副管理者', $final->name);
+        // Authority and work untouched too.
+        $this->assertSame(1, $final->authority);
+        $this->assertSame(1, $final->work);
     }
 
     public function testUnknownLoginIdRaisesNotFound(): void
