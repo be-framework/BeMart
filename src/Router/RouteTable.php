@@ -106,8 +106,8 @@ final class RouteTable
             new Route('contact_complete', ['GET'], '/contact/complete', 'page://self/contact/complete'),
 
             // ---- Storefront: customer registration ----
-            new Route('entry', ['GET'], '/entry', 'page://self/entry'),
-            new Route('entry_confirm', ['POST'], '/entry/confirm', 'page://self/entry/confirm'),
+            new Route('entry', ['GET', 'POST'], '/entry', 'page://self/entry'),
+            new Route('entry_confirm', ['GET'], '/entry/confirm', 'page://self/entry/confirm'),
             new Route('entry_complete', ['GET'], '/entry/complete', 'page://self/entry/complete'),
             new Route(
                 'entry_activate',
