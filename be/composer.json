@@ -1,0 +1,27 @@
+{
+    "name": "my-vendor/be-mart-be",
+    "type": "library",
+    "license": "MIT",
+    "description": "BeMart Be — pure Be Framework domain (Input / Final / Semantic / Exception / Becoming / Reason) for the BeMart project.",
+    "require": {
+        "php": "^8.3",
+        "be-framework/be": "0.x-dev as 0.1.0",
+        "ray/input-query": "^1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "MyVendor\\BeMart\\Be\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "MyVendor\\BeMart\\Be\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

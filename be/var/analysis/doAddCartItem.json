@@ -1,0 +1,154 @@
+{
+  "descriptor_id": "doAddCartItem",
+  "alps_id_resolved": "doAddCartItem",
+  "alps_found": true,
+  "descriptor_type": "unsafe",
+  "be_pattern": "Cascade Diamond",
+  "be_reference_demo": "loan-application",
+  "be_reference_demo_secondary": "order-processing",
+  "alps_source": {
+    "title": "カートに追加する",
+    "type": "unsafe",
+    "rt": "#Cart",
+    "tag": "cart flow-purchase actor-customer src-router",
+    "doc": "PurchaseFlow(cartフロー)により在庫チェック・販売制限数チェック・配送設定チェックを実行。制限超過時は数量を自動調整。販売種別が異なる商品は別カート(cartKey)に分離。",
+    "descriptor_inputs": ["productCode", "quantity"]
+  },
+  "rt_container": {
+    "id": "Cart",
+    "ownDescriptors": [
+      "cartKey", "preOrderId", "totalPrice", "deliveryFeeTotal",
+      "addPoint", "usePoint", "createDate", "updateDate"
+    ],
+    "nestedContainer": {
+      "id": "CartItem",
+      "ownDescriptors": ["cartItemPrice", "quantity", "productName", "productCode"]
+    },
+    "transitions": ["goCart", "doAddCartItem", "doUpdateCartItemQuantity", "doRemoveCartItem", "goShopping"]
+  },
+  "client_inputs": [
+    {
+      "name": "productCode",
+      "title": "商品コード",
+      "def": "https://schema.org/sku",
+      "doc": "SKU/品番。在庫管理や受注明細での識別に使用",
+      "semantic_class": "ProductCode",
+      "semantic_reuse_from_pilot": "goProduct (Pilot 1)"
+    },
+    {
+      "name": "quantity",
+      "title": "数量",
+      "doc": "購入数量。カート明細と受注明細で共通使用",
+      "semantic_class": "Quantity",
+      "semantic_reuse_from_pilot": null,
+      "is_new": true
+    }
+  ],
+  "server_fetched_fields": [
+    {"name": "stock", "title": "在庫数", "from": "ProductClass", "purpose": "Stock 検査"},
+    {"name": "stockUnlimited", "title": "在庫無制限", "from": "ProductClass", "purpose": "Stock 検査スキップ判定"},
+    {"name": "saleLimit", "title": "購入制限数", "from": "ProductClass", "purpose": "SaleLimit 検査"},
+    {"name": "price01", "title": "通常価格", "from": "ProductClass", "purpose": "Price 表示"},
+    {"name": "price02", "title": "販売価格", "from": "ProductClass", "purpose": "Price 計算ベース"},
+    {"name": "deliveryFee", "title": "商品別送料", "from": "ProductClass", "purpose": "Delivery 計算"},
+    {"name": "saleTypeName", "title": "販売種別", "from": "ProductClass", "purpose": "cartKey 分離"},
+    {"name": "productName", "title": "商品名", "from": "ProductClass(親 Product)", "purpose": "CartItem 表示"}
+  ],
+  "server_derived_fields": [
+    {"name": "cartKey", "title": "カートキー", "derivation": "{sessionPrefix}_{saleTypeId}", "purpose": "Cart 分離"},
+    {"name": "preOrderId", "title": "仮注文 ID", "derivation": "SHA1 セッショントークン", "purpose": "Cart↔Order 紐付け"}
+  ],
+  "reasons": [
+    {
+      "name": "StockCheck",
+      "order": 1,
+      "cascade_dependency": "なし (最初に評価)",
+      "input": ["ProductClass.stock", "ProductClass.stockUnlimited", "client.quantity"],
+      "output": {"adjustedQuantity": "int — stock を超えた場合は stock に補正、stockUnlimited=true なら client.quantity をそのまま"},
+      "fake_query": "FakeProductClassQuery",
+      "phase_1_only": true
+    },
+    {
+      "name": "SaleLimitCheck",
+      "order": 2,
+      "cascade_dependency": "StockCheck.adjustedQuantity を受ける",
+      "input": ["ProductClass.saleLimit", "StockCheck.adjustedQuantity"],
+      "output": {"adjustedQuantity": "int — saleLimit を超えた場合は saleLimit に補正"},
+      "fake_query": "FakeProductClassQuery (同一 fetch を再利用)"
+    },
+    {
+      "name": "SaleTypeResolution",
+      "order": 3,
+      "cascade_dependency": "並列可能 (Stock/SaleLimit と独立)",
+      "input": ["ProductClass.saleTypeName", "Session.prefix"],
+      "output": {"cartKey": "string — {prefix}_{saleTypeId}"},
+      "fake_query": "FakeProductClassQuery (parent Product 経由)"
+    },
+    {
+      "name": "DeliveryFeeAccumulation",
+      "order": 4,
+      "cascade_dependency": "SaleLimitCheck.adjustedQuantity と SaleTypeResolution.cartKey に依存",
+      "input": ["ProductClass.deliveryFee", "SaleLimitCheck.adjustedQuantity", "ExistingCart.items"],
+      "output": {"deliveryFeeTotal": "int — Cart 全体の送料合計"},
+      "fake_query": "FakeCartQuery + FakeProductClassQuery"
+    },
+    {
+      "name": "CartItemMergePrice",
+      "order": 5,
+      "cascade_dependency": "全 Reason の結果を統合 (Cascade の最終段)",
+      "input": ["ProductClass.price02", "SaleLimitCheck.adjustedQuantity", "ExistingCart.items (同一 productCode の merge 判定)"],
+      "output": {
+        "cartItem": "{productCode, quantity (merged), cartItemPrice}",
+        "totalPrice": "int — Cart 全体の合計価格"
+      },
+      "fake_query": "FakeCartQuery (read + write)"
+    }
+  ],
+  "diamond_classification_reasoning": {
+    "axis_independent_parallel": false,
+    "axis_cascade": true,
+    "axis_branching_final": false,
+    "decision": "Cascade Diamond — Reason 間に順序依存あり (Stock 検査 → 数量補正 → SaleLimit 検査 → cartKey 解決 → Delivery 計算 → Price 確定)。Final 分岐なし (常に CartItemAdded)。",
+    "implementation_note": "Cascade のため Being を 1〜2 段挟む。候補: AddCartItemInput → CartItemValidated (Stock+SaleLimit 補正済) → CartItemAdded (Delivery+Price 確定)"
+  },
+  "exceptions_to_create": [
+    {"name": "QuantityFormatException", "trigger": "client.quantity <= 0 または >= 100", "i18n": "ja: 数量が不正です。/ en: Invalid quantity."},
+    {"name": "ProductClassNotFoundException", "trigger": "productCode に該当する ProductClass が存在しない", "i18n": "ja: 商品規格が見つかりません。/ en: ProductClass not found."},
+    {"name": "OutOfStockException", "trigger": "stockUnlimited=false かつ stock=0", "i18n": "ja: 在庫がありません。/ en: Out of stock.", "note": "数量が 1 以上で stock=0 の場合のみ。stock>0 かつ requested>stock は自動補正 (例外ではない)"}
+  ],
+  "alps_consistency_check_targets": [
+    {"final_property": "cartKey", "alps_descriptor": "cartKey", "exists": true},
+    {"final_property": "totalPrice", "alps_descriptor": "totalPrice", "exists": true},
+    {"final_property": "deliveryFeeTotal", "alps_descriptor": "deliveryFeeTotal", "exists": true},
+    {"final_property": "addPoint", "alps_descriptor": "addPoint", "exists": true},
+    {"final_property": "usePoint", "alps_descriptor": "usePoint", "exists": true},
+    {"final_property": "items[].productCode", "alps_descriptor": "productCode", "exists": true},
+    {"final_property": "items[].productName", "alps_descriptor": "productName", "exists": true},
+    {"final_property": "items[].quantity", "alps_descriptor": "quantity", "exists": true},
+    {"final_property": "items[].cartItemPrice", "alps_descriptor": "cartItemPrice", "exists": true}
+  ],
+  "bear_resource_target": {
+    "path": "src/Resource/Page/Cart/Item.php",
+    "method": "onPost",
+    "url": "/cart/item",
+    "request_params": ["productCode", "quantity"],
+    "links": [
+      {"rel": "goCart", "href": "/cart", "method": "GET"},
+      {"rel": "doRemoveCartItem", "href": "/cart/item", "method": "DELETE"},
+      {"rel": "doUpdateCartItemQuantity", "href": "/cart/item", "method": "PUT"},
+      {"rel": "goShopping", "href": "/shopping", "method": "GET"}
+    ],
+    "http_code_mapping": [
+      {"exception": "QuantityFormatException", "code": "BAD_REQUEST (400)"},
+      {"exception": "ProductClassNotFoundException", "code": "NOT_FOUND (404)"},
+      {"exception": "OutOfStockException", "code": "CONFLICT (409)"}
+    ]
+  },
+  "bear_skip": false,
+  "notes": [
+    "Pilot 2 として実装。Pilot 1 (goProduct) で確立した AppMetaModule override・DevBecoming bind は再利用。",
+    "ProductCode Semantic は Pilot 1 から再利用 (1 変数 1 クラスルール)。Quantity Semantic は新規。",
+    "Cascade Diamond の中間 Being として CartItemValidated を導入する案 (Stock+SaleLimit 補正の結果を保持)。実装時に Final 単段で十分か Being 必要かを判断。",
+    "Diamond 専用テスト 3 件: (1) stock=3 で qty=5 → qty=3 補正、(2) 同 SKU 2 回追加 → quantity 加算、(3) 異 saleType → 別 cartKey 分離。"
+  ]
+}
