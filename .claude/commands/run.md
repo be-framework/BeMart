@@ -25,7 +25,7 @@ disable-model-invocation: true
 
 存在しない場合は、`.claude/workflows/` 配下の利用可能なワークフロー一覧を表示して終了する。
 
-読み込んだ JSON を `.claude/workflows/workflow.schema.json` で検証する。少なくとも必須キーの `workflow` / `description` / `steps` が欠けている、または `steps` が空の場合は停止してユーザーに報告する。
+読み込んだ JSON が `.claude/workflows/workflow.schema.json` に準拠しているか目視で確認する（Claude はスキーマを読んで理解できる）。`steps` 配列が無い、`name` が欠けているなど明らかな異常があれば停止してユーザーに報告する。
 
 ### 3. 引数の検証
 
@@ -56,14 +56,14 @@ disable-model-invocation: true
 
 Agent ツールを以下のように呼ぶ:
 
-```yaml
+```
 description: "<step.name> for <descriptor>"
 subagent_type: "general-purpose"
 prompt: |
   <prompt_file の内容（placeholder 置換済み）>
 
   対象ディスクリプタ: <descriptor>
-  プロジェクトルート: ${workspaceFolder}
+  プロジェクトルート: ~/git/ec-cube-alps
 
   レビュー結果を以下の JSON 形式で返してください:
   {

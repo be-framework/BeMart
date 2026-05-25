@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\ProductStatusCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -51,10 +51,10 @@ final readonly class AdminProductsStatusBulkUpdated
     public function __construct(
         #[Input] array $productCodes,
         #[Input] int $productStatus,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] ProductStatusCommandInterface $productStatusCommand,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,8 +14,7 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderStatusUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderStatusInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderStatusForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -57,8 +57,7 @@ class OrderStatus extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -72,7 +71,7 @@ class OrderStatus extends ResourceObject
      */
     public function onGet(): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 
@@ -98,22 +97,14 @@ class OrderStatus extends ResourceObject
      *
      * @psalm-taint-source input $orderNo
      * @psalm-taint-source input $orderStatus
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
+    #[CsrfProtected]
     public function onPost(
         string $orderNo,
         int $orderStatus,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AdminUpdateOrderStatusInput(
                 orderNo: $orderNo,

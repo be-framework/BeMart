@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -24,12 +24,12 @@ use function str_contains;
  * AUTHN / AUTHZ / CSRF branches. The only differences are:
  *
  *  - the storage binding (PageStorageInterface → SqlPageStorage) and
- *    id generator (PageIdGeneratorInterface → direct MediaQuery page id proxy) are
+ *    id query (PageIdQueryInterface → direct MediaQuery page id proxy) are
  *    layered via the base class's sqlOverrideModule; persistence is
  *    against the real dtb_page table.
  *
  *  - pageIds are numeric strings drawn from dtb_page.id, not the
- *    `pg-` prefixed hex the FakePageIdGenerator emits. Both suites
+ *    `pg-` prefixed hex the FakePageIdProvider emits. Both suites
  *    assert "the response carries a pageId" but only the Fake side
  *    ever observes the literal seed handle (`pg-homepage`) —
  *    SqlPageStorage rejects it as non-numeric on lookup (the same 404
@@ -68,7 +68,7 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

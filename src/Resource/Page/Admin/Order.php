@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderFetched;
 use MyVendor\BeMart\Be\Final\AdminOrderUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderInput;
 use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 
 use function assert;
 
@@ -54,7 +55,7 @@ class Order extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -111,7 +112,7 @@ class Order extends ResourceObject
             'items' => $final->items,
             'itemCount' => $final->itemCount,
             'customer' => $final->customer,
-            'csrfToken' => $this->csrf->getToken(),
+            'csrfToken' => $this->csrf->token,
             'orderStatusOptions' => [
                 1 => '新規受付',
                 3 => '注文取消',
@@ -134,23 +135,15 @@ class Order extends ResourceObject
      * @psalm-taint-source input $discount
      * @psalm-taint-source input $charge
      * @psalm-taint-source input $usePoint
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[CsrfProtected]
     public function onPut(
         string $orderNo,
         int|null $discount = null,
         int|null $charge = null,
         int|null $usePoint = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AdminUpdateOrderInput(
                 orderNo: $orderNo,

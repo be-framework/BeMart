@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 
 use function count;
@@ -24,7 +24,7 @@ use function stream_get_contents;
  *   AdminExportCustomerInput → AdminCustomerCsvExported  (Direct, safe)
  *
  * AUTHZ — admin firewall:
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess
  *
  * Format is RFC 4180 — header row + one row per customer. Encoded via
  * PHP's native fputcsv() so quoting / escaping is identical to what
@@ -48,10 +48,10 @@ final readonly class AdminCustomerCsvExported
     public int $rowCount;
 
     public function __construct(
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] CustomerQueryInterface $customerQuery,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

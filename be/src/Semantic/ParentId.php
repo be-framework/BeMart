@@ -8,7 +8,7 @@ use Be\Framework\Attribute\Validate;
 
 /**
  * Parent category id — nullable foreign key into the same category
- * table. null = root-level node. Type assertion only; the generator is
+ * table. null = root-level node. Type assertion only; the category lookup is
  * the contract for existence checks (and the Final asserts a referenced
  * parent resolves before persistence).
  */

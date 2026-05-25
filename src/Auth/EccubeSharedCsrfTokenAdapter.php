@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Auth;
 
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Override;
 
 use function bin2hex;
@@ -16,7 +16,7 @@ use function random_bytes;
 use const PHP_SAPI;
 
 /**
- * Production CsrfTokenInterface adapter — validates submitted tokens
+ * Production CsrfToken adapter — validates submitted tokens
  * against the trusted reference stored in PHP's `$_SESSION` (alongside
  * the flat customerId key Slice 7 already shares with EC-CUBE).
  *
@@ -50,13 +50,13 @@ use const PHP_SAPI;
  * Comparison is always timing-safe (`hash_equals`). Empty strings and
  * non-string types are rejected before comparison.
  *
- * Token issuance ({@see getToken()}): the adapter returns the reference
+ * Token value (`$token`): the adapter snapshots the reference
  * already stored under {@see SESSION_KEY}, or — when none is present —
  * generates a cryptographically strong one and stores it back, so a
  * form render and its subsequent POST agree even before the EC-CUBE
  * EventListener mirror ships. It never rotates an existing token.
  */
-final class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
+final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
 {
     /**
      * Flat-string session key holding the trusted CSRF reference. EC-CUBE
@@ -76,8 +76,9 @@ final class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
     public const CLI_ENV_VAR = 'BEMART_CLI_CSRF_TOKEN';
 
     public function __construct(
-        private readonly string $sessionKey = self::SESSION_KEY,
+        private string $sessionKey = self::SESSION_KEY,
     ) {
+        parent::__construct($this->resolveToken());
     }
 
     #[Override]
@@ -107,17 +108,8 @@ final class EccubeSharedCsrfTokenAdapter implements CsrfTokenInterface
         return false;
     }
 
-    /**
-     * Returns the session-bound CSRF reference, seeding one if absent.
-     *
-     * A form render calls this to embed the token in its hidden input;
-     * the matching POST echoes it back to {@see isValid()}. The token is
-     * generated only once per session — an existing reference is never
-     * rotated here, so concurrent form pages in the same session all
-     * carry the same valid token.
-     */
-    #[Override]
-    public function getToken(): string
+    /** @return non-empty-string */
+    private function resolveToken(): string
     {
         $session = isset($_SESSION) ? $_SESSION : [];
         /** @var mixed $stored */

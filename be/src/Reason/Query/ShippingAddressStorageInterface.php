@@ -47,5 +47,5 @@ interface ShippingAddressStorageInterface
      * orderNo) is a silent no-op, same shape as `put`.
      */
     #[DbQuery('shipping_update_tracking')]
-    public function tracking(string $orderNo, string $trackingNumber): void;
+    public function updateTrackingNumber(string $orderNo, string $trackingNumber): void;
 }

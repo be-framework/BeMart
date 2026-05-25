@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -50,7 +50,7 @@ final class CustomerWithdrawnTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)->toInstance($this->session);
+                $this->bind(CustomerSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -111,10 +111,10 @@ final class CustomerWithdrawnTest extends TestCase
     {
         $this->rebindSession(self::ALICE_ID);
 
-        $before = count($this->mailer->withdrawConfirmations());
+        $before = count($this->mailer->withdrawConfirmations);
         ($this->becoming)(new WithdrawCustomerInput());
 
-        $after = $this->mailer->withdrawConfirmations();
+        $after = $this->mailer->withdrawConfirmations;
         $this->assertCount($before + 1, $after);
         $last = $after[count($after) - 1];
         $this->assertSame(self::ALICE_EMAIL, $last['email']);
@@ -127,7 +127,7 @@ final class CustomerWithdrawnTest extends TestCase
         $this->rebindSession(self::ALICE_ID);
 
         ($this->becoming)(new WithdrawCustomerInput());
-        $mailsAfterFirst = count($this->mailer->withdrawConfirmations());
+        $mailsAfterFirst = count($this->mailer->withdrawConfirmations);
 
         // Replay — the customer record is already STATUS_WITHDRAWN, so
         // the Final must short-circuit: no second mail, no second
@@ -140,7 +140,7 @@ final class CustomerWithdrawnTest extends TestCase
         $this->assertTrue($final->cleared);
         $this->assertCount(
             $mailsAfterFirst,
-            $this->mailer->withdrawConfirmations(),
+            $this->mailer->withdrawConfirmations,
             'Idempotent replay must NOT send a second withdrawal mail.',
         );
     }

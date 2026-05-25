@@ -23,7 +23,7 @@ use function sprintf;
 final class FakePaymentGateway implements PaymentGatewayInterface
 {
     /** @var list<array{preOrderId: string, paymentMethodId: int, amount: int}> */
-    private array $captures = [];
+    public array $captures = [];
 
     #[Override]
     public function checkout(string $preOrderId, int $paymentMethodId, int $amount): void
@@ -42,11 +42,5 @@ final class FakePaymentGateway implements PaymentGatewayInterface
             'paymentMethodId' => $paymentMethodId,
             'amount' => $amount,
         ];
-    }
-
-    /** @return list<array{preOrderId: string, paymentMethodId: int, amount: int}> */
-    public function captures(): array
-    {
-        return $this->captures;
     }
 }

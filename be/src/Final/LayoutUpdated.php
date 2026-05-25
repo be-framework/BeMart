@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\LayoutNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -24,10 +24,10 @@ final readonly class LayoutUpdated
     public function __construct(
         #[Input] string $layoutId,
         #[Input] string|null $layoutName,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] LayoutStorageInterface $layouts,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\OrderNumberGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -21,7 +21,7 @@ use function date;
  *   AdminCreateOrderInput → AdminOrderCreated  (Direct, unsafe)
  *
  * AUTHZ — admin firewall:
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess (403)
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess (403)
  *
  * Phase 2 scope (explicitly deferred):
  *   - PurchaseFlow recompute (tax / delivery / stock allocation)
@@ -30,7 +30,7 @@ use function date;
  *   - Cart linkage (preOrderId placeholder used here)
  *
  * The Final allocates an orderNo via the existing
- * {@see OrderNumberGeneratorInterface}, derives `total` /
+ * {@see OrderNoProvider}, derives `total` /
  * `paymentTotal` from the supplied money columns, fixes
  * `orderStatus = NEW(1)`, and persists via the existing
  * {@see OrderCommandInterface::register}. addPoint/usePoint default
@@ -60,15 +60,15 @@ final readonly class AdminOrderCreated
         #[Input] int $charge,
         #[Input] int $discount,
         #[Input] int $tax,
-        #[Inject] AdminSessionInterface $adminSession,
-        #[Inject] OrderNumberGeneratorInterface $orderNumberGenerator,
+        #[Inject] AdminSession $adminSession,
+        #[Inject] OrderNoProvider $orderNumbers,
         #[Inject] OrderCommandInterface $orderCommand,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
-        $orderNo = $orderNumberGenerator->generate();
+        $orderNo = $orderNumbers->get();
         $total = $subtotal + $deliveryFeeTotal + $charge + $tax - $discount;
         $orderDate = date('Y-m-d H:i:s');
 

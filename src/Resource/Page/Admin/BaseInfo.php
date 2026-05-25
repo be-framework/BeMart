@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\BaseInfoFetched;
 use MyVendor\BeMart\Be\Final\BaseInfoUpdated;
 use MyVendor\BeMart\Be\Input\GetBaseInfoInput;
 use MyVendor\BeMart\Be\Input\UpdateBaseInfoInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminShopMasterForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -46,7 +46,6 @@ class BaseInfo extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -124,9 +123,9 @@ class BaseInfo extends ResourceObject
      * @psalm-taint-source input $businessHour
      * @psalm-taint-source input $shopEmail01
      * @psalm-taint-source input $shopMessage
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTop', href: 'page://self/admin')]
+    #[CsrfProtected]
     public function onPost(
         string $shopName,
         string|null $shopKana = null,
@@ -140,15 +139,7 @@ class BaseInfo extends ResourceObject
         string|null $businessHour = null,
         string|null $shopEmail01 = null,
         string|null $shopMessage = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateBaseInfoInput(
                 shopName: $shopName,

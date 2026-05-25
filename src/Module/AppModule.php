@@ -10,8 +10,15 @@ use BEAR\Package\PackageModule;
 use Be\Framework\Module\BeModule;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistry;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
-use MyVendor\BeMart\Be\Reason\Service\ResetKeyGenerator;
-use MyVendor\BeMart\Be\Reason\Service\ResetKeyGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\NativePasswordHasher;
+use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
+use BEAR\Resource\InvokerInterface;
+use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
+use MyVendor\BeMart\Support\Resource\RequestQueryCapturingInvoker;
+use MyVendor\BeMart\Support\Resource\RequestQueryContext;
+use Ray\Di\Scope;
 use Ray\WebFormModule\FormFactory;
 
 /**
@@ -32,14 +39,20 @@ final class AppModule extends AbstractAppModule
         // `new Injector(new *Module(...))` without the factory.
         $this->override(new AppMetaModule($this->appMeta));
 
+        $this->bind(RequestQueryContext::class)->in(Scope::SINGLETON);
+        $this->bind(InvokerInterface::class)->to(RequestQueryCapturingInvoker::class);
+        $this->bindPriorityInterceptor(
+            $this->matcher->subclassesOf(ResourceObject::class),
+            $this->matcher->annotatedWith(CsrfProtected::class),
+            [CsrfProtectedInterceptor::class],
+        );
+
         // Be Framework: BecomingInterface, SemanticLogger, semantic validator,
         // Been provider. Dev/Test contexts override logging with DevLoggingModule;
         // prod keeps BeModule's plain Becoming/SemanticLogger bindings.
         $this->install(new BeModule('MyVendor\\BeMart\\Be\\Semantic'));
 
-        // The reset key is an unguessable one-time token — minted by a
-        // dedicated CSPRNG-backed generator, NOT a customer-id generator.
-        $this->bind(ResetKeyGeneratorInterface::class)->to(ResetKeyGenerator::class);
+        $this->bind(PasswordHasherInterface::class)->to(NativePasswordHasher::class);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -25,14 +25,14 @@ use function str_contains;
  * same AUTHN / AUTHZ / CSRF branches. The only differences are:
  *
  *  - the storage binding (PaymentMethodAdminStorageInterface →
- *    SqlPaymentMethodAdminStorage) and id generator
- *    (PaymentMethodAdminIdGeneratorInterface →
+ *    SqlPaymentMethodAdminStorage) and id query
+ *    (PaymentMethodAdminIdQueryInterface →
  *    direct MediaQuery payment id proxy) are layered via the base class's
  *    sqlOverrideModule; persistence is against the real dtb_payment
  *    table.
  *
  *  - paymentIds are numeric strings drawn from dtb_payment.id, not the
- *    32-char hex the FakePaymentMethodAdminIdGenerator emits. Both
+ *    32-char hex the FakePaymentMethodAdminIdProvider emits. Both
  *    suites assert "the response carries a paymentId" but only the SQL
  *    side observes a numeric handle. An unknown-id PUT folds to a 404
  *    on both backends (SqlPaymentMethodAdminStorage rejects a
@@ -72,7 +72,7 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

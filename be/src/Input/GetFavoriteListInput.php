@@ -12,7 +12,7 @@ use MyVendor\BeMart\Be\Final\FavoriteListFetched;
  * favorites list (the read pair for Pilot 13's doAddFavorite +
  * doRemoveFavorite).
  *
- * Direct pattern: Input → Final. The Final injects SessionInterface
+ * Direct pattern: Input → Final. The Final injects CustomerSession
  * to resolve the customerId (AUTHN) and the FavoriteStorageInterface
  * to load the rows.
  *

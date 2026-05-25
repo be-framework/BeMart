@@ -12,7 +12,7 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryItemEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryMailEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryShippingEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -89,10 +89,10 @@ final readonly class MypageHistoryFetched
 
     public function __construct(
         #[Input] string $orderNo,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] OrderHistoryQueryInterface $orderQuery,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

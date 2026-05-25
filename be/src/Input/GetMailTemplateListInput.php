@@ -19,7 +19,7 @@ use MyVendor\BeMart\Be\Final\MailTemplateListFetched;
  * notification templates (order-confirm, register-thanks, …), the admin
  * grid displays all of them.
  *
- * AUTHZ in the Final (AdminSessionInterface).
+ * AUTHZ in the Final (AdminSession).
  *
  * @link https://schema.org/SearchAction
  */

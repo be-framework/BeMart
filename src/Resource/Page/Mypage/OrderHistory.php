@@ -19,7 +19,7 @@ use function assert;
  * EC-CUBE goOrderHistory — 注文履歴一覧 (Mypage/OrderHistory).
  *
  * Safe read. No CSRF (read-only). AUTHN is enforced in the Be layer: the
- * customer's full order history is surfaced from {@see SessionInterface}'s
+ * customer's full order history is surfaced from {@see CustomerSession}'s
  * customerId, so request-parameter tampering cannot widen the scope to
  * another customer's orders.
  *

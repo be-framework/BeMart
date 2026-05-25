@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderPdfForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -32,7 +32,7 @@ use function assert;
 class OrderPdf extends ResourceObject
 {
     public function __construct(
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -44,7 +44,7 @@ class OrderPdf extends ResourceObject
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(string $orderNo = ''): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 

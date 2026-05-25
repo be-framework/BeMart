@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\AddressEntity;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Provider\AddressIdProvider;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -18,11 +18,11 @@ use Ray\InputQuery\Attribute\Input;
  *
  *   CreateCustomerAddressInput → CustomerAddressCreated  (Direct)
  *
- * AUTHN: customerId comes from SessionInterface. A null session
+ * AUTHN: customerId comes from CustomerSession. A null session
  * raises UnauthenticatedException — the BEAR layer maps this to 401.
  *
  * Server-derived fields (Pilot 5 F-2 + Pilot 8 lesson):
- *   - `addressId` is generated here via AddressIdGeneratorInterface
+ *   - `addressId` is generated here via AddressIdProvider
  *   - `customerId` is pulled from the session — the body never carries it
  *
  * Both shields close the mass-assignment hole: a malicious body that
@@ -55,16 +55,16 @@ final readonly class CustomerAddressCreated
         #[Input] string|null $kana01,
         #[Input] string|null $kana02,
         #[Input] string|null $companyName,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] AddressStorageInterface $addresses,
-        #[Inject] AddressIdGeneratorInterface $idGenerator,
+        #[Inject] AddressIdProvider $ids,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }
 
-        $addressId = $idGenerator->next()->value;
+        $addressId = $ids->get();
 
         $entity = new AddressEntity(
             addressId: $addressId,

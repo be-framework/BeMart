@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -60,7 +60,7 @@ final class AdminProductResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

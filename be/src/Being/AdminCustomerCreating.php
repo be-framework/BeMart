@@ -8,8 +8,8 @@ use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerCreated;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use Ray\Di\Di\Inject;
@@ -23,9 +23,9 @@ use SensitiveParameter;
  * {@see CustomerRegistering}, with the admin AUTHZ guard added as the
  * very first check:
  *
- *   0. AdminSessionInterface          — fail-fast if no admin session
+ *   0. AdminSession          — fail-fast if no admin session
  *   1. EmailUniquenessQueryInterface — fail-fast on duplicate email
- *   2. CustomerIdGeneratorInterface    — opaque 32-char hex id
+ *   2. CustomerIdProvider    — opaque 32-char hex id
  *   3. PasswordHasherInterface         — bcrypt hash of plaintext password
  *   4. CustomerInitialPointInterface   — registration bonus points
  *
@@ -71,13 +71,13 @@ final readonly class AdminCustomerCreating
         #[Input] public string|null $birth,
         #[Input] public int|null $sex,
         #[Input] public int|null $job,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] EmailUniquenessQueryInterface $uniquenessChecker,
-        #[Inject] CustomerIdGeneratorInterface $idGenerator,
+        #[Inject] CustomerIdProvider $ids,
         #[Inject] PasswordHasherInterface $passwordHasher,
         #[Inject] CustomerInitialPointInterface $initialPointService,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
@@ -85,7 +85,7 @@ final readonly class AdminCustomerCreating
         /** @psalm-suppress InvalidDocblock Psalm treats assert* methods as assertion helpers. */
         $uniqueness->assertUnique();
 
-        $this->customerId = $idGenerator->next()->value;
+        $this->customerId = $ids->get();
         $this->passwordHash = $passwordHasher->hash($password);
         $this->initialPoint = $initialPointService->initial();
         $this->customerStatus = 2;

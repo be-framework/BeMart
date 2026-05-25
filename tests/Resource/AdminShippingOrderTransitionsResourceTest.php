@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
@@ -55,7 +55,7 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -164,7 +164,7 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame(self::ORDER_NO, $ro->body['orderNo']);
         $this->assertSame(self::CUSTOMER_ID, $ro->body['customerId']);
-        $this->assertCount(1, $this->mailer->shippingNotifications());
+        $this->assertCount(1, $this->mailer->shippingNotifications);
     }
 
     public function testSendShippingNotifyMailIncludesTrackingNumber(): void
@@ -184,7 +184,7 @@ final class AdminShippingOrderTransitionsResourceTest extends TestCase
         $this->assertSame('TRK-SHIPPED', $ro->body['trackingNumber']);
         $this->assertSame(
             'TRK-SHIPPED',
-            $this->mailer->shippingNotifications()[0]['trackingNumber'],
+            $this->mailer->shippingNotifications[0]['trackingNumber'],
         );
     }
 

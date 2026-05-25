@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\BaseInfoEntity;
 use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -16,7 +16,7 @@ use Ray\InputQuery\Attribute\Input;
  *
  *   UpdateBaseInfoInput → BaseInfoUpdated (Direct, idempotent)
  *
- * AUTHZ — admin firewall: AdminSession::adminId() === null →
+ * AUTHZ — admin firewall: AdminSession::$adminId === null →
  * UnauthorizedAdminAccessException (403).
  *
  * dtb_base_info is a single-row table; the update is a wholesale
@@ -57,10 +57,10 @@ final readonly class BaseInfoUpdated
         #[Input] string|null $businessHour,
         #[Input] string|null $shopEmail01,
         #[Input] string|null $shopMessage,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] BaseInfoStorageInterface $baseInfoStorage,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

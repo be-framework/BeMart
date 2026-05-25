@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\ClassNameIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -25,16 +25,16 @@ final readonly class ClassNameCreated
 
     public function __construct(
         #[Input] string $classNameLabel,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] ClassNameStorageInterface $classNames,
-        #[Inject] ClassNameIdGeneratorInterface $idGenerator,
+        #[Inject] ClassNameIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $entity = new ClassNameEntity(
-            classNameId: $idGenerator->next()->value,
+            classNameId: $ids->get(),
             name: $classNameLabel,
         );
 

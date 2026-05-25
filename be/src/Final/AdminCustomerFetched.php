@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -97,14 +97,14 @@ final readonly class AdminCustomerFetched
     public function __construct(
         #[Input] string $selector,
         #[Input] string $selectorType,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] OrderQueryInterface $orderQuery,
         #[Inject] FavoriteStorageInterface $favorites,
     ) {
         // AUTHZ cross-firewall first — refuse non-admin requests before
         // probing existence (no enumeration via 404 vs 403 distinction).
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

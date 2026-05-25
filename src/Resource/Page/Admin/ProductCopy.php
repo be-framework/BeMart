@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminProductCopied;
 use MyVendor\BeMart\Be\Input\AdminCopyProductInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -33,29 +33,20 @@ class ProductCopy extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     /**
      * @psalm-taint-source input $productCode
      * @psalm-taint-source input $newProductCode
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goProduct', href: 'page://self/admin/product', method: 'get')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    #[CsrfProtected]
     public function onPost(
         string $productCode,
         string $newProductCode,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AdminCopyProductInput(
                 productCode: $productCode,

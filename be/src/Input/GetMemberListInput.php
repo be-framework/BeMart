@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Final\MemberListFetched;
  *   GetMemberListInput → MemberListFetched (Final — Direct, safe read)
  *
  * Admin-only endpoint. AUTHN/AUTHZ live in the Final via the Wave 4
- * AdminSessionInterface — a null admin session raises
+ * AdminSession — a null admin session raises
  * UnauthorizedAdminAccessException, which the BEAR layer maps to 403.
  *
  * Filter scope (Wave 8 first iteration):

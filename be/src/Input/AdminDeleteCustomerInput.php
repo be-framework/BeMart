@@ -12,7 +12,7 @@ use MyVendor\BeMart\Be\Final\AdminCustomerDeleted;
  * (management screen).
  *
  * Direct pattern (hello-world demo): Input → Final, no intermediate
- * Being. The Final injects AdminSessionInterface to refuse non-admin
+ * Being. The Final injects AdminSession to refuse non-admin
  * requests (Wave 4 cross-firewall AUTHZ) and then performs the
  * EC-CUBE soft-delete:
  *
@@ -21,11 +21,11 @@ use MyVendor\BeMart\Be\Final\AdminCustomerDeleted;
  * AUTHZ design — different shape from Pilot doWithdrawCustomer (Wave 2G):
  *
  *   - Wave 2G {@see WithdrawCustomerInput} pulls customerId from
- *     SessionInterface (customer self-withdraws, ANY customerId in the
+ *     CustomerSession (customer self-withdraws, ANY customerId in the
  *     body is refused via mass-assignment safety — F-2 lesson).
  *   - This admin variant pulls the TARGET customerId from the request
  *     body (the admin picks which customer to delete) AND pulls the
- *     authorising adminId from AdminSessionInterface. The Be Framework
+ *     authorising adminId from AdminSession. The Be Framework
  *     G-17 rule (Pilot 10) forbids reusing CustomerWithdrawn for this
  *     differently-shaped chain — different intent ⇒ different Final.
  *

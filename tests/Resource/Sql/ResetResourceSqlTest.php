@@ -46,15 +46,15 @@ use function is_string;
  *  - mtb_customer_status (FK target of customer_status_id) is empty in
  *    the structure-only dump — seeded in setUp.
  *
- *  - the reset KEY comes from the dedicated {@see \MyVendor\BeMart\Be\Reason\Service\ResetKeyGeneratorInterface}
- *    (CSPRNG-backed, 32-char hex), NOT from the customer-id generator —
- *    so this suite needs no generator rebind. Earlier the forgot-password
+ *  - the reset KEY comes from the dedicated {@see \MyVendor\BeMart\Be\Reason\Provider\ResetKeyProvider}
+ *    (CSPRNG-backed, 32-char hex), NOT from the customer-id provider —
+ *    so this suite needs no provider rebind. Earlier the forgot-password
  *    issuer {@see \MyVendor\BeMart\Be\Final\PasswordResetRequested} reused
- *    CustomerIdGeneratorInterface to mint the key; under SQL the
+ *    CustomerIdProvider to mint the key; under SQL the
  *    `direct MediaQuery customer id proxy` `MAX(id)+1` output is a 1-2 digit string,
  *    far short of the ResetKey semantic floor of 16 chars, so the reset
- *    endpoint 400'd. The fix split the concern into its own generator;
- *    whichever customer-id generator is bound is now irrelevant to reset.
+ *    endpoint 400'd. The fix split the concern into its own provider;
+ *    whichever customer-id provider is bound is now irrelevant to reset.
  *
  * Why mirror exactly: per G-23 the Resource-layer contract MUST stay
  * green for both Fake and SQL backings — Fake green AND SQL green =

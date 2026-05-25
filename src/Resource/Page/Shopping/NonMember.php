@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -11,7 +12,6 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Final\NonMemberSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitNonMemberInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\NonMemberForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -53,7 +53,6 @@ class NonMember extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -121,9 +120,9 @@ class NonMember extends ResourceObject
      * @psalm-taint-source input $pref
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
+    #[CsrfProtected]
     public function onPost(
         string $name01,
         string $name02,
@@ -135,15 +134,7 @@ class NonMember extends ResourceObject
         int $pref,
         string $addr01,
         string $addr02,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new SubmitNonMemberInput(
                 name01: $name01,

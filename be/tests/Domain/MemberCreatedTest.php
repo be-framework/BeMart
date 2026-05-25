@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MemberCreated;
 use MyVendor\BeMart\Be\Input\CreateMemberInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -43,7 +43,7 @@ final class MemberCreatedTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);

@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\BlockEntity;
 use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\BlockIdQueryInterface;
 
 use function date;
 
@@ -92,7 +92,7 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
-        // The Fake seed `bk-header` and hex ids from FakeBlockIdGenerator
+        // The Fake seed `bk-header` and hex ids from FakeBlockIdProvider
         // can never match an int PK; surface as miss so BlockDeleted /
         // BlockUpdated fire their 404 paths instead of a PDO error.
         $storage = $this->sql(BlockStorageInterface::class);
@@ -103,8 +103,8 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(BlockIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(BlockIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new BlockEntity(
             blockId: $newId,
@@ -134,8 +134,8 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         // System blocks (blockDeletable=false) round-trip the same as
         // user blocks — only BlockDeleted enforces the guard, not the
         // storage.
-        $generator = $this->sql(BlockIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(BlockIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(BlockStorageInterface::class);
 
         $storage->put(new BlockEntity(
@@ -284,16 +284,16 @@ final class SqlBlockStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testBlockIdGeneratorAllocatesIncrementingIds(): void
+    public function testBlockIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(BlockIdGeneratorInterface::class);
+        $ids = $this->sql(BlockIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertBlock();
         $secondId = $this->insertBlock();
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

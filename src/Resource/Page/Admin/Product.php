@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -20,7 +21,7 @@ use MyVendor\BeMart\Be\Input\AdminCreateProductInput;
 use MyVendor\BeMart\Be\Input\AdminDeleteProductInput;
 use MyVendor\BeMart\Be\Input\AdminUpdateProductInput;
 use MyVendor\BeMart\Be\Input\GetAdminProductInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 
 use function assert;
 use function sprintf;
@@ -51,7 +52,7 @@ class Product extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -101,7 +102,7 @@ class Product extends ResourceObject
             'categoryNames' => $final->categoryNames,
             'tagNames' => $final->tagNames,
             'classNames' => $final->classNames,
-            'csrfToken' => $this->csrf->getToken(),
+            'csrfToken' => $this->csrf->token,
             'productStatusOptions' => [
                 1 => '公開',
                 2 => '非公開',
@@ -123,8 +124,8 @@ class Product extends ResourceObject
      * @psalm-taint-source input $description
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
-     * @psalm-taint-source input $csrfToken
      */
+    #[CsrfProtected]
     public function onPost(
         string $productCode,
         string $productName,
@@ -134,15 +135,7 @@ class Product extends ResourceObject
         string|null $description = null,
         string|null $searchWord = null,
         string|null $note = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AdminCreateProductInput(
                 productCode: $productCode,
@@ -203,8 +196,8 @@ class Product extends ResourceObject
      * @psalm-taint-source input $description
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
-     * @psalm-taint-source input $csrfToken
      */
+    #[CsrfProtected]
     public function onPut(
         string $productCode,
         string|null $productName = null,
@@ -214,15 +207,7 @@ class Product extends ResourceObject
         string|null $description = null,
         string|null $searchWord = null,
         string|null $note = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AdminUpdateProductInput(
                 productCode: $productCode,
@@ -272,19 +257,11 @@ class Product extends ResourceObject
      * surfaces `alreadyDeleted=true`.
      *
      * @psalm-taint-source input $productCode
-     * @psalm-taint-source input $csrfToken
      */
+    #[CsrfProtected]
     public function onDelete(
         string $productCode,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AdminDeleteProductInput(productCode: $productCode));
         } catch (SemanticVariableException $e) {

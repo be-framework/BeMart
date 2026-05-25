@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -35,9 +35,9 @@ final readonly class CategoryCsvImported
 
     public function __construct(
         #[Input] string $csv,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

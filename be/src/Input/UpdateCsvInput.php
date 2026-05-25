@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Final\CsvConfigUpdated;
  * does a per-type atomic replace so the table cannot drift into a
  * mixed-old-and-new row set.
  *
- * AUTHZ in the Final (AdminSessionInterface).
+ * AUTHZ in the Final (AdminSession).
  *
  * Wave 9 first iteration scope:
  *   - persists the configuration round-trip (the storage holds it,

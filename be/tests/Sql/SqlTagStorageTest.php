@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\TagEntity;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\TagIdQueryInterface;
 
 /**
  * Storage-layer coverage for {@see TagStorageInterface} (Phase 2b).
@@ -65,7 +65,7 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
         // Fake-shaped seeds (`tg-new`, `tg-sale`) and hex ids from
-        // FakeTagIdGenerator can never match an int PK; surface as
+        // FakeTagIdProvider can never match an int PK; surface as
         // miss so TagDeleted's 404 path fires instead of a PDO error.
         $storage = $this->sql(TagStorageInterface::class);
         $this->assertNull($storage->item('tg-new'));
@@ -74,8 +74,8 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(TagIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(TagIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new TagEntity(tagId: $newId, tagName: '限定');
 
@@ -95,8 +95,8 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
 
     public function testPutSetsSortNoToZeroOnInsert(): void
     {
-        $generator = $this->sql(TagIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(TagIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(TagStorageInterface::class);
 
         $storage->put(new TagEntity(tagId: $newId, tagName: 'X'));
@@ -191,16 +191,16 @@ final class SqlTagStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testTagIdGeneratorAllocatesIncrementingIds(): void
+    public function testTagIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(TagIdGeneratorInterface::class);
+        $ids = $this->sql(TagIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertTag();
         $secondId = $this->insertTag();
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

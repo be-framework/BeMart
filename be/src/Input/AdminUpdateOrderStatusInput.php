@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderStatusUpdated;
  *                                                          idempotent)
  *
  * AUTHZ — cross-firewall (Wave 4 lesson): the Final pulls the adminId
- * from {@see \MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface}.
+ * from {@see \MyVendor\BeMart\Be\Reason\Service\AdminSession}.
  * No admin session → 403. Unknown orderNo → 404.
  *
  * `orderStatus` is bounded by the {@see \MyVendor\BeMart\Be\Semantic\OrderStatus}

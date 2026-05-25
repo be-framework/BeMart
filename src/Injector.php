@@ -6,7 +6,7 @@ namespace MyVendor\BeMart;
 
 use BEAR\AppMeta\Meta;
 use MyVendor\BeMart\Module\DevFakeHalApiModule;
-use MyVendor\BeMart\Module\FakeHalApiModule;
+use MyVendor\BeMart\Module\FakeModule;
 use MyVendor\BeMart\Module\HalApiModule;
 use MyVendor\BeMart\Module\HtmlHalModule;
 use MyVendor\BeMart\Module\HtmlProdModule;
@@ -40,7 +40,7 @@ final class Injector
     {
         return match ($context) {
             'hal-api-app', 'cli-hal-api-app' => new HalApiModule($meta),
-            'fake-hal-api-app', 'cli-fake-hal-api-app' => new FakeHalApiModule($meta),
+            'fake-hal-api-app', 'cli-fake-hal-api-app' => new FakeModule($meta),
             'dev-fake-hal-api-app', 'cli-dev-fake-hal-api-app' => new DevFakeHalApiModule($meta),
             'test-hal-api-app', 'cli-test-hal-api-app' => new TestModule($meta),
             'html-hal-app', 'cli-html-hal-app' => new HtmlHalModule($meta),

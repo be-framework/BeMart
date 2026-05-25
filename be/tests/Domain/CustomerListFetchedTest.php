@@ -9,7 +9,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\CustomerListFetched;
 use MyVendor\BeMart\Be\Input\GetCustomerListInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -42,7 +42,7 @@ final class CustomerListFetchedTest extends TestCase
     /**
      * Build a Becoming with the given admin session adminId (null =
      * admin-anonymous). Mirrors the customer-side `rebindSession`
-     * helper but rebinds AdminSessionInterface — Wave 4 decision:
+     * helper but rebinds AdminSession — Wave 4 decision:
      * admin and customer are parallel firewalls.
      */
     private function rebindAdminSession(string|null $adminId): void
@@ -57,7 +57,7 @@ final class CustomerListFetchedTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);

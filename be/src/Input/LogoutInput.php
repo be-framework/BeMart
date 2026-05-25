@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Final\LoggedOut;
  * Input for doLogout — front-end customer logout.
  *
  * Direct pattern (hello-world demo): Input → Final, no intermediate
- * Being. The Final consults SessionInterface to capture who (if anyone)
+ * Being. The Final consults CustomerSession to capture who (if anyone)
  * was logged in and emits a proof that the logout request was processed.
  *
  *   LogoutInput → LoggedOut (Final — logout processed)
