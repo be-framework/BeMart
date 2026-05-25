@@ -1,0 +1,52 @@
+{#
+  BeMart admin Log display — EC-CUBE Setting/System/log.twig.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_system_log' %}
+{% set title = 'ログ表示' %}
+{% set sub_title = 'システム設定' %}
+
+{% block main %}
+    <div class="c-outsideBlock">
+        <div class="c-outsideBlock__contents">
+            <div class="card rounded border-0 mb-4">
+                <div class="card-header">
+                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="アクセスやエラー状況などのログを確認できます。">
+                        <span class="card-title">ログ表示</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form name="form1" id="form1" method="post">
+                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                        <div class="row mb-3">
+                            <div class="mb-3 pe-3 col-2">
+                                {{ form.input('files')|raw }}
+                            </div>
+                            <div class="row mb-3 pe-3 col-auto align-items-center">
+                                <span class="col-auto">{{ form.input('line_max')|raw }}</span>
+                                <span class="col-auto ps-0">行</span>
+                            </div>
+                            <div class="mb-3 pe-3 col-auto">
+                                <button type="submit" class="btn btn-ec-conversion">読み込む</button>
+                            </div>
+                            <div class="mb-3 pe-3 col-auto">
+                                <button type="submit" name="download" class="btn btn-ec-regular">ダウンロード</button>
+                            </div>
+                            {% if form.error('line_max') %}
+                                <span class="col-auto">{{ form.error('line_max') }}</span>
+                            {% endif %}
+                        </div>
+                    </form>
+                    <div>
+<textarea class="form-control" rows="20" wrap="off" readonly>
+{% for line in log %}
+    {{ line }}
+{% endfor %}
+</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

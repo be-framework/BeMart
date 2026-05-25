@@ -106,11 +106,18 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
     }
 
     /**
-     * The EC-CUBE 4.3 messages.ja.yaml values the storefront template
+     * The EC-CUBE 4.3 messages.ja.yaml values the STOREFRONT template
      * ports substitute for `{{ '...'|trans }}`. Only the keys the ported
-     * pages (Cart / Top / ProductList / Login / Entry / Contact) and
-     * default_frame.twig actually use are listed — the values are copied
-     * verbatim from src/Eccube/Resource/locale/messages.ja.yaml.
+     * storefront pages (Cart / Top / ProductList / Login / Entry /
+     * Contact / Mypage / ...) and the default-theme `default_frame.twig`
+     * use are listed — values copied verbatim from
+     * src/Eccube/Resource/locale/messages.ja.yaml.
+     *
+     * This method is the FROZEN storefront baseline: the admin
+     * section-waves do NOT append here. Admin `trans` keys live in the
+     * per-section files under `tests/Resource/Admin/` and are merged via
+     * {@see \MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages::forSection()}
+     * — keeping this shared file conflict-free for parallel admin waves.
      *
      * @return array<string, string>
      */
@@ -138,6 +145,15 @@ final class EcCubeStub implements ArrayAccess, IteratorAggregate, Countable
             'common.subtotal__with_separator' => '小計：',
             'common.total__with_separator' => '合計：',
             'common.pagetop' => 'ページトップへ',
+            // --- Block/*.twig storefront layout widgets -----------------
+            // The default EC-CUBE layout wires the static `footer` widget
+            // into the frame's FOOTER region; BeMart ports it directly
+            // (var/templates/Block/footer.html.twig). Keys copied verbatim
+            // from messages.ja.yaml.
+            'front.block.footer.about_us' => '当サイトについて',
+            'front.block.footer.privacy_policy' => 'プライバシーポリシー',
+            'front.block.footer.act_on_specified_commercial_transactions' => '特定商取引法に基づく表記',
+            'front.block.footer.inquiry' => 'お問い合わせ',
             // --- common.* (Login / Entry / Contact / ProductList) -------
             'common.login' => 'ログイン',
             'common.remember_me' => '次回から自動的にログインする',

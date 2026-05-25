@@ -14,16 +14,26 @@
    - `{{ '...'|trans }}`  -> Japanese literal the key resolves to in
      messages.ja.yaml. BeMart has no translation layer; substituting the
      literal is the lower-noise option (no Twig extension to register).
-   - `asset('x')`         -> `/x` passthrough. BeMart has no asset-hash
-     pipeline; the path is kept so the <link>/<script> markup survives.
+   - `asset('x'[, pkg])`  -> static URL. BeMart has no asset-hash
+     pipeline; BeMartTwigExtension::asset() ports EC-CUBE's asset PACKAGE
+     map (default theme -> `/`, `admin` -> `/template/admin/`, `bundle` ->
+     `/bundle/`) so the <link>/<script> markup keeps real, resolvable
+     hrefs against the deployed `public/` tree.
    - `app.*`, `is_granted()`, `csrf_token()` — EC-CUBE runtime only.
      The CSRF <meta> and the `body id="page_{route}"` are rendered with
      stable BeMart-side values; enumerated as residual in the diff test.
    - `Layout.*` block regions (Header/Footer/SideLeft/...) — EC-CUBE's
-     configurable layout blocks. A default EC-CUBE install renders header
-     /footer block content here; BeMart has no block system, so the
-     `<header>`/`<footer>` wrappers are kept but left empty. Enumerated
-     as residual.
+     configurable layout blocks. A default EC-CUBE install wires a fixed
+     set of Block widgets into the HEADER / FOOTER / DRAWER regions
+     (dtb_block_position.csv). BeMart has no operator-configurable block
+     system, but the widgets that render PURELY STATIC markup (logo,
+     footer) are ported as Twig partials under var/templates/Block/ and
+     included directly here. The widgets that need un-modelled domain
+     data (cart contents, category tree, auth state) — header / cart /
+     login / category_nav / search_product — are NOT ported: ALPS does
+     not model Block, and the storefront frame carries no data channel
+     to source them. Those regions stay empty and are enumerated as
+     residual. See var/templates/Block/ and var/templates/README.md.
 #}
 <!doctype html>
 <html lang="ja">
@@ -35,14 +45,18 @@
     <link rel="icon" href="{{ asset('assets/img/common/favicon.ico') }}">
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.2/css/all.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-    <script src="{{ asset('front.bundle.js') }}"></script>
+    <script src="{{ asset('front.bundle.js', 'bundle') }}"></script>
     {% block stylesheet %}{% endblock %}
     <link rel="stylesheet" href="{{ asset('assets/css/customize.css') }}">
 </head>
 <body id="page_{{ route|default('homepage') }}" class="{{ body_class|default('other_page') }}">
 
 <div class="ec-layoutRole">
+    {# Layout: HEADER — default EC-CUBE wires header / logo / category_nav_pc
+       here; only the static `logo` widget is ported (the others need
+       un-modelled data). #}
     <header class="ec-layoutRole__header">
+        {{ include('Block/logo.html.twig') }}
     </header>
 
     <div class="ec-layoutRole__contents">
@@ -56,7 +70,10 @@
 
     </div>
 
+    {# Layout: FOOTER — default EC-CUBE wires the static `footer` widget
+       here; ported directly as a Twig partial. #}
     <footer class="ec-layoutRole__footer">
+        {{ include('Block/footer.html.twig') }}
     </footer>
 </div><!-- ec-layoutRole -->
 

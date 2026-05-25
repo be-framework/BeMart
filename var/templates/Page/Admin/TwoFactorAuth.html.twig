@@ -1,0 +1,81 @@
+{#
+  BeMart admin 2段階認証 (challenge) — EC-CUBE admin two_factor_auth.
+
+  PORT of EC-CUBE 4.3 admin-theme `two_factor_auth.twig`
+  (src/Eccube/Resource/template/admin/two_factor_auth.twig).
+
+  This is a top-level wave login-context FORM page. It extends the admin
+  LOGIN frame (`admin-login-base.html.twig`, the port of EC-CUBE's
+  `login_frame.twig`) — EC-CUBE's `two_factor_auth.twig` likewise
+  `{% extends '@admin/login_frame.twig' %}`. The markup skeleton +
+  Bootstrap classes are kept verbatim; only the dynamic bindings are
+  rebound to the TwoFactorAuth resource body
+  (src/Resource/Page/Admin/TwoFactorAuth.php).
+
+  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
+  the resource exposes an
+  {@see \MyVendor\BeMart\Form\AdminTwoFactorAuthForm} as `body['form']`.
+  The token input renders through that real form object:
+
+    {{ form.input('device_token')|raw }}
+
+  EC-CUBE renders the same input through the Symfony FormView
+  (`form_widget(form.device_token)`); Ray.WebFormModule is BeMart's
+  BEAR-idiomatic equivalent.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `path('admin_two_factor_auth')` -> deterministic `/{route}`.
+   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
+     hidden `_token` input is kept (structure) with an empty value;
+     EC-CUBE-runtime only — enumerated as residual.
+   - `{% if error %}` -> EC-CUBE's auth-error string. The thin-renderer
+     resource surfaces a domain rejection through `body.message` (none
+     for a pristine GET); rendered in the same `text-danger` block.
+   - `form_errors(form.device_token)` -> inline field error; renders
+     nothing for the pristine form, exactly as EC-CUBE.
+   - `"now"|date("Y")` -> the current year, inlined as a literal.
+#}
+{% extends 'admin-login-base.html.twig' %}
+
+{% set title = '2段階認証' %}
+
+{% block main %}
+
+    <div class="container" style="margin-top: 150px;">
+        <div class="row">
+            <div class="col-12 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
+                <div class="text-center p-5 bg-white">
+                    <form name="form1" id="form1" method="post" action="{{ url('admin_two_factor_auth') }}">
+                        <input type="hidden" id="admin_two_factor_auth__token" name="_token" value="{{ csrfToken|default('') }}">
+                        <p><img src="{{ asset('assets/img/logo2.png', 'admin') }}" width="106"></p>
+                        <h5 class="mb-3">2段階認証</h5>
+
+                        {% if message is defined and message %}
+                            <div class="text-danger mb-3 text-start small">{{ message }}</div>
+                        {% endif %}
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="mb-3 d-flex justify-content-center">
+                                    {{ form.input('device_token')|raw }}
+                                </div>
+                                {% if form.error('device_token') %}<span class="invalid-feedback d-block">{{ form.error('device_token') }}</span>{% endif %}
+                            </div>
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-primary w-100">認証</button>
+                            </div>
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+            <div class="col-12">
+                <p class="text-center mt-3">
+                    <small>Copyright &copy; 2000-2026 EC-CUBE CO.,LTD. All Rights Reserved.</small>
+                </p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

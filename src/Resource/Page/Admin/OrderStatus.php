@@ -13,7 +13,10 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderStatusUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderStatusInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminOrderStatusForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -55,7 +58,37 @@ class OrderStatus extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * EC-CUBE 受注対応状況設定 — Setting/Shop Tier-2.
+     *
+     * Thin GET renderer for `Setting/Shop/order_status.twig`. BeMart
+     * has a per-order status-change transition on POST, but not yet a
+     * master-data transition for editing status labels/colors.
+     */
+    public function onGet(): static
+    {
+        if ($this->adminSession->adminId() === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        $form = $this->formFactory->newInstance(AdminOrderStatusForm::class);
+        assert($form instanceof AdminOrderStatusForm);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'form' => $form,
+            'orderStatuses' => AdminOrderStatusForm::rows(),
+        ];
+
+        return $this;
     }
 
     /**

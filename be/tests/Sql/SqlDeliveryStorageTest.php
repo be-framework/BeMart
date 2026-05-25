@@ -233,6 +233,46 @@ final class SqlDeliveryStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
+    public function testReorderRewritesSortNo(): void
+    {
+        $id = $this->insertDelivery(['sort_no' => 4]);
+        $storage = new SqlDeliveryStorage($this->pdo);
+
+        $storage->reorder((string) $id, 31);
+
+        $stmt = $this->pdo->prepare('SELECT sort_no FROM dtb_delivery WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        $this->assertNotFalse($row);
+        $this->assertSame(31, (int) $row['sort_no']);
+    }
+
+    public function testSetVisibleRewritesVisibleColumnAndIsReadBack(): void
+    {
+        $id = $this->insertDelivery(['visible' => 1]);
+        $storage = new SqlDeliveryStorage($this->pdo);
+
+        $storage->setVisible((string) $id, false);
+
+        // `visible` IS part of the DeliveryEntity projection.
+        $entity = $storage->getById((string) $id);
+        $this->assertInstanceOf(DeliveryEntity::class, $entity);
+        $this->assertFalse($entity->visible);
+
+        $storage->setVisible((string) $id, true);
+        $back = $storage->getById((string) $id);
+        $this->assertInstanceOf(DeliveryEntity::class, $back);
+        $this->assertTrue($back->visible);
+    }
+
+    public function testReorderAndSetVisibleAreSilentNoOpForNonNumericId(): void
+    {
+        $storage = new SqlDeliveryStorage($this->pdo);
+        $storage->reorder('deadbeefdeadbeefdeadbeefdeadbeef', 5);
+        $storage->setVisible('deadbeefdeadbeefdeadbeefdeadbeef', false);
+        $this->assertTrue(true);
+    }
+
     public function testSqlDeliveryIdGeneratorAllocatesIncrementingIds(): void
     {
         $generator = new SqlDeliveryIdGenerator($this->pdo);

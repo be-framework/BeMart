@@ -14,9 +14,15 @@ use MyVendor\BeMart\Be\Final\TradeLawFetched;
 use MyVendor\BeMart\Be\Final\TradeLawUpdated;
 use MyVendor\BeMart\Be\Input\GetTradeLawInput;
 use MyVendor\BeMart\Be\Input\UpdateTradeLawInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminTradeLawForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
+use function count;
+use function explode;
+use function trim;
 
 /**
  * EC-CUBE doUpdateTradeLaw + goTradeLawList — 特定商取引法 (Wave 8 + Wave 9).
@@ -37,6 +43,8 @@ class TradeLaw extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -46,6 +54,13 @@ class TradeLaw extends ResourceObject
     #[Link(rel: 'doUpdateTradeLaw', href: 'page://self/admin/trade-law', method: 'post')]
     public function onGet(): static
     {
+        if ($this->adminSession->adminId() === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
         try {
             $final = ($this->becoming)(new GetTradeLawInput());
         } catch (UnauthorizedAdminAccessException) {
@@ -57,12 +72,55 @@ class TradeLaw extends ResourceObject
 
         assert($final instanceof TradeLawFetched);
 
+        $rows = $this->tradeLawRows($final->tradeLawBody);
+        $form = $this->formFactory->newInstance(AdminTradeLawForm::class);
+        assert($form instanceof AdminTradeLawForm);
+        $form->fillRows($rows);
+
         $this->code = Code::OK;
         $this->body = [
+            'form' => $form,
+            'tradeLawRows' => $rows,
             'tradeLawBody' => $final->tradeLawBody,
         ];
 
         return $this;
+    }
+
+    /**
+     * @return list<array{id: int, name: string, description: string, displayOrderScreen: bool, nameKey: string, descriptionKey: string, displayOrderScreenKey: string}>
+     */
+    private function tradeLawRows(string $body): array
+    {
+        $rows = [];
+        $index = 1;
+        foreach (explode("\n", $body) as $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+
+            $name = '項目' . $index;
+            $description = $line;
+            $parts = explode(': ', $line, 2);
+            if (count($parts) === 2) {
+                [$name, $description] = $parts;
+            }
+
+            $keys = AdminTradeLawForm::fieldKeys($index);
+            $rows[] = [
+                'id' => $index,
+                'name' => $name,
+                'description' => $description,
+                'displayOrderScreen' => true,
+                'nameKey' => $keys['nameKey'],
+                'descriptionKey' => $keys['descriptionKey'],
+                'displayOrderScreenKey' => $keys['displayOrderScreenKey'],
+            ];
+            $index++;
+        }
+
+        return $rows;
     }
 
     /**

@@ -15,6 +15,8 @@ use MyVendor\BeMart\Be\Final\BaseInfoUpdated;
 use MyVendor\BeMart\Be\Input\GetBaseInfoInput;
 use MyVendor\BeMart\Be\Input\UpdateBaseInfoInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminShopMasterForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -45,11 +47,16 @@ class BaseInfo extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
     /**
      * Wave 9ι: goBaseInfo — admin views the shop base info form data.
+     *
+     * Setting/Shop Tier-2 also renders `shop_master.twig` from this body;
+     * the `form` key carries an {@see AdminShopMasterForm} pre-filled
+     * with the dtb_base_info row for the HTML editor.
      */
     #[Link(rel: 'doUpdateBaseInfo', href: 'page://self/admin/base-info', method: 'post')]
     public function onGet(): static
@@ -65,8 +72,26 @@ class BaseInfo extends ResourceObject
 
         assert($final instanceof BaseInfoFetched);
 
+        $form = $this->formFactory->newInstance(AdminShopMasterForm::class);
+        assert($form instanceof AdminShopMasterForm);
+        $form->fillValues([
+            'shop_name' => $final->shopName,
+            'shop_kana' => $final->shopKana,
+            'shop_name_eng' => $final->shopNameEng,
+            'company_name' => $final->companyName,
+            'postal_code' => $final->postalCode,
+            'pref' => $final->pref,
+            'addr01' => $final->addr01,
+            'addr02' => $final->addr02,
+            'phone_number' => $final->phoneNumber,
+            'business_hour' => $final->businessHour,
+            'email01' => $final->shopEmail01,
+            'shop_message' => $final->shopMessage,
+        ]);
+
         $this->code = Code::OK;
         $this->body = [
+            'form' => $form,
             'shopName' => $final->shopName,
             'shopKana' => $final->shopKana,
             'shopNameEng' => $final->shopNameEng,

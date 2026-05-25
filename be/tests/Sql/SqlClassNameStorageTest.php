@@ -258,6 +258,27 @@ final class SqlClassNameStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
+    public function testReorderRewritesSortNo(): void
+    {
+        $id = $this->insertClassName(['name' => 'Color', 'sort_no' => 2]);
+        $storage = new SqlClassNameStorage($this->pdo);
+
+        $storage->reorder((string) $id, 42);
+
+        $stmt = $this->pdo->prepare('SELECT sort_no FROM dtb_class_name WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        $this->assertNotFalse($row);
+        $this->assertSame(42, (int) $row['sort_no']);
+    }
+
+    public function testReorderIsSilentNoOpForNonNumericId(): void
+    {
+        $storage = new SqlClassNameStorage($this->pdo);
+        $storage->reorder('nonexistent-zzz', 5); // non-numeric, no exception
+        $this->assertTrue(true);
+    }
+
     public function testSqlClassNameIdGeneratorAllocatesIncrementingIds(): void
     {
         $generator = new SqlClassNameIdGenerator($this->pdo);

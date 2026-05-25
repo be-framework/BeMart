@@ -1,0 +1,299 @@
+{#
+  BeMart admin Page edit — EC-CUBE goPage (ページ登録/編集).
+
+  PORT of EC-CUBE 4.3 admin-theme `Content/page_edit.twig`
+  (src/Eccube/Resource/template/admin/Content/page_edit.twig).
+
+  FORM/CRUD page. Extends the admin frame (`admin-base.html.twig`). The
+  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
+  from EC-CUBE; only the dynamic bindings are rebound.
+
+  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
+  Page resource (src/Resource/Page/Admin/Page/Page.php) exposes an
+  {@see \MyVendor\BeMart\Form\AdminPageForm} as `body['form']`, pre-filled
+  with the persisted row. The inputs render through that real form object:
+    {{ form.input('name')|raw }}      <- real <input> w/ id/attrs/value
+    {{ form.error('name') }}          <- inline Be-domain error, if any
+  `AdminPageForm::init()` ports the field names / ids from EC-CUBE's
+  `MainEditType` (block prefix `main_edit`).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
+     hidden `_token` input is kept (structure) with an empty value;
+     EC-CUBE-runtime only — enumerated as residual.
+   - `is_user_data_page` -> the seed page is a SYSTEM page (pageEditType
+     2 = EDIT_TYPE_DEFAULT), so the `{% else %}` (non-user-data) branch
+     is rendered: the URL / file-name show as a static label + hidden
+     input. The user-data-page branch is dropped.
+   - `is_confirm_page` -> false; the layout-設定 + meta-設定 cards render.
+   - `form_widget(form.PcLayout)` / `form_widget(form.SpLayout)` -> the
+     PC / Mobile layout selects. The AdminPageFetched projection carries
+     no page->layout join (out of the Wave 9 CMS slice), so the
+     AdminPageForm declares no PcLayout/SpLayout fields and those select
+     cells render empty. Enumerated as residual — MISSING-BODY-FIELD:
+     `Page.PcLayout` / `Page.SpLayout`.
+   - the ACE editor `tpl_data` source + the meta fields — the free-page
+     template body + page meta were out of the Wave 9 CMS slice, so the
+     editor + meta inputs render empty (the AdminPageForm fields have no
+     persisted value). The markup shells are kept.
+   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
+     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_content_page_edit' %}
+{% set title = 'ページ管理' %}
+{% set sub_title = 'コンテンツ管理' %}
+
+{% block stylesheet %}
+    <style>
+        .ui-resizable-se {
+            right: -3px;
+            bottom: -3px;
+        }
+    </style>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        ace.require('ace/ext/language_tools');
+        var editor = ace.edit('editor');
+        editor.session.setMode('ace/mode/twig');
+        editor.setTheme('ace/theme/tomorrow');
+        editor.setValue('{{ pageTplData|default('')|escape('js') }}');
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableSnippets: true,
+            enableLiveAutocompletion: true,
+            showInvisibles: true
+        });
+
+        $("#editor").resizable({
+            resize: function (event, ui) {
+                editor.resize();
+            }
+        });
+
+        $('#content_page_form').on('submit', function(elem) {
+            $('#main_edit_tpl_data').val(editor.getValue());
+        });
+    </script>
+{% endblock %}
+
+{% block main %}
+    <form id="content_page_form" method="post"
+          action="{{ url('admin_content_page_edit', {id: pageId}) }}">
+        <input type="hidden" id="main_edit__token" name="_token" value="{{ csrfToken|default('') }}">
+
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <!-- ページ設定 -->
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8"><span class="card-title">ページ設定</span></div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#pageDetail" aria-expanded="false" aria-controls="pageDetail">
+                                        <i class="fa fa-angle-up fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="pageDetail">
+                            <div class="card-body">
+                                <!-- ページ名 -->
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <span>ページ名</span>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col-10">
+                                        {{ form.input('name')|raw }}
+                                        {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <!-- URL -->
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <span>URL</span>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col-10">
+                                        <div class="row">
+                                            <div class="col pe-0"><span class="align-middle">{{ pageUrl|default('') }}</span></div>
+                                            <div>{{ form.input('url')|raw }}</div>
+                                            {% if form.error('url') %}<span class="invalid-feedback d-block">{{ form.error('url') }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- ファイル名 -->
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="ページの内容を記述したtwigテンプレートファイルの名前です。">
+                                            <span>ファイル名</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col-10">
+                                        <div class="row">
+                                            <div class="col pe-0 align-middle">
+                                                <span class="align-middle">{{ pageFileName|default('') }}.twig</span>
+                                                <div>{{ form.input('file_name')|raw }}</div>
+                                            </div>
+                                            {% if form.error('file_name') %}<span class="invalid-feedback d-block">{{ form.error('file_name') }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- コード -->
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="テンプレートファイルを編集します。twigで記述します。">
+                                            <span>コード</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col-10">
+                                        <div id="editor" style="height: 480px" class="form-control"></div>
+                                        <div style="display: none">{{ form.input('tpl_data')|raw }}</div>
+                                        {% if form.error('tpl_data') %}<span class="invalid-feedback d-block">{{ form.error('tpl_data') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div> <!-- レイアウト設定 -->
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top"
+                                         title="このページに適用するレイアウトを選択します。">
+                                        <span class="card-title">
+                                            レイアウト設定
+                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#pageLayout" aria-expanded="false" aria-controls="pageLayout">
+                                        <i class="fa fa-angle-up fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="pageLayout">
+                            <div class="card-body">
+                                <!-- PC -->
+                                <div class="row mb-2">
+                                    <div class="col-2"><span>PC</span></div>
+                                    <div class="col-10">
+                                    </div>
+                                </div>
+                                <!-- モバイル -->
+                                <div class="row mb-2">
+                                    <div class="col-2"><span>モバイル</span></div>
+                                    <div class="col-10">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- メタ設定 -->
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8">
+                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="ページのMETAタグの内容を指定できます。">
+                                        <span class="card-title">メタ設定</span>
+                                        <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                    </div>
+                                </div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#pageMeta" aria-expanded="false" aria-controls="pageMeta">
+                                        <i class="fa fa-angle-up fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="pageMeta">
+                            <div class="card-body">
+                                <!-- author -->
+                                <div class="row mb-2">
+                                    <div class="col-2"><span>author</span></div>
+                                    <div class="col-10">
+                                        {{ form.input('author')|raw }}
+                                        {% if form.error('author') %}<span class="invalid-feedback d-block">{{ form.error('author') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <!-- description -->
+                                <div class="row mb-2">
+                                    <div class="col-2"><span>description</span></div>
+                                    <div class="col-10">
+                                        {{ form.input('description')|raw }}
+                                        {% if form.error('description') %}<span class="invalid-feedback d-block">{{ form.error('description') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <!-- keyword -->
+                                <div class="row mb-2">
+                                    <div class="col-2"><span>keyword</span></div>
+                                    <div class="col-10">
+                                        {{ form.input('keyword')|raw }}
+                                        {% if form.error('keyword') %}<span class="invalid-feedback d-block">{{ form.error('keyword') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <!-- robot -->
+                                <div class="row mb-2">
+                                    <div class="col-2"><span>robot</span></div>
+                                    <div class="col-10">
+                                        {{ form.input('meta_robots')|raw }}
+                                        {% if form.error('meta_robots') %}<span class="invalid-feedback d-block">{{ form.error('meta_robots') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                <!-- metatag -->
+                                <div class="row">
+                                    <div class="col-2">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="METAタグの出力をカスタマイズできます。twig内で利用されている変数も利用可能です。空欄の場合は、テンプレートフォルダの meta.twig ファイルが読み込まれます。">
+                                            <span>metatag</span>
+                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col-10">
+                                        {{ form.input('meta_tags')|raw }}
+                                        {% if form.error('meta_tags') %}<span class="invalid-feedback d-block">{{ form.error('meta_tags') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_content_page') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>ページ管理</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if message is defined and message %}
+        <p class="ec-errorMessage">{{ message }}</p>
+    {% endif %}
+{% endblock %}

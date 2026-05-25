@@ -1,0 +1,132 @@
+{#
+  BeMart admin News list — EC-CUBE goNewsList.
+
+  PORT of EC-CUBE 4.3 admin-theme `Content/news.twig`
+  (src/Eccube/Resource/template/admin/Content/news.twig).
+
+  This is the admin pilot's DATA/LIST page. It extends the admin frame
+  (`admin-base.html.twig`, the port of EC-CUBE's admin
+  `default_frame.twig`), not the storefront `base.html.twig`. The markup
+  skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim from
+  EC-CUBE; only the dynamic bindings are rebound to the NewsList resource
+  body (src/Resource/Page/Admin/News/NewsList.php — body carries
+  `count` + `news`, a list of {newsId, newsTitle, newsDescription,
+  newsUrl, publishDate, linkMethod}).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`
+     (`BeMartTwigExtension`).
+   - `{% for News in pagination %}` -> the resource body's `news` list.
+     EC-CUBE's `pagination` is a KnpPaginator object; BeMart's list
+     endpoint returns the full collection (no server-side paging in
+     scope), so the `pagination.paginationData.pageCount` pager block is
+     OMITTED — the body carries no paging metadata. Enumerated as
+     residual.
+   - `News.visible` (公開 / 非公開 display-status) -> NOT carried by the
+     AdminNewsListFetched projection (EC-CUBE's dtb_news.visible was out
+     of the Wave 9 CMS slice). The display-status column is OMITTED, not
+     invented. Enumerated as residual.
+   - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
+     CSRF widget. OMITTED exactly as the storefront ports omit it.
+     EC-CUBE-runtime only — enumerated as residual.
+   - `publishDate|date_sec` -> EC-CUBE's date filter. The body stores
+     `publishDate` as an ISO-8601 string; rendered as-is (BeMart has no
+     date_sec filter — the value is already a stable string).
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_content_news' %}
+{% set title = '新着情報管理' %}
+{% set sub_title = 'コンテンツ管理' %}
+
+{% block stylesheet %}
+    <style type="text/css">
+        li.list-group-item {
+            z-index: inherit !important;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="d-block mb-3">
+                    <a id="addNew" class="btn btn-ec-regular"
+                       href="{{ url('admin_content_news_new') }}">新規作成</a>
+                </div>
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush mb-4 sortable-container">
+                            <li class="list-group-item">
+                                <div class="row justify-content-around">
+                                    <div class="col-2"><strong>公開日時</strong>
+                                    </div>
+                                    <div class="col"><strong>タイトル</strong></div>
+                                </div>
+                            </li>
+                            {% for News in news %}
+                                <li class="list-group-item sortable-item" data-id="{{ News.newsId }}">
+                                    <div class="row justify-content-around">
+                                        <div class="col-2 d-flex align-items-center">
+                                            <span>{{ News.publishDate }}</span></div>
+                                        <div class="col d-flex align-items-center"><a
+                                                    href="{{ url('admin_content_news_edit', {id: News.newsId}) }}">{{ News.newsTitle }}</a>
+                                        </div>
+                                        <div class="col-2">
+                                            <div class="row">
+                                                <div class="col px-0 text-center">
+                                                    <a class="btn btn-ec-actionIcon"
+                                                       href="{{ url('admin_content_news_edit', {id: News.newsId}) }}"
+                                                       data-bs-toggle="tooltip" data-bs-placement="top"
+                                                       title="編集">
+                                                        <i class="fa fa-pencil fa-lg text-secondary"></i>
+                                                    </a>
+                                                </div>
+                                                <div class="col ps-0 text-center" data-bs-toggle="tooltip"
+                                                     data-bs-placement="top" title="削除">
+                                                    <a class="btn btn-ec-actionIcon" data-bs-toggle="modal"
+                                                       data-bs-target="#delete_{{ News.newsId }}">
+                                                        <i class="fa fa-close fa-lg text-secondary"
+                                                           aria-hidden="true"></i>
+                                                    </a>
+                                                    <div class="modal fade" id="delete_{{ News.newsId }}" tabindex="-1"
+                                                         role="dialog"
+                                                         aria-labelledby="delete_{{ News.newsId }}" aria-hidden="true">
+                                                        <div class="modal-dialog" role="document">
+                                                            <div class="modal-content">
+                                                                <div class="modal-header">
+                                                                    <h5 class="modal-title fw-bold">削除します</h5>
+                                                                    <button class="btn-close" type="button"
+                                                                            data-bs-dismiss="modal"
+                                                                            aria-label="Close">
+                                                                    </button>
+                                                                </div>
+                                                                <div class="modal-body text-start">
+                                                                    <p class="text-start">この操作はあとから取り消すことができません。「{{ News.newsTitle }}」を削除してよろしいですか？</p>
+                                                                </div>
+                                                                <div class="modal-footer">
+                                                                    <button class="btn btn-ec-sub" type="button"
+                                                                            data-bs-dismiss="modal">キャンセル</button>
+                                                                    <a class="btn btn-ec-delete"
+                                                                       href="{{ url('admin_content_news_delete', {id: News.newsId}) }}"
+                                                                       data-method="delete"
+                                                                       data-confirm="false">削除</a>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

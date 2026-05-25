@@ -12,7 +12,10 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\CsvConfigUpdated;
 use MyVendor\BeMart\Be\Input\UpdateCsvInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminCsvConfigForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -41,7 +44,38 @@ class CsvConfig extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * EC-CUBE CSV出力項目設定 — Setting/Shop Tier-2.
+     *
+     * Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
+     * persists a submitted vector; this GET serves the editor body.
+     */
+    public function onGet(int $id = 1): static
+    {
+        if ($this->adminSession->adminId() === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        $form = $this->formFactory->newInstance(AdminCsvConfigForm::class);
+        assert($form instanceof AdminCsvConfigForm);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'form' => $form,
+            'id' => $id,
+            'outputColumns' => AdminCsvConfigForm::outputColumns(),
+            'notOutputColumns' => AdminCsvConfigForm::notOutputColumns(),
+        ];
+
+        return $this;
     }
 
     /**

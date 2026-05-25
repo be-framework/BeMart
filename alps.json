@@ -16,6 +16,7 @@
       {"id": "companyName", "title": "会社名","def": "https://schema.org/name", "tag": "src-entity", "doc": {"value": "法人顧客の社名。B2B取引やインボイスで使用"}},
       {"id": "postalCode", "title": "郵便番号","def": "https://schema.org/postalCode", "tag": "src-entity", "doc": {"value": "日本の郵便番号。ハイフンなし7桁またはハイフン付き8桁"}},
       {"id": "pref", "title": "都道府県","tag": "src-entity", "doc": {"value": "日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用"}},
+      {"id": "prefName", "title": "都道府県名","tag": "src-template", "doc": {"value": "都道府県の表示名（mtb_pref.name）。pref（mtb_pref への整数 FK）を住所行に描画するための表示用投影フィールドであり、storage の真の leaf 列ではない。Phase 3 enrichment で追加。SqlAddressStorage が dtb_customer_address.pref_id → mtb_pref を JOIN して充填する（構造のみダンプでは mtb_pref は空のため、未シード時は空文字に degrade）。配送先住所一覧画面（CustomerAddress）が pref の整数 id ではなく都道府県名を表示するために使用"}},
       {"id": "addr01", "title": "市区町村","def": "https://schema.org/addressLocality", "tag": "src-entity", "doc": {"value": "都道府県より下位の市区町村名"}},
       {"id": "addr02", "title": "番地・建物名","def": "https://schema.org/streetAddress", "tag": "src-entity", "doc": {"value": "番地・ビル名・部屋番号等の詳細住所"}},
       {"id": "email", "title": "メールアドレス","def": "https://schema.org/email", "tag": "src-entity", "doc": {"value": "会員のログインIDを兼ねる。有効会員間で一意"}},
@@ -757,8 +758,10 @@
       },
 
       {"id": "CustomerAddress", "title": "配送先住所","tag": "account src-template",
+        "doc": {"value": "EC-CUBE の配送先住所一覧画面（Mypage/delivery.twig）が1行あたり描画する情報構造。storage の src-entity 投影 Address を内包し、画面描画に必要な表示用フィールド prefName（都道府県名 — pref 整数 id を mtb_pref への JOIN で名称解決）を加える。Phase 3 enrichment で prefName を追加 — 従前は pref の整数 master id のみを画面に描画していた（CustomerAddressListFetched 投影が SqlAddressStorage の JOIN 結果を surface する）"},
         "descriptor": [
           {"href": "#Address"},
+          {"href": "#prefName"},
           {"href": "#createDate"},
           {"href": "#updateDate"},
           {"href": "#doUpdateCustomerAddress"},
@@ -773,12 +776,13 @@
       },
 
       {"id": "Favorite", "title": "お気に入り","tag": "favorite src-template",
-        "doc": {"value": "EC-CUBE のお気に入り一覧画面（Mypage/favorite.twig）が1行あたり描画する情報構造。dtb_customer_favorite_product の実カラム（customer_id / product_id）に加え、お気に入り行を描画するために dtb_product / dtb_product_class を辿って表示する商品名・単価を含む — このディスクリプタは画面から再導出された投影であり、Entity から逆生成したものではない（CartItem と同型）。productCode と customerId のみが dtb_customer_favorite_product 由来の真の leaf 列（customerId は所有者 FK、productCode は default class 規約 class_category_id1 IS NULL AND class_category_id2 IS NULL で解決する自然キー）。productName と unitPrice は dtb_product / dtb_product_class への JOIN で取得する表示用投影フィールド。所有者キーは customerId のみで、productCode が同じでも customerId が異なれば別行。EC-CUBE 4.3 には (customer_id, product_id) UNIQUE が無く、SqlFavoriteStorage は ON DUPLICATE KEY UPDATE id=id でベストエフォート冪等にしている"},
+        "doc": {"value": "EC-CUBE のお気に入り一覧画面（Mypage/favorite.twig）が1行あたり描画する情報構造。dtb_customer_favorite_product の実カラム（customer_id / product_id）に加え、お気に入り行を描画するために dtb_product / dtb_product_class / dtb_product_image を辿って表示する商品名・単価・商品画像を含む — このディスクリプタは画面から再導出された投影であり、Entity から逆生成したものではない（CartItem と同型）。productCode と customerId のみが dtb_customer_favorite_product 由来の真の leaf 列（customerId は所有者 FK、productCode は default class 規約 class_category_id1 IS NULL AND class_category_id2 IS NULL で解決する自然キー）。productName と unitPrice は dtb_product / dtb_product_class への JOIN で取得する表示用投影フィールド。fileName は dtb_product_image の最小 sort_no 行のファイル名（画像無し商品では NULL）— Phase 3 enrichment で追加、CartItem.fileName と同規約。所有者キーは customerId のみで、productCode が同じでも customerId が異なれば別行。EC-CUBE 4.3 には (customer_id, product_id) UNIQUE が無く、SqlFavoriteStorage は ON DUPLICATE KEY UPDATE id=id でベストエフォート冪等にしている"},
         "descriptor": [
           {"href": "#customerId"},
           {"href": "#productCode"},
           {"href": "#productName"},
-          {"href": "#unitPrice"}
+          {"href": "#unitPrice"},
+          {"href": "#fileName"}
         ]
       },
 
@@ -1125,7 +1129,6 @@
           {"href": "#goNewsList"},
           {"href": "#goNews"},
           {"href": "#doCreateNews"},
-          {"href": "#doSortNoMove"},
           {"href": "#doToggleVisible"}
         ]
       },
@@ -1689,7 +1692,7 @@
         "doc": {"value": "店舗基本情報を更新する。`BaseInfo` テーブルは 1 レコードのみで全店舗共通設定として参照される。"}},
       {"id": "doSortNoMove", "title": "並び順を変更する", "type": "idempotent", "rt": "#AdminTop",
         "tag": "admin-system flow-manage-shop actor-admin src-router",
-        "doc": {"value": "管理画面の一覧画面で行をドラッグ＆ドロップして表示順（sort_no）を更新する汎用インライン操作。EC-CUBE の *_sort_no_move ルート群（admin_setting_shop_payment_sort_no_move / admin_setting_shop_delivery_sort_no_move / admin_product_tag_sort_no_move / admin_product_class_name_sort_no_move / admin_product_class_category_sort_no_move / admin_content_news 等、10+ ルート）から導出した抽象遷移。並べ替え結果は冪等（同一順序の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
+        "doc": {"value": "管理画面の一覧画面で行をドラッグ＆ドロップして表示順（sort_no）を更新する汎用インライン操作。EC-CUBE の *_sort_no_move ルート群（admin_setting_shop_payment_sort_no_move / admin_setting_shop_delivery_sort_no_move / admin_product_tag_sort_no_move / admin_product_class_name_sort_no_move / admin_product_class_category_sort_no_move 等）から導出した抽象遷移。sort_no カラムを持つマスタ（dtb_payment / dtb_delivery / dtb_tag / dtb_class_name / dtb_class_category）の一覧でのみ参照される — dtb_news には sort_no カラムが無いため NewsList は本遷移を参照しない。並べ替え結果は冪等（同一順序の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
       {"id": "doToggleVisible", "title": "表示・非表示を切り替える", "type": "idempotent", "rt": "#AdminTop",
         "tag": "admin-system flow-manage-shop actor-admin src-router",
         "doc": {"value": "管理画面の一覧画面で行の表示／非表示（visible）をインラインでトグルする汎用操作。EC-CUBE の *_visible(ity) ルート群（admin_setting_shop_payment_visible / admin_setting_shop_delivery_visibility 等）から導出した抽象遷移。トグルは可視状態を明示値に設定する冪等操作（同一値の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},

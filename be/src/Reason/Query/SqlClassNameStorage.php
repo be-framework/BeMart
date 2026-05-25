@@ -230,6 +230,27 @@ final class SqlClassNameStorage implements ClassNameStorageInterface
         $stmt->execute([':id' => $id]);
     }
 
+    #[Override]
+    public function reorder(string $classNameId, int $sortNo): void
+    {
+        if (! ctype_digit($classNameId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake
+            // which no-ops on a missing key.
+            return;
+        }
+
+        // Generic `doSortNoMove` — rewrite the `sort_no` column directly.
+        // No `update_date` bump: a drag-and-drop reorder is metadata-only
+        // and EC-CUBE's *_sort_no_move routes likewise touch sort_no only.
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_class_name SET sort_no = :sort_no WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $classNameId,
+            ':sort_no' => $sortNo,
+        ]);
+    }
+
     /**
      * Derive the next append slot for `sort_no` (NOT NULL, no DEFAULT).
      * Empty table → 1; otherwise MAX(sort_no)+1. The projection never

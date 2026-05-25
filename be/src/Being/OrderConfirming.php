@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Be\Being;
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
+use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\PaymentVerifyResult;
 use MyVendor\BeMart\Be\Reason\Entity\PurchaseFlowResult;
 use MyVendor\BeMart\Be\Reason\PaymentFailureCase;
@@ -21,6 +22,10 @@ use Ray\InputQuery\Attribute\Input;
  * $being discriminator. The Be Framework's BecomingType then selects
  * OrderConfirmed (PaymentSuccessCase) or OrderConfirmFailed (PaymentFailureCase)
  * by matching the type against each Final's `#[Input] <Case> $being` parameter.
+ *
+ * Phase 3 enrichment — the resolved pre-order $order is forwarded so the
+ * happy-path Final (OrderConfirmed) can compose the confirm-screen
+ * order-detail projection (customer info + line items) off it.
  */
 #[Be([OrderConfirmed::class, OrderConfirmFailed::class])]
 final readonly class OrderConfirming
@@ -31,6 +36,7 @@ final readonly class OrderConfirming
     public function __construct(
         #[Input] public string $preOrderId,
         #[Input] public int $paymentMethodId,
+        #[Input] public OrderEntity $order,
         #[Input] PurchaseFlowResult $totals,
         #[Input] PaymentVerifyResult $result,
     ) {

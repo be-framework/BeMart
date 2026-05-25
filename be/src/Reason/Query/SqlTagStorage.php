@@ -153,6 +153,26 @@ final class SqlTagStorage implements TagStorageInterface
         $stmt->execute([':id' => (int) $tagId]);
     }
 
+    #[Override]
+    public function reorder(string $tagId, int $sortNo): void
+    {
+        if (! ctype_digit($tagId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake
+            // which no-ops on a missing key.
+            return;
+        }
+
+        // Generic `doSortNoMove` — rewrite the `sort_no` column directly.
+        // dtb_tag has no timestamp columns, so this is the whole write.
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_tag SET sort_no = :sort_no WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $tagId,
+            ':sort_no' => $sortNo,
+        ]);
+    }
+
     /**
      * @param array<string, mixed> $row
      */

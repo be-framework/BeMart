@@ -18,18 +18,31 @@ use MyVendor\BeMart\Be\Input\DeleteNewsInput;
 use MyVendor\BeMart\Be\Input\GetAdminNewsInput;
 use MyVendor\BeMart\Be\Input\UpdateNewsInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminNewsForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
 /**
  * EC-CUBE goNews + doUpdateNews + doDeleteNews — single-row endpoint
  * (Wave 9).
+ *
+ * Phase 3 — HTML FORM page (admin pilot). `onGet` exposes an
+ * {@see AdminNewsForm} (Ray.WebFormModule AbstractForm) as `body['form']`
+ * pre-filled with the persisted row so the admin edit page can render
+ * real `<input>`s via `{{ form.input(...) }}`. The form is a
+ * field-definition + renderer only — VALIDATION AUTHORITY STAYS WITH the
+ * Be Framework Becoming chain. The JSON contexts (`app`, `prod`, `test`)
+ * ignore `body['form']`; the resource tests assert key-wise on `body`
+ * and are unaffected. FormFactory is self-sufficient (no Ray.Di bindings
+ * needed).
  */
 class News extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -64,8 +77,30 @@ class News extends ResourceObject
             'publishDate' => $final->publishDate,
             'linkMethod' => $final->linkMethod,
         ];
+        // Phase 3: an AdminNewsForm pre-filled with the persisted row,
+        // for the HTML edit page to render via `{{ form.input(...) }}`.
+        // JSON contexts ignore it.
+        $this->body['form'] = $this->editForm($this->body);
 
         return $this;
+    }
+
+    /**
+     * Builds an AdminNewsForm filled from a News body.
+     *
+     * The Becoming chain reached the data; this only loads it onto the
+     * form so the HTML edit page renders the persisted values. The form
+     * is a renderer here, never a validator.
+     *
+     * @param array<string, mixed> $body
+     */
+    private function editForm(array $body): AdminNewsForm
+    {
+        $form = $this->formFactory->newInstance(AdminNewsForm::class);
+        assert($form instanceof AdminNewsForm);
+        $form->fillValues($body);
+
+        return $form;
     }
 
     /**

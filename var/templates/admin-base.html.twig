@@ -1,0 +1,147 @@
+{#
+  BeMart shared ADMIN layout.
+
+  PORT of EC-CUBE 4.3 admin-theme `default_frame.twig`
+  (src/Eccube/Resource/template/admin/default_frame.twig).
+
+  The storefront pages extend `base.html.twig` (a port of EC-CUBE's
+  default-theme `default_frame.twig`). The admin pages use a DIFFERENT
+  layout — EC-CUBE's admin theme has its own frame: a left sidebar
+  navigation (`c-mainNavArea`), a top header bar (`c-headerBar`) with the
+  logged-in operator's menu, and a `c-contentsArea` content region with
+  the page title. This file is the port of that admin frame; every admin
+  page does `{% extends 'admin-base.html.twig' %}`.
+
+  Same port standard as `base.html.twig` (see var/templates/README.md,
+  "Admin pages" section): keep EC-CUBE's markup skeleton and `c-*` /
+  `ec-*` class names verbatim; only the EC-CUBE-runtime bindings are
+  rebound.
+
+  EC-CUBE-ism rebinding (documented; see README "Admin pages"):
+   - `{{ '...'|trans }}`  -> the Japanese literal the key resolves to in
+     messages.ja.yaml. Same rebinding as the storefront port. The static
+     chrome labels (ホーム / 情報 / the official-site links / the header
+     menu labels) are inlined as ja literals.
+   - `asset('x', 'admin'|'bundle')` -> static URL (`BeMartTwigExtension`).
+     BeMart has no asset-hash pipeline, but the asset PACKAGE argument is
+     KEPT: BeMartTwigExtension::asset() ports EC-CUBE's `assets.packages`
+     map (framework.yaml) — `admin` -> `/template/admin/`, `bundle` ->
+     `/bundle/`. The admin theme and the default storefront theme ship
+     byte-different files at the same `assets/...` path (e.g.
+     `assets/js/function.js`); the package keeps them on separate served
+     URLs so the deployed `public/` tree resolves each to the right file.
+   - `csrf_token(...)` -> EC-CUBE per-request CSRF widget. The
+     `<meta eccube-csrf-token>` is kept (structure) with an empty value;
+     the inline jQuery `$.ajaxSetup` <script> is OMITTED exactly as
+     `base.html.twig` omits it. EC-CUBE-runtime only — enumerated as
+     residual in the render-diff tests.
+   - `app.user.*` (the logged-in operator), `eccubeNav` / `menus` /
+     `active_menus()` (the dynamic admin menu tree + active-section
+     state) -> ADMIN auth/menu runtime. BeMart's admin resources are
+     authenticated at the resource layer (`AdminSessionInterface`); the
+     html context carries no operator entity and no dynamic nav tree, so
+     the operator menu and the `eccubeNav` loop are rendered from a
+     MINIMAL STUB: the header user-menu shows a fixed operator label and
+     the sidebar renders only the static ホーム / 情報 items (EC-CUBE's
+     `nav.twig` `{% for %}` over `eccubeNav` is reduced to its two static
+     bookend `<li>`s). Enumerated as residual.
+   - `@admin/nav.twig`, `@admin/alert.twig`, `@admin/info.twig`,
+     `@admin/notice_debug_mode.twig`, `@common/lang.twig`,
+     `@admin/snippet.twig` -> EC-CUBE admin includes (the nav tree, flash
+     alerts, the EC-CUBE notice strip, the JS i18n bundle, plugin
+     snippets). BeMart has no equivalent; the nav is inlined minimally
+     (above) and the alert/info/notice/lang/snippet includes are dropped.
+     The render-diff test serves them as empty templates so they
+     contribute nothing on either side.
+#}
+<!doctype html>
+<html lang="ja">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="eccube-csrf-token" content="{{ csrf_token|default('') }}">
+    <title>{% if title is defined and title is not empty %}{{ title }} {% endif %}{% if sub_title is defined and sub_title is not empty %}{{ sub_title }} {% endif %}- {{ shop_name|default('BeMart') }}</title>
+    <link rel="icon" href="{{ asset('assets/img/favicon.ico', 'admin') }}">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.2/css/all.css" integrity="sha384-PPIZEGYM1v8zp5Py7UjFb79S58UeqCL9pYVnVPURKEqvioPROaVAJKKLzvH2rDnI" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.5.2/css/v4-shims.css" integrity="sha384-XyvK/kKwgVW+fuRkusfLgfhAMuaxLPSOY8W7wj8tUkf0Nr2WGHniPmpdu+cmPS5n" crossorigin="anonymous">
+    <link rel="stylesheet" href="{{ asset('assets/css/bootstrap.css', 'admin') }}">
+    <link rel="stylesheet" href="{{ asset('assets/css/app.css', 'admin') }}">
+    <script src="{{ asset('admin.bundle.js', 'bundle') }}"></script>
+    {% block stylesheet %}{% endblock %}
+</head>
+<body id="page_{{ route|default('admin_homepage') }}">
+<header class="c-headerBar">
+    <div class="c-headerBar__container">
+        <div class="c-headerBar__logo">
+            <h1><img src="{{ asset('assets/img/logo@2x.png', 'admin') }}"></h1>
+        </div>
+        <a class="c-headerBar__toggleBtn"><i class="fa fa-bars" aria-hidden="true"></i></a>
+        <a class="c-headerBar__shopTitle" href="{{ url('homepage') }}" target="_blank"><span>{{ shop_name|default('BeMart') }}</span><i class="fa fa-angle-right" aria-hidden="true"></i></a>
+        <a class="c-headerBar__userMenu"
+           data-bs-container="body"
+           data-bs-toggle="popover"
+           data-bs-placement="bottom"
+           title="最終ログイン"
+           data-bs-html="true"><i class="fa fa-user-circle" aria-hidden="true"></i><span>{{ admin_name|default('管理者') }} 様</span><i class="fa fa-angle-down" aria-hidden="true"></i></a>
+    </div>
+</header>
+<div class="c-container">
+    <div class="c-mainNavArea">
+        <nav>
+            <ul class="c-mainNavArea__nav">
+                <!-- ホーム -->
+                <li class="c-mainNavArea__navItem">
+                    <a class="c-mainNavArea__navItemTitle" href="{{ url('admin_homepage') }}">
+                        <i class="fa fa-home fa-fw" aria-hidden="true"></i>
+                        <span>ホーム</span>
+                    </a>
+                </li>
+                <!-- 情報 -->
+                <li class="c-mainNavArea__navItem">
+                    <a class="c-mainNavArea__navItemTitle collapsed" data-bs-toggle="collapse" href="#others" aria-expanded="false"
+                       aria-controls="others">
+                        <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+                        <span>情報</span>
+                    </a>
+                    <ul class="collapse" id="others">
+                        <li>
+                            <a href="https://www.ec-cube.net/" target="_blank">
+                                <span>公式サイト</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://xoo.ps/eccube/" target="_blank">
+                                <span>開発コミュニティ</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://doc4.ec-cube.net/" target="_blank">
+                                <span>ドキュメント</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="https://www.ec-cube.net/product/" target="_blank">
+                                <span>管理・運用マニュアル</span>
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    <div class="c-curtain"></div>
+    <div class="c-contentsArea">
+        <div class="c-pageTitle">
+            <div class="c-pageTitle__titles">
+                <h2 class="c-pageTitle__title">{{ title|default('') }}</h2><span class="c-pageTitle__subTitle">{{ sub_title|default('') }}</span>
+            </div>
+        </div>
+
+        {% block main %}{% endblock %}
+
+    </div>
+</div>
+<script src="{{ asset('assets/js/function.js', 'admin') }}"></script>
+{% block javascript %}{% endblock %}
+</body>
+</html>

@@ -10,6 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeBaseInfoStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Form\AdminShopMasterForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -77,5 +78,13 @@ final class AdminBaseInfoGetResourceTest extends TestCase
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
         $this->assertStringContainsString('管理者', $ro->body['message']);
+    }
+
+    public function testOnGetCarriesShopMasterForm(): void
+    {
+        $ro = $this->resource->get('page://self/admin/base-info');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminShopMasterForm::class, $ro->body['form']);
     }
 }

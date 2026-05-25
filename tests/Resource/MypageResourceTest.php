@@ -8,6 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeSession;
@@ -108,6 +109,17 @@ final class MypageResourceTest extends TestCase
             orderDate: '2026-05-01 12:00:00',
             paymentDate: '2026-05-01 12:00:00',
         ));
+        // Phase 3 enrichment — the dashboard's recentOrders rows carry an
+        // `items` sub-array (read via OrderQuery::itemsByOrderNo).
+        $storage->putItems($aliceOrderNo, [
+            new OrderItemEntity(
+                orderNo: $aliceOrderNo,
+                productCode: 'sample-001',
+                productName: 'サンプル商品 A',
+                quantity: 2,
+                unitPrice: 1200,
+            ),
+        ]);
 
         $ro = $this->resource->get('page://self/mypage');
 
@@ -119,6 +131,14 @@ final class MypageResourceTest extends TestCase
             FinalizedOrderEntity::STATUS_NEW,
             $ro->body['recentOrders'][0]['orderStatus'],
         );
+        // The order's line-item snapshot is surfaced under `items`.
+        $this->assertCount(1, $ro->body['recentOrders'][0]['items']);
+        $this->assertSame(
+            'サンプル商品 A',
+            $ro->body['recentOrders'][0]['items'][0]['productName'],
+        );
+        $this->assertSame(2, $ro->body['recentOrders'][0]['items'][0]['quantity']);
+        $this->assertSame(1200, $ro->body['recentOrders'][0]['items'][0]['unitPrice']);
     }
 
     public function testOnGetUnauthenticatedReturns401(): void

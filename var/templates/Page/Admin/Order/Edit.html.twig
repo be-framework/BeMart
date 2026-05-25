@@ -1,0 +1,171 @@
+{#
+  BeMart admin order editor — EC-CUBE admin-theme `Order/edit.twig`.
+
+  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/edit.twig`
+  — the ~1057-line multi-panel 受注登録 / 受注編集 screen. It extends the
+  admin frame (`admin-base.html.twig`), not the storefront frame.
+
+  Tier-2 port note: EC-CUBE's editor wires a Customer-search panel, a
+  Shipping collection, an OrderItem collection (with a product-search
+  modal), the price-recompute totals and a per-status workflow panel.
+  The Be projection ({@see \MyVendor\BeMart\Be\Final\AdminOrderFetched})
+  keeps a flat order header + a line-item snapshot, so the port renders
+  the editable header panels — orderer contact, money knobs, the
+  read-only line-item table and the totals summary. The Shipping
+  collection edits live on the sibling `shipping` page; the
+  product-search modal + the customer-search modal are EC-CUBE-runtime
+  fragments dropped as enumerated residuals.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
+     AdminOrderEditForm leaf fields (Ray.WebFormModule).
+   - `price` filter -> JPY NumberFormatter.
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_order_edit' %}
+{% set title = orderNo ? '受注編集' : '受注登録' %}
+{% set sub_title = '受注管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_order_edit') }}" id="order_form" name="form1" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">注文者情報</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3"><span>お名前</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col-6">{{ form.input('name01')|raw }}</div>
+                                        <div class="col-6">{{ form.input('name02')|raw }}</div>
+                                    </div>
+                                    {% if form.error('name01') %}<span class="invalid-feedback d-block">{{ form.error('name01') }}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>メールアドレス</span></div>
+                                <div class="col">{{ form.input('email')|raw }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">商品明細</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm" id="order_item_table">
+                                <thead>
+                                <tr>
+                                    <th class="border-top-0 pt-2 pb-2 ps-3">商品コード</th>
+                                    <th class="border-top-0 pt-2 pb-2">商品名</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-end">単価</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-center">数量</th>
+                                    <th class="border-top-0 pt-2 pb-2 text-end pe-3">小計</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for item in items %}
+                                    <tr>
+                                        <td class="align-middle ps-3">{{ item.productCode }}</td>
+                                        <td class="align-middle">{{ item.productName }}</td>
+                                        <td class="align-middle text-end">{{ item.unitPrice|price }}</td>
+                                        <td class="align-middle text-center">{{ item.quantity }}</td>
+                                        <td class="align-middle text-end pe-3">{{ (item.unitPrice * item.quantity)|price }}</td>
+                                    </tr>
+                                {% else %}
+                                    <tr>
+                                        <td class="align-middle text-center text-muted" colspan="5">商品明細はありません</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">管理用メモ</span>
+                        </div>
+                        <div class="card-body">
+                            {{ form.input('message')|raw }}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="c-contentsArea__secondaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header">
+                        <span class="card-title">ご請求額</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-6"><span>小計</span></div>
+                            <div class="col-6 text-end">{{ (order.subtotal|default(0))|price }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><span>送料</span></div>
+                            <div class="col-6 text-end">{{ (order.deliveryFeeTotal|default(0))|price }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><span>手数料</span></div>
+                            <div class="col-6">{{ form.input('charge')|raw }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><span>値引き</span></div>
+                            <div class="col-6">{{ form.input('discount')|raw }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><span>消費税</span></div>
+                            <div class="col-6 text-end">{{ (order.tax|default(0))|price }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-6"><span>利用ポイント</span></div>
+                            <div class="col-6">{{ form.input('use_point')|raw }}</div>
+                        </div>
+                        <hr>
+                        <div class="row mb-2">
+                            <div class="col-6"><span class="fw-bold">合計</span></div>
+                            <div class="col-6 text-end fw-bold">{{ (order.paymentTotal|default(0))|price }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_order') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>受注一覧へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

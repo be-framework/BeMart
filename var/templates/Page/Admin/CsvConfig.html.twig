@@ -1,0 +1,177 @@
+{#
+  BeMart admin CSV config — EC-CUBE Setting/Shop/csv.twig.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_shop_csv' %}
+{% set title = 'CSV出力項目設定' %}
+{% set sub_title = '店舗設定' %}
+
+{% block javascript %}
+    <script>
+        $(function() {
+            function add(event) {
+                $('#' + event.data.from + ' option:selected')
+                    .appendTo($('#' + event.data.to))
+                    .prop('selected', false);
+            }
+
+            function addAll(event) {
+                $('#' + event.data.from + ' option').each(function() {
+                    $(this).appendTo($('#' + event.data.to));
+                    $(this).prop('selected', false);
+                });
+            }
+
+            $('#add').on('click', {from: 'csv-not-output', to: 'csv-output'}, add);
+            $('#add-all').on('click', {from: 'csv-not-output', to: 'csv-output'}, addAll);
+            $('#remove').on('click', {from: 'csv-output', to: 'csv-not-output'}, add);
+            $('#remove-all').on('click', {from: 'csv-output', to: 'csv-not-output'}, addAll);
+
+            $('.move').click(function() {
+                var $op = $('#csv-output option:selected');
+                var val = $(this).data('value');
+                if ($op.length) {
+                    val == 'up' ? $op.first().prev().before($op) : $op.last().next().after($op);
+                }
+            });
+
+            $('.move-most').click(function() {
+                var $op = $('#csv-output option:selected');
+                var val = $(this).data('value');
+                if ($op.length) {
+                    val == 'top' ? $op.prependTo('#csv-output') : $op.appendTo('#csv-output');
+                }
+            });
+
+            $('#csv-type').on('change', function() {
+                var id = $(this).val();
+                var href = '{{ url('admin_setting_shop_csv') }}' + '/' + id;
+                location.href = href;
+                return false;
+            });
+
+            $('#csv-form').submit(function() {
+                $('#csv-not-output').children().prop('selected', true);
+                $('#csv-output').children().prop('selected', true);
+            });
+        });
+    </script>
+{% endblock %}
+
+{% block main %}
+    <form id="csv-form" method="post" action="{{ url('admin_setting_shop_csv', {'id': id}) }}">
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="各種のデータをCSVで出力できます。出力したい項目をこちらで設定することが可能です。">
+                                <span>CSV出力項目</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-4 justify-content-between">
+                                <div class="col-2">
+                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="設定したいCSVの種類を指定してください。">
+                                        <span>CSV種別</span>
+                                        <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                    </div>
+                                </div>
+                                <div class="col-6">
+                                    {{ form.input('csv_type')|raw }}
+                                </div>
+                                <div class="col"></div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-4">
+                                    <div class="mb-3">
+                                        <label for="csv-not-output">出力しない項目</label>
+                                        {{ form.input('csv_not_output')|raw }}
+                                    </div>
+                                </div>
+                                <div class="col-2 align-self-center">
+                                    <div class="row mb-2">
+                                        <div class="col text-center"><span>操作項目</span></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col text-center">
+                                            <div class="btn btn-ec-regular w-100" id="add"><i class="fa fa-arrow-right" aria-hidden="true"></i><span>&nbsp;出力</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col text-center">
+                                            <div class="btn btn-ec-regular w-100" id="remove"><i class="fa fa-arrow-left" aria-hidden="true"></i><span>&nbsp;解除</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col text-center">
+                                            <div class="btn btn-ec-regular w-100" id="add-all"><i class="fa fa-arrow-circle-right" aria-hidden="true"></i><span>&nbsp;すべて出力</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col text-center">
+                                            <div class="btn btn-ec-regular w-100" id="remove-all"><i class="fa fa-arrow-circle-left" aria-hidden="true"></i><span>&nbsp;すべて解除</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-4">
+                                    <div class="mb-3">
+                                        <label for="csv-output">出力する項目</label>
+                                        {{ form.input('csv_output')|raw }}
+                                    </div>
+                                </div>
+                                <div class="col-2 align-self-center">
+                                    <div class="row mb-2">
+                                        <div class="col text-center"><span>項目順序</span></div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col text-center">
+                                            <div class="btn btn-ec-regular w-100 move" data-value="up"><i class="fa fa-arrow-up" aria-hidden="true"></i><span>&nbsp;ひとつ上へ</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col text-center">
+                                            <div class="btn btn-ec-regular w-100 move" data-value="down"><i class="fa fa-arrow-down" aria-hidden="true"></i><span>&nbsp;ひとつ下へ</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col text-center">
+                                            <div class="btn btn-ec-regular w-100 move-most" data-value="top"><i class="fa fa-arrow-circle-up" aria-hidden="true"></i><span>&nbsp;一番上へ</span></div>
+                                        </div>
+                                    </div>
+                                    <div class="row mb-2">
+                                        <div class="col text-center">
+                                            <div class="btn btn-ec-regular w-100 move-most" data-value="bottom"><i class="fa fa-arrow-circle-down" aria-hidden="true"></i><span>&nbsp;一番下へ</span></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <p></p>
+                            任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。<br>
+                            出力する項目の順序は［項目順序］ボタンで変更することができます。<br>
+                            複数の項目を選択する場合はctrlキー（Macの場合はcommandキー）を押しながら項目を押します。shiftキーを押しながら選択すると範囲選択ができます。
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem"></div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}
