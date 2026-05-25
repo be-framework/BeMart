@@ -1,0 +1,108 @@
+{#
+  BeMart admin class-name-CSV upload — EC-CUBE admin-theme
+  `Product/csv_class_name.twig`.
+
+  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Product/csv_class_name.twig`
+  — the ~129-line CSV-upload screen. It extends the admin frame
+  (`admin-base.html.twig`), not the storefront frame.
+
+  Tier-2 port note: EC-CUBE's screen renders a CSV file-upload form,
+  a 雛形 (template-CSV) download link and a format-description table.
+  The Be `doImportProductCsv` write transition is a Phase-A stub, so
+  this port renders the upload shell — the file input, the skeleton
+  link and the format table. The four `csv_*` screens share this
+  structure (see AbstractCsvUpload); only the heading and the table
+  rows differ.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `form_widget(form.import_file)` -> `form.input('import_file')` —
+     the real AdminCsvUploadForm field (Ray.WebFormModule).
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_product_csv_class_name' %}
+{% set title = csvTitle %}
+{% set sub_title = '商品管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_product_csv_class_name') }}" id="csv_class_name_form" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">{{ csvTitle }}</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3"><span>CSVファイル</span></div>
+                                <div class="col">
+                                    {{ form.input('import_file')|raw }}
+                                    {% if form.error('import_file') %}<span class="invalid-feedback d-block">{{ form.error('import_file') }}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"></div>
+                                <div class="col">
+                                    <a href="{{ url(skeletonRoute) }}">雛形ファイルダウンロード</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">CSVファイルフォーマット</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-sm" id="csv_class_name_format">
+                                <thead>
+                                <tr>
+                                    <th class="border-top-0 pt-2 pb-2 ps-3">項目名</th>
+                                    <th class="border-top-0 pt-2 pb-2 pe-3">説明</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                {% for col in columns %}
+                                    <tr>
+                                        <td class="align-middle ps-3">{{ col.name }}</td>
+                                        <td class="align-middle pe-3">{{ col.description }}</td>
+                                    </tr>
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_product') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>商品管理へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">CSVファイルをアップロード</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

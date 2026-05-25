@@ -10,6 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeTradeLawStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Form\AdminTradeLawForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -62,6 +63,9 @@ final class AdminTradeLawGetResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($this->storage->get()->body, $ro->body['tradeLawBody']);
         $this->assertStringContainsString('株式会社EC-CUBE', $ro->body['tradeLawBody']);
+        $this->assertInstanceOf(AdminTradeLawForm::class, $ro->body['form']);
+        $this->assertCount(3, $ro->body['tradeLawRows']);
+        $this->assertSame('販売業者', $ro->body['tradeLawRows'][0]['name']);
         // changed flag (write-only field) MUST NOT leak into the read body.
         $this->assertArrayNotHasKey('changed', $ro->body);
     }

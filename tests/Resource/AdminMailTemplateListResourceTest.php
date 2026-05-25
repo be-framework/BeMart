@@ -10,6 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeMailTemplateStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Form\AdminMailTemplateForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -59,6 +60,9 @@ final class AdminMailTemplateListResourceTest extends TestCase
         $ro = $this->resource->get('page://self/admin/mail-template');
 
         $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminMailTemplateForm::class, $ro->body['form']);
+        $this->assertNull($ro->body['id']);
+        $this->assertFalse($ro->body['Mail']['isDeletable']);
         $this->assertGreaterThanOrEqual(2, $ro->body['count']);
 
         $ids = array_column($ro->body['mailTemplates'], 'mailTemplateId');

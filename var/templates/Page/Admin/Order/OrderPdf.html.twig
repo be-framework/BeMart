@@ -1,0 +1,94 @@
+{#
+  BeMart admin order-PDF options — EC-CUBE admin-theme
+  `Order/order_pdf.twig`.
+
+  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/order_pdf.twig`
+  — the 帳票出力 (納品書 PDF) options screen. It extends the admin frame
+  (`admin-base.html.twig`).
+
+  Tier-2 port note: EC-CUBE collects the delivery-note title / greeting
+  / note / print date, then posts to the PDF renderer (TCPDF). BeMart's
+  PDF export ({@see \MyVendor\BeMart\Resource\Page\Admin\Order\ExportOrderPdf})
+  is a Phase 2 stub; this page renders the options panel so the screen
+  is faithful — the real renderer is the enumerated residual.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
+     AdminOrderPdfForm leaf fields (Ray.WebFormModule).
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_order_pdf' %}
+{% set title = '帳票出力' %}
+{% set sub_title = '受注管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_order_export_pdf') }}" id="order_pdf_form" name="form1" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">納品書PDF出力</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3"><span>タイトル</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col">
+                                    {{ form.input('title')|raw }}
+                                    {% if form.error('title') %}<span class="invalid-feedback d-block">{{ form.error('title') }}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>注文一覧上部のメッセージ</span></div>
+                                <div class="col">
+                                    {{ form.input('message1')|raw }}
+                                    {{ form.input('message2')|raw }}
+                                    {{ form.input('message3')|raw }}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>備考欄</span></div>
+                                <div class="col">
+                                    {{ form.input('note1')|raw }}
+                                    {{ form.input('note2')|raw }}
+                                    {{ form.input('note3')|raw }}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>発行日</span></div>
+                                <div class="col-4">{{ form.input('issue_date')|raw }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_order') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>受注一覧へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">PDF出力</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -2579,22 +2579,17 @@
 </g>
 </g>
 <!-- NewsList&#45;&gt;AdminTop -->
-<g id="edge108" class="edge doSortNoMove">
+<g id="edge108" class="edge doToggleVisible">
 <title>NewsList&#45;&gt;AdminTop</title>
-<g id="a_edge108"><a xlink:href="#doSortNoMove" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge108"><a xlink:href="#doToggleVisible" xlink:title="&lt;TABLE&gt;">
 <path fill="none" stroke="#000000" stroke-width="1.3" d="M6527.76,-1165.37C6495.33,-1174.84 6451.24,-1187.98 6447.85,-1190.4 6433.91,-1200.35 6440.43,-1213.72 6425.22,-1221.6 6358.24,-1256.31 5178.71,-1227.63 5025.25,-1240.21"/>
 <polygon fill="#000000" stroke="#000000" stroke-width="1.3" points="5024.88,-1236.73 5015.36,-1241.38 5025.7,-1243.68 5024.88,-1236.73"/>
 </a>
 </g>
-<g id="a_edge108&#45;label"><a xlink:href="#doSortNoMove" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge108_140"><a xlink:href="#doSortNoMove" xlink:title="並び順を変更する (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="6447.85" y="-1210.9" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="6457.6" y="-1210.9" font-family="Times,serif" font-size="13.00"> doSortNoMove</text>
-</a>
-</g>
-<g id="a_edge108_141"><a xlink:href="#doToggleVisible" xlink:title="表示・非表示を切り替える (idempotent)">
-<text xml:space="preserve" text-anchor="start" x="6447.85" y="-1195.3" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
-<text xml:space="preserve" text-anchor="start" x="6457.6" y="-1195.3" font-family="Times,serif" font-size="13.00"> doToggleVisible</text>
+<g id="a_edge108&#45;label"><a xlink:href="#doToggleVisible" xlink:title="&lt;TABLE&gt;">
+<g id="a_edge108_140"><a xlink:href="#doToggleVisible" xlink:title="表示・非表示を切り替える (idempotent)">
+<text xml:space="preserve" text-anchor="start" x="6447.85" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
+<text xml:space="preserve" text-anchor="start" x="6457.6" y="-1203.1" font-family="Times,serif" font-size="13.00"> doToggleVisible</text>
 </a>
 </g>
 </a>
@@ -2618,12 +2613,12 @@
 </a>
 </g>
 <g id="a_edge157&#45;label"><a xlink:href="#goPage" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge157_142"><a xlink:href="#goPage" xlink:title="ページ詳細を見る (safe)">
+<g id="a_edge157_141"><a xlink:href="#goPage" xlink:title="ページ詳細を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3466.22" y="-1009.3" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3475.97" y="-1009.3" font-family="Times,serif" font-size="13.00"> goPage</text>
 </a>
 </g>
-<g id="a_edge157_143"><a xlink:href="#doUpdatePage" xlink:title="ページを更新する (idempotent)">
+<g id="a_edge157_142"><a xlink:href="#doUpdatePage" xlink:title="ページを更新する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="3466.22" y="-993.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="3475.97" y="-993.7" font-family="Times,serif" font-size="13.00"> doUpdatePage</text>
 </a>
@@ -2649,7 +2644,7 @@
 </a>
 </g>
 <g id="a_edge159&#45;label"><a xlink:href="#doDeletePage" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge159_144"><a xlink:href="#doDeletePage" xlink:title="ページを削除する (idempotent)">
+<g id="a_edge159_143"><a xlink:href="#doDeletePage" xlink:title="ページを削除する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="3364.03" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="3373.78" y="-1076.5" font-family="Times,serif" font-size="13.00"> doDeletePage</text>
 </a>
@@ -2666,12 +2661,12 @@
 </a>
 </g>
 <g id="a_edge158&#45;label"><a xlink:href="#goPage" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge158_145"><a xlink:href="#goPage" xlink:title="ページ詳細を見る (safe)">
+<g id="a_edge158_144"><a xlink:href="#goPage" xlink:title="ページ詳細を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3464.75" y="-1084.3" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3474.5" y="-1084.3" font-family="Times,serif" font-size="13.00"> goPage</text>
 </a>
 </g>
-<g id="a_edge158_146"><a xlink:href="#doCreatePage" xlink:title="ページを作成する (unsafe)">
+<g id="a_edge158_145"><a xlink:href="#doCreatePage" xlink:title="ページを作成する (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="3464.75" y="-1068.7" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="3474.5" y="-1068.7" font-family="Times,serif" font-size="13.00"> doCreatePage</text>
 </a>
@@ -2688,7 +2683,7 @@
 </a>
 </g>
 <g id="a_edge155&#45;label"><a xlink:href="#goPageList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge155_147"><a xlink:href="#goPageList" xlink:title="ページ一覧を見る (safe)">
+<g id="a_edge155_146"><a xlink:href="#goPageList" xlink:title="ページ一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3435.92" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3445.67" y="-1151.5" font-family="Times,serif" font-size="13.00"> goPageList</text>
 </a>
@@ -2705,7 +2700,7 @@
 </a>
 </g>
 <g id="a_edge94&#45;label"><a xlink:href="#goContactForm" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge94_148"><a xlink:href="#goContactForm" xlink:title="お問い合わせフォームを見る (safe)">
+<g id="a_edge94_147"><a xlink:href="#goContactForm" xlink:title="お問い合わせフォームを見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="2513.36" y="-789.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="2523.11" y="-789.7" font-family="Times,serif" font-size="13.00"> goContactForm</text>
 </a>
@@ -2731,7 +2726,7 @@
 </a>
 </g>
 <g id="a_edge95&#45;label"><a xlink:href="#doSubmitContact" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge95_149"><a xlink:href="#doSubmitContact" xlink:title="お問い合わせを送信する (unsafe)">
+<g id="a_edge95_148"><a xlink:href="#doSubmitContact" xlink:title="お問い合わせを送信する (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="2466.05" y="-665.5" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="2475.8" y="-665.5" font-family="Times,serif" font-size="13.00"> doSubmitContact</text>
 </a>
@@ -2748,7 +2743,7 @@
 </a>
 </g>
 <g id="a_edge13&#45;label"><a xlink:href="#goProductList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge13_150"><a xlink:href="#goProductList" xlink:title="商品一覧を見る (safe)">
+<g id="a_edge13_149"><a xlink:href="#goProductList" xlink:title="商品一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="2456.17" y="-444.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="2465.92" y="-444.1" font-family="Times,serif" font-size="13.00"> goProductList</text>
 </a>
@@ -2774,12 +2769,12 @@
 </a>
 </g>
 <g id="a_edge130&#45;label"><a xlink:href="#goMember" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge130_151"><a xlink:href="#goMember" xlink:title="管理者詳細を見る (safe)">
+<g id="a_edge130_150"><a xlink:href="#goMember" xlink:title="管理者詳細を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3844.14" y="-1009.3" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3853.89" y="-1009.3" font-family="Times,serif" font-size="13.00"> goMember</text>
 </a>
 </g>
-<g id="a_edge130_152"><a xlink:href="#doUpdateMember" xlink:title="管理者を更新する (idempotent)">
+<g id="a_edge130_151"><a xlink:href="#doUpdateMember" xlink:title="管理者を更新する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="3844.14" y="-993.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="3853.89" y="-993.7" font-family="Times,serif" font-size="13.00"> doUpdateMember</text>
 </a>
@@ -2805,7 +2800,7 @@
 </a>
 </g>
 <g id="a_edge132&#45;label"><a xlink:href="#doDeleteMember" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge132_153"><a xlink:href="#doDeleteMember" xlink:title="管理者を削除する (idempotent)">
+<g id="a_edge132_152"><a xlink:href="#doDeleteMember" xlink:title="管理者を削除する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="3729.26" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="3739.01" y="-1076.5" font-family="Times,serif" font-size="13.00"> doDeleteMember</text>
 </a>
@@ -2822,12 +2817,12 @@
 </a>
 </g>
 <g id="a_edge131&#45;label"><a xlink:href="#goMember" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge131_154"><a xlink:href="#goMember" xlink:title="管理者詳細を見る (safe)">
+<g id="a_edge131_153"><a xlink:href="#goMember" xlink:title="管理者詳細を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3847.05" y="-1084.3" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3856.8" y="-1084.3" font-family="Times,serif" font-size="13.00"> goMember</text>
 </a>
 </g>
-<g id="a_edge131_155"><a xlink:href="#doCreateMember" xlink:title="管理者を作成する (unsafe)">
+<g id="a_edge131_154"><a xlink:href="#doCreateMember" xlink:title="管理者を作成する (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="3847.05" y="-1068.7" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="3856.8" y="-1068.7" font-family="Times,serif" font-size="13.00"> doCreateMember</text>
 </a>
@@ -2844,7 +2839,7 @@
 </a>
 </g>
 <g id="a_edge128&#45;label"><a xlink:href="#goMemberList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge128_156"><a xlink:href="#goMemberList" xlink:title="管理者一覧を見る (safe)">
+<g id="a_edge128_155"><a xlink:href="#goMemberList" xlink:title="管理者一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3898.03" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3907.78" y="-1151.5" font-family="Times,serif" font-size="13.00"> goMemberList</text>
 </a>
@@ -2870,7 +2865,7 @@
 </a>
 </g>
 <g id="a_edge135&#45;label"><a xlink:href="#doUpdateAuthorityRole" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge135_157"><a xlink:href="#doUpdateAuthorityRole" xlink:title="権限ルールを更新する (idempotent)">
+<g id="a_edge135_156"><a xlink:href="#doUpdateAuthorityRole" xlink:title="権限ルールを更新する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="5144.86" y="-1254.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="5154.61" y="-1254.7" font-family="Times,serif" font-size="13.00"> doUpdateAuthorityRole</text>
 </a>
@@ -2896,7 +2891,7 @@
 </a>
 </g>
 <g id="a_edge138&#45;label"><a xlink:href="#doUpdateMailTemplate" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge138_158"><a xlink:href="#doUpdateMailTemplate" xlink:title="メールテンプレートを更新する (idempotent)">
+<g id="a_edge138_157"><a xlink:href="#doUpdateMailTemplate" xlink:title="メールテンプレートを更新する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="5413.07" y="-1254.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="5422.82" y="-1254.7" font-family="Times,serif" font-size="13.00"> doUpdateMailTemplate</text>
 </a>
@@ -2922,7 +2917,7 @@
 </a>
 </g>
 <g id="a_edge136&#45;label"><a xlink:href="#goMailTemplateList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge136_159"><a xlink:href="#goMailTemplateList" xlink:title="メールテンプレート一覧を見る (safe)">
+<g id="a_edge136_158"><a xlink:href="#goMailTemplateList" xlink:title="メールテンプレート一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3658.96" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3668.71" y="-1151.5" font-family="Times,serif" font-size="13.00"> goMailTemplateList</text>
 </a>
@@ -2948,7 +2943,7 @@
 </a>
 </g>
 <g id="a_edge133&#45;label"><a xlink:href="#goLoginHistoryList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge133_160"><a xlink:href="#goLoginHistoryList" xlink:title="ログイン履歴を見る (safe)">
+<g id="a_edge133_159"><a xlink:href="#goLoginHistoryList" xlink:title="ログイン履歴を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4349.03" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4358.78" y="-1151.5" font-family="Times,serif" font-size="13.00"> goLoginHistoryList</text>
 </a>
@@ -2974,7 +2969,7 @@
 </a>
 </g>
 <g id="a_edge176&#45;label"><a xlink:href="#doUpdateCsv" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge176_161"><a xlink:href="#doUpdateCsv" xlink:title="CSV出力設定を更新する (idempotent)">
+<g id="a_edge176_160"><a xlink:href="#doUpdateCsv" xlink:title="CSV出力設定を更新する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="5640.22" y="-1254.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="5649.97" y="-1254.7" font-family="Times,serif" font-size="13.00"> doUpdateCsv</text>
 </a>
@@ -3000,12 +2995,12 @@
 </a>
 </g>
 <g id="a_edge143&#45;label"><a xlink:href="#doEnablePlugin" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge143_162"><a xlink:href="#doEnablePlugin" xlink:title="プラグインを有効化する (idempotent)">
+<g id="a_edge143_161"><a xlink:href="#doEnablePlugin" xlink:title="プラグインを有効化する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="4564.22" y="-1009.3" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="4573.97" y="-1009.3" font-family="Times,serif" font-size="13.00"> doEnablePlugin</text>
 </a>
 </g>
-<g id="a_edge143_163"><a xlink:href="#doDisablePlugin" xlink:title="プラグインを無効化する (idempotent)">
+<g id="a_edge143_162"><a xlink:href="#doDisablePlugin" xlink:title="プラグインを無効化する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="4564.22" y="-993.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="4573.97" y="-993.7" font-family="Times,serif" font-size="13.00"> doDisablePlugin</text>
 </a>
@@ -3031,7 +3026,7 @@
 </a>
 </g>
 <g id="a_edge144&#45;label"><a xlink:href="#doUninstallPlugin" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge144_164"><a xlink:href="#doUninstallPlugin" xlink:title="プラグインをアンインストールする (idempotent)">
+<g id="a_edge144_163"><a xlink:href="#doUninstallPlugin" xlink:title="プラグインをアンインストールする (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="4565.34" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="4575.09" y="-1076.5" font-family="Times,serif" font-size="13.00"> doUninstallPlugin</text>
 </a>
@@ -3048,7 +3043,7 @@
 </a>
 </g>
 <g id="a_edge142&#45;label"><a xlink:href="#doInstallPlugin" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge142_165"><a xlink:href="#doInstallPlugin" xlink:title="プラグインをインストールする (unsafe)">
+<g id="a_edge142_164"><a xlink:href="#doInstallPlugin" xlink:title="プラグインをインストールする (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="4462.78" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="4472.53" y="-1076.5" font-family="Times,serif" font-size="13.00"> doInstallPlugin</text>
 </a>
@@ -3065,7 +3060,7 @@
 </a>
 </g>
 <g id="a_edge140&#45;label"><a xlink:href="#goPluginList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge140_166"><a xlink:href="#goPluginList" xlink:title="プラグイン一覧を見る (safe)">
+<g id="a_edge140_165"><a xlink:href="#goPluginList" xlink:title="プラグイン一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4573.6" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4583.35" y="-1151.5" font-family="Times,serif" font-size="13.00"> goPluginList</text>
 </a>
@@ -3091,7 +3086,7 @@
 </a>
 </g>
 <g id="a_edge174&#45;label"><a xlink:href="#goTemplateList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge174_167"><a xlink:href="#goTemplateList" xlink:title="テンプレート一覧を見る (safe)">
+<g id="a_edge174_166"><a xlink:href="#goTemplateList" xlink:title="テンプレート一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4778.74" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4788.49" y="-1151.5" font-family="Times,serif" font-size="13.00"> goTemplateList</text>
 </a>
@@ -3117,7 +3112,7 @@
 </a>
 </g>
 <g id="a_edge147&#45;label"><a xlink:href="#doUpdateLayout" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge147_168"><a xlink:href="#doUpdateLayout" xlink:title="レイアウトを更新する (idempotent)">
+<g id="a_edge147_167"><a xlink:href="#doUpdateLayout" xlink:title="レイアウトを更新する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="5814.25" y="-1254.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="5824" y="-1254.7" font-family="Times,serif" font-size="13.00"> doUpdateLayout</text>
 </a>
@@ -3143,7 +3138,7 @@
 </a>
 </g>
 <g id="a_edge145&#45;label"><a xlink:href="#goLayoutList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge145_169"><a xlink:href="#goLayoutList" xlink:title="レイアウト一覧を見る (safe)">
+<g id="a_edge145_168"><a xlink:href="#goLayoutList" xlink:title="レイアウト一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4986.14" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4995.89" y="-1151.5" font-family="Times,serif" font-size="13.00"> goLayoutList</text>
 </a>
@@ -3169,7 +3164,7 @@
 </a>
 </g>
 <g id="a_edge151&#45;label"><a xlink:href="#doUpdateBlock" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge151_170"><a xlink:href="#doUpdateBlock" xlink:title="ブロックを更新する (idempotent)">
+<g id="a_edge151_169"><a xlink:href="#doUpdateBlock" xlink:title="ブロックを更新する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="5167.22" y="-1001.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="5176.97" y="-1001.5" font-family="Times,serif" font-size="13.00"> doUpdateBlock</text>
 </a>
@@ -3195,7 +3190,7 @@
 </a>
 </g>
 <g id="a_edge152&#45;label"><a xlink:href="#doDeleteBlock" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge152_171"><a xlink:href="#doDeleteBlock" xlink:title="ブロックを削除する (idempotent)">
+<g id="a_edge152_170"><a xlink:href="#doDeleteBlock" xlink:title="ブロックを削除する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="5167.17" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="5176.92" y="-1076.5" font-family="Times,serif" font-size="13.00"> doDeleteBlock</text>
 </a>
@@ -3212,7 +3207,7 @@
 </a>
 </g>
 <g id="a_edge150&#45;label"><a xlink:href="#doCreateBlock" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge150_172"><a xlink:href="#doCreateBlock" xlink:title="ブロックを作成する (unsafe)">
+<g id="a_edge150_171"><a xlink:href="#doCreateBlock" xlink:title="ブロックを作成する (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="5066.25" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="5076" y="-1076.5" font-family="Times,serif" font-size="13.00"> doCreateBlock</text>
 </a>
@@ -3229,7 +3224,7 @@
 </a>
 </g>
 <g id="a_edge148&#45;label"><a xlink:href="#goBlockList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge148_173"><a xlink:href="#goBlockList" xlink:title="ブロック一覧を見る (safe)">
+<g id="a_edge148_172"><a xlink:href="#goBlockList" xlink:title="ブロック一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="5175.03" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="5184.78" y="-1151.5" font-family="Times,serif" font-size="13.00"> goBlockList</text>
 </a>
@@ -3255,12 +3250,12 @@
 </a>
 </g>
 <g id="a_edge153&#45;label"><a xlink:href="#goTradeLawList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge153_174"><a xlink:href="#goTradeLawList" xlink:title="特定商取引法一覧を見る (safe)">
+<g id="a_edge153_173"><a xlink:href="#goTradeLawList" xlink:title="特定商取引法一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="5382.07" y="-1159.3" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="5391.82" y="-1159.3" font-family="Times,serif" font-size="13.00"> goTradeLawList</text>
 </a>
 </g>
-<g id="a_edge153_175"><a xlink:href="#doUpdateTradeLaw" xlink:title="特定商取引法を更新する (idempotent)">
+<g id="a_edge153_174"><a xlink:href="#doUpdateTradeLaw" xlink:title="特定商取引法を更新する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="5382.07" y="-1143.7" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="5391.82" y="-1143.7" font-family="Times,serif" font-size="13.00"> doUpdateTradeLaw</text>
 </a>
@@ -3286,7 +3281,7 @@
 </a>
 </g>
 <g id="a_edge64&#45;label"><a xlink:href="#doAdminLogin" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge64_176"><a xlink:href="#doAdminLogin" xlink:title="管理者ログインする (unsafe)">
+<g id="a_edge64_175"><a xlink:href="#doAdminLogin" xlink:title="管理者ログインする (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="6209.06" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="6218.81" y="-1203.1" font-family="Times,serif" font-size="13.00"> doAdminLogin</text>
 </a>
@@ -3303,7 +3298,7 @@
 </a>
 </g>
 <g id="a_edge14&#45;label"><a xlink:href="#goProductList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge14_177"><a xlink:href="#goProductList" xlink:title="商品一覧を見る (safe)">
+<g id="a_edge14_176"><a xlink:href="#goProductList" xlink:title="商品一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="2904.22" y="-789.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="2913.97" y="-789.7" font-family="Times,serif" font-size="13.00"> goProductList</text>
 </a>
@@ -3320,7 +3315,7 @@
 </a>
 </g>
 <g id="a_edge161&#45;label"><a xlink:href="#goTagList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge161_178"><a xlink:href="#goTagList" xlink:title="タグ一覧を見る (safe)">
+<g id="a_edge161_177"><a xlink:href="#goTagList" xlink:title="タグ一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="5368.79" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="5378.54" y="-1203.1" font-family="Times,serif" font-size="13.00"> goTagList</text>
 </a>
@@ -3337,7 +3332,7 @@
 </a>
 </g>
 <g id="a_edge165&#45;label"><a xlink:href="#goClassNameList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge165_179"><a xlink:href="#goClassNameList" xlink:title="規格名一覧を見る (safe)">
+<g id="a_edge165_178"><a xlink:href="#goClassNameList" xlink:title="規格名一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="5574.79" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="5584.54" y="-1203.1" font-family="Times,serif" font-size="13.00"> goClassNameList</text>
 </a>
@@ -3354,7 +3349,7 @@
 </a>
 </g>
 <g id="a_edge170&#45;label"><a xlink:href="#goClassCategoryList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge170_180"><a xlink:href="#goClassCategoryList" xlink:title="規格分類一覧を見る (safe)">
+<g id="a_edge170_179"><a xlink:href="#goClassCategoryList" xlink:title="規格分類一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="5826.18" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="5835.93" y="-1203.1" font-family="Times,serif" font-size="13.00"> goClassCategoryList</text>
 </a>
@@ -3371,7 +3366,7 @@
 </a>
 </g>
 <g id="a_edge48&#45;label"><a xlink:href="#goOrderList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge48_181"><a xlink:href="#goOrderList" xlink:title="受注一覧を見る (safe)">
+<g id="a_edge48_180"><a xlink:href="#goOrderList" xlink:title="受注一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="682.67" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="692.42" y="-1076.5" font-family="Times,serif" font-size="13.00"> goOrderList</text>
 </a>
@@ -3388,7 +3383,7 @@
 </a>
 </g>
 <g id="a_edge78&#45;label"><a xlink:href="#goCustomerList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge78_182"><a xlink:href="#goCustomerList" xlink:title="会員一覧を見る (safe)">
+<g id="a_edge78_181"><a xlink:href="#goCustomerList" xlink:title="会員一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="2794.45" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="2804.2" y="-1203.1" font-family="Times,serif" font-size="13.00"> goCustomerList</text>
 </a>
@@ -3405,7 +3400,7 @@
 </a>
 </g>
 <g id="a_edge102&#45;label"><a xlink:href="#goBaseInfo" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge102_183"><a xlink:href="#goBaseInfo" xlink:title="基本情報を見る (safe)">
+<g id="a_edge102_182"><a xlink:href="#goBaseInfo" xlink:title="基本情報を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3196.29" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3206.04" y="-1203.1" font-family="Times,serif" font-size="13.00"> goBaseInfo</text>
 </a>
@@ -3422,7 +3417,7 @@
 </a>
 </g>
 <g id="a_edge110&#45;label"><a xlink:href="#goPaymentList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge110_184"><a xlink:href="#goPaymentList" xlink:title="支払方法一覧を見る (safe)">
+<g id="a_edge110_183"><a xlink:href="#goPaymentList" xlink:title="支払方法一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4065.51" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4075.26" y="-1203.1" font-family="Times,serif" font-size="13.00"> goPaymentList</text>
 </a>
@@ -3439,7 +3434,7 @@
 </a>
 </g>
 <g id="a_edge115&#45;label"><a xlink:href="#goDeliveryList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge115_185"><a xlink:href="#goDeliveryList" xlink:title="配送方法一覧を見る (safe)">
+<g id="a_edge115_184"><a xlink:href="#goDeliveryList" xlink:title="配送方法一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="6094.52" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="6104.27" y="-1203.1" font-family="Times,serif" font-size="13.00"> goDeliveryList</text>
 </a>
@@ -3456,7 +3451,7 @@
 </a>
 </g>
 <g id="a_edge120&#45;label"><a xlink:href="#goTaxRuleList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge120_186"><a xlink:href="#goTaxRuleList" xlink:title="税率ルール一覧を見る (safe)">
+<g id="a_edge120_185"><a xlink:href="#goTaxRuleList" xlink:title="税率ルール一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3382.24" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3391.99" y="-1203.1" font-family="Times,serif" font-size="13.00"> goTaxRuleList</text>
 </a>
@@ -3473,7 +3468,7 @@
 </a>
 </g>
 <g id="a_edge124&#45;label"><a xlink:href="#goNewsList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge124_187"><a xlink:href="#goNewsList" xlink:title="ニュース一覧を見る (safe)">
+<g id="a_edge124_186"><a xlink:href="#goNewsList" xlink:title="ニュース一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="6562.94" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="6572.69" y="-1203.1" font-family="Times,serif" font-size="13.00"> goNewsList</text>
 </a>
@@ -3490,7 +3485,7 @@
 </a>
 </g>
 <g id="a_edge156&#45;label"><a xlink:href="#goPageList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge156_188"><a xlink:href="#goPageList" xlink:title="ページ一覧を見る (safe)">
+<g id="a_edge156_187"><a xlink:href="#goPageList" xlink:title="ページ一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3588.73" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3598.48" y="-1203.1" font-family="Times,serif" font-size="13.00"> goPageList</text>
 </a>
@@ -3507,7 +3502,7 @@
 </a>
 </g>
 <g id="a_edge129&#45;label"><a xlink:href="#goMemberList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge129_189"><a xlink:href="#goMemberList" xlink:title="管理者一覧を見る (safe)">
+<g id="a_edge129_188"><a xlink:href="#goMemberList" xlink:title="管理者一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3955.96" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3965.71" y="-1203.1" font-family="Times,serif" font-size="13.00"> goMemberList</text>
 </a>
@@ -3524,7 +3519,7 @@
 </a>
 </g>
 <g id="a_edge137&#45;label"><a xlink:href="#goMailTemplateList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge137_190"><a xlink:href="#goMailTemplateList" xlink:title="メールテンプレート一覧を見る (safe)">
+<g id="a_edge137_189"><a xlink:href="#goMailTemplateList" xlink:title="メールテンプレート一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="3765.36" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="3775.11" y="-1203.1" font-family="Times,serif" font-size="13.00"> goMailTemplateList</text>
 </a>
@@ -3541,7 +3536,7 @@
 </a>
 </g>
 <g id="a_edge134&#45;label"><a xlink:href="#goLoginHistoryList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge134_191"><a xlink:href="#goLoginHistoryList" xlink:title="ログイン履歴を見る (safe)">
+<g id="a_edge134_190"><a xlink:href="#goLoginHistoryList" xlink:title="ログイン履歴を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4474.95" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4484.7" y="-1203.1" font-family="Times,serif" font-size="13.00"> goLoginHistoryList</text>
 </a>
@@ -3558,7 +3553,7 @@
 </a>
 </g>
 <g id="a_edge141&#45;label"><a xlink:href="#goPluginList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge141_192"><a xlink:href="#goPluginList" xlink:title="プラグイン一覧を見る (safe)">
+<g id="a_edge141_191"><a xlink:href="#goPluginList" xlink:title="プラグイン一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4680.05" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4689.8" y="-1203.1" font-family="Times,serif" font-size="13.00"> goPluginList</text>
 </a>
@@ -3575,7 +3570,7 @@
 </a>
 </g>
 <g id="a_edge175&#45;label"><a xlink:href="#goTemplateList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge175_193"><a xlink:href="#goTemplateList" xlink:title="テンプレート一覧を見る (safe)">
+<g id="a_edge175_192"><a xlink:href="#goTemplateList" xlink:title="テンプレート一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4818.91" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4828.66" y="-1203.1" font-family="Times,serif" font-size="13.00"> goTemplateList</text>
 </a>
@@ -3592,7 +3587,7 @@
 </a>
 </g>
 <g id="a_edge146&#45;label"><a xlink:href="#goLayoutList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge146_194"><a xlink:href="#goLayoutList" xlink:title="レイアウト一覧を見る (safe)">
+<g id="a_edge146_193"><a xlink:href="#goLayoutList" xlink:title="レイアウト一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="4923.18" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="4932.93" y="-1203.1" font-family="Times,serif" font-size="13.00"> goLayoutList</text>
 </a>
@@ -3609,7 +3604,7 @@
 </a>
 </g>
 <g id="a_edge149&#45;label"><a xlink:href="#goBlockList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge149_195"><a xlink:href="#goBlockList" xlink:title="ブロック一覧を見る (safe)">
+<g id="a_edge149_194"><a xlink:href="#goBlockList" xlink:title="ブロック一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="5028.95" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="5038.7" y="-1203.1" font-family="Times,serif" font-size="13.00"> goBlockList</text>
 </a>
@@ -3626,7 +3621,7 @@
 </a>
 </g>
 <g id="a_edge154&#45;label"><a xlink:href="#goTradeLawList" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge154_196"><a xlink:href="#goTradeLawList" xlink:title="特定商取引法一覧を見る (safe)">
+<g id="a_edge154_195"><a xlink:href="#goTradeLawList" xlink:title="特定商取引法一覧を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="5129.59" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="5139.34" y="-1203.1" font-family="Times,serif" font-size="13.00"> goTradeLawList</text>
 </a>
@@ -3643,7 +3638,7 @@
 </a>
 </g>
 <g id="a_edge65&#45;label"><a xlink:href="#doAdminLogout" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge65_197"><a xlink:href="#doAdminLogout" xlink:title="管理者ログアウトする (idempotent)">
+<g id="a_edge65_196"><a xlink:href="#doAdminLogout" xlink:title="管理者ログアウトする (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="6325.56" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="6335.31" y="-1203.1" font-family="Times,serif" font-size="13.00"> doAdminLogout</text>
 </a>
@@ -3666,7 +3661,7 @@
 </a>
 </g>
 <g id="a_edge18&#45;label"><a xlink:href="#goProduct" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge18_198"><a xlink:href="#goProduct" xlink:title="商品詳細を見る (safe)">
+<g id="a_edge18_197"><a xlink:href="#goProduct" xlink:title="商品詳細を見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="1871.37" y="-503.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="1881.12" y="-503.5" font-family="Times,serif" font-size="13.00"> goProduct</text>
 </a>
@@ -3689,7 +3684,7 @@
 </a>
 </g>
 <g id="a_edge63&#45;label"><a xlink:href="#doLogout" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge63_199"><a xlink:href="#doLogout" xlink:title="ログアウトする (idempotent)">
+<g id="a_edge63_198"><a xlink:href="#doLogout" xlink:title="ログアウトする (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="1549.03" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="1558.78" y="-1076.5" font-family="Times,serif" font-size="13.00"> doLogout</text>
 </a>
@@ -3706,17 +3701,17 @@
 </a>
 </g>
 <g id="a_edge21&#45;label"><a xlink:href="#doBulkUpdateProductStatus" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge21_200"><a xlink:href="#doBulkUpdateProductStatus" xlink:title="商品ステータスを一括変更する (unsafe)">
+<g id="a_edge21_199"><a xlink:href="#doBulkUpdateProductStatus" xlink:title="商品ステータスを一括変更する (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="2644.22" y="-805.3" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="2653.97" y="-805.3" font-family="Times,serif" font-size="13.00"> doBulkUpdateProductStatus</text>
 </a>
 </g>
-<g id="a_edge21_201"><a xlink:href="#goExportProduct" xlink:title="商品CSVをエクスポートする (safe)">
+<g id="a_edge21_200"><a xlink:href="#goExportProduct" xlink:title="商品CSVをエクスポートする (safe)">
 <text xml:space="preserve" text-anchor="start" x="2644.22" y="-789.7" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="2653.97" y="-789.7" font-family="Times,serif" font-size="13.00"> goExportProduct</text>
 </a>
 </g>
-<g id="a_edge21_202"><a xlink:href="#doImportProductCsv" xlink:title="商品CSVをインポートする (unsafe)">
+<g id="a_edge21_201"><a xlink:href="#doImportProductCsv" xlink:title="商品CSVをインポートする (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="2644.22" y="-774.1" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="2653.97" y="-774.1" font-family="Times,serif" font-size="13.00"> doImportProductCsv</text>
 </a>
@@ -3733,12 +3728,12 @@
 </a>
 </g>
 <g id="a_edge22&#45;label"><a xlink:href="#doImportCategoryCsv" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge22_203"><a xlink:href="#doImportCategoryCsv" xlink:title="カテゴリCSVをインポートする (unsafe)">
+<g id="a_edge22_202"><a xlink:href="#doImportCategoryCsv" xlink:title="カテゴリCSVをインポートする (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="2765.96" y="-724.9" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="2775.71" y="-724.9" font-family="Times,serif" font-size="13.00"> doImportCategoryCsv</text>
 </a>
 </g>
-<g id="a_edge22_204"><a xlink:href="#goExportCategory" xlink:title="カテゴリCSVをエクスポートする (safe)">
+<g id="a_edge22_203"><a xlink:href="#goExportCategory" xlink:title="カテゴリCSVをエクスポートする (safe)">
 <text xml:space="preserve" text-anchor="start" x="2765.96" y="-709.3" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="2775.71" y="-709.3" font-family="Times,serif" font-size="13.00"> goExportCategory</text>
 </a>
@@ -3755,7 +3750,7 @@
 </a>
 </g>
 <g id="a_edge34&#45;label"><a xlink:href="#goShoppingLogin" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge34_205"><a xlink:href="#goShoppingLogin" xlink:title="購入ログインを見る (safe)">
+<g id="a_edge34_204"><a xlink:href="#goShoppingLogin" xlink:title="購入ログインを見る (safe)">
 <text xml:space="preserve" text-anchor="start" x="1156.22" y="-1001.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="1165.97" y="-1001.5" font-family="Times,serif" font-size="13.00"> goShoppingLogin</text>
 </a>
@@ -3772,27 +3767,27 @@
 </a>
 </g>
 <g id="a_edge52&#45;label"><a xlink:href="#doBulkDeleteOrder" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge52_206"><a xlink:href="#doBulkDeleteOrder" xlink:title="受注を一括削除する (unsafe)">
+<g id="a_edge52_205"><a xlink:href="#doBulkDeleteOrder" xlink:title="受注を一括削除する (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="494.66" y="-1107.7" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="504.41" y="-1107.7" font-family="Times,serif" font-size="13.00"> doBulkDeleteOrder</text>
 </a>
 </g>
-<g id="a_edge52_207"><a xlink:href="#goExportOrder" xlink:title="受注CSVをエクスポートする (safe)">
+<g id="a_edge52_206"><a xlink:href="#goExportOrder" xlink:title="受注CSVをエクスポートする (safe)">
 <text xml:space="preserve" text-anchor="start" x="494.66" y="-1092.1" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="504.41" y="-1092.1" font-family="Times,serif" font-size="13.00"> goExportOrder</text>
 </a>
 </g>
-<g id="a_edge52_208"><a xlink:href="#goExportShipping" xlink:title="配送CSVをエクスポートする (safe)">
+<g id="a_edge52_207"><a xlink:href="#goExportShipping" xlink:title="配送CSVをエクスポートする (safe)">
 <text xml:space="preserve" text-anchor="start" x="494.66" y="-1076.5" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="504.41" y="-1076.5" font-family="Times,serif" font-size="13.00"> goExportShipping</text>
 </a>
 </g>
-<g id="a_edge52_209"><a xlink:href="#doImportShippingCsv" xlink:title="配送CSVをインポートする (unsafe)">
+<g id="a_edge52_208"><a xlink:href="#doImportShippingCsv" xlink:title="配送CSVをインポートする (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="494.66" y="-1060.9" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="504.41" y="-1060.9" font-family="Times,serif" font-size="13.00"> doImportShippingCsv</text>
 </a>
 </g>
-<g id="a_edge52_210"><a xlink:href="#goExportOrderPdf" xlink:title="帳票PDFをエクスポートする (safe)">
+<g id="a_edge52_209"><a xlink:href="#goExportOrderPdf" xlink:title="帳票PDFをエクスポートする (safe)">
 <text xml:space="preserve" text-anchor="start" x="494.66" y="-1045.3" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="504.41" y="-1045.3" font-family="Times,serif" font-size="13.00"> goExportOrderPdf</text>
 </a>
@@ -3809,7 +3804,7 @@
 </a>
 </g>
 <g id="a_edge60&#45;label"><a xlink:href="#doActivateCustomer" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge60_211"><a xlink:href="#doActivateCustomer" xlink:title="会員を有効化する (idempotent)">
+<g id="a_edge60_210"><a xlink:href="#doActivateCustomer" xlink:title="会員を有効化する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="746.64" y="-1151.5" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="756.39" y="-1151.5" font-family="Times,serif" font-size="13.00"> doActivateCustomer</text>
 </a>
@@ -3826,12 +3821,12 @@
 </a>
 </g>
 <g id="a_edge81&#45;label"><a xlink:href="#doDeleteCustomer" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge81_212"><a xlink:href="#doDeleteCustomer" xlink:title="会員を削除する (idempotent)">
+<g id="a_edge81_211"><a xlink:href="#doDeleteCustomer" xlink:title="会員を削除する (idempotent)">
 <text xml:space="preserve" text-anchor="start" x="1030.29" y="-1210.9" font-family="Times,serif" font-size="13.00" fill="#d4a000">■</text>
 <text xml:space="preserve" text-anchor="start" x="1040.04" y="-1210.9" font-family="Times,serif" font-size="13.00"> doDeleteCustomer</text>
 </a>
 </g>
-<g id="a_edge81_213"><a xlink:href="#goExportCustomer" xlink:title="会員CSVをエクスポートする (safe)">
+<g id="a_edge81_212"><a xlink:href="#goExportCustomer" xlink:title="会員CSVをエクスポートする (safe)">
 <text xml:space="preserve" text-anchor="start" x="1030.29" y="-1195.3" font-family="Times,serif" font-size="13.00" fill="#00a86b">■</text>
 <text xml:space="preserve" text-anchor="start" x="1040.04" y="-1195.3" font-family="Times,serif" font-size="13.00"> goExportCustomer</text>
 </a>
@@ -3848,7 +3843,7 @@
 </a>
 </g>
 <g id="a_edge66&#45;label"><a xlink:href="#doRequestPasswordReset" xlink:title="&lt;TABLE&gt;">
-<g id="a_edge66_214"><a xlink:href="#doRequestPasswordReset" xlink:title="パスワードリセットを依頼する (unsafe)">
+<g id="a_edge66_213"><a xlink:href="#doRequestPasswordReset" xlink:title="パスワードリセットを依頼する (unsafe)">
 <text xml:space="preserve" text-anchor="start" x="1192.62" y="-1203.1" font-family="Times,serif" font-size="13.00" fill="#ff4136">■</text>
 <text xml:space="preserve" text-anchor="start" x="1202.37" y="-1203.1" font-family="Times,serif" font-size="13.00"> doRequestPasswordReset</text>
 </a>

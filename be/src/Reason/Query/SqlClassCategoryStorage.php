@@ -284,6 +284,45 @@ final class SqlClassCategoryStorage implements ClassCategoryStorageInterface
         $stmt->execute([':id' => $id]);
     }
 
+    #[Override]
+    public function reorder(string $classCategoryId, int $sortNo): void
+    {
+        if (! ctype_digit($classCategoryId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake.
+            return;
+        }
+
+        // Generic `doSortNoMove` — rewrite the `sort_no` column directly.
+        // No `update_date` bump (drag-and-drop reorder is metadata-only).
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_class_category SET sort_no = :sort_no WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $classCategoryId,
+            ':sort_no' => $sortNo,
+        ]);
+    }
+
+    #[Override]
+    public function setVisible(string $classCategoryId, bool $visible): void
+    {
+        if (! ctype_digit($classCategoryId)) {
+            // Silent no-op on a non-numeric id — same shape as the Fake.
+            return;
+        }
+
+        // Generic `doToggleVisible` — rewrite the `visible` column
+        // (tinyint(1) NOT NULL DEFAULT 1) directly. The column is
+        // outside the ClassCategoryEntity projection.
+        $stmt = $this->pdo->prepare(
+            'UPDATE dtb_class_category SET visible = :visible WHERE id = :id',
+        );
+        $stmt->execute([
+            ':id' => (int) $classCategoryId,
+            ':visible' => (int) $visible,
+        ]);
+    }
+
     /**
      * Derive the next append slot for `sort_no` (NOT NULL, no DEFAULT).
      * Empty table → 1; otherwise MAX(sort_no)+1. The projection never

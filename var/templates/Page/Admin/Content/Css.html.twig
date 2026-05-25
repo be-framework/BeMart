@@ -1,0 +1,111 @@
+{#
+  BeMart admin カスタマイズCSS編集 — EC-CUBE goCss.
+
+  PORT of EC-CUBE 4.3 admin-theme `Content/css.twig`
+  (src/Eccube/Resource/template/admin/Content/css.twig).
+
+  FORM/CRUD page. Extends the admin frame (`admin-base.html.twig`). The
+  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
+  from EC-CUBE; only the dynamic bindings are rebound.
+
+  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
+  Css resource (src/Resource/Page/Admin/Content/Css.php — a thin HTML
+  renderer, see its port header) exposes an
+  {@see \MyVendor\BeMart\Form\AdminCssForm} as `body['form']`. The CSS
+  textarea renders through that real form object:
+    {{ form.input('css')|raw }}     <- real <textarea> w/ id `form_css`
+  `AdminCssForm::init()` ports the field name / id from EC-CUBE's inline
+  `CssController` form (block prefix `form`).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
+     hidden `_token` input is kept (structure) with an empty value;
+     EC-CUBE-runtime only — enumerated as residual.
+   - `has_errors(form.css)` -> always-false here (no domain error on a
+     fresh GET); the `is-invalid` class is omitted.
+   - the ACE editor `css` source — the customize-CSS file is not modelled
+     in any ALPS wave (see the Css resource port header), so the editor
+     renders empty (the AdminCssForm `css` field has no persisted value).
+     The `<div id="editor">` shell + hidden textarea are kept.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_content_css' %}
+{% set title = 'CSS管理' %}
+{% set sub_title = 'コンテンツ管理' %}
+
+{% block stylesheet %}
+    <style>
+        .ui-resizable-se {
+            right: -3px;
+            bottom: -3px;
+        }
+    </style>
+{% endblock %}
+
+{% block main %}
+    <form id="content_css_form" method="post" action="{{ url('admin_content_css') }}">
+        <input type="hidden" id="form__token" name="_token" value="{{ csrfToken|default('') }}">
+
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <!-- ページ設定 -->
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8"><span class="card-title">CSS設定</span></div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#pageDetail" aria-expanded="false" aria-controls="pageDetail">
+                                        <i class="fa fa-angle-up fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="pageDetail">
+                            <div class="card-body">
+                                <!-- コード -->
+                                <div class="row mb-2">
+                                    <div class="col-2">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="カスタマイズ用CSSファイルを編集します。CSSで記述します。">
+                                            <span>コード</span><i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col-10">
+                                        <div id="editor" style="height: 480px" class="form-control"></div>
+                                        <div style="display: none">{{ form.input('css')|raw }}</div>
+                                        {% if form.error('css') %}<span class="invalid-feedback d-block">{{ form.error('css') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_content_page') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>CSS管理</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button id="save-button" class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

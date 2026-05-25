@@ -1,0 +1,61 @@
+{#
+  BeMart admin キャッシュ管理 — EC-CUBE goCache.
+
+  PORT of EC-CUBE 4.3 admin-theme `Content/cache.twig`
+  (src/Eccube/Resource/template/admin/Content/cache.twig).
+
+  DATA page with a single action button. Extends the admin frame
+  (`admin-base.html.twig`). The markup skeleton + `c-*` / `ec-*` /
+  Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
+  bindings are rebound.
+
+  The Cache resource (src/Resource/Page/Admin/Content/Cache.php) is a
+  thin HTML renderer — see its port header (the cache-clear POST is an
+  operational action, not a domain mutation).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
+     hidden `_token` input is kept (structure) with an empty value;
+     EC-CUBE-runtime only — enumerated as residual.
+   - the `{% block javascript %}` `app.flashes(...)` maintenance-mode
+     auto-disable script -> EC-CUBE flash + maintenance runtime. Dropped.
+   - `{% form_theme %}` -> Symfony form-theme runtime. Dropped.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_content_cache' %}
+{% set title = 'キャッシュ管理' %}
+{% set sub_title = 'コンテンツ管理' %}
+
+{% block main %}
+    <form method="post" action="{{ url('admin_content_cache') }}">
+        <input type="hidden" id="cache__token" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col"><span class="card-title">キャッシュ管理</span></div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-auto">
+                                    <span>本番環境にFTPなどでTwigファイルをアップロードして入れ替えた場合、画面を反映させるにはTwigキャッシュを削除する必要があります。</span>
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-auto">
+                                    <button type="submit" class="btn btn-ec-conversion">キャッシュ削除</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

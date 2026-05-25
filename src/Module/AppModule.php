@@ -12,6 +12,8 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Module\BeModule;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistry;
+use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
@@ -340,6 +342,13 @@ final class AppModule extends AbstractAppModule
         // Wave 9ι: misc admin transitions.
         $this->bind(CsvColumnConfigStorageInterface::class)
             ->to(FakeCsvColumnConfigStorage::class)->in(Scope::SINGLETON);
+
+        // Phase 3 ALPS-audit remediation: generic admin-list transitions
+        // (doSortNoMove / doToggleVisible). AdminMasterRegistry routes
+        // the abstract transition to the per-master storage keyed by
+        // `masterType`; it depends only on the storage interfaces, so
+        // the single binding works under both the Fake and SQL stores.
+        $this->bind(AdminMasterRegistryInterface::class)->to(AdminMasterRegistry::class);
 
         // Wave 9ζ: CMS admin CRUD (Page / News / Block / Layout / Tag / Template).
         $this->bind(PageStorageInterface::class)->to(FakePageStorage::class)->in(Scope::SINGLETON);

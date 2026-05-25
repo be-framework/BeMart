@@ -54,6 +54,12 @@ final class FavoriteListHtmlRenderTest extends TestCase
     /**
      * EC-CUBE lines with no BeMart counterpart and vice versa.
      *
+     * Phase 3 ENRICHMENT — the favorite-row product thumbnail is no
+     * longer a residual: the `Favorite` ALPS descriptor + FavoriteEntity
+     * gained `fileName` (the product main-image file name), so BeMart's
+     * port emits the same `<img>` EC-CUBE does. Both sides are fed the
+     * same image file name below, so the thumbnail line diffs to zero.
+     *
      * @var list<string>
      */
     private const RESIDUAL_ALLOWLIST = [
@@ -70,15 +76,6 @@ final class FavoriteListHtmlRenderTest extends TestCase
         '<title>BeMart / マイページ</title>',
         '<title>EC-CUBE / マイページ</title>',
         '<meta name="author" content="">',
-
-        // --- favorite row: product thumbnail (missing body field) -------
-        // EC-CUBE's favorite.twig renders the product image inside
-        // `ec-favoriteRole__item-image`. BeMart's FavoriteEntity carries
-        // only productCode / productName / unitPrice (no surrogate
-        // product id, no image), so the `<img>` is omitted; the
-        // `ec-favoriteRole__item-image` <p> is kept (structure) but
-        // empty on the BeMart side. EC-CUBE emits the <img> line.
-        '<img src="/assets/img/common/no_image_product.png">',
 
         // --- favorite pager (not a paged view in BeMart) ----------------
         '<div class="ec-pagerRole">',
@@ -113,6 +110,7 @@ final class FavoriteListHtmlRenderTest extends TestCase
             productCode: 'sample-001',
             productName: 'サンプル商品 A',
             unitPrice: 1200,
+            fileName: 'sample-a.jpg',
         ));
 
         $this->resource = $injector->getInstance(ResourceInterface::class);
@@ -179,8 +177,13 @@ final class FavoriteListHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
+        // Phase 3 enrichment shrank the residual: the favorite-row
+        // product thumbnail is now a real body field (`Favorite.fileName`)
+        // and diffs to zero. The remaining ~12 lines are the EC-CUBE
+        // <head> furniture + the ec-pagerRole node (BeMart's favorites
+        // list is not a paged view).
         $this->assertLessThanOrEqual(
-            16,
+            13,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -220,19 +223,24 @@ final class FavoriteListHtmlRenderTest extends TestCase
         $this->registerEcCubeStubs($twig);
 
         // The same logical favorite as BeMart's seed: sample-001 /
-        // サンプル商品 A / ￥1,200. EC-CUBE keys the row by the surrogate
-        // Product.id and renders a price RANGE
+        // サンプル商品 A / ￥1,200 / image `sample-a.jpg`. EC-CUBE keys
+        // the row by the surrogate Product.id and renders a price RANGE
         // (price02_inc_tax_min..max); BeMart's FavoriteEntity carries
         // productCode + a single unitPrice, so the row keys by
         // productCode and shows the single price. To keep the row's
         // TITLE / PRICE comparable, EC-CUBE is fed equal min/max prices
         // (so its `==` branch renders a single price) and the same id is
         // the productCode.
+        //
+        // Phase 3 enrichment — the product THUMBNAIL is now a real body
+        // field (`Favorite.fileName`). EC-CUBE is fed the SAME image
+        // file name (`main_list_image`) BeMart's FavoriteEntity carries,
+        // so the `<img>` line diffs to zero on both sides.
         $favorite = new EcCubeStub([
             'Product' => new EcCubeStub([
                 'id' => 'sample-001',
                 'name' => 'サンプル商品 A',
-                'main_list_image' => null,
+                'main_list_image' => 'sample-a.jpg',
                 'price02_inc_tax_min' => 1200,
                 'price02_inc_tax_max' => 1200,
             ]),
@@ -257,10 +265,10 @@ final class FavoriteListHtmlRenderTest extends TestCase
                 'meta_robots' => '',
             ]),
             'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [0 => 'x'],
+                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
                 'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
                 'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [0 => 'x'], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
+                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
                 'ColumnNum' => 1,
             ]),
             'app' => new EcCubeStub([

@@ -6,7 +6,7 @@
 | 評価時点 | 2026-05-18 |
 | 評価種別 | 中間評価 (Branching 検証済み / Cascade Diamond は構造的に不成立と判明) |
 | 想定読者 | BEAR.Sunday + Service Object で書いている人。「なぜ Be を追加で入れるのか？」を疑問に思う立場 |
-| 関連 | [HANDOVER.md](../../HANDOVER.md) (工程ログ・指標達成記録) |
+| 関連 | [HANDOVER.md](../../docs/HANDOVER.md) (工程ログ・指標達成記録) |
 
 ---
 

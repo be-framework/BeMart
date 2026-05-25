@@ -275,6 +275,33 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
+    public function testSetVisibleRewritesVisibleColumn(): void
+    {
+        $id = $this->insertNews(['visible' => 1]);
+        $storage = new SqlNewsStorage($this->pdo);
+
+        $storage->setVisible((string) $id, false);
+
+        $stmt = $this->pdo->prepare('SELECT visible FROM dtb_news WHERE id = :id');
+        $stmt->execute([':id' => $id]);
+        $row = $stmt->fetch();
+        $this->assertNotFalse($row);
+        $this->assertSame(0, (int) $row['visible']);
+
+        $storage->setVisible((string) $id, true);
+        $stmt->execute([':id' => $id]);
+        $back = $stmt->fetch();
+        $this->assertNotFalse($back);
+        $this->assertSame(1, (int) $back['visible']);
+    }
+
+    public function testSetVisibleIsSilentNoOpForNonNumericId(): void
+    {
+        $storage = new SqlNewsStorage($this->pdo);
+        $storage->setVisible('nw-welcome', false); // non-numeric, no exception
+        $this->assertTrue(true);
+    }
+
     public function testSqlNewsIdGeneratorAllocatesIncrementingIds(): void
     {
         $generator = new SqlNewsIdGenerator($this->pdo);

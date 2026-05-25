@@ -14,6 +14,7 @@ use MyVendor\BeMart\Be\Exception\InsufficientAuthorityException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AuthorityRoleUpdated;
 use MyVendor\BeMart\Be\Input\UpdateAuthorityRoleInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
@@ -58,7 +59,40 @@ class AuthorityRole extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly AdminSessionInterface $adminSession,
     ) {
+    }
+
+    /**
+     * Phase 3 admin HTML Tier-2: render the authority-rule management
+     * screen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE
+     * also has a GET page for editing URL-deny rules. No persisted
+     * `dtb_authority_role` storage exists in BeMart yet, so this GET
+     * exposes the stable form body shape the HTML needs and flags the
+     * rule rows as static placeholders.
+     */
+    #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
+    public function onGet(): static
+    {
+        if ($this->adminSession->adminId() === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
+        $this->body = [
+            'authorityOptions' => [
+                ['id' => 0, 'label' => 'システム管理者'],
+                ['id' => 1, 'label' => '店舗オーナー'],
+            ],
+            'rules' => [
+                ['authority' => 1, 'denyUrl' => '/setting/system/security'],
+            ],
+        ];
+
+        return $this;
     }
 
     /**

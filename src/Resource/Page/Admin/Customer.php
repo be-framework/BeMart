@@ -13,6 +13,8 @@ use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
 use MyVendor\BeMart\Be\Input\GetAdminCustomerInput;
+use MyVendor\BeMart\Form\AdminCustomerForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -52,6 +54,7 @@ class Customer extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -113,6 +116,14 @@ class Customer extends ResourceObject
             'favorites' => $final->favorites,
             'favoriteCount' => $final->favoriteCount,
         ];
+        // Phase 3: an AdminCustomerForm pre-filled with the persisted
+        // profile, for the HTML edit page (Customer.html.twig) to render
+        // via `{{ form.input(...) }}`. JSON contexts ignore `body.form`;
+        // the resource tests assert key-wise on body and are unaffected.
+        $form = $this->formFactory->newInstance(AdminCustomerForm::class);
+        assert($form instanceof AdminCustomerForm);
+        $form->fillValues($this->body);
+        $this->body['form'] = $form;
 
         return $this;
     }

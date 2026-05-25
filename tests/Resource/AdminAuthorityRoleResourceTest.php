@@ -148,4 +148,29 @@ final class AdminAuthorityRoleResourceTest extends TestCase
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
+
+    /**
+     * Phase 3 admin HTML Tier-2: the GET renderer exposes the
+     * authority-rule editor body shape (`authorityOptions` + `rules`).
+     */
+    public function testOnGetReturnsAuthorityRuleBody(): void
+    {
+        $this->rebindAdminSession(self::SYSTEM_ADMIN_ID);
+
+        $ro = $this->resource->get('page://self/admin/authority-role');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertNotEmpty($ro->body['authorityOptions']);
+        $this->assertArrayHasKey('rules', $ro->body);
+    }
+
+    public function testOnGetAnonymousAdminReturns403(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->get('page://self/admin/authority-role');
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('管理者', $ro->body['message']);
+    }
 }

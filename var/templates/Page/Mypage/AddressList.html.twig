@@ -11,10 +11,17 @@
   (src/Resource/Page/Mypage/AddressList.php):
     customerId, count,
     addresses[] { addressId, name01, name02, kana01, kana02,
-                  companyName, phoneNumber, postalCode, pref,
+                  companyName, phoneNumber, postalCode, pref, prefName,
                   addr01, addr02 }
 
   Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
+
+  Phase 3 ENRICHMENT — the `CustomerAddress` ALPS descriptor + the
+  AddressEntity projection were widened with `prefName` (the prefecture
+  DISPLAY name — `mtb_pref.name`). SqlAddressStorage LEFT JOINs the
+  `mtb_pref` master; FakeAddressStorage carries the parallel field. The
+  address line now renders the prefecture NAME (it previously rendered
+  the bare integer `pref` master id).
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
@@ -27,11 +34,8 @@
    - `csrf_token_for_anchor()` — EC-CUBE per-request CSRF widget on the
      delete anchor; BeMart's html context has no CSRF widget, so the
      attribute is absent. EC-CUBE-runtime only — enumerated as residual.
-   - MISSING BODY FIELD — EC-CUBE renders `CustomerAddress.Pref` (the
-     prefecture's display NAME, from the `mtb_pref` master). BeMart's
-     AddressEntity carries `pref` as the integer master id only (no Pref
-     name join), so the integer is rendered in the address line and the
-     name is OMITTED. Enumerated as residual / follow-up.
+   - `CustomerAddress.Pref` -> the body's `prefName` (the prefecture
+     display name); a null `prefName` (unresolved master) renders empty.
 #}
 {% extends 'base.html.twig' %}
 
@@ -73,7 +77,7 @@
                                     </a>
                                     <div class="ec-addressList__address">
                                         <div>{{ CustomerAddress.name01 }}&nbsp;{{ CustomerAddress.name02 }}</div>
-                                        <div>〒{{ CustomerAddress.postalCode }} {{ CustomerAddress.pref }}{{ CustomerAddress.addr01 }}{{ CustomerAddress.addr02 }}</div>
+                                        <div>〒{{ CustomerAddress.postalCode }} {{ CustomerAddress.prefName|default('') }}{{ CustomerAddress.addr01 }}{{ CustomerAddress.addr02 }}</div>
                                         <div>{{ CustomerAddress.phoneNumber }}</div>
                                     </div>
                                     <div class="ec-addressList__action">

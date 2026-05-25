@@ -1,0 +1,117 @@
+{#
+  BeMart admin category editor — EC-CUBE admin-theme `Product/category.twig`.
+
+  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Product/category.twig`
+  — the ~359-line category tree-list + inline add/edit screen. It
+  extends the admin frame (`admin-base.html.twig`), not the storefront
+  frame.
+
+  Tier-2 port note: EC-CUBE's screen renders the recursive category
+  tree (with per-row drag-drop sort, move-up/down and child-add
+  affordances) alongside an inline add/edit form. The Be projection
+  ({@see \MyVendor\BeMart\Be\Final\AdminCategoryListFetched}) carries a
+  flat category list, so the port renders the list as a flat table and
+  the add/edit form. The recursive tree nesting + the drag-drop sort JS
+  are EC-CUBE-runtime fragments dropped as enumerated residuals.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
+     AdminCategoryForm leaf fields (Ray.WebFormModule).
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_product_category' %}
+{% set title = categoryId ? 'カテゴリ編集' : 'カテゴリ登録' %}
+{% set sub_title = '商品管理' %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header">
+                        <span class="card-title">カテゴリ一覧</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-sm" id="category_table">
+                            <thead>
+                            <tr>
+                                <th class="border-top-0 pt-2 pb-2 ps-3">カテゴリ名</th>
+                                <th class="border-top-0 pt-2 pb-2 text-center">表示順</th>
+                                <th class="border-top-0 pt-2 pb-2 pe-3">&nbsp;</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for cat in categories %}
+                                <tr>
+                                    <td class="align-middle ps-3">{{ cat.categoryName }}</td>
+                                    <td class="align-middle text-center">{{ cat.sortNo }}</td>
+                                    <td class="align-middle pe-3">
+                                        <a href="{{ url('admin_product_category', {'categoryId': cat.categoryId}) }}">編集</a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr>
+                                    <td class="align-middle text-center text-muted" colspan="3">カテゴリは登録されていません</td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="c-contentsArea__secondaryCol">
+            <form role="form" method="post" action="{{ url('admin_product_category') }}" id="category_form" name="form1" novalidate>
+                <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <input type="hidden" name="categoryId" value="{{ categoryId|default('') }}">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header">
+                        <span class="card-title">{{ categoryId ? 'カテゴリ編集' : 'カテゴリ登録' }}</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-2">
+                            <div class="col-4"><span>カテゴリ名</span><span class="badge bg-primary ms-1">必須</span></div>
+                            <div class="col">
+                                {{ form.input('name')|raw }}
+                                {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                            </div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><span>親カテゴリID</span></div>
+                            <div class="col">{{ form.input('parent_id')|raw }}</div>
+                        </div>
+                        <div class="row mb-2">
+                            <div class="col-4"><span>表示順</span></div>
+                            <div class="col">{{ form.input('sort_no')|raw }}</div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end">
+                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="c-conversionArea">
+        <div class="c-conversionArea__container">
+            <div class="row justify-content-between align-items-center">
+                <div class="col-6">
+                    <div class="c-conversionArea__leftBlockItem">
+                        <a class="c-baseLink" href="{{ url('admin_product') }}">
+                            <i class="fa fa-backward" aria-hidden="true"></i>
+                            <span>商品管理へ戻る</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
