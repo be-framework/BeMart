@@ -24,7 +24,14 @@ BeMartのEC-CUBE移植では、既存のPhase 2 SQL実装に `Sql*Query` / `Sql*
 - メソッド引数名とSQLの `:named` placeholderを一致させる。
 - return typeでfetch/hydration/exec結果を決める。
 - Entity constructor hydrationを使う場合、`SELECT` のカラム順をconstructor引数順に合わせる。
+- FactoryでEntityを復元する場合も、SQLのSELECT順とEntity constructor順を合わせ、単純な橋渡しではnamed argumentsを使わない。
+  - named argumentsは、順序を意図的に崩す／一部defaultを飛ばす／同型引数の取り違えを避ける必要がある時だけ使う。
+  - `new CustomerEntity(customerId: ..., email: ...)` のような全項目列挙は、FactoryとEntity定義を二重管理にするため避ける。
 - `void`, `?Entity`, `array<Entity>`, `AffectedRows`, `InsertedRow`, `PostQueryInterface`, `Pages` を意図に応じて使い分ける。
+- `PostQueryInterface` の戻り値クラス名に、機械的な `Result` postfix や `Generated*` のような生成手段名を付けない。
+  - 良い例: `AllocatedId`, `CopiedProduct`, `ProductStatusUpdate`, `PluginEnablement`, `FavoritePresence`
+  - 避ける例: `GeneratedId`, `ProductCopyResult`, `BulkStatusUpdateResult`, `FooData`, `FooManager`
+  - 詳細は G-25: BDRはdomain noun + readonly propertyで表す。
 
 ## Code example
 
@@ -95,4 +102,5 @@ final class SqlProductQuery implements ProductQueryInterface
 ## Related
 
 - G-23: Hypermedia tests are the storage-migration contract
+- G-25: BDRはdomain noun + readonly propertyで表す
 - Ray.MediaQuery official llms reference: `https://ray-di.github.io/Ray.MediaQuery/llms-full.txt`

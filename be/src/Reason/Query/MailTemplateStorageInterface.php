@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\MailTemplateUpdate;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Mail template storage — unified Query + Command (Wave 8).
@@ -13,7 +15,7 @@ use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
  *   - findById(int $mailTemplateId)       → one template or null
  *   - update(MailTemplateEntity $entity)  → replace subject
  *
- * The migration scope only covers UPDATE of subject. Creating a new
+ * The migration scope only covers subject changes. Creating a new
  * template (which requires setting the underlying file_name) is
  * Phase 2 — for now the `mailTemplateId` MUST refer to an existing
  * seeded row, otherwise update() raises
@@ -22,9 +24,12 @@ use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
 interface MailTemplateStorageInterface
 {
     /** @return list<MailTemplateEntity> */
+    #[DbQuery('tmail_template_list', factory: MailTemplateEntity::class)]
     public function list(): array;
 
+    #[DbQuery('tmail_template_get', factory: MailTemplateEntity::class)]
     public function findById(int $mailTemplateId): MailTemplateEntity|null;
 
-    public function update(MailTemplateEntity $entity): void;
+    #[DbQuery('tmail_template_update')]
+    public function update(MailTemplateEntity $entity): MailTemplateUpdate;
 }

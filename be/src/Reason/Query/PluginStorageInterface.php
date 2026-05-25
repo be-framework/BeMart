@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\PluginEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\PluginEnablement;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Plugin lifecycle — unified Query + Command (Wave 8 first iteration).
@@ -43,13 +45,18 @@ use MyVendor\BeMart\Be\Reason\Entity\PluginEntity;
 interface PluginStorageInterface
 {
     /** @return list<PluginEntity> */
+    #[DbQuery('plugin_list_all', factory: PluginEntity::class)]
     public function listAll(): array;
 
+    #[DbQuery('plugin_find_by_code', factory: PluginEntity::class)]
     public function findByCode(string $pluginCode): PluginEntity|null;
 
+    #[DbQuery('plugin_install')]
     public function install(string $pluginCode, string $pluginName, string $version): void;
 
+    #[DbQuery('plugin_uninstall')]
     public function uninstall(string $pluginCode): void;
 
-    public function setEnabled(string $pluginCode, bool $enabled): void;
+    #[DbQuery('plugin_set_enabled')]
+    public function setEnabled(string $pluginCode, bool $enabled): PluginEnablement;
 }

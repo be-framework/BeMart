@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\FavoritePresence;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Customer favorites — unified Query + Command (Pilot 13 first
@@ -19,12 +21,16 @@ use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
  */
 interface FavoriteStorageInterface
 {
+    #[DbQuery('favorite_add')]
     public function add(FavoriteEntity $favorite): void;
 
-    public function has(string $customerId, string $productCode): bool;
+    #[DbQuery('favorite_has')]
+    public function has(string $customerId, string $productCode): FavoritePresence;
 
     /** @return list<FavoriteEntity> */
+    #[DbQuery('favorite_list', factory: FavoriteEntity::class)]
     public function listByCustomer(string $customerId): array;
 
+    #[DbQuery('favorite_remove')]
     public function remove(string $customerId, string $productCode): void;
 }

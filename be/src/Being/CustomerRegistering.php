@@ -71,9 +71,11 @@ final readonly class CustomerRegistering
         #[Inject] PasswordHasherInterface $passwordHasher,
         #[Inject] CustomerInitialPointInterface $initialPointService,
     ) {
-        $uniquenessChecker->ensureUnique($email);
+        $uniqueness = $uniquenessChecker->check($email);
+        /** @psalm-suppress InvalidDocblock Psalm treats assert* methods as assertion helpers. */
+        $uniqueness->assertUnique();
 
-        $this->customerId = $idGenerator->generate();
+        $this->customerId = $idGenerator->generate()->value;
         $this->passwordHash = $passwordHasher->hash($password);
         $this->initialPoint = $initialPointService->initial();
         $this->customerStatus = 2;

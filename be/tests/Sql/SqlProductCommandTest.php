@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlProductCommand;
-use MyVendor\BeMart\Be\Reason\Query\SqlProductQuery;
+use MyVendor\BeMart\Be\Reason\Query\ProductCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\Param\ProductCodeList;
+use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use RuntimeException;
 
 /**
- * Storage-layer coverage for {@see SqlProductCommand} (Phase 2b).
+ * Storage-layer coverage for {@see ProductCommandInterface} (Phase 2b).
  *
- * Mirrors the shape of {@see SqlDeliveryStorageTest}. Per G-23 the
+ * Mirrors the shape of {@see DeliveryStorageInterfaceTest}. Per G-23 the
  * client-observable contract lives in the Resource-layer hypermedia
  * tests under `tests/Resource/Sql/AdminProduct*ResourceSqlTest`; the
  * cases below verify the per-method SQL paths in isolation —
@@ -33,7 +34,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
     public function testCreateWritesBothProductAndDefaultClassRows(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         $command->create(new ProductEntity(
             productCode: 'P-CREATE-001',
             productName: 'New Product',
@@ -45,9 +46,9 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             note: 'note',
         ));
 
-        // Read back via SqlProductQuery — proves both rows landed and
+        // Read back via ProductQueryInterface — proves both rows landed and
         // the flattened JOIN re-assembles the entity.
-        $read = (new SqlProductQuery($this->pdo))->item('P-CREATE-001');
+        $read = ($this->sql(ProductQueryInterface::class))->item('P-CREATE-001');
         $this->assertInstanceOf(ProductEntity::class, $read);
         $this->assertSame('New Product', $read->productName);
         $this->assertSame(2500, $read->price02);
@@ -65,7 +66,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
     public function testCreateWritesUnlimitedStockFlagForNullStock(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         $command->create(new ProductEntity(
             productCode: 'P-CREATE-NULLSTOCK',
             productName: 'Unlimited',
@@ -86,7 +87,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
     public function testUpdateMergesBothTables(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         $command->create(new ProductEntity(
             productCode: 'P-UPDATE-001',
             productName: 'Before',
@@ -107,7 +108,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             note: 'after-note',
         ));
 
-        $read = (new SqlProductQuery($this->pdo))->item('P-UPDATE-001');
+        $read = ($this->sql(ProductQueryInterface::class))->item('P-UPDATE-001');
         $this->assertInstanceOf(ProductEntity::class, $read);
         $this->assertSame('After', $read->productName);
         $this->assertSame(9999, $read->price02);
@@ -124,7 +125,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
     public function testUpdateIsNoOpForUnknownCode(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         // No exception — silent no-op (the Final has already verified
         // existence before reaching update).
         $command->update(new ProductEntity(
@@ -134,12 +135,12 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             stock: null,
         ));
 
-        $this->assertNull((new SqlProductQuery($this->pdo))->item('does-not-exist'));
+        $this->assertNull(($this->sql(ProductQueryInterface::class))->item('does-not-exist'));
     }
 
     public function testDeleteSoftDeletesByFlippingStatus(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         $command->create(new ProductEntity(
             productCode: 'P-DELETE-001',
             productName: 'Doomed',
@@ -151,7 +152,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         $command->delete('P-DELETE-001');
 
         // The row still exists (soft delete) — status flipped to 3.
-        $read = (new SqlProductQuery($this->pdo))->item('P-DELETE-001');
+        $read = ($this->sql(ProductQueryInterface::class))->item('P-DELETE-001');
         $this->assertInstanceOf(ProductEntity::class, $read);
         $this->assertSame(ProductEntity::STATUS_WITHDRAWN, $read->productStatus);
         $this->assertSame(1, $this->countProductRows('P-DELETE-001'));
@@ -159,7 +160,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
     public function testDeleteIsIdempotentOnReplay(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         $command->create(new ProductEntity(
             productCode: 'P-DELETE-REPLAY',
             productName: 'Doomed',
@@ -171,14 +172,14 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         // Second call is a genuine no-op — no exception, status stays 3.
         $command->delete('P-DELETE-REPLAY');
 
-        $read = (new SqlProductQuery($this->pdo))->item('P-DELETE-REPLAY');
+        $read = ($this->sql(ProductQueryInterface::class))->item('P-DELETE-REPLAY');
         $this->assertInstanceOf(ProductEntity::class, $read);
         $this->assertSame(ProductEntity::STATUS_WITHDRAWN, $read->productStatus);
     }
 
     public function testDeleteIsNoOpForUnknownCode(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         // No exception.
         $command->delete('does-not-exist');
         $this->assertTrue(true);
@@ -186,7 +187,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
     public function testCopyClonesUnderNewCodeWithPrefixedName(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         $command->create(new ProductEntity(
             productCode: 'P-COPY-SRC',
             productName: 'Original',
@@ -198,7 +199,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
             note: 'orig-note',
         ));
 
-        $copy = $command->copy('P-COPY-SRC', 'P-COPY-NEW');
+        $copy = $command->copy('P-COPY-SRC', 'P-COPY-NEW')->product;
 
         $this->assertSame('P-COPY-NEW', $copy->productCode);
         $this->assertSame('(コピー) Original', $copy->productName);
@@ -206,7 +207,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         // source's status.
         $this->assertSame(ProductEntity::STATUS_VISIBLE, $copy->productStatus);
 
-        $read = (new SqlProductQuery($this->pdo))->item('P-COPY-NEW');
+        $read = ($this->sql(ProductQueryInterface::class))->item('P-COPY-NEW');
         $this->assertInstanceOf(ProductEntity::class, $read);
         $this->assertSame('(コピー) Original', $read->productName);
         $this->assertSame(4200, $read->price02);
@@ -215,7 +216,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         $this->assertSame('orig-desc', $read->description);
 
         // The source is untouched.
-        $source = (new SqlProductQuery($this->pdo))->item('P-COPY-SRC');
+        $source = ($this->sql(ProductQueryInterface::class))->item('P-COPY-SRC');
         $this->assertInstanceOf(ProductEntity::class, $source);
         $this->assertSame('Original', $source->productName);
         $this->assertSame(ProductEntity::STATUS_HIDDEN, $source->productStatus);
@@ -223,15 +224,15 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
     public function testCopyRaisesForUnknownSource(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
 
         $this->expectException(RuntimeException::class);
-        $command->copy('does-not-exist', 'P-COPY-FAIL');
+        $command->copy('does-not-exist', 'P-COPY-FAIL')->product;
     }
 
     public function testBulkUpdateStatusFlipsStatusAndCountsChanges(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         foreach (['P-BULK-001', 'P-BULK-002'] as $code) {
             $command->create(new ProductEntity(
                 productCode: $code,
@@ -243,12 +244,12 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         }
 
         $changed = $command->bulkUpdateStatus(
-            ['P-BULK-001', 'P-BULK-002'],
+            ProductCodeList::fromArray(['P-BULK-001', 'P-BULK-002']),
             ProductEntity::STATUS_WITHDRAWN,
         );
 
-        $this->assertSame(2, $changed);
-        $query = new SqlProductQuery($this->pdo);
+        $this->assertSame(2, $changed->changedCount);
+        $query = $this->sql(ProductQueryInterface::class);
         foreach (['P-BULK-001', 'P-BULK-002'] as $code) {
             $entity = $query->item($code);
             $this->assertInstanceOf(ProductEntity::class, $entity);
@@ -258,7 +259,7 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
 
     public function testBulkUpdateStatusSkipsUnknownCodes(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         $command->create(new ProductEntity(
             productCode: 'P-BULK-PARTIAL',
             productName: 'P-BULK-PARTIAL',
@@ -268,17 +269,17 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         ));
 
         $changed = $command->bulkUpdateStatus(
-            ['P-BULK-PARTIAL', 'does-not-exist'],
+            ProductCodeList::fromArray(['P-BULK-PARTIAL', 'does-not-exist']),
             ProductEntity::STATUS_HIDDEN,
         );
 
         // Only the known code is counted.
-        $this->assertSame(1, $changed);
+        $this->assertSame(1, $changed->changedCount);
     }
 
     public function testBulkUpdateStatusDoesNotCountIdempotentReapplication(): void
     {
-        $command = new SqlProductCommand($this->pdo);
+        $command = $this->sql(ProductCommandInterface::class);
         $command->create(new ProductEntity(
             productCode: 'P-BULK-IDEMP',
             productName: 'P-BULK-IDEMP',
@@ -290,11 +291,11 @@ final class SqlProductCommandTest extends AbstractSqlTestCase
         // The product is already STATUS_HIDDEN — re-applying the same
         // status changes 0 rows.
         $changed = $command->bulkUpdateStatus(
-            ['P-BULK-IDEMP'],
+            ProductCodeList::fromArray(['P-BULK-IDEMP']),
             ProductEntity::STATUS_HIDDEN,
         );
 
-        $this->assertSame(0, $changed);
+        $this->assertSame(0, $changed->changedCount);
     }
 
     private function countProductRows(string $productCode): int

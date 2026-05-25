@@ -15,8 +15,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * mail_body. `mail_html_body` is intentionally omitted — the storefront
  * history screen renders only the plain-text body (`MailHistory.mail_body`).
  */
-final readonly class OrderHistoryMailEntity
+final readonly class OrderHistoryMailEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $sendDate,
         public string $mailSubject,

@@ -22,8 +22,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * `items` are the `dtb_order_item` rows whose `shipping_id` points at
  * this shipping row — the per-delivery line items the screen lists.
  */
-final readonly class OrderHistoryShippingEntity
+final readonly class OrderHistoryShippingEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     /** @param list<OrderHistoryItemEntity> $items */
     public function __construct(
         public string $name01,

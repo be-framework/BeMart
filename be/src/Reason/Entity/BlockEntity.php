@@ -11,8 +11,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * built-in blocks (header, footer, ...) cannot be deleted from the
  * admin UI.
  */
-final readonly class BlockEntity
+final readonly class BlockEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $blockId,
         public string $blockName,

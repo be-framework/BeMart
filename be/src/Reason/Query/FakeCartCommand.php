@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\SavedCart;
 use Override;
 
 final class FakeCartCommand implements CartCommandInterface
@@ -15,9 +16,11 @@ final class FakeCartCommand implements CartCommandInterface
     }
 
     #[Override]
-    public function save(CartEntity $cart): void
+    public function save(CartEntity $cart): SavedCart
     {
         $this->storage->put($cart);
+
+        return new SavedCart(true);
     }
 
     #[Override]

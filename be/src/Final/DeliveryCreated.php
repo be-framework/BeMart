@@ -36,7 +36,7 @@ final readonly class DeliveryCreated
         }
 
         $entity = new DeliveryEntity(
-            deliveryId: $idGenerator->generate(),
+            deliveryId: $idGenerator->generate()->value,
             deliveryName: $deliveryName,
             visible: $visible,
         );

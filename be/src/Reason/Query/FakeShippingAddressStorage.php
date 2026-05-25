@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
+use MyVendor\BeMart\Be\Reason\Query\Result\ShippingTrackingNumber;
 use Override;
 
 use function array_values;
@@ -58,8 +59,8 @@ final class FakeShippingAddressStorage implements ShippingAddressStorageInterfac
     }
 
     #[Override]
-    public function trackingNumberByOrderNo(string $orderNo): string|null
+    public function trackingNumberByOrderNo(string $orderNo): ShippingTrackingNumber
     {
-        return $this->trackingNumbers[$orderNo] ?? null;
+        return new ShippingTrackingNumber($this->trackingNumbers[$orderNo] ?? null);
     }
 }

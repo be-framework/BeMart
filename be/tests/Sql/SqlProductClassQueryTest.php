@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductClassEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery;
+use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 
 /**
- * Storage-layer coverage for {@see SqlProductClassQuery} (Phase 2b).
+ * Storage-layer coverage for {@see ProductClassQueryInterface} (Phase 2b).
  *
  * Per G-23 the client-observable contract lives in the Resource-layer
  * sibling ({@see \MyVendor\BeMart\Tests\Resource\Sql\CartItemResourceSqlTest});
@@ -16,7 +16,7 @@ use MyVendor\BeMart\Be\Reason\Query\SqlProductClassQuery;
  *
  * Surprises this suite locks in:
  *  - `dtb_product_class.product_code` is the lookup key directly — no
- *    surrogate-id indirection (unlike SqlFavoriteStorage's product_id
+ *    surrogate-id indirection (unlike FavoriteStorageInterface's product_id
  *    join). The default-class filter
  *    (`class_category_id1 IS NULL AND class_category_id2 IS NULL`)
  *    collapses a variation product to its single representative row,
@@ -34,7 +34,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
 {
     public function testItemReturnsNullWhenProductCodeUnknown(): void
     {
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $this->assertNull($query->item('no-such-code'));
     }
 
@@ -51,7 +51,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'delivery_fee' => 0,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-sql-001');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -75,7 +75,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'stock_unlimited' => 1,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-unlimited');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -93,7 +93,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'stock_unlimited' => 0,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-oos');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -108,7 +108,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'sale_limit' => 2,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-limited');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -125,7 +125,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'delivery_fee' => 200,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-money');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -142,7 +142,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'delivery_fee' => null,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-nofee');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -158,13 +158,13 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
         // FK_1A11D1BAB0524E01 is enforced, so a row with a non-NULL
         // sale_type_id always has a matching master row (unlike
         // dtb_cart, where saleTypeId is derived from the cart_key suffix
-        // and SqlCartQuery's empty-master fallback genuinely fires).
+        // and CartQueryInterface's empty-master fallback genuinely fires).
         $this->insertProduct([
             'product_code' => 'pc-nullsaletype',
             'sale_type_id' => null,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-nullsaletype');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -182,7 +182,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'sale_type_id' => 2,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-preorder');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);
@@ -194,7 +194,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
     {
         // A productCode that ONLY appears on a non-default variation row
         // (one axis non-NULL) is NOT resolvable — the query restricts to
-        // the default class, mirroring SqlFavoriteStorage / SqlCartCommand.
+        // the default class, mirroring FavoriteStorageInterface / CartCommandInterface.
         $productId = $this->insertProduct(['product_code' => 'pc-default-only']);
         $axisValue = $this->insertClassCategory(['name' => 'Red']);
         $this->insertProductClassVariation($productId, [
@@ -202,7 +202,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'class_category_id1' => $axisValue,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
 
         // The variation-only code does not resolve …
         $this->assertNull($query->item('pc-variation-red'));
@@ -230,7 +230,7 @@ final class SqlProductClassQueryTest extends AbstractSqlTestCase
             'price02' => 1500,
         ]);
 
-        $query = new SqlProductClassQuery($this->pdo);
+        $query = $this->sql(ProductClassQueryInterface::class);
         $entity = $query->item('pc-with-variations');
 
         $this->assertInstanceOf(ProductClassEntity::class, $entity);

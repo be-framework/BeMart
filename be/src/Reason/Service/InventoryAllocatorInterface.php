@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
  * requested; the decrement is then NOT applied (atomic per call).
  *
  * Phase 2 swaps the fake for a Ray.MediaQuery binding against
- * dtb_product_class with SELECT ... FOR UPDATE for row locking.
+ * dtb_product_class with row-locking read for row locking.
  */
 interface InventoryAllocatorInterface
 {

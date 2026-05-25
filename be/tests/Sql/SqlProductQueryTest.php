@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlProductQuery;
+use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 
 /**
- * Storage-layer coverage for {@see SqlProductQuery} (Phase 2b).
+ * Storage-layer coverage for {@see ProductQueryInterface} (Phase 2b).
  *
- * Mirrors the shape of {@see SqlProductClassQueryTest}. Per G-23 the
+ * Mirrors the shape of {@see ProductClassQueryInterfaceTest}. Per G-23 the
  * client-observable contract lives in the Resource-layer hypermedia
  * tests under `tests/Resource/Sql/AdminProduct*ResourceSqlTest`; the
  * cases below verify the per-method SQL paths in isolation — the
@@ -34,7 +34,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
             'note' => 'internal note',
         ]);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $entity = $query->item('P-ITEM-001');
 
         $this->assertInstanceOf(ProductEntity::class, $entity);
@@ -50,7 +50,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
 
     public function testItemReturnsNullForUnknownCode(): void
     {
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $this->assertNull($query->item('does-not-exist'));
     }
 
@@ -63,7 +63,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
             'product_status_id' => null,
         ]);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $entity = $query->item('P-NULLSTATUS-001');
 
         $this->assertInstanceOf(ProductEntity::class, $entity);
@@ -78,7 +78,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
             'stock_unlimited' => 1,
         ]);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $entity = $query->item('P-UNLIMITED-001');
 
         $this->assertInstanceOf(ProductEntity::class, $entity);
@@ -88,7 +88,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
     public function testItemSkipsVariationOnlyProductCode(): void
     {
         // A productCode that ONLY appears on a non-default variation
-        // row must NOT resolve — SqlProductQuery restricts to the
+        // row must NOT resolve — ProductQueryInterface restricts to the
         // default class (both class_category_id* axes NULL).
         $productId = $this->insertProduct(['product_code' => 'P-DEFAULT-001']);
         $classCategoryId = $this->insertClassCategory();
@@ -97,7 +97,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
             'class_category_id1' => $classCategoryId,
         ]);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $this->assertNull($query->item('P-VARIATION-ONLY'));
         // The default class still resolves.
         $this->assertInstanceOf(ProductEntity::class, $query->item('P-DEFAULT-001'));
@@ -109,7 +109,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'P-LIST-002']);
         $this->insertProduct(['product_code' => 'P-LIST-003']);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $rows = $query->listAll(50, 0);
 
         $this->assertCount(3, $rows);
@@ -118,7 +118,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
 
     public function testListAllReturnsEmptyArrayOnEmptyTable(): void
     {
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $this->assertSame([], $query->listAll(50, 0));
     }
 
@@ -128,7 +128,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'P-PAGE-002']);
         $this->insertProduct(['product_code' => 'P-PAGE-003']);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
 
         $firstPage = $query->listAll(2, 0);
         $this->assertCount(2, $firstPage);
@@ -147,7 +147,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
     {
         $this->insertProduct(['product_code' => 'P-OFFSET-001']);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $this->assertSame([], $query->listAll(50, 100));
     }
 
@@ -157,7 +157,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'P-SRCH-002', 'name' => '管理画面用 商品B']);
         $this->insertProduct(['product_code' => 'P-SRCH-003', 'name' => 'Unrelated Product']);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $rows = $query->search('管理画面用', 50);
 
         $this->assertCount(2, $rows);
@@ -171,7 +171,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'P-NULLKW-001']);
         $this->insertProduct(['product_code' => 'P-NULLKW-002']);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $this->assertCount(2, $query->search(null, 50));
         $this->assertCount(2, $query->search('', 50));
     }
@@ -183,7 +183,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'P-PCT-001', 'name' => '50% OFF Sale']);
         $this->insertProduct(['product_code' => 'P-PCT-002', 'name' => 'Plain Product']);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $rows = $query->search('50%', 50);
 
         $this->assertCount(1, $rows);
@@ -196,7 +196,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'P-LIM-002', 'name' => 'Common Name 2']);
         $this->insertProduct(['product_code' => 'P-LIM-003', 'name' => 'Common Name 3']);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $this->assertCount(2, $query->search('Common Name', 2));
     }
 
@@ -208,7 +208,7 @@ final class SqlProductQueryTest extends AbstractSqlTestCase
         // Even a withdrawn product is in the export — admin scope.
         $this->insertProduct(['product_code' => 'P-EXP-003', 'product_status_id' => 3]);
 
-        $query = new SqlProductQuery($this->pdo);
+        $query = $this->sql(ProductQueryInterface::class);
         $rows = $query->listForExport();
 
         $this->assertCount(3, $rows);

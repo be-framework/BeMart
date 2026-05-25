@@ -20,8 +20,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * independently. For now the single-blob shape is enough for the
  * doUpdateTradeLaw transition.
  */
-final readonly class TradeLawEntity
+final readonly class TradeLawEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $body,
     ) {

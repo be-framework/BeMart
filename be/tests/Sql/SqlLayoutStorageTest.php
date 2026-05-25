@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
-use MyVendor\BeMart\Be\Reason\Query\SqlLayoutStorage;
+use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 
 /**
- * Storage-layer coverage for {@see SqlLayoutStorage} (Phase 2b).
+ * Storage-layer coverage for {@see LayoutStorageInterface} (Phase 2b).
  *
  * Per G-23 the client-observable contract lives in
  * {@see \MyVendor\BeMart\Tests\Resource\Sql\AdminLayoutResourceSqlTest};
@@ -28,7 +28,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $first = $this->insertLayout(['layout_name' => 'PC標準', 'device_type_id' => 10]);
         $second = $this->insertLayout(['layout_name' => 'スマホ標準', 'device_type_id' => 2]);
 
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertCount(2, $rows);
@@ -41,7 +41,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
 
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $this->assertSame([], $storage->list());
     }
 
@@ -54,7 +54,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $this->insertLayout(['device_type_id' => 10]);
         $this->insertLayout(['device_type_id' => 2]);
 
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $rows = $storage->list();
 
         $this->assertSame(10, $rows[0]->deviceType);
@@ -66,7 +66,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $this->seedDeviceTypes();
         $id = $this->insertLayout(['layout_name' => 'PC標準', 'device_type_id' => 10]);
 
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(LayoutEntity::class, $entity);
@@ -77,7 +77,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForMissingRow(): void
     {
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $this->assertNull($storage->getById('99999999'));
     }
 
@@ -87,7 +87,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         // / `lo-sp-default`) and `nonexistent` can never match an int
         // PK; surface as miss so the LayoutUpdated Final fires its 404
         // path instead of a PDO error.
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $this->assertNull($storage->getById('lo-pc-default'));
         $this->assertNull($storage->getById('nonexistent'));
     }
@@ -100,7 +100,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $this->seedDeviceTypes();
         $id = $this->insertLayout(['layout_name' => null]);
 
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(LayoutEntity::class, $entity);
@@ -113,7 +113,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         // non-null int — a row with NULL projects deviceType = 0.
         $id = $this->insertLayout(['device_type_id' => null]);
 
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $entity = $storage->getById((string) $id);
 
         $this->assertInstanceOf(LayoutEntity::class, $entity);
@@ -135,7 +135,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
             deviceType: 10,
         );
 
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $storage->put($merged);
 
         $read = $storage->getById((string) $id);
@@ -154,7 +154,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $this->seedDeviceTypes();
         $id = $this->insertLayout(['layout_name' => 'PC標準', 'device_type_id' => 10]);
 
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $storage->put(new LayoutEntity(
             layoutId: (string) $id,
             layoutName: 'PC Refreshed',
@@ -177,7 +177,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         // existing row writes a fresh layout. device_type_id is NULL
         // (mtb_device_type FK guard), so the projection reads back
         // deviceType = 0.
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $storage->put(new LayoutEntity(
             layoutId: '777',
             layoutName: 'Fresh Layout',
@@ -200,7 +200,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         // The Fake seeds `lo-` prefixed string ids — the SQL impl
         // cannot persist a non-numeric PK, so put silently no-ops
         // rather than raising.
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $storage->put(new LayoutEntity(
             layoutId: 'lo-pc-default',
             layoutName: 'Fake-shaped id',
@@ -218,7 +218,7 @@ final class SqlLayoutStorageTest extends AbstractSqlTestCase
         $pcId = $this->insertLayout(['layout_name' => 'PC標準', 'device_type_id' => 10]);
         $spId = $this->insertLayout(['layout_name' => 'スマホ標準', 'device_type_id' => 2]);
 
-        $storage = new SqlLayoutStorage($this->pdo);
+        $storage = $this->sql(LayoutStorageInterface::class);
         $storage->put(new LayoutEntity(
             layoutId: (string) $pcId,
             layoutName: 'PC Refreshed',

@@ -18,8 +18,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * delivery target lives in dtb_shipping — so the Phase 2 migration to
  * Ray.MediaQuery can map this entity 1:1 onto dtb_shipping rows.
  */
-final readonly class ShippingAddressEntity
+final readonly class ShippingAddressEntity implements \Ray\MediaQuery\ToScalarInterface
 {
+    use MediaQueryJsonEntityTrait;
+
     public function __construct(
         public string $orderNo,
         public string $name01,

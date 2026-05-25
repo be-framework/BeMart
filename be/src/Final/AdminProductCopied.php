@@ -67,7 +67,7 @@ final readonly class AdminProductCopied
             throw new ProductCodeAlreadyInUseException();
         }
 
-        $copy = $productCommand->copy($productCode, $newProductCode);
+        $copy = $productCommand->copy($productCode, $newProductCode)->product;
 
         $this->productCode = $productCode;
         $this->newProductCode = $copy->productCode;

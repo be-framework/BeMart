@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
+use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
  * Admin payment-method master — unified Query + Command (Wave 9θ).
@@ -25,12 +26,16 @@ use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
 interface PaymentMethodAdminStorageInterface
 {
     /** @return list<PaymentMethodAdminEntity> */
+    #[DbQuery('tpayment_list', factory: PaymentMethodAdminEntity::class)]
     public function list(): array;
 
+    #[DbQuery('tpayment_get', factory: PaymentMethodAdminEntity::class)]
     public function getById(string $paymentId): PaymentMethodAdminEntity|null;
 
+    #[DbQuery('tpayment_put')]
     public function put(PaymentMethodAdminEntity $payment): void;
 
+    #[DbQuery('tpayment_remove')]
     public function remove(string $paymentId): void;
 
     /**
@@ -39,6 +44,7 @@ interface PaymentMethodAdminStorageInterface
      * PaymentMethodAdminEntity projection; this edits the column
      * directly. A miss is a silent no-op (same shape as `remove`).
      */
+    #[DbQuery('tpayment_reorder')]
     public function reorder(string $paymentId, int $sortNo): void;
 
     /**
@@ -47,5 +53,6 @@ interface PaymentMethodAdminStorageInterface
      * {@see PaymentMethodAdminEntity}, so the Fake also rebuilds the
      * cached entity so its `list()` projection stays consistent.
      */
+    #[DbQuery('tpayment_visible')]
     public function setVisible(string $paymentId, bool $visible): void;
 }

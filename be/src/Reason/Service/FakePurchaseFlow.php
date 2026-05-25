@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Reason\Service;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\PurchaseFlowResult;
+use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 use Override;
 
 use function array_map;
@@ -27,7 +27,7 @@ final class FakePurchaseFlow implements PurchaseFlowInterface
     private const POINT_RATE = 0.01;
 
     #[Override]
-    public function apply(OrderEntity $preOrder): PurchaseFlowResult
+    public function apply(OrderEntity $preOrder): PurchaseTotals
     {
         $subtotal = (int) array_sum(array_map(
             static fn (CartItemEntity $i): int => $i->price * $i->quantity,
@@ -43,7 +43,7 @@ final class FakePurchaseFlow implements PurchaseFlowInterface
         $addPoint = (int) ($total * self::POINT_RATE);
         $usePoint = 0;
 
-        return new PurchaseFlowResult(
+        return new PurchaseTotals(
             subtotal: $subtotal,
             deliveryFeeTotal: $deliveryFeeTotal,
             charge: $charge,

@@ -25,7 +25,7 @@ use function str_contains;
  *
  *  - the storage binding (ClassNameStorageInterface →
  *    SqlClassNameStorage) and id generator
- *    (ClassNameIdGeneratorInterface → SqlClassNameIdGenerator) are
+ *    (ClassNameIdGeneratorInterface → direct MediaQuery class-name id proxy) are
  *    layered via the base class's sqlOverrideModule; persistence is
  *    against the real dtb_class_name table.
  *
@@ -91,7 +91,7 @@ final class AdminClassNameResourceSqlTest extends AbstractResourceSqlTestCase
      * Seed a single class name (axis) through the resource layer and
      * return the server-generated classNameId — mirrors the Fake-backed
      * sibling's helper exactly. The POST drives the full Becoming chain
-     * (Input → ClassName-create Final → SqlClassNameIdGenerator →
+     * (Input → ClassName-create Final → direct MediaQuery class-name id proxy →
      * SqlClassNameStorage) so the row appears in the same transactional
      * state every subsequent assertion will see.
      */
