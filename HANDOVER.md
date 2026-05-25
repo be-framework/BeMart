@@ -1296,3 +1296,440 @@ Slice 8 の `CsrfTokenInterface::isValid($token)` は `$token` を比較する�
 | **Slice 11**: Be Framework Psalm plugin | 非決定的 | Slice 9 で発見した opacity 問題への対策。plugin が `#[Be]` の chain を辿って flow propagation を行う |
 | (追加検討) bear-security-setup skill 適用 | skill bake | Slice 6-7-8 で手動構築した AUTHZ + CSRF + Slice 9 の taint contract を skill 化するレビュー |
 | **Slice 7.2 / 8.2 統合**: EC-CUBE 側 EventListener | Phase 2 入口 | `customer_id` + `_csrf_token` の両 mirror を 1 つの Symfony EventListener にまとめる。Phase 2 キックオフ |
+
+
+## Pilot 6-8 — account 系 3 件 (Direct パターン量産 Batch 1)
+
+| 項目 | 内容 |
+|---|---|
+| 対象 transition | `doLogin` (Pilot 6) / `doActivateCustomer` (Pilot 7) / `doUpdateCustomer` (Pilot 8) |
+| パターン | 3 件とも **Direct** (Input → Final、Being なし) |
+| 採用理由 | account 系 transition は単一副作用 (DB 1 write or 0 write) で完結し、Multi-Reason Being や Diamond の必要が無い |
+| テスト | 119 passed (Pilot 1-5 既存 90 + Pilot 6-8 新規 29: domain 14 + resource 15), 273 assertions |
+| Psalm / psalm-taint | 全 green |
+
+### Pilot 6 — `doLogin`
+
+- Be flow: `LoginInput → CustomerAuthenticated`
+- 既存 `FakeCustomerStorage` を read-side で利用するため **CQRS split** を導入: `CustomerQueryInterface` (`findByEmail` / `findBySecretKey` / `findById`) + `FakeCustomerQuery`。Order 系の Command/Query split と同じ規約
+- `PasswordHasherInterface::verify()` を追加 (`password_verify`)。Pilot 4 で hash 側だけ実装されていたものを補完
+- **設計判断**: Session-write は **Be 層スコープ外**。Slice 7.2 contract で「EC-CUBE EventListener が session に customerId を書く」と決めた通り。Be 層は credentials check の proof (= Final) を返すだけ。BEAR resource もそれを body にして返すのみ
+- **設計判断**: 「unknown email」 と 「wrong password」 は同一 `LoginFailedException` に集約。user-enumeration を防ぐため
+- fixture: `customers.json` に `login-test@example.com` を本物の bcrypt hash 付きで追加 (alice/bob/carol は dummy hash のまま)
+
+### Pilot 7 — `doActivateCustomer`
+
+- Be flow: `ActivateCustomerInput → CustomerActivated`
+- **新規 Semantic**: `SecretKey` (URL-safe printable, 16-128 chars)
+- **新規 Exception**: `SecretKeyFormatException` / `SecretKeyNotFoundException`
+- `CustomerEntity` に nullable `secretKey` プロパティ追加 (default null、既存呼び出し不変)
+- `FakeCustomerStorage::getBySecretKey` + `activate(customerId)` (idempotent)
+- **設計判断**: 「wrong key」 / 「expired」 / 「already used」 を `SecretKeyNotFoundException` に集約 (enumeration 防止と同じ思想)
+- **設計判断**: HTTP は `onPost` + CSRF — email link UX (`GET ?secretKey=...`) ではなく、確認画面のフォーム submit を経由する。secretKey が CSRF 代替になる議論もあるが、Slice 8 の境界 contract (全 state-changing endpoint で CSRF) を統一的に保つ方を優先
+
+### Pilot 8 — `doUpdateCustomer`
+
+- Be flow: `UpdateCustomerInput → CustomerUpdated`
+- **AUTHZ via Session** — Pilot 5 F-2 の mass-assignment 教訓を踏襲: `customerId` は **Input に含めない**。`SessionInterface::customerId()` を Final が pull
+- **新規 Exception**: `UnauthenticatedException` (Pilot 5 の `UnauthorizedPreOrderAccessException` は「ログイン済みだが他人のもの」、こちらは「未ログイン」と区別)
+- `CustomerQueryInterface::findById` + `CustomerCommandInterface::update` 追加
+- `FakeCustomerStorage::replace` — email-rekey (email 変更時に古い key を unset) 対応
+- **設計判断**: パスワード更新は Pilot 8 スコープ外 → Pilot 14 `doRequestPasswordReset` で扱う
+- **設計判断**: 部分 update — email は required (uniqueness 再 check は変更時のみ)、他は nullable で「null = この field は触らない」
+- **Semantic への波及**: `Name01` / `Name02` を nullable 受容に変更 (early-return on null)。Pilot 4 の register は `string` 宣言 (non-null) なので影響なし
+
+### Batch 1 振り返り (決定的 / 非決定的)
+
+- **決定的だった**:
+  - Direct パターン採用 (3 件とも単一副作用)
+  - CQRS split の追加 (既存 Order pattern 踏襲)
+  - AUTHZ via Session の踏襲 (Pilot 5 / Slice 6 と同形)
+  - CSRF 強制の継承 (Slice 8 contract uniform)
+  - user-enumeration 回避の例外集約 (login / activate)
+- **非決定的だった**:
+  - Pilot 7 で `onPost` を選択 (`onGet` で email link UX を直接踏襲する選択肢を退ける根拠は Slice 8 contract の uniformity)
+  - Pilot 8 で email change を allow するかどうか → ALPS doc に明記されているため include
+  - `Name01` / `Name02` を nullable に変えるか、UpdateCustomerInput で別 Semantic を作るか → 「nullable 受容で early-return」 を採用 (validator 数を増やさず Pilot 4 を破壊しない)
+- **積み残し**:
+  - email-link UX のままにする path (Pilot 7 `onGet` バージョン) — 必要なら別 Slice
+  - password change — Pilot 14 で扱う
+  - `findById` が O(n) scan (storage map indexes by email) — Phase 2 で DB impl にすれば解消
+
+## Pilot 9-11 — cart manipulation 3 件 (量産 Batch 2)
+
+| 項目 | 内容 |
+|---|---|
+| 対象 transition | `goCart` (Pilot 9) / `doUpdateCartItemQuantity` (Pilot 10) / `doRemoveCartItem` (Pilot 11) |
+| パターン | Direct (Pilot 9, 11) / Linear (Pilot 10) |
+| テスト | 128 passed (Batch 1 末 119 + Batch 2 新規 9: cart 3 + cart/item PUT 3 + cart/item DELETE 3), 297 assertions |
+| Psalm / psalm-taint | 全 green |
+
+### Pilot 9 — `goCart`
+
+- Be flow: `GetCartsInput → CartsFetched`
+- Multi-cart semantics — EC-CUBE は 1 shopping session を saleType 単位で N cart に partition する (`cartKey = {sessionPrefix}_{saleTypeId}`)。Final は prefix で scan して per-session totals を集計
+- 新規: `CartQueryInterface::bySessionPrefix` + `FakeCartStorage::getBySessionPrefix`
+- **safe read** のため CSRF / AUTHZ なし。ownership は sessionPrefix cookie で implicit
+
+### Pilot 10 — `doUpdateCartItemQuantity`
+
+- Be flow: `UpdateCartItemQuantityInput → CartItemQuantityReplacing → CartItemQuantityUpdated`
+- Linear pattern (contact-form demo)
+- HTTP: **PUT** /cart/item (idempotent matches PUT)
+- Quantity は **置換** (Pilot 2 doAddCartItem は加算)
+- Cap 再適用: stock + saleLimit (PurchaseFlow 相当の最小実装)
+- 既存 item 必須 — 無ければ `CartItemNotInCartException` → 404
+
+#### 設計上の発見 (G-17): Be Framework chain は class-level fixed
+
+Pilot 10 は本来 Pilot 2 の `QuantityAdjusted` Being を再利用したかったが、Be Framework の `#[Be(NextClass::class)]` attribute は **Being class** 上に置かれるため、下流の宛先が class level で固定される。`QuantityAdjusted` は `#[Be(CartMerged::class)]` を持ち、必ず加算 merge へ流れる。
+
+選択肢:
+- (A) `QuantityAdjusted` に Branching: 動的な宛先選択 → Be Framework は構造的型付けの哲学から外れる
+- (B) 同形 Being を別名で複製 (`QuantityCapped` 等): DRY 違反だが構造的に正しい
+- (C) **Input 段で意図を区別し、Being も分ける**: 採用 — `CartItemQuantityReplacing` を新規作成
+
+これは **G-15 (Multi-side-effect Final 判定基準)** と同列の重要発見として `SKILL.md` 候補に記載すべき。Be Framework での「同じ前処理を異なる下流に向ける」 ケースの規約として `Input-per-intent + Being-per-shape` を踏襲する。
+
+### Pilot 11 — `doRemoveCartItem`
+
+- Be flow: `RemoveCartItemInput → CartItemRemoved`
+- Direct pattern
+- HTTP: **DELETE** /cart/item (idempotent matches DELETE)
+- Final が session prefix 配下の全 cart を scan して該当 productCode を含む cart を見つけ、その中の item を除去 → totals 再計算 → 永続化
+- 既存 item 必須 — 無ければ `CartItemNotInCartException` → 404 (再削除は idempotent ではなく明示的 404)
+
+### Batch 2 振り返り (決定的 / 非決定的)
+
+- **決定的だった**:
+  - HTTP method の REST 規約 (POST → create, PUT → update, DELETE → remove)
+  - safe read に CSRF/AUTHZ を付けない (Pilot 1 goProduct の踏襲)
+  - quantity=0 を Quantity Semantic 側で reject、削除は別 endpoint
+- **非決定的だった**:
+  - Pilot 9 で空 carts を 200 で返すか 404 にするか → 200 を採用 (「cart 一覧」 が空であることは正常状態)
+  - Pilot 10 で QuantityAdjusted を再利用するか別 Being を作るか → 別 Being を採用 (G-17)
+  - Pilot 11 で 再削除を idempotent (200) として swallow するか 404 にするか → 404 を採用 (UI が「カートが空」と「2 度押し」 を区別できる)
+- **積み残し**:
+  - 1 つの productCode が複数 cart (異なる saleType) に存在する場合の挙動 — Pilot 11 は最初に見つけた 1 件だけ削除する。EC-CUBE では同 productCode は 1 cart にしか入らないので実用上問題ないが、Phase 2 で全 cart スキャンに変える余地
+  - PurchaseFlow の本物の再評価 (送料・手数料・割引) は Phase 2
+
+## Pilot 13-15 — favorite / contact / password-reset 3 件 (量産 Batch 3)
+
+| 項目 | 内容 |
+|---|---|
+| 対象 transition | `doAddFavorite` (Pilot 13) / `doSubmitContact` (Pilot 15) / `doRequestPasswordReset` (Pilot 14) |
+| パターン | 3 件とも Direct |
+| テスト | 141 passed (Batch 2 末 128 + Batch 3 新規 13: favorite 5 + contact 4 + forgot-password 4), 323 assertions |
+| Psalm / psalm-taint | 全 green |
+
+### Pilot 13 — `doAddFavorite`
+
+- Be flow: `AddFavoriteInput → FavoriteAdded`
+- AUTHZ via Session (Pilot 8 と同形)
+- 重複追加 idempotent — first add = 201, re-add = 200 with `alreadyExisted=true`
+- 新規: `FavoriteStorageInterface` (unified Query+Command for v1) + `FakeFavoriteStorage` + `FavoriteEntity`
+- **設計判断**: CQRS split は load が demand したときに deferred (Phase 2)
+
+### Pilot 15 — `doSubmitContact`
+
+- Be flow: `SubmitContactInput → ContactSubmitted`
+- Anonymous accessible — AUTHN / AUTHZ なし、CSRF のみ
+- `MailerInterface::sendContactInquiry` を追加 (shop + sender 両宛先は impl 内部で fan-out)
+- 新規 Semantic 4 件: `ContactName01` / `ContactName02` / `ContactEmail` / `ContactContents`
+  - 既存 Name01/Name02/Email Semantic と同一ロジックだが、ALPS descriptor 名 (contactName01 等) で参照されるため、Be Framework の per-param-name wiring に合わせて別 class を作成
+- **設計判断**: 既存 Semantic を再利用するか別 class を作るか → ALPS 名規約 (`contact*`) を保つ別 class を採用
+
+### Pilot 14 — `doRequestPasswordReset`
+
+- Be flow: `RequestPasswordResetInput → PasswordResetRequested`
+- **Anti-enumeration**: 登録済み email / 未登録 email の双方で identical 200 + identical body shape を返す。`issued` flag は Final 内部にのみ存在 (mail 送信を制御)、resource は client に echo しない
+- Token: 32-char hex (`CustomerIdGenerator` を re-purpose)、TTL 1 hour (EC-CUBE デフォルト準拠)、latest-wins
+- 新規: `PasswordResetTokenEntity` + `PasswordResetTokenStorageInterface` + `FakePasswordResetTokenStorage`
+- `MailerInterface::sendPasswordReset(email, resetKey)` を追加 (email が html sink)
+- **設計判断**: token を `CustomerEntity` に持たせず別 storage に分離 — expiry 管理が cleaner
+
+### Pilot 12 — `doReorder` (本 Batch では deferred)
+
+ALPS doc: 「過去の受注内容をカートに再投入する。在庫切れ商品はスキップ、現在価格を適用」
+
+**Deferred の理由**:
+1. `FinalizedOrderEntity` に items が含まれていない (Pilot 5 で order item は別 table と decided)
+2. `OrderQueryInterface` に `itemsByOrderNo` が無い
+3. Fake fixture `var/fake/orders.json` に items column が無い
+4. これらすべての追加は 2-unit 規模 (Pilot 1 件分 + infrastructure)
+
+次の Batch (Pilot 12 含む) で着手するべき先行作業:
+- `OrderItemEntity` 新規
+- `FinalizedOrderEntity` 拡張 (items: list<OrderItemEntity>)
+- `OrderQueryInterface::itemsByOrderNo` 追加
+- `orders.json` fixture に items 追加 (alice's history で 2-3 件)
+- Cart 側との merge ロジック (existing cart があれば追加 / 無ければ新規)
+- 在庫切れ skip / 廃番 skip の policy
+
+### Batch 3 振り返り (決定的 / 非決定的)
+
+- **決定的だった**:
+  - Anti-enumeration の uniform 200 response (Pilot 14)
+  - Anonymous-accessible / AUTHN required の区分 (Pilot 15 vs Pilot 13)
+  - Token を別 storage に分離 (Pilot 14)
+- **非決定的だった**:
+  - Pilot 13: idempotent re-add を 200 (alreadyExisted) で返すか silent 201 にするか → 200 を採用 (UI 区別性)
+  - Pilot 15: Semantic class を新規作成するか既存を再利用するか → 新規作成 (per-param-name wiring 規約)
+  - Pilot 14: token を `CustomerEntity` に持たせるか別 storage にするか → 別 storage (expiry handling cleaner)
+- **積み残し**:
+  - **Pilot 12 全体** — 上記 deferred 理由参照
+  - `doResetPassword` (Pilot 14 の対) — token 消費側、別 Pilot で
+  - `doRemoveFavorite` — Pilot 13 の対、`FavoriteStorageInterface::remove` は既に実装済みなので軽量
+  - Resource Page で `/favorite/list` (お気に入り一覧) — Pilot 13 の query 側を Public にする
+
+### Batch 1-3 累計の進捗
+
+| 指標 | Pilot 1-5 末 | Batch 3 末 | 差分 |
+|---|---|---|---|
+| 移植済み transition 数 | 5 / 137 | 13 / 137 | +8 (Pilot 6, 7, 8, 9, 10, 11, 13, 14, 15 ※ 9 件) |
+| Transition 量産率 | 3.6% | 9.5% | +5.9 pt |
+| テスト数 | 90 | 141 | +51 |
+| パターン実証 | 5 種 | 5 種 (Direct 多発生 + Linear 1 新) | (新規パターンなし、Direct の量産技法を確立) |
+
+実証された pattern instance:
+- Direct: Pilot 1, 6, 7, 8, 9, 11, 13, 14, 15 (9 件) — 量産可能、AUTHZ via Session / anti-enumeration / idempotent re-do などの規約が定着
+- Linear: contact-form (元) + Pilot 10 (新) — `Input-per-intent + Being-per-shape` の規約を Pilot 10 で確立 (G-17)
+- Multi-Reason Being: Pilot 4 (CustomerRegistering)
+- Diamond-Cascade: Pilot 2 / Pilot 5 (CheckoutPrepared)
+- Branching Final: Pilot 3
+
+
+## Wave 1 + Wave 2 — Orchestrated parallel agents (Pilot 12 + 5 新 transition)
+
+**指揮スタイル**: 単一 agent の直列実行から、worktree-isolated 並列 subagent への切替。1 user turn で 3-4 agent を kick → 完了通知ごとに本ブランチへ cherry-pick → push のループ。
+
+### Wave 1 (3 agent 並列、worktree isolation)
+
+| Agent | 対象 | 結果 | テスト追加 |
+|---|---|---|---|
+| A | Pilot 12 prep (`OrderItemEntity` infrastructure) | `5fbe6d6` cherry-picked as `3028041` | +3 (domain) |
+| B | `doRemoveFavorite` (Pilot 13 idempotent inverse) | `4521c6f` cherry-picked as `c366723` | +4 (resource) |
+| C | `doResetPassword` (Pilot 14 single-use consumer) | `951038c` cherry-picked as `87e0319` | +11 (4 domain + 7 resource) |
+
+Wave 1 net: +18 tests (141 → 159)、新 transition 2 件 (`doRemoveFavorite` / `doResetPassword`) + 1 infra prep。
+
+### Wave 2 (4 agent 並列、worktree isolation)
+
+| Agent | 対象 | パターン | 結果 | テスト追加 |
+|---|---|---|---|---|
+| D | Pilot 12 `doReorder` | Diamond-Cascade (loan-application) | `7366c90` cherry-picked as `263c525` | +11 |
+| E | `doLogout` | Direct (session-clear by EventListener) | `7f18d89` cherry-picked as `351dcd1` | +5 |
+| F | `goMypage` | Direct safe-read (dashboard aggregation) | `e7cb6dd` cherry-picked as `cef5447` | +4 |
+| G | `doWithdrawCustomer` | Direct + multi-side-effect | `a235ad9` cherry-picked as `ab2e674` | +9 |
+
+Wave 2 net: +29 tests (159 → 188)、新 transition 4 件。
+
+### Wave 2 で発見された設計事項
+
+#### Pilot 12 (Agent D)
+- **Stage 1 Being `ReorderResolving`** が AUTHN/AUTHZ + past-items load + per-item current ProductClass 解決 + cap 適用を 1 段で吸収 (Pilot 5 `CheckoutPrepared` の方針踏襲)
+- **`Included` / `Skipped` Semantic** — Being → Final 間で list payload を運ぶ pattern。`MergedCart` / `Result` 既存パターンの踏襲 (composite-type validate body 空)
+- **Skip-rather-than-fail** — 廃番 (ProductClass null) / 在庫切れ (stock=0 & !stockUnlimited) は skip; 数量 over は cap で adjust。EC-CUBE doc の「在庫切れ商品はスキップ、現在価格を適用」 を踏襲
+- **prep 不足の発見**: Wave 1A の Pilot 12 prep は `itemsByOrderNo` のみ追加していて `byOrderNo` (header lookup) が無かった。Agent D が in-flight で interface 拡張 (storage 側にすでに `getByOrderNo` が存在したため最小追加)
+
+#### Pilot doLogout (Agent E)
+- **0-arg Input** が Be Framework で動く確認 — `BecomingArguments` の `getParameters()` 空 loop は no-op。dummy field fallback は不要だった
+- Session-clear は EC-CUBE EventListener 側 (Slice 7.2 contract)、Be 層は LoggedOut Final で「処理した」 という proof を返すのみ — Pilot 6 doLogin と同形
+
+#### goMypage (Agent F)
+- **dashboard aggregation pattern** — 1 Final で複数 Reason (CustomerQuery + OrderQuery + FavoriteStorage) を converge し、shallow projection を組む
+- `recentOrders` は flat projection (`{orderNo, total, orderDate, orderStatus}`)、`favoriteCount` のみ (full list は出さない)。dashboard scope の規約
+- `OrderLimit` Semantic 新規 (1-50 cap) — `SessionPrefix` 等の int-typed semantic 規約踏襲
+
+#### doWithdrawCustomer (Agent G)
+- **Multi-side-effect Final** (Pilot 5 convention): capture-original-email → replace-record → clear-carts → send-mail の strict order
+- **Dummy email**: `withdrawn-{customerId}@example.invalid` (RFC 2606 reserved `.invalid` TLD)
+- **`customerStatus=3` = withdrawn** を const として publish — `FinalizedOrderEntity::STATUS_NEW` パターン踏襲
+- Idempotency short-circuit: 既に status=3 なら mail 再送なし。`cleared=true` は idempotent replay 時も維持 (UI 区別なし)
+
+### Cherry-pick 衝突対応
+
+Agent D (Pilot 12) と Agent F (goMypage) は両者 `OrderQueryInterface` / `FakeOrderQuery` を拡張 (D: `byOrderNo`、F: `listByCustomer`)。git auto-merge が成功 — 異なる method を追加していたため。Wave 設計時の disjoint-files 原則が機能した。
+
+### Orchestration の振り返り
+
+- **walltime 短縮**: Wave 1 (3 agent) は wall ~5min、Wave 2 (4 agent) は wall ~12min。直列なら 7 unit ≒ 1.5-2 倍時間
+- **briefing の粒度**: prep 工程 (Wave 1A) と本実装 (Wave 2 D) を別 wave にしたのは正解。1 agent が両方やると context が膨らみすぎ判断が雑になる
+- **prep 漏れの発見** (Pilot 12 の `byOrderNo`): briefing で「依存している interface methods をすべて列挙する」 工程が抜けていた。Wave 3 以降は briefing 設計時に dependency 表を作成
+- **既存 file への複数 agent 書込み**: G (CartCommand 拡張) と D (CartCommand 読込) は read/write split で OK、F (OrderQuery 拡張) と D (OrderQuery 拡張) は git auto-merge 任せで OK。**3 agent 以上が同 file を write する場合は事前に分担を明示するべき**
+
+### 累計進捗 (Wave 2 末)
+
+| 指標 | Pilot 1-5 末 | Batch 3 末 | Wave 2 末 |
+|---|---|---|---|
+| 移植 transition | 5 / 137 (3.6%) | 14 / 137 (10.2%) | 20 / 137 (14.6%) |
+| Tests | 90 | 141 | **188** |
+| Assertions | 205 | 323 | **477** |
+
+実証された pattern instance:
+- Direct: 13 件 (Pilot 1, 6, 7, 8, 9, 11, 13, 14, 15, doLogout, goMypage, doWithdrawCustomer, doResetPassword, doRemoveFavorite)
+- Linear: 1 件 (Pilot 10)
+- Multi-Reason Being: 1 件 (Pilot 4)
+- Diamond-Cascade: 3 件 (Pilot 2, 5, 12)
+- Branching Final: 1 件 (Pilot 3)
+
+
+## Wave 3 + Wave 4 + Wave 5 — オーケストレーション習熟期
+
+**1 turn = 3-4 並列 agent + per-agent cherry-pick + integrated test/psalm verify** のループが定常運転に。Wave 3 で 8 transition (3 agent)、Wave 4 で admin 基盤 + 2 transition (1 agent)、Wave 5 で 3 transition (3 agent) を投入。
+
+### Wave 3 (8 transition、3 agent 並列)
+
+| Agent | 対象 | 結果 | テスト |
+|---|---|---|---|
+| H | go* pure renderers (`goLogin` / `goCustomerRegistration` / `goContactForm` / `goMypageWithdraw`) | `6dba995` | +6 |
+| I | `goMypageHistory` / `goMypageChange` (Direct + authenticated) | `e6ac521` | +13 |
+| J | `goShopping` (Direct aggregation) | `ac1ce6f` | +9 |
+
+Wave 3 net: 188 → 216 (+28 tests)、新 transition 7 件 (goForgotPassword は ALPS 不在のため正当に skip)。
+
+#### 発見
+
+- **pure form-info endpoint** は Be Framework を使わず BEAR Resource 単体で実装する規約を確立 (H が判断)。`{transitionId, fields, submitTo, csrfToken}` のuniform body shape
+- **`goForgotPassword` が ALPS に無い** — `doRequestPasswordReset` (POST) は存在するが、その入口の form-show transition は ALPS に登録されていない。agent が invent しなかったのは正解 (orchestrator briefing で「skip して報告」 と明示済)
+- **`PaymentMethodFactoryInterface::available()`** を Wave 3J が新規追加 (Pilot 5 では single method lookup のみ実装、enumeration は未着手だった)
+
+### Wave 4 (admin AAA infrastructure + 2 transition、1 agent)
+
+| 対象 | 結果 | テスト |
+|---|---|---|
+| admin AAA infra + `doAdminLogin` + `doAdminLogout` | `b925397` | +13 |
+
+#### 重要な発見 (G-18): 仕様外 transition の発見規約
+
+agent が ALPS を網羅探索した結果、**`doAdminLogin` / `doAdminLogout` は alps.json に存在しない** ことを発見。Member 系 admin user CRUD (`goMemberList` / `doUpdateMember` 等) は存在するが、admin 自身の auth/logout transition は欠落。
+
+採用した対応:
+- agent は「conventional な命名 (`doAdminLogin` / `doAdminLogout`) で実装、docblock に ALPS 欠落を明記、orchestrator に報告」 を選択
+- orchestrator が事後に alps.json に該当 transition を追記 (`actor-admin` tag、`loginId` + `password` descriptor)
+
+**G-18 として記録**: ALPS と実装の往復は片方向ではない。実装 agent が「ALPS にあるべきだがない」 transition を見つけた場合、agent が ALPS を勝手に編集するのではなく、(a) conventional 名で実装 (b) gap を docblock + return message で報告 (c) orchestrator が ALPS の整合性を取る、の責務分担を採用。
+
+#### admin AAA infrastructure (新設)
+
+- `AdminEntity` (parallel to `CustomerEntity`、admin shape: `adminId` / `loginId` / `passwordHash` / `name` / `mailAddress` / `authority`)
+- `AdminQueryInterface` (`findByLoginId` / `findById`) + `FakeAdminQuery` + `FakeAdminStorage`
+- `AdminSessionInterface` (`adminId(): ?string`、`@psalm-taint-source session`) + `FakeAdminSession`
+- `admins.json` fixture (3 seed admins、`test-admin` が本物の bcrypt password)
+- `UnauthorizedAdminAccessException` / `AdminLoginFailedException` / `LoginIdFormatException`
+- `LoginId` Semantic
+
+EC-CUBE は admin と customer の二重 firewall モデル — それを mirror。同じ `SessionInterface` に admin id を相乗りさせず、別 interface に分離した方が AAA boundary が明確になる。
+
+### Wave 5 (3 transition、3 agent 並列、admin AUTHZ 量産)
+
+| Agent | 対象 | パターン | 結果 | テスト |
+|---|---|---|---|---|
+| M | `goCustomerList` | Direct + admin AUTHZ + filter search | `31e1d93` | +11 |
+| N | `goCustomer` | Direct + admin AUTHZ + aggregation | `1e22b42` | +7 |
+| O | `doCreateCustomer` | Multi-Reason Being + admin AUTHZ (Pilot 4 並列) | `0bb3ea0` | +9 |
+
+Wave 5 net: 229 → 256 (+27 tests)、新 transition 3 件。
+
+#### 発見
+
+- **admin AUTHZ pattern が CustomerQuery / OrderQuery / FavoriteStorage を across 透過的に使える** — admin が customer entity を読む経路は customer 自身が読む経路と同じ Reason を共有 (AAA は session-side で吸収)。読み専用 Reason 群が role-agnostic に設計されていた効果
+- **G-17 再確認** — Wave 5O `doCreateCustomer` で改めて確認: Pilot 4 `CustomerRegistering` を再利用すれば DRY だが `#[Be(CustomerRegistered)]` が class-level fixed なので admin 用 Final へ流せない。Input-per-intent + Being-per-shape を踏襲して `AdminCustomerCreating` を別 class 化
+- **Anti-enumeration ladder** — Wave 5N `goCustomer` で AUTHZ check (403) → existence check (404) の順序を確立。403 のレスポンスは email を echo back しないことを test で pin
+
+### 累計進捗 (Wave 5 末)
+
+| 指標 | Pilot 1-5 | Pilot 15 末 | Wave 2 末 | Wave 5 末 |
+|---|---|---|---|---|
+| 移植 transition | 5 (3.6%) | 14 (10.2%) | 20 (14.6%) | **30 (21.9%)** |
+| Tests | 90 | 141 | 188 | **256** |
+| Assertions | 205 | 323 | 477 | **798** |
+
+実証された pattern instance:
+- Direct: 19 件 (累計)
+- Linear: 1 件 (Pilot 10)
+- Multi-Reason Being: 2 件 (Pilot 4 + Wave 5O `doCreateCustomer`)
+- Diamond-Cascade: 3 件 (Pilot 2, 5, 12)
+- Branching Final: 1 件 (Pilot 3)
+
+#### 新 skill gap
+
+- **G-18: ALPS 不在 transition の発見と編集責務** — 上記
+- **G-19: admin AAA は parallel firewall として独立 interface 化する** — Wave 4 で発見。`SessionInterface` (customer) / `AdminSessionInterface` (admin) を分離することで、(a) 一方の null check で他方を無効化する事故を防げる (b) audit log で role 判別が明示的になる (c) BEAR resource で `Code::UNAUTHORIZED` (顧客) vs `Code::FORBIDDEN` (admin-only endpoint だが顧客 logged-in、role mismatch) を明確に分けられる
+
+### alps.json update
+
+orchestrator が事後追記:
+- `doAdminLogin` (unsafe、`actor-admin` tag、`loginId` + `password` descriptor)
+- `doAdminLogout` (idempotent、`actor-admin` tag、no descriptor)
+
+これで Wave 4 で実装した 2 transition が ALPS-traceable に。alps.json の JSON validity も `php -r json_decode` で確認済。
+
+
+## Wave 6 — domain 拡張 + pair completion (7 transition、4 agent 並列)
+
+| Agent | 対象 | 内訳 | 結果 | テスト |
+|---|---|---|---|---|
+| P | customer address book (4 transition) | `goCustomerAddressList` / `doCreateCustomerAddress` / `doUpdateCustomerAddress` / `doDeleteCustomerAddress` — 単一 agent で `AddressEntity` infrastructure 込み | `30065aa` | +26 |
+| Q | `goFavoriteList` | Pilot 13 read pair | `dc660f2` | +6 |
+| R | `goOrderHistory` | customer 全件 + pagination | `bea5948` | +7 |
+| S | `doDeleteCustomer` | admin soft-delete、Wave 5O pair | `1b31d91` | +11 |
+
+Wave 6 net: 256 → 306 (+50 tests)、新 transition 7 件。
+
+### Wave 6 で発見された設計事項
+
+#### G-20: Singleton storage と cross-session 切替テスト
+Wave 6P で発見:
+- AUTHZ test (Alice の address を Bob が編集しようとして 403) で session を rebind すると、各 Injector が独立した `FakeAddressStorage` singleton を持つため、Alice の write が Bob の view に見えない
+- **解決**: テスト setUp で `$storage = new FakeAddressStorage(); $module->bind(AddressStorageInterface::class)->toInstance($storage); $module->bind(FakeAddressStorage::class)->toInstance($storage);` を rebind 時にも維持する
+- これは Pilot 5 で発見した **G-14 (Ray.Di binding gotcha)** の cross-session 切替版。今後の AUTHZ test で session rebind パターンを使うケースに適用
+
+#### G-21: idempotent DELETE の 2 つのスタイル
+Wave 6 で 2 つの DELETE 実装が並存:
+- Pilot 11 / 13 / 6S `doRemoveFavorite`: **silent idempotent** — 不在の item を削除しても 200 + `alreadyAbsent: true`、UI が flag で区別
+- Pilot 11 `doRemoveCartItem` / Wave 6P `doDeleteCustomerAddress`: **404 on miss** — 認証済み caller には精密 feedback、idempotent 性は「persisted state は同じ」 で保たれる
+
+**規約**: 一般的な "rare-but-OK" path (お気に入りを 2 回押した) は silent、本当に変更を期待する path (cart や住所) は 404。Wave 6P がこの規約を明文化。
+
+#### G-22: pagination の Semantic 命名
+Wave 6R `goOrderHistory` で、既存 `Limit` Semantic (1-50) を再利用するか別 `HistoryLimit` Semantic を作るかが論点に:
+- 既存 `OrderLimit` (1-50) は dashboard / grid 用、`Limit` (1-50) は admin search 用、`HistoryLimit` (1-200) は full-history 用
+- Be Framework の per-param-name wiring 規約により、param 名で Semantic が選択される → 同じ「数値の cap」 でも context によって別 class
+- DRY 違反だが、cap range が context-specific であるべきという ALPS 思想とも整合
+- **Wave 3 `OrderLimit` 設定時にこの分岐が起きていれば DRY の議論が浮上していたが、当時 Wave 6R を想定していなかった**
+
+### 累計進捗 (Wave 6 末)
+
+| 指標 | Pilot 1-5 | Pilot 15 末 | Wave 2 末 | Wave 5 末 | Wave 6 末 |
+|---|---|---|---|---|---|
+| 移植 transition | 5 (3.6%) | 14 (10.2%) | 20 (14.6%) | 30 (21.9%) | **37 (27.0%)** |
+| Tests | 90 | 141 | 188 | 256 | **306** |
+| Assertions | 205 | 323 | 477 | 798 | **962** |
+
+### 累計 skill gap 一覧 (このセッションで発見)
+
+| ID | 内容 | 発見 wave |
+|---|---|---|
+| G-14 | Ray.Di `bind(Iface)->to(Impl)` は singleton scope を consult しない | Pilot 5 (前 session) |
+| G-15 | Multi-side-effect Final (Complex Convergence) の判定基準 | Pilot 5 (前 session) |
+| G-16 | server-derived Semantic 登録漏れ | Pilot 5 (前 session) |
+| G-17 | Be Framework chain は `#[Be]` で class-level fixed → Input-per-intent + Being-per-shape | Pilot 10 |
+| G-18 | ALPS 不在 transition の発見規約 — agent が conventional 名で実装 + orchestrator が ALPS 整合 | Wave 4 |
+| G-19 | admin AAA は parallel firewall (`SessionInterface` / `AdminSessionInterface` 分離) | Wave 4 |
+| G-20 | cross-session rebind 時の singleton storage 共有パターン | Wave 6P |
+| G-21 | idempotent DELETE の "silent" vs "404 on miss" 規約 | Wave 6P |
+| G-22 | pagination Semantic は context-specific (`Limit` / `OrderLimit` / `HistoryLimit`) | Wave 6R |
+
+これら G-17 以降は **`be-framework-skills` repo / `alps-skills` repo へ contribute する候補** として整理可能。Wave 7 (SKILL bake) で実施候補。
+
+### orchestration マトリクスの定常運転
+
+セッション後半 (Wave 1-6) の運用パターン:
+1. orchestrator が wave 設計時に dependency 表を作成 (Wave 4 で漏れて Wave 5 brief で補完)
+2. agent 並列度は 3-4 が安全圏 (Wave 2 で 4 agent、Wave 5/6 で 3-4 agent)
+3. 各 agent には briefing で「STOP and report」 ルートを明示 → S1-S7 stop condition 相当の自律判断を委譲
+4. 完了通知ごとに orchestrator が cherry-pick + integrated test/psalm verify → push
+5. wave 完了時に HANDOVER 追記 + HOW_TO_CONTINUE 反映 + PR body 更新 (orchestrator 専任)
+
+walltime 効率: 直列なら累計 12-15 unit が、6 wave × ~5-10 min walls で着地。約 60-90 分セッション内で 32 新 transition + 9 skill gap 発見。

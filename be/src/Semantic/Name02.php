@@ -15,8 +15,12 @@ use function mb_strlen;
 final class Name02
 {
     #[Validate]
-    public function validate(string $name02): void
+    public function validate(string|null $name02): void
     {
+        if ($name02 === null) {
+            return;
+        }
+
         $length = mb_strlen($name02);
         if ($length < 1 || $length > 50) {
             throw new Name02FormatException();

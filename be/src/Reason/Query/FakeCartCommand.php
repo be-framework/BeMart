@@ -25,4 +25,10 @@ final class FakeCartCommand implements CartCommandInterface
     {
         $this->storage->removeByPreOrderId($preOrderId);
     }
+
+    #[Override]
+    public function clearBySessionPrefix(string $sessionPrefix): void
+    {
+        $this->storage->removeBySessionPrefix($sessionPrefix);
+    }
 }
