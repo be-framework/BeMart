@@ -196,29 +196,6 @@
                                 {{ product.price02|price }}
                             </p>
                         </a>
-                        {% if product.stockFind %}
-                            <form name="form{{ product.id }}" id="productForm{{ product.id }}" action="{{ url('product_add_cart', { id: product.id }) }}" method="post">
-                                <div class="ec-productRole__actions">
-                                    <div class="ec-numberInput">
-                                        <span>数量</span>
-                                        <input type="number" name="quantity" value="1" min="1" maxlength="9" class="quantity">
-                                    </div>
-                                </div>
-                                <input type="hidden" name="product_id" value="{{ product.id }}">
-                                <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
-                            </form>
-                            <div class="ec-productRole__btn">
-                                <button type="submit" class="ec-blockBtn--action add-cart" data-cartid="{{ product.id }}" form="productForm{{ product.id }}">
-                                    カートに入れる
-                                </button>
-                            </div>
-                        {% else %}
-                            <div class="ec-productRole__btn">
-                                <button type="button" class="ec-blockBtn--action" disabled="disabled">
-                                    ただいま品切れ中です。
-                                </button>
-                            </div>
-                        {% endif %}
                     </li>
                 {% endfor %}
             </ul>

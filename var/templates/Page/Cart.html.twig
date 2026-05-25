@@ -80,13 +80,14 @@
                 </li>
             </ul>
         </div>
-        {% if cartCount > 0 %}
+        {% set displayCarts = carts|filter(cart => cart.items|length > 0) %}
+        {% if displayCarts|length > 0 %}
             <div class="ec-cartRole__totalText">
                 <p>
                     商品の合計金額は「<strong>{{ totalPrice|price }}</strong>」です。
                 </p>
             </div>
-            {% if carts|length > 1 %}
+            {% if displayCarts|length > 1 %}
                 <div class="ec-cartRole__error">
                     <div class="ec-alert-warning">
                         <div class="ec-alert-warning__inner">
@@ -102,7 +103,7 @@
 
             <form name="form" id="form_cart" class="ec-cartRole" method="post" action="/cart">
 
-                {% for cart in carts %}
+                {% for cart in displayCarts %}
                     {% set cartKey = cart.cartKey %}
                     <div class="ec-cartRole__cart">
                         <div class="ec-cartTable">
