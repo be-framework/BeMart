@@ -67,6 +67,13 @@ final class FakeOrderQuery implements OrderQueryInterface
         return $this->finalizedOrderStorage->getByCustomerId($customerId, $limit, $offset);
     }
 
+    /** @return list<FinalizedOrderEntity> */
+    #[Override]
+    public function listAll(int $limit = 50, int $offset = 0): array
+    {
+        return $this->finalizedOrderStorage->getAll($limit, $offset);
+    }
+
     /** @return array<string, OrderEntity> */
     private function load(): array
     {

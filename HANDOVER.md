@@ -1733,3 +1733,147 @@ Wave 6R `goOrderHistory` で、既存 `Limit` Semantic (1-50) を再利用する
 5. wave 完了時に HANDOVER 追記 + HOW_TO_CONTINUE 反映 + PR body 更新 (orchestrator 専任)
 
 walltime 効率: 直列なら累計 12-15 unit が、6 wave × ~5-10 min walls で着地。約 60-90 分セッション内で 32 新 transition + 9 skill gap 発見。
+
+## Wave 7 — SKILL bake + admin order + guest checkout (3 agent 並列)
+
+**3 agent 並列のうち 1 は docs-only (X)、2 はコード生産 (Y, W)**。docs と code を独立 agent に分けることで、SKILL bake (G-NN の externalize) が code 生産と非競合に走る運用を確立。
+
+| Agent | 対象 | 結果 | テスト |
+|---|---|---|---|
+| X | SKILL bake — `docs/skills/G-14 〜 G-22` の 9 件 + `index.md` | `2241185` | 0 (docs only) |
+| Y | admin order management 4 件 (`goOrderList` / `goOrder` / `doUpdateOrder` / `doUpdateOrderStatus`) | `a59485a` | +38 |
+| W | guest checkout entry 2 件 (`goShoppingNonMember` / `doSubmitNonMember`) | `f326e12` | +6 |
+
+Wave 7 net: 306 → 350 (+44 tests)、新 transition 6 件、新 docs 10 件。
+
+### Wave 7 で発見された設計事項
+
+#### Y (admin order management) で確立した規約
+- **status constants** を `FinalizedOrderEntity` に EC-CUBE `dtb_order_status` (1, 3-9) verbatim 採用。`STATUS_NEW=1`、`STATUS_CANCEL=3`、`STATUS_IN_PROGRESS=4`、`STATUS_DELIVERED=5`、`STATUS_PAID=6`、`STATUS_PENDING=7`、`STATUS_PROCESSING=8`、`STATUS_RETURNED=9`。値 2 は EC-CUBE 4.x で削除されたため除外
+- **mass-assignment safety の admin variant** — `doUpdateOrder` の editable field は `discount`, `charge`, `usePoint` のみに narrow。`customerId` / `total` / `orderStatus` / `orderDate` / `paymentDate` は body から書けない (round-trip verbatim)
+- **status flip は独立 sub-resource** — `src/Resource/Page/Admin/OrderStatus.php` を `Order.php` から分離。workflow significant な操作 (cancel = stock 戻し、ship = point 付与) は将来別 chain になる想定
+- **Semantic widening (nullable 化)** — `Charge` / `Discount` / `UsePoint` Semantics を `int|null` に変更。partial-update Input の null 値を受容 (Pilot 8 `Name01`/`Name02` の nullable 化 と同パターン)
+
+#### W (guest checkout) のスコープ判断
+- ALPS の `goShoppingNonMember` / `doSubmitNonMember` は **form entry only として実装**、guest checkout の AUTHZ 緩和 (Pilot 5 doCheckout を session-less で通す) は Phase 2 として明示 defer
+- `doSubmitNonMember` Final は `preOrderId` を `CustomerIdGenerator` (32-char hex) で synthesize して返すが、**Cart や PreOrder には書かない** stub。Final docblock で Phase 2 gap を明文化
+- 32-char hex (CustomerIdGenerator) vs 40-char hex (`PreOrderId` Semantic) の format 不一致も docblock で記録 — Phase 2 で `PreOrderIdGenerator` を独立 interface 化する余地
+
+#### X (SKILL bake) の構造
+- 10 ファイル (`index.md` + G-14 〜 G-22) を `docs/skills/` 配下に配置
+- 各 G-NN file は **self-contained** — future engineer がプロジェクト context 無しに読める
+- 構造: `Context → Problem → Solution → Code example → Anti-pattern → Where this matters → Related`
+- 各 file 90-145 行、200 行 cap 内
+- 上流 contribution 候補振り分け: G-14/15/16/17/22 → `be-framework-skills`、G-18/19 → `alps-skills`、G-20/21 → either
+- agent flag: 旧 HANDOVER の G-16 は別概念 (side-effect ordering / partial-commit window) を含んでいた。Wave 7 brief は「server-derived Semantic registration NOTICE」 という後者解釈を採用。partial-commit window topic は G-15 末尾で言及のみ、独立 G-NN は未起票 (Phase 2 候補)
+
+### 累計進捗 (Wave 7 末 = セッション最終)
+
+| 指標 | session 開始時 | Wave 7 末 | 増分 |
+|---|---|---|---|
+| 移植 transition | 5 / 137 (3.6%) | **45 / 137 (32.8%)** | **+40** |
+| Tests | 90 | **350** | +260 |
+| Assertions | 205 | **1120** | +915 |
+| Skill gap 発見 | 3 (G-14/15/16) | 9 (G-14 〜 G-22) | +6 |
+| Skill docs (externalized) | 0 | 10 (`docs/skills/`) | +10 |
+| Branch commit 数 | 10 (pre-session) | 約 50 | +40 |
+| Wave (parallel orchestration) | 0 | 7 wave | 構造化定着 |
+
+### Session summary
+
+**前半 (Pilot 6-15)**: 直列 agent (主に自分自身が driver)、9 Pilot を 6 commit 投入。Pilot 12 を一度 defer。
+**中盤 (Wave 1-2)**: orchestrator pattern 確立。worktree-isolated parallel subagent への切替。Pilot 12 prep + Pilot 12 本実装を別 wave に分割し成功。
+**後半 (Wave 3-7)**: 3-4 agent 並列が定常運転。各 wave 完了時 cherry-pick + integrated test/psalm verify + push の reflexes が定着。SKILL bake で外部資産化まで到達。
+
+実証された pattern instance (累計):
+- Direct: 30+ 件
+- Linear: 1 件 (Pilot 10)
+- Multi-Reason Being: 2 件 (Pilot 4, Wave 5O)
+- Diamond-Cascade: 3 件 (Pilot 2, 5, 12)
+- Branching Final: 1 件 (Pilot 3)
+
+**Phase A の transition 量産という当初目標 (Pilot 1-5 = 5/137 = 3.6%) に対し、1 セッションで 32.8% まで到達**。残り 92 transition は大半が admin tooling (product CRUD / category / plugin / layout / CSV export-import 等) + customer の細部 (point / address detail / shipping date 等) で、新規 pattern 発見の余地は限定的。Phase 2 (Fake → real DB / Mailer / 本物の AUTHZ 統合) への移行 readiness が今 session で大幅に向上。
+
+
+## Wave 8 + Wave 9 — 100% transition coverage
+
+**45 → 139 transitions (32.8% → 100%)** in two big parallel waves.
+
+### Wave 8 (5 agents): 49 transitions
+
+| Agent | 対象 | 結果 | テスト |
+|---|---|---|---|
+| α | admin product CRUD (8) | `c4452b1` | +67 |
+| β | category + className + classCategory (15) | `c2fdef2` | +81 |
+| γ | admin member + login history (7 + skip 1) | `7047f93` | +52 |
+| δ | help + top + shopping renderers (11) | `4196f37` | +11 |
+| ε | plugin + base info + mail template + trade law (8) | `c4c831f` | +40 |
+
+Wave 8 net: 350 → 601 (+251 tests), 45 → 94 transitions.
+
+#### Wave 8 で発見された運用課題
+
+**G-23: 並列 agent で複数 file 同時編集の cherry-pick 衝突**
+- 5 agent が `AppModule.php` を編集 → 4 件で textual conflict (auto-merge fail)
+- 各 agent が自分専用の anchor comment (`// Wave 8α:` 等) を持っても、imports が他 agent の imports と隣接して衝突
+- **規約**: AppModule 編集を要する複数 agent を並列起動する場合、orchestrator が cherry-pick 時に conflict resolution を都度実施 (今回 4 件解決済)
+- 代替案: AppModule を分割 (CustomerModule / AdminModule / CmsModule) → Phase 2 検討
+
+**G-24: 同名 Semantic class の意図せぬ重複作成**
+- Wave 8α と Wave 8β が両方 `SortNo` Semantic を作成 (前者 0+、後者 0-9999)
+- Cherry-pick 時に file-level conflict (`<add/add>`)、SortNoFormatException も同様
+- Orchestrator が手動 merge — 0-9999 range を採用 (より制約的)
+
+**Stale autoload cache の罠**
+- Cherry-pick 直後の `composer test` が AppModule の最新 class を見つけられず `Unbound` error 多発 (59 件) → `composer dump-autoload` で解消
+- Wave 9 以降は cherry-pick 後に常に `dump-autoload` を実行
+
+### Wave 9 (4 agents): 45 transitions
+
+| Agent | 対象 | 結果 | テスト |
+|---|---|---|---|
+| ζ | CMS Page+News+Block+Layout+Tag+Template (20) | `50fb50f` | +39 |
+| η | Order admin extras (9) | `c3414c3` | +31 |
+| θ | Payment+Delivery+TaxRule (11) | `c3414c3` | +26 |
+| ι | misc + goodTraded skip (5 + 1 not-a-transition) | `60633b8` | +12 |
+
+Wave 9 net: 601 → 709 (+108 tests), 94 → 139 transitions。
+
+#### Wave 9 で確定した最終事項
+
+- **`goodTraded`** は ALPS data descriptor (BaseInfo entity field "取扱商品")、transition でないと Agent ι が確認 → 139/139 全 transition 移植が完了とみなす
+- **`doUpdateTaxRule`** は ALPS に存在せず (TaxRule は create / list / delete のみ) → Agent θ が delete+create のみ実装
+- 全 Wave 8-9 で stub / 部分実装になった件 (Phase 2 deferral): doImportProductCsv / doImportCategoryCsv / doImportShippingCsv / doInstallPlugin / goExportOrderPdf / doCreateOrder / doUpdateCsv
+
+### 累計進捗 (Wave 9 末 = セッション最終最終)
+
+| 指標 | 開始時 | Wave 5 末 | Wave 7 末 | Wave 9 末 (最終) |
+|---|---|---|---|---|
+| 移植 transition | 5 / 140 (3.6%) | 30 (21.4%) | 45 (32.1%) | **139 / 139 (100%)** |
+| Tests | 90 | 256 | 350 | **709** |
+| Assertions | 205 | 798 | 1120 | **2012** |
+| Skill gap 発見 | 3 | 7 | 9 | **11 (G-14 〜 G-24)** |
+| Skill docs externalized | 0 | 0 | 10 | **10** |
+| Wave (parallel orchestration) | 0 | 5 | 7 | **9** |
+
+実証された pattern instance (累計):
+- Direct: 70+ 件 (admin CRUD 系で多発生)
+- Linear: 1 件 (Pilot 10)
+- Multi-Reason Being: 3 件 (Pilot 4, Wave 5O, Wave 8α `doCreateProduct`)
+- Diamond-Cascade: 3 件 (Pilot 2, 5, 12)
+- Branching Final: 1 件 (Pilot 3)
+
+### 構築のフェーズ移行
+
+**Phase A (transition 量産)** はこのセッションで完了。次の Phase 2 の主作業:
+
+1. **Fake → real persistence**: 全 `Fake*Storage` を Doctrine / Ray.MediaQuery 等に置換
+2. **Fake → real services**: `FakeMailer` → EC-CUBE MailService, `FakePaymentGateway` → 本物 PSP, `FakePurchaseFlow` → EC-CUBE Service
+3. **Slice 7.2 / 8.2**: EC-CUBE 側 EventListener で session / CSRF mirror
+4. **stub 解消**: 上記 Wave 8-9 で stub になった 7 件の本物実装
+5. **Slice 11**: Be Framework Psalm plugin (chain opacity 解消)
+
+### Session 総括
+
+**1 session で** 134 transition 移植 + 9 + 2 (G-23/24) skill gap 発見 + 10 docs externalized + 9 wave parallel orchestration を達成。orchestrator + worktree-isolated parallel subagent pattern が大量並列実装の standard workflow として定着した。
+

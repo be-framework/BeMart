@@ -33,6 +33,14 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
  * the `$offset` argument to walk past the first page when rendering the
  * customer's full order history. Returns an empty list when the customer
  * has no past orders (or `$offset` walks past the end).
+ *
+ * `listAll` returns the global finalized-order list sorted by `orderDate`
+ * descending (newest first), advanced by `$offset` and capped at `$limit`.
+ * Wave 7 (goOrderList) is the first consumer — the admin grid pulls the
+ * head of the list for the back-office screen. Unlike `listByCustomer`
+ * this is unfiltered by ownership: every finalized order on the system is
+ * in scope. AUTHZ is enforced by the Final via {@see AdminSessionInterface}
+ * — there is no API for a non-admin to call this directly.
  */
 interface OrderQueryInterface
 {
@@ -45,4 +53,7 @@ interface OrderQueryInterface
 
     /** @return list<FinalizedOrderEntity> */
     public function listByCustomer(string $customerId, int $limit = 10, int $offset = 0): array;
+
+    /** @return list<FinalizedOrderEntity> */
+    public function listAll(int $limit = 50, int $offset = 0): array;
 }
