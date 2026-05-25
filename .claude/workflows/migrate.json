@@ -46,8 +46,8 @@
       "name": "security",
       "prompt_file": ".claude/prompts/security-review.md",
       "agent": true,
-      "condition": "(Auth|Payment|Checkout|Order|Customer)",
-      "description": "認証・決済・注文・顧客関連の変更時のみ発火するセキュリティレビュー"
+      "condition": "(?i)(auth|security|csrf|session|payment|checkout|shopping|order|customer|cart|admin)",
+      "description": "変更ファイルパスが認証・セッション・CSRF・決済・注文・顧客・管理系を含む場合に発火するセキュリティレビュー"
     }
   ]
 }
