@@ -26,17 +26,17 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface PaymentMethodAdminStorageInterface
 {
     /** @return list<PaymentMethodAdminEntity> */
-    #[DbQuery('tpayment_list', factory: PaymentMethodAdminEntity::class)]
+    #[DbQuery('tpayment_list')]
     public function list(): array;
 
-    #[DbQuery('tpayment_get', factory: PaymentMethodAdminEntity::class)]
-    public function getById(string $paymentId): PaymentMethodAdminEntity|null;
+    #[DbQuery('tpayment_get')]
+    public function item(string $paymentId): PaymentMethodAdminEntity|null;
 
     #[DbQuery('tpayment_put')]
     public function put(PaymentMethodAdminEntity $payment): void;
 
     #[DbQuery('tpayment_remove')]
-    public function remove(string $paymentId): void;
+    public function delete(string $paymentId): void;
 
     /**
      * Generic `doSortNoMove` — rewrites the storage-only `sort_no`
@@ -54,5 +54,5 @@ interface PaymentMethodAdminStorageInterface
      * cached entity so its `list()` projection stays consistent.
      */
     #[DbQuery('tpayment_visible')]
-    public function setVisible(string $paymentId, bool $visible): void;
+    public function visible(string $paymentId, bool $visible): void;
 }

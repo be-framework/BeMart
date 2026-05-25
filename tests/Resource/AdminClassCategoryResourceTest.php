@@ -7,21 +7,15 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeClassCategoryStorage;
-use MyVendor\BeMart\Be\Reason\Query\FakeClassNameStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
-use function is_string;
 
 /**
  * Wave 7 — resource-layer coverage for the admin ClassCategory
@@ -30,38 +24,32 @@ use function is_string;
 final class AdminClassCategoryResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const COLOR_CLASS_NAME_ID = 'cn-color';
+    private const SIZE_CLASS_NAME_ID = 'cn-size';
+    private const RED_CLASS_CATEGORY_ID = 'cc-red';
+    private const BLUE_CLASS_CATEGORY_ID = 'cc-blue';
+    private const SMALL_CLASS_CATEGORY_ID = 'cc-small';
 
     private ResourceInterface $resource;
-    private FakeClassNameStorage $classNameStorage;
-    private FakeClassCategoryStorage $storage;
 
     protected function setUp(): void
     {
-        $this->classNameStorage = new FakeClassNameStorage();
-        $this->storage = new FakeClassCategoryStorage();
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session, $this->classNameStorage, $this->storage) extends AbstractModule {
-            public function __construct(
-                private readonly FakeAdminSession $session,
-                private readonly FakeClassNameStorage $classNameStorage,
-                private readonly FakeClassCategoryStorage $storage,
-            ) {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSessionInterface::class)->toInstance($this->session);
-                $this->bind(ClassNameStorageInterface::class)->toInstance($this->classNameStorage);
-                $this->bind(FakeClassNameStorage::class)->toInstance($this->classNameStorage);
-                $this->bind(ClassCategoryStorageInterface::class)->toInstance($this->storage);
-                $this->bind(FakeClassCategoryStorage::class)->toInstance($this->storage);
             }
         };
         $base->override($override);
@@ -72,27 +60,20 @@ final class AdminClassCategoryResourceTest extends TestCase
 
     private function seedClassName(string $label): string
     {
-        $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
-            'classNameLabel' => $label,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['classNameId'];
-        assert(is_string($id));
-
-        return $id;
+        // Static Ray.FakeQuery fixture, not a mutable seed.
+        return $label === 'Size' ? self::SIZE_CLASS_NAME_ID : self::COLOR_CLASS_NAME_ID;
     }
 
     private function seedClassCategory(string $classNameId, string $name): string
     {
-        $ro = $this->resource->post('page://self/admin/class-category/class-category-list', [
-            'classNameId' => $classNameId,
-            'classCategoryName' => $name,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['classCategoryId'];
-        assert(is_string($id));
+        // Static Ray.FakeQuery fixture, not a mutable seed.
+        unset($classNameId);
 
-        return $id;
+        return match ($name) {
+            'Blue' => self::BLUE_CLASS_CATEGORY_ID,
+            'S' => self::SMALL_CLASS_CATEGORY_ID,
+            default => self::RED_CLASS_CATEGORY_ID,
+        };
     }
 
     public function testCreateReturns201(): void

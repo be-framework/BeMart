@@ -21,7 +21,6 @@ use MyVendor\BeMart\Be\Input\AdminDeleteProductInput;
 use MyVendor\BeMart\Be\Input\AdminUpdateProductInput;
 use MyVendor\BeMart\Be\Input\GetAdminProductInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 
 use function assert;
 use function sprintf;
@@ -102,7 +101,7 @@ class Product extends ResourceObject
             'categoryNames' => $final->categoryNames,
             'tagNames' => $final->tagNames,
             'classNames' => $final->classNames,
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => $this->csrf->getToken(),
             'productStatusOptions' => [
                 1 => '公開',
                 2 => '非公開',

@@ -39,7 +39,7 @@ final readonly class NewsCreated
         }
 
         $entity = new NewsEntity(
-            newsId: $idGenerator->generate()->value,
+            newsId: $idGenerator->next()->value,
             newsTitle: $newsTitle,
             newsDescription: $newsDescription,
             newsUrl: $newsUrl,

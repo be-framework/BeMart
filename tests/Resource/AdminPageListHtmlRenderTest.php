@@ -7,10 +7,10 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakePageStorage;
+use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
 use MyVendor\BeMart\Tests\Resource\Admin\ContentJaMessages;
 use PHPUnit\Framework\TestCase;
@@ -75,7 +75,7 @@ final class AdminPageListHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
@@ -216,10 +216,10 @@ final class AdminPageListHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // The same logical page list as BeMart's FakePageStorage seed:
+        // The same logical page list as BeMart's PageStorageInterface seed:
         // the system homepage (edit_type 2 = EDIT_TYPE_DEFAULT).
         $page = new EcCubeStub([
-            'id' => FakePageStorage::SEED_PAGE_ID,
+            'id' => 'pg-homepage',
             'name' => 'ホームページ',
             'url' => 'homepage',
             'file_name' => 'index',

@@ -7,10 +7,9 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -36,7 +35,7 @@ final class MypageHistoryResourceTest extends TestCase
     private function rebindSession(string|null $customerId): void
     {
         $session = new FakeSession($customerId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {
@@ -57,11 +56,11 @@ final class MypageHistoryResourceTest extends TestCase
     public function testOnGetHappyPathReturns200(): void
     {
         $ro = $this->resource->get('page://self/mypage/history', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame(FakeFinalizedOrderStorage::SEED_ORDER_NO, $ro->body['orderNo']);
+        $this->assertSame('past0000000000000000000000000001', $ro->body['orderNo']);
         $this->assertSame(12700, $ro->body['total']);
         $this->assertSame(127, $ro->body['addPoint']);
     }
@@ -69,7 +68,7 @@ final class MypageHistoryResourceTest extends TestCase
     public function testOnGetHappyPathSurfacesEnrichedProjection(): void
     {
         $ro = $this->resource->get('page://self/mypage/history', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
@@ -111,11 +110,11 @@ final class MypageHistoryResourceTest extends TestCase
         $this->rebindSession('customer-999');
 
         $ro = $this->resource->get('page://self/mypage/history', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertSame(FakeFinalizedOrderStorage::SEED_ORDER_NO, $ro->body['orderNo']);
+        $this->assertSame('past0000000000000000000000000001', $ro->body['orderNo']);
     }
 
     public function testOnGetAnonymousReturns401(): void
@@ -123,7 +122,7 @@ final class MypageHistoryResourceTest extends TestCase
         $this->rebindSession(null);
 
         $ro = $this->resource->get('page://self/mypage/history', [
-            'orderNo' => FakeFinalizedOrderStorage::SEED_ORDER_NO,
+            'orderNo' => 'past0000000000000000000000000001',
         ]);
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);

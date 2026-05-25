@@ -7,19 +7,15 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeClassNameStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
-use function is_string;
 use function str_contains;
 
 /**
@@ -28,33 +24,29 @@ use function str_contains;
 final class AdminClassNameResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const COLOR_CLASS_NAME_ID = 'cn-color';
+    private const SIZE_CLASS_NAME_ID = 'cn-size';
 
     private ResourceInterface $resource;
-    private FakeClassNameStorage $storage;
 
     protected function setUp(): void
     {
-        $this->storage = new FakeClassNameStorage();
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session, $this->storage) extends AbstractModule {
-            public function __construct(
-                private readonly FakeAdminSession $session,
-                private readonly FakeClassNameStorage $storage,
-            ) {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSessionInterface::class)->toInstance($this->session);
-                $this->bind(ClassNameStorageInterface::class)->toInstance($this->storage);
-                $this->bind(FakeClassNameStorage::class)->toInstance($this->storage);
             }
         };
         $base->override($override);
@@ -65,14 +57,8 @@ final class AdminClassNameResourceTest extends TestCase
 
     private function seed(string $label): string
     {
-        $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
-            'classNameLabel' => $label,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['classNameId'];
-        assert(is_string($id));
-
-        return $id;
+        // Static Ray.FakeQuery fixture, not a mutable seed.
+        return $label === 'Size' ? self::SIZE_CLASS_NAME_ID : self::COLOR_CLASS_NAME_ID;
     }
 
     public function testCreateReturns201(): void

@@ -19,18 +19,18 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface NewsStorageInterface
 {
     /** @return list<NewsEntity> */
-    #[DbQuery('tnews_list', factory: NewsEntity::class)]
+    #[DbQuery('tnews_list')]
     public function list(): array;
 
-    #[DbQuery('tnews_get', factory: NewsEntity::class)]
-    public function getById(string $newsId): NewsEntity|null;
+    #[DbQuery('tnews_get')]
+    public function item(string $newsId): NewsEntity|null;
 
     #[DbQuery('tnews_put')]
     public function put(NewsEntity $news): void;
 
     #[DbQuery('tnews_delete')]
-    public function remove(string $newsId): void;
+    public function delete(string $newsId): void;
 
     #[DbQuery('tnews_visible')]
-    public function setVisible(string $newsId, bool $visible): void;
+    public function visible(string $newsId, bool $visible): void;
 }

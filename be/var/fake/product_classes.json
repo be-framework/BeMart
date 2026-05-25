@@ -1,6 +1,5 @@
-{
-  "$comment": "ProductClass のサーバー側典型値分布。Reason (FakeProductClassQuery) が参照。Pilot 2 doAddCartItem で必要なフィールドだけを記述 (Pilot 1 ProductFetched とは別ストア)。productCode をキーとして lookup。",
-  "sample-001": {
+[
+  {
     "productCode": "sample-001",
     "productName": "サンプル商品 A",
     "stock": 50,
@@ -12,7 +11,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "sample-002": {
+  {
     "productCode": "sample-002",
     "productName": "Sample Product B",
     "stock": null,
@@ -24,7 +23,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "sample-003": {
+  {
     "productCode": "sample-003",
     "productName": "サンプル商品 C (在庫僅少)",
     "stock": 3,
@@ -36,7 +35,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "out-of-stock-test-001": {
+  {
     "productCode": "out-of-stock-test-001",
     "productName": "在庫切れ商品",
     "stock": 0,
@@ -48,7 +47,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "single-purchase-rare-coin": {
+  {
     "productCode": "single-purchase-rare-coin",
     "productName": "限定品 (1 個まで)",
     "stock": 10,
@@ -60,7 +59,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "preorder-2026-spring-bag": {
+  {
     "productCode": "preorder-2026-spring-bag",
     "productName": "2026 春予約バッグ",
     "stock": 100,
@@ -72,7 +71,7 @@
     "saleTypeName": "予約販売",
     "saleTypeId": 2
   },
-  "preorder-2026-summer-shoes": {
+  {
     "productCode": "preorder-2026-summer-shoes",
     "productName": "2026 夏予約シューズ",
     "stock": 50,
@@ -84,7 +83,7 @@
     "saleTypeName": "予約販売",
     "saleTypeId": 2
   },
-  "unlimited-digital-book": {
+  {
     "productCode": "unlimited-digital-book",
     "productName": "デジタル書籍 (無制限)",
     "stock": null,
@@ -96,7 +95,7 @@
     "saleTypeName": "ダウンロード販売",
     "saleTypeId": 3
   },
-  "test-cart-merge-001": {
+  {
     "productCode": "test-cart-merge-001",
     "productName": "マージテスト用商品",
     "stock": 100,
@@ -108,7 +107,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "api-persist-20260522-001": {
+  {
     "productCode": "api-persist-20260522-001",
     "productName": "彩のジェラートセット",
     "stock": 7,
@@ -120,7 +119,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "admin-active-001": {
+  {
     "productCode": "admin-active-001",
     "productName": "管理画面用 商品A",
     "stock": 20,
@@ -132,7 +131,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "admin-hidden-001": {
+  {
     "productCode": "admin-hidden-001",
     "productName": "管理画面用 非公開商品B",
     "stock": 10,
@@ -144,7 +143,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "admin-withdrawn-001": {
+  {
     "productCode": "admin-withdrawn-001",
     "productName": "管理画面用 廃止商品C",
     "stock": 0,
@@ -156,7 +155,7 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   },
-  "ui-create-20260522-001": {
+  {
     "productCode": "ui-create-20260522-001",
     "productName": "UI商品登録テスト",
     "stock": 5,
@@ -168,4 +167,4 @@
     "saleTypeName": "通常販売",
     "saleTypeId": 1
   }
-}
+]

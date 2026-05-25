@@ -10,7 +10,18 @@ use Ray\MediaQuery\Result\PostQueryInterface;
 
 final readonly class ProductStatusUpdate implements PostQueryInterface
 {
-    public function __construct(public int $changedCount) {}
+    public int $changedCount;
+
+    /** @param int|array<int, self|array<string, mixed>> $changedCount */
+    public function __construct(int|array $changedCount)
+    {
+        if (is_array($changedCount)) {
+            $row = $changedCount[0] ?? [];
+            $changedCount = $row instanceof self ? $row->changedCount : (int) (is_array($row) ? ($row['changed_count'] ?? $row['changedCount'] ?? 0) : 0);
+        }
+
+        $this->changedCount = $changedCount;
+    }
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static

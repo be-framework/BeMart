@@ -50,7 +50,7 @@ final readonly class PaymentMethodAdminUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $payments->getById($paymentId);
+        $current = $payments->item($paymentId);
         if ($current === null) {
             throw new PaymentMethodAdminNotFoundException();
         }

@@ -7,10 +7,10 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeNewsStorage;
+use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
 use MyVendor\BeMart\Tests\Resource\Admin\ContentJaMessages;
 use PHPUnit\Framework\TestCase;
@@ -103,7 +103,7 @@ final class AdminNewsListHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
@@ -262,10 +262,10 @@ final class AdminNewsListHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // The same logical news list as BeMart's FakeNewsStorage seed:
+        // The same logical news list as BeMart's NewsStorageInterface seed:
         // a single welcome post.
         $news = new EcCubeStub([
-            'id' => FakeNewsStorage::SEED_NEWS_ID,
+            'id' => 'nw-welcome',
             'title' => 'ようこそ',
             'publishDate' => '2026-01-01T00:00:00+09:00',
             'visible' => true,

@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use Ray\Di\AbstractModule;
 
 /**
@@ -23,7 +23,7 @@ use Ray\Di\AbstractModule;
  *
  *  - Template has NO create affordance (the interface is `list()` only —
  *    `goTemplateList` in ALPS), so there is no resource-layer POST to
- *    seed rows with. The Fake-backed sibling relies on FakeTemplateStorage's
+ *    seed rows with. The Fake-backed sibling relies on the JSON template corpus'
  *    two stock seed rows (tp-default-pc / tp-default-sp) being present on
  *    construction; the SQL table is empty on each test (the per-test
  *    transaction rolls back), so this test seeds the two equivalent rows
@@ -76,7 +76,7 @@ final class AdminTemplateResourceSqlTest extends AbstractResourceSqlTestCase
 
     /**
      * Seed the two EC-CUBE stock design templates directly into
-     * dtb_template — the SQL analogue of FakeTemplateStorage's PC +
+     * dtb_template — the SQL analogue of the JSON template corpus' PC +
      * Mobile seed pair. Template has no create affordance so this
      * cannot go through the resource layer; the fixture INSERT writes
      * the rows the same transaction every subsequent assertion reads.

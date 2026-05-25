@@ -22,15 +22,15 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface AddressStorageInterface
 {
     /** @return list<AddressEntity> */
-    #[DbQuery('address_list_by_customer', factory: AddressEntity::class)]
+    #[DbQuery('address_list_by_customer')]
     public function listByCustomer(string $customerId): array;
 
-    #[DbQuery('address_get', factory: AddressEntity::class)]
-    public function getById(string $addressId): AddressEntity|null;
+    #[DbQuery('address_get')]
+    public function item(string $addressId): AddressEntity|null;
 
     #[DbQuery('address_put')]
     public function put(AddressEntity $address): void;
 
     #[DbQuery('address_delete')]
-    public function remove(string $addressId): void;
+    public function delete(string $addressId): void;
 }

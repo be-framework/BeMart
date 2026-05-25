@@ -73,11 +73,11 @@ final readonly class MemberCreating
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($adminQuery->findByLoginId($loginId) !== null) {
+        if ($adminQuery->byLogin($loginId) !== null) {
             throw new LoginIdAlreadyTakenException();
         }
 
-        $this->adminId = $idGenerator->generate()->value;
+        $this->adminId = $idGenerator->next()->value;
         $this->passwordHash = $passwordHasher->hash($password);
         $this->work = 1;
     }

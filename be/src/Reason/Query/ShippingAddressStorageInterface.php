@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
-use MyVendor\BeMart\Be\Reason\Query\Result\ShippingTrackingNumber;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
@@ -27,8 +26,8 @@ use Ray\MediaQuery\Annotation\DbQuery;
  */
 interface ShippingAddressStorageInterface
 {
-    #[DbQuery('shipping_get_by_order_no', factory: ShippingAddressEntity::class)]
-    public function getByOrderNo(string $orderNo): ShippingAddressEntity|null;
+    #[DbQuery('shipping_get_by_order_no')]
+    public function byOrderNo(string $orderNo): ShippingAddressEntity|null;
 
     #[DbQuery('shipping_put')]
     public function put(ShippingAddressEntity $address): void;
@@ -39,8 +38,8 @@ interface ShippingAddressStorageInterface
      *
      * @return list<ShippingAddressEntity>
      */
-    #[DbQuery('shipping_list_all', factory: ShippingAddressEntity::class)]
-    public function listAll(): array;
+    #[DbQuery('shipping_list_all')]
+    public function list(): array;
 
     /**
      * `doUpdateTrackingNumber` — write the shipping tracking number of
@@ -48,14 +47,5 @@ interface ShippingAddressStorageInterface
      * orderNo) is a silent no-op, same shape as `put`.
      */
     #[DbQuery('shipping_update_tracking')]
-    public function updateTrackingNumber(string $orderNo, string $trackingNumber): void;
-
-    /**
-     * Read the tracking number last written for an order. Returns null
-     * when the order has no shipping row, or has one with no tracking
-     * number set. Lets the `doUpdateTrackingNumber` Final echo back the
-     * persisted value.
-     */
-    #[DbQuery('shipping_tracking_by_order_no')]
-    public function trackingNumberByOrderNo(string $orderNo): ShippingTrackingNumber;
+    public function tracking(string $orderNo, string $trackingNumber): void;
 }

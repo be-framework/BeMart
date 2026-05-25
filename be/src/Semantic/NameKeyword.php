@@ -13,7 +13,7 @@ use function mb_strlen;
  * Admin customer-list name keyword — Wave 5 (goCustomerList).
  *
  * Substring filter applied across name01 / name02 / companyName in
- * FakeCustomerStorage::search. Optional (null disables the filter).
+ * customer search. Optional (null disables the filter).
  * Bounded length to keep the search scan trivial and to avoid stuffing
  * giant strings through the admin form.
  */

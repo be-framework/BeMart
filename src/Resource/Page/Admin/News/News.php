@@ -19,7 +19,6 @@ use MyVendor\BeMart\Be\Input\GetAdminNewsInput;
 use MyVendor\BeMart\Be\Input\UpdateNewsInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminNewsForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -71,7 +70,7 @@ class News extends ResourceObject
                 'newsUrl' => '',
                 'publishDate' => '2026-05-23 00:00:00',
                 'linkMethod' => false,
-                'csrfToken' => FakeCsrfToken::TOKEN,
+                'csrfToken' => $this->csrf->getToken(),
             ];
             $this->body['form'] = $this->editForm($this->body);
 

@@ -37,11 +37,11 @@ final readonly class TradeLawUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $existing = $tradeLawStorage->get();
+        $existing = $tradeLawStorage->item();
         $changed = $existing->body !== $tradeLawBody;
 
         if ($changed) {
-            $tradeLawStorage->update(new TradeLawEntity(body: $tradeLawBody));
+            $tradeLawStorage->put(new TradeLawEntity(body: $tradeLawBody));
         }
 
         $this->tradeLawBody = $tradeLawBody;

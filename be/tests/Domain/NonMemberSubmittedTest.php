@@ -10,7 +10,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\EmailFormatException;
 use MyVendor\BeMart\Be\Final\NonMemberSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitNonMemberInput;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -23,7 +23,7 @@ final class NonMemberSubmittedTest extends TestCase
     protected function setUp(): void
     {
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->becoming = $injector->getInstance(BecomingInterface::class);

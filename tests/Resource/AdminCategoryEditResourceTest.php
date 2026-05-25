@@ -8,17 +8,14 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminCategoryForm;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
-use function is_string;
 
 /**
  * Resource-layer coverage for the admin カテゴリ登録 / カテゴリ編集
@@ -33,6 +30,7 @@ use function is_string;
 final class AdminCategoryEditResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const FOOD_CATEGORY_ID = 'cat-food';
 
     private ResourceInterface $resource;
 
@@ -44,7 +42,7 @@ final class AdminCategoryEditResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $base->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -63,15 +61,11 @@ final class AdminCategoryEditResourceTest extends TestCase
 
     private function seed(string $name, int $sortNo = 0): string
     {
-        $ro = $this->resource->post('page://self/admin/category/category-list', [
-            'categoryName' => $name,
-            'sortNo' => $sortNo,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['categoryId'];
-        assert(is_string($id));
+        // Fake context is static-fixture based. The requested fixture row
+        // is `tcategory_get.jsonl` / `tcategory_list.jsonl`.
+        unset($name, $sortNo);
 
-        return $id;
+        return self::FOOD_CATEGORY_ID;
     }
 
     public function testOnGetNewRendersBlankEditor(): void

@@ -6,8 +6,8 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -35,7 +35,7 @@ use function str_contains;
  *    SqlPageStorage rejects it as non-numeric on lookup (the same 404
  *    path as any unknown id, by design).
  *
- *  - the Fake's testListIncludesSeed leans on the FakePageStorage
+ *  - the Fake's testListIncludesSeed leans on the PageStorageInterface
  *    constructor seeding one system page (`pg-homepage`); dtb_page is
  *    empty on each test, so the SQL sibling seeds one user-page row
  *    through the resource layer first and asserts the same
@@ -111,7 +111,7 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
 
     public function testListIncludesSeed(): void
     {
-        // FakePageStorage seeds `pg-homepage` in its constructor;
+        // PageStorageInterface seeds `pg-homepage` in its constructor;
         // dtb_page is empty on each test, so seed an equivalent row
         // through the resource layer first. The assertion shape
         // matches the Fake-backed sibling.
@@ -210,7 +210,7 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
     {
         // Mirror of the Fake-backed sibling's check: a page with
         // pageEditType >= 2 is system-managed and PageDeleted maps
-        // that to a 404 (masking system-page existence). FakePageStorage
+        // that to a 404 (masking system-page existence). PageStorageInterface
         // seeds `pg-homepage` with editType = 2 in its constructor;
         // dtb_page is empty so we seed an equivalent row directly via
         // the fixture helper at edit_type = 2.

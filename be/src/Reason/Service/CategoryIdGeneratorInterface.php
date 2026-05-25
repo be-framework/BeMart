@@ -16,5 +16,5 @@ use Ray\MediaQuery\Annotation\DbQuery;
 interface CategoryIdGeneratorInterface
 {
     #[DbQuery('category_next_id')]
-    public function generate(): AllocatedId;
+    public function next(): AllocatedId;
 }

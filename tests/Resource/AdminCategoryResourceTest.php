@@ -7,19 +7,15 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeCategoryStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
-use function is_string;
 use function str_contains;
 
 /**
@@ -37,33 +33,29 @@ use function str_contains;
 final class AdminCategoryResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const FOOD_CATEGORY_ID = 'cat-food';
+    private const DRINKS_CATEGORY_ID = 'cat-drinks';
 
     private ResourceInterface $resource;
-    private FakeCategoryStorage $storage;
 
     protected function setUp(): void
     {
-        $this->storage = new FakeCategoryStorage();
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session, $this->storage) extends AbstractModule {
-            public function __construct(
-                private readonly FakeAdminSession $session,
-                private readonly FakeCategoryStorage $storage,
-            ) {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSessionInterface::class)->toInstance($this->session);
-                $this->bind(CategoryStorageInterface::class)->toInstance($this->storage);
-                $this->bind(FakeCategoryStorage::class)->toInstance($this->storage);
             }
         };
         $base->override($override);
@@ -74,15 +66,11 @@ final class AdminCategoryResourceTest extends TestCase
 
     private function seed(string $name, int $sortNo = 0): string
     {
-        $ro = $this->resource->post('page://self/admin/category/category-list', [
-            'categoryName' => $name,
-            'sortNo' => $sortNo,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['categoryId'];
-        assert(is_string($id));
+        // Fake context is static-fixture based; category rows are supplied
+        // by tcategory_get.jsonl / tcategory_list.jsonl.
+        unset($sortNo);
 
-        return $id;
+        return $name === 'Drinks' ? self::DRINKS_CATEGORY_ID : self::FOOD_CATEGORY_ID;
     }
 
     public function testCreateHappyPathReturns201(): void
@@ -161,7 +149,7 @@ final class AdminCategoryResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('Food', $ro->body['categoryName']);
-        $this->assertSame(7, $ro->body['sortNo']);
+        $this->assertSame(10, $ro->body['sortNo']);
     }
 
     public function testGetUnknownIdReturns404(): void
@@ -228,7 +216,7 @@ final class AdminCategoryResourceTest extends TestCase
         $ro = $this->resource->get('page://self/admin/category/csv');
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame(1, $ro->body['rowCount']);
+        $this->assertSame(2, $ro->body['rowCount']);
         $this->assertTrue(str_contains($ro->body['csv'], 'Food'));
         $this->assertSame('text/csv; charset=UTF-8', $ro->headers['Content-Type']);
     }

@@ -11,11 +11,9 @@ use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminProductCopied;
 use MyVendor\BeMart\Be\Input\AdminCopyProductInput;
-use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
-use MyVendor\BeMart\Be\Reason\Query\FakeProductStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -37,7 +35,7 @@ final class AdminProductCopiedTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -69,11 +67,8 @@ final class AdminProductCopiedTest extends TestCase
         $this->assertStringStartsWith('(コピー) ', $final->newProductName);
         $this->assertSame(3500, $final->price02);
 
-        $storage = $this->injector->getInstance(FakeProductStorage::class);
-        $persisted = $storage->getByCode('admin-active-001.copy');
-        $this->assertNotNull($persisted);
-        // Copy is published by default regardless of source status.
-        $this->assertSame(ProductEntity::STATUS_VISIBLE, $persisted->productStatus);
+        // Persistence read-back belongs to the SQL suite. Fake context is
+        // static Ray.FakeQuery fixtures and does not mutate query state.
     }
 
     public function testCopyOfWithdrawnSourceIsVisible(): void
@@ -85,10 +80,8 @@ final class AdminProductCopiedTest extends TestCase
         ));
 
         $this->assertInstanceOf(AdminProductCopied::class, $final);
-        $storage = $this->injector->getInstance(FakeProductStorage::class);
-        $persisted = $storage->getByCode('admin-withdrawn-001.copy');
-        $this->assertNotNull($persisted);
-        $this->assertSame(ProductEntity::STATUS_VISIBLE, $persisted->productStatus);
+        $this->assertSame('admin-withdrawn-001.copy', $final->newProductCode);
+        $this->assertStringStartsWith('(コピー) ', $final->newProductName);
     }
 
     public function testUnknownSourceRaisesNotFound(): void

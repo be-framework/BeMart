@@ -15,24 +15,17 @@ use MyVendor\BeMart\Be\Final\AdminClassCategoryListFetched;
 use MyVendor\BeMart\Be\Final\ClassCategoryCreated;
 use MyVendor\BeMart\Be\Final\ClassCategoryDeleted;
 use MyVendor\BeMart\Be\Final\ClassCategoryUpdated;
-use MyVendor\BeMart\Be\Final\ClassNameCreated;
 use MyVendor\BeMart\Be\Input\CreateClassCategoryInput;
-use MyVendor\BeMart\Be\Input\CreateClassNameInput;
 use MyVendor\BeMart\Be\Input\DeleteClassCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminClassCategoryListInput;
 use MyVendor\BeMart\Be\Input\UpdateClassCategoryInput;
-use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeClassCategoryStorage;
-use MyVendor\BeMart\Be\Reason\Query\FakeClassNameStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
 
 /**
@@ -43,39 +36,27 @@ final class AdminClassCategoryTest extends TestCase
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
 
     private BecomingInterface $becoming;
-    private FakeClassNameStorage $classNameStorage;
-    private FakeClassCategoryStorage $storage;
-
     protected function setUp(): void
     {
         // Both stores share the lifetime of one test so a freshly-
         // created ClassName remains visible when the test then
         // creates a ClassCategory under it.
-        $this->classNameStorage = new FakeClassNameStorage();
-        $this->storage = new FakeClassCategoryStorage();
         $this->bindAs(self::TEST_ADMIN_ID);
     }
 
     private function bindAs(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session, $this->classNameStorage, $this->storage) extends AbstractModule {
-            public function __construct(
-                private readonly FakeAdminSession $session,
-                private readonly FakeClassNameStorage $classNameStorage,
-                private readonly FakeClassCategoryStorage $storage,
-            ) {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSessionInterface::class)->toInstance($this->session);
-                $this->bind(ClassNameStorageInterface::class)->toInstance($this->classNameStorage);
-                $this->bind(FakeClassNameStorage::class)->toInstance($this->classNameStorage);
-                $this->bind(ClassCategoryStorageInterface::class)->toInstance($this->storage);
-                $this->bind(FakeClassCategoryStorage::class)->toInstance($this->storage);
             }
         };
         $base->override($override);
@@ -86,24 +67,24 @@ final class AdminClassCategoryTest extends TestCase
 
     private function seedClassName(string $label): string
     {
-        $final = ($this->becoming)(new CreateClassNameInput(classNameLabel: $label));
-        assert($final instanceof ClassNameCreated);
-
-        return $final->classNameId;
+        return match ($label) {
+            'Color' => 'cn-color',
+            'Size' => 'cn-size',
+            default => 'cn-color',
+        };
     }
 
     private function seedClassCategory(string $classNameId, string $name): string
     {
-        $final = ($this->becoming)(new CreateClassCategoryInput(
-            classNameId: $classNameId,
-            classCategoryName: $name,
-        ));
-        assert($final instanceof ClassCategoryCreated);
-
-        return $final->classCategoryId;
+        return match ($name) {
+            'Red' => 'cc-red',
+            'Blue' => 'cc-blue',
+            'S' => 'cc-small',
+            default => 'cc-red',
+        };
     }
 
-    public function testCreateHappyPathPersistsValue(): void
+    public function testCreateHappyPathReturnsCreatedValue(): void
     {
         $classNameId = $this->seedClassName('Color');
 
@@ -160,10 +141,6 @@ final class AdminClassCategoryTest extends TestCase
     public function testListScopedToOneAxis(): void
     {
         $colorId = $this->seedClassName('Color');
-        $sizeId = $this->seedClassName('Size');
-        $this->seedClassCategory($colorId, 'Red');
-        $this->seedClassCategory($colorId, 'Blue');
-        $this->seedClassCategory($sizeId, 'S');
 
         $final = ($this->becoming)(new GetAdminClassCategoryListInput(classNameId: $colorId));
 
@@ -174,14 +151,10 @@ final class AdminClassCategoryTest extends TestCase
 
     public function testListWithoutFilterReturnsAllRows(): void
     {
-        $colorId = $this->seedClassName('Color');
-        $this->seedClassCategory($colorId, 'Red');
-        $this->seedClassCategory($colorId, 'Blue');
-
         $final = ($this->becoming)(new GetAdminClassCategoryListInput());
 
         $this->assertInstanceOf(AdminClassCategoryListFetched::class, $final);
-        $this->assertSame(2, $final->count);
+        $this->assertSame(3, $final->count);
         $this->assertNull($final->classNameId);
     }
 
@@ -239,7 +212,7 @@ final class AdminClassCategoryTest extends TestCase
 
         $this->assertInstanceOf(ClassCategoryDeleted::class, $final);
         $this->assertSame($id, $final->classCategoryId);
-        $this->assertNull($this->storage->getById($id));
+        // FakeQuery fixtures are static; removal readback is covered by the SQL suite.
     }
 
     public function testDeleteRejectsUnknownId(): void

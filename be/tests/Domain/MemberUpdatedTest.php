@@ -10,10 +10,9 @@ use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MemberUpdated;
 use MyVendor\BeMart\Be\Input\UpdateMemberInput;
-use MyVendor\BeMart\Be\Reason\Query\FakeAdminStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -25,7 +24,6 @@ final class MemberUpdatedTest extends TestCase
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
 
     private BecomingInterface $becoming;
-    private FakeAdminStorage $storage;
 
     protected function setUp(): void
     {
@@ -35,7 +33,7 @@ final class MemberUpdatedTest extends TestCase
     private function build(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -51,7 +49,6 @@ final class MemberUpdatedTest extends TestCase
 
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->becoming = $injector->getInstance(BecomingInterface::class);
-        $this->storage = $injector->getInstance(FakeAdminStorage::class);
     }
 
     public function testHappyPathUpdatesName(): void
@@ -67,11 +64,7 @@ final class MemberUpdatedTest extends TestCase
         // Authority and work are preserved (no role-flip via this path).
         $this->assertSame(1, $final->authority);
         $this->assertSame(1, $final->work);
-
-        // Persisted reflects the merged shape.
-        $persisted = $this->storage->getByLoginId('shop-owner');
-        $this->assertNotNull($persisted);
-        $this->assertSame('改名後オーナー', $persisted->name);
+        // FakeQuery fixtures are static; merged persistence is covered by the SQL suite.
     }
 
     public function testPartialUpdateLeavesUnchangedFieldsAlone(): void

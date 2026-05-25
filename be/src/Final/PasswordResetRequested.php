@@ -42,7 +42,7 @@ final readonly class PasswordResetRequested
         #[Inject] ResetKeyGeneratorInterface $resetKeyGenerator,
         #[Inject] MailerInterface $mailer,
     ) {
-        $customer = $customerQuery->findByEmail($email);
+        $customer = $customerQuery->byEmail($email);
         $this->email = $email;
 
         if ($customer === null) {

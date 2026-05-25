@@ -12,7 +12,26 @@ use Ray\MediaQuery\Result\PostQueryInterface;
 
 final readonly class PluginEnablement implements PostQueryInterface
 {
-    public function __construct(public bool $changed) {}
+    public bool $changed;
+
+    /** @param bool|array<int, self|array<string, mixed>> $changed */
+    public function __construct(bool|array $changed, bool|int $found = true, bool|int $installed = true)
+    {
+        if (is_array($changed)) {
+            $row = $changed[0] ?? null;
+            $changed = $row instanceof self ? $row->changed : false;
+        }
+
+        if (! (bool) $found) {
+            throw new PluginNotFoundException();
+        }
+
+        if (! (bool) $installed) {
+            throw new PluginNotInstalledException();
+        }
+
+        $this->changed = $changed;
+    }
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static

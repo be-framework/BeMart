@@ -9,9 +9,9 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\MypageChangeFormFetched;
 use MyVendor\BeMart\Be\Input\GetMypageChangeInput;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -36,7 +36,7 @@ final class MypageChangeFormFetchedTest extends TestCase
     private function rebindSession(string|null $customerId): void
     {
         $session = new FakeSession($customerId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {

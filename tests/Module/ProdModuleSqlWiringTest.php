@@ -8,10 +8,9 @@ use Aura\Sql\ExtendedPdoInterface;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
-use MyVendor\BeMart\Module\AppModule;
 use MyVendor\BeMart\Module\ProdModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -21,21 +20,14 @@ use function getenv;
 /**
  * Phase 2c — production cutover smoke test.
  *
- * Proves that the `prod` context's override chain actually swaps the
- * in-memory Fake Reasons for the SQL-backed implementations:
+ * Proves that prod uses the real SQL-backed MediaQuery runtime, while
+ * dev/test use the same public #[DbQuery] proxies over Ray.FakeQuery fixture JSONs.
  *
- *   ProdModule
- *     install(AppModule)              ← Fake* bindings
- *     override(ProdLoggingOverrideModule)
- *     override(ProdSessionOverrideModule)
- *     override(ProdCsrfOverrideModule)
- *     override(SqlModule)             ← Fake* -> Sql* + MediaQuery runtime
+ *   ProdModule = AppModule + session/csrf adapters + SqlModule
+ *   TestModule = AppModule + dev logging + FakeModule
  *
- * The check builds the prod injector exactly as bin/app.php does
- * (APP_CONTEXT=prod -> ProdModule) and asserts that resolving a sample
- * storage interface yields a `Sql*` impl, not a `Fake*` one. AppModule's
- * Fake binding is confirmed unchanged as a negative control so the
- * assertion can't go vacuous.
+ * The important invariant is that public query interfaces are direct
+ * MediaQuery proxies in both contexts; only the interceptor backend changes.
  *
  * SqlModule's MediaQuery connection reads DATABASE_URL at runtime. phpunit.xml
  * points DATABASE_URL at `eccubedb_test` (which the bemart-sql bootstrap
@@ -45,16 +37,10 @@ use function getenv;
  */
 final class ProdModuleSqlWiringTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        $databaseUrl = getenv('DATABASE_URL');
-        if ($databaseUrl === false || $databaseUrl === '') {
-            $this->markTestSkipped('DATABASE_URL not set — prod SQL wiring requires a DB.');
-        }
-    }
-
     public function testProdContextResolvesMediaQueryCustomerProxyNotFake(): void
     {
+        $this->skipWithoutDatabaseUrl();
+
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
             dirname(__DIR__, 2) . '/var/tmp/prod',
@@ -65,15 +51,14 @@ final class ProdModuleSqlWiringTest extends TestCase
         $resource = $injector->getInstance(ResourceInterface::class);
         $this->assertInstanceOf(ResourceInterface::class, $resource);
 
-        // The cutover assertion: a storage interface that AppModule binds
-        // to a Fake must resolve to the MediaQuery proxy under prod, not
-        // the old Sql* concrete locator implementation.
+        // The cutover assertion: public query interfaces resolve to
+        // MediaQuery direct proxies, not Fake* or Sql* concrete classes.
         $customerQuery = $injector->getInstance(CustomerQueryInterface::class);
         $this->assertInstanceOf(CustomerQueryInterface::class, $customerQuery);
-        $this->assertNotInstanceOf(
-            FakeCustomerQuery::class,
-            $customerQuery,
-            'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy, not FakeCustomerQuery.',
+        $this->assertStringContainsString(
+            CustomerQueryInterface::class,
+            $customerQuery::class,
+            'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy.',
         );
 
         // IdGenerators are also part of the cutover — production customer
@@ -98,6 +83,8 @@ final class ProdModuleSqlWiringTest extends TestCase
 
     public function testProdMediaQueryConnectionIsSingletonAcrossResolutions(): void
     {
+        $this->skipWithoutDatabaseUrl();
+
         $injector = new Injector(
             new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
             dirname(__DIR__, 2) . '/var/tmp/prod',
@@ -111,21 +98,32 @@ final class ProdModuleSqlWiringTest extends TestCase
         );
     }
 
-    public function testDevContextStillBindsFakeCustomerQuery(): void
+    public function testDevContextUsesMediaQueryProxyOverRayFakeQuery(): void
     {
-        // Negative control: AppModule (test/dev default) is untouched, so
-        // it must still resolve the Fake — otherwise the cutover assertion
-        // above is vacuous.
+        // Negative control: dev/test stay DB-free, but the public interface
+        // is still a MediaQuery proxy. Ray.FakeQuery intercepts the DbQuery call.
         $injector = new Injector(
-            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
 
         $customerQuery = $injector->getInstance(CustomerQueryInterface::class);
-        $this->assertInstanceOf(
-            FakeCustomerQuery::class,
-            $customerQuery,
-            'AppModule must keep the Fake binding — test/dev contexts stay DB-free.',
+        $this->assertInstanceOf(CustomerQueryInterface::class, $customerQuery);
+        $this->assertStringContainsString(
+            CustomerQueryInterface::class,
+            $customerQuery::class,
+            'TestModule must bind CustomerQueryInterface as a MediaQuery proxy.',
         );
+
+        $customer = $customerQuery->byEmail('alice@example.com');
+        $this->assertSame('alice@example.com', $customer?->email);
+    }
+
+    private function skipWithoutDatabaseUrl(): void
+    {
+        $databaseUrl = getenv('DATABASE_URL');
+        if ($databaseUrl === false || $databaseUrl === '') {
+            $this->markTestSkipped('DATABASE_URL not set — prod SQL wiring requires a DB.');
+        }
     }
 }

@@ -8,13 +8,14 @@ use function getenv;
 use function is_string;
 use function session_id;
 use function session_status;
+use function str_contains;
 
 use const PHP_SESSION_ACTIVE;
 
 /**
  * HTML-context cart session anchor.
  *
- * `public/index.php` starts PHP's cookie-backed session for APP_CONTEXT=html.
+ * `public/index.php` starts PHP's cookie-backed session for an html APP_CONTEXT.
  * The storefront cart key prefix is derived once from that PHP session id and
  * then kept in $_SESSION so every resource request in the browser session uses
  * the same `{sessionPrefix}_{saleTypeId}` cart partition.
@@ -25,7 +26,7 @@ final class HtmlCartSession
 
     public static function cartSessionPrefix(): string|null
     {
-        if (getenv('APP_CONTEXT') !== 'html') {
+        if (! str_contains((string) getenv('APP_CONTEXT'), 'html')) {
             return null;
         }
 

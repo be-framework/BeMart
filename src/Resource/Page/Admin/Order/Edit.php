@@ -30,7 +30,7 @@ use function assert;
  * carries the `goOrder` read + `doUpdateOrder` write; this resource is
  * the HTML editor shell only. An empty `$orderNo` renders the blank
  * editor (EC-CUBE's "受注登録" path — the render-smoke test exercises
- * this with empty Fake storage); a known orderNo pre-fills; an unknown
+ * this with empty JSON-backed fake storage); a known orderNo pre-fills; an unknown
  * orderNo is 404.
  *
  * AUTHZ: the blank-editor path checks the admin session directly

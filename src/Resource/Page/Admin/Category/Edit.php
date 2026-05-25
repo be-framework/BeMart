@@ -34,7 +34,7 @@ use function assert;
  * (update / delete) carry the writes; this resource is the HTML editor
  * shell — it renders the category tree alongside the add/edit form. An
  * empty `$categoryId` renders the blank "新規カテゴリ" form (the
- * render-smoke test exercises this with empty Fake storage); a known
+ * render-smoke test exercises this with empty JSON-backed fake storage); a known
  * categoryId pre-fills; an unknown categoryId is 404.
  *
  * AUTHZ delegates to the Be Finals, which raise

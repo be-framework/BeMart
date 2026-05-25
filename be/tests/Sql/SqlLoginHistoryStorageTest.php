@@ -29,7 +29,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
     public function testListReturnsEmptyArrayOnEmptyTable(): void
     {
         $storage = $this->sql(LoginHistoryStorageInterface::class);
-        $this->assertSame([], $storage->listRecent());
+        $this->assertSame([], $storage->list());
     }
 
     public function testListReturnsNewestFirst(): void
@@ -49,7 +49,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(LoginHistoryStorageInterface::class);
-        $rows = $storage->listRecent();
+        $rows = $storage->list();
 
         $this->assertCount(3, $rows);
         $this->assertContainsOnlyInstancesOf(LoginHistoryEntity::class, $rows);
@@ -67,8 +67,8 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
         }
 
         $storage = $this->sql(LoginHistoryStorageInterface::class);
-        $this->assertCount(2, $storage->listRecent(2));
-        $this->assertCount(5, $storage->listRecent(50));
+        $this->assertCount(2, $storage->list(2));
+        $this->assertCount(5, $storage->list(50));
     }
 
     public function testListWithNonPositiveLimitReturnsNothing(): void
@@ -80,8 +80,8 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
         $this->insertLoginHistory();
 
         $storage = $this->sql(LoginHistoryStorageInterface::class);
-        $this->assertSame([], $storage->listRecent(0));
-        $this->assertSame([], $storage->listRecent(-1));
+        $this->assertSame([], $storage->list(0));
+        $this->assertSame([], $storage->list(-1));
     }
 
     public function testListProjectsStatusIdToSuccessBool(): void
@@ -99,7 +99,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(LoginHistoryStorageInterface::class);
-        $rows = $storage->listRecent();
+        $rows = $storage->list();
 
         $this->assertSame('won', $rows[0]->loginId);
         $this->assertTrue($rows[0]->success);
@@ -116,7 +116,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
         ]);
 
         $storage = $this->sql(LoginHistoryStorageInterface::class);
-        $rows = $storage->listRecent();
+        $rows = $storage->list();
 
         // MySQL `Y-m-d H:i:s` re-emitted as ISO-8601 with the JST
         // offset (matches the Fake projection's shape).
@@ -135,7 +135,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
             clientIp: '198.51.100.7',
         ));
 
-        $rows = $storage->listRecent();
+        $rows = $storage->list();
         $this->assertCount(1, $rows);
         $this->assertSame('test-admin', $rows[0]->loginId);
         $this->assertTrue($rows[0]->success);
@@ -168,7 +168,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
         $this->assertNull($row['member_id']);
         $this->assertSame('login_history', $row['discriminator_type']);
 
-        $rows = $storage->listRecent();
+        $rows = $storage->list();
         $this->assertFalse($rows[0]->success);
     }
 
@@ -219,7 +219,7 @@ final class SqlLoginHistoryStorageTest extends AbstractSqlTestCase
             clientIp: '203.0.113.2',
         ));
 
-        $rows = $storage->listRecent();
+        $rows = $storage->list();
         $this->assertCount(2, $rows);
         // Newest append timestamp first regardless of insert order.
         $this->assertSame('second', $rows[0]->loginId);

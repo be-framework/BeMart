@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
 
 /**
  * Customer entity — projection of EC-CUBE 4.3 dtb_customer for the
- * registration pipeline. Holds the persisted shape so the Fake store
+ * registration pipeline. Holds the persisted shape so the JSON-backed fake store
  * can answer EmailUniquenessChecker queries without re-reading the
  * raw json fixture.
  *

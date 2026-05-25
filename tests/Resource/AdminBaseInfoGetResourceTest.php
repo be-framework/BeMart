@@ -7,11 +7,11 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakeBaseInfoStorage;
+use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminShopMasterForm;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -27,7 +27,7 @@ final class AdminBaseInfoGetResourceTest extends TestCase
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
 
     private ResourceInterface $resource;
-    private FakeBaseInfoStorage $storage;
+    private BaseInfoStorageInterface $storage;
 
     protected function setUp(): void
     {
@@ -37,7 +37,7 @@ final class AdminBaseInfoGetResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -53,7 +53,7 @@ final class AdminBaseInfoGetResourceTest extends TestCase
 
         $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
         $this->resource = $injector->getInstance(ResourceInterface::class);
-        $this->storage = $injector->getInstance(FakeBaseInfoStorage::class);
+        $this->storage = $injector->getInstance(BaseInfoStorageInterface::class);
     }
 
     public function testOnGetReturnsSeedBaseInfo(): void
@@ -61,7 +61,7 @@ final class AdminBaseInfoGetResourceTest extends TestCase
         $ro = $this->resource->get('page://self/admin/base-info');
 
         $this->assertSame(Code::OK, $ro->code);
-        $seed = $this->storage->get();
+        $seed = $this->storage->item();
         $this->assertSame($seed->shopName, $ro->body['shopName']);
         $this->assertSame($seed->companyName, $ro->body['companyName']);
         $this->assertSame($seed->pref, $ro->body['pref']);

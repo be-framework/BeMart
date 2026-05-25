@@ -12,7 +12,22 @@ use RuntimeException;
 
 final readonly class CopiedProduct implements PostQueryInterface
 {
-    public function __construct(public ProductEntity $product) {}
+    public ProductEntity $product;
+
+    /** @param ProductEntity|array<int, ProductEntity|array<string, mixed>> $product */
+    public function __construct(ProductEntity|array $product)
+    {
+        if (is_array($product)) {
+            $row = $product[0] ?? null;
+            if (! $row instanceof ProductEntity) {
+                throw new RuntimeException('Product not found.');
+            }
+
+            $product = $row;
+        }
+
+        $this->product = $product;
+    }
 
     #[Override]
     public static function fromContext(PostQueryContext $context): static

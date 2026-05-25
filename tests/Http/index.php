@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-putenv('APP_CONTEXT=html');
+putenv('APP_CONTEXT=html-test-hal-api-app');
 
 $sessionPath = __DIR__ . '/../../var/tmp/html/session';
 if (! is_dir($sessionPath)) {

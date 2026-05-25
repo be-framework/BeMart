@@ -7,20 +7,16 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Query\FakePaymentMethodAdminStorage;
-use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminPaymentForm;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
-use function assert;
 use function dirname;
-use function is_string;
 use function str_contains;
 
 /**
@@ -29,33 +25,29 @@ use function str_contains;
 final class AdminPaymentResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
+    private const COD_PAYMENT_ID = 'pay-cod';
+    private const CREDIT_PAYMENT_ID = 'pay-credit';
 
     private ResourceInterface $resource;
-    private FakePaymentMethodAdminStorage $storage;
 
     protected function setUp(): void
     {
-        $this->storage = new FakePaymentMethodAdminStorage();
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session, $this->storage) extends AbstractModule {
-            public function __construct(
-                private readonly FakeAdminSession $session,
-                private readonly FakePaymentMethodAdminStorage $storage,
-            ) {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSessionInterface::class)->toInstance($this->session);
-                $this->bind(PaymentMethodAdminStorageInterface::class)->toInstance($this->storage);
-                $this->bind(FakePaymentMethodAdminStorage::class)->toInstance($this->storage);
             }
         };
         $base->override($override);
@@ -66,15 +58,10 @@ final class AdminPaymentResourceTest extends TestCase
 
     private function seed(string $name, int $charge = 0): string
     {
-        $ro = $this->resource->post('page://self/admin/payment/payment-list', [
-            'paymentMethodName' => $name,
-            'charge' => $charge,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-        $id = $ro->body['paymentId'];
-        assert(is_string($id));
+        // Static Ray.FakeQuery fixture, not a mutable seed.
+        unset($charge);
 
-        return $id;
+        return $name === '代金引換' ? self::COD_PAYMENT_ID : self::CREDIT_PAYMENT_ID;
     }
 
     public function testCreateReturns201(): void

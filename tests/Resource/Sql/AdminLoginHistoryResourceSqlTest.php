@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use Ray\Di\AbstractModule;
 
 /**
@@ -22,7 +22,7 @@ use Ray\Di\AbstractModule;
  *    sqlOverrideModule; persistence is against the real
  *    dtb_login_history table.
  *
- *  - the Fake-backed sibling leans on FakeLoginHistoryStorage seeding
+ *  - the Fake-backed sibling leans on the JSON login-history corpus seeding
  *    four sample attempts in its constructor. dtb_login_history is
  *    empty on each test, and the LoginHistory Resource exposes a single
  *    `goLoginHistoryList` affordance — there is NO append / POST
@@ -81,7 +81,7 @@ final class AdminLoginHistoryResourceSqlTest extends AbstractResourceSqlTestCase
     }
 
     /**
-     * Seed the four sample login attempts that FakeLoginHistoryStorage
+     * Seed the four sample login attempts that the JSON login-history corpus
      * carries in its constructor — directly via the fixture, since the
      * resource layer cannot append an audit row.
      */
@@ -116,7 +116,7 @@ final class AdminLoginHistoryResourceSqlTest extends AbstractResourceSqlTestCase
 
     public function testOnGetReturnsLoginHistory(): void
     {
-        // FakeLoginHistoryStorage seeds four attempts in its
+        // the JSON login-history corpus seeds four attempts in its
         // constructor; dtb_login_history is empty on each test, so seed
         // the equivalent rows first. The assertion shape matches the
         // Fake-backed sibling.

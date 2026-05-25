@@ -7,10 +7,10 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
 use MyVendor\BeMart\Form\ShoppingOrderForm;
-use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -130,7 +130,7 @@ final class ShoppingHtmlRenderTest extends TestCase
     protected function setUp(): void
     {
         $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlModule($meta);
+        $module = new HtmlTestModule($meta);
         $session = new FakeSession(self::ALICE_ID);
         $module->override(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)

@@ -37,7 +37,7 @@ final readonly class ClassNameUpdated
             throw new UnauthorizedAdminAccessException();
         }
 
-        $current = $classNames->getById($classNameId);
+        $current = $classNames->item($classNameId);
         if ($current === null) {
             throw new ClassNameNotFoundException();
         }

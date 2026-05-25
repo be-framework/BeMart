@@ -19,7 +19,6 @@ use MyVendor\BeMart\Be\Input\GetAdminPageInput;
 use MyVendor\BeMart\Be\Input\UpdatePageInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminPageForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -66,7 +65,7 @@ class Page extends ResourceObject
                 'pageUrl' => '',
                 'pageFileName' => '',
                 'pageEditType' => 1,
-                'csrfToken' => FakeCsrfToken::TOKEN,
+                'csrfToken' => $this->csrf->getToken(),
             ];
             $form = $this->formFactory->newInstance(AdminPageForm::class);
             assert($form instanceof AdminPageForm);

@@ -23,7 +23,6 @@ use MyVendor\BeMart\Be\Input\GetMemberInput;
 use MyVendor\BeMart\Be\Input\UpdateMemberInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminMemberForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -98,7 +97,7 @@ class Member extends ResourceObject
                 'name' => '',
                 'authority' => 0,
                 'work' => 0,
-                'csrfToken' => FakeCsrfToken::TOKEN,
+                'csrfToken' => $this->csrf->getToken(),
                 'form' => $form,
             ];
 

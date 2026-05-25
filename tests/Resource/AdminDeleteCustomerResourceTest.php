@@ -8,10 +8,10 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\FakeMailer;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -32,6 +32,7 @@ final class AdminDeleteCustomerResourceTest extends TestCase
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';
     private const ALICE_EMAIL = 'alice@example.com';
+    private const WITHDRAWN_ID = '30000000aaaa3333bbbb4444cccc5555';
 
     private ResourceInterface $resource;
     private Injector $injector;
@@ -50,7 +51,7 @@ final class AdminDeleteCustomerResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -82,21 +83,16 @@ final class AdminDeleteCustomerResourceTest extends TestCase
         $this->assertStringContainsString('削除', $ro->body['message']);
     }
 
-    public function testOnPostReDeleteReturns200WithAlreadyDeletedFlag(): void
+    public function testOnPostAlreadyDeletedReturns200WithAlreadyDeletedFlag(): void
     {
-        // First delete — fresh.
-        $this->resource->post('page://self/admin/delete-customer', [
-            'customerId' => self::ALICE_ID,
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-
+        // Fake context is static-fixture based; replay-after-mutation is
+        // covered by the SQL suite. This fixture directly exercises the
+        // idempotent already-deleted branch.
         $mailer = $this->injector->getInstance(FakeMailer::class);
-        $mailCountAfterFirst = count($mailer->withdrawConfirmations());
+        $mailCountBefore = count($mailer->withdrawConfirmations());
 
-        // Second delete — replay. The customer is already in status=3,
-        // so the Final short-circuits.
         $ro = $this->resource->post('page://self/admin/delete-customer', [
-            'customerId' => self::ALICE_ID,
+            'customerId' => self::WITHDRAWN_ID,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
@@ -104,9 +100,9 @@ final class AdminDeleteCustomerResourceTest extends TestCase
         $this->assertTrue($ro->body['alreadyDeleted']);
         $this->assertStringContainsString('既に削除', $ro->body['message']);
         $this->assertCount(
-            $mailCountAfterFirst,
+            $mailCountBefore,
             $mailer->withdrawConfirmations(),
-            'Idempotent replay must NOT send a second withdrawal mail.',
+            'Already-deleted branch must NOT send a withdrawal mail.',
         );
     }
 

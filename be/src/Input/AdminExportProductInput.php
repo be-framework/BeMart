@@ -24,7 +24,7 @@ use MyVendor\BeMart\Be\Final\AdminProductCsvExported;
  * (insert OR update per row), validates against a multi-column
  * uniqueness contract, and orchestrates an extended PurchaseFlow-like
  * service surface. That depth doesn't fit a single-day migration
- * agent and would force the FakeProductStorage to grow a bulk-upsert
+ * agent and would force the JSON-backed fake product handler to grow a bulk-upsert
  * surface that contradicts the CQRS split. Phase 2 will land it as a
  * dedicated Cascade Diamond pattern (`insurance-claim` demo).
  *

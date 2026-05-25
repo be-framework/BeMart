@@ -8,9 +8,9 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
-use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\AppModule;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -26,6 +26,7 @@ final class AdminMemberResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
     private const SHOP_OWNER_ID = 'ad000000000000000000000000000002';
+    private const DELETED_LOGIN_ID = 'deleted-admin';
 
     private ResourceInterface $resource;
 
@@ -37,7 +38,7 @@ final class AdminMemberResourceTest extends TestCase
     private function rebindAdminSession(string|null $adminId): void
     {
         $session = new FakeAdminSession($adminId);
-        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
         $override = new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
@@ -176,15 +177,13 @@ final class AdminMemberResourceTest extends TestCase
         $this->assertStringContainsString('権限', $ro->body['message']);
     }
 
-    public function testOnDeleteReDeleteReturns200WithFlag(): void
+    public function testOnDeleteAlreadyDeletedReturns200WithFlag(): void
     {
-        $this->resource->delete('page://self/admin/member', [
-            'loginId' => 'shop-owner',
-            'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
-
+        // Fake context is static-fixture based; replay-after-mutation is
+        // covered by the SQL suite. This fixture directly exercises the
+        // idempotent already-deleted branch.
         $ro = $this->resource->delete('page://self/admin/member', [
-            'loginId' => 'shop-owner',
+            'loginId' => self::DELETED_LOGIN_ID,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 

@@ -1734,8 +1734,8 @@ trait SqlFixturesTrait
     }
 
     /**
-     * Seed dtb_plugin with the two demo plugins {@see \MyVendor\BeMart\Be\Reason\Query\FakePluginStorage}
-     * carries, so a SQL-backed hypermedia test starts from the same
+     * Seed dtb_plugin with the two demo plugins that the Ray.FakeQuery
+     * fixture JSON carries, so a SQL-backed hypermedia test starts from the same
      * client-observable baseline as the Fake-backed contract test:
      *
      *   - `Sample/SamplePlugin`   — installed + enabled

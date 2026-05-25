@@ -29,7 +29,7 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * `categoryNames`, `tagNames`, `classNames`) are the HTML-screen
  * enrichment slice: they mirror EC-CUBE's `dtb_product_image`,
  * `dtb_product_category`, `dtb_product_tag` and class-category joins
- * without changing the existing create/update contract. Fake fixtures
+ * without changing the existing create/update contract. JSON fake fixtures
  * can carry them; SQL reads them from the real EC-CUBE schema.
  *
  * Status enum (matches `productStatus` ALPS descriptor):

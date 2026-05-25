@@ -6,12 +6,8 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
-use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryEntity;
-use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 use MyVendor\BeMart\Be\Reason\Query\Factory\FinalizedOrderFactory;
 use MyVendor\BeMart\Be\Reason\Query\Factory\OrderFactory;
-use MyVendor\BeMart\Be\Reason\Query\Factory\OrderHistoryFactory;
-use MyVendor\BeMart\Be\Reason\Query\Factory\OrderItemFactory;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
@@ -64,18 +60,11 @@ interface OrderQueryInterface
     #[DbQuery('order_by_order_no', factory: FinalizedOrderFactory::class)]
     public function byOrderNo(string $orderNo): ?FinalizedOrderEntity;
 
-    #[DbQuery('order_history_by_order_no', factory: OrderHistoryFactory::class)]
-    public function historyByOrderNo(string $orderNo): ?OrderHistoryEntity;
-
-    /** @return list<OrderItemEntity> */
-    #[DbQuery('order_items_by_order_no', factory: OrderItemFactory::class)]
-    public function itemsByOrderNo(string $orderNo): array;
-
     /** @return list<FinalizedOrderEntity> */
     #[DbQuery('order_list_by_customer', factory: FinalizedOrderFactory::class)]
     public function listByCustomer(string $customerId, int $limit = 10, int $offset = 0): array;
 
     /** @return list<FinalizedOrderEntity> */
     #[DbQuery('order_list_all', factory: FinalizedOrderFactory::class)]
-    public function listAll(int $limit = 50, int $offset = 0): array;
+    public function list(int $limit = 50, int $offset = 0): array;
 }

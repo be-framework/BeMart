@@ -20,7 +20,7 @@ interface CustomerQueryInterface
 {
     /** @return CustomerEntity|null  null when no customer has this email. */
     #[DbQuery('customer_find_by_email', factory: CustomerFactory::class)]
-    public function findByEmail(string $email): CustomerEntity|null;
+    public function byEmail(string $email): CustomerEntity|null;
 
     /**
      * Look up a customer by email-verification secret key — Pilot 7
@@ -28,14 +28,14 @@ interface CustomerQueryInterface
      * distinguish "wrong key" from "expired" at this layer.
      */
     #[DbQuery('customer_find_by_secret_key', factory: CustomerFactory::class)]
-    public function findBySecretKey(string $secretKey): CustomerEntity|null;
+    public function bySecretKey(string $secretKey): CustomerEntity|null;
 
     /**
      * Look up a customer by their opaque id — Pilot 8 (doUpdateCustomer
      * and other "the logged-in customer is editing themselves" flows).
      */
     #[DbQuery('customer_find_by_id', factory: CustomerFactory::class)]
-    public function findById(string $customerId): CustomerEntity|null;
+    public function item(string $customerId): CustomerEntity|null;
 
     /**
      * Pilot Wave 5 goCustomerList: admin-side filter search over the
