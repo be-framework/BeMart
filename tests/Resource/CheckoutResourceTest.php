@@ -1,0 +1,178 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Tests\Resource;
+
+use BEAR\AppMeta\Meta;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Module\AppModule;
+use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
+use Ray\Di\Injector;
+
+use function dirname;
+
+final class CheckoutResourceTest extends TestCase
+{
+    private ResourceInterface $resource;
+
+    protected function setUp(): void
+    {
+        // Default to customer-001 (owns the `aaaa…` / `bbbb…` fixtures).
+        // Tests touching `cccc…` (customer-002) or asserting AUTHZ rejection
+        // call rebindSession() to swap the session before invoking the
+        // resource.
+        $this->rebindSession('customer-001');
+    }
+
+    /** Build a fresh resource client with the given session customerId (null = anonymous). */
+    private function rebindSession(string|null $customerId): void
+    {
+        $session = new FakeSession($customerId);
+        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(SessionInterface::class)->toInstance($this->session);
+            }
+        };
+        $base->override($override);
+
+        $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
+        $this->resource = $injector->getInstance(ResourceInterface::class);
+    }
+
+    public function testOnPostCheckoutReturns201WithCompleteBody(): void
+    {
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+        $this->assertMatchesRegularExpression('/\A[0-9a-f]{32}\z/', $ro->body['orderNo']);
+        $this->assertSame('customer-001', $ro->body['customerId']);
+        $this->assertSame(2250, $ro->body['total']);
+        $this->assertSame(2250, $ro->body['paymentTotal']);
+        $this->assertSame(22, $ro->body['addPoint']);
+        $this->assertSame('', $ro->body['completeMessage']);
+        $this->assertArrayHasKey('Location', $ro->headers);
+    }
+
+    public function testOnPostUnknownPreOrderReturns404(): void
+    {
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'eeee00000000000000000000000000000000eeee',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->assertSame('eeee00000000000000000000000000000000eeee', $ro->body['preOrderId']);
+    }
+
+    public function testOnPostInsufficientStockReturns422(): void
+    {
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'bbbb00000000000000000000000000000000bbbb',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(422, $ro->code);
+        $this->assertStringContainsString('Insufficient', $ro->body['message']);
+    }
+
+    public function testOnPostPaymentDeclinedReturns422(): void
+    {
+        // `cccc…` belongs to customer-002 — rebind so we reach PurchaseFlow
+        // rather than tripping AUTHZ first.
+        $this->rebindSession('customer-002');
+
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'cccc00000000000000000000000000000000cccc',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(422, $ro->code);
+        $this->assertStringContainsString('declined', $ro->body['message']);
+    }
+
+    public function testOnPostForeignCustomerReturns403(): void
+    {
+        // Phase B Slice 6 (Pilot 5 F-1): a logged-in customer cannot confirm
+        // someone else's pre-order. The resource layer maps the domain
+        // exception to HTTP 403.
+        $this->rebindSession('customer-999');
+
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertSame('aaaa00000000000000000000000000000000aaaa', $ro->body['preOrderId']);
+    }
+
+    public function testOnPostAnonymousReturns403(): void
+    {
+        // Anonymous sessions are also rejected: a customer-scoped pre-order
+        // requires the matching logged-in customer.
+        $this->rebindSession(null);
+
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+
+    public function testOnPostMalformedPreOrderIdReturns400(): void
+    {
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'not-a-hex-id',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::BAD_REQUEST, $ro->code);
+        $this->assertNotEmpty($ro->body['message']);
+    }
+
+    public function testClientSuppliedPaymentMethodIdIsIgnored(): void
+    {
+        // Pilot 5 F-2: even if a client tries to inject a different payment
+        // method id via the request body, the gateway must be charged against
+        // the persisted OrderEntity's paymentMethodId (2 for this preOrderId).
+        // We can't directly assert on the gateway here, but the request must
+        // still succeed — the extra key is silently ignored.
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+            'paymentMethodId' => 9, // would otherwise trigger PaymentDeclinedException
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+    }
+
+    public function testOnPostMissingCsrfReturns403BeforeAuthz(): void
+    {
+        // Phase B Slice 8: CSRF is checked at the boundary — before AUTHZ,
+        // even though both can produce 403. The body carries the CSRF
+        // message (not the AUTHZ wording) which lets us distinguish.
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('CSRF', $ro->body['message']);
+    }
+}

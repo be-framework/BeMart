@@ -1,0 +1,111 @@
+{
+  "$comment": "ProductClass のサーバー側典型値分布。Reason (FakeProductClassQuery) が参照。Pilot 2 doAddCartItem で必要なフィールドだけを記述 (Pilot 1 ProductFetched とは別ストア)。productCode をキーとして lookup。",
+  "sample-001": {
+    "productCode": "sample-001",
+    "productName": "サンプル商品 A",
+    "stock": 50,
+    "stockUnlimited": false,
+    "saleLimit": null,
+    "price01": 1500,
+    "price02": 1200,
+    "deliveryFee": 0,
+    "saleTypeName": "通常販売",
+    "saleTypeId": 1
+  },
+  "sample-002": {
+    "productCode": "sample-002",
+    "productName": "サンプル商品 B (在庫無制限)",
+    "stock": null,
+    "stockUnlimited": true,
+    "saleLimit": null,
+    "price01": 800,
+    "price02": 800,
+    "deliveryFee": 0,
+    "saleTypeName": "通常販売",
+    "saleTypeId": 1
+  },
+  "sample-003": {
+    "productCode": "sample-003",
+    "productName": "サンプル商品 C (在庫僅少)",
+    "stock": 3,
+    "stockUnlimited": false,
+    "saleLimit": null,
+    "price01": 5000,
+    "price02": 4500,
+    "deliveryFee": 200,
+    "saleTypeName": "通常販売",
+    "saleTypeId": 1
+  },
+  "out-of-stock-test-001": {
+    "productCode": "out-of-stock-test-001",
+    "productName": "在庫切れ商品",
+    "stock": 0,
+    "stockUnlimited": false,
+    "saleLimit": null,
+    "price01": 2000,
+    "price02": 1800,
+    "deliveryFee": 0,
+    "saleTypeName": "通常販売",
+    "saleTypeId": 1
+  },
+  "single-purchase-rare-coin": {
+    "productCode": "single-purchase-rare-coin",
+    "productName": "限定品 (1 個まで)",
+    "stock": 10,
+    "stockUnlimited": false,
+    "saleLimit": 1,
+    "price01": 30000,
+    "price02": 28000,
+    "deliveryFee": 500,
+    "saleTypeName": "通常販売",
+    "saleTypeId": 1
+  },
+  "preorder-2026-spring-bag": {
+    "productCode": "preorder-2026-spring-bag",
+    "productName": "2026 春予約バッグ",
+    "stock": 100,
+    "stockUnlimited": false,
+    "saleLimit": 2,
+    "price01": 15000,
+    "price02": 13500,
+    "deliveryFee": 0,
+    "saleTypeName": "予約販売",
+    "saleTypeId": 2
+  },
+  "preorder-2026-summer-shoes": {
+    "productCode": "preorder-2026-summer-shoes",
+    "productName": "2026 夏予約シューズ",
+    "stock": 50,
+    "stockUnlimited": false,
+    "saleLimit": null,
+    "price01": 12000,
+    "price02": 10800,
+    "deliveryFee": 0,
+    "saleTypeName": "予約販売",
+    "saleTypeId": 2
+  },
+  "unlimited-digital-book": {
+    "productCode": "unlimited-digital-book",
+    "productName": "デジタル書籍 (無制限)",
+    "stock": null,
+    "stockUnlimited": true,
+    "saleLimit": null,
+    "price01": 1500,
+    "price02": 1500,
+    "deliveryFee": 0,
+    "saleTypeName": "ダウンロード販売",
+    "saleTypeId": 3
+  },
+  "test-cart-merge-001": {
+    "productCode": "test-cart-merge-001",
+    "productName": "マージテスト用商品",
+    "stock": 100,
+    "stockUnlimited": false,
+    "saleLimit": null,
+    "price01": 1000,
+    "price02": 1000,
+    "deliveryFee": 0,
+    "saleTypeName": "通常販売",
+    "saleTypeId": 1
+  }
+}
