@@ -17,6 +17,7 @@ use function rawurldecode;
 use function rawurlencode;
 use function str_contains;
 use function str_replace;
+use function strtolower;
 use function strtoupper;
 
 /**
@@ -43,7 +44,9 @@ final class Route
      * @param list<string>          $methods   Upper-case HTTP verbs this route serves.
      * @param string               $path      EC-CUBE URL pattern with `{placeholder}` segments.
      * @param string               $resource  BEAR resource URI (e.g. `page://self/product`).
-     * @param array<string,string> $paramMap  EC-CUBE placeholder name => BEAR resource param name.
+     * @param array<string,string> $paramMap       EC-CUBE placeholder name => BEAR resource param name.
+     * @param string|null          $dispatchMethod Internal BEAR resource method, defaults to the HTTP method.
+     * @param array<string,string> $defaults       Default params merged into a successful match.
      */
     public function __construct(
         public readonly string $name,
@@ -51,6 +54,8 @@ final class Route
         public readonly string $path,
         public readonly string $resource,
         public readonly array $paramMap = [],
+        public readonly string|null $dispatchMethod = null,
+        public readonly array $defaults = [],
     ) {
     }
 
@@ -58,6 +63,12 @@ final class Route
     public function allowsMethod(string $method): bool
     {
         return in_array(strtoupper($method), $this->methods, true);
+    }
+
+    /** The BEAR resource method to invoke for this HTTP method. */
+    public function dispatchMethodFor(string $method): string
+    {
+        return strtolower($this->dispatchMethod ?? $method);
     }
 
     /**
@@ -82,7 +93,7 @@ final class Route
             return null;
         }
 
-        $params = [];
+        $params = $this->defaults;
         /** @var array<array-key, string> $matches */
         foreach ($matches as $key => $value) {
             if (! is_string($key)) {
@@ -161,11 +172,5 @@ final class Route
     {
         return array_key_exists($name, $this->paramMap)
             || str_contains($this->path, '{' . $name . '}');
-    }
-
-    /** Number of `{placeholder}` segments — used by RouteTable diagnostics. */
-    public function placeholderCount(): int
-    {
-        return count($this->paramMap);
     }
 }

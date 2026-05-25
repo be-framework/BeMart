@@ -38,20 +38,18 @@ namespace MyVendor\BeMart\Router;
  * Routes are limited to EC-CUBE 4.3 core (`tools/ec-cube-source` route
  * annotations) that have a corresponding BeMart BEAR resource — the
  * GET-serving storefront + admin pages plus the state-changing actions
- * the ported templates POST/PUT/DELETE to. Plugin routes are out of scope
+ * the ported templates submit with GET/POST. HTML-only routes may still dispatch internally to PUT/DELETE resources. Plugin routes are out of scope
  * (standing "plug-in を除く" instruction). Admin paths use EC-CUBE's
  * configurable `%eccube_admin_route%` segment, fixed here to the default
  * `admin`.
  */
-final class RouteTable
+final readonly class RouteTable
 {
-    /** @var list<Route> */
-    private array $routes;
-
     /** @param list<Route> $routes */
-    public function __construct(array $routes)
-    {
-        $this->routes = $routes;
+    public function __construct(
+        /** @var list<Route> */
+        public array $routes,
+    ) {
     }
 
     /**
@@ -66,6 +64,7 @@ final class RouteTable
         return new self([
             // ---- Storefront: top + catalogue ----
             new Route('homepage', ['GET'], '/', 'page://self/'),
+            new Route('block_cart', ['GET'], '/block/cart', 'page://self/unsupported-route', [], null, ['routeName' => 'block_cart']),
             new Route('product_list', ['GET'], '/products/list', 'page://self/products'),
             new Route(
                 'product_detail',
@@ -89,11 +88,12 @@ final class RouteTable
                 ['id' => 'productCode'],
             ),
             // `cart_handle_item` is the BeMart port's own helper name for the
-            // quantity up/down/remove anchors in Cart.html.twig (EC-CUBE 4.3
-            // splits these across cart_up/cart_down/cart_remove). It maps to
-            // the same Cart/Item resource, which serves PUT (quantity) and
-            // DELETE (remove); the front controller method drives the verb.
-            new Route('cart_handle_item', ['PUT', 'DELETE'], '/cart/item', 'page://self/cart/item'),
+            // quantity up/down/remove controls in Cart.html.twig (EC-CUBE 4.3
+            // splits these across cart_up/cart_down/cart_remove). HTML exposes
+            // GET/POST only: GET falls back to the cart page, POST calls the
+            // Cart/Item resource.
+            new Route('cart_handle_item', ['GET'], '/cart/item', 'page://self/cart'),
+            new Route('cart_handle_item', ['POST'], '/cart/item', 'page://self/cart/item'),
 
             // ---- Storefront: contact ----
             // `contact` serves the form (GET) and the doSubmitContact
@@ -150,7 +150,9 @@ final class RouteTable
                 'page://self/mypage/address',
                 ['id' => 'addressId'],
             ),
+            new Route('mypage_delivery_delete', ['GET', 'POST'], '/mypage/delivery/delete', 'page://self/unsupported-route', [], null, ['routeName' => 'mypage_delivery_delete']),
             new Route('mypage_favorite', ['GET'], '/mypage/favorite', 'page://self/mypage/favorite-list'),
+            new Route('mypage_favorite_delete', ['GET', 'POST'], '/mypage/favorite/delete', 'page://self/unsupported-route', [], null, ['routeName' => 'mypage_favorite_delete']),
             new Route(
                 'mypage_history',
                 ['GET'],
@@ -168,6 +170,10 @@ final class RouteTable
 
             // ---- Storefront: shopping (checkout flow) ----
             new Route('shopping', ['GET'], '/shopping', 'page://self/shopping'),
+            new Route('shopping_shipping', ['GET', 'POST'], '/shopping/shipping', 'page://self/shopping/shipping'),
+            new Route('shopping_shipping_edit', ['GET', 'POST'], '/shopping/shipping/edit', 'page://self/shopping/shipping-edit'),
+            new Route('shopping_shipping_multiple', ['GET', 'POST'], '/shopping/shipping/multiple', 'page://self/shopping/shipping-multiple'),
+            new Route('shopping_shipping_multiple_edit', ['GET', 'POST'], '/shopping/shipping/multiple/edit', 'page://self/shopping/shipping-multiple-edit'),
             new Route('shopping_login', ['GET'], '/shopping/login', 'page://self/shopping/login'),
             new Route('shopping_nonmember', ['GET', 'POST'], '/shopping/nonmember', 'page://self/shopping/non-member'),
             new Route('shopping_confirm', ['POST'], '/shopping/confirm', 'page://self/shopping/confirm'),
@@ -276,17 +282,136 @@ final class RouteTable
             ),
             new Route(
                 'admin_setting_system_member',
-                ['GET', 'PUT'],
+                ['GET', 'POST'],
                 '/admin/setting/system/member',
                 'page://self/admin/member-list',
             ),
+            ...self::adminUnsupportedRoutes(),
         ]);
     }
 
     /** @return list<Route> */
-    public function routes(): array
+    private static function adminUnsupportedRoutes(): array
     {
-        return $this->routes;
+        $routes = [];
+        foreach ([
+            'admin_content_block_delete',
+            'admin_content_block_edit',
+            'admin_content_block_new',
+            'admin_content_cache',
+            'admin_content_css',
+            'admin_content_js',
+            'admin_content_layout_edit',
+            'admin_content_layout_new',
+            'admin_content_maintenance',
+            'admin_content_news_delete',
+            'admin_content_news_edit',
+            'admin_content_news_new',
+            'admin_content_page_delete',
+            'admin_content_page_edit',
+            'admin_content_page_new',
+            'admin_customer_delete',
+            'admin_customer_delivery_new',
+            'admin_customer_edit',
+            'admin_customer_export',
+            'admin_homepage_customer',
+            'admin_homepage_nonstock',
+            'admin_homepage_sale',
+            'admin_order_bulk_delete',
+            'admin_order_csv_shipping',
+            'admin_order_edit',
+            'admin_order_export_order',
+            'admin_order_export_pdf',
+            'admin_order_export_shipping',
+            'admin_order_mail',
+            'admin_order_shipping',
+            'admin_product_bulk_product_status',
+            'admin_product_category_edit',
+            'admin_product_class_category',
+            'admin_product_class_category_delete',
+            'admin_product_class_category_edit',
+            'admin_product_class_category_export',
+            'admin_product_class_category_sort_no_move',
+            'admin_product_class_category_visibility',
+            'admin_product_class_name_delete',
+            'admin_product_class_name_export',
+            'admin_product_class_name_sort_no_move',
+            'admin_product_csv_category',
+            'admin_product_csv_class_category',
+            'admin_product_csv_class_name',
+            'admin_product_csv_product',
+            'admin_product_export',
+            'admin_product_product_class',
+            'admin_product_product_copy',
+            'admin_product_product_delete',
+            'admin_product_product_edit',
+            'admin_product_product_new',
+            'admin_product_tag_delete',
+            'admin_product_tag_sort_no_move',
+            'admin_setting_shop',
+            'admin_setting_shop_calendar',
+            'admin_setting_shop_calendar_delete',
+            'admin_setting_shop_calendar_new',
+            'admin_setting_shop_csv',
+            'admin_setting_shop_delivery_delete',
+            'admin_setting_shop_delivery_edit',
+            'admin_setting_shop_delivery_new',
+            'admin_setting_shop_delivery_sort_no_move',
+            'admin_setting_shop_delivery_visibility',
+            'admin_setting_shop_mail',
+            'admin_setting_shop_mail_delete',
+            'admin_setting_shop_order_status',
+            'admin_setting_shop_payment_delete',
+            'admin_setting_shop_payment_edit',
+            'admin_setting_shop_payment_new',
+            'admin_setting_shop_payment_sort_no_move',
+            'admin_setting_shop_payment_visible',
+            'admin_setting_shop_tax_delete',
+            'admin_setting_shop_tax_new',
+            'admin_setting_shop_tradelaw',
+            'admin_setting_system_authority',
+            'admin_setting_system_masterdata',
+            'admin_setting_system_masterdata_edit',
+            'admin_setting_system_member_delete',
+            'admin_setting_system_member_down',
+            'admin_setting_system_member_edit',
+            'admin_setting_system_member_new',
+            'admin_setting_system_member_up',
+            'admin_setting_system_security',
+            'admin_setting_system_system_phpinfo',
+            'admin_shipping_notify_mail',
+            'admin_shipping_preview_notify_mail',
+            'admin_shipping_update_order_status',
+            'admin_shipping_update_tracking_number',
+            'admin_store_plugin_disable',
+            'admin_store_plugin_enable',
+            'admin_store_plugin_install',
+            'admin_store_plugin_owners_search_page',
+            'admin_store_plugin_uninstall',
+            'admin_store_template',
+            'admin_store_template_delete',
+            'admin_store_template_download',
+            'admin_store_template_install',
+            'admin_two_factor_auth',
+            'admin_two_factor_auth_set',
+        ] as $name) {
+            $routes[] = self::adminUnsupportedRoute($name);
+        }
+
+        return $routes;
+    }
+
+    private static function adminUnsupportedRoute(string $name): Route
+    {
+        return new Route(
+            $name,
+            ['GET', 'POST'],
+            '/' . $name,
+            'page://self/admin/unsupported-route',
+            [],
+            null,
+            ['routeName' => $name],
+        );
     }
 
     /** Look a route up by its EC-CUBE name, or null when absent. */

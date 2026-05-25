@@ -144,7 +144,7 @@
             $('#DeleteModal').on('shown.bs.modal', function(event) {
                 var target = $(event.relatedTarget);
                 // hrefの変更
-                $(this).find('[data-method="delete"]').attr('href', target.data('url'));
+                $(this).find('[data-post-action="delete"]').attr('href', target.data('url'));
 
                 // messageの変更
                 $(this).find('p.modal-message').text(target.data('message'));
@@ -243,7 +243,7 @@
                                                 </a>
                                                 <a class="btn btn-ec-actionIcon me-2 action-visible" href="{{ url('admin_product_class_category_visibility', {'class_name_id': ClassCategory.classNameId, 'id': ClassCategory.classCategoryId}) }}"
                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="非表示中 | 表示にする"
-                                                   data-confirm="false" data-method="put">
+                                                   data-confirm="false">
                                                     <i class="fa fa-toggle-off fa-lg text-secondary" aria-hidden="true"></i>
                                                 </a>
                                                 <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
@@ -295,7 +295,7 @@
                                                 キャンセル
                                             </button>
                                             <a class="btn btn-ec-delete" href="#"
-                                               data-method="delete" data-confirm="false">
+                                               data-confirm="false">
                                                 削除
                                             </a>
                                         </div>

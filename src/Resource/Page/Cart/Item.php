@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Cart;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +20,6 @@ use MyVendor\BeMart\Be\Final\CartItemRemoved;
 use MyVendor\BeMart\Be\Input\AddCartItemInput;
 use MyVendor\BeMart\Be\Input\RemoveCartItemInput;
 use MyVendor\BeMart\Be\Input\UpdateCartItemQuantityInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -37,7 +37,6 @@ class Item extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -50,24 +49,44 @@ class Item extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      * @psalm-taint-source input $quantity
-     * @psalm-taint-source input $csrfToken
      * @psalm-taint-source input $sessionPrefix
      */
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping', method: 'post')]
+    #[CsrfProtected]
     public function onPost(
         string $productCode,
-        int $quantity,
-        string|null $csrfToken = null,
+        int|null $quantity = null,
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
+        string|null $operation = null,
     ): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+        if ($operation === 'remove') {
+            $this->onDelete($productCode, $sessionPrefix);
+
+            return $this->redirectToCartOnSuccess();
+        }
+
+        if ($operation === 'up' || $operation === 'down' || $operation === 'update') {
+            if ($quantity === null) {
+                return $this->missingQuantity($productCode);
+            }
+
+            $this->onPut($productCode, $quantity, $sessionPrefix);
+
+            return $this->redirectToCartOnSuccess();
+        }
+
+        if ($operation !== null) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => 'Invalid cart operation.', 'productCode' => $productCode];
 
             return $this;
+        }
+
+        if ($quantity === null) {
+            return $this->missingQuantity($productCode);
         }
 
         try {
@@ -122,23 +141,15 @@ class Item extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      * @psalm-taint-source input $quantity
-     * @psalm-taint-source input $csrfToken
      * @psalm-taint-source input $sessionPrefix
      */
     #[Link(rel: 'goCart', href: 'page://self/cart')]
+    #[CsrfProtected]
     public function onPut(
         string $productCode,
         int $quantity,
-        string|null $csrfToken = null,
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateCartItemQuantityInput(
                 productCode: $productCode,
@@ -193,23 +204,15 @@ class Item extends ResourceObject
      * Idempotent (DELETE), CSRF-guarded.
      *
      * @psalm-taint-source input $productCode
-     * @psalm-taint-source input $csrfToken
      * @psalm-taint-source input $sessionPrefix
      */
     #[Link(rel: 'goCart', href: 'page://self/cart')]
+    #[CsrfProtected]
     public function onDelete(
         string $productCode,
-        string|null $csrfToken = null,
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
     ): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new RemoveCartItemInput(
                 productCode: $productCode,
@@ -242,4 +245,22 @@ class Item extends ResourceObject
 
         return $this;
     }
+
+    private function missingQuantity(string $productCode): static
+    {
+        $this->code = Code::BAD_REQUEST;
+        $this->body = ['message' => 'Invalid input.', 'productCode' => $productCode, 'quantity' => null];
+
+        return $this;
+    }
+
+    private function redirectToCartOnSuccess(): static
+    {
+        if ($this->code < 400) {
+            $this->headers['Location'] = '/cart';
+        }
+
+        return $this;
+    }
+
 }
