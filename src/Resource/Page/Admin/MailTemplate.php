@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,8 +16,7 @@ use MyVendor\BeMart\Be\Final\MailTemplateListFetched;
 use MyVendor\BeMart\Be\Final\MailTemplateUpdated;
 use MyVendor\BeMart\Be\Input\GetMailTemplateListInput;
 use MyVendor\BeMart\Be\Input\UpdateMailTemplateInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminMailTemplateForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -45,8 +45,7 @@ class MailTemplate extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -57,7 +56,7 @@ class MailTemplate extends ResourceObject
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
     public function onGet(): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 
@@ -105,21 +104,13 @@ class MailTemplate extends ResourceObject
     /**
      * @psalm-taint-source input $mailTemplateId
      * @psalm-taint-source input $mailSubject
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTop', href: 'page://self/admin')]
+    #[CsrfProtected]
     public function onPost(
         int $mailTemplateId,
         string $mailSubject,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateMailTemplateInput(
                 mailTemplateId: $mailTemplateId,

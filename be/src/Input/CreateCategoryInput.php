@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Final\CategoryCreated;
  *
  * Mass-assignment safety:
  *   - `categoryId` is INTENTIONALLY ABSENT — generated server-side
- *     by {@see \MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface}.
+ *     by {@see \MyVendor\BeMart\Be\Reason\Provider\CategoryIdProvider}.
  *
  * `parentId` is nullable (root-level node when null). `sortNo` is
  * required so the admin commits to a display position up front.

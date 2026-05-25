@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
 
 /**
@@ -24,7 +24,7 @@ use Ray\Di\AbstractModule;
  * shippings[] with grouped items / mailHistories[]) whether
  * OrderQueryInterface resolves to the Fake or the SQL impl.
  *
- * customerId comes from {@see SessionInterface} (Pilot 5 F-2 lesson —
+ * customerId comes from {@see CustomerSession} (Pilot 5 F-2 lesson —
  * the actor is read from the session, never the request body); the
  * test rebinds it to the inserted customer's numeric dtb_customer.id
  * (SqlOrderQuery's owner AUTHZ compares string-equal against it).
@@ -47,7 +47,7 @@ final class MypageHistoryResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)
+                $this->bind(CustomerSession::class)
                     ->toInstance(new FakeSession($this->customerId));
             }
         };

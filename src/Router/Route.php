@@ -162,10 +162,4 @@ final class Route
         return array_key_exists($name, $this->paramMap)
             || str_contains($this->path, '{' . $name . '}');
     }
-
-    /** Number of `{placeholder}` segments — used by RouteTable diagnostics. */
-    public function placeholderCount(): int
-    {
-        return count($this->paramMap);
-    }
 }

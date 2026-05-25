@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ActivationMailResent;
 use MyVendor\BeMart\Be\Input\ResendActivationMailInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Module\TestModule;
@@ -62,7 +62,7 @@ final class ActivationMailResentTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -82,7 +82,7 @@ final class ActivationMailResentTest extends TestCase
         $this->assertSame(self::PROVISIONAL_ID, $final->customerId);
         $this->assertSame(self::PROVISIONAL_EMAIL, $final->email);
 
-        $activations = $this->mailer->customerActivations();
+        $activations = $this->mailer->customerActivations;
         $this->assertCount(1, $activations);
         $this->assertSame(self::PROVISIONAL_EMAIL, $activations[0]['email']);
         $this->assertSame(self::PROVISIONAL_SECRET_KEY, $activations[0]['secretKey']);
@@ -94,7 +94,7 @@ final class ActivationMailResentTest extends TestCase
         ($this->becoming)(new ResendActivationMailInput(self::PROVISIONAL_EMAIL));
         ($this->becoming)(new ResendActivationMailInput(self::PROVISIONAL_EMAIL));
 
-        $this->assertCount(2, $this->mailer->customerActivations());
+        $this->assertCount(2, $this->mailer->customerActivations);
     }
 
     public function testNoAdminSessionRaisesUnauthorizedAdmin(): void
@@ -137,6 +137,6 @@ final class ActivationMailResentTest extends TestCase
             // expected — assertion is on the side effect below.
         }
 
-        $this->assertCount(0, $this->mailer->customerActivations());
+        $this->assertCount(0, $this->mailer->customerActivations);
     }
 }

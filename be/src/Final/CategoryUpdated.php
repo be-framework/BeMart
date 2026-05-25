@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\CategoryNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -40,10 +40,10 @@ final readonly class CategoryUpdated
         #[Input] string|null $categoryName,
         #[Input] int|null $sortNo,
         #[Input] string|null $parentId,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] CategoryStorageInterface $categories,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

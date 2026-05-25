@@ -9,8 +9,8 @@ use MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MemberCreated;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Provider\AdminIdProvider;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -22,9 +22,9 @@ use SensitiveParameter;
  * Multi-Reason Being mirroring Wave 5O {@see AdminCustomerCreating},
  * with the admin AUTHZ guard as the first check:
  *
- *   0. AdminSessionInterface         — fail-fast if no admin session
+ *   0. AdminSession         — fail-fast if no admin session
  *   1. AdminQueryInterface           — fail-fast on duplicate loginId
- *   2. AdminIdGeneratorInterface     — opaque 32-char hex id
+ *   2. AdminIdProvider     — opaque 32-char hex id
  *   3. PasswordHasherInterface       — bcrypt hash of plaintext password
  *
  * Existence of this object proves all four succeeded. The downstream
@@ -64,12 +64,12 @@ final readonly class MemberCreating
         #[Input] #[SensitiveParameter] string $password,
         #[Input] public string $name,
         #[Input] public int $authority,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] AdminQueryInterface $adminQuery,
-        #[Inject] AdminIdGeneratorInterface $idGenerator,
+        #[Inject] AdminIdProvider $ids,
         #[Inject] PasswordHasherInterface $passwordHasher,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
@@ -77,7 +77,7 @@ final readonly class MemberCreating
             throw new LoginIdAlreadyTakenException();
         }
 
-        $this->adminId = $idGenerator->next()->value;
+        $this->adminId = $ids->get();
         $this->passwordHash = $passwordHasher->hash($password);
         $this->work = 1;
     }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,7 +14,6 @@ use MyVendor\BeMart\Be\Final\CategoryCsvExported;
 use MyVendor\BeMart\Be\Final\CategoryCsvImported;
 use MyVendor\BeMart\Be\Input\ExportCategoryInput;
 use MyVendor\BeMart\Be\Input\ImportCategoryCsvInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -35,7 +35,6 @@ class Csv extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -65,18 +64,11 @@ class Csv extends ResourceObject
 
     /**
      * @psalm-taint-source input $csv
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
-    public function onPost(string $csv, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onPost(string $csv): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new ImportCategoryCsvInput(csv: $csv));
         } catch (UnauthorizedAdminAccessException) {

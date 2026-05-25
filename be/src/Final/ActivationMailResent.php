@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\CustomerAlreadyActivatedException;
 use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -58,11 +58,11 @@ final readonly class ActivationMailResent
 
     public function __construct(
         #[Input] string $email,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] MailerInterface $mailer,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

@@ -11,6 +11,6 @@ final class ClassCategoryId
     #[Validate]
     public function validate(string|null $classCategoryId): void
     {
-        // Type assertion only — generator is the contract.
+        // Type assertion only — provider is the contract.
     }
 }

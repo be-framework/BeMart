@@ -19,33 +19,27 @@ use Override;
 final class FakeMailer implements MailerInterface
 {
     /** @var list<FinalizedOrderEntity> */
-    private array $sent = [];
+    public array $sent = [];
 
     /** @var list<ContactEntity> */
-    private array $contactInquiries = [];
+    public array $contactInquiries = [];
 
     /** @var list<array{email: string, resetKey: string}> */
-    private array $passwordResets = [];
+    public array $passwordResets = [];
 
     /** @var list<array{email: string, name01: string, name02: string}> */
-    private array $withdrawConfirmations = [];
+    public array $withdrawConfirmations = [];
 
     /** @var list<array{order: FinalizedOrderEntity, trackingNumber: string|null}> */
-    private array $shippingNotifications = [];
+    public array $shippingNotifications = [];
 
     /** @var list<array{email: string, secretKey: string}> */
-    private array $customerActivations = [];
+    public array $customerActivations = [];
 
     #[Override]
     public function sendOrderConfirmation(FinalizedOrderEntity $order): void
     {
         $this->sent[] = $order;
-    }
-
-    /** @return list<FinalizedOrderEntity> */
-    public function sent(): array
-    {
-        return $this->sent;
     }
 
     #[Override]
@@ -54,22 +48,10 @@ final class FakeMailer implements MailerInterface
         $this->contactInquiries[] = $contact;
     }
 
-    /** @return list<ContactEntity> */
-    public function contactInquiries(): array
-    {
-        return $this->contactInquiries;
-    }
-
     #[Override]
     public function sendPasswordReset(string $email, string $resetKey): void
     {
         $this->passwordResets[] = ['email' => $email, 'resetKey' => $resetKey];
-    }
-
-    /** @return list<array{email: string, resetKey: string}> */
-    public function passwordResets(): array
-    {
-        return $this->passwordResets;
     }
 
     #[Override]
@@ -82,12 +64,6 @@ final class FakeMailer implements MailerInterface
         ];
     }
 
-    /** @return list<array{email: string, name01: string, name02: string}> */
-    public function withdrawConfirmations(): array
-    {
-        return $this->withdrawConfirmations;
-    }
-
     #[Override]
     public function sendShippingNotification(FinalizedOrderEntity $order, string|null $trackingNumber): void
     {
@@ -97,21 +73,9 @@ final class FakeMailer implements MailerInterface
         ];
     }
 
-    /** @return list<array{order: FinalizedOrderEntity, trackingNumber: string|null}> */
-    public function shippingNotifications(): array
-    {
-        return $this->shippingNotifications;
-    }
-
     #[Override]
     public function sendCustomerActivation(string $email, string $secretKey): void
     {
         $this->customerActivations[] = ['email' => $email, 'secretKey' => $secretKey];
-    }
-
-    /** @return list<array{email: string, secretKey: string}> */
-    public function customerActivations(): array
-    {
-        return $this->customerActivations;
     }
 }

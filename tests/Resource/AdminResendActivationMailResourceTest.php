@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
@@ -45,7 +45,7 @@ final class AdminResendActivationMailResourceTest extends TestCase
 
     /**
      * Build a fresh resource client with the given admin session
-     * adminId (null = admin-anonymous). Rebinds AdminSessionInterface
+     * adminId (null = admin-anonymous). Rebinds AdminSession
      * so the admin firewall can be flipped per-test — same pattern as
      * AdminDeleteCustomerResourceTest.
      */
@@ -61,7 +61,7 @@ final class AdminResendActivationMailResourceTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -83,10 +83,10 @@ final class AdminResendActivationMailResourceTest extends TestCase
         $this->assertStringContainsString('認証メール', $ro->body['message']);
 
         $mailer = $this->injector->getInstance(FakeMailer::class);
-        $this->assertCount(1, $mailer->customerActivations());
+        $this->assertCount(1, $mailer->customerActivations);
         $this->assertSame(
             self::PROVISIONAL_EMAIL,
-            $mailer->customerActivations()[0]['email'],
+            $mailer->customerActivations[0]['email'],
         );
     }
 
@@ -138,6 +138,6 @@ final class AdminResendActivationMailResourceTest extends TestCase
         $this->assertStringContainsString('本会員', $ro->body['message']);
 
         $mailer = $this->injector->getInstance(FakeMailer::class);
-        $this->assertCount(0, $mailer->customerActivations());
+        $this->assertCount(0, $mailer->customerActivations);
     }
 }

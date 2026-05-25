@@ -10,7 +10,7 @@ use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -26,7 +26,7 @@ use function count;
  * Aggregates three independent reads so the BEAR layer renders the
  * pre-doCheckout review screen in one pass:
  *
- *   - `SessionInterface::customerId`        → AUTHN (null → 401)
+ *   - `CustomerSession::$customerId`        → AUTHN (null → 401)
  *   - `CustomerQuery::findById`             → default shipping address
  *   - `CartQuery::bySessionPrefix`          → current carts + totals
  *   - `PaymentMethodFactory::available`     → user-selectable methods
@@ -90,12 +90,12 @@ final readonly class ShoppingFetched
 
     public function __construct(
         #[Input] string $sessionPrefix,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CartQueryInterface $cartQuery,
         #[Inject] PaymentMethodFactoryInterface $paymentMethodFactory,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

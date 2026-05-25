@@ -8,7 +8,7 @@ use Aura\Sql\ExtendedPdoInterface;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerIdQueryInterface;
 use MyVendor\BeMart\Module\ProdModule;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -61,14 +61,14 @@ final class ProdModuleSqlWiringTest extends TestCase
             'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy.',
         );
 
-        // IdGenerators are also part of the cutover — production customer
-        // ids are direct MediaQuery BDR proxies, not Fake hex generators.
-        $customerIdGenerator = $injector->getInstance(CustomerIdGeneratorInterface::class);
-        $this->assertInstanceOf(CustomerIdGeneratorInterface::class, $customerIdGenerator);
+        // IdQueries are also part of the cutover — production customer
+        // ids are direct MediaQuery BDR proxies, not FakeQuery hex fixtures.
+        $customerIdProvider = $injector->getInstance(CustomerIdQueryInterface::class);
+        $this->assertInstanceOf(CustomerIdQueryInterface::class, $customerIdProvider);
         $this->assertStringContainsString(
-            CustomerIdGeneratorInterface::class,
-            $customerIdGenerator::class,
-            'ProdModule must override CustomerIdGeneratorInterface Fake -> MediaQuery proxy.',
+            CustomerIdQueryInterface::class,
+            $customerIdProvider::class,
+            'ProdModule must override CustomerIdQueryInterface Fake -> MediaQuery proxy.',
         );
 
         // MediaQuery runtime builds a real connection from DATABASE_URL.

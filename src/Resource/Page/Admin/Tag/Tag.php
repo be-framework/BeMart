@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Tag;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -12,7 +13,6 @@ use MyVendor\BeMart\Be\Exception\TagNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\TagDeleted;
 use MyVendor\BeMart\Be\Input\DeleteTagInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -24,24 +24,16 @@ class Tag extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     /**
      * @psalm-taint-source input $tagId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTagList', href: 'page://self/admin/tag/tag-list')]
-    public function onDelete(string $tagId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $tagId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeleteTagInput(tagId: $tagId));
         } catch (UnauthorizedAdminAccessException) {

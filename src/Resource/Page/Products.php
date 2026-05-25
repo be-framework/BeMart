@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 
 use function array_filter;
@@ -42,7 +42,7 @@ class Products extends ResourceObject
 {
     public function __construct(
         private readonly ProductQueryInterface $productQuery,
-        private readonly CsrfTokenInterface $csrf,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -95,7 +95,7 @@ class Products extends ResourceObject
             'transitionId' => 'goProductList',
             'totalItemCount' => $totalItemCount,
             'products' => array_map($this->productRow(...), $pagedProducts),
-            'csrfToken' => $this->csrf->getToken(),
+            'csrfToken' => $this->csrf->token,
             'filters' => [
                 'name' => $name,
                 'nameKeyword' => $nameKeyword,

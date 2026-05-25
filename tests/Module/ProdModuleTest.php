@@ -70,11 +70,11 @@ final class ProdModuleTest extends TestCase
             unlink($this->logFile);
         }
 
-        // Slice 7: ProdModule binds SessionInterface to EccubeSharedSessionAdapter,
+        // Slice 7: ProdModule binds CustomerSession to EccubeSharedSessionAdapter,
         // which reads $_SESSION['customer_id'].
         $_SESSION['customer_id'] = 'customer-001';
 
-        // Slice 8: ProdModule also binds CsrfTokenInterface to
+        // Slice 8: ProdModule also binds CsrfToken to
         // EccubeSharedCsrfTokenAdapter, which checks `$_SESSION['_csrf_token']`.
         // Mirror a reference token so the prod adapter accepts our submission.
         $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'prod-csrf-mirror';

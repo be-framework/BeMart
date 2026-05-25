@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 
 /**
  * EC-CUBE 受注メール確認 — Order Tier-2 (`admin/Order/mail_confirm.twig`).
@@ -30,7 +30,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 class MailConfirm extends ResourceObject
 {
     public function __construct(
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
     ) {
     }
 
@@ -41,7 +41,7 @@ class MailConfirm extends ResourceObject
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     public function onGet(string $orderNo = ''): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 

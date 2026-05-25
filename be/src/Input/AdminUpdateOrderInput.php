@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderUpdated;
  *   AdminUpdateOrderInput → AdminOrderUpdated  (Direct, idempotent)
  *
  * AUTHZ — cross-firewall (Wave 4 lesson): the Final pulls the adminId
- * from {@see \MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface}.
+ * from {@see \MyVendor\BeMart\Be\Reason\Service\AdminSession}.
  * No admin session → 403. Unknown orderNo → 404 (OrderNotFoundException).
  *
  * Mass-assignment safety (Pilot 5 F-2 lesson) — admin variant of the

@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminCustomerDeliveryForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -29,7 +29,7 @@ use function assert;
 class CustomerDeliveryEdit extends ResourceObject
 {
     public function __construct(
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -44,7 +44,7 @@ class CustomerDeliveryEdit extends ResourceObject
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
     public function onGet(string $customerId = '', string $id = ''): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 

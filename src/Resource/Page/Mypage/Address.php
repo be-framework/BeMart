@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,8 +18,7 @@ use MyVendor\BeMart\Be\Final\CustomerAddressUpdated;
 use MyVendor\BeMart\Be\Input\DeleteCustomerAddressInput;
 use MyVendor\BeMart\Be\Input\UpdateCustomerAddressInput;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Form\AddressForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -37,7 +37,7 @@ use function assert;
  * `page://self/mypage/address-list` handles GET / POST.
  *
  * AUTHN + AUTHZ are enforced in the Be Final — the customerId is
- * pulled from SessionInterface and compared against the entity's
+ * pulled from CustomerSession and compared against the entity's
  * owner. A logged-in customer cannot mutate another customer's
  * address book by guessing addressIds.
  *
@@ -52,8 +52,7 @@ class Address extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
-        private readonly SessionInterface $session,
+        private readonly CustomerSession $session,
         private readonly AddressStorageInterface $addresses,
         private readonly FormFactory $formFactory,
     ) {
@@ -86,7 +85,7 @@ class Address extends ResourceObject
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     public function onGet(string|null $addressId = null): static
     {
-        $customerId = $this->session->customerId();
+        $customerId = $this->session->customerId;
         if ($customerId === null) {
             $this->code = Code::UNAUTHORIZED;
             $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
@@ -158,9 +157,9 @@ class Address extends ResourceObject
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
+    #[CsrfProtected]
     public function onPut(
         string $addressId,
         string|null $name01 = null,
@@ -173,15 +172,7 @@ class Address extends ResourceObject
         string|null $addr01 = null,
         string|null $addr02 = null,
         string|null $phoneNumber = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateCustomerAddressInput(
                 addressId: $addressId,
@@ -250,18 +241,11 @@ class Address extends ResourceObject
 
     /**
      * @psalm-taint-source input $addressId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
-    public function onDelete(string $addressId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $addressId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeleteCustomerAddressInput(addressId: $addressId));
         } catch (SemanticVariableException $e) {

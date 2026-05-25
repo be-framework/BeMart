@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\AddressEntity;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 
 use function array_map;
@@ -20,7 +20,7 @@ use function count;
  *   GetCustomerAddressListInput → CustomerAddressListFetched
  *     (Direct, safe read)
  *
- * AUTHN: customerId comes from SessionInterface. A null session
+ * AUTHN: customerId comes from CustomerSession. A null session
  * raises UnauthenticatedException — the BEAR layer maps this to 401.
  *
  * `addresses` is exposed as a flat projection list (not the
@@ -37,10 +37,10 @@ final readonly class CustomerAddressListFetched
     public array $addresses;
 
     public function __construct(
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] AddressStorageInterface $addresses,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

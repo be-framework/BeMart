@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,8 +14,7 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 
 use function assert;
 
@@ -35,8 +35,7 @@ class Withdraw extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
-        private readonly SessionInterface $session,
+        private readonly CustomerSession $session,
         private readonly CustomerQueryInterface $customerQuery,
     ) {
     }
@@ -57,7 +56,7 @@ class Withdraw extends ResourceObject
     #[Link(rel: 'doWithdrawCustomer', href: 'page://self/mypage/withdraw', method: 'post')]
     public function onGet(): static
     {
-        $customerId = $this->session->customerId();
+        $customerId = $this->session->customerId;
         if ($customerId === null) {
             $this->code = Code::UNAUTHORIZED;
             $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
@@ -96,20 +95,12 @@ class Withdraw extends ResourceObject
 
     /**
      * @psalm-taint-source input $sessionPrefix
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTop', href: 'page://self/')]
+    #[CsrfProtected]
     public function onPost(
         string|null $sessionPrefix = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $input = $sessionPrefix === null
                 ? new WithdrawCustomerInput()

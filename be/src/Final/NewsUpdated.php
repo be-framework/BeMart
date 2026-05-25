@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\NewsNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\NewsEntity;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -31,10 +31,10 @@ final readonly class NewsUpdated
         #[Input] string|null $newsUrl,
         #[Input] string|null $publishDate,
         #[Input] bool|null $linkMethod,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] NewsStorageInterface $news,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

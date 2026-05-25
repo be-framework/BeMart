@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -25,7 +25,7 @@ use function count;
  * dashboard panel. This Final is the unbounded view — paged by
  * `historyLimit` + `offset` so the BEAR layer can walk a long history.
  *
- * AUTHN: customerId comes from {@see SessionInterface}. A null session
+ * AUTHN: customerId comes from {@see CustomerSession}. A null session
  * raises {@see UnauthenticatedException} — the BEAR layer maps this to
  * 401. Unlike {@see MypageFetched} we do not consult CustomerQuery::findById
  * here: this resource exposes only the customer's own orders (a one-table
@@ -52,10 +52,10 @@ final readonly class OrderHistoryFetched
     public function __construct(
         #[Input] int $historyLimit,
         #[Input] int $offset,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] OrderQueryInterface $orderQuery,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

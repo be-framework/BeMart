@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Reason\Entity\ProductClassEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -28,7 +28,7 @@ use function min;
  * Cascade Diamond Stage 1 (loan-application demo). Collapses three
  * Reasons into one existence:
  *
- *   1. `SessionInterface` — AUTHN: requires a logged-in customer.
+ *   1. `CustomerSession` — AUTHN: requires a logged-in customer.
  *      Anonymous (null customerId) throws `UnauthenticatedException`.
  *   2. `OrderQueryInterface` — loads the finalized-order header via
  *      `byOrderNo`, then performs the AUTHZ check (`$order->customerId`
@@ -90,12 +90,12 @@ final readonly class ReorderResolving
     public function __construct(
         #[Input] string $orderNo,
         #[Input] string $sessionPrefix,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] OrderQueryInterface $orderQuery,
         #[Inject] OrderItemQueryInterface $orderItems,
         #[Inject] ProductClassQueryInterface $productClassQuery,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

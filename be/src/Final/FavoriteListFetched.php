@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 
 use function array_map;
@@ -20,7 +20,7 @@ use function count;
  *
  *   GetFavoriteListInput → FavoriteListFetched  (Direct, safe read)
  *
- * AUTHN: the customerId comes from SessionInterface. A null session
+ * AUTHN: the customerId comes from CustomerSession. A null session
  * raises UnauthenticatedException — the BEAR layer maps this to 401.
  * Unlike MypageFetched there is no second-stage existence check on
  * the customer record: the favorites listing is keyed only on the
@@ -45,10 +45,10 @@ final readonly class FavoriteListFetched
     public int $favoriteCount;
 
     public function __construct(
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] FavoriteStorageInterface $favorites,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

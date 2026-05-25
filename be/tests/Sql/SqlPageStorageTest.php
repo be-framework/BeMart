@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\PageEntity;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\PageIdQueryInterface;
 
 use function date;
 
@@ -97,7 +97,7 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
-        // The Fake seed `pg-homepage` and hex ids from FakePageIdGenerator
+        // The Fake seed `pg-homepage` and hex ids from FakePageIdProvider
         // can never match an int PK; surface as miss so PageDeleted /
         // PageUpdated / AdminPageFetched fire their 404 paths instead
         // of a PDO error.
@@ -109,8 +109,8 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(PageIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(PageIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new PageEntity(
             pageId: $newId,
@@ -141,8 +141,8 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
     {
         // System pages (edit_type >= 2) round-trip the same as user
         // pages — only PageDeleted enforces the guard, not the storage.
-        $generator = $this->sql(PageIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(PageIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(PageStorageInterface::class);
 
         $storage->put(new PageEntity(
@@ -294,16 +294,16 @@ final class SqlPageStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testPageIdGeneratorAllocatesIncrementingIds(): void
+    public function testPageIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(PageIdGeneratorInterface::class);
+        $ids = $this->sql(PageIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertPage();
         $secondId = $this->insertPage();
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

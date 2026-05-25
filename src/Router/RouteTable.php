@@ -43,15 +43,13 @@ namespace MyVendor\BeMart\Router;
  * configurable `%eccube_admin_route%` segment, fixed here to the default
  * `admin`.
  */
-final class RouteTable
+final readonly class RouteTable
 {
-    /** @var list<Route> */
-    private array $routes;
-
     /** @param list<Route> $routes */
-    public function __construct(array $routes)
-    {
-        $this->routes = $routes;
+    public function __construct(
+        /** @var list<Route> */
+        public array $routes,
+    ) {
     }
 
     /**
@@ -281,12 +279,6 @@ final class RouteTable
                 'page://self/admin/member-list',
             ),
         ]);
-    }
-
-    /** @return list<Route> */
-    public function routes(): array
-    {
-        return $this->routes;
     }
 
     /** Look a route up by its EC-CUBE name, or null when absent. */

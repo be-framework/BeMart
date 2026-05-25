@@ -48,7 +48,7 @@ use function trim;
  * The page extends the admin LOGIN frame (`admin-login-base.html.twig`,
  * a port of EC-CUBE's `login_frame.twig`). The resource
  * (`Page/Admin/TwoFactorAuth.php`) is anonymous-accessible (login
- * context), so no `AdminSessionInterface` rebind is needed.
+ * context), so no `AdminSession` rebind is needed.
  */
 final class AdminTwoFactorAuthHtmlRenderTest extends TestCase
 {

@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -21,7 +21,7 @@ use function count;
  *   AdminBulkDeleteOrderInput → AdminOrdersBulkDeleted  (Direct, unsafe)
  *
  * AUTHZ — admin firewall (same ladder as the rest of Wave 7+):
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess (403)
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess (403)
  *
  * Unknown orderNos in the list are silently skipped — the public
  * `requestedCount` / `changedCount` projection lets the admin UI
@@ -42,11 +42,11 @@ final readonly class AdminOrdersBulkDeleted
     /** @param list<string> $orderNos */
     public function __construct(
         #[Input] array $orderNos,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] OrderQueryInterface $orderQuery,
         #[Inject] OrderCommandInterface $orderCommand,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

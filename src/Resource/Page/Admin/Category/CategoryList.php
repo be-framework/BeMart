@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Final\AdminCategoryListFetched;
 use MyVendor\BeMart\Be\Final\CategoryCreated;
 use MyVendor\BeMart\Be\Input\CreateCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -43,7 +43,6 @@ class CategoryList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -79,22 +78,14 @@ class CategoryList extends ResourceObject
      * @psalm-taint-source input $categoryName
      * @psalm-taint-source input $sortNo
      * @psalm-taint-source input $parentId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
+    #[CsrfProtected]
     public function onPost(
         string $categoryName,
         int $sortNo,
         string|null $parentId = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreateCategoryInput(
                 categoryName: $categoryName,
