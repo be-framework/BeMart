@@ -2228,3 +2228,36 @@ docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.
 残りHTML画面移植を進めてください。
 新規SQL境界は Ray.MediaQuery を使い、既存PDO実装は今すぐ移行しないでください。
 ```
+
+## 2026-05-26 — HTML route coverage and SQL baseline handover
+
+### 完了事項
+
+- `RouteTable` の `unsupported-route` 到達を 0 に整理。
+- HTML 入口の公開 method を GET / POST のみに統一。
+- HTML POST から内部 Resource の PUT / DELETE へ dispatch する設計を固定。
+- 管理画面 route alias と query/form param map を補完。
+- `BadRequestException` を HTTP response に変換し、欠落 parameter などで raw Fatal が出ないようにした。
+- prod context で Be Final が解決できるよう、production-safe default service bindings を追加。
+- SQL suite は MariaDB baseline と明記し、非MariaDB環境では skip するようにした。
+
+### 追加ドキュメント
+
+- `/Users/akihito/git/be-bemart/docs/methodology/html-route-coverage.md`
+- `/Users/akihito/git/be-bemart/docs/methodology/sql-test-baseline.md`
+
+### 検証結果
+
+- `vendor/bin/phpunit --filter 'RouterTest|TemplateRouteCoverageTest|CsrfProtectionCoverageTest' --colors=never` OK
+- `vendor/bin/phpunit tests/Resource --filter HtmlRender --colors=never` OK
+- `composer test:fake -- --colors=never` OK
+- `composer test:sql -- --colors=never` OK扱い（非MariaDBのため 742 skipped）
+- `composer test:http -- --colors=never` OK
+- `composer psalm -- --output-format=console` No errors found
+- ローカルリンククロール: 158 pages / 158 links / problems 0
+
+### 次回注意
+
+- Twig に route name を追加したら `RouteTable` と coverage test を同時に更新する。
+- HTML には PUT / DELETE を出さない。更新・削除は POST form で送る。
+- SQL suite の green 判定は MariaDB で行う。MySQL 8/9 での大量失敗は baseline 違いとして扱う。
