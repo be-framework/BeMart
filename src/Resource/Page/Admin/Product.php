@@ -97,7 +97,6 @@ class Product extends ResourceObject
             'description' => $final->description,
             'searchWord' => $final->searchWord,
             'note' => $final->note,
-            'sortNo' => $final->sortNo,
         ];
 
         return $this;
@@ -114,7 +113,6 @@ class Product extends ResourceObject
      * @psalm-taint-source input $description
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
-     * @psalm-taint-source input $sortNo
      * @psalm-taint-source input $csrfToken
      */
     public function onPost(
@@ -126,7 +124,6 @@ class Product extends ResourceObject
         string|null $description = null,
         string|null $searchWord = null,
         string|null $note = null,
-        int|null $sortNo = null,
         string|null $csrfToken = null,
     ): static {
         if (! $this->csrf->isValid($csrfToken)) {
@@ -146,7 +143,6 @@ class Product extends ResourceObject
                 description: $description,
                 searchWord: $searchWord,
                 note: $note,
-                sortNo: $sortNo,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
@@ -197,7 +193,6 @@ class Product extends ResourceObject
      * @psalm-taint-source input $description
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
-     * @psalm-taint-source input $sortNo
      * @psalm-taint-source input $csrfToken
      */
     public function onPut(
@@ -209,7 +204,6 @@ class Product extends ResourceObject
         string|null $description = null,
         string|null $searchWord = null,
         string|null $note = null,
-        int|null $sortNo = null,
         string|null $csrfToken = null,
     ): static {
         if (! $this->csrf->isValid($csrfToken)) {
@@ -229,7 +223,6 @@ class Product extends ResourceObject
                 description: $description,
                 searchWord: $searchWord,
                 note: $note,
-                sortNo: $sortNo,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;

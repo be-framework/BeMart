@@ -38,7 +38,7 @@ use Ray\InputQuery\Attribute\Input;
  *
  * Mass-assignment safety: only `loginId` (target selector) and
  * `authority` (new value) are accepted. The role-flip path cannot
- * reach name / mailAddress / passwordHash through this Final.
+ * reach name / passwordHash through this Final.
  *
  * Idempotency: when the supplied authority matches the persisted
  * value, the Final short-circuits — no second write, `changed=false`

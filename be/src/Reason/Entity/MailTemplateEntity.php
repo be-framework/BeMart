@@ -9,14 +9,20 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  *
  * Each row is one mail template (order-confirm, register-thanks,
  * password-reset, …) addressed by an integer id. The admin screen
- * lists every template and lets the operator edit subject + body +
- * htmlBody. The file path (`file_name`) is fixed at creation time and
- * not editable post-create.
+ * lists every template and lets the operator edit the subject. The
+ * file path (`file_name`) is fixed at creation time and not editable
+ * post-create.
  *
- * doUpdateMailTemplate (Wave 8) only updates subject / body /
- * htmlBody — the migration scope does NOT yet cover the create-new-
- * template flow. The mailTemplateId is therefore required input and
- * MUST match an existing row.
+ * 厳密移植 alignment: dtb_mail_template has NO body columns. EC-CUBE
+ * 4.3 stores mail bodies as Twig files on disk — `file_name` is the
+ * path to that template. `body` and `htmlBody` were BeMart-only
+ * fields that drifted from the schema and have been dropped; the mail
+ * body is the on-disk Twig file, not a database column.
+ *
+ * doUpdateMailTemplate (Wave 8) only updates the subject — the
+ * migration scope does NOT yet cover the create-new-template flow.
+ * The mailTemplateId is therefore required input and MUST match an
+ * existing row.
  */
 final readonly class MailTemplateEntity
 {
@@ -25,8 +31,6 @@ final readonly class MailTemplateEntity
         public string $mailTemplateName,
         public string $fileName,
         public string $subject,
-        public string $body,
-        public string|null $htmlBody = null,
     ) {
     }
 }

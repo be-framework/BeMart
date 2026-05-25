@@ -23,13 +23,13 @@ use function count;
  *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess
  *
  * Public surface — full MailTemplateEntity projection (no
- * passwordHash-grade secrets in this table, so the body / subject text
- * is safe to expose to an authenticated admin). The grid links to the
+ * passwordHash-grade secrets in this table, so the subject text is
+ * safe to expose to an authenticated admin). The grid links to the
  * per-template UPDATE affordance (doUpdateMailTemplate, Wave 8ε).
  */
 final readonly class MailTemplateListFetched
 {
-    /** @var list<array{mailTemplateId: int, mailTemplateName: string, fileName: string, mailSubject: string, mailBody: string, mailHtmlBody: string|null}> */
+    /** @var list<array{mailTemplateId: int, mailTemplateName: string, fileName: string, mailSubject: string}> */
     public array $mailTemplates;
 
     public int $count;
@@ -50,8 +50,6 @@ final readonly class MailTemplateListFetched
                 'mailTemplateName' => $t->mailTemplateName,
                 'fileName' => $t->fileName,
                 'mailSubject' => $t->subject,
-                'mailBody' => $t->body,
-                'mailHtmlBody' => $t->htmlBody,
             ],
             $rows,
         );

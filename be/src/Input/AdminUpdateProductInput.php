@@ -40,7 +40,6 @@ final readonly class AdminUpdateProductInput
      * @psalm-taint-source input $description
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
-     * @psalm-taint-source input $sortNo
      */
     public function __construct(
         public string $productCode,
@@ -51,7 +50,6 @@ final readonly class AdminUpdateProductInput
         public string|null $description = null,
         public string|null $searchWord = null,
         public string|null $note = null,
-        public int|null $sortNo = null,
     ) {
     }
 }

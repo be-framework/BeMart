@@ -14,7 +14,7 @@ use Ray\InputQuery\Attribute\Input;
 
 /**
  * Mail template updated — Final, proof an admin edited a mail
- * template's subject / body / htmlBody.
+ * template's subject.
  *
  *   UpdateMailTemplateInput → MailTemplateUpdated (Direct, idempotent)
  *
@@ -22,9 +22,12 @@ use Ray\InputQuery\Attribute\Input;
  *   1. No admin session     → UnauthorizedAdminAccessException  (403)
  *   2. Unknown id           → MailTemplateNotFoundException     (404)
  *
- * Idempotency: when the new (subject, body, htmlBody) tuple equals
- * the persisted values, the storage write is skipped and the Final
- * reports `changed=false`.
+ * Idempotency: when the new subject equals the persisted value, the
+ * storage write is skipped and the Final reports `changed=false`.
+ *
+ * 厳密移植 alignment: dtb_mail_template has NO body columns — EC-CUBE
+ * 4.3 stores mail bodies as on-disk Twig files. The former mailBody /
+ * mailHtmlBody fields were BeMart-only and have been dropped.
  *
  * Mass-assignment safety: mailTemplateName + fileName are NOT in the
  * Input, so this transition cannot rename the template or rebind it
@@ -36,15 +39,11 @@ final readonly class MailTemplateUpdated
     public string $mailTemplateName;
     public string $fileName;
     public string $mailSubject;
-    public string $mailBody;
-    public string|null $mailHtmlBody;
     public bool $changed;
 
     public function __construct(
         #[Input] int $mailTemplateId,
         #[Input] string $mailSubject,
-        #[Input] string $mailBody,
-        #[Input] string|null $mailHtmlBody,
         #[Inject] AdminSessionInterface $adminSession,
         #[Inject] MailTemplateStorageInterface $mailTemplateStorage,
     ) {
@@ -62,13 +61,9 @@ final readonly class MailTemplateUpdated
             mailTemplateName: $existing->mailTemplateName,
             fileName: $existing->fileName,
             subject: $mailSubject,
-            body: $mailBody,
-            htmlBody: $mailHtmlBody,
         );
 
-        $changed = $existing->subject !== $next->subject
-            || $existing->body !== $next->body
-            || $existing->htmlBody !== $next->htmlBody;
+        $changed = $existing->subject !== $next->subject;
 
         if ($changed) {
             $mailTemplateStorage->update($next);
@@ -78,8 +73,6 @@ final readonly class MailTemplateUpdated
         $this->mailTemplateName = $next->mailTemplateName;
         $this->fileName = $next->fileName;
         $this->mailSubject = $next->subject;
-        $this->mailBody = $next->body;
-        $this->mailHtmlBody = $next->htmlBody;
         $this->changed = $changed;
     }
 }

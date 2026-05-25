@@ -62,7 +62,6 @@ final class MemberCreatedTest extends TestCase
             password: 'new-admin-password-2026',
             name: '新規管理者',
             authority: 1,
-            mailAddress: 'new-admin@example.com',
         ));
 
         $this->assertInstanceOf(MemberCreated::class, $final);

@@ -21,12 +21,13 @@ use MyVendor\BeMart\Be\Final\MemberUpdated;
  *   - "権限" (authority) updates flow through the dedicated
  *     {@see UpdateAuthorityRoleInput} transition so the privilege-
  *     escalation guard stays observable.
- *   - This transition only edits `name` + `mailAddress`.
+ *   - This transition only edits `name`. EC-CUBE 4.3 dtb_member has
+ *     no email column, so no mailAddress field is accepted.
  *
- * Mass-assignment safety: only the editable fields are accepted here
- * (loginId is the target selector, name / mailAddress are the edit
- * payload). Authority / work / passwordHash CANNOT be reached via
- * this Input — those go through their own dedicated transitions.
+ * Mass-assignment safety: only the editable field is accepted here
+ * (loginId is the target selector, name is the edit payload).
+ * Authority / work / passwordHash CANNOT be reached via this Input —
+ * those go through their own dedicated transitions.
  */
 #[Be(MemberUpdated::class)]
 final readonly class UpdateMemberInput
@@ -34,12 +35,10 @@ final readonly class UpdateMemberInput
     /**
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $name
-     * @psalm-taint-source input $mailAddress
      */
     public function __construct(
         public string $loginId,
         public string|null $name = null,
-        public string|null $mailAddress = null,
     ) {
     }
 }

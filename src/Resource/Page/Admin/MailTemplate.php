@@ -26,13 +26,15 @@ use function assert;
  *   - GET  → goMailTemplateList (collection list, safe, admin, Wave 9ι)
  *   - POST → doUpdateMailTemplate (per-id update, idempotent, Wave 8ε)
  *
- * The migration scope only covers UPDATE of subject + body + htmlBody —
- * creating a new template requires setting the underlying file_name,
- * which is Phase 2 scope.
+ * The migration scope only covers UPDATE of the subject — creating a
+ * new template requires setting the underlying file_name, which is
+ * Phase 2 scope. 厳密移植 alignment: dtb_mail_template has no body
+ * columns (mail bodies are on-disk Twig files), so the former
+ * mailBody / mailHtmlBody inputs were dropped.
  *
  * Failure mapping:
  *   - Invalid CSRF                          → 403 (POST only)
- *   - SemanticVariableException             → 400 (subject / body format)
+ *   - SemanticVariableException             → 400 (subject format)
  *   - UnauthorizedAdminAccessException      → 403 (no admin session)
  *   - MailTemplateNotFoundException         → 404 (unknown id)
  */
@@ -73,16 +75,12 @@ class MailTemplate extends ResourceObject
     /**
      * @psalm-taint-source input $mailTemplateId
      * @psalm-taint-source input $mailSubject
-     * @psalm-taint-source input $mailBody
-     * @psalm-taint-source input $mailHtmlBody
      * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     public function onPost(
         int $mailTemplateId,
         string $mailSubject,
-        string $mailBody,
-        string|null $mailHtmlBody = null,
         string|null $csrfToken = null,
     ): static {
         if (! $this->csrf->isValid($csrfToken)) {
@@ -96,8 +94,6 @@ class MailTemplate extends ResourceObject
             $final = ($this->becoming)(new UpdateMailTemplateInput(
                 mailTemplateId: $mailTemplateId,
                 mailSubject: $mailSubject,
-                mailBody: $mailBody,
-                mailHtmlBody: $mailHtmlBody,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
@@ -124,8 +120,6 @@ class MailTemplate extends ResourceObject
             'mailTemplateName' => $final->mailTemplateName,
             'fileName' => $final->fileName,
             'mailSubject' => $final->mailSubject,
-            'mailBody' => $final->mailBody,
-            'mailHtmlBody' => $final->mailHtmlBody,
             'changed' => $final->changed,
         ];
 

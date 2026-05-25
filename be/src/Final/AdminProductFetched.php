@@ -51,7 +51,6 @@ final readonly class AdminProductFetched
     public string|null $description;
     public string|null $searchWord;
     public string|null $note;
-    public int|null $sortNo;
 
     public function __construct(
         #[Input] string $productCode,
@@ -75,6 +74,5 @@ final readonly class AdminProductFetched
         $this->description = $entity->description;
         $this->searchWord = $entity->searchWord;
         $this->note = $entity->note;
-        $this->sortNo = $entity->sortNo;
     }
 }

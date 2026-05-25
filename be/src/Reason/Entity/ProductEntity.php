@@ -7,13 +7,18 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
 /**
  * Flattened Product × ProductClass row, Pilot scope.
  *
- * Wave 8 extends the Pilot 1 shape with five admin-relevant fields
- * — `productStatus`, `description`, `searchWord`, `note`, `sortNo` —
+ * Wave 8 extends the Pilot 1 shape with four admin-relevant fields
+ * — `productStatus`, `description`, `searchWord`, `note` —
  * matching the EC-CUBE 4.3 dtb_product columns that the admin product
  * management transitions (Wave 8) exercise. Pilot 1's four fields
  * (`productCode`, `productName`, `price02`, `stock`) are preserved
  * verbatim with the same positional order, so all existing Pilot 1
  * tests round-trip unchanged.
+ *
+ * 厳密移植 alignment: `dtb_product` has NO `sort_no` column — product
+ * ordering in EC-CUBE 4.3 lives on `dtb_product_category.sort_no`
+ * (per-category). An earlier `sortNo` field on this entity was a
+ * BeMart-only drift from the schema and has been dropped.
  *
  * The new fields default to safe values on construction to keep the
  * shape backward compatible: existing call sites that build a Pilot 1
@@ -49,7 +54,6 @@ final readonly class ProductEntity
         public string|null $description = null,
         public string|null $searchWord = null,
         public string|null $note = null,
-        public int|null $sortNo = null,
     ) {
     }
 }

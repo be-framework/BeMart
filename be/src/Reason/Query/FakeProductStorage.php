@@ -124,7 +124,7 @@ final class FakeProductStorage
             throw new RuntimeException(sprintf('Fake fixture missing: %s', $path));
         }
 
-        /** @var list<array{productCode: string, productName: string, price02: int, stock: int|null, productStatus?: int, description?: string|null, searchWord?: string|null, note?: string|null, sortNo?: int|null}> $rows */
+        /** @var list<array{productCode: string, productName: string, price02: int, stock: int|null, productStatus?: int, description?: string|null, searchWord?: string|null, note?: string|null}> $rows */
         $rows = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
         if (! is_array($rows)) {
             throw new RuntimeException(sprintf('Fake fixture must be a JSON array: %s', $path));
@@ -141,7 +141,6 @@ final class FakeProductStorage
                 description: $row['description'] ?? null,
                 searchWord: $row['searchWord'] ?? null,
                 note: $row['note'] ?? null,
-                sortNo: $row['sortNo'] ?? null,
             );
         }
 
