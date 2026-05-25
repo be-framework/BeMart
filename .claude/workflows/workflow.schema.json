@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://ec-cube-alps.local/schemas/workflow.schema.json",
+  "title": "Claude Code Workflow",
+  "description": "Claude Code のネイティブ機能で実行されるワークフロー定義。/run コマンドがこのファイルを読み、上から順にステップを解釈する。",
+  "type": "object",
+  "required": ["workflow", "description", "steps"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "workflow": {
+      "type": "string",
+      "description": "ワークフロー識別子。/run <workflow> の <workflow> と一致する",
+      "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "description": {
+      "type": "string",
+      "description": "ワークフローの目的を1行で説明"
+    },
+    "arguments": {
+      "type": "array",
+      "description": "/run <workflow> に続けて渡される引数の定義",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "additionalProperties": false,
+        "properties": {
+          "name": { "type": "string" },
+          "hint": { "type": "string" },
+          "required": { "type": "boolean", "default": true },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "steps": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/step" }
+    }
+  },
+  "$defs": {
+    "step": {
+      "type": "object",
+      "required": ["name"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "ステップ識別子。on_fail の戻り先として参照される",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "description": {
+          "type": "string",
+          "description": "このステップの目的を1行で説明"
+        },
+        "prompt": {
+          "type": "string",
+          "description": "インラインプロンプト。prompt_file と排他"
+        },
+        "prompt_file": {
+          "type": "string",
+          "description": ".claude/prompts/ 配下のファイルパス。prompt と排他"
+        },
+        "agent": {
+          "type": "boolean",
+          "default": false,
+          "description": "true の場合、独立コンテキストのサブエージェントで実行する"
+        },
+        "condition": {
+          "type": "string",
+          "description": "正規表現。変更対象ファイルパスにマッチする場合のみ実行。未指定なら常に実行"
+        },
+        "on_fail": {
+          "type": "string",
+          "description": "レビュー不合格時に戻るステップ名。agent: true のステップでのみ意味を持つ",
+          "pattern": "^[a-z][a-z0-9-]*$"
+        },
+        "max_retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "default": 3,
+          "description": "on_fail で戻る最大回数"
+        }
+      },
+      "oneOf": [
+        { "required": ["prompt"] },
+        { "required": ["prompt_file"] }
+      ]
+    }
+  }
+}
