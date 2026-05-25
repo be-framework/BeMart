@@ -12,9 +12,9 @@ use Ray\MediaQuery\Annotation\DbQuery;
  * same convention as {@see CategoryStorageInterface}).
  *
  *   - list(): every axis, sorted by id for stable display
- *   - getById(classNameId): single-row lookup
+ *   - item(classNameId): single-row lookup
  *   - put(className): upsert (create / replace)
- *   - remove(classNameId): drop (silent no-op on miss)
+ *   - delete(classNameId): drop (silent no-op on miss)
  *   - reorder(classNameId, sortNo): generic `doSortNoMove` — rewrites
  *     the storage-only `sort_no` column (not projected onto
  *     {@see ClassNameEntity}). dtb_class_name has no `visible` column,

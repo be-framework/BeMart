@@ -88,7 +88,7 @@ final class SqlAdminQueryTest extends AbstractSqlTestCase
 
     public function testFindByIdReturnsNullForNonNumericId(): void
     {
-        // A 32-char hex from FakeAdminIdGenerator can never match an
+        // A 32-char hex from FakeAdminIdProvider can never match an
         // int PK — surface as miss so the Final's 404 path fires
         // instead of a PDO error.
         $query = $this->sql(AdminQueryInterface::class);

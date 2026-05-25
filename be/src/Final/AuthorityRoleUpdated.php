@@ -9,7 +9,7 @@ use MyVendor\BeMart\Be\Exception\InsufficientAuthorityException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -56,11 +56,11 @@ final readonly class AuthorityRoleUpdated
     public function __construct(
         #[Input] string $loginId,
         #[Input] int $authority,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] AdminQueryInterface $adminQuery,
         #[Inject] AdminCommandInterface $adminCommand,
     ) {
-        $callerId = $adminSession->adminId();
+        $callerId = $adminSession->adminId;
         if ($callerId === null) {
             throw new UnauthorizedAdminAccessException();
         }

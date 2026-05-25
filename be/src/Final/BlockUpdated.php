@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\BlockNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\BlockEntity;
 use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -26,10 +26,10 @@ final readonly class BlockUpdated
         #[Input] string $blockId,
         #[Input] string|null $blockName,
         #[Input] string|null $blockFileName,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] BlockStorageInterface $blocks,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

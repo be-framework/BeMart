@@ -15,12 +15,16 @@ namespace MyVendor\BeMart\Router;
  */
 final class MatchedRoute
 {
-    /** @param array<string, string> $params Path params keyed by BEAR resource param name. */
+    /**
+     * @param array<string, string> $params Path params keyed by BEAR resource param name.
+     * @param array<string, string> $queryParamMap Query/form params keyed by EC-CUBE name, valued by BEAR resource param name.
+     */
     public function __construct(
         public readonly string $name,
         public readonly string $resource,
         public readonly string $dispatchMethod,
         public readonly array $params = [],
+        public readonly array $queryParamMap = [],
     ) {
     }
 }

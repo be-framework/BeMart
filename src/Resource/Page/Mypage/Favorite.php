@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Final\FavoriteAdded;
 use MyVendor\BeMart\Be\Final\FavoriteRemoved;
 use MyVendor\BeMart\Be\Input\AddFavoriteInput;
 use MyVendor\BeMart\Be\Input\RemoveFavoriteInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -30,24 +30,16 @@ class Favorite extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     /**
      * @psalm-taint-source input $productCode
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goProduct', href: 'page://self/product')]
-    public function onPost(string $productCode, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onPost(string $productCode): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AddFavoriteInput(productCode: $productCode));
         } catch (SemanticVariableException $e) {
@@ -93,18 +85,11 @@ class Favorite extends ResourceObject
      * a real product — DELETE removes a stored row, not a product.
      *
      * @psalm-taint-source input $productCode
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
-    public function onDelete(string $productCode, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $productCode): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));
         } catch (SemanticVariableException $e) {

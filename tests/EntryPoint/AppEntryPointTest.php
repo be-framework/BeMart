@@ -127,7 +127,32 @@ final class AppEntryPointTest extends TestCase
         if ($databaseUrl === false || $databaseUrl === '') {
             $this->markTestSkipped('DATABASE_URL not set — prod context requires SQL wiring.');
         }
+
+        $parts = \parse_url($databaseUrl);
+        if ($parts === false || ! isset($parts['scheme'], $parts['host'], $parts['user'], $parts['path'])) {
+            $this->markTestSkipped('DATABASE_URL malformed — prod context requires SQL wiring.');
+        }
+
+        $serverDsn = \sprintf(
+            'mysql:host=%s;port=%d;charset=utf8mb4',
+            $parts['host'],
+            $parts['port'] ?? 3306,
+        );
+
+        try {
+            $pdo = new \PDO($serverDsn, $parts['user'], $parts['pass'] ?? '', [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            ]);
+            $version = (string) $pdo->query('SELECT VERSION()')->fetchColumn();
+        } catch (\PDOException $e) {
+            $this->markTestSkipped('DATABASE_URL unreachable — prod context requires SQL wiring: ' . $e->getMessage());
+        }
+
+        if (! \str_contains(\strtolower($version), 'mariadb')) {
+            $this->markTestSkipped('DATABASE_URL is not MariaDB — prod SQL wiring baseline targets MariaDB: ' . $version);
+        }
     }
+
 
     /**
      * @param list<string>          $args
@@ -140,6 +165,11 @@ final class AppEntryPointTest extends TestCase
         $escapedArgs = '';
         foreach ($args as $a) {
             $escapedArgs .= ' ' . escapeshellarg($a);
+        }
+
+        $databaseUrl = getenv('DATABASE_URL');
+        if ($databaseUrl !== false && $databaseUrl !== '' && ! \array_key_exists('DATABASE_URL', $env)) {
+            $env['DATABASE_URL'] = $databaseUrl;
         }
 
         $envPrefix = '';

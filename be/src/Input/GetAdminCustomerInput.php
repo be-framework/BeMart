@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
  * Input for goCustomer — admin views a specific customer's detail page.
  *
  * Direct pattern (hello-world demo): Input → Final, no intermediate
- * Being. The Final injects AdminSessionInterface to refuse non-admin
+ * Being. The Final injects AdminSession to refuse non-admin
  * requests (Wave 4 cross-firewall AUTHZ) and then aggregates the
  * customer's profile + full order history + favorites.
  *

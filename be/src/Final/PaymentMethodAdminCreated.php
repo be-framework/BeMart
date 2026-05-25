@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\PaymentMethodAdminIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -34,16 +34,16 @@ final readonly class PaymentMethodAdminCreated
         #[Input] int|null $ruleMin,
         #[Input] int|null $ruleMax,
         #[Input] bool $visible,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] PaymentMethodAdminStorageInterface $payments,
-        #[Inject] PaymentMethodAdminIdGeneratorInterface $idGenerator,
+        #[Inject] PaymentMethodAdminIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $entity = new PaymentMethodAdminEntity(
-            paymentId: $idGenerator->next()->value,
+            paymentId: $ids->get(),
             paymentMethodName: $paymentMethodName,
             charge: $charge,
             ruleMin: $ruleMin,

@@ -48,7 +48,7 @@ final class CustomerRegisteredTest extends TestCase
         $this->assertSame('次郎', $final->name02);
         $this->assertSame(100, $final->initialPoint);
         $this->assertSame(2, $final->customerStatus);
-        // CustomerIdGenerator produces a 32-char hex id.
+        // CustomerIdProvider produces a 32-char hex id.
         $this->assertMatchesRegularExpression('/\A[0-9a-f]{32}\z/', $final->customerId);
         // FakeQuery fixtures are static; persistence readback is covered by the SQL suite.
     }

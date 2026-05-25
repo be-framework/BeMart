@@ -94,7 +94,7 @@ abstract class AbstractSqlTestCase extends TestCase
     private function mediaQueryTestModule(): AbstractModule
     {
         $pdo = $this->pdo;
-        $sqlDir = dirname(__DIR__, 3) . '/sql/media-query';
+        $sqlDir = dirname(__DIR__, 3) . '/var/sql';
 
         return new class ($pdo, $sqlDir) extends AbstractModule {
             public function __construct(

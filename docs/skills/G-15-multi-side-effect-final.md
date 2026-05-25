@@ -70,7 +70,7 @@ This is **Complex Convergence** in `be-patterns` `loan-application` terms: multi
 //   final class OrderProcessed {
 //       public function __construct(
 //           PaymentGatewayInterface $gateway,
-//           OrderNumberGeneratorInterface $numbers,
+//           OrderNoProvider $numbers,
 //           OrderCommandInterface $orderCommand,
 //       ) {
 //           $auth      = $gateway->capture(...);   // result feeds...

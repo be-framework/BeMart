@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 
 /**
  * EC-CUBE メンテナンス管理 — admin CMS thin renderer (Phase 3 HTML).
@@ -17,7 +17,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
  * the only `form_widget` call is the CSRF `_token` (EC-CUBE-runtime,
  * kept as a render-diff residual). This resource is a THIN HTML RENDERER
  * only — it carries no `be/src/` Becoming chain, authenticating at the
- * resource layer via {@see AdminSessionInterface}. `body['isMaintenance']`
+ * resource layer via {@see AdminSession}. `body['isMaintenance']`
  * drives which toggle button the template shows; it defaults to false
  * (maintenance off — the fresh-install state).
  *
@@ -28,13 +28,13 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 class Maintenance extends ResourceObject
 {
     public function __construct(
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
     ) {
     }
 
     public function onGet(): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 

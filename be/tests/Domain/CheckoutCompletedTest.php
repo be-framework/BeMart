@@ -16,7 +16,7 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentGateway;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -54,7 +54,7 @@ final class CheckoutCompletedTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)->toInstance($this->session);
+                $this->bind(CustomerSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -99,22 +99,22 @@ final class CheckoutCompletedTest extends TestCase
 
     public function testSendsExactlyOneConfirmationMail(): void
     {
-        $before = count($this->mailer->sent());
+        $before = count($this->mailer->sent);
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'aaaa00000000000000000000000000000000aaaa',
         ));
 
-        $this->assertCount($before + 1, $this->mailer->sent());
+        $this->assertCount($before + 1, $this->mailer->sent);
     }
 
     public function testCapturesPaymentExactlyOnceWithCorrectAmount(): void
     {
-        $before = count($this->gateway->captures());
+        $before = count($this->gateway->captures);
         ($this->becoming)(new CheckoutInput(
             preOrderId: 'aaaa00000000000000000000000000000000aaaa',
         ));
 
-        $captures = $this->gateway->captures();
+        $captures = $this->gateway->captures;
         $this->assertCount($before + 1, $captures);
         $last = $captures[count($captures) - 1];
         $this->assertSame('aaaa00000000000000000000000000000000aaaa', $last['preOrderId']);
@@ -175,8 +175,8 @@ final class CheckoutCompletedTest extends TestCase
         // any side effect runs (no payment capture, no mail, no order persist).
         $this->rebindSession('customer-999');
 
-        $beforeCaptures = count($this->gateway->captures());
-        $beforeMails = count($this->mailer->sent());
+        $beforeCaptures = count($this->gateway->captures);
+        $beforeMails = count($this->mailer->sent);
 
         try {
             ($this->becoming)(new CheckoutInput(
@@ -187,8 +187,8 @@ final class CheckoutCompletedTest extends TestCase
             // expected
         }
 
-        $this->assertCount($beforeCaptures, $this->gateway->captures(), 'No payment must be captured on AUTHZ failure.');
-        $this->assertCount($beforeMails, $this->mailer->sent(), 'No mail must be sent on AUTHZ failure.');
+        $this->assertCount($beforeCaptures, $this->gateway->captures, 'No payment must be captured on AUTHZ failure.');
+        $this->assertCount($beforeMails, $this->mailer->sent, 'No mail must be sent on AUTHZ failure.');
     }
 
     public function testAnonymousSessionRejectedWithAuthz(): void

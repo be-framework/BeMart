@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,8 +15,7 @@ use MyVendor\BeMart\Be\Exception\InsufficientAuthorityException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AuthorityRoleUpdated;
 use MyVendor\BeMart\Be\Input\UpdateAuthorityRoleInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 
 use function assert;
 
@@ -58,8 +58,7 @@ class AuthorityRole extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
     ) {
     }
 
@@ -74,7 +73,7 @@ class AuthorityRole extends ResourceObject
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     public function onGet(): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 
@@ -102,22 +101,14 @@ class AuthorityRole extends ResourceObject
      *
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $authority
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
+    #[CsrfProtected]
     public function onPost(
         string $loginId,
         int $authority,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateAuthorityRoleInput(
                 loginId: $loginId,

@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\CategoryIdQueryInterface;
 
 /**
  * Storage-layer coverage for {@see CategoryStorageInterface} (Phase 2b).
@@ -105,7 +105,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
-        // The hex ids from FakeCategoryIdGenerator and seeds like
+        // The hex ids from FakeCategoryIdProvider and seeds like
         // `nonexistent-zzz` can never match an int PK; surface as miss
         // so CategoryUpdated / CategoryDeleted fire their 404 paths
         // instead of a PDO error.
@@ -116,8 +116,8 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRootRowWithProvidedId(): void
     {
-        $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(CategoryIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new CategoryEntity(
             categoryId: $newId,
@@ -147,8 +147,8 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // hierarchy is NOT NULL with no DEFAULT — a root INSERT must
         // write depth 1. The projection never reads it, so probe the
         // raw column directly.
-        $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(CategoryIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
@@ -172,9 +172,9 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         // the cascade of derivation is observable.
         $rootId = $this->insertCategory(['category_name' => 'Food', 'hierarchy' => 1]);
         $storage = $this->sql(CategoryStorageInterface::class);
-        $gen = $this->sql(CategoryIdGeneratorInterface::class);
+        $ids = $this->sql(CategoryIdQueryInterface::class);
 
-        $childId = $gen->next()->value;
+        $childId = $ids->next()->value;
         $storage->put(new CategoryEntity(
             categoryId: $childId,
             categoryName: 'Cookies',
@@ -182,7 +182,7 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
             sortNo: 0,
         ));
 
-        $grandchildId = $gen->next()->value;
+        $grandchildId = $ids->next()->value;
         $storage->put(new CategoryEntity(
             categoryId: $grandchildId,
             categoryName: 'Chocolate',
@@ -222,8 +222,8 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
     {
         // A non-numeric parentId can never reference a real int PK —
         // the storage stores it as NULL (root) rather than raising.
-        $generator = $this->sql(CategoryIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(CategoryIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(CategoryStorageInterface::class);
 
         $storage->put(new CategoryEntity(
@@ -358,16 +358,16 @@ final class SqlCategoryStorageTest extends AbstractSqlTestCase
         $this->assertTrue(true);
     }
 
-    public function testCategoryIdGeneratorAllocatesIncrementingIds(): void
+    public function testCategoryIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(CategoryIdGeneratorInterface::class);
+        $ids = $this->sql(CategoryIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertCategory();
         $secondId = $this->insertCategory();
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

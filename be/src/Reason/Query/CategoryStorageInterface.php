@@ -14,9 +14,9 @@ use Ray\MediaQuery\Annotation\DbQuery;
  * split happens only when the access pattern demands it.
  *
  *   - list(): flat list of every row (UI flattens by sortNo for display)
- *   - getById(categoryId): single-row lookup
+ *   - item(categoryId): single-row lookup
  *   - put(category): upsert — create on first write, replace on update
- *   - remove(categoryId): drop a row (idempotent — silent no-op on miss)
+ *   - delete(categoryId): drop a row (idempotent — silent no-op on miss)
  */
 interface CategoryStorageInterface
 {

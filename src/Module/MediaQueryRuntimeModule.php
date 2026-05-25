@@ -43,19 +43,19 @@ use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassNameIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\PaymentMethodAdminIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
-use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\AddressIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\BlockIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\CategoryIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\ClassCategoryIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\ClassNameIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\DeliveryIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\NewsIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\PageIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\TagIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\TaxRuleIdQueryInterface;
 use Override;
 use Ray\AuraSqlModule\AuraSqlBaseModule;
 use Ray\AuraSqlModule\AuraSqlModule;
@@ -133,19 +133,19 @@ final class MediaQueryRuntimeModule extends AbstractModule
             TaxRuleStorageInterface::class,
             TemplateStorageInterface::class,
             TradeLawStorageInterface::class,
-            AddressIdGeneratorInterface::class,
-            AdminIdGeneratorInterface::class,
-            BlockIdGeneratorInterface::class,
-            CategoryIdGeneratorInterface::class,
-            ClassCategoryIdGeneratorInterface::class,
-            ClassNameIdGeneratorInterface::class,
-            CustomerIdGeneratorInterface::class,
-            DeliveryIdGeneratorInterface::class,
-            NewsIdGeneratorInterface::class,
-            PageIdGeneratorInterface::class,
-            PaymentMethodAdminIdGeneratorInterface::class,
-            TagIdGeneratorInterface::class,
-            TaxRuleIdGeneratorInterface::class,
+            AddressIdQueryInterface::class,
+            AdminIdQueryInterface::class,
+            BlockIdQueryInterface::class,
+            CategoryIdQueryInterface::class,
+            ClassCategoryIdQueryInterface::class,
+            ClassNameIdQueryInterface::class,
+            CustomerIdQueryInterface::class,
+            DeliveryIdQueryInterface::class,
+            NewsIdQueryInterface::class,
+            PageIdQueryInterface::class,
+            PaymentMethodAdminIdQueryInterface::class,
+            TagIdQueryInterface::class,
+            TaxRuleIdQueryInterface::class,
         ];
     }
 }

@@ -70,11 +70,11 @@ final class ProdModuleTest extends TestCase
             unlink($this->logFile);
         }
 
-        // Slice 7: ProdModule binds SessionInterface to EccubeSharedSessionAdapter,
+        // Slice 7: ProdModule binds CustomerSession to EccubeSharedSessionAdapter,
         // which reads $_SESSION['customer_id'].
         $_SESSION['customer_id'] = 'customer-001';
 
-        // Slice 8: ProdModule also binds CsrfTokenInterface to
+        // Slice 8: ProdModule also binds CsrfToken to
         // EccubeSharedCsrfTokenAdapter, which checks `$_SESSION['_csrf_token']`.
         // Mirror a reference token so the prod adapter accepts our submission.
         $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'prod-csrf-mirror';
@@ -162,7 +162,32 @@ final class ProdModuleTest extends TestCase
         if ($databaseUrl === false || $databaseUrl === '') {
             $this->markTestSkipped('DATABASE_URL not set — prod context requires SQL wiring.');
         }
+
+        $parts = \parse_url($databaseUrl);
+        if ($parts === false || ! isset($parts['scheme'], $parts['host'], $parts['user'], $parts['path'])) {
+            $this->markTestSkipped('DATABASE_URL malformed — prod context requires SQL wiring.');
+        }
+
+        $serverDsn = \sprintf(
+            'mysql:host=%s;port=%d;charset=utf8mb4',
+            $parts['host'],
+            $parts['port'] ?? 3306,
+        );
+
+        try {
+            $pdo = new \PDO($serverDsn, $parts['user'], $parts['pass'] ?? '', [
+                \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
+            ]);
+            $version = (string) $pdo->query('SELECT VERSION()')->fetchColumn();
+        } catch (\PDOException $e) {
+            $this->markTestSkipped('DATABASE_URL unreachable — prod context requires SQL wiring: ' . $e->getMessage());
+        }
+
+        if (! \str_contains(\strtolower($version), 'mariadb')) {
+            $this->markTestSkipped('DATABASE_URL is not MariaDB — prod SQL wiring baseline targets MariaDB: ' . $version);
+        }
     }
+
 
     protected function tearDown(): void
     {

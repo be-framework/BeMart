@@ -39,5 +39,5 @@ interface CustomerCommandInterface
      * Final's job, persistence is this command's job.
      */
     #[DbQuery('customer_update_password')]
-    public function password(string $customerId, string $passwordHash): void;
+    public function updatePassword(string $customerId, string $passwordHash): void;
 }

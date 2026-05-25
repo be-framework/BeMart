@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\PaymentMethodAdminNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -43,10 +43,10 @@ final readonly class PaymentMethodAdminUpdated
         #[Input] int|null $ruleMin,
         #[Input] int|null $ruleMax,
         #[Input] bool|null $visible,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] PaymentMethodAdminStorageInterface $payments,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

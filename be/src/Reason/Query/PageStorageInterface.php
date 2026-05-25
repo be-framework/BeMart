@@ -13,9 +13,9 @@ use Ray\MediaQuery\Annotation\DbQuery;
  * convention).
  *
  *   - list(): flat list of every row (UI orders by pageId for display)
- *   - getById(pageId): single-row lookup
+ *   - item(pageId): single-row lookup
  *   - put(page): upsert — create on first write, replace on update
- *   - remove(pageId): drop a row (idempotent — silent no-op on miss)
+ *   - delete(pageId): drop a row (idempotent — silent no-op on miss)
  */
 interface PageStorageInterface
 {

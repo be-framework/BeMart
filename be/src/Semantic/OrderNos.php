@@ -16,7 +16,7 @@ use function trim;
  *
  * Plural counterpart of {@see OrderNo} used by the bulk-delete
  * transition. Each element must be a non-empty string (the OrderNo
- * Semantic is intentionally lax — generators are the contract — so
+ * Semantic is intentionally lax — providers are the contract — so
  * we mirror that here). The list itself must be non-empty and capped
  * at 100 elements (an admin operator should not be cancelling more
  * than a page's worth of orders in one request).

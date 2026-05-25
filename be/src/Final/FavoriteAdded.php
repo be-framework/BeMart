@@ -10,7 +10,7 @@ use MyVendor\BeMart\Be\Reason\Entity\FavoriteEntity;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -35,11 +35,11 @@ final readonly class FavoriteAdded
 
     public function __construct(
         #[Input] string $productCode,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] ProductQueryInterface $productQuery,
         #[Inject] FavoriteStorageInterface $favorites,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }
@@ -49,7 +49,7 @@ final readonly class FavoriteAdded
             throw new ProductNotFoundException();
         }
 
-        $this->alreadyExisted = $favorites->has($sessionCustomerId, $productCode)->exists;
+        $this->alreadyExisted = $favorites->exists($sessionCustomerId, $productCode)->exists;
         if (! $this->alreadyExisted) {
             $favorites->add(new FavoriteEntity(
                 customerId: $sessionCustomerId,

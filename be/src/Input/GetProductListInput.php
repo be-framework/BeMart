@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Final\ProductListFetched;
  *   GetProductListInput → ProductListFetched  (Direct, safe read)
  *
  * Admin-only endpoint. AUTHN/AUTHZ live in the Final via Wave 4
- * AdminSessionInterface (null admin session → 403). The customer-
+ * AdminSession (null admin session → 403). The customer-
  * facing product list (when it lands) will be a sibling Input.
  *
  * Filter scope (Wave 8 first iteration):

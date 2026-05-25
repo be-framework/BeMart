@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -24,13 +24,13 @@ use function str_contains;
  * assertions, same AUTHN / CSRF branches. The only differences are:
  *
  *  - the storage binding (ClassNameStorageInterface →
- *    SqlClassNameStorage) and id generator
- *    (ClassNameIdGeneratorInterface → direct MediaQuery class-name id proxy) are
+ *    SqlClassNameStorage) and id query
+ *    (ClassNameIdQueryInterface → direct MediaQuery class-name id proxy) are
  *    layered via the base class's sqlOverrideModule; persistence is
  *    against the real dtb_class_name table.
  *
  *  - classNameIds are numeric strings drawn from dtb_class_name.id, not
- *    the 32-char hex the FakeClassNameIdGenerator emits. Both suites
+ *    the 32-char hex the FakeClassNameIdProvider emits. Both suites
  *    assert "the response carries a classNameId" but only the Fake side
  *    ever observes a hex handle — SqlClassNameStorage rejects a
  *    non-numeric id as a miss on lookup (the same 404 path as any
@@ -68,7 +68,7 @@ final class AdminClassNameResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

@@ -34,7 +34,7 @@ class UnsupportedRoute extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'routeName' => $routeName,
-            'message' => 'この管理画面ルートは未実装です。',
+            'message' => 'この管理画面ルートは現在利用できません。',
         ];
 
         return $this;
@@ -54,7 +54,7 @@ class UnsupportedRoute extends ResourceObject
         $this->headers['Location'] = $this->safeReturnTo($returnTo);
         $this->body = [
             'routeName' => $routeName,
-            'message' => 'この管理画面操作は未実装のため何も変更していません。',
+            'message' => 'この管理画面操作は現在利用できないため何も変更していません。',
         ];
 
         return $this;
