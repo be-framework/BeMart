@@ -11,7 +11,9 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Final\ProductFetched;
 use MyVendor\BeMart\Be\Input\GetProductInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AddCartForm;
+use MyVendor\BeMart\Support\ProductImageCatalog;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
@@ -44,6 +46,7 @@ class Product extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -83,11 +86,20 @@ class Product extends ResourceObject
             // body has the raw `stock` count; `stockFind` is the derived
             // purchasable flag (null stock = 在庫無制限 -> always true).
             'stockFind' => $final->stock === null || $final->stock > 0,
+            'description' => $final->description,
+            'categoryNames' => $final->categoryNames,
+            'tagNames' => $final->tagNames,
+            'classNames' => $final->classNames,
+            'mainImage' => $final->imagePath ?? ProductImageCatalog::forProductCode($final->productCode),
             // Phase 3: the add-to-cart form. EC-CUBE renders the add-cart
             // quantity input through `AddCartType`; BeMart renders it
             // through this AddCartForm. The hidden `product_id` is seeded
             // with the product code. JSON contexts ignore `form`.
             'form' => $this->addCartForm($final->productCode),
+            // CSRF reference for the add-to-cart POST: the HTML port
+            // renders it into the form's hidden `_token` input so the
+            // POST to `page://self/cart/item` passes CSRF validation.
+            'csrfToken' => $this->csrf->getToken(),
         ];
 
         return $this;

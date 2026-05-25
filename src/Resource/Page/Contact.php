@@ -44,9 +44,10 @@ class Contact extends ResourceObject
      *
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
-     * state). `csrfToken` body field stays `null` for the same reason
-     * described on Login::onGet — EventListener mirrors the Symfony
-     * token into the session for the subsequent POST.
+     * state). `csrfToken` carries the trusted reference
+     * {@see CsrfTokenInterface::getToken()} issues — the HTML port
+     * renders it into the form's hidden `_token` input so the
+     * subsequent POST passes CSRF validation.
      */
     #[Link(rel: 'doSubmitContact', href: 'page://self/contact', method: 'post')]
     public function onGet(): static
@@ -65,7 +66,7 @@ class Contact extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->getToken(),
             // Phase 3: an empty ContactForm for the HTML port to render
             // via `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ContactForm::class),
@@ -122,7 +123,14 @@ class Contact extends ResourceObject
 
         assert($final instanceof ContactSubmitted);
 
-        $this->code = Code::CREATED;
+        // Post/Redirect/Get: a successful submit redirects to the
+        // completion page. The resource returns `Code::OK` + a `Location`
+        // header (mirrors Admin\Login::onPost) — the HTTP layer turns
+        // that into a browser redirect, while JSON clients still read the
+        // projected body. Rendering Contact.html.twig against this body
+        // is never attempted: the redirect supersedes it.
+        $this->code = Code::OK;
+        $this->headers['Location'] = '/contact/complete';
         $this->body = [
             'contactName01' => $final->contactName01,
             'contactName02' => $final->contactName02,

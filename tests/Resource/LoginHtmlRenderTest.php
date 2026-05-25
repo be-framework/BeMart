@@ -182,10 +182,12 @@ final class LoginHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="login_email"', $html);
         $this->assertStringContainsString('ime-mode: disabled;', $html);
         $this->assertStringContainsString('placeholder="メールアドレス"', $html);
+        $this->assertStringContainsString('value="login-test@example.com"', $html);
         // login_pass — password input.
         $this->assertStringContainsString('id="login_pass"', $html);
         $this->assertStringContainsString('type="password"', $html);
         $this->assertStringContainsString('placeholder="パスワード"', $html);
+        $this->assertStringContainsString('value="login-test-password-2026"', $html);
     }
 
     /**
@@ -221,14 +223,10 @@ final class LoginHtmlRenderTest extends TestCase
 
         // With the form inputs rendered by a real LoginForm on both
         // sides, the residual is purely the shared <head> frame material
-        // + the empty CSRF hidden value — no form-widget residual at all.
-        // Wave 1 was 15; this rework drops it to <= 12.
-        // With the form inputs rendered by a real LoginForm on both
-        // sides, the residual is purely the shared <head> frame material
-        // + the empty CSRF hidden value — no form-widget residual at all.
-        // Wave 1 was 15; this rework drops it to 11.
+        // + the CSRF hidden value — no form-widget residual at all.
+        // Wave 1 was 15; this rework keeps it at 13 with the live token.
         $this->assertLessThanOrEqual(
-            12,
+            13,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -246,6 +244,7 @@ final class LoginHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
+            'name="_csrf_token"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -339,13 +338,8 @@ final class LoginHtmlRenderTest extends TestCase
 
         $twig->addFunction(new TwigFunction('trans', $trans));
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p): string => '/' . $p));
-        $twig->addFunction(new TwigFunction('url', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
-        $twig->addFunction(new TwigFunction('path', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
+        EcCubeAssetStub::register($twig);
+        EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
@@ -363,6 +357,12 @@ final class LoginHtmlRenderTest extends TestCase
         // pre-escaped Markup, and BeMart's port renders the input with
         // `|raw`. Both sides therefore emit identical, unescaped markup.
         $loginForm = (new FormFactory())->newInstance(LoginForm::class);
+        if ($loginForm instanceof LoginForm) {
+            $loginForm->fillValues([
+                'login_email' => 'login-test@example.com',
+                'login_pass' => 'login-test-password-2026',
+            ]);
+        }
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($loginForm): Markup {
             if ($loginForm instanceof LoginForm && \is_string($field) && $field !== '') {
                 return new Markup($loginForm->input($field), 'UTF-8');

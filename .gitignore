@@ -2,8 +2,15 @@
 /.phpunit.cache/
 /var/log/*.json
 /var/tmp/
+/tests/Http/log/*.log
 .DS_Store
 /.claude/worktrees/
+
+# Malt local runtime state
+/malt/logs/
+/malt/tmp/
+/malt/var/
+/malt/conf/*.tmp
 
 # EC-CUBE source clone for schema extraction (Phase 2a)
 /tools/ec-cube-source/

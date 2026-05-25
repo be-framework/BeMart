@@ -49,4 +49,15 @@ final class FakeCsrfToken implements CsrfTokenInterface
 
         return hash_equals($this->referenceToken, $token);
     }
+
+    /**
+     * Returns the fixed reference token. An HTML form page renders this
+     * into its hidden CSRF input; the form POST then echoes it back and
+     * {@see isValid()} accepts it.
+     */
+    #[Override]
+    public function getToken(): string
+    {
+        return $this->referenceToken;
+    }
 }

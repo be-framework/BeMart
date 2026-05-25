@@ -5,9 +5,13 @@
     "price02": 1200,
     "stock": 50,
     "productStatus": 1,
-    "description": "Pilot 1 happy-path fixture",
+    "description": null,
     "searchWord": null,
-    "note": null
+    "note": null,
+    "imagePath": null,
+    "categoryNames": [],
+    "tagNames": [],
+    "classNames": []
   },
   {
     "productCode": "sample-002",
@@ -17,7 +21,17 @@
     "productStatus": 1,
     "description": "Stock-unlimited fixture",
     "searchWord": null,
-    "note": null
+    "note": null,
+    "imagePath": "assets/img/top/img_item01_02.jpg",
+    "categoryNames": [
+      "雑貨"
+    ],
+    "tagNames": [
+      "送料無料"
+    ],
+    "classNames": [
+      "通常"
+    ]
   },
   {
     "productCode": "admin-active-001",
@@ -27,7 +41,18 @@
     "productStatus": 1,
     "description": "Wave 8 admin grid: visible row",
     "searchWord": "管理 active",
-    "note": "internal note A"
+    "note": "internal note A",
+    "imagePath": "assets/img/top/img_item02_01.jpg",
+    "categoryNames": [
+      "管理商品",
+      "公開"
+    ],
+    "tagNames": [
+      "管理"
+    ],
+    "classNames": [
+      "通常"
+    ]
   },
   {
     "productCode": "admin-hidden-001",
@@ -37,7 +62,18 @@
     "productStatus": 2,
     "description": "Wave 8 admin grid: hidden row",
     "searchWord": "管理 hidden",
-    "note": "internal note B"
+    "note": "internal note B",
+    "imagePath": "assets/img/top/img_item02_02.jpg",
+    "categoryNames": [
+      "管理商品",
+      "非公開"
+    ],
+    "tagNames": [
+      "管理"
+    ],
+    "classNames": [
+      "通常"
+    ]
   },
   {
     "productCode": "admin-withdrawn-001",
@@ -47,6 +83,62 @@
     "productStatus": 3,
     "description": "Wave 8 admin grid: withdrawn row",
     "searchWord": "管理 withdrawn",
-    "note": "internal note C"
+    "note": "internal note C",
+    "imagePath": "assets/img/top/img_item02_03.jpg",
+    "categoryNames": [
+      "管理商品",
+      "廃止"
+    ],
+    "tagNames": [
+      "管理"
+    ],
+    "classNames": [
+      "通常"
+    ]
+  },
+  {
+    "productCode": "api-persist-20260522-001",
+    "productName": "彩のジェラートセット",
+    "price02": 2980,
+    "stock": 7,
+    "productStatus": 1,
+    "description": "管理画面から名称変更した、彩り豊かなジェラートセットです。",
+    "searchWord": "ジェラート ギフト 彩 api",
+    "note": "管理画面名称変更 smoke 2026-05-23",
+    "imagePath": "assets/img/top/img_item01_01.jpg",
+    "categoryNames": [
+      "新入荷",
+      "ジェラート",
+      "スイーツ",
+      "ギフト"
+    ],
+    "tagNames": [
+      "冷凍",
+      "ギフト"
+    ],
+    "classNames": [
+      "通常"
+    ]
+  },
+  {
+    "productCode": "ui-create-20260522-001",
+    "productName": "UI商品登録テスト",
+    "price02": 1980,
+    "stock": 5,
+    "productStatus": 1,
+    "description": "管理画面から作成した商品",
+    "searchWord": "ui create",
+    "note": "Codex smoke",
+    "imagePath": "assets/img/top/img_item02_01.jpg",
+    "categoryNames": [
+      "管理商品",
+      "テスト"
+    ],
+    "tagNames": [
+      "UI登録"
+    ],
+    "classNames": [
+      "通常"
+    ]
   }
 ]

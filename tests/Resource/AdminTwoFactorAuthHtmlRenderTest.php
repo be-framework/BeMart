@@ -198,13 +198,8 @@ final class AdminTwoFactorAuthHtmlRenderTest extends TestCase
         $twig->addFilter(new TwigFilter('trans', $trans));
 
         $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p, string ...$rest): string => '/' . $p));
-        $twig->addFunction(new TwigFunction('url', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
-        $twig->addFunction(new TwigFunction('path', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
+        EcCubeAssetStub::register($twig);
+        EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
 
         $formFields = ['device_token', 'auth_key'];

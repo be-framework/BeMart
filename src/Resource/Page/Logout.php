@@ -9,11 +9,16 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Be\Final\LoggedOut;
 use MyVendor\BeMart\Be\Input\LogoutInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
+use function getenv;
+use function session_status;
+
+use const PHP_SESSION_ACTIVE;
 
 /**
  * EC-CUBE doLogout — 会員ログアウト (Pilot — Direct, idempotent).
@@ -36,12 +41,10 @@ use function assert;
  * carries `wasLoggedIn=false`. The resource MUST NOT treat the absence
  * of a session as an error.
  *
- * Session-clear deliberately out of scope: the Slice 7.2 contract
- * places HTTP session teardown on the EC-CUBE EventListener, which
- * observes this response and clears `$_SESSION['customer_id']`. This
- * mirrors Pilot 6 (doLogin) where the same EventListener performs the
- * session-write. Cart contents — kept in the same session by EC-CUBE —
- * are cleared as a side-effect of that session destruction.
+ * In the html context this resource clears the flat customer session key
+ * read by HtmlSessionAdapter. The clear is guarded by APP_CONTEXT=html
+ * and PHP_SESSION_ACTIVE so app/test/prod contexts keep their existing
+ * session behaviour.
  */
 class Logout extends ResourceObject
 {
@@ -77,7 +80,14 @@ class Logout extends ResourceObject
 
         assert($final instanceof LoggedOut);
 
+        if (getenv('APP_CONTEXT') === 'html' && session_status() === PHP_SESSION_ACTIVE) {
+            unset($_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY]);
+        }
+
+        // Post/Redirect/Get: EC-CUBE's doLogout redirects to the storefront
+        // top page (the `goTop` transition declared above).
         $this->code = Code::OK;
+        $this->headers['Location'] = '/';
         $this->body = [
             'wasLoggedIn' => $final->wasLoggedIn,
             'customerId' => $final->customerId,

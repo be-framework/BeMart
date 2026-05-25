@@ -200,7 +200,7 @@ all 13 files; **the wave handles 11 routable pages**). Need-new: `calendar`. `pa
 | `Store/plugin_confirm_uninstall.twig` | data (0) | needs new | simple | 61L; uninstall-confirm; includes `plugin_confirm_uninstall_panel.twig` (partial) |
 | `Store/authentication_setting.twig` | form (2) | needs new | simple | 207L; EC-CUBE.co auth-key config |
 | `Store/template.twig` | form (2) | `Template/TemplateList.php` exists | medium | 131L; template list + select/delete |
-| `Store/template_add.twig` | form (4) | needs onGet (no `Template/Add`) | simple | 98L; template upload form |
+| `Store/template_add.twig` | form (4) | `Template/TemplateAdd.php` exists | simple | 98L; template upload form — ported in Tier-2 pilot |
 | `Store/plugin_table.twig` | *(partial)* | n/a | — | fragment of plugin.twig — section 3 |
 | `Store/plugin_table_official.twig` | *(partial)* | n/a | — | fragment — section 3 |
 | `Store/unregisterd_plugin_table.twig` | *(partial)* | n/a | — | fragment — section 3 |
@@ -365,7 +365,7 @@ shared `pager.twig`, handled in Wave 0).
 - Effort: **medium** on the HTML side but **resource-heavy**: 9 of these have no
   BEAR resource (`plugin_handler`, `plugin_search`, `plugin_confirm`,
   `plugin_confirm_uninstall`, `authentication_setting` need new; `template_add`
-  needs onGet). Best assigned to an agent comfortable scaffolding thin renderers.
+  is now ported). Best assigned to an agent comfortable scaffolding thin renderers.
 - Cross-wave dep: `pager.twig` (Wave 0) for `plugin_search`.
 
 ### Wave 7 — top-level (6 pages)

@@ -35,19 +35,25 @@ use function trim;
  * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
  * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
  *
- * SCOPE — the Products resource is a Phase 3 pure renderer (the same
- * shape as Index): it declares the hypermedia surface and an EMPTY
- * product list. A faithful product LISTING needs a real catalog query
- * (filter + pagination) — a vertical slice (Entity + SQL) out of scope
- * for this template-porting wave. So this test renders the
- * `totalItemCount > 0` ELSE branch of EC-CUBE's `Product/list.twig`:
- * the search-nav skeleton + topicpath + the "お探しの商品は見つかりませんでした"
- * empty-result counter. The populated `ec-shelfGrid` branch, the
- * `eccube.productsClassCategories` JS payload and the add-cart modal
- * are all behind `if pagination.totalItemCount > 0` in EC-CUBE's
- * template; with an empty list neither side emits them, so they
- * contribute nothing to the diff. The populated-list branch is flagged
- * for a follow-up ProductList vertical-slice enrichment.
+ * SCOPE — the Products resource is now backed by the storefront catalog
+ * query (`GetStorefrontProductListInput` → `StorefrontProductListFetched`):
+ * it projects every STATUS_VISIBLE product as `{id, name, price02}`. So
+ * this test renders the POPULATED `ec-shelfGrid` branch of EC-CUBE's
+ * `Product/list.twig`, feeding BOTH sides the same three visible
+ * products the Fake corpus carries (`sample-001`, `sample-002`,
+ * `admin-active-001`).
+ *
+ * The BeMart catalog row is a deliberately SIMPLIFIED port (厳密移植
+ * Grade-C, parity with the Cart row): bare name + a single `price02` +
+ * the `product_detail` link + the placeholder thumbnail. EC-CUBE's row
+ * additionally renders a per-item add-cart `<form>` (ProductClass
+ * selects + quantity), an `.ec-modal` add-cart dialog, the
+ * `disp_number` / `orderby` sort controls and an `.ec-pagerRole` pager —
+ * all needing data the resource body does not carry (a ProductClass
+ * join, a Symfony FormView, pagination metadata). Those EC-CUBE-only
+ * features are the enumerated residuals in {@see RESIDUAL_ALLOWLIST} /
+ * {@see isResidual()}; category / keyword filtering + pagination are
+ * deferred to Phase 2.
  */
 final class ProductsHtmlRenderTest extends TestCase
 {
@@ -59,19 +65,30 @@ final class ProductsHtmlRenderTest extends TestCase
      * @var list<string>
      */
     private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
+        // --- frame: EC-CUBE-runtime-only <head> nodes -------------------
+        // EC-CUBE's default_frame.twig wires a live CSRF token into a
+        // jQuery `$.ajaxSetup` default header. BeMart's html context has
+        // no per-request CSRF widget, so the ported base.html.twig omits
+        // the meta and the wiring script. EC-CUBE-runtime only.
         '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
         '$.ajaxSetup({',
         "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
+        // EC-CUBE's <title> is "<shop_name> / <page title>"; BeMart's
+        // html context has no BaseInfo, so the shop name differs.
         '<title>BeMart / 商品一覧</title>',
         '<title>EC-CUBE / 商品一覧</title>',
         '<meta name="author" content="">',
+
+        // --- catalog row: simplified-port omissions (Grade-C) -----------
+        // EC-CUBE's `list.twig` add-cart <form> closes with a bare
+        // </button> and the 「カートに入れる」 label; BeMart's storefront
+        // grid carries no per-item add-cart UI (see the families in
+        // isResidual()), so these two trailing lines have no counterpart.
+        '</button>',
+        'カートに入れる',
+        // The add-cart modal's inner role wrapper — `ec-modal` /
+        // `ec-inlineBtn` cover the rest of the dialog (see isResidual()).
+        '<div class="ec-role">',
     ];
 
     private ResourceInterface $resource;
@@ -115,7 +132,14 @@ final class ProductsHtmlRenderTest extends TestCase
             'class="ec-topicpath__item"',
             'class="ec-searchnavRole__infos"',
             'class="ec-searchnavRole__counter"',
-            'お探しの商品は見つかりませんでした',
+            // Populated branch — the storefront catalog query projects
+            // three STATUS_VISIBLE products.
+            'の商品が見つかりました',
+            '<div class="ec-shelfRole">',
+            '<ul class="ec-shelfGrid">',
+            '<li class="ec-shelfGrid__item">',
+            'class="ec-shelfGrid__item-image"',
+            'class="price02-default"',
         ] as $needle) {
             $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
         }
@@ -152,10 +176,14 @@ final class ProductsHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
-        // Empty-result branch: the residual is the shared EC-CUBE-runtime
-        // <head> material only.
+        // Populated branch: the residual is the EC-CUBE-runtime <head>
+        // material plus the Grade-C catalog-row omissions (the per-item
+        // add-cart <form>, the add-cart modal, the sort controls and the
+        // pager — see isResidual()). The add-cart <form> repeats once per
+        // visible product, so the line count scales with the three-row
+        // fixture; if it balloons past this the port has drifted.
         $this->assertLessThan(
-            14,
+            48,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -170,9 +198,27 @@ final class ProductsHtmlRenderTest extends TestCase
         }
 
         foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
+            // --- frame: EC-CUBE-runtime-only artefacts ------------------
+            'eccube-csrf-token',                     // <head> CSRF meta
+            '<title>',                               // shop-title composition
+            'meta name="author"',                    // meta.twig include
+
+            // --- catalog row: simplified-port omissions (Grade-C) -------
+            // EC-CUBE's `list.twig` row carries a per-item add-cart UI,
+            // an add-cart modal, sort controls and a pager. BeMart's
+            // storefront grid is a Grade-C port — name + single price02 +
+            // product-detail link only — so the resource body carries no
+            // ProductClass join, no Symfony FormView and no pagination
+            // metadata. Each family below is one EC-CUBE-only feature.
+            'ec-searchnavRole__actions',             // disp_number / orderby wrapper
+            'ec-select',                             // sort-control <select> wrapper
+            '[form_widget:',                         // stubbed Symfony FormView widget
+            'productForm',                           // per-item add-cart <form> + button
+            'ec-productRole',                        // add-cart form actions / button wrappers
+            'ec-numberInput',                        // add-cart quantity input
+            'ec-modal',                              // add-cart completion modal
+            'ec-inlineBtn',                          // modal continue / go-to-cart buttons
+            'ec-pagerRole',                          // pagination pager
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -183,10 +229,54 @@ final class ProductsHtmlRenderTest extends TestCase
     }
 
     /**
+     * The same three STATUS_VISIBLE products the storefront catalog query
+     * ({@see \MyVendor\BeMart\Be\Final\StorefrontProductListFetched})
+     * projects from the Fake corpus (`be/var/fake/products.json`):
+     * `sample-001`, `sample-002`, `admin-active-001`. Each carries the
+     * `{id, name, price02}` projection BeMart's resource body exposes;
+     * EC-CUBE's `list.twig` reads `getPrice02IncTaxMin` for the
+     * single-price (non-ProductClass) row, so it is set to the same
+     * `price02` value the port renders.
+     *
+     * @return list<EcCubeStub>
+     */
+    private static function visibleProductRows(): array
+    {
+        $rows = [
+            ['id' => 'sample-001', 'name' => 'サンプル商品 A', 'price02' => 1200],
+            ['id' => 'sample-002', 'name' => 'Sample Product B', 'price02' => 9800],
+            ['id' => 'admin-active-001', 'name' => '管理画面用 商品A', 'price02' => 3500],
+        ];
+
+        $products = [];
+        foreach ($rows as $row) {
+            $products[] = new EcCubeStub([
+                'id' => $row['id'],
+                'name' => $row['name'],
+                // No product imagery in the BeMart body → both sides fall
+                // back to the shared no_image placeholder.
+                'main_list_image' => null,
+                // No catalog description / ProductClass join in the body:
+                // the description <p> is skipped and the single price02
+                // renders (not a min–max range).
+                'description_list' => null,
+                'hasProductClass' => false,
+                'getPrice02Min' => $row['price02'],
+                'getPrice02Max' => $row['price02'],
+                'getPrice02IncTaxMin' => $row['price02'],
+                'getPrice02IncTaxMax' => $row['price02'],
+                'stock_find' => true,
+            ]);
+        }
+
+        return $products;
+    }
+
+    /**
      * Render EC-CUBE 4.3's real Product/list.twig + default_frame.twig
      * from the gitignored clone, with EC-CUBE's Twig API stubbed. The
-     * pagination is empty — the same logical (empty) result set as the
-     * Products pure renderer.
+     * pagination carries the same three visible products the storefront
+     * catalog query projects — the populated `ec-shelfGrid` branch.
      */
     private function renderEcCubeProductList(): string
     {
@@ -202,22 +292,27 @@ final class ProductsHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
+        $products = self::visibleProductRows();
+
         return $twig->render('Product/list.twig', [
-            // Empty result: totalItemCount 0, no product rows. EC-CUBE
-            // iterates `pagination` itself for products and `search_form`
-            // itself for hidden inputs — both iterate ZERO items here
-            // (explicit empty iteration set), while their `.totalItemCount`
-            // / `.category_id` properties stay readable. category_id has
-            // no errors, so the normal (else) branch renders.
+            // Populated result: totalItemCount 3, three product rows.
+            // EC-CUBE iterates `pagination` itself for the product grid
+            // (explicit iteration set) while its `.totalItemCount` /
+            // `.paginationData` properties stay readable; `search_form`
+            // iterates ZERO hidden inputs (BeMart's body carries no search
+            // form). category_id has no errors, so the normal (else)
+            // branch renders.
             'pagination' => new EcCubeStub([
-                'totalItemCount' => 0,
+                'totalItemCount' => 3,
                 'paginationData' => [],
-            ], []),
+            ], $products),
             'search_form' => new EcCubeStub([
                 'category_id' => new EcCubeStub([
                     'vars' => new EcCubeStub(['errors' => []]),
                 ]),
                 'vars' => new EcCubeStub(['value' => null]),
+                'disp_number' => null,
+                'orderby' => null,
             ], []),
             'Category' => null,
             'forms' => [],
@@ -270,13 +365,8 @@ final class ProductsHtmlRenderTest extends TestCase
 
         $twig->addFunction(new TwigFunction('trans', $trans));
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p): string => '/' . $p));
-        $twig->addFunction(new TwigFunction('url', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
-        $twig->addFunction(new TwigFunction('path', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
+        EcCubeAssetStub::register($twig);
+        EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));

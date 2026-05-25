@@ -1,0 +1,110 @@
+{#
+  BeMart admin product create page.
+
+  First-slice EC-CUBE Product/product.twig port: the full EC-CUBE edit
+  screen has product images/categories/classes/tax/product-class joins
+  that BeMart does not yet expose. This form connects only the already
+  implemented AdminCreateProductInput fields, so the browser can create
+  products without inventing missing data.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_product_product_new' %}
+{% set title = '商品登録' %}
+{% set sub_title = '商品管理' %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <form method="post" action="{{ url('admin_product_product_new') }}" id="admin_product_form">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">基本情報</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label required" for="productCode">商品コード</label>
+                                <div class="col">
+                                    <input class="form-control" type="text" id="productCode" name="productCode" required maxlength="64" autocomplete="off">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label required" for="productName">商品名</label>
+                                <div class="col">
+                                    <input class="form-control" type="text" id="productName" name="productName" required maxlength="255">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label required" for="price02">販売価格</label>
+                                <div class="col">
+                                    <input class="form-control" type="number" id="price02" name="price02" required min="0" step="1">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label" for="stock">在庫数</label>
+                                <div class="col">
+                                    <input class="form-control" type="number" id="stock" name="stock" min="0" step="1" placeholder="空欄で無制限">
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label" for="productStatus">公開状態</label>
+                                <div class="col">
+                                    <select class="form-select" id="productStatus" name="productStatus">
+                                        {% for value, label in productStatusOptions %}
+                                            <option value="{{ value }}" {{ value == 1 ? 'selected' : '' }}>{{ label }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">説明・管理情報</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label" for="description">説明</label>
+                                <div class="col">
+                                    <textarea class="form-control" id="description" name="description" rows="5"></textarea>
+                                </div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label" for="searchWord">検索ワード</label>
+                                <div class="col">
+                                    <input class="form-control" type="text" id="searchWord" name="searchWord">
+                                </div>
+                            </div>
+                            <div class="row mb-0">
+                                <label class="col-3 col-form-label" for="note">管理メモ</label>
+                                <div class="col">
+                                    <textarea class="form-control" id="note" name="note" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="c-conversionArea">
+                        <div class="c-conversionArea__container">
+                            <div class="row justify-content-between align-items-center">
+                                <div class="col-6">
+                                    <a class="c-baseLink" href="{{ url('admin_product') }}">
+                                        <i class="fa fa-backward" aria-hidden="true"></i>
+                                        <span>商品一覧</span>
+                                    </a>
+                                </div>
+                                <div class="col-6 text-end">
+                                    <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

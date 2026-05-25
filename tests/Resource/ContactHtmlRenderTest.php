@@ -86,11 +86,6 @@ final class ContactHtmlRenderTest extends TestCase
         '<title>BeMart / お問い合わせ</title>',
         '<title>EC-CUBE / お問い合わせ</title>',
         '<meta name="author" content="">',
-
-        // --- contact form: CSRF hidden input ----------------------------
-        // EC-CUBE's hidden _token carries a live form CSRF token; BeMart's
-        // html context has no CSRF widget, so the value is empty.
-        '<input type="hidden" name="_token" value="">',
     ];
 
     /**
@@ -218,15 +213,17 @@ final class ContactHtmlRenderTest extends TestCase
         );
 
         // With the modelled form inputs rendered by a real ContactForm on
-        // both sides, wave-1's 46-line residual collapses to 23 — ALL
+        // both sides, wave-1's 46-line residual collapses to ~25 — ALL
         // explained: 13 shared <head>/<title>/CSRF frame lines + 10
         // distinct EC-CUBE-only kana/address/phone missing-body-field
-        // lines (some collapse-equal across the three rows). The
+        // lines (some collapse-equal across the three rows) + the 2
+        // hidden-CSRF-input lines (EC-CUBE's empty `_token` vs BeMart's
+        // CsrfTokenInterface reference — the values never match). The
         // form-widget residual family is eliminated; what remains is the
         // frame + the genuinely-missing fields, which are flagged for a
         // follow-up vertical slice (not fixed in a template wave).
         $this->assertLessThanOrEqual(
-            24,
+            26,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -246,6 +243,11 @@ final class ContactHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
+            // The hidden CSRF input: EC-CUBE renders a live per-request
+            // form `_token`, BeMart renders the CsrfTokenInterface
+            // reference. The token VALUE can never match across the two
+            // runtimes — residual by its `_token` field name.
+            'name="_token"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -346,13 +348,8 @@ final class ContactHtmlRenderTest extends TestCase
 
         $twig->addFunction(new TwigFunction('trans', $trans));
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p): string => '/' . $p));
-        $twig->addFunction(new TwigFunction('url', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
-        $twig->addFunction(new TwigFunction('path', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
+        EcCubeAssetStub::register($twig);
+        EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));

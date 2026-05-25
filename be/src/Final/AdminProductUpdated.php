@@ -90,6 +90,10 @@ final readonly class AdminProductUpdated
             description: $description ?? $current->description,
             searchWord: $searchWord ?? $current->searchWord,
             note: $note ?? $current->note,
+            imagePath: $current->imagePath,
+            categoryNames: $current->categoryNames,
+            tagNames: $current->tagNames,
+            classNames: $current->classNames,
         );
 
         $productCommand->update($merged);

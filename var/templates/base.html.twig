@@ -26,14 +26,11 @@
      configurable layout blocks. A default EC-CUBE install wires a fixed
      set of Block widgets into the HEADER / FOOTER / DRAWER regions
      (dtb_block_position.csv). BeMart has no operator-configurable block
-     system, but the widgets that render PURELY STATIC markup (logo,
-     footer) are ported as Twig partials under var/templates/Block/ and
-     included directly here. The widgets that need un-modelled domain
-     data (cart contents, category tree, auth state) — header / cart /
-     login / category_nav / search_product — are NOT ported: ALPS does
-     not model Block, and the storefront frame carries no data channel
-     to source them. Those regions stay empty and are enumerated as
-     residual. See var/templates/Block/ and var/templates/README.md.
+     system, but static first-slice Block widgets are ported under
+     var/templates/Block/ and included directly here. Dynamic data is not
+     invented: login renders the anonymous branch, cart renders an empty
+     total, and category navigation exposes the key 商品一覧 link until
+     category/cart/auth body enrichment lands.
 #}
 <!doctype html>
 <html lang="ja">
@@ -53,10 +50,11 @@
 
 <div class="ec-layoutRole">
     {# Layout: HEADER — default EC-CUBE wires header / logo / category_nav_pc
-       here; only the static `logo` widget is ported (the others need
-       un-modelled data). #}
+       here. #}
     <header class="ec-layoutRole__header">
+        {{ include('Block/header.html.twig') }}
         {{ include('Block/logo.html.twig') }}
+        {{ include('Block/category_nav_pc.html.twig') }}
     </header>
 
     <div class="ec-layoutRole__contents">
@@ -80,10 +78,13 @@
 <div class="ec-overlayRole"></div>
 <div class="ec-drawerRoleClose"><i class="fas fa-times"></i></div>
 <div class="ec-drawerRole">
+    {{ include('Block/login_sp.html.twig') }}
+    {{ include('Block/category_nav_sp.html.twig') }}
 </div>
 <div class="ec-blockTopBtn pagetop">ページトップへ</div>
 <script src="{{ asset('assets/js/function.js') }}"></script>
 <script src="{{ asset('assets/js/eccube.js') }}"></script>
+<script src="{{ asset('assets/js/bemart-unsupported.js') }}"></script>
 {% block javascript %}{% endblock %}
     <script src="{{ asset('assets/js/customize.js') }}"></script>
 </body>

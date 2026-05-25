@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Template;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -24,6 +25,7 @@ class TemplateList extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'goTemplateAdd', href: 'page://self/admin/template/template-add')]
     public function onGet(): static
     {
         try {
@@ -41,6 +43,9 @@ class TemplateList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'templates' => $final->templates,
+            'links' => [
+                'goTemplateAdd' => 'page://self/admin/template/template-add',
+            ],
         ];
 
         return $this;

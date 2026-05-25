@@ -1,0 +1,45 @@
+{# EC-CUBE admin category edit — product category detail screen. #}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_product_category_edit' %}
+{% set title = 'カテゴリ編集' %}
+{% set sub_title = '商品管理' %}
+
+{% block main %}
+    <form method="post" action="{{ url('admin_product_category_edit', { id: categoryId }) }}">
+        <input type="hidden" name="_method" value="put">
+        <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category') }}">
+        <input type="hidden" name="categoryId" value="{{ categoryId }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header"><span class="card-title">カテゴリ情報</span></div>
+                        <div class="card-body">
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label">カテゴリID</label>
+                                <div class="col"><input class="form-control" value="{{ categoryId }}" readonly></div>
+                            </div>
+                            <div class="row mb-3">
+                                <label class="col-3 col-form-label" for="categoryName">カテゴリ名</label>
+                                <div class="col"><input class="form-control" id="categoryName" name="categoryName" value="{{ categoryName }}" required></div>
+                            </div>
+                            <div class="row mb-0">
+                                <label class="col-3 col-form-label" for="sortNo">並び順</label>
+                                <div class="col"><input class="form-control" id="sortNo" name="sortNo" type="number" value="{{ sortNo }}" min="1"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6"><a class="c-baseLink" href="{{ url('admin_product_category') }}"><i class="fa fa-backward"></i><span>カテゴリ管理</span></a></div>
+                    <div class="col-6 text-end"><button class="btn btn-ec-conversion px-5" type="submit">保存</button></div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

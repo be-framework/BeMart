@@ -1,0 +1,41 @@
+{#
+  EC-CUBE default-theme Block/new_item.twig first-slice port.
+
+  Links are rebound to existing BeMart product codes, not EC-CUBE's
+  numeric product ids.
+#}
+<div class="ec-role">
+    <div class="ec-newItemRole">
+        <div class="ec-newItemRole__list">
+            <div class="ec-newItemRole__listItem">
+                <div class="ec-newItemRole__listItemHeading ec-secHeading--tandem">
+                    <span class="ec-secHeading__en">NEW ITEM</span>
+                    <span class="ec-secHeading__line"></span>
+                    <span class="ec-secHeading__ja">新着商品</span>
+                    <a class="ec-inlineBtn--top" href="{{ url('product_list') }}">more</a>
+                </div>
+            </div>
+            <div class="ec-newItemRole__listItem">
+                <a href="{{ url('product_detail', {'id': 'sample-001'}) }}">
+                    <img src="{{ asset('assets/img/common/no_image_product.png') }}">
+                    <p class="ec-newItemRole__listItemTitle">サンプル商品 A</p>
+                    <p class="ec-newItemRole__listItemPrice">￥1,200(税込)</p>
+                </a>
+            </div>
+            <div class="ec-newItemRole__listItem">
+                <a href="{{ url('product_detail', {'id': 'api-persist-20260522-001'}) }}">
+                    <img src="{{ asset('assets/img/top/img_item01_01.jpg') }}">
+                    <p class="ec-newItemRole__listItemTitle">彩のジェラートセット</p>
+                    <p class="ec-newItemRole__listItemPrice">￥2,980(税込)</p>
+                </a>
+            </div>
+            <div class="ec-newItemRole__listItem">
+                <a href="{{ url('product_detail', {'id': 'ui-create-20260522-001'}) }}">
+                    <img src="{{ asset('assets/img/top/img_item02_01.jpg') }}">
+                    <p class="ec-newItemRole__listItemTitle">UI商品登録テスト</p>
+                    <p class="ec-newItemRole__listItemPrice">￥1,980(税込)</p>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

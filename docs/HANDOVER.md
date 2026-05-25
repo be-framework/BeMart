@@ -1948,7 +1948,7 @@ Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEA
 - **Admin HTML Tier-2（残 約 28 テンプレート）** — Tier-1（77 ページ中 34、list/data + 単純 CRUD）は 8 section-wave で完了（下記「Admin HTML — section-wave 並列移植」参照）。その後 4 つの Tier-2 wave で 15 ページを回収（下記「Admin HTML Tier-2 — section ごとの回収」参照）。残る Tier-2 は重量エディタと、action-only リソースに `onGet` が無く新規リソース＝`be/src` ドメイン層追加を要するページ群。
 - **enrichment backlog の残 5 件**（上記）
 - **`Block/*` ウィジェットテンプレート** — ヘッダ/フッタ/カート/ログイン/検索のブロック領域は今は EC-CUBE ランタイム residual のまま。ウィジェットレンダリングのサブステップが必要（Block は ALPS で意図的に未モデル化）。
-- Phase 3 中の ALPS 是正で追加した 5 遷移（`doSortNoMove` 等）は `be/src` にドメイン実装が無い（domain coverage が 139/144 である理由）
+- ~~Phase 3 中の ALPS 是正で追加した 5 遷移（`doSortNoMove` 等）は `be/src` にドメイン実装が無い~~ → **解消済み**。5 遷移すべてドメイン実装完了（下記「Phase-3 是正遷移のドメイン実装完了」参照）。domain coverage は **144/144**。
 
 ### Admin HTML — section-wave 並列移植（Tier-1 完了）
 
@@ -1982,7 +1982,8 @@ Phase A / Phase 2 までの BeMart は JSON リソースのみ。Phase 3 は BEA
   authority/system/log/masterdata/security。これらは `be/src` ドメイン層
   （Input/Final/body-shape）の追加を伴うため、テンプレ移植 wave とは別種の作業。
 
-Tier-2 は 77 ページ中 43 ページ。section 別の defer リストは
+Tier-2 はこの時点で 77 ページ中 43 ページが残っていた（その後すべて回収済み —
+次節「Admin HTML Tier-2 — section ごとの回収（完了）」参照）。section 別の履歴は
 `docs/phases/admin-fanout-plan.md` と `var/templates/README.md`「Fan-out status」が正。
 
 **並列オーケストレーションの教訓** — バッチ 1 の 2 agent（Content / Top-level）が
@@ -1990,9 +1991,9 @@ Tier-2 は 77 ページ中 43 ページ。section 別の defer リストは
 だったため手動 salvage で 2 commit に分割して回収（`855c412` / `dff64ca`）。バッチ 2 では
 各 agent に**ページ単位の逐次 commit**を指示し、カットオフ耐性を確保した。
 
-### Admin HTML Tier-2 — section ごとの回収（進行中）
+### Admin HTML Tier-2 — section ごとの回収（完了）
 
-Tier-1 完了後、defer した 43 ページの Tier-2 を section 単位で回収中。Tier-2 は
+Tier-1 完了後、defer した Tier-2 を section 単位で回収。Tier-2 は
 テンプレ移植ではなく「新規 GET リソース／action-only リソースへの `onGet` 追加／
 `be/src` body-shape」を伴うリソース生成作業（`docs/migration-status.md` の punch-list 1 参照）。
 
@@ -2008,14 +2009,222 @@ Tier-1 完了後、defer した 43 ページの Tier-2 を section 単位で回�
   shop_master）。action-only `Payment`/`Delivery` リソースへの `onGet` エディタ追加
   （マスタ一覧 fetch が AUTHZ ゲートを兼ねる）+ `BaseInfo.onGet` への shop-master フォーム
   追加 + 3 `<Name>Form`。Setting/Shop section 完了。
+- **Order Tier-2 wave**（`2f59bb3`/`4c7c4a1`/`42214a3`/`2a45b43`/`30c97c6`/`a455281`）—
+  6 ページ（edit / shipping / mail / mail_confirm / order_pdf / csv_shipping）。大型
+  マルチパネルエディタ（`edit` ~1057L・`shipping` ~709L）をページ単位逐次 commit で移植。
+- **Product Tier-2 wave**（`4eb93f3`/`a08f38f`/`9ca00d6`/`0296306`）— 7 ページ
+  （product ~932L / product_class ~448L / category / csv ×4）。
+- **Store template_add**（`571dd5b`）— 1 ページ。Store section の残りは plugin
+  install/search 系のみ（移植対象外）。
 
-回収済み計 **15 ページ → admin HTML は 77 ページ中 49 ページ移植**。Customer /
-Setting/System / Setting/Shop の 3 section が Tier-2 まで完了。残 Tier-2 は約 28 ページ
-（Order 編集系 `edit`/`shipping`/`mail`・Product 編集系 `product`/`product_class`/`category`・
-Store/Plugin の install/search 系が主）。
+回収済み計 **29 ページ → admin HTML は 77 ページ中 63 ページ移植**。残 14 ページは
+**Store/Plugin の install/search サブツリーのみ — プラグインは移植対象外**のため、
+スコープ内の admin HTML 移植は完了。
+
+### Phase 3 storefront — 仕上げ
+
+- **Block ウィジェット**（`f3df0d4`）— `logo` / `footer` の 2 ウィジェットを
+  `var/templates/Block/` に移植。残る Block 領域（cart/login/search）は
+  EC-CUBE ランタイム残差のまま（Block は ALPS 非モデル化）。
+- **Shopping confirm/complete エンリッチ**（`1177e0d`/`2f8d17a`）— 薄かった
+  resource body を EC-CUBE から再導出し、テンプレートに配線。
+- **fidelity-test 修正**（`5d9e6ba`）— Cart/Confirm の render-diff を EC-CUBE
+  4.3.1 実体に合わせて是正。
+
+### Phase B — セキュリティ・本番化
+
+- **静的アセット配備**（`a002097`）— EC-CUBE 4.3 の `default` + `admin` テーマの
+  静的アセットを `public/` に配備。served URL（`/assets`・`/template/admin/assets`・
+  `/bundle`）を忠実にミラー。
+- **HTTP ルーター**（`53e587e`/`39f1117`）— `RouteTable`（EC-CUBE ルート名 ↔ URL
+  パス ↔ リソース URI のマップ）+ `Router`（`(method, path)` 照合）。
+  `public/index.php` が 404/405 セマンティクス付きでディスパッチ。
+  `BeMartTwigExtension::url()/path()` は共有 `RouteTable` 経由で解決。
+- **render-diff スタブのアセットパッケージ対応**（`16e8c9d`）— EC-CUBE の
+  `asset(path, package)` パッケージマップ（`admin`→`/template/admin/`・
+  `bundle`→`/bundle/`）を `EcCubeAssetStub` 経由で両サイド同一に評価。
 
 ### Phase 3 現在のテスト規模
 
-`vendor/bin/phpunit` → **約 1796 tests / 5889 assertions, OK**（deprecation 3 件のみ、failure なし）。
-正確な現在値は `docs/migration-status.md` を参照。
+`vendor/bin/phpunit` → **1893 tests / 4002 assertions**。非 SQL スイート
+（`--testsuite bemart,bemart-be`）は DB 無しで全 green。`bemart-sql` スイートは
+ローカル MariaDB が必要で、無い場合 745 件 skip + prod-DB コンテキスト 3 件が
+fail（既知・MariaDB 依存）。正確な現在値は `docs/migration-status.md` を参照。
 
+### Phase-3 是正遷移のドメイン実装完了
+
+Phase 3 の ALPS 監査（`8d93500`/`f01e1ae`）で追加した 5 遷移は当初 ALPS-only
+（`be/src` ドメイン実装なし）だった。その後 4 遷移（`doSortNoMove` /
+`doToggleVisible` / `doUpdateTrackingNumber` / `doSendShippingNotifyMail`）が
+実装され、最後に残った **`doResendActivationMail`** を実装して
+**domain coverage 143/144 → 144/144** を達成した。
+
+- **`doResendActivationMail`（認証メールを再送する）** — EC-CUBE
+  `admin_customer_resend` ルートから導出。管理画面の会員一覧から ADMIN が
+  仮会員（`customerStatus = 1`）へメール認証（本登録）メールを再送する。
+  ALPS type は `unsafe`（送信のたびに新規メールが発生）。
+  - **shape は `doSendShippingNotifyMail` を踏襲** — admin-only / unsafe /
+    メール送信という同型の遷移。`MailerInterface` に
+    `sendCustomerActivation(string $email, string $secretKey)` を追加
+    （`FakeMailer` が `customerActivations` に記録）。
+  - **AUTHZ ラダー**（クロスファイアウォール → 存在 → 状態の順）:
+    管理者セッション無し → `UnauthorizedAdminAccessException`（403）→
+    メール未解決 → `CustomerNotFoundException`（404、既存例外を再利用）→
+    対象が仮会員でない（既に本会員） → `CustomerAlreadyActivatedException`
+    （409、新規ドメイン例外）。既に本会員へ再送するのは無意味な要求なので
+    silent success ではなく明示的な 4xx で返す。
+  - リソース `Page\Admin\Customer\ResendActivationMail`
+    （`page://self/admin/customer/resend-activation-mail`、POST、CSRF ガード）。
+    `RouteTable` に `admin_customer_resend` を登録。
+    Final の公開面は `customerId` / `email` のみ — `secretKey` はメール本文
+    専用トークンなので echo しない。
+  - テストは Fake のみ（モック禁止）。seed `provisional@example.com`
+    （`customerStatus = 1`、`secretKey` 保持）を happy-path の仮会員ターゲット、
+    `alice@example.com`（`customerStatus = 2`）を 409 ケースに使用。
+
+### Phase B — ハイパーメディア / HTTP テストフレーム整備
+
+`html` コンテキストでカート追加（`POST /products/add_cart` → 201）後の
+`GET /cart` が空になる不具合（`FakeCartStorage` がリクエスト毎のインメモリ
+Singleton で、別 PHP プロセスのリクエスト間でカートが永続しない）を契機に、
+テスト層の不備が判明した。BeMart は BEAR.Skeleton の 3 層テスト構造で
+scaffold されておらず、ワークフロー assertion が in-process でしか走らず、
+実 HTTP / Cookie 境界を一度も越えていなかった。
+
+- **カート修正**（`cb4739d`）— `FakeCartStorage` が `APP_CONTEXT=html` +
+  active session 時に fixture を `$_SESSION`（`bemart_html_carts` キー）へ
+  ミラー。`Cart` / `Cart\Item` は session prefix を `HtmlCartSession` 経由で
+  導出（ハードコード定数を廃止）。汎用 `RuntimeException` は
+  `FakeCartFixtureException` に置換。
+- **3 層テストフレーム**（`6b03171`）— `phpunit.xml` を
+  `resource` / `hypermedia` / `http` の 3 suite 構成に。
+  `tests/Hypermedia/WorkflowTest` が storefront 購入動線を `RoutedResource`
+  経由で in-process 駆動し、`tests/Http/WorkflowTest` はそれを継承して
+  `setUp()` で `HttpResource` に差し替えるだけ（同一 assertion を 2
+  トランスポートで実行）。`hypermedia` 層は 1 プロセス・1 injector で
+  workflow を通すため DI Singleton がテスト全体で生き続けるのに対し、
+  `http` 層は実 HTTP 経由で毎リクエスト injector を再構築し session
+  cookie のみを引き継ぐ — リクエストスコープの Singleton に状態を持つ
+  バグ（インメモリカート等）は `http` 層でしか捕捉できない。スタッシュ
+  証明で「カート修正を外すと `http` のみ赤・`hypermedia` は緑」を確認した。
+  詳細は `tests/README.md`。
+- **HttpResource を `koriym/php-server` ベースへ是正**（dev 依存追加）—
+  当初 `HttpResource` はリクエスト毎に `php-cgi` を `proc_open` する
+  383 行の自前実装だった。サーバライフサイクルを BEAR 自身のテスト基盤が
+  使う保守済みコンポーネント `koriym/php-server`（`php -S` 管理）へ委譲し、
+  curl の cookie jar で session を引き継ぐ薄い実装に置換。スケルトン標準の
+  `HttpResource` は stateless JSON API 向けで cookie を扱わないため、
+  cookie jar のみが BeMart 固有の追加点。`aura/installer-default`
+  （`aura/input` 経由の旧 Composer プラグイン）は `allow-plugins` で
+  明示的に無効化（`false`）して install ブロックを解消。
+- **暫定事項**（将来の整理候補）— `RoutedResource` は BEAR ネイティブの
+  `#[Link]` / `crawl` でなく自前 Router の shim、`canonicalizeFormFields` が
+  wire フィールド名（`_token` / `product_id`）をリソース引数名へ手で
+  詰め替えている。
+
+
+## 2026-05-23 — EC-CUBE実サイト探索とHTML導線安定化の保存前サマリ
+
+長いセッションで、コード上のRouteMap/Twig棚卸しだけでなく、起動中のEC-CUBE参照サイト `http://127.0.0.1:8081` とBeMart `http://127.0.0.1:8080` を実HTTPで探索した。詳細は `docs/ec-cube-site-exploration-gaps-2026-05-23.md` と `docs/html-screen-migration-matrix.md`。
+
+### 実施した主な変更
+
+- EC-CUBE由来のstorefront/admin静的アセットを `public/assets/**`, `public/bundle/**`, `public/template/admin/assets/**` に追加し、CSS未適用状態を解消する基盤を入れた。
+- `public/index.php` と `src/Http/EccubeRouteMap.php` で、EC-CUBE route名・friendly URL・未実装fallback・HTTPエラー処理を整理した。raw Fatal / Unbound はHTMLに漏らさず、未対応非画面アクションは `/__not-implemented?route=...` + shared JS alertへ流す。
+- HTTPセッションアダプタを追加し、管理ログインと会員ログインをブラウザセッションで扱えるようにした。
+- Storefrontは header/search/logo/login/cart/category-nav/footer の共有Block first sliceを追加し、商品一覧はカテゴリ/表示件数/並び順/一覧カート投入フォームまで拡張した。匿名MYページ系はEC-CUBE同様 `/login` へ誘導する。
+- Product bodyを画像・カテゴリ・タグ・規格名でenrichし、投入商品を `彩のジェラートセット` として画像付き表示にした。
+- Adminは `/admin/product/new`, `/admin/order?orderNo=...`, `/admin/customer?customerId=...`, category list/edit, template add first sliceを接続し、admin nav/submenuをEC-CUBE相当に寄せた。
+- ALPSに `page*` / `route-ec-cube` / `migration-target` taxonomyと `AdminOrderEditPage` / `AdminCustomerEditPage` を追加し、画面状態の追跡粒度を補強した。
+
+### 実サイト探索で確認した残差
+
+- Product: 商品規格行列、画像アップロード、カテゴリ/タグ実編集、在庫無制限、販売種別、通常価格、販売制限、発送日目安。
+- Order: 受注新規、詳細検索、購入者/配送先/明細/支払/対応状況/出荷通知/メール履歴。
+- Customer: 管理会員新規、詳細検索、購入履歴、配送先一覧、お気に入り、ステータス操作。
+- Content/Setting: ファイル管理、メンテナンス、特商法、定休日、ログイン履歴、ログ表示、システム情報、マスタデータ。
+
+### 新しいSQL境界ルール
+
+ユーザー指示により、今後の新規SQL Query/CommandではPHP実クラスにPDOクエリを書かず、Ray.MediaQueryを使う。開発順は **Fake → EC-CUBEスキーマ照合 → Ray.MediaQuery SQL → Resource/Form → Twig/Browser**。既存の `Sql*Query` / `Sql*Command` は今回は変更せず、後でまとめて移行する。詳細ルールは `docs/skills/G-24-ray-media-query-boundary.md`。
+
+### 検証メモ
+
+- `asd --validate alps.json` OK。
+- Product/Customer/Order/Category/Template周辺のResource/HTML render testsを局所実行してOK。
+- `tests/Http/WorkflowTest.php` は `koriym/php-server` で実HTTPサーバをテスト内起動し、`tests/Hypermedia/WorkflowTest.php` と同じ storefront purchase spine を Cookie 境界込みで検証する。起動中の8080に対するHTTP smokeでも主要URLが200/303で応答した。
+- Codex in-app browser自動操作APIは `No active Codex browser pane available` で取得不可だったため、スクリーンショット付き操作ではなく実HTTP探索で代替した。
+
+## 2026-05-23 — Session close: HTML migration save/rebase/push handover
+
+This section closes the long HTML-migration session and records the exact repository state to resume from.
+
+### Repository state
+
+- Working directory: `/Users/akihito/git/be-bemart`
+- Branch: `be-first-migration-bootstrap`
+- Remote: `origin https://github.com/koriym/ec-cube-alps.git`
+- Pushed head: `e651b5e Align template upload screen with upstream port`
+- Push completed: `origin/be-first-migration-bootstrap` is in sync with local `be-first-migration-bootstrap` at close time.
+
+### Commits added after rebasing onto origin
+
+The local save was first split into meaningful commits, then rebased over the upstream work that had landed during the side session. Static assets and the large test commit overlapped with upstream and were dropped/skipped where upstream already carried the better version. The final pushed delta is:
+
+- `d0a9587 Stabilize HTTP route dispatch and sessions`
+  - After rebase, this mostly contributes the shared unsupported-feature JS fallback because upstream already contains the shared `RouteTable`/`Router` front-controller implementation.
+- `bc7825e Improve storefront product and customer flows`
+  - Product list/detail enrichment, storefront blocks, images/categories/tags, cart/session fixes preserved where not already upstream.
+- `da5a2fd Add admin product customer order screen slices`
+  - Admin product/customer/order/category/template first-slice screens preserved where not already upstream.
+- `b121e62 Document Ray.MediaQuery boundary rule`
+  - New skill doc: `docs/skills/G-24-ray-media-query-boundary.md`.
+- `3f08bf1 Update migration status and handover docs`
+  - Exploration gaps, HTML screen matrix, link audit, state notes.
+- `11f0e5a Add malt local runtime config`
+  - `malt.json` + reusable `malt/conf/*`; runtime logs/tmp/DB files remain ignored.
+- `e651b5e Align template upload screen with upstream port`
+  - Post-rebase cleanup: kept upstream's EC-CUBE-faithful `Store/template_add.twig` port so tests and template cache agree.
+
+### Rebase notes
+
+- Before push, local was `ahead 9, behind 27` against `origin/be-first-migration-bootstrap`.
+- Rebased instead of force-pushing. No force push was used.
+- Upstream already contained EC-CUBE static assets, so the local static-asset commit was dropped as patch-equivalent.
+- The previous local `tests/Http/HttpHypermediaTest.php` commit conflicted with upstream's newer 3-tier test framework (`tests/Hypermedia/WorkflowTest.php` + `tests/Http/WorkflowTest.php`), so it was skipped in favor of upstream.
+- `composer install` was required locally after rebase because `composer.lock` already included `koriym/php-server`, but the local `vendor/` did not yet have it.
+
+### Verified before close
+
+```bash
+asd --validate alps.json
+rm -rf var/tmp/html
+./vendor/bin/phpunit \
+  tests/Resource/ProductsHtmlRenderTest.php \
+  tests/Resource/ProductHtmlRenderTest.php \
+  tests/Resource/AdminProductResourceTest.php \
+  tests/Resource/AdminTemplateAddHtmlRenderTest.php \
+  tests/Http/WorkflowTest.php \
+  --stop-on-failure
+```
+
+Result: ALPS valid; selected PHPUnit green — `23 tests / 114 assertions`, with expected deprecations/skips.
+
+### Non-negotiable next-session rules
+
+- New SQL Query/Command boundaries use **Ray.MediaQuery** (`#[DbQuery]` interface + SQL file). Do not add new concrete PHP PDO query classes.
+- Existing `Sql*Query` / `Sql*Command` implementations stay as-is until a dedicated batch migration.
+- Development order remains **Fake → EC-CUBE schema check → Ray.MediaQuery SQL → Resource/Form → Twig/Browser**.
+- JS alert is only a safety net for non-screen/unsupported actions. The main job remains EC-CUBE routable HTML screen migration and browser-flow parity.
+- Unsupported links/buttons must stay visible; they should fail safely via alert and `/__not-implemented?route=...`, not via hidden links, raw Fatal, or Unbound.
+
+### Recommended first prompt for the next session
+
+```text
+/Users/akihito/git/be-bemart で作業します。branch は be-first-migration-bootstrap です。
+前セッションは e651b5e まで push 済みです。
+まず docs/HANDOVER.md, docs/HOW_TO_CONTINUE.md, docs/migration-status.md,
+docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.md を読んで、
+残りHTML画面移植を進めてください。
+新規SQL境界は Ray.MediaQuery を使い、既存PDO実装は今すぐ移行しないでください。
+```
