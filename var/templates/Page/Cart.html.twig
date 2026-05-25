@@ -170,7 +170,7 @@
                     <div class="ec-cartRole__actions">
                         <div class="ec-cartRole__total">合計：<span class="ec-cartRole__totalAmount">{{ cart.totalPrice|price }}</span>
                         </div>
-                        <a class="ec-blockBtn--action" href="{{ path('cart_buystep', {'cart_key': cartKey}) }}">レジに進む</a>
+                        <a class="ec-blockBtn--action" href="{{ path('shopping') }}">レジに進む</a>
                         {% if loop.last %}
                             <a class="ec-blockBtn--cancel" href="{{ path('homepage') }}">お買い物を続ける</a>
                         {% endif %}

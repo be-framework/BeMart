@@ -124,6 +124,22 @@ final class RouterTest extends TestCase
         $this->assertSame('cart_handle_item', $this->router->match('DELETE', '/cart/item')->name);
     }
 
+    public function testEntryFormPostsToRegisterResource(): void
+    {
+        $matched = $this->router->match('POST', '/entry');
+
+        $this->assertSame('entry', $matched->name);
+        $this->assertSame('page://self/entry', $matched->resource);
+    }
+
+    public function testEntryConfirmPageIsDisplayable(): void
+    {
+        $matched = $this->router->match('GET', '/entry/confirm');
+
+        $this->assertSame('entry_confirm', $matched->name);
+        $this->assertSame('page://self/entry/confirm', $matched->resource);
+    }
+
     public function testGenerateIsInverseOfMatch(): void
     {
         // A route a template links to must be a route the router resolves:
