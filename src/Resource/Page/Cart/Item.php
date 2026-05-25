@@ -9,10 +9,15 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\CartItemNotInCartException;
 use MyVendor\BeMart\Be\Exception\OutOfStockException;
 use MyVendor\BeMart\Be\Exception\ProductClassNotFoundException;
 use MyVendor\BeMart\Be\Final\CartItemAdded;
+use MyVendor\BeMart\Be\Final\CartItemQuantityUpdated;
+use MyVendor\BeMart\Be\Final\CartItemRemoved;
 use MyVendor\BeMart\Be\Input\AddCartItemInput;
+use MyVendor\BeMart\Be\Input\RemoveCartItemInput;
+use MyVendor\BeMart\Be\Input\UpdateCartItemQuantityInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
@@ -94,6 +99,122 @@ class Item extends ResourceObject
             'totalPrice' => $final->totalPrice,
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
             'saleTypeName' => $final->saleTypeName,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doUpdateCartItemQuantity — replace an item's quantity
+     * (Pilot 10). Idempotent (PUT semantics), CSRF-guarded.
+     *
+     * @psalm-taint-source input $productCode
+     * @psalm-taint-source input $quantity
+     * @psalm-taint-source input $csrfToken
+     */
+    #[Link(rel: 'goCart', href: 'page://self/cart')]
+    public function onPut(
+        string $productCode,
+        int $quantity,
+        string|null $csrfToken = null,
+    ): static {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+
+            return $this;
+        }
+
+        try {
+            $final = ($this->becoming)(new UpdateCartItemQuantityInput(
+                productCode: $productCode,
+                quantity: $quantity,
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = [
+                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
+                'productCode' => $productCode,
+                'quantity' => $quantity,
+            ];
+
+            return $this;
+        } catch (ProductClassNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
+
+            return $this;
+        } catch (CartItemNotInCartException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => 'The product is not in the cart.', 'productCode' => $productCode];
+
+            return $this;
+        } catch (OutOfStockException) {
+            $this->code = 409;
+            $this->body = ['message' => 'The product is out of stock.', 'productCode' => $productCode];
+
+            return $this;
+        }
+
+        assert($final instanceof CartItemQuantityUpdated);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'cartKey' => $final->cartKey,
+            'productCode' => $final->productCode,
+            'requestedQuantity' => $final->requestedQuantity,
+            'adjustedQuantity' => $final->adjustedQuantity,
+            'unitPrice' => $final->unitPrice,
+            'totalPrice' => $final->totalPrice,
+            'deliveryFeeTotal' => $final->deliveryFeeTotal,
+            'saleTypeName' => $final->saleTypeName,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doRemoveCartItem — remove an item from the cart (Pilot 11).
+     * Idempotent (DELETE), CSRF-guarded.
+     *
+     * @psalm-taint-source input $productCode
+     * @psalm-taint-source input $csrfToken
+     */
+    #[Link(rel: 'goCart', href: 'page://self/cart')]
+    public function onDelete(string $productCode, string|null $csrfToken = null): static
+    {
+        if (! $this->csrf->isValid($csrfToken)) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'Invalid or missing CSRF token.'];
+
+            return $this;
+        }
+
+        try {
+            $final = ($this->becoming)(new RemoveCartItemInput(productCode: $productCode));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = [
+                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
+                'productCode' => $productCode,
+            ];
+
+            return $this;
+        } catch (CartItemNotInCartException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => 'The product is not in the cart.', 'productCode' => $productCode];
+
+            return $this;
+        }
+
+        assert($final instanceof CartItemRemoved);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'cartKey' => $final->cartKey,
+            'productCode' => $final->productCode,
+            'totalPrice' => $final->totalPrice,
+            'deliveryFeeTotal' => $final->deliveryFeeTotal,
         ];
 
         return $this;

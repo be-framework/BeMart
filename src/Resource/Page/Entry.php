@@ -43,6 +43,51 @@ class Entry extends ResourceObject
     }
 
     /**
+     * EC-CUBE goCustomerRegistration — show the customer registration
+     * form scaffolding.
+     *
+     * Pure form-info endpoint: no Be Framework involved, no domain
+     * logic. Anonymous-accessible (returns 200 regardless of session
+     * state). Fields mirror RegisterCustomerInput: 4 required + 11
+     * optional. `csrfToken` body field stays `null` for the same
+     * reason described on Login::onGet — EventListener mirrors the
+     * Symfony token into the session for the subsequent POST.
+     */
+    #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
+    public function onGet(): static
+    {
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'goCustomerRegistration',
+            'fields' => [
+                'email',
+                'password',
+                'name01',
+                'name02',
+                'kana01',
+                'kana02',
+                'companyName',
+                'phoneNumber',
+                'postalCode',
+                'pref',
+                'addr01',
+                'addr02',
+                'birth',
+                'sex',
+                'job',
+                'csrfToken',
+            ],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/entry',
+            ],
+            'csrfToken' => null,
+        ];
+
+        return $this;
+    }
+
+    /**
      * Phase B Slice 9: every form field is user-controlled input. Declared
      * as taint sources so Psalm can trace them. Semantic value objects
      * format-validate but do not universally escape — sinks downstream

@@ -9,6 +9,12 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * registration pipeline. Holds the persisted shape so the Fake store
  * can answer EmailUniquenessChecker queries without re-reading the
  * raw json fixture.
+ *
+ * Pilot 7 (doActivateCustomer) adds `secretKey`: the per-customer
+ * one-time URL token EC-CUBE sends in the activation email. For active
+ * (status=2) customers it is null; for provisional (status=1) customers
+ * it carries the token that the activation flow validates. Default null
+ * so existing call sites that build active customers need no change.
  */
 final readonly class CustomerEntity
 {
@@ -31,6 +37,7 @@ final readonly class CustomerEntity
         public int|null $job,
         public int $initialPoint,
         public int $customerStatus,
+        public string|null $secretKey = null,
     ) {
     }
 }
