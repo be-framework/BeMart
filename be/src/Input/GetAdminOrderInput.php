@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderFetched;
  *   GetAdminOrderInput → AdminOrderFetched  (Direct, safe read)
  *
  * Admin-only endpoint. AUTHZ lives in the Final via
- * {@see \MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface} — a
+ * {@see \MyVendor\BeMart\Be\Reason\Service\AdminSession} — a
  * null admin session raises {@see \MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException}
  * (403). Unknown orderNo raises
  * {@see \MyVendor\BeMart\Be\Exception\OrderNotFoundException} (404).

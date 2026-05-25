@@ -100,7 +100,7 @@ final class MediaQueryCoverageTest extends TestCase
     /** @return list<string> */
     private static function sqlIds(): array
     {
-        return self::stems(__DIR__ . '/../../sql/media-query/*.sql');
+        return self::stems(__DIR__ . '/../../var/sql/*.sql');
     }
 
     /** @return list<string> */

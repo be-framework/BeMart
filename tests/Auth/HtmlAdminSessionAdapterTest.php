@@ -65,14 +65,14 @@ final class HtmlAdminSessionAdapterTest extends TestCase
 
         $adapter = new HtmlAdminSessionAdapter();
 
-        $this->assertSame('admin-001', $adapter->adminId());
+        $this->assertSame('admin-001', $adapter->adminId);
     }
 
     public function testReturnsNullWhenSessionKeyAbsent(): void
     {
         $adapter = new HtmlAdminSessionAdapter();
 
-        $this->assertNull($adapter->adminId());
+        $this->assertNull($adapter->adminId);
     }
 
     public function testEmptyStringSessionValueTreatedAsAnonymous(): void
@@ -81,7 +81,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
 
         $adapter = new HtmlAdminSessionAdapter();
 
-        $this->assertNull($adapter->adminId());
+        $this->assertNull($adapter->adminId);
     }
 
     public function testNonStringSessionValueTreatedAsAnonymous(): void
@@ -90,7 +90,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
 
         $adapter = new HtmlAdminSessionAdapter();
 
-        $this->assertNull($adapter->adminId());
+        $this->assertNull($adapter->adminId);
     }
 
     #[RunInSeparateProcess]

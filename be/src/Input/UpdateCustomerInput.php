@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Final\CustomerUpdated;
  * Input for doUpdateCustomer — the logged-in customer is editing
  * their own profile (Pilot 8).
  *
- * Direct pattern: Input → Final. The Final injects SessionInterface
+ * Direct pattern: Input → Final. The Final injects CustomerSession
  * to resolve the customerId, looks up the current state via
  * CustomerQuery, and writes the merged record back via
  * CustomerCommand.

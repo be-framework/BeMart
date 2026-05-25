@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,7 +14,6 @@ use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerCreated;
 use MyVendor\BeMart\Be\Input\AdminCreateCustomerInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -46,7 +46,6 @@ class CreateCustomer extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -71,9 +70,9 @@ class CreateCustomer extends ResourceObject
      * @psalm-taint-source input $birth
      * @psalm-taint-source input $sex
      * @psalm-taint-source input $job
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
+    #[CsrfProtected]
     public function onPost(
         string $email,
         string $password,
@@ -90,15 +89,7 @@ class CreateCustomer extends ResourceObject
         string|null $birth = null,
         int|null $sex = null,
         int|null $job = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AdminCreateCustomerInput(
                 email: $email,

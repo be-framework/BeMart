@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminNewsForm;
 use MyVendor\BeMart\Module\HtmlTestModule;
@@ -58,7 +58,7 @@ use function trim;
  * extends `admin-base.html.twig` (a port of EC-CUBE's admin-theme
  * `default_frame.twig`), served via {@see EcCubeAdminStubLoader}. The
  * News resource requires an authenticated admin, so the html context's
- * `AdminSessionInterface` is rebound to a seeded admin id.
+ * `AdminSession` is rebound to a seeded admin id.
  */
 final class AdminNewsHtmlRenderTest extends TestCase
 {
@@ -105,7 +105,7 @@ final class AdminNewsHtmlRenderTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');

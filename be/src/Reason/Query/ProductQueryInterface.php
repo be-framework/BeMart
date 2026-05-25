@@ -13,14 +13,14 @@ use Ray\MediaQuery\Annotation\DbQuery;
  *
  * Pilot 1 (`item`) shipped the single-row lookup keyed by productCode.
  * Wave 8 (admin product management) adds list-projection methods used
- * by the admin grid (`listAll`) and the admin filter search
+ * by the admin grid (`list`) and the admin filter search
  * (`search`). Both list methods walk the same underlying corpus —
  * the storage layer is responsible for capping the result set; the
  * Semantic\Limit + Semantic\Offset bounds on the input parameters
  * keep tampered queries from reaching the storage layer with
  * unbounded values.
  *
- * Note: `listAll` returns ALL statuses including STATUS_WITHDRAWN so
+ * Note: `list` returns ALL statuses including STATUS_WITHDRAWN so
  * the admin grid can show soft-deleted rows when the operator wants
  * to audit / restore them. The customer-side product list (when it
  * lands) will use a `listVisible(...)` projection or filter on
@@ -47,7 +47,7 @@ interface ProductQueryInterface
      * Wave 8 (goProductList admin) — substring filter scan keyed on
      * the product name (matches `productName` only — search across
      * `searchWord` and `description` is a Phase 2 extension). When
-     * `$nameKeyword` is null, behaves like `listAll($limit, 0)` for
+     * `$nameKeyword` is null, behaves like `list($limit, 0)` for
      * convenience so the resource layer can use a single call. The
      * scan walks all statuses (admin sees everything).
      *

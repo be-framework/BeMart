@@ -8,7 +8,7 @@ use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
 
 /**
@@ -49,7 +49,7 @@ use Ray\Di\AbstractModule;
  *
  * Session is rebound per-test with a {@see FakeSession} carrying the
  * pre-order's numeric customer id (CheckoutPrepared's ownership check
- * compares `session->customerId()` against the OrderEntity's
+ * compares `session->customerId` against the OrderEntity's
  * customerId, both strings) — the same `rebindSession` pattern the
  * Fake-backed sibling uses, layered on top of the SQL override.
  */
@@ -74,7 +74,7 @@ final class CheckoutResourceSqlTest extends AbstractResourceSqlTestCase
             {
                 /** @var non-empty-string|null $id */
                 $id = $this->customerId === '' ? null : $this->customerId;
-                $this->bind(SessionInterface::class)
+                $this->bind(CustomerSession::class)
                     ->toInstance(new FakeSession($id));
             }
         };

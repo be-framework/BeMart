@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Being;
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use Ray\Di\Di\Inject;
@@ -22,7 +22,7 @@ use SensitiveParameter;
  * without any of them forming a Diamond.
  *
  *   1. EmailUniquenessQueryInterface — fail-fast on duplicate email
- *   2. CustomerIdGeneratorInterface    — opaque 32-char hex id
+ *   2. CustomerIdProvider    — opaque 32-char hex id
  *   3. PasswordHasherInterface         — bcrypt hash of plaintext password
  *   4. CustomerInitialPointInterface   — registration bonus points
  *
@@ -67,7 +67,7 @@ final readonly class CustomerRegistering
         #[Input] public int|null $sex,
         #[Input] public int|null $job,
         #[Inject] EmailUniquenessQueryInterface $uniquenessChecker,
-        #[Inject] CustomerIdGeneratorInterface $idGenerator,
+        #[Inject] CustomerIdProvider $ids,
         #[Inject] PasswordHasherInterface $passwordHasher,
         #[Inject] CustomerInitialPointInterface $initialPointService,
     ) {
@@ -75,7 +75,7 @@ final readonly class CustomerRegistering
         /** @psalm-suppress InvalidDocblock Psalm treats assert* methods as assertion helpers. */
         $uniqueness->assertUnique();
 
-        $this->customerId = $idGenerator->next()->value;
+        $this->customerId = $ids->get();
         $this->passwordHash = $passwordHasher->hash($password);
         $this->initialPoint = $initialPointService->initial();
         $this->customerStatus = 2;

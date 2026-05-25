@@ -36,12 +36,12 @@ use Ray\MediaQuery\Annotation\DbQuery;
  * customer's full order history. Returns an empty list when the customer
  * has no past orders (or `$offset` walks past the end).
  *
- * `listAll` returns the global finalized-order list sorted by `orderDate`
+ * `list` returns the global finalized-order list sorted by `orderDate`
  * descending (newest first), advanced by `$offset` and capped at `$limit`.
  * Wave 7 (goOrderList) is the first consumer — the admin grid pulls the
  * head of the list for the back-office screen. Unlike `listByCustomer`
  * this is unfiltered by ownership: every finalized order on the system is
- * in scope. AUTHZ is enforced by the Final via {@see AdminSessionInterface}
+ * in scope. AUTHZ is enforced by the Final via {@see AdminSession}
  * — there is no API for a non-admin to call this directly.
  *
  * `historyByOrderNo` returns the enriched {@see OrderHistoryEntity}

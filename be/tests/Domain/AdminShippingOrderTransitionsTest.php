@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Input\SendShippingNotifyMailInput;
 use MyVendor\BeMart\Be\Input\UpdateTrackingNumberInput;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Module\TestModule;
@@ -63,7 +63,7 @@ final class AdminShippingOrderTransitionsTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -173,10 +173,10 @@ final class AdminShippingOrderTransitionsTest extends TestCase
         $this->assertNull($final->trackingNumber);
 
         $mailer = $this->injector->getInstance(FakeMailer::class);
-        $this->assertCount(1, $mailer->shippingNotifications());
+        $this->assertCount(1, $mailer->shippingNotifications);
         $this->assertSame(
             self::TARGET_ORDER_NO,
-            $mailer->shippingNotifications()[0]['order']->orderNo,
+            $mailer->shippingNotifications[0]['order']->orderNo,
         );
     }
 
@@ -193,7 +193,7 @@ final class AdminShippingOrderTransitionsTest extends TestCase
         $mailer = $this->injector->getInstance(FakeMailer::class);
         $this->assertSame(
             'TRK-SHIPPED',
-            $mailer->shippingNotifications()[0]['trackingNumber'],
+            $mailer->shippingNotifications[0]['trackingNumber'],
         );
     }
 
@@ -204,7 +204,7 @@ final class AdminShippingOrderTransitionsTest extends TestCase
 
         // unsafe — each call fires a fresh mail.
         $mailer = $this->injector->getInstance(FakeMailer::class);
-        $this->assertCount(2, $mailer->shippingNotifications());
+        $this->assertCount(2, $mailer->shippingNotifications);
     }
 
     public function testSendShippingNotifyMailRejectsUnknownOrder(): void

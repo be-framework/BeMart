@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -41,7 +41,7 @@ use function trim;
  * `Mypage/history.twig` is a DATA page. The History resource requires
  * AUTHN + AUTHZ (the order's owner must match the session); the seed
  * order belongs to `customer-001`, so the `html` context's
- * `SessionInterface` is rebound to `customer-001`.
+ * `CustomerSession` is rebound to `customer-001`.
  *
  * Phase 3 enrichment — the MypageHistoryFetched projection was widened
  * to carry the per-shipping address blocks (with their line items), the
@@ -108,7 +108,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)->toInstance($this->session);
+                $this->bind(CustomerSession::class)->toInstance($this->session);
             }
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -20,7 +20,7 @@ use Ray\Di\AbstractModule;
  * differences from the Fake-backed sibling:
  *
  *  - the storage bindings (AdminQueryInterface → SqlAdminQuery,
- *    AdminCommandInterface → SqlAdminCommand, AdminIdGeneratorInterface
+ *    AdminCommandInterface → SqlAdminCommand, AdminIdQueryInterface
  *    → direct MediaQuery admin id proxy) are layered via the base class's
  *    sqlOverrideModule; CRUD runs against real dtb_member rows.
  *
@@ -87,7 +87,7 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

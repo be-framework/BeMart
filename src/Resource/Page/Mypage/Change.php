@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Final\CustomerUpdated;
 use MyVendor\BeMart\Be\Final\MypageChangeFormFetched;
 use MyVendor\BeMart\Be\Input\GetMypageChangeInput;
 use MyVendor\BeMart\Be\Input\UpdateCustomerInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\ChangeForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -26,7 +26,7 @@ use function assert;
  * EC-CUBE doUpdateCustomer — マイページから会員情報を更新 (Pilot 8).
  *
  * AUTHZ via the Be layer: the customerId for the update target is
- * the SessionInterface's value — never the request body — so an
+ * the CustomerSession's value — never the request body — so an
  * authenticated customer cannot edit another customer's record by
  * tampering with form fields (Pilot 5 F-2 lesson).
  *
@@ -39,7 +39,6 @@ class Change extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -129,9 +128,9 @@ class Change extends ResourceObject
      * @psalm-taint-source input $pref
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
+    #[CsrfProtected]
     public function onPost(
         string $email,
         string|null $name01 = null,
@@ -144,15 +143,7 @@ class Change extends ResourceObject
         int|null $pref = null,
         string|null $addr01 = null,
         string|null $addr02 = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateCustomerInput(
                 email: $email,

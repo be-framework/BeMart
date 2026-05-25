@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -20,7 +20,7 @@ use Ray\InputQuery\Attribute\Input;
  *   This Final proves the form transition exists: every guest field
  *   passes its Semantic validation (Email, Name01, Name02, Kana01,
  *   Kana02, PhoneNumber, PostalCode, Pref, Addr01, Addr02) and the
- *   server synthesises a preOrderId from CustomerIdGeneratorInterface.
+ *   server synthesises a preOrderId from CustomerIdProvider.
  *
  * PHASE 2 GAP — what this Final intentionally does NOT do:
  *
@@ -33,10 +33,10 @@ use Ray\InputQuery\Attribute\Input;
  *     POST using the preOrderId returned here will therefore 403.
  *     Closing that gap is Phase 2's job (a dedicated GuestProfile and
  *     a non-member PreOrder branch in CheckoutPrepared).
- *   - It reuses CustomerIdGeneratorInterface to mint the preOrderId;
- *     Phase 2 should introduce a dedicated PreOrderIdGenerator (and
+ *   - It reuses CustomerIdProvider to mint the preOrderId;
+ *     Phase 2 should introduce a dedicated PreOrderIdProvider (and
  *     align with PreOrderId Semantic's 40-hex format, which the
- *     reused generator does NOT satisfy — it produces 32 hex chars).
+ *     reused provider does NOT satisfy — it produces 32 hex chars).
  *
  * The Final's public surface mirrors the doSubmitNonMember ALPS
  * descriptor (#name01, #name02, #email) plus the synthesised
@@ -60,11 +60,11 @@ final readonly class NonMemberSubmitted
         #[Input] int $pref,
         #[Input] string $addr01,
         #[Input] string $addr02,
-        #[Inject] CustomerIdGeneratorInterface $idGenerator,
+        #[Inject] CustomerIdProvider $ids,
     ) {
         // Wave 7W: synthesise a preOrderId. Persistence is deliberately
         // omitted — see the class-level docblock's "Phase 2 gap" note.
-        $this->preOrderId = $idGenerator->next()->value;
+        $this->preOrderId = $ids->get();
         $this->name01 = $name01;
         $this->name02 = $name02;
         $this->email = $email;

@@ -9,8 +9,8 @@ use DomainException;
 
 /**
  * Thrown when a request reaches an admin-only endpoint without the
- * admin firewall granting access — i.e. the AdminSessionInterface
- * reports `adminId() === null`. Typical scenario: a logged-in customer
+ * admin firewall granting access — i.e. the AdminSession
+ * reports `$adminId === null`. Typical scenario: a logged-in customer
  * (customer firewall passed) tries to hit `/admin/...` (admin firewall
  * fails, no admin session).
  *

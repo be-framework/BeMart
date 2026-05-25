@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -24,10 +24,10 @@ use function str_contains;
  * same AUTHZ + CSRF branches. The only differences:
  *
  *  - the storage binding (TaxRuleStorageInterface → SqlTaxRuleStorage)
- *    and id generator (TaxRuleIdGeneratorInterface → direct MediaQuery tax-rule id proxy)
+ *    and id query (TaxRuleIdQueryInterface → direct MediaQuery tax-rule id proxy)
  *    are layered via the base class's sqlOverrideModule; persistence
  *    is against the real dtb_tax_rule table.
- *  - the AUTHZ override rebinds AdminSessionInterface per case (via
+ *  - the AUTHZ override rebinds AdminSession per case (via
  *    `rebindAdminSession`) — same convention as
  *    {@see AdminBaseInfoResourceSqlTest}.
  *
@@ -61,7 +61,7 @@ final class AdminTaxRuleResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

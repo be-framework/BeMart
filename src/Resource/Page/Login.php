@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,7 +14,7 @@ use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Be\Exception\LoginFailedException;
 use MyVendor\BeMart\Be\Final\CustomerAuthenticated;
 use MyVendor\BeMart\Be\Input\LoginInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -66,7 +67,7 @@ class Login extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
+        private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -77,7 +78,7 @@ class Login extends ResourceObject
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
      * state). The `csrfToken` body field carries the trusted reference
-     * {@see CsrfTokenInterface::getToken()} issues, which the HTML port
+     * {@see CsrfToken::$token} issues, which the HTML port
      * renders into the form's hidden `_csrf_token` input so the
      * subsequent POST passes CSRF validation.
      */
@@ -94,7 +95,7 @@ class Login extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/login',
             ],
-            'csrfToken' => $this->csrf->getToken(),
+            'csrfToken' => $this->csrf->token,
             // PoC fixture prefill for quick HTML-context verification.
             // See prefilledLoginForm(); deliberately easy to remove.
             'form' => $this->prefilledLoginForm(),
@@ -108,18 +109,11 @@ class Login extends ResourceObject
      *
      * @psalm-taint-source input $email
      * @psalm-taint-source input $password
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
-    public function onPost(string $email, string $password, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onPost(string $email, string $password): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new LoginInput(
                 email: $email,

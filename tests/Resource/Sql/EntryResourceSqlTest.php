@@ -19,14 +19,14 @@ use function ctype_digit;
  * sibling:
  *
  *  - the storage bindings (CustomerCommandInterface → SqlCustomerCommand,
- *    CustomerIdGeneratorInterface → direct MediaQuery customer id proxy,
+ *    CustomerIdQueryInterface → direct MediaQuery customer id proxy,
  *    EmailUniquenessQueryInterface → SqlEmailUniquenessChecker,
  *    CustomerQueryInterface → SqlCustomerQuery) are layered via the
  *    base class's sqlOverrideModule; registration writes a real
  *    dtb_customer row.
  *
  *  - `customerId` is a numeric dtb_customer.id (direct MediaQuery customer id proxy
- *    pre-allocates MAX(id)+1) — NOT the 32-char hex the Fake generator
+ *    pre-allocates MAX(id)+1) — NOT the 32-char hex the FakeQuery fixture
  *    emits. The Fake test pins the hex shape; this sibling pins the
  *    numeric shape. Per G-23 the Fake-backed Resource test stays
  *    untouched: the customerId shape is a storage detail, not a
@@ -85,7 +85,7 @@ final class EntryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(100, $ro->body['initialPoint']);
         $this->assertSame(2, $ro->body['customerStatus']);
         // SQL backing: customerId is the numeric dtb_customer.id, not
-        // the 32-char hex the Fake generator emits.
+        // the 32-char hex the FakeQuery fixture emits.
         $this->assertTrue(ctype_digit($ro->body['customerId']));
         $this->assertArrayHasKey('Location', $ro->headers);
     }

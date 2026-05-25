@@ -4,33 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Fake\Service;
 
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
-use Override;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 
 /**
- * In-memory Session fake.
+ * In-memory customer session snapshot.
  *
- * Holds a fixed customerId (or null for anonymous) for the lifetime of
- * the injector. Tests that need a different customer override the
- * AppModule binding with a fresh `FakeSession` instance — there is no
- * `loginAs()` mutator on purpose, to keep request-scope semantics
- * obvious (you don't "log in mid-request" in a stateless framework).
- *
- * Default in AppModule binds `FakeSession('customer-001')` to match the
- * `aaaa…` happy-path pre-order fixture.
+ * Tests that need a different customer override the binding with a fresh
+ * instance. There is no `loginAs()` mutator: request-scope identity is a value.
  */
-final class FakeSession implements SessionInterface
+final readonly class FakeSession extends CustomerSession
 {
-    /** @param non-empty-string|null $customerId */
-    public function __construct(
-        private readonly string|null $customerId = null,
-    ) {
-    }
-
-    /** @return non-empty-string|null */
-    #[Override]
-    public function customerId(): string|null
-    {
-        return $this->customerId;
-    }
 }

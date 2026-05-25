@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminMemberForm;
 use MyVendor\BeMart\Module\HtmlTestModule;
@@ -55,7 +55,7 @@ use function trim;
  *
  * The page extends `admin-base.html.twig`, served via
  * {@see EcCubeAdminStubLoader}. The Member resource requires an
- * authenticated admin, so the html context's `AdminSessionInterface` is
+ * authenticated admin, so the html context's `AdminSession` is
  * rebound to a seeded admin id.
  */
 final class AdminMemberHtmlRenderTest extends TestCase
@@ -110,7 +110,7 @@ final class AdminMemberHtmlRenderTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');

@@ -71,8 +71,8 @@ final class ShoppingNonMemberResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
-        // Wave 7W reuses CustomerIdGenerator → 32-char hex (not the 40
-        // PreOrderId Semantic would demand). Phase 2 dedicates a generator.
+        // Wave 7W reuses CustomerIdProvider → 32-char hex (not the 40
+        // PreOrderId Semantic would demand). Phase 2 dedicates a provider.
         $this->assertMatchesRegularExpression('/\A[0-9a-f]{32}\z/', $ro->body['preOrderId']);
         $this->assertSame('田中', $ro->body['name01']);
         $this->assertSame('太郎', $ro->body['name02']);

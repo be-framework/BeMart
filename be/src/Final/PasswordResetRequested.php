@@ -9,7 +9,7 @@ use MyVendor\BeMart\Be\Reason\Entity\PasswordResetTokenEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
-use MyVendor\BeMart\Be\Reason\Service\ResetKeyGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Provider\ResetKeyProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -39,7 +39,7 @@ final readonly class PasswordResetRequested
         #[Input] string $email,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] PasswordResetTokenStorageInterface $tokenStorage,
-        #[Inject] ResetKeyGeneratorInterface $resetKeyGenerator,
+        #[Inject] ResetKeyProvider $resetKeys,
         #[Inject] MailerInterface $mailer,
     ) {
         $customer = $customerQuery->byEmail($email);
@@ -51,7 +51,7 @@ final readonly class PasswordResetRequested
             return;
         }
 
-        $resetKey = $resetKeyGenerator->generate();
+        $resetKey = $resetKeys->get();
         $tokenStorage->put(new PasswordResetTokenEntity(
             customerId: $customer->customerId,
             resetKey: $resetKey,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -12,7 +13,6 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\PluginUninstalled;
 use MyVendor\BeMart\Be\Input\UninstallPluginInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -45,7 +45,6 @@ class Plugin extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -53,18 +52,11 @@ class Plugin extends ResourceObject
      * Wave 8: pluginCode is admin-form input (selected from the grid).
      *
      * @psalm-taint-source input $pluginCode
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goPluginList', href: 'page://self/admin/plugin-list', method: 'get')]
-    public function onDelete(string $pluginCode, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $pluginCode): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UninstallPluginInput(pluginCode: $pluginCode));
         } catch (SemanticVariableException $e) {

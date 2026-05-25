@@ -112,7 +112,7 @@ final class LoginHtmlRenderTest extends TestCase
         // --- login form: CSRF hidden input ------------------------------
         // EC-CUBE's hidden _csrf_token carries a live
         // csrf_token('authenticate') value; BeMart's html context has no
-        // CSRF widget (CsrfTokenInterface is isValid-only — Slice 8), so
+        // CSRF widget (CsrfToken is isValid-only — Slice 8), so
         // the value is empty. Same hidden input, different (empty) value.
         '<input type="hidden" name="_csrf_token" value="">',
     ];

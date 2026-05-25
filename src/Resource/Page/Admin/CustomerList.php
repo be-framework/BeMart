@@ -21,7 +21,7 @@ use function assert;
  * EC-CUBE goCustomerList — 会員一覧 (Wave 5, admin filter search).
  *
  * Safe read. No CSRF (read-only). Admin-only — the Be Final raises
- * UnauthorizedAdminAccessException when AdminSessionInterface reports
+ * UnauthorizedAdminAccessException when AdminSession reports
  * no admin session, which we map to 403. Distinct from customer-side
  * 401 (Unauthenticated): admin and customer firewalls are parallel and
  * a logged-in customer is NOT logged-in-as-admin (Wave 4 decision).

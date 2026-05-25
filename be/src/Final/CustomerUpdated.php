@@ -9,7 +9,7 @@ use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -19,7 +19,7 @@ use Ray\InputQuery\Attribute\Input;
  *
  *   UpdateCustomerInput → CustomerUpdated  (this stage)
  *
- * AUTHN: the customerId comes from SessionInterface. A null session
+ * AUTHN: the customerId comes from CustomerSession. A null session
  * raises UnauthenticatedException — the BEAR layer maps this to 401.
  *
  * Merge semantics (Pilot 8 scope):
@@ -50,12 +50,12 @@ final readonly class CustomerUpdated
         #[Input] int|null $pref,
         #[Input] string|null $addr01,
         #[Input] string|null $addr02,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CustomerCommandInterface $customerCommand,
         #[Inject] EmailUniquenessQueryInterface $uniquenessChecker,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

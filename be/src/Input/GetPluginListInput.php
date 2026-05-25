@@ -12,7 +12,7 @@ use MyVendor\BeMart\Be\Final\PluginListFetched;
  *
  *   GetPluginListInput → PluginListFetched (Final — Direct, safe read)
  *
- * Admin-only endpoint (AUTHZ in the Final via AdminSessionInterface).
+ * Admin-only endpoint (AUTHZ in the Final via AdminSession).
  *
  * No request fields: the admin grid simply asks for "every plugin
  * the registry knows about". A future Wave 9 sweep may introduce

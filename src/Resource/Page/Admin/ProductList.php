@@ -22,7 +22,7 @@ use function assert;
  * search + pagination).
  *
  * Safe read. No CSRF (read-only). Admin-only — the Be Final raises
- * UnauthorizedAdminAccessException when AdminSessionInterface reports
+ * UnauthorizedAdminAccessException when AdminSession reports
  * no admin session, which we map to 403. The customer-facing product
  * list (when it lands) will be a sibling resource at a different URL.
  *

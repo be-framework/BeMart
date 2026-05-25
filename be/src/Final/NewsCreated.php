@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\NewsEntity;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\NewsIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -30,16 +30,16 @@ final readonly class NewsCreated
         #[Input] string|null $newsDescription,
         #[Input] string|null $newsUrl,
         #[Input] bool $linkMethod,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] NewsStorageInterface $news,
-        #[Inject] NewsIdGeneratorInterface $idGenerator,
+        #[Inject] NewsIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $entity = new NewsEntity(
-            newsId: $idGenerator->next()->value,
+            newsId: $ids->get(),
             newsTitle: $newsTitle,
             newsDescription: $newsDescription,
             newsUrl: $newsUrl,

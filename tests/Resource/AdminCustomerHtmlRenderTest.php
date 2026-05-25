@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Form\AdminCustomerForm;
 use MyVendor\BeMart\Module\HtmlTestModule;
@@ -57,7 +57,7 @@ use function trim;
  * The page extends `admin-base.html.twig` (a port of EC-CUBE's
  * admin-theme `default_frame.twig`), served via {@see EcCubeAdminStubLoader}.
  * The Customer resource requires an authenticated admin, so the html
- * context's `AdminSessionInterface` is rebound to a seeded admin id.
+ * context's `AdminSession` is rebound to a seeded admin id.
  *
  * EDIT MODE only — BeMart's Customer resource always resolves an existing
  * customer, so EC-CUBE's `{% if Customer.id %}` edit branches are always
@@ -120,7 +120,7 @@ final class AdminCustomerHtmlRenderTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');

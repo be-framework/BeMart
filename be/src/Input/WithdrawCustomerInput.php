@@ -16,7 +16,7 @@ use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
  *   WithdrawCustomerInput → CustomerWithdrawn (Final)
  *
  * AUTHZ via Session — customerId is NOT in the body (Pilot 5 F-2 +
- * Pilot 8 lesson). The Final pulls it from SessionInterface and
+ * Pilot 8 lesson). The Final pulls it from CustomerSession and
  * refuses to proceed when the session is anonymous. A logged-in
  * customer cannot withdraw a different customer's account by
  * tampering with form fields; the body simply doesn't accept an id.

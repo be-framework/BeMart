@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerIdQueryInterface;
 
 use function bin2hex;
 use function random_bytes;
@@ -105,8 +105,8 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         // the pref_id FK holds for this round-trip-every-field case.
         $this->insertPref(13, '東京都');
 
-        $generator = $this->sql(CustomerIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(CustomerIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
@@ -133,8 +133,8 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         // CustomerRegistered builds a CustomerEntity with secretKey=null
         // (an active customer carries no token). secret_key is NOT NULL
         // UNIQUE — register() must supply one so the INSERT succeeds.
-        $generator = $this->sql(CustomerIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(CustomerIdQueryInterface::class);
+        $newId = $ids->next()->value;
 
         $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
@@ -156,8 +156,8 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         // A provisional (status-1) customer carries the activation
         // token; register() must persist it verbatim so the activation
         // flow can later look the customer up by it.
-        $generator = $this->sql(CustomerIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(CustomerIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $token = bin2hex(random_bytes(16));
 
         $command = $this->sql(CustomerCommandInterface::class);
@@ -178,7 +178,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
 
     public function testRegisterIsNoOpForNonNumericId(): void
     {
-        // FakeCustomerIdGenerator emits 32-char hex; CustomerCommandInterface
+        // FakeCustomerIdProvider emits 32-char hex; CustomerCommandInterface
         // must reject it silently rather than coerce it into an int PK.
         $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
@@ -192,8 +192,8 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
 
     public function testRegisterPersistsInitialPointAsPoint(): void
     {
-        $generator = $this->sql(CustomerIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(CustomerIdQueryInterface::class);
+        $newId = $ids->next()->value;
 
         $command = $this->sql(CustomerCommandInterface::class);
         $command->register($this->entity([
@@ -376,7 +376,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]);
 
         $command = $this->sql(CustomerCommandInterface::class);
-        $command->password((string) $id, '$2y$12$newhash');
+        $command->updatePassword((string) $id, '$2y$12$newhash');
 
         $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->item((string) $id);
@@ -395,7 +395,7 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         ]);
 
         $command = $this->sql(CustomerCommandInterface::class);
-        $command->password('0123456789abcdef0123456789abcdef', '$2y$12$hijacked');
+        $command->updatePassword('0123456789abcdef0123456789abcdef', '$2y$12$hijacked');
 
         $query = $this->sql(CustomerQueryInterface::class);
         $read = $query->item((string) $id);
@@ -403,16 +403,16 @@ final class SqlCustomerCommandTest extends AbstractSqlTestCase
         $this->assertSame('$2y$12$untouched', $read->passwordHash);
     }
 
-    public function testCustomerIdGeneratorAllocatesIncrementingIds(): void
+    public function testCustomerIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(CustomerIdGeneratorInterface::class);
+        $ids = $this->sql(CustomerIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertCustomer(['email' => 'gen-1@example.com']);
         $secondId = $this->insertCustomer(['email' => 'gen-2@example.com']);
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

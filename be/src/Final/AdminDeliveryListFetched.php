@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\DeliveryEntity;
 use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 
 use function array_map;
@@ -34,10 +34,10 @@ final readonly class AdminDeliveryListFetched
     public array $deliveries;
 
     public function __construct(
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] DeliveryStorageInterface $deliveries,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

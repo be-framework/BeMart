@@ -8,7 +8,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Exception\MasterTypeFormatException;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminMasterDataForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -25,7 +25,7 @@ use function assert;
 class MasterData extends ResourceObject
 {
     public function __construct(
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
         private readonly AdminMasterRegistryInterface $masters,
         private readonly FormFactory $formFactory,
     ) {
@@ -36,7 +36,7 @@ class MasterData extends ResourceObject
      */
     public function onGet(string $masterType = 'tag'): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 

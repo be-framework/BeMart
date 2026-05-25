@@ -8,7 +8,7 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -55,11 +55,11 @@ final readonly class AdminOrderStatusUpdated
     public function __construct(
         #[Input] string $orderNo,
         #[Input] int $orderStatus,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] OrderQueryInterface $orderQuery,
         #[Inject] OrderCommandInterface $orderCommand,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

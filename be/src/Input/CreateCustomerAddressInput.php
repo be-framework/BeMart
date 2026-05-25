@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Final\CustomerAddressCreated;
  * AUTHZ design — mass-assignment safety (Pilot 5 F-2 + Pilot 8
  * lesson, carried by Pilot 13):
  *   - `addressId` is INTENTIONALLY ABSENT — generated server-side by
- *     AddressIdGeneratorInterface so the client cannot collide with
+ *     AddressIdProvider so the client cannot collide with
  *     or overwrite existing rows
  *   - `customerId` is INTENTIONALLY ABSENT — taken from the session
  *     so the client cannot pin a new row onto someone else

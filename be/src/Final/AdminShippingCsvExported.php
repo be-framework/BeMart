@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 
 use function assert;
@@ -24,7 +24,7 @@ use function stream_get_contents;
  *   AdminExportShippingInput → AdminShippingCsvExported (Direct, safe read)
  *
  * AUTHZ — admin firewall:
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess (403)
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess (403)
  *
  * Format: RFC 4180. One header row + one row per recorded shipping
  * address. `trackingNumber` column is exposed empty for the Wave 9η
@@ -39,10 +39,10 @@ final readonly class AdminShippingCsvExported
     public int $rowCount;
 
     public function __construct(
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] ShippingAddressStorageInterface $shippingAddresses,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

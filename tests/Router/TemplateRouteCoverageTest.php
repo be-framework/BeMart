@@ -14,6 +14,7 @@ use function array_keys;
 use function file_get_contents;
 use function preg_match_all;
 use function sort;
+use function str_contains;
 
 final class TemplateRouteCoverageTest extends TestCase
 {
@@ -25,6 +26,19 @@ final class TemplateRouteCoverageTest extends TestCase
     public function testAllTemplateRouteReferencesExistInRouteTable(): void
     {
         $this->assertTemplateRouteCoverage('var/templates');
+    }
+
+    public function testRouteTableDoesNotExposeUnsupportedRoutes(): void
+    {
+        $unsupported = [];
+        foreach (RouteTable::default()->routes as $route) {
+            if (str_contains($route->resource, 'unsupported-route')) {
+                $unsupported[] = $route->name . ' => ' . $route->resource;
+            }
+        }
+
+        sort($unsupported);
+        self::assertSame([], $unsupported);
     }
 
     private function assertTemplateRouteCoverage(string $directory): void

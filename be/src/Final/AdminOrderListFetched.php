@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -21,7 +21,7 @@ use function count;
  *
  * AUTHZ — admin firewall (Wave 4 contract, same shape as Wave 5
  * {@see CustomerListFetched}):
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess
  *
  * Admin-only endpoint. Distinct from the customer-side
  * {@see OrderHistoryFetched} (one customer's history); this Final
@@ -52,10 +52,10 @@ final readonly class AdminOrderListFetched
     public function __construct(
         #[Input] int $limit,
         #[Input] int $offset,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] OrderQueryInterface $orderQuery,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

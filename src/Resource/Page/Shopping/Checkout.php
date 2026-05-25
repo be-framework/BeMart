@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Input\CheckoutInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -44,30 +44,22 @@ class Checkout extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
     /**
-     * Phase B Slice 9: both params arrive from the HTTP request body.
+     * Phase B Slice 9: the domain parameter arrives from the HTTP request body.
      * `$preOrderId` is a 40-hex-char id that PreOrderId Semantic
-     * format-validates; `$csrfToken` is the Slice 8 boundary token.
-     * Both are sources so Psalm can trace into downstream sinks.
+     * format-validates. The CSRF boundary token is enforced declaratively by
+     * the CsrfProtected attribute.
      *
      * @psalm-taint-source input $preOrderId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    public function onPost(string $preOrderId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onPost(string $preOrderId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CheckoutInput(
                 preOrderId: $preOrderId,

@@ -1,12 +1,12 @@
 {% extends 'base.html.twig' %}
 
 {% set route = routeName|default('unsupported_route') %}
-{% set title = '未実装ルート' %}
+{% set title = '利用できないルート' %}
 
 {% block main %}
     <div class="ec-role">
         <div class="ec-pageHeader">
-            <h1>未実装</h1>
+            <h1>利用できないルート</h1>
         </div>
         <p>このルートはまだ BeMart 側に実装されていません。</p>
         <p><code>{{ routeName|default('') }}</code></p>

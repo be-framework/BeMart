@@ -11,8 +11,11 @@
  *   can skip cleanly. (This keeps the suite useful in environments
  *   without MariaDB, e.g. early CI.)
  * - If DATABASE_URL is set but the server is unreachable, or the
- *   schema fails to load → die loudly with a clear message. This is
- *   a smoke test: silent skips defeat its purpose.
+ *   available server is not MariaDB, set a skip marker. The suite
+ *   targets EC-CUBE's MariaDB baseline and MySQL's JSON semantics are
+ *   not equivalent here.
+ * - If MariaDB is reachable but schema loading fails, die loudly with a
+ *   clear message. This is a smoke test: silent skips defeat its purpose.
  */
 
 declare(strict_types=1);
@@ -52,16 +55,28 @@ try {
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
     ]);
 } catch (PDOException $e) {
-    fwrite(STDERR, sprintf(
-        "[bemart-sql] Cannot connect to MariaDB at %s:%d as %s — %s\n"
-        . "Hint: start the server (e.g. `sudo service mariadb start`) "
-        . "or unset DATABASE_URL to skip the SQL suite.\n",
-        $host,
-        $port,
-        $user,
-        $e->getMessage(),
-    ));
-    exit(1);
+    $GLOBALS['BEMART_SQL_BOOTSTRAP'] = [
+        'skip' => true,
+        'reason' => sprintf(
+            'Cannot connect to MariaDB at %s:%d as %s — %s',
+            $host,
+            $port,
+            $user,
+            $e->getMessage(),
+        ),
+    ];
+
+    return;
+}
+
+$serverVersion = (string) $admin->query('SELECT VERSION()')->fetchColumn();
+if (! str_contains(strtolower($serverVersion), 'mariadb')) {
+    $GLOBALS['BEMART_SQL_BOOTSTRAP'] = [
+        'skip' => true,
+        'reason' => 'SQL suite targets MariaDB; current server is ' . $serverVersion,
+    ];
+
+    return;
 }
 
 $quotedDb = '`' . str_replace('`', '``', $dbName) . '`';

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Layout;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,7 +14,6 @@ use MyVendor\BeMart\Be\Exception\LayoutNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\LayoutUpdated;
 use MyVendor\BeMart\Be\Input\UpdateLayoutInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminLayoutForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -41,7 +41,6 @@ class Layout extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -66,21 +65,13 @@ class Layout extends ResourceObject
     /**
      * @psalm-taint-source input $layoutId
      * @psalm-taint-source input $layoutName
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
+    #[CsrfProtected]
     public function onPut(
         string $layoutId,
         string|null $layoutName = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateLayoutInput(
                 layoutId: $layoutId,

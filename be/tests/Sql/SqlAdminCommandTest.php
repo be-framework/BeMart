@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminIdQueryInterface;
 
 /**
  * Storage-layer coverage for {@see AdminCommandInterface} (Admin auth Phase B).
@@ -32,8 +32,8 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
 
     public function testCreateInsertsRowWithProvidedId(): void
     {
-        $generator = $this->sql(AdminIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(AdminIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
@@ -58,7 +58,7 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
 
     public function testCreateIsNoOpForNonNumericId(): void
     {
-        // FakeAdminIdGenerator emits `ad…` hex; AdminCommandInterface must
+        // FakeAdminIdProvider emits `ad…` hex; AdminCommandInterface must
         // reject it silently rather than coerce it into an int PK.
         $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
@@ -79,8 +79,8 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         // authority=0 (system admin) is the most common case and the
         // EC-CUBE seed value. We write NULL to satisfy the empty
         // mtb_authority FK constraint; hydrate coerces back to 0.
-        $generator = $this->sql(AdminIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(AdminIdQueryInterface::class);
+        $newId = $ids->next()->value;
 
         $command = $this->sql(AdminCommandInterface::class);
         $command->create(new AdminEntity(
@@ -236,16 +236,16 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $this->assertSame(1, $read->authority);
     }
 
-    public function testAdminIdGeneratorAllocatesIncrementingIds(): void
+    public function testAdminIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(AdminIdGeneratorInterface::class);
+        $ids = $this->sql(AdminIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertAdmin(['login_id' => 'gen-1']);
         $secondId = $this->insertAdmin(['login_id' => 'gen-2']);
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
-use MyVendor\BeMart\Be\Reason\Service\OrderNumberGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -28,7 +28,7 @@ use Ray\InputQuery\Attribute\Input;
  *      gateway. Runs ONLY after inventory has been reserved (so we never
  *      charge for stock we cannot fulfill). Throws
  *      `PaymentDeclinedException` on decline.
- *   3. `OrderNumberGeneratorInterface::generate()` — issues the customer-
+ *   3. `OrderNoProvider::get()` — issues the customer-
  *      facing order number. Runs last because there is no point allocating
  *      a number for a checkout that already failed.
  *
@@ -57,14 +57,14 @@ final readonly class CheckoutSettled
         #[Input] public PurchaseTotals $totals,
         #[Inject] InventoryAllocatorInterface $inventory,
         #[Inject] PaymentGatewayInterface $gateway,
-        #[Inject] OrderNumberGeneratorInterface $numbers,
+        #[Inject] OrderNoProvider $orderNumbers,
     ) {
         $inventory->allocate($order);
         // Payment method is sourced from the persisted order, not from the
         // client request — see CheckoutInput docblock for the rationale.
         $gateway->checkout($preOrderId, $order->paymentMethodId, $totals->paymentTotal);
 
-        $this->orderNo = $numbers->generate();
+        $this->orderNo = $orderNumbers->get();
         $now = (new DateTimeImmutable())->format(DateTimeInterface::ATOM);
         $this->orderDate = $now;
         $this->paymentDate = $now;
