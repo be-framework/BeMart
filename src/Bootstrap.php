@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart;
 
+use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Router\RouteMethodNotAllowedException;
 use MyVendor\BeMart\Router\RouteNotFoundException;
@@ -34,6 +35,7 @@ use function session_status;
 use function sprintf;
 use function strtolower;
 use function str_contains;
+use function str_starts_with;
 
 use const JSON_PRETTY_PRINT;
 use const JSON_THROW_ON_ERROR;
@@ -166,7 +168,7 @@ final class Bootstrap
             return $ro->code >= 400 ? 1 : 0;
         }
 
-        http_response_code($ro->code);
+        http_response_code($this->httpStatusCode($ro->code, $isHtml, $isRedirect));
         if ($isHtml) {
             foreach ($ro->headers as $name => $value) {
                 if (is_string($value)) {
@@ -195,6 +197,15 @@ final class Bootstrap
         return $ro->code >= 400 ? 1 : 0;
     }
 
+    private function httpStatusCode(int $resourceCode, bool $isHtml, bool $isRedirect): int
+    {
+        if ($isHtml && $isRedirect && ($resourceCode < 300 || $resourceCode >= 400)) {
+            return Code::SEE_OTHER;
+        }
+
+        return $resourceCode;
+    }
+
     /**
      * @param non-empty-string $defaultContext
      *
@@ -208,7 +219,35 @@ final class Bootstrap
         }
 
         /** @var non-empty-string $context */
-        return $context;
+        return $this->normalizeContext($context, $defaultContext);
+    }
+
+    /**
+     * @param non-empty-string $context
+     * @param non-empty-string $defaultContext
+     *
+     * @return non-empty-string
+     */
+    private function normalizeContext(string $context, string $defaultContext): string
+    {
+        $normalized = match ($context) {
+            'app' => 'hal-api-app',
+            'fake' => 'fake-hal-api-app',
+            'dev' => 'dev-fake-hal-api-app',
+            'test' => 'test-hal-api-app',
+            'html' => 'html-hal-app',
+            'html-test' => 'html-test-hal-api-app',
+            'prod' => 'prod-hal-api-app',
+            'html-prod' => 'html-prod-hal-api-app',
+            default => $context,
+        };
+
+        if ($normalized === $context || ! str_starts_with($defaultContext, 'cli-')) {
+            return $normalized;
+        }
+
+        /** @var non-empty-string */
+        return 'cli-' . $normalized;
     }
 
     /** @param array<string, mixed> $globals */
