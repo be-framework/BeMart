@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -11,7 +12,7 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Final\ContactSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitContactInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\ContactForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -34,7 +35,7 @@ class Contact extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
+        private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -45,7 +46,7 @@ class Contact extends ResourceObject
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
      * state). `csrfToken` carries the trusted reference
-     * {@see CsrfTokenInterface::getToken()} issues — the HTML port
+     * {@see CsrfToken::$token} issues — the HTML port
      * renders it into the form's hidden `_token` input so the
      * subsequent POST passes CSRF validation.
      */
@@ -66,7 +67,7 @@ class Contact extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],
-            'csrfToken' => $this->csrf->getToken(),
+            'csrfToken' => $this->csrf->token,
             // Phase 3: an empty ContactForm for the HTML port to render
             // via `{{ form.input(...) }}`. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ContactForm::class),
@@ -80,23 +81,15 @@ class Contact extends ResourceObject
      * @psalm-taint-source input $contactName02
      * @psalm-taint-source input $contactEmail
      * @psalm-taint-source input $contactContents
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goTop', href: 'page://self/')]
+    #[CsrfProtected]
     public function onPost(
         string $contactName01,
         string $contactName02,
         string $contactEmail,
         string $contactContents,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new SubmitContactInput(
                 contactName01: $contactName01,

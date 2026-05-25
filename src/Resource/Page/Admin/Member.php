@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,8 +22,8 @@ use MyVendor\BeMart\Be\Input\CreateMemberInput;
 use MyVendor\BeMart\Be\Input\DeleteMemberInput;
 use MyVendor\BeMart\Be\Input\GetMemberInput;
 use MyVendor\BeMart\Be\Input\UpdateMemberInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminMemberForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -65,8 +66,8 @@ class Member extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
-        private readonly AdminSessionInterface $adminSession,
+        private readonly CsrfToken $csrf,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -81,7 +82,7 @@ class Member extends ResourceObject
     public function onGet(string|null $loginId = null): static
     {
         if ($loginId === null || $loginId === '') {
-            if ($this->adminSession->adminId() === null) {
+            if ($this->adminSession->adminId === null) {
                 $this->code = Code::FORBIDDEN;
                 $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 
@@ -97,7 +98,7 @@ class Member extends ResourceObject
                 'name' => '',
                 'authority' => 0,
                 'work' => 0,
-                'csrfToken' => $this->csrf->getToken(),
+                'csrfToken' => $this->csrf->token,
                 'form' => $form,
             ];
 
@@ -158,23 +159,15 @@ class Member extends ResourceObject
      * @psalm-taint-source input $password
      * @psalm-taint-source input $name
      * @psalm-taint-source input $authority
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
+    #[CsrfProtected]
     public function onPost(
         string $loginId,
         string $password,
         string $name,
         int $authority,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreateMemberInput(
                 loginId: $loginId,
@@ -229,21 +222,13 @@ class Member extends ResourceObject
      *
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $name
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
+    #[CsrfProtected]
     public function onPut(
         string $loginId,
         string|null $name = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateMemberInput(
                 loginId: $loginId,
@@ -288,18 +273,11 @@ class Member extends ResourceObject
      * raises {@see InsufficientAuthorityException} → 403.
      *
      * @psalm-taint-source input $loginId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
-    public function onDelete(string $loginId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $loginId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeleteMemberInput(loginId: $loginId));
         } catch (SemanticVariableException $e) {

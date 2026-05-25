@@ -10,7 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Entity\AddressEntity;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
@@ -71,7 +71,7 @@ final class AdminOrderExtrasResourceTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -212,7 +212,7 @@ final class AdminOrderExtrasResourceTest extends TestCase
 
     public function testSendMailHappyPathInvokesMailer(): void
     {
-        $before = count($this->mailer->sent());
+        $before = count($this->mailer->sent);
 
         $ro = $this->resource->post('page://self/admin/order/send-mail', [
             'orderNo' => self::ORDER_NO_A,
@@ -222,7 +222,7 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame(self::ORDER_NO_A, $ro->body['orderNo']);
         $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
-        $this->assertSame($before + 1, count($this->mailer->sent()));
+        $this->assertSame($before + 1, count($this->mailer->sent));
     }
 
     public function testSendMailUnknownOrderReturns404(): void

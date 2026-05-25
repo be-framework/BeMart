@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Template;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminTemplateAddForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -31,7 +31,7 @@ use function assert;
 class TemplateAdd extends ResourceObject
 {
     public function __construct(
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -39,7 +39,7 @@ class TemplateAdd extends ResourceObject
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
     public function onGet(): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 

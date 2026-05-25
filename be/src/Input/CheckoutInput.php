@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Being\CheckoutPrepared;
  *         Reasons: OrderQueryInterface, PurchaseFlowInterface
  *     → CheckoutSettled    (Stage 2 — inventory + payment + order-number)
  *         Reasons: InventoryAllocatorInterface, PaymentGatewayInterface,
- *                  OrderNumberGeneratorInterface
+ *                  OrderNoProvider
  *     → CheckoutCompleted  (Final — persist + mail + cart-clear)
  *         Reasons: OrderCommandInterface, MailerInterface,
  *                  CartCommandInterface

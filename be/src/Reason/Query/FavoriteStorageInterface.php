@@ -15,9 +15,9 @@ use Ray\MediaQuery\Annotation\DbQuery;
  * trivial enough to share one interface.
  *
  *   - add(customerId, productCode): idempotent — duplicate add is a no-op
- *   - has(customerId, productCode): exists check
+ *   - exists(customerId, productCode): existence check
  *   - listByCustomer(customerId): list for the customer's favorites view
- *   - remove(customerId, productCode): for the future doRemoveFavorite pilot
+ *   - delete(customerId, productCode): for the future doRemoveFavorite pilot
  */
 interface FavoriteStorageInterface
 {
@@ -25,7 +25,7 @@ interface FavoriteStorageInterface
     public function add(FavoriteEntity $favorite): void;
 
     #[DbQuery('favorite_has')]
-    public function has(string $customerId, string $productCode): FavoritePresence;
+    public function exists(string $customerId, string $productCode): FavoritePresence;
 
     /** @return list<FavoriteEntity> */
     #[DbQuery('favorite_list')]

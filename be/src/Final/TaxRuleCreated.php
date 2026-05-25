@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\TaxRuleEntity;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\TaxRuleIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\TaxRuleIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -29,16 +29,16 @@ final readonly class TaxRuleCreated
         #[Input] float $taxRate,
         #[Input] string $applyDate,
         #[Input] int $roundingType,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] TaxRuleStorageInterface $taxRules,
-        #[Inject] TaxRuleIdGeneratorInterface $idGenerator,
+        #[Inject] TaxRuleIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $entity = new TaxRuleEntity(
-            taxRuleId: $idGenerator->next()->value,
+            taxRuleId: $ids->get(),
             taxRate: $taxRate,
             roundingType: $roundingType,
             applyDate: $applyDate,

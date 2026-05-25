@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Delivery;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,7 +18,6 @@ use MyVendor\BeMart\Be\Final\DeliveryUpdated;
 use MyVendor\BeMart\Be\Input\DeleteDeliveryInput;
 use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
 use MyVendor\BeMart\Be\Input\UpdateDeliveryInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminDeliveryForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -35,7 +35,6 @@ class Delivery extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -103,22 +102,14 @@ class Delivery extends ResourceObject
      * @psalm-taint-source input $deliveryId
      * @psalm-taint-source input $deliveryName
      * @psalm-taint-source input $visible
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
+    #[CsrfProtected]
     public function onPut(
         string $deliveryId,
         string|null $deliveryName = null,
         bool|null $visible = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateDeliveryInput(
                 deliveryId: $deliveryId,
@@ -156,18 +147,11 @@ class Delivery extends ResourceObject
 
     /**
      * @psalm-taint-source input $deliveryId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
-    public function onDelete(string $deliveryId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $deliveryId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeleteDeliveryInput(deliveryId: $deliveryId));
         } catch (UnauthorizedAdminAccessException) {

@@ -121,7 +121,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $this->insertFavorite($customerId, $product);
 
         $storage = $this->sql(FavoriteStorageInterface::class);
-        $this->assertTrue($storage->has((string) $customerId, 'HAS-IT')->exists);
+        $this->assertTrue($storage->exists((string) $customerId, 'HAS-IT')->exists);
     }
 
     public function testHasReturnsFalseWhenFavoriteMissing(): void
@@ -130,8 +130,8 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $this->insertProduct(['product_code' => 'NOT-FAVORITED']);
 
         $storage = $this->sql(FavoriteStorageInterface::class);
-        $this->assertFalse($storage->has((string) $customerId, 'NOT-FAVORITED')->exists);
-        $this->assertFalse($storage->has((string) $customerId, 'DOES-NOT-EXIST')->exists);
+        $this->assertFalse($storage->exists((string) $customerId, 'NOT-FAVORITED')->exists);
+        $this->assertFalse($storage->exists((string) $customerId, 'DOES-NOT-EXIST')->exists);
     }
 
     public function testAddInsertsNewFavorite(): void
@@ -147,7 +147,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
             unitPrice: 0,
         ));
 
-        $this->assertTrue($storage->has((string) $customerId, 'NEW-FAV')->exists);
+        $this->assertTrue($storage->exists((string) $customerId, 'NEW-FAV')->exists);
         $this->assertCount(1, $storage->listByCustomer((string) $customerId));
     }
 
@@ -173,7 +173,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         // product_id) index for Phase 2b. For now, document the gap
         // by asserting the projection still reports a single entry
         // when GROUP BY-style consumers read it.
-        $this->assertTrue($storage->has((string) $customerId, 'DUP-FAV')->exists);
+        $this->assertTrue($storage->exists((string) $customerId, 'DUP-FAV')->exists);
     }
 
     public function testAddIgnoresUnknownProductCode(): void
@@ -188,7 +188,7 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
             unitPrice: 0,
         ));
 
-        $this->assertFalse($storage->has((string) $customerId, 'GHOST')->exists);
+        $this->assertFalse($storage->exists((string) $customerId, 'GHOST')->exists);
     }
 
     public function testRemoveDeletesByCustomerAndProductCode(): void
@@ -198,10 +198,10 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
         $this->insertFavorite($customerId, $product);
 
         $storage = $this->sql(FavoriteStorageInterface::class);
-        $this->assertTrue($storage->has((string) $customerId, 'REM-FAV')->exists);
+        $this->assertTrue($storage->exists((string) $customerId, 'REM-FAV')->exists);
 
         $storage->delete((string) $customerId, 'REM-FAV');
-        $this->assertFalse($storage->has((string) $customerId, 'REM-FAV')->exists);
+        $this->assertFalse($storage->exists((string) $customerId, 'REM-FAV')->exists);
     }
 
     public function testRemoveIsNoOpForUnknownProductCode(): void
@@ -212,6 +212,6 @@ final class SqlFavoriteStorageTest extends AbstractSqlTestCase
 
         $storage = $this->sql(FavoriteStorageInterface::class);
         $storage->delete((string) $customerId, 'NOT-A-REAL-CODE');
-        $this->assertTrue($storage->has((string) $customerId, 'KEEP-ME')->exists);
+        $this->assertTrue($storage->exists((string) $customerId, 'KEEP-ME')->exists);
     }
 }

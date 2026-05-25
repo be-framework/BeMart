@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderPdfExported;
  * TCPDF + a configurable template) which is well out of Phase 1
  * scope. The Wave 9η iteration returns a text/plain placeholder body
  * keyed by the targeted orderNo so the AUTHZ + URL surface can be
- * exercised; the real PDF generator is Phase 2.
+ * exercised; the real PDF renderer is Phase 2.
  */
 #[Be(AdminOrderPdfExported::class)]
 final readonly class AdminExportOrderPdfInput

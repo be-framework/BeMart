@@ -10,7 +10,7 @@ use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
 use MyVendor\BeMart\Be\Input\GetAdminCustomerInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -26,7 +26,7 @@ use function dirname;
  * pre-seeded). Order history / favorites are empty for alice in the
  * default fixtures — the projection still returns valid empty lists
  * with `orderCount=0` / `favoriteCount=0` / `totalSpent=0`. The 403 /
- * 404 branches are driven by rebinding AdminSessionInterface (mirrors
+ * 404 branches are driven by rebinding AdminSession (mirrors
  * the Wave 4 AdminLogoutResourceTest helper).
  */
 final class AdminCustomerFetchedTest extends TestCase
@@ -58,7 +58,7 @@ final class AdminCustomerFetchedTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);

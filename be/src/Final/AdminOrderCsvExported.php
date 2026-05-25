@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 
 use function assert;
@@ -24,7 +24,7 @@ use function stream_get_contents;
  *   AdminExportOrderInput → AdminOrderCsvExported  (Direct, safe read)
  *
  * AUTHZ — admin firewall:
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess (403)
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess (403)
  *
  * Light implementation: aggregate every finalized order via
  * {@see OrderQueryInterface::listAll}, dump as RFC 4180 CSV. The
@@ -42,10 +42,10 @@ final readonly class AdminOrderCsvExported
     public int $rowCount;
 
     public function __construct(
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] OrderQueryInterface $orderQuery,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

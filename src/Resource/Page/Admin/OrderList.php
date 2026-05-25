@@ -22,7 +22,7 @@ use function assert;
  *
  * Safe read. No CSRF (read-only). Admin-only — the Be Final raises
  * {@see UnauthorizedAdminAccessException} when
- * {@see \MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface}
+ * {@see \MyVendor\BeMart\Be\Reason\Service\AdminSession}
  * reports no admin session; we map that to 403. Distinct from the
  * customer-side 401: admin and customer firewalls are parallel (Wave 4
  * decision).

@@ -163,7 +163,7 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
     }
 
     #[Override]
-    public function visible(string $masterType, string $rowId, bool $visible): void
+    public function setVisible(string $masterType, string $rowId, bool $visible): void
     {
         if (! $this->supportsVisible($masterType)) {
             // Either an unknown master, or a known master with no
@@ -172,10 +172,10 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
         }
 
         match ($masterType) {
-            'payment' => $this->payments->visible($rowId, $visible),
-            'delivery' => $this->deliveries->visible($rowId, $visible),
-            'classCategory' => $this->classCategories->visible($rowId, $visible),
-            'news' => $this->news->visible($rowId, $visible),
+            'payment' => $this->payments->setVisible($rowId, $visible),
+            'delivery' => $this->deliveries->setVisible($rowId, $visible),
+            'classCategory' => $this->classCategories->setVisible($rowId, $visible),
+            'news' => $this->news->setVisible($rowId, $visible),
             default => throw new MasterTypeFormatException(),
         };
     }

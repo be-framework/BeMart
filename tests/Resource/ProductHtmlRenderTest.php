@@ -258,7 +258,7 @@ final class ProductHtmlRenderTest extends TestCase
             // The add-to-cart form's hidden CSRF input. EC-CUBE's
             // detail.twig drives add-cart through AJAX with the
             // `eccube-csrf-token` meta; BeMart's ported form carries the
-            // token as a hidden `_token` input (CsrfTokenInterface
+            // token as a hidden `_token` input (CsrfToken
             // reference). Residual by its `_token` field name.
             'name="_token"',
         ] as $family) {

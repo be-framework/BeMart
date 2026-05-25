@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\PurchaseTotals;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -23,9 +23,9 @@ use Ray\InputQuery\Attribute\Input;
  *   1. `OrderQueryInterface` — proves a pre-order with
  *      orderStatus=PROCESSING(8) exists for the given preOrderId. Throws
  *      `PreOrderNotFoundException` on miss.
- *   2. `SessionInterface` — proves the current request's customer owns
+ *   2. `CustomerSession` — proves the current request's customer owns
  *      the pre-order. Phase B Slice 6 (Pilot 5 F-1 AUTHZ): compare
- *      `$session->customerId()` against `$order->customerId`; mismatch
+ *      `$session->customerId` against `$order->customerId`; mismatch
  *      (including anonymous sessions) throws
  *      `UnauthorizedPreOrderAccessException`.
  *   3. `PurchaseFlowInterface` — runs the EC-CUBE shopping flow against the
@@ -58,7 +58,7 @@ final readonly class CheckoutPrepared
     public function __construct(
         #[Input] public string $preOrderId,
         #[Inject] OrderQueryInterface $orderQuery,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] PurchaseFlowInterface $purchaseFlow,
     ) {
         $order = $orderQuery->byPreOrderId($preOrderId);
@@ -66,7 +66,7 @@ final readonly class CheckoutPrepared
             throw new PreOrderNotFoundException();
         }
 
-        if ($session->customerId() !== $order->customerId) {
+        if ($session->customerId !== $order->customerId) {
             throw new UnauthorizedPreOrderAccessException();
         }
 

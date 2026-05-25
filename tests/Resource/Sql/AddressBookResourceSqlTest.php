@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
 
 use function assert;
@@ -71,7 +71,7 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)
+                $this->bind(CustomerSession::class)
                     ->toInstance(new FakeSession($this->customerId));
             }
         };

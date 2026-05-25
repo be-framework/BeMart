@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\PageEntity;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\PageIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\PageIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -31,16 +31,16 @@ final readonly class PageCreated
         #[Input] string $pageName,
         #[Input] string $pageUrl,
         #[Input] string $pageFileName,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] PageStorageInterface $pages,
-        #[Inject] PageIdGeneratorInterface $idGenerator,
+        #[Inject] PageIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $entity = new PageEntity(
-            pageId: $idGenerator->next()->value,
+            pageId: $ids->get(),
             pageName: $pageName,
             pageUrl: $pageUrl,
             pageFileName: $pageFileName,

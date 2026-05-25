@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -23,12 +23,12 @@ use function is_string;
  * AUTHN / AUTHZ / CSRF branches. The only differences are:
  *
  *  - the storage binding (BlockStorageInterface → SqlBlockStorage) and
- *    id generator (BlockIdGeneratorInterface → direct MediaQuery block id proxy) are
+ *    id query (BlockIdQueryInterface → direct MediaQuery block id proxy) are
  *    layered via the base class's sqlOverrideModule; persistence is
  *    against the real dtb_block table.
  *
  *  - blockIds are numeric strings drawn from dtb_block.id, not the
- *    `bk-` prefixed hex the FakeBlockIdGenerator emits. Both suites
+ *    `bk-` prefixed hex the FakeBlockIdProvider emits. Both suites
  *    assert "the response carries a blockId" but only the Fake side
  *    ever observes the literal seed handle (`bk-header`) —
  *    SqlBlockStorage rejects it as non-numeric on lookup (the same 404
@@ -68,7 +68,7 @@ final class AdminBlockResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

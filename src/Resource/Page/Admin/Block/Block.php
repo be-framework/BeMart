@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Block;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,7 +16,6 @@ use MyVendor\BeMart\Be\Final\BlockDeleted;
 use MyVendor\BeMart\Be\Final\BlockUpdated;
 use MyVendor\BeMart\Be\Input\DeleteBlockInput;
 use MyVendor\BeMart\Be\Input\UpdateBlockInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminBlockForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -43,7 +43,6 @@ class Block extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -69,22 +68,14 @@ class Block extends ResourceObject
      * @psalm-taint-source input $blockId
      * @psalm-taint-source input $blockName
      * @psalm-taint-source input $blockFileName
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
+    #[CsrfProtected]
     public function onPut(
         string $blockId,
         string|null $blockName = null,
         string|null $blockFileName = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateBlockInput(
                 blockId: $blockId,
@@ -123,18 +114,11 @@ class Block extends ResourceObject
 
     /**
      * @psalm-taint-source input $blockId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
-    public function onDelete(string $blockId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $blockId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));
         } catch (UnauthorizedAdminAccessException) {

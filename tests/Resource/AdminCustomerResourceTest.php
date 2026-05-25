@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -38,8 +38,8 @@ final class AdminCustomerResourceTest extends TestCase
     /**
      * Build a fresh resource client with the given admin session
      * adminId (null = admin-anonymous). Same pattern as
-     * AdminLogoutResourceTest — rebinds AdminSessionInterface rather
-     * than SessionInterface because admin and customer are parallel
+     * AdminLogoutResourceTest — rebinds AdminSession rather
+     * than CustomerSession because admin and customer are parallel
      * firewalls (Wave 4 decision).
      */
     private function rebindAdminSession(string|null $adminId): void
@@ -54,7 +54,7 @@ final class AdminCustomerResourceTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);

@@ -64,7 +64,7 @@ final class ContactResourceTest extends TestCase
         $this->assertSame('/contact/complete', $ro->headers['Location']);
         $this->assertSame('yamada@example.com', $ro->body['contactEmail']);
 
-        $sent = $this->mailer->contactInquiries();
+        $sent = $this->mailer->contactInquiries;
         $this->assertCount(1, $sent);
         $this->assertSame('お問い合わせの本文です。', $sent[0]->contactContents);
     }

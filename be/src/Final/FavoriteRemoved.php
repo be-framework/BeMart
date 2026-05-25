@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -35,15 +35,15 @@ final readonly class FavoriteRemoved
 
     public function __construct(
         #[Input] string $productCode,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] FavoriteStorageInterface $favorites,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }
 
-        $this->alreadyAbsent = ! $favorites->has($sessionCustomerId, $productCode)->exists;
+        $this->alreadyAbsent = ! $favorites->exists($sessionCustomerId, $productCode)->exists;
         $favorites->delete($sessionCustomerId, $productCode);
 
         $this->customerId = $sessionCustomerId;

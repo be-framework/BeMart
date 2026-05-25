@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Delivery;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\AdminDeliveryListFetched;
 use MyVendor\BeMart\Be\Final\DeliveryCreated;
 use MyVendor\BeMart\Be\Input\CreateDeliveryInput;
 use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -33,7 +33,6 @@ class DeliveryList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -65,21 +64,13 @@ class DeliveryList extends ResourceObject
     /**
      * @psalm-taint-source input $deliveryName
      * @psalm-taint-source input $visible
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
+    #[CsrfProtected]
     public function onPost(
         string $deliveryName,
         bool $visible = true,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreateDeliveryInput(
                 deliveryName: $deliveryName,

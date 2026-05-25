@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\PluginStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -16,7 +16,7 @@ use Ray\InputQuery\Attribute\Input;
  *
  *   InstallPluginInput → PluginInstalled (Direct, unsafe)
  *
- * AUTHZ — admin firewall: AdminSession::adminId() === null →
+ * AUTHZ — admin firewall: AdminSession::$adminId === null →
  * UnauthorizedAdminAccessException (403).
  *
  * INSTALL STUB: see {@see PluginStorageInterface::install}. The real
@@ -48,10 +48,10 @@ final readonly class PluginInstalled
         #[Input] string $pluginCode,
         #[Input] string $pluginName,
         #[Input] string $pluginVersion,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] PluginStorageInterface $pluginStorage,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

@@ -9,8 +9,8 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
 use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\ClassCategoryIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -35,12 +35,12 @@ final readonly class ClassCategoryCreated
     public function __construct(
         #[Input] string $classNameId,
         #[Input] string $classCategoryName,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] ClassNameStorageInterface $classNames,
         #[Inject] ClassCategoryStorageInterface $classCategories,
-        #[Inject] ClassCategoryIdGeneratorInterface $idGenerator,
+        #[Inject] ClassCategoryIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
@@ -49,7 +49,7 @@ final readonly class ClassCategoryCreated
         }
 
         $entity = new ClassCategoryEntity(
-            classCategoryId: $idGenerator->next()->value,
+            classCategoryId: $ids->get(),
             classNameId: $classNameId,
             name: $classCategoryName,
         );

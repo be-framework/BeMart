@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -21,7 +21,7 @@ use function count;
  *
  * AUTHZ — admin firewall (Wave 4 contract, parity with Wave 5M
  * CustomerListFetched):
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess
  *
  * Admin-only endpoint. The customer-facing product list (when it
  * lands) will be a sibling Final that filters on
@@ -56,10 +56,10 @@ final readonly class ProductListFetched
         #[Input] string|null $nameKeyword,
         #[Input] int $limit,
         #[Input] int $offset,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] ProductQueryInterface $productQuery,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

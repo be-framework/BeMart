@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\News;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,8 +18,8 @@ use MyVendor\BeMart\Be\Final\NewsUpdated;
 use MyVendor\BeMart\Be\Input\DeleteNewsInput;
 use MyVendor\BeMart\Be\Input\GetAdminNewsInput;
 use MyVendor\BeMart\Be\Input\UpdateNewsInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminNewsForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -42,8 +43,8 @@ class News extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
-        private readonly AdminSessionInterface $adminSession,
+        private readonly CsrfToken $csrf,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -55,7 +56,7 @@ class News extends ResourceObject
     public function onGet(string|null $newsId = null): static
     {
         if ($newsId === null || $newsId === '') {
-            if ($this->adminSession->adminId() === null) {
+            if ($this->adminSession->adminId === null) {
                 $this->code = Code::FORBIDDEN;
                 $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 
@@ -70,7 +71,7 @@ class News extends ResourceObject
                 'newsUrl' => '',
                 'publishDate' => '2026-05-23 00:00:00',
                 'linkMethod' => false,
-                'csrfToken' => $this->csrf->getToken(),
+                'csrfToken' => $this->csrf->token,
             ];
             $this->body['form'] = $this->editForm($this->body);
 
@@ -135,9 +136,9 @@ class News extends ResourceObject
      * @psalm-taint-source input $newsUrl
      * @psalm-taint-source input $publishDate
      * @psalm-taint-source input $linkMethod
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goNews', href: 'page://self/admin/news/news')]
+    #[CsrfProtected]
     public function onPut(
         string $newsId,
         string|null $newsTitle = null,
@@ -145,15 +146,7 @@ class News extends ResourceObject
         string|null $newsUrl = null,
         string|null $publishDate = null,
         bool|null $linkMethod = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdateNewsInput(
                 newsId: $newsId,
@@ -197,18 +190,11 @@ class News extends ResourceObject
 
     /**
      * @psalm-taint-source input $newsId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
-    public function onDelete(string $newsId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $newsId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeleteNewsInput(newsId: $newsId));
         } catch (UnauthorizedAdminAccessException) {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -13,7 +14,6 @@ use MyVendor\BeMart\Be\Exception\MasterRowNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\VisibleToggled;
 use MyVendor\BeMart\Be\Input\ToggleVisibleInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -40,7 +40,6 @@ class ToggleVisible extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -48,21 +47,13 @@ class ToggleVisible extends ResourceObject
      * @psalm-taint-source input $masterType
      * @psalm-taint-source input $rowId
      * @psalm-taint-source input $visible
-     * @psalm-taint-source input $csrfToken
      */
+    #[CsrfProtected]
     public function onPut(
         string $masterType,
         string $rowId,
         bool $visible,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new ToggleVisibleInput(
                 masterType: $masterType,

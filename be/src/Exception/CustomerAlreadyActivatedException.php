@@ -11,7 +11,7 @@ use DomainException;
  * Thrown when an admin asks to resend the email-verification
  * (full-registration) mail for a customer who is ALREADY an active
  * member. Phase 3 `doResendActivationMail` raises this after the admin
- * firewall has proven `adminId() !== null` and the email has resolved
+ * firewall has proven `$adminId !== null` and the email has resolved
  * to an existing customer record.
  *
  * An active customer (customerStatus = 2) carries no `secretKey` — the

@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Form\ChangeForm;
 use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
@@ -55,7 +55,7 @@ use function trim;
  *
  * The Change::onGet form-info endpoint requires AUTHN against a real
  * customer (the Be Final fetches the profile), so the `html` context's
- * `SessionInterface` is rebound to the fixture customer alice.
+ * `CustomerSession` is rebound to the fixture customer alice.
  */
 final class ChangeHtmlRenderTest extends TestCase
 {
@@ -103,7 +103,7 @@ final class ChangeHtmlRenderTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)->toInstance($this->session);
+                $this->bind(CustomerSession::class)->toInstance($this->session);
             }
         });
         $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');

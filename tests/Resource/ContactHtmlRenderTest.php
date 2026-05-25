@@ -218,7 +218,7 @@ final class ContactHtmlRenderTest extends TestCase
         // distinct EC-CUBE-only kana/address/phone missing-body-field
         // lines (some collapse-equal across the three rows) + the 2
         // hidden-CSRF-input lines (EC-CUBE's empty `_token` vs BeMart's
-        // CsrfTokenInterface reference — the values never match). The
+        // CsrfToken reference — the values never match). The
         // form-widget residual family is eliminated; what remains is the
         // frame + the genuinely-missing fields, which are flagged for a
         // follow-up vertical slice (not fixed in a template wave).
@@ -244,7 +244,7 @@ final class ContactHtmlRenderTest extends TestCase
             '<title>',
             'meta name="author"',
             // The hidden CSRF input: EC-CUBE renders a live per-request
-            // form `_token`, BeMart renders the CsrfTokenInterface
+            // form `_token`, BeMart renders the CsrfToken
             // reference. The token VALUE can never match across the two
             // runtimes — residual by its `_token` field name.
             'name="_token"',

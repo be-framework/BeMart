@@ -60,7 +60,7 @@ final readonly class PasswordResetCompleted
         }
 
         $hash = $passwordHasher->hash($password);
-        $customerCommand->password($token->customerId, $hash);
+        $customerCommand->updatePassword($token->customerId, $hash);
 
         // Single-use: consume the token immediately. A subsequent attempt
         // with the same resetKey will miss on getByResetKey() above and

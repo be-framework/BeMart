@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderListFetched;
  *   GetAdminOrderListInput → AdminOrderListFetched  (Direct, safe read)
  *
  * Admin-only endpoint. AUTHZ lives in the Final via the Wave 4
- * {@see \MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface} —
+ * {@see \MyVendor\BeMart\Be\Reason\Service\AdminSession} —
  * a null admin session raises
  * {@see \MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException},
  * which the BEAR layer maps to 403. Distinct from the customer-side

@@ -54,7 +54,7 @@ final class Router
         $method = strtoupper($method);
 
         $pathMatched = false;
-        foreach ($this->table->routes() as $route) {
+        foreach ($this->table->routes as $route) {
             $params = $route->match($normalizedPath);
             if ($params === null) {
                 continue;

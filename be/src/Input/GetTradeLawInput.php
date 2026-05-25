@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Final\TradeLawFetched;
  * shape. Phase 2 will split into per-item rows (see
  * {@see TradeLawStorageInterface}).
  *
- * AUTHZ in the Final (AdminSessionInterface). The customer-side display
+ * AUTHZ in the Final (AdminSession). The customer-side display
  * surface lives at {@see \MyVendor\BeMart\Resource\Page\Help\TradeLaw},
  * which is anonymous-accessible — admin and help routes are separate.
  *

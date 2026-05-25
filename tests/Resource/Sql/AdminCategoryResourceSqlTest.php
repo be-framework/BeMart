@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -25,13 +25,13 @@ use function str_contains;
  * AUTHN / CSRF / parent-resolution branches. The only differences are:
  *
  *  - the storage binding (CategoryStorageInterface → SqlCategoryStorage)
- *    and id generator (CategoryIdGeneratorInterface →
+ *    and id query (CategoryIdQueryInterface →
  *    direct MediaQuery category id proxy) are layered via the base class's
  *    sqlOverrideModule; persistence is against the real dtb_category
  *    table.
  *
  *  - categoryIds are numeric strings drawn from dtb_category.id, not
- *    the 32-char hex the FakeCategoryIdGenerator emits. Both suites
+ *    the 32-char hex the FakeCategoryIdProvider emits. Both suites
  *    assert "the response carries a categoryId" but only the Fake side
  *    ever observes a hex handle — SqlCategoryStorage rejects a
  *    non-numeric id as non-numeric on lookup (the same 404 path as any
@@ -70,7 +70,7 @@ final class AdminCategoryResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

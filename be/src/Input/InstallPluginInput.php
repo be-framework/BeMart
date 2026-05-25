@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Final\PluginInstalled;
  *   InstallPluginInput → PluginInstalled (Final — Direct, unsafe)
  *
  * AUTHZ — admin firewall: the Final pulls adminId from
- * {@see \MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface};
+ * {@see \MyVendor\BeMart\Be\Reason\Service\AdminSession};
  * `null` raises {@see \MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException}.
  *
  * INSTALL STUB: the real EC-CUBE install pipeline downloads + unzips

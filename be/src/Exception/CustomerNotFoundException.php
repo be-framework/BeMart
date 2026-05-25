@@ -10,7 +10,7 @@ use DomainException;
 /**
  * Thrown when an admin-side lookup queries a customer by email and no
  * such customer exists in storage. Wave 5 (goCustomer) raises this
- * after the admin firewall has already proven `adminId() !== null`.
+ * after the admin firewall has already proven `$adminId !== null`.
  *
  * Distinct from {@see UnauthenticatedException} — that one is the
  * customer-firewall AUTHN-missing case ("you need to log in"). This

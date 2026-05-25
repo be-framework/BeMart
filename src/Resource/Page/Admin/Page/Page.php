@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,8 +18,8 @@ use MyVendor\BeMart\Be\Final\PageUpdated;
 use MyVendor\BeMart\Be\Input\DeletePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageInput;
 use MyVendor\BeMart\Be\Input\UpdatePageInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminPageForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -38,8 +39,8 @@ class Page extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
-        private readonly AdminSessionInterface $adminSession,
+        private readonly CsrfToken $csrf,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -51,7 +52,7 @@ class Page extends ResourceObject
     public function onGet(string|null $pageId = null): static
     {
         if ($pageId === null || $pageId === '') {
-            if ($this->adminSession->adminId() === null) {
+            if ($this->adminSession->adminId === null) {
                 $this->code = Code::FORBIDDEN;
                 $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 
@@ -65,7 +66,7 @@ class Page extends ResourceObject
                 'pageUrl' => '',
                 'pageFileName' => '',
                 'pageEditType' => 1,
-                'csrfToken' => $this->csrf->getToken(),
+                'csrfToken' => $this->csrf->token,
             ];
             $form = $this->formFactory->newInstance(AdminPageForm::class);
             assert($form instanceof AdminPageForm);
@@ -114,23 +115,15 @@ class Page extends ResourceObject
      * @psalm-taint-source input $pageName
      * @psalm-taint-source input $pageUrl
      * @psalm-taint-source input $pageFileName
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goPage', href: 'page://self/admin/page/page')]
+    #[CsrfProtected]
     public function onPut(
         string $pageId,
         string|null $pageName = null,
         string|null $pageUrl = null,
         string|null $pageFileName = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new UpdatePageInput(
                 pageId: $pageId,
@@ -171,18 +164,11 @@ class Page extends ResourceObject
 
     /**
      * @psalm-taint-source input $pageId
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
-    public function onDelete(string $pageId, string|null $csrfToken = null): static
+    #[CsrfProtected]
+    public function onDelete(string $pageId): static
     {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new DeletePageInput(pageId: $pageId));
         } catch (UnauthorizedAdminAccessException) {

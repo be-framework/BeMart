@@ -32,7 +32,7 @@ Pilot 3 で確立済みの pre-order と紐付いたものを再確認するの�
 | preOrder 全フィールド | PreOrderQuery (Pilot 3 fixture 拡張) | 注文確定の元データ |
 | subtotal / deliveryFeeTotal / charge / discount / tax / total / paymentTotal | PurchaseFlowApplied (Pilot 3) | 金額計算済みの値 |
 | stock 残高 (per item) | InventoryQuery | 在庫引当時の最終チェック |
-| orderNo | OrderNumberGenerator | 注文番号発番 |
+| orderNo | OrderNoProvider | 注文番号発番 |
 | addPoint / usePoint | ポイント計算済み | Pilot 3 totals に含む |
 | completeMessage | 決済プラグインからの追記 (Pilot 5 では空文字) | ShoppingComplete 表示用 |
 
@@ -53,7 +53,7 @@ Pilot 3 で確立済みの pre-order と紐付いたものを再確認するの�
 | preOrderId | client-input | `CheckoutInput` | Pilot 3 から引き継がれる識別子 |
 | 在庫引当 | side-effect | `InventoryAllocatorInterface` (Reason) | PurchaseFlow の StockReducePostProcessor 相当 |
 | 決済確定 | side-effect | `PaymentGatewayInterface` (Reason) | PaymentMethod::checkout() 相当 |
-| 注文番号発番 | server-derived | `OrderNumberGeneratorInterface` (Reason) | Pilot 4 IdGenerator の踏襲 |
+| 注文番号発番 | server-derived | `OrderNoProvider` (Reason) | Pilot 4 IdProvider の踏襲 |
 | 注文永続化 | side-effect | `OrderCommandInterface` (Reason) | Pilot 4 CustomerCommand の踏襲 |
 | メール送信 | side-effect | `MailerInterface` (Reason) | 新規 |
 | カートクリア | side-effect | `CartCommandInterface::clear()` | Pilot 2 Cart の拡張 |
@@ -66,7 +66,7 @@ CheckoutInput (preOrderId, paymentMethodId)
 CheckoutSettling  ← Multi-Reason Being (cascading 副作用)
   - InventoryAllocator (在庫引当 → InsufficientStockException で停止)
   - PaymentGateway (決済確定 → PaymentDeclinedException で停止)
-  - OrderNumberGenerator (注文番号発番)
+  - OrderNoProvider (注文番号発番)
   - PreOrderQuery (確定済み totals の読み取り)
   ↓  #[Be(CheckoutCompleted::class)]
 CheckoutCompleted  ← 3 副作用の収束 Final
@@ -103,7 +103,7 @@ Phase 1 (FakeQuery) 方針で実装する:
 
 - **`InventoryAllocatorInterface`** (新規) — `allocate(preOrderId)`。fixture: pre-order item ごとに固定 stock を返す `FakeInventoryAllocator`。3 件目以降は `InsufficientStockException` を throw するシナリオを混ぜる
 - **`PaymentGatewayInterface`** (新規) — `checkout(preOrderId, paymentMethodId, amount)`。fixture: `paymentMethodId === 99` を「決済失敗」シナリオ、それ以外を成功
-- **`OrderNumberGeneratorInterface`** (新規) — `generate()`。bcc Pilot 4 の CustomerIdGenerator と同様の 32-hex 形式
+- **`OrderNoProvider`** (新規) — `get()`。bcc Pilot 4 の CustomerIdProvider と同様の 32-hex 形式
 - **`OrderCommandInterface`** (新規) — `persist(OrderEntity)`。fixture: `FakeOrderStorage` (Pilot 4 の FakeCustomerStorage パターン)
 - **`MailerInterface`** (新規) — `sendOrderConfirmation(OrderEntity)`。fixture: `FakeMailer` が送信回数を記録
 - **`CartCommandInterface::clear`** (拡張) — Pilot 2 の既存 Command にメソッド追加。fixture: `FakeCartStorage` に `clear(preOrderId)` を追加
@@ -127,7 +127,7 @@ CustomerRegistered が `CustomerCommand` 1 つしか持たなかったのに対�
 ## 次ステップへの引き渡し事項
 
 - `CheckoutInput` は Pilot 3 既存の `preOrderId` と `paymentMethodId` を受け取る。新規 Semantic は不要 (Pilot 3 と共有)
-- `CheckoutSettling` は **Multi-Reason Being** として 4 つの `#[Inject]` Reason を持つ。実行順序は (1) PreOrderQuery → (2) InventoryAllocator → (3) PaymentGateway → (4) OrderNumberGenerator
+- `CheckoutSettling` は **Multi-Reason Being** として 4 つの `#[Inject]` Reason を持つ。実行順序は (1) PreOrderQuery → (2) InventoryAllocator → (3) PaymentGateway → (4) OrderNoProvider
 - `CheckoutCompleted` は **3 副作用収束 Final**。constructor 内で 3 つの Reason を順に呼ぶ
 - Fake fixture: `var/fake/orders.json` (空配列で start)、`var/fake/inventory.json` (3 アイテム分の stock 値)
 - 例外: `InsufficientStockException`, `PaymentDeclinedException`, `PreOrderNotFoundException` を新規作成
@@ -162,7 +162,7 @@ CustomerRegistered が `CustomerCommand` 1 つしか持たなかったのに対�
     },
     {
       "name": "orderNo",
-      "from": "OrderNumberGeneratorInterface",
+      "from": "OrderNoProvider",
       "purpose": "注文番号発番",
       "fake_fixture_path": null
     }
@@ -171,7 +171,7 @@ CustomerRegistered が `CustomerCommand` 1 つしか持たなかったのに対�
     {"type": "DB-Query", "interface_name": "PreOrderQueryInterface", "phase": "Pilot 3 既存", "fake_fixture": "be/var/fake/preorders.json"},
     {"type": "Inventory", "interface_name": "InventoryAllocatorInterface", "phase": "Phase 1 (FakeQuery)", "fake_fixture": "be/var/fake/inventory.json"},
     {"type": "Payment", "interface_name": "PaymentGatewayInterface", "phase": "Phase 1 (FakeQuery)", "fake_fixture": null},
-    {"type": "Other", "interface_name": "OrderNumberGeneratorInterface", "phase": "Phase 1 (FakeQuery)", "fake_fixture": null},
+    {"type": "Other", "interface_name": "OrderNoProvider", "phase": "Phase 1 (FakeQuery)", "fake_fixture": null},
     {"type": "DB-Command", "interface_name": "OrderCommandInterface", "phase": "Phase 1 (FakeQuery)", "fake_fixture": "be/var/fake/orders.json"},
     {"type": "Mailer", "interface_name": "MailerInterface", "phase": "Phase 1 (FakeQuery)", "fake_fixture": null},
     {"type": "DB-Command", "interface_name": "CartCommandInterface", "phase": "Pilot 2 既存 + clear() 追加", "fake_fixture": "be/var/fake/carts.json"}

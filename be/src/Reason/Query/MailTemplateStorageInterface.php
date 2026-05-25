@@ -12,7 +12,7 @@ use Ray\MediaQuery\Annotation\DbQuery;
  * Mail template storage — unified Query + Command (Wave 8).
  *
  *   - list()                              → every template, sorted by id
- *   - findById(int $mailTemplateId)       → one template or null
+ *   - item(int $mailTemplateId)       → one template or null
  *   - update(MailTemplateEntity $entity)  → replace subject
  *
  * The migration scope only covers subject changes. Creating a new

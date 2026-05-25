@@ -51,14 +51,14 @@ final class EccubeSharedSessionAdapterTest extends TestCase
 
         $adapter = new EccubeSharedSessionAdapter();
 
-        $this->assertSame('customer-001', $adapter->customerId());
+        $this->assertSame('customer-001', $adapter->customerId);
     }
 
     public function testReturnsNullWhenSessionAndEnvUnset(): void
     {
         $adapter = new EccubeSharedSessionAdapter();
 
-        $this->assertNull($adapter->customerId());
+        $this->assertNull($adapter->customerId);
     }
 
     public function testCliEnvFallbackUsedWhenSessionEmpty(): void
@@ -67,7 +67,7 @@ final class EccubeSharedSessionAdapterTest extends TestCase
 
         $adapter = new EccubeSharedSessionAdapter();
 
-        $this->assertSame('customer-042', $adapter->customerId());
+        $this->assertSame('customer-042', $adapter->customerId);
     }
 
     public function testSessionTakesPriorityOverCliEnv(): void
@@ -81,7 +81,7 @@ final class EccubeSharedSessionAdapterTest extends TestCase
 
         $adapter = new EccubeSharedSessionAdapter();
 
-        $this->assertSame('from-session', $adapter->customerId());
+        $this->assertSame('from-session', $adapter->customerId);
     }
 
     public function testEmptyStringSessionTreatedAsAnonymous(): void
@@ -90,7 +90,7 @@ final class EccubeSharedSessionAdapterTest extends TestCase
 
         $adapter = new EccubeSharedSessionAdapter();
 
-        $this->assertNull($adapter->customerId());
+        $this->assertNull($adapter->customerId);
     }
 
     public function testNonStringSessionTreatedAsAnonymous(): void
@@ -102,7 +102,7 @@ final class EccubeSharedSessionAdapterTest extends TestCase
 
         $adapter = new EccubeSharedSessionAdapter();
 
-        $this->assertNull($adapter->customerId());
+        $this->assertNull($adapter->customerId);
     }
 
     public function testCustomSessionKeyHonored(): void
@@ -116,6 +116,6 @@ final class EccubeSharedSessionAdapterTest extends TestCase
             sessionKey: 'alt_customer_field',
         );
 
-        $this->assertSame('customer-alt', $adapter->customerId());
+        $this->assertSame('customer-alt', $adapter->customerId);
     }
 }

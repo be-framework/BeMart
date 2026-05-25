@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart;
 
+use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Router\RouteMethodNotAllowedException;
 use MyVendor\BeMart\Router\RouteNotFoundException;
@@ -166,7 +167,7 @@ final class Bootstrap
             return $ro->code >= 400 ? 1 : 0;
         }
 
-        http_response_code($ro->code);
+        http_response_code($this->httpStatusCode($ro->code, $isHtml, $isRedirect));
         if ($isHtml) {
             foreach ($ro->headers as $name => $value) {
                 if (is_string($value)) {
@@ -193,6 +194,15 @@ final class Bootstrap
         echo json_encode($ro->body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         return $ro->code >= 400 ? 1 : 0;
+    }
+
+    private function httpStatusCode(int $resourceCode, bool $isHtml, bool $isRedirect): int
+    {
+        if ($isHtml && $isRedirect && ($resourceCode < 300 || $resourceCode >= 400)) {
+            return Code::SEE_OTHER;
+        }
+
+        return $resourceCode;
     }
 
     /**

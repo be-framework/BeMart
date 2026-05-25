@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\TagEntity;
 use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\TagIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\TagIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -22,16 +22,16 @@ final readonly class TagCreated
 
     public function __construct(
         #[Input] string $tagName,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] TagStorageInterface $tags,
-        #[Inject] TagIdGeneratorInterface $idGenerator,
+        #[Inject] TagIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $entity = new TagEntity(
-            tagId: $idGenerator->next()->value,
+            tagId: $ids->get(),
             tagName: $tagName,
         );
 

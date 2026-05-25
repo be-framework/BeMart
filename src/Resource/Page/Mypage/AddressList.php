@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\CustomerAddressCreated;
 use MyVendor\BeMart\Be\Final\CustomerAddressListFetched;
 use MyVendor\BeMart\Be\Input\CreateCustomerAddressInput;
 use MyVendor\BeMart\Be\Input\GetCustomerAddressListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -35,13 +35,12 @@ use function assert;
  *
  * GET is safe and skips CSRF; POST is unsafe and validates CSRF.
  * customerId is NEVER taken from the request body — the Be Final
- * pulls it from SessionInterface (Pilot 5 F-2 / Pilot 8 lesson).
+ * pulls it from CustomerSession (Pilot 5 F-2 / Pilot 8 lesson).
  */
 class AddressList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -83,9 +82,9 @@ class AddressList extends ResourceObject
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
+    #[CsrfProtected]
     public function onPost(
         string $name01,
         string $name02,
@@ -97,15 +96,7 @@ class AddressList extends ResourceObject
         string|null $kana01 = null,
         string|null $kana02 = null,
         string|null $companyName = null,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreateCustomerAddressInput(
                 name01: $name01,

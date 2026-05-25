@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\DeliveryEntity;
 use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\DeliveryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\DeliveryIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -27,16 +27,16 @@ final readonly class DeliveryCreated
     public function __construct(
         #[Input] string $deliveryName,
         #[Input] bool $visible,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] DeliveryStorageInterface $deliveries,
-        #[Inject] DeliveryIdGeneratorInterface $idGenerator,
+        #[Inject] DeliveryIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $entity = new DeliveryEntity(
-            deliveryId: $idGenerator->next()->value,
+            deliveryId: $ids->get(),
             deliveryName: $deliveryName,
             visible: $visible,
         );

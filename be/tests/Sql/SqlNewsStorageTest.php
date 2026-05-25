@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\NewsEntity;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\NewsIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\NewsIdQueryInterface;
 
 use function str_contains;
 use function strlen;
@@ -98,7 +98,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
-        // The Fake seed `nw-welcome` and hex ids from FakeNewsIdGenerator
+        // The Fake seed `nw-welcome` and hex ids from FakeNewsIdProvider
         // can never match an int PK; surface as miss so NewsDeleted's
         // 404 path fires instead of a PDO error.
         $storage = $this->sql(NewsStorageInterface::class);
@@ -109,8 +109,8 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
 
     public function testPutInsertsNewRowWithProvidedId(): void
     {
-        $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(NewsIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new NewsEntity(
             newsId: $newId,
@@ -141,8 +141,8 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
 
     public function testPutSerialisesIsoDateToMysqlDatetime(): void
     {
-        $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(NewsIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(NewsStorageInterface::class);
 
         $storage->put(new NewsEntity(
@@ -171,8 +171,8 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
 
     public function testPutPersistsLinkMethodAsTinyint(): void
     {
-        $generator = $this->sql(NewsIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(NewsIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(NewsStorageInterface::class);
 
         $storage->put(new NewsEntity(
@@ -280,7 +280,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $id = $this->insertNews(['visible' => 1]);
         $storage = $this->sql(NewsStorageInterface::class);
 
-        $storage->visible((string) $id, false);
+        $storage->setVisible((string) $id, false);
 
         $stmt = $this->pdo->prepare('SELECT visible FROM dtb_news WHERE id = :id');
         $stmt->execute([':id' => $id]);
@@ -288,7 +288,7 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
         $this->assertNotFalse($row);
         $this->assertSame(0, (int) $row['visible']);
 
-        $storage->visible((string) $id, true);
+        $storage->setVisible((string) $id, true);
         $stmt->execute([':id' => $id]);
         $back = $stmt->fetch();
         $this->assertNotFalse($back);
@@ -298,20 +298,20 @@ final class SqlNewsStorageTest extends AbstractSqlTestCase
     public function testSetVisibleIsSilentNoOpForNonNumericId(): void
     {
         $storage = $this->sql(NewsStorageInterface::class);
-        $storage->visible('nw-welcome', false); // non-numeric, no exception
+        $storage->setVisible('nw-welcome', false); // non-numeric, no exception
         $this->assertTrue(true);
     }
 
-    public function testNewsIdGeneratorAllocatesIncrementingIds(): void
+    public function testNewsIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(NewsIdGeneratorInterface::class);
+        $ids = $this->sql(NewsIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $firstId = $this->insertNews();
         $secondId = $this->insertNews();
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

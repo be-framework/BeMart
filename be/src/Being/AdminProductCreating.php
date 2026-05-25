@@ -10,7 +10,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminProductCreated;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -21,7 +21,7 @@ use Ray\InputQuery\Attribute\Input;
  * {@see AdminCustomerCreating}, with two Reasons checked before
  * persistence:
  *
- *   0. AdminSessionInterface     — fail-fast if no admin session
+ *   0. AdminSession     — fail-fast if no admin session
  *   1. ProductQueryInterface     — fail-fast on duplicate productCode
  *
  * Existence of this object proves both checks passed. The downstream
@@ -57,10 +57,10 @@ final readonly class AdminProductCreating
         #[Input] public string|null $description,
         #[Input] public string|null $searchWord,
         #[Input] public string|null $note,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] ProductQueryInterface $productQuery,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

@@ -88,7 +88,7 @@ context は `APP_CONTEXT` 環境変数で切替（`app`/`prod` は JSON、`html`
 3. **domain-review** — subagent が Be 原則違反をチェック（不合格 → domain に差し戻し、最大 3 回）
 4. **application** — BEAR.Sunday でアプリケーション層（Resource）を実装
 5. **application-review** — subagent が 2 層境界違反をチェック（不合格 → application に差し戻し）
-6. **security** — 変更ファイルに認証・セッション・CSRF・決済・注文・顧客・管理系の語がマッチした場合のみ発火
+6. **security** — 変更ファイルに `(Auth|Payment|Checkout|Order|Customer)` がマッチした場合のみ発火
 
 レビューの subagent は `{ "verdict": "pass"|"fail", "findings": [...], "blocking": [...] }` の JSON を返す。`blocking` が空なら pass、1 件以上で fail。
 

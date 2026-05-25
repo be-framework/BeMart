@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Final\AdminLoggedOut;
 use MyVendor\BeMart\Be\Input\AdminLogoutInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -33,7 +33,7 @@ final class AdminLoggedOutTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);

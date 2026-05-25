@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminFileForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -20,7 +20,7 @@ use function assert;
  * directly on the filesystem). It has no Be domain entity — the
  * filesystem IS its model. This resource is therefore a THIN HTML
  * RENDERER only — it carries no `be/src/` Becoming chain, authenticating
- * at the resource layer via {@see AdminSessionInterface}.
+ * at the resource layer via {@see AdminSession}.
  *
  * The body renders the file manager in its **fresh / empty-directory**
  * state: `arrFileList` empty, `tplIsTopDir` true (at the user_data root),
@@ -36,14 +36,14 @@ use function assert;
 class FileManager extends ResourceObject
 {
     public function __construct(
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
 
     public function onGet(): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 

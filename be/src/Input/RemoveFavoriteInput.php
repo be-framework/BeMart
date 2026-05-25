@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Final\FavoriteRemoved;
  *   RemoveFavoriteInput → FavoriteRemoved (Final)
  *
  * AUTHZ via Session — customerId is NOT in the body (Pilot 5 F-2 +
- * Pilot 8 pattern). The Final pulls it from SessionInterface.
+ * Pilot 8 pattern). The Final pulls it from CustomerSession.
  *
  * Idempotent (ALPS type=idempotent): re-removing an already-absent
  * item is a silent no-op — the Final still constructs with

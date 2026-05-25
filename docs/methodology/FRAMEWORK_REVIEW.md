@@ -104,7 +104,7 @@ related to G-14 — same root cause (Singleton scope not honored across linked b
 
 ### CSRF interface direction
 
-`CsrfTokenInterface::isValid(?string $token): bool` is the only method. Slice 8 deliberately omitted `issue()` because Slice 7.2's EC-CUBE EventListener was supposed to mirror the active Symfony token into the session for the next POST.
+`CsrfToken::isValid(?string $token): bool` is the only method. Slice 8 deliberately omitted `issue()` because Slice 7.2's EC-CUBE EventListener was supposed to mirror the active Symfony token into the session for the next POST.
 
 result: `goLoginForm::onGet` returns `csrfToken: null` in the body. the API surface is honest (token is null until the EventListener runs) but the read endpoint can't help a fresh client bootstrap. **Phase 2 might want `issue()` on the interface** with the production adapter delegating to Symfony's CsrfTokenManager.
 

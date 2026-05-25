@@ -9,7 +9,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -91,14 +91,14 @@ final readonly class AdminCustomerDeleted
 
     public function __construct(
         #[Input] string $customerId,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CustomerCommandInterface $customerCommand,
         #[Inject] MailerInterface $mailer,
     ) {
         // AUTHZ cross-firewall first — refuse non-admin requests before
         // probing existence (no enumeration via 404 vs 403 distinction).
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

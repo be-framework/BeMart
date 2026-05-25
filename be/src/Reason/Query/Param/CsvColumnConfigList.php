@@ -16,18 +16,12 @@ use const JSON_THROW_ON_ERROR;
 final readonly class CsvColumnConfigList implements ToScalarInterface
 {
     /** @param list<CsvColumnConfigEntity> $entries */
-    public function __construct(private array $entries) {}
+    public function __construct(public array $entries) {}
 
     /** @param list<CsvColumnConfigEntity> $entries */
     public static function fromArray(array $entries): self
     {
         return new self($entries);
-    }
-
-    /** @return list<CsvColumnConfigEntity> */
-    public function values(): array
-    {
-        return $this->entries;
     }
 
     #[Override]
