@@ -2,8 +2,8 @@
 
 ## GraphQLスキーマの概要
 
-- 定義済み型の数: 38型（Connection/Edge/PageInfo系の中間型を含む）
-  - 実体型: 29型（Authority, Category, ClassCategory, ClassName, Country, Customer, CustomerAddress, CustomerFavoriteProduct, CustomerOrderStatus, CustomerStatus, Delivery, DeliveryDuration, DeliveryFee, DeliveryTime, DeviceType, Job, MailHistory, Member, Order, OrderItem, OrderItemType, OrderStatus, OrderStatusColor, Payment, PaymentOption, Pref, Product, ProductCategory, ProductClass, ProductConnection, ProductImage, ProductStatus, ProductStock, ProductTag, RoundingType, SaleType, Sex, Shipping, Tag, TaxDisplayType, TaxRule, TaxType, Work）
+- 定義済み型の数: 51型（実体型 42 + ページネーション型 9）
+  - 実体型: 42型（Authority, Category, ClassCategory, ClassName, Country, Customer, CustomerAddress, CustomerFavoriteProduct, CustomerOrderStatus, CustomerStatus, Delivery, DeliveryDuration, DeliveryFee, DeliveryTime, DeviceType, Job, MailHistory, Member, Order, OrderItem, OrderItemType, OrderStatus, OrderStatusColor, Payment, PaymentOption, Pref, Product, ProductCategory, ProductClass, ProductImage, ProductStatus, ProductStock, ProductTag, RoundingType, SaleType, Sex, Shipping, Tag, TaxDisplayType, TaxRule, TaxType, Work）
   - ページネーション型: 9型（CustomerConnection, CustomerEdge, CustomerPageInfo, OrderConnection, OrderEdge, OrderPageInfo, ProductConnection, ProductEdge, ProductPageInfo）
 - Query: 7件（customer, customers, hello, order, orders, product, products）
 - Mutation: 2件（updateProductStock, updateShipped）

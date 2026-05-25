@@ -60,6 +60,7 @@
 - Phase 6 の全成果物（`bin/orchestrator`, `src/`, `tests/OrchestratorTest.php`, `composer.json`, `phpunit.xml`, `.migrate/`, `orchestrator/`, `orchestrator-v1.md`, `vendor/`, `.phpunit.cache/`, `.gitignore`）は git rm で削除した。履歴は `git log` で参照可能
 
 ## Technical Decisions
+
 | Decision | Rationale |
 |----------|-----------|
 | `alps.json` を機能契約の一次資料にする | safe / unsafe / idempotent、状態、語彙が既に整理されているため |
@@ -81,6 +82,7 @@
 | 振り返りは感想ではなく運用知識として残す | 次回の判断速度を上げ、同じ迷いを減らすため |
 
 ## Issues Encountered
+
 | Issue | Resolution |
 |-------|------------|
 | admin 領域は ALPS 契約が未完成 | storefront 先行の段階移行に変更 |
@@ -91,18 +93,18 @@
 - Be Framework LLM reference: https://be-framework.github.io/llms-full.txt
 - Be Skills: https://github.com/be-framework/be-skills
 - BEAR.Skills: https://github.com/bearsunday/BEAR.Skills
-- Day 0 workflow: `/Users/akihito/git/ec-cube-alps/day0-workflow.md`
-- Project summary: `/Users/akihito/git/ec-cube-alps/README.md`
-- Coverage / next-ai notes: `/Users/akihito/git/ec-cube-alps/HANDOVER.md`
-- Domain tags: `/Users/akihito/git/ec-cube-alps/tag.md`
-- Migration plan draft: `/Users/akihito/git/ec-cube-alps/ec-cube-bear-be-migration-plan.md`
-- Autonomous execution runbook: `/Users/akihito/git/ec-cube-alps/autonomous-execution-runbook.md`
-- Claude Code native workflow: `/Users/akihito/git/ec-cube-alps/.claude/commands/run.md`
-- Migration workflow definition: `/Users/akihito/git/ec-cube-alps/.claude/workflows/migrate.json`
-- Workflow JSON Schema: `/Users/akihito/git/ec-cube-alps/.claude/workflows/workflow.schema.json`
-- Step prompts: `/Users/akihito/git/ec-cube-alps/.claude/prompts/`
-- Skills matrix: `/Users/akihito/git/ec-cube-alps/skills-matrix.md`
-- Be-first method: `/Users/akihito/git/ec-cube-alps/be-first-migration-method.md`
+- Day 0 workflow: `day0-workflow.md`
+- Project summary: `README.md`
+- Coverage / next-ai notes: `HANDOVER.md`
+- Domain tags: `tag.md`
+- Migration plan draft: `ec-cube-bear-be-migration-plan.md`
+- Autonomous execution runbook: `autonomous-execution-runbook.md`
+- Claude Code native workflow: `.claude/commands/run.md`
+- Migration workflow definition: `.claude/workflows/migrate.json`
+- Workflow JSON Schema: `.claude/workflows/workflow.schema.json`
+- Step prompts: `.claude/prompts/`
+- Skills matrix: `skills-matrix.md`
+- Be-first method: `be-first-migration-method.md`
 
 ## Visual/Browser Findings
 - BEAR.Sunday 公式資料では、`page://` が外部リクエスト向け、`app://` が内部 API 的 resource として説明されている
