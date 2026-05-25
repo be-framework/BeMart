@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 
 use function str_starts_with;
 
@@ -23,6 +24,7 @@ class UnsupportedRoute extends ResourceObject
         return $this;
     }
 
+    #[CsrfProtected]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
     {
         $this->code = Code::OK;
