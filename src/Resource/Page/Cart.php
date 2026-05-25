@@ -13,6 +13,7 @@ use MyVendor\BeMart\Be\Final\CartsFetched;
 use MyVendor\BeMart\Be\Input\GetCartsInput;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 
 use function array_map;
 use function assert;
@@ -30,6 +31,7 @@ class Cart extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -50,6 +52,7 @@ class Cart extends ResourceObject
             'cartCount' => $final->cartCount,
             'totalPrice' => $final->totalPrice,
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
+            'csrfToken' => $this->csrf->token,
             'carts' => array_map(
                 static fn (CartEntity $cart): array => [
                     'cartKey' => $cart->cartKey,
