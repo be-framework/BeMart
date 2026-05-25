@@ -118,10 +118,20 @@ final class RouterTest extends TestCase
         $this->assertSame('homepage', $this->router->match('get', '/')->name);
     }
 
-    public function testCartItemServesPutAndDelete(): void
+    public function testCartItemHtmlEndpointUsesGetAndPostOnly(): void
     {
-        $this->assertSame('cart_handle_item', $this->router->match('PUT', '/cart/item')->name);
-        $this->assertSame('cart_handle_item', $this->router->match('DELETE', '/cart/item')->name);
+        $get = $this->router->match('GET', '/cart/item');
+        $this->assertSame('cart_handle_item', $get->name);
+        $this->assertSame('page://self/cart', $get->resource);
+        $this->assertSame('get', $get->dispatchMethod);
+
+        $post = $this->router->match('POST', '/cart/item');
+        $this->assertSame('cart_handle_item', $post->name);
+        $this->assertSame('page://self/cart/item', $post->resource);
+        $this->assertSame('post', $post->dispatchMethod);
+
+        $this->expectException(RouteMethodNotAllowedException::class);
+        $this->router->match('PUT', '/cart/item');
     }
 
     public function testEntryFormPostsToRegisterResource(): void
@@ -138,6 +148,37 @@ final class RouterTest extends TestCase
 
         $this->assertSame('entry_confirm', $matched->name);
         $this->assertSame('page://self/entry/confirm', $matched->resource);
+    }
+
+
+    public function testPostRouteCanDispatchToInternalResourceMethod(): void
+    {
+        $router = new Router(new RouteTable([
+            new Route(
+                'delete_example',
+                ['POST'],
+                '/example/delete',
+                'page://self/example',
+                [],
+                'delete',
+                ['routeName' => 'delete_example'],
+            ),
+        ]));
+
+        $matched = $router->match('POST', '/example/delete');
+
+        $this->assertSame('delete_example', $matched->name);
+        $this->assertSame('delete', $matched->dispatchMethod);
+        $this->assertSame(['routeName' => 'delete_example'], $matched->params);
+    }
+
+    public function testDefaultHtmlRouteTablePublishesGetOrPostOnly(): void
+    {
+        foreach (RouteTable::default()->routes as $route) {
+            foreach ($route->methods as $method) {
+                $this->assertContains($method, ['GET', 'POST'], $route->name);
+            }
+        }
     }
 
     public function testGenerateIsInverseOfMatch(): void

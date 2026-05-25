@@ -111,7 +111,7 @@
             $('#DeleteModal').on('shown.bs.modal', function(event) {
                 var target = $(event.relatedTarget);
                 // hrefの変更
-                $(this).find('[data-method="delete"]').attr('href', target.data('url'));
+                $(this).find('[data-post-action="delete"]').attr('href', target.data('url'));
 
                 // messageの変更
                 $(this).find('p.modal-message').text(target.data('message'));
@@ -159,7 +159,7 @@
                                                         </a>
                                                         <a class="btn btn-ec-actionIcon me-2 action-visible" href="{{ url('admin_setting_shop_delivery_visibility', {'id': Delivery.deliveryId }) }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" title="{{ Delivery.visible ? '非表示にする' : '表示する' }}"
-                                                           data-confirm="false" data-method="put" >
+                                                           data-confirm="false" >
                                                             <i class="fa fa-toggle-{{ Delivery.visible ? 'on' : 'off' }} fa-lg text-secondary" aria-hidden="true"></i>
                                                         </a>
                                                         <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top"
@@ -197,7 +197,7 @@
                                                     キャンセル
                                                 </button>
                                                 <a class="btn btn-ec-delete" href="#"
-                                                   data-method="delete" data-confirm="false">
+                                                   data-confirm="false">
                                                     削除
                                                 </a>
                                             </div>

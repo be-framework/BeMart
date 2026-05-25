@@ -121,7 +121,7 @@ final class Bootstrap
 
         ob_start();
         try {
-            $ro = match ($request->method) {
+            $ro = match ($matched->dispatchMethod) {
                 'get' => $resource->get($matched->resource, $params),
                 'post' => $resource->post($matched->resource, $params),
                 'put' => $resource->put($matched->resource, $params),

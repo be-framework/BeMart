@@ -135,7 +135,7 @@
                                                     <a class="btn btn-ec-actionIcon action-up {% if loop.first %} disabled {% endif %}"
                                                        href="{{ url('admin_setting_system_member_up', {id: Member.loginId}) }}"
                                                        data-bs-toggle="tooltip"
-                                                       data-method="put"
+
                                                        data-bs-placement="top"
                                                        title="上へ">
                                                         <i class="fa fa-arrow-up fa-lg text-secondary" aria-hidden="true"></i>
@@ -145,7 +145,7 @@
                                                     <a class="btn btn-ec-actionIcon action-down {% if loop.last %} disabled {% endif %}"
                                                        href="{{ url('admin_setting_system_member_down', {id: Member.loginId}) }}"
                                                        data-bs-toggle="tooltip"
-                                                       data-method="put"
+
                                                        data-bs-placement="top"
                                                        title="下へ">
                                                         <i class="fa fa-arrow-down fa-lg text-secondary" aria-hidden="true"></i>
@@ -182,7 +182,7 @@
                                                                     </button>
                                                                     <a class="btn btn-ec-delete"
                                                                        href="{{ url('admin_setting_system_member_delete', {id: Member.loginId}) }}"
-                                                                       data-method="delete" data-confirm="false">
+                                                                       data-confirm="false">
                                                                         削除
                                                                     </a>
                                                                 </div>

@@ -101,7 +101,7 @@
                 </div>
             {% endif %}
 
-            <form name="form" id="form_cart" class="ec-cartRole" method="post" action="/cart">
+            <div id="form_cart" class="ec-cartRole">
 
                 {% for cart in displayCarts %}
                     {% set cartKey = cart.cartKey %}
@@ -116,9 +116,14 @@
                             {% for item in cart.items %}
                                 <ul class="ec-cartRow">
                                     <li class="ec-cartRow__delColumn">
-                                        <a href="{{ url('cart_handle_item', {'operation': 'remove', 'productClassId': item.productClassId}) }}" class="ec-icon" data-method="put" data-message="カートから商品を削除してもよろしいですか?">
-                                            <img src="{{ asset('assets/icon/cross.svg') }}" alt="delete">
-                                        </a>
+                                        <form method="post" action="{{ url('cart_handle_item') }}" class="ec-cartRow__operationForm">
+                                            <input type="hidden" name="_csrf_token" value="{{ csrfToken|default(csrf_token('cart')) }}">
+                                            <input type="hidden" name="productCode" value="{{ item.productCode }}">
+                                            <input type="hidden" name="operation" value="remove">
+                                            <button type="submit" class="ec-icon" data-message="カートから商品を削除してもよろしいですか?">
+                                                <img src="{{ asset('assets/icon/cross.svg') }}" alt="delete">
+                                            </button>
+                                        </form>
                                     </li>
                                     <li class="ec-cartRow__contentColumn">
                                         <div class="ec-cartRow__img">
@@ -145,17 +150,29 @@
                                         <div class="ec-cartRow__amountSP">数量：{{ item.quantity|number_format }}</div>
                                         <div class="ec-cartRow__amountUpDown">
                                             {% if item.quantity > 1 %}
-                                                <a href="{{ url('cart_handle_item', {'operation': 'down', 'productClassId': item.productClassId}) }}" class="ec-cartRow__amountDownButton load-overlay" data-method="put" data-confirm="false">
-                                                    <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus-dark.svg') }}" alt="reduce"></span>
-                                                </a>
+                                                <form method="post" action="{{ url('cart_handle_item') }}" class="ec-cartRow__amountDownForm">
+                                                    <input type="hidden" name="_csrf_token" value="{{ csrfToken|default(csrf_token('cart')) }}">
+                                                    <input type="hidden" name="productCode" value="{{ item.productCode }}">
+                                                    <input type="hidden" name="operation" value="down">
+                                                    <input type="hidden" name="quantity" value="{{ item.quantity - 1 }}">
+                                                    <button type="submit" class="ec-cartRow__amountDownButton load-overlay" data-confirm="false">
+                                                        <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus-dark.svg') }}" alt="reduce"></span>
+                                                    </button>
+                                                </form>
                                             {% else %}
                                                 <div class="ec-cartRow__amountDownButtonDisabled">
                                                     <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus.svg') }}" alt="reduce"></span>
                                                 </div>
                                             {% endif %}
-                                            <a href="{{ url('cart_handle_item', {'operation': 'up', 'productClassId': item.productClassId}) }}" class="ec-cartRow__amountUpButton load-overlay" data-method="put" data-confirm="false">
-                                                <span class="ec-cartRow__amountUpButton__icon"><img src="{{ asset('assets/icon/plus-dark.svg') }}" alt="increase"></span>
-                                            </a>
+                                            <form method="post" action="{{ url('cart_handle_item') }}" class="ec-cartRow__amountUpForm">
+                                                <input type="hidden" name="_csrf_token" value="{{ csrfToken|default(csrf_token('cart')) }}">
+                                                <input type="hidden" name="productCode" value="{{ item.productCode }}">
+                                                <input type="hidden" name="operation" value="up">
+                                                <input type="hidden" name="quantity" value="{{ item.quantity + 1 }}">
+                                                <button type="submit" class="ec-cartRow__amountUpButton load-overlay" data-confirm="false">
+                                                    <span class="ec-cartRow__amountUpButton__icon"><img src="{{ asset('assets/icon/plus-dark.svg') }}" alt="increase"></span>
+                                                </button>
+                                            </form>
                                         </div>
                                     </li>
                                     <li class="ec-cartRow__subtotalColumn">
@@ -176,7 +193,7 @@
                         {% endif %}
                     </div>
                 {% endfor %}
-            </form>
+            </div>
         {% else %}
             <div class="ec-role">
                 <div class="ec-off3Grid">
