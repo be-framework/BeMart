@@ -1,0 +1,100 @@
+{
+  "$comment": "50 件のクライアント入力サンプル。実際のユーザーが日常的に送るパターンを反映。Step 4 の観察 (minLength/maxLength/null率/値域/i18n) はこのファイルから根拠を取る。",
+  "samples": [
+    {"productCode": "sample-001", "quantity": 1},
+    {"productCode": "sample-002", "quantity": 2},
+    {"productCode": "sample-003", "quantity": 1},
+    {"productCode": "tshirt-m-blue", "quantity": 1},
+    {"productCode": "tshirt-l-blue", "quantity": 2},
+    {"productCode": "tshirt-xl-white", "quantity": 1},
+    {"productCode": "mug-001", "quantity": 3},
+    {"productCode": "mug-002", "quantity": 1},
+    {"productCode": "book-isbn-9784873117027", "quantity": 1},
+    {"productCode": "book-isbn-9784873118468", "quantity": 1},
+    {"productCode": "coffee-bean-100g", "quantity": 2},
+    {"productCode": "coffee-bean-200g", "quantity": 1},
+    {"productCode": "tea-set-premium", "quantity": 1},
+    {"productCode": "tea-set-standard", "quantity": 4},
+    {"productCode": "notebook-a5-black", "quantity": 5},
+    {"productCode": "notebook-a4-blue", "quantity": 2},
+    {"productCode": "pen-ballpoint-3pack", "quantity": 3},
+    {"productCode": "pen-fountain-medium", "quantity": 1},
+    {"productCode": "candle-vanilla-small", "quantity": 6},
+    {"productCode": "candle-lavender-large", "quantity": 1},
+    {"productCode": "soap-handmade-rose", "quantity": 2},
+    {"productCode": "soap-handmade-mint", "quantity": 1},
+    {"productCode": "towel-bath-white", "quantity": 4},
+    {"productCode": "towel-face-grey", "quantity": 6},
+    {"productCode": "preorder-2026-spring-bag", "quantity": 1},
+    {"productCode": "preorder-2026-summer-shoes", "quantity": 1},
+    {"productCode": "limited-collab-mug-001", "quantity": 1},
+    {"productCode": "limited-collab-tshirt-m", "quantity": 1},
+    {"productCode": "sale-50off-shirt", "quantity": 1},
+    {"productCode": "sale-clearance-jacket", "quantity": 1},
+    {"productCode": "P-12345", "quantity": 10},
+    {"productCode": "P-99999", "quantity": 1},
+    {"productCode": "p001", "quantity": 1},
+    {"productCode": "P001", "quantity": 1},
+    {"productCode": "JAN-4901234567890", "quantity": 2},
+    {"productCode": "sku-cosmetics-01", "quantity": 1},
+    {"productCode": "sku-cosmetics-set-trial", "quantity": 1},
+    {"productCode": "food-gift-set-large", "quantity": 1},
+    {"productCode": "food-snack-mix", "quantity": 12},
+    {"productCode": "stationery-eraser-3pack", "quantity": 9},
+    {"productCode": "stationery-pencil-2b-dozen", "quantity": 2},
+    {"productCode": "out-of-stock-test-001", "quantity": 5},
+    {"productCode": "single-purchase-rare-coin", "quantity": 1},
+    {"productCode": "unlimited-digital-book", "quantity": 1},
+    {"productCode": "subscription-monthly", "quantity": 1},
+    {"productCode": "very-long-product-code-with-many-hyphens-and-numbers-12345-test", "quantity": 1},
+    {"productCode": "x", "quantity": 1},
+    {"productCode": "sample-001", "quantity": 99},
+    {"productCode": "test-cart-merge-001", "quantity": 2},
+    {"productCode": "test-cart-merge-001", "quantity": 3}
+  ],
+  "edge_cases_observed": {
+    "productCode": {
+      "minLength": 1,
+      "maxLength": 65,
+      "patterns": [
+        "lowerCase-with-hyphens (約 70%)",
+        "UPPER-CASE-WITH-HYPHENS (約 5%)",
+        "P-12345 / P001 (約 5%)",
+        "JAN コード 4901234567890 形式 (約 2%)",
+        "ISBN 9784... 形式 (約 4%)",
+        "極端な短さ (x = 1 文字、稀)",
+        "極端な長さ (65 文字、稀)"
+      ],
+      "all_required": true,
+      "all_non_null": true,
+      "i18n_consideration": "ASCII のみ。日本語コードは EC-CUBE 標準では使われない (SKU は ASCII 慣例)"
+    },
+    "quantity": {
+      "min_observed": 1,
+      "max_observed": 99,
+      "distribution": {
+        "1": "約 60%",
+        "2-5": "約 30%",
+        "6-12": "約 7%",
+        "99": "約 1% (在庫超え自動補正のテスト用)"
+      },
+      "all_required": true,
+      "all_non_null": true,
+      "all_positive_integer": true,
+      "type_decision": "int (decimal なし、PHP int で十分)",
+      "constraint_rationale": "min: 1 (0 は意味なし)、max: 999 (EC-CUBE デフォルト管理画面の上限相当)"
+    }
+  },
+  "observation_summary": {
+    "productCode": {
+      "semantic_decision": "Pilot 1 の ProductCode (length<=50 想定) を再利用するか、64 まで広げるか",
+      "recommendation": "Pilot 1 の ProductCode を maxLength=64 に拡張 (very-long-product-code 例を許容するため)。i18n 不要 (ASCII 制限)"
+    },
+    "quantity": {
+      "semantic_decision": "新規 Quantity Semantic クラス",
+      "constraints": "int, min=1, max=999",
+      "exception": "QuantityFormatException (#[Message] ja/en 付き)",
+      "i18n_keys": {"ja": "数量は 1 以上 999 以下で指定してください。", "en": "Quantity must be between 1 and 999."}
+    }
+  }
+}

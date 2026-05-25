@@ -1,0 +1,6 @@
+{
+  "$comment": "ProductClass.stock fixture keyed by productCode. Consumed by FakeInventoryAllocator at checkout time. Pilot 5 seeds enough stock for the happy-path pre-orders (sample-001=10, preorder-2026-spring-bag=5) and intentionally short stock for the OOS scenario (oos-pilot5-tightstock=1) so that requesting 3 units triggers InsufficientStockException.",
+  "sample-001": 10,
+  "preorder-2026-spring-bag": 5,
+  "oos-pilot5-tightstock": 1
+}
