@@ -1,0 +1,23 @@
+{% extends 'admin-base.html.twig' %}
+
+{% set route = routeName|default('admin_unsupported_route') %}
+{% set title = '未実装ルート' %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header"><span>未実装</span></div>
+                    <div class="card-body">
+                        <p class="mb-2">この管理画面ルートはまだ BeMart 側に実装されていません。</p>
+                        <dl class="mb-0">
+                            <dt>route</dt>
+                            <dd><code>{{ routeName|default('') }}</code></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

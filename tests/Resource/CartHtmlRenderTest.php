@@ -179,7 +179,7 @@ final class CartHtmlRenderTest extends TestCase
             '<ul class="ec-progress">',
             'class="ec-progress__item is-complete"',
             '<div class="ec-cartRole__totalText">',
-            '<form name="form" id="form_cart" class="ec-cartRole" method="post"',
+            '<div id="form_cart" class="ec-cartRole">',
             '<div class="ec-cartTable">',
             '<ol class="ec-cartHeader">',
             '<ul class="ec-cartRow">',

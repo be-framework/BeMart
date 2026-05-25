@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Router\RouteTable;
 use NumberFormatter;
 use Override;
@@ -11,7 +12,10 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
+use function bin2hex;
 use function http_build_query;
+use function is_string;
+use function random_bytes;
 
 /**
  * Twig helpers the EC-CUBE template port relies on.
@@ -88,6 +92,8 @@ final class BeMartTwigExtension extends AbstractExtension
             new TwigFunction('asset', [$this, 'asset']),
             new TwigFunction('url', [$this, 'url']),
             new TwigFunction('path', [$this, 'path']),
+            new TwigFunction('csrf_token', [$this, 'csrfToken']),
+            new TwigFunction('csrf_token_for_anchor', [$this, 'csrfTokenForAnchor']),
         ];
     }
 
@@ -125,6 +131,37 @@ final class BeMartTwigExtension extends AbstractExtension
         };
 
         return $prefix . $path;
+    }
+
+    /**
+     * Minimal EC-CUBE-compatible CSRF widget for ported Twig templates.
+     *
+     * The html front controller starts PHP's session before rendering, so the
+     * generated token is stored under the same flat key that the production
+     * CSRF adapter validates on POST. In CLI/render-test contexts with no
+     * active session, returning a fresh non-empty token is enough to keep
+     * templates renderable.
+     */
+    public function csrfToken(string $tokenId = ''): string
+    {
+        /** @var mixed $stored */
+        $stored = $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] ?? null;
+        if (is_string($stored) && $stored !== '') {
+            return $stored;
+        }
+
+        $token = bin2hex(random_bytes(32));
+        if (isset($_SESSION)) {
+            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = $token;
+        }
+
+        return $token;
+    }
+
+    /** EC-CUBE's anchor-token helper; BeMart reuses the same request token. */
+    public function csrfTokenForAnchor(string $tokenId = ''): string
+    {
+        return $this->csrfToken($tokenId);
     }
 
     /** @param array<string, int|string> $params */

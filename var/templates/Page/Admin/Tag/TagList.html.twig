@@ -142,7 +142,7 @@
             $('#DeleteModal').on('shown.bs.modal', function(event) {
                 var target = $(event.relatedTarget);
                 // hrefの変更
-                $(this).find('[data-method="delete"]').attr('href', target.data('url'));
+                $(this).find('[data-post-action="delete"]').attr('href', target.data('url'));
 
                 // messageの変更
                 $(this).find('p.modal-message').text(target.data('message'));
@@ -245,7 +245,7 @@
                                                 キャンセル
                                             </button>
                                             <a class="btn btn-ec-delete" href="#"
-                                               data-method="delete" data-confirm="false">
+                                               data-confirm="false">
                                                 削除
                                             </a>
                                         </div>
