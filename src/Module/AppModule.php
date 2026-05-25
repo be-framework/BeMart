@@ -11,28 +11,43 @@ use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Module\BeModule;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\EmailUniquenessCheckerInterface;
+use MyVendor\BeMart\Be\Reason\Query\FakeAdminQuery;
+use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\FakeAddressStorage;
+use MyVendor\BeMart\Be\Reason\Query\FakeAdminStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCartStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeCustomerCommand;
+use MyVendor\BeMart\Be\Reason\Query\FakeCustomerQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeCustomerStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeEmailUniquenessChecker;
+use MyVendor\BeMart\Be\Reason\Query\FakeFavoriteStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeFinalizedOrderStorage;
+use MyVendor\BeMart\Be\Reason\Query\FavoriteStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderCommand;
 use MyVendor\BeMart\Be\Reason\Query\FakeOrderQuery;
+use MyVendor\BeMart\Be\Reason\Query\FakePasswordResetTokenStorage;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductClassQuery;
 use MyVendor\BeMart\Be\Reason\Query\FakeProductQuery;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\PasswordResetTokenStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductClassQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\AddressIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerIdGeneratorInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeAddressIdGenerator;
+use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerIdGenerator;
 use MyVendor\BeMart\Be\Reason\Service\FakeCustomerInitialPoint;
@@ -99,6 +114,8 @@ final class AppModule extends AbstractAppModule
         $this->bind(FakeCustomerStorage::class)->in(Scope::SINGLETON);
         $this->bind(EmailUniquenessCheckerInterface::class)->to(FakeEmailUniquenessChecker::class);
         $this->bind(CustomerCommandInterface::class)->to(FakeCustomerCommand::class);
+        // Pilot 6 (doLogin): read-side Customer lookup over the same Storage.
+        $this->bind(CustomerQueryInterface::class)->to(FakeCustomerQuery::class);
         $this->bind(PasswordHasherInterface::class)->to(FakePasswordHasher::class);
         $this->bind(CustomerIdGeneratorInterface::class)->to(FakeCustomerIdGenerator::class);
         $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class);
@@ -147,5 +164,41 @@ final class AppModule extends AbstractAppModule
         // `csrfToken` body field; tests that need to exercise rejection
         // simply omit it or pass a mismatch.
         $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class)->in(Scope::SINGLETON);
+
+        // Reason (Pilot 13 doAddFavorite): unified Query+Command for the
+        // customer favorites list. Singleton so adds within a request
+        // are visible to subsequent reads.
+        $this->bind(FavoriteStorageInterface::class)->to(FakeFavoriteStorage::class)->in(Scope::SINGLETON);
+
+        // Reason (Pilot 16 customer address book): unified Query+Command
+        // for the address store + an opaque-id generator. Singleton on
+        // storage so a request's POST is visible to the same request's
+        // GET / PUT / DELETE within a single test.
+        $this->bind(AddressStorageInterface::class)->to(FakeAddressStorage::class)->in(Scope::SINGLETON);
+        $this->bind(AddressIdGeneratorInterface::class)->to(FakeAddressIdGenerator::class);
+
+        // Reason (Pilot 14 doRequestPasswordReset): reset-token store +
+        // mailer for the password-reset link. Singleton so a test can
+        // inspect what was issued.
+        $this->bind(PasswordResetTokenStorageInterface::class)
+            ->to(FakePasswordResetTokenStorage::class)->in(Scope::SINGLETON);
+
+        // Reason (Wave 4 doAdminLogin / doAdminLogout): admin role AAA
+        // infrastructure — parallel firewall to the customer-side
+        // SessionInterface. Mirrors EC-CUBE / Symfony's two-firewall
+        // model (`admin` + `customer`): admins and customers are
+        // distinct AAA principal classes, so the admin id lives behind
+        // its own interface rather than overloading SessionInterface.
+        //
+        // Storage is Singleton so a future AdminCommand (Wave 5+) sees
+        // its writes inside the same request — same CQRS convention as
+        // FakeCustomerStorage. AdminSessionInterface defaults to the
+        // anonymous binding (`new FakeAdminSession(null)`) to match the
+        // customer-side default: tests that exercise an admin-only path
+        // rebind it via override module (same `rebindSession` helper
+        // pattern as ChangeResourceTest, but for AdminSessionInterface).
+        $this->bind(FakeAdminStorage::class)->in(Scope::SINGLETON);
+        $this->bind(AdminQueryInterface::class)->to(FakeAdminQuery::class);
+        $this->bind(AdminSessionInterface::class)->toInstance(new FakeAdminSession(null));
     }
 }

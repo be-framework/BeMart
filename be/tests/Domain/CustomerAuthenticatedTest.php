@@ -1,0 +1,96 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Be\Tests\Domain;
+
+use BEAR\AppMeta\Meta;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\EmailFormatException;
+use MyVendor\BeMart\Be\Exception\LoginFailedException;
+use MyVendor\BeMart\Be\Exception\PasswordFormatException;
+use MyVendor\BeMart\Be\Final\CustomerAuthenticated;
+use MyVendor\BeMart\Be\Input\LoginInput;
+use MyVendor\BeMart\Module\AppModule;
+use PHPUnit\Framework\TestCase;
+use Ray\Di\Injector;
+
+use function dirname;
+
+final class CustomerAuthenticatedTest extends TestCase
+{
+    private BecomingInterface $becoming;
+
+    protected function setUp(): void
+    {
+        $injector = new Injector(
+            new AppModule(new Meta('MyVendor\\BeMart', 'test')),
+            dirname(__DIR__, 2) . '/var/tmp/test',
+        );
+        $this->becoming = $injector->getInstance(BecomingInterface::class);
+    }
+
+    public function testHappyPathReturnsAuthenticatedCustomer(): void
+    {
+        $final = ($this->becoming)(new LoginInput(
+            email: 'login-test@example.com',
+            password: 'login-test-password-2026',
+        ));
+
+        $this->assertInstanceOf(CustomerAuthenticated::class, $final);
+        $this->assertSame('10000000aaaa1111bbbb2222cccc3333', $final->customerId);
+        $this->assertSame('login-test@example.com', $final->email);
+        $this->assertSame('鈴木', $final->name01);
+        $this->assertSame(2, $final->customerStatus);
+    }
+
+    public function testWrongPasswordRaisesLoginFailed(): void
+    {
+        $this->expectException(LoginFailedException::class);
+        ($this->becoming)(new LoginInput(
+            email: 'login-test@example.com',
+            password: 'not-the-right-password',
+        ));
+    }
+
+    public function testUnknownEmailRaisesLoginFailed(): void
+    {
+        // Same exception as wrong-password case (no user enumeration).
+        $this->expectException(LoginFailedException::class);
+        ($this->becoming)(new LoginInput(
+            email: 'nobody@example.com',
+            password: 'login-test-password-2026',
+        ));
+    }
+
+    public function testInvalidEmailFormatRejected(): void
+    {
+        $this->expectException(SemanticVariableException::class);
+        try {
+            ($this->becoming)(new LoginInput(
+                email: 'not-an-email',
+                password: 'login-test-password-2026',
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->assertInstanceOf(EmailFormatException::class, $e->getErrors()->exceptions[0]);
+
+            throw $e;
+        }
+    }
+
+    public function testShortPasswordRejected(): void
+    {
+        $this->expectException(SemanticVariableException::class);
+        try {
+            ($this->becoming)(new LoginInput(
+                email: 'login-test@example.com',
+                password: 'short',
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->assertInstanceOf(PasswordFormatException::class, $e->getErrors()->exceptions[0]);
+
+            throw $e;
+        }
+    }
+}

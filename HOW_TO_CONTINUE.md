@@ -164,8 +164,36 @@ ec-cube-alps/
 | Slice 6 | `51256d4` | AUTHZ ownership check for Pilot 5 F-1 | 完了 |
 | Slice 7 | `8847636` | production Session adapter (EC-CUBE bridge) | 完了 (BEAR 側のみ) |
 | Slice 7.1 | `0c48d8b` | rename + `@` 除去 + HANDOVER 修正 | 完了 |
-| Slice 8 | (本ブランチ) | CSRF token (BEAR 側のみ) | 完了 (BEAR 側のみ) |
-| Slice 9 | (本ブランチ) | Taint annotation (Pilot 1-5 全体) | 完了 (※ opacity 課題あり) |
+| Slice 8 | `91198e6` | CSRF token (BEAR 側のみ) | 完了 (BEAR 側のみ) |
+| Slice 9 | `ed0e9b1` | Taint annotation (Pilot 1-5 全体) | 完了 (※ opacity 課題あり) |
+| Pilot 6 | `f34bd78` | doLogin — Direct (credentials verification) | 完了 |
+| Pilot 7 | `27e8ee9` | doActivateCustomer — Direct (idempotent activation) | 完了 |
+| Pilot 8 | `2039e43` | doUpdateCustomer — Direct (AUTHZ + partial merge) | 完了 |
+| Pilot 9 | `111000b` | goCart — Direct (safe read, multi-cart aggregation) | 完了 |
+| Pilot 10 | `a9f45ee` | doUpdateCartItemQuantity — Linear (G-17 chain-class-fixed) | 完了 |
+| Pilot 11 | `a9f45ee` | doRemoveCartItem — Direct | 完了 |
+| Pilot 12 | — | doReorder — Diamond-Cascade (OrderItem 拡張要、deferred) | 未着手 |
+| Pilot 13 | `26a1591` | doAddFavorite — Direct (idempotent + AUTHZ) | 完了 |
+| Pilot 14 | `8709bbe` | doRequestPasswordReset — Direct (anti-enumeration) | 完了 |
+| Pilot 15 | `3e821e0` | doSubmitContact — Direct (anonymous + dual mail) | 完了 |
+| Wave 1A | `3028041` | Pilot 12 prep (OrderItemEntity infrastructure) | 完了 |
+| Wave 1B | `c366723` | doRemoveFavorite — Direct (Pilot 13 inverse) | 完了 |
+| Wave 1C | `87e0319` | doResetPassword — Direct (Pilot 14 consumer, single-use) | 完了 |
+| Pilot 12 | `263c525` | doReorder — Diamond-Cascade | 完了 |
+| Wave 2E | `351dcd1` | doLogout — Direct | 完了 |
+| Wave 2F | `cef5447` | goMypage — Direct safe-read aggregation | 完了 |
+| Wave 2G | `ab2e674` | doWithdrawCustomer — Direct + multi-side-effect | 完了 |
+| Wave 3H | `6dba995` | 4 go* form renderers (Login/Entry/Contact/MypageWithdraw) — pure BEAR | 完了 |
+| Wave 3I | `e6ac521` | goMypageHistory + goMypageChange — Direct authenticated | 完了 |
+| Wave 3J | `ac1ce6f` | goShopping — Direct aggregation | 完了 |
+| Wave 4K | `b925397` | admin AAA infra + doAdminLogin + doAdminLogout | 完了 (※ ALPS 後追記済) |
+| Wave 5M | `31e1d93` | goCustomerList — Direct + admin AUTHZ + filter | 完了 |
+| Wave 5N | `1e22b42` | goCustomer — Direct + admin AUTHZ + aggregation | 完了 |
+| Wave 5O | `0bb3ea0` | doCreateCustomer — Multi-Reason Being + admin AUTHZ | 完了 |
+| Wave 6P | `2e7184b` | customer address book (4 transition) — Direct + AUTHZ | 完了 |
+| Wave 6Q | `bb9a328` | goFavoriteList — Direct safe-read | 完了 |
+| Wave 6R | `0f0ffe1` | goOrderHistory — Direct + pagination | 完了 |
+| Wave 6S | `b071142` | doDeleteCustomer — Direct + admin soft-delete | 完了 |
 | Slice 10 | — | 存在オラクル軽減 (404/403 統一) | 未着手 (要判断) |
 | Slice 11 | — | Be Framework Psalm plugin (opacity 対策) | 未着手 (要判断) |
 

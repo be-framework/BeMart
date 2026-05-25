@@ -26,4 +26,14 @@ interface CartCommandInterface
      * succeeded and a stale fixture should not break the Final.
      */
     public function clearByPreOrderId(string $preOrderId): void;
+
+    /**
+     * Remove every Cart whose cartKey begins with the supplied
+     * sessionPrefix. The cartKey shape is `{sessionPrefix}_{saleTypeId}`,
+     * so the prefix scopes a single shopping session into N carts
+     * (one per sale type). Pilot doWithdrawCustomer uses this to wipe
+     * the leaving customer's entire cart footprint in one call. A
+     * sessionPrefix with no matching carts is a no-op.
+     */
+    public function clearBySessionPrefix(string $sessionPrefix): void;
 }

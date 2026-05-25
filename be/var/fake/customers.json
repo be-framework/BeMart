@@ -1,5 +1,5 @@
 {
-  "$comment": "Pre-registered Customer 一覧。FakeCustomerStorage が email をキーに indexing して保持。Pilot 4 の uniqueness テスト (重複登録は EmailAlreadyRegisteredException) と happy-path (空いている email で成功) のために 3 件用意。passwordHash は password_hash('correct horse battery staple', PASSWORD_DEFAULT) 風のダミー — 検証はしないので形式だけ整える。customerStatus=2 は Active。",
+  "$comment": "Pre-registered Customer 一覧。FakeCustomerStorage が email をキーに indexing して保持。Pilot 4 の uniqueness テスト (重複登録は EmailAlreadyRegisteredException) と happy-path (空いている email で成功) のために用意。alice/bob/carol の passwordHash はダミー文字列 (Pilot 4 では検証しない)。Pilot 6 doLogin 用に login-test@example.com を追加 — こちらは password_hash('login-test-password-2026', PASSWORD_DEFAULT) の本物の bcrypt 出力。customerStatus=2 は Active。",
   "alice@example.com": {
     "customerId": "0123456789abcdef0123456789abcdef",
     "email": "alice@example.com",
@@ -59,5 +59,46 @@
     "job": 18,
     "initialPoint": 100,
     "customerStatus": 2
+  },
+  "login-test@example.com": {
+    "customerId": "10000000aaaa1111bbbb2222cccc3333",
+    "email": "login-test@example.com",
+    "passwordHash": "$2y$12$dC7U8xCHBGmNT2TjlWbv6.ho4y.Lcezn5PT0ywpUsaxk0x49tUune",
+    "name01": "鈴木",
+    "name02": "次郎",
+    "kana01": null,
+    "kana02": null,
+    "companyName": null,
+    "phoneNumber": null,
+    "postalCode": null,
+    "pref": null,
+    "addr01": null,
+    "addr02": null,
+    "birth": null,
+    "sex": null,
+    "job": null,
+    "initialPoint": 100,
+    "customerStatus": 2
+  },
+  "provisional@example.com": {
+    "customerId": "20000000dddd2222eeee3333ffff4444",
+    "email": "provisional@example.com",
+    "passwordHash": "$2y$12$placeholder.hash.never.verified.never.0123456789abcde",
+    "name01": "高橋",
+    "name02": "三郎",
+    "kana01": null,
+    "kana02": null,
+    "companyName": null,
+    "phoneNumber": null,
+    "postalCode": null,
+    "pref": null,
+    "addr01": null,
+    "addr02": null,
+    "birth": null,
+    "sex": null,
+    "job": null,
+    "initialPoint": 100,
+    "customerStatus": 1,
+    "secretKey": "pending-secret-key-pilot7-2026abcd"
   }
 }
