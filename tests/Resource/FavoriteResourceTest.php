@@ -1,0 +1,164 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Tests\Resource;
+
+use BEAR\AppMeta\Meta;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Module\AppModule;
+use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
+use Ray\Di\Injector;
+
+use function dirname;
+
+final class FavoriteResourceTest extends TestCase
+{
+    private const ALICE_ID = '0123456789abcdef0123456789abcdef';
+
+    private ResourceInterface $resource;
+
+    protected function setUp(): void
+    {
+        $this->rebindSession(self::ALICE_ID);
+    }
+
+    private function rebindSession(string|null $customerId): void
+    {
+        $session = new FakeSession($customerId);
+        $base = new AppModule(new Meta('MyVendor\\BeMart', 'test'));
+        $override = new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(SessionInterface::class)->toInstance($this->session);
+            }
+        };
+        $base->override($override);
+
+        $injector = new Injector($base, dirname(__DIR__, 2) . '/var/tmp/test');
+        $this->resource = $injector->getInstance(ResourceInterface::class);
+    }
+
+    public function testOnPostAddsFavoriteAndReturns201(): void
+    {
+        $ro = $this->resource->post('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertFalse($ro->body['alreadyExisted']);
+    }
+
+    public function testOnPostDuplicateReturns200WithAlreadyExisted(): void
+    {
+        // Add once, then add again.
+        $this->resource->post('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+        $ro = $this->resource->post('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertTrue($ro->body['alreadyExisted']);
+    }
+
+    public function testOnPostUnknownProductReturns404(): void
+    {
+        $ro = $this->resource->post('page://self/mypage/favorite', [
+            'productCode' => 'missing-zzz',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::NOT_FOUND, $ro->code);
+    }
+
+    public function testOnPostUnauthenticatedReturns401(): void
+    {
+        $this->rebindSession(null);
+
+        $ro = $this->resource->post('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+    }
+
+    public function testOnPostMissingCsrfReturns403(): void
+    {
+        $ro = $this->resource->post('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+
+    public function testOnDeleteRemovesAndReturns200(): void
+    {
+        // Add, then delete.
+        $this->resource->post('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+        $ro = $this->resource->delete('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertFalse($ro->body['alreadyAbsent']);
+    }
+
+    public function testOnDeleteAbsentIsIdempotent(): void
+    {
+        // Delete without prior add — still 200, alreadyAbsent=true.
+        $ro = $this->resource->delete('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(self::ALICE_ID, $ro->body['customerId']);
+        $this->assertTrue($ro->body['alreadyAbsent']);
+    }
+
+    public function testOnDeleteUnauthenticatedReturns401(): void
+    {
+        $this->rebindSession(null);
+
+        $ro = $this->resource->delete('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+    }
+
+    public function testOnDeleteMissingCsrfReturns403(): void
+    {
+        $ro = $this->resource->delete('page://self/mypage/favorite', [
+            'productCode' => 'sample-001',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+}
