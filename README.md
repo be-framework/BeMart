@@ -78,7 +78,28 @@ stateDiagram-v2
 | `openapi.yaml` | ALPS から変換した OpenAPI 3.1 仕様（フロントエンドのみ・参考実装） |
 | `openapi.html` | OpenAPI の HTML ドキュメント（Redoc で生成・参考実装） |
 | `tag.md` | タグ分類体系（ワークフロー・ドメイン・アクター・情報源の命名規則） |
-| `handover.json` | 構築プロセスの記録（カバレッジ、情報源、戦略の説明） |
+| `HANDOVER.md` | 構築プロセスの記録（カバレッジ、Pilot 1/2 完了報告、次の AI への助言） |
+
+## 移植検討用の補助資料
+
+このリポジトリの主目的は `alps.json` と公開ドキュメントの保守だが、EC-CUBE を Be / BEAR.Sunday へ移植するための補助資料と Claude Code ネイティブワークフローも同居している。
+
+| ファイル / ディレクトリ | 説明 |
+|---|---|
+| `ec-cube-bear-be-migration-plan.md` | 移植全体の段階計画 |
+| `be-first-migration-method.md` | 最初は Be-only で進める方針の共有用要約 |
+| `autonomous-execution-runbook.md` | 長時間作業の再開手順と停止条件 |
+| `day0-workflow.md` | 実移植 repo を立ち上げる初日手順 |
+| `skills-matrix.md` | 利用する skill の一覧と位置づけ |
+| `task_plan.md` / `findings.md` / `progress.md` | file-based planning 用の作業メモ |
+| `.claude/commands/run.md` | `/run <workflow> <args>` を解釈するコマンド |
+| `.claude/workflows/migrate.json` | ALPS 起点の 2 層移植ワークフロー定義 |
+| `.claude/workflows/workflow.schema.json` | ワークフロー定義の JSON Schema |
+| `.claude/prompts/*.md` | 各ステップのプロンプト（analyze / domain / review / application / security） |
+
+`/run migrate <descriptor-id>` を実行すると、`alps-analyze → domain → domain-review → application → application-review → (security)` のステップが実行される。レビューステップはサブエージェント（独立コンテキスト）で走る。
+
+これらは ALPS 本体の公開成果物ではなく、移植検討と検証のための補助資料として扱う。
 
 ## 使い方
 
@@ -106,3 +127,5 @@ asd -s alps.json
 - [ALPS 仕様](https://www.app-state-diagram.com/manuals/1.0/ja/index.html)
 - [app-state-diagram](https://github.com/alps-asd/app-state-diagram) — ALPS プロファイルの可視化ツール
 - [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube) — 対象アプリケーション
+- [Be Framework](https://be-framework.github.io/llms-full.txt) — 移植先候補のドメイン変換フレームワーク
+- [BEAR.Sunday](https://bearsunday.github.io/llms-full.txt) — 移植先候補の resource 指向フレームワーク
