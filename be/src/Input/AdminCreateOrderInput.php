@@ -23,7 +23,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderCreated;
  *
  * Editable fields kept narrow: customerId + a handful of money
  * columns. Every other dtb_order column is server-derived (orderNo
- * from {@see \MyVendor\BeMart\Be\Reason\Service\OrderNumberGeneratorInterface},
+ * from {@see \MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider},
  * orderStatus=NEW(1), orderDate=now, addPoint=0, derived totals from
  * subtotal+tax+deliveryFeeTotal+charge-discount) — same mass-
  * assignment discipline as {@see AdminUpdateOrderInput} (Pilot 5 F-2

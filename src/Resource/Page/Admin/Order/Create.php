@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -12,7 +13,6 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderCreated;
 use MyVendor\BeMart\Be\Input\AdminCreateOrderInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 
@@ -29,7 +29,7 @@ use function assert;
  * Phase 2.
  *
  * The Final allocates the orderNo server-side via the existing
- * {@see \MyVendor\BeMart\Be\Reason\Service\OrderNumberGeneratorInterface}
+ * {@see \MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider}
  * — admins cannot inject a chosen orderNo.
  *
  * Failure mapping:
@@ -41,7 +41,6 @@ class Create extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -53,10 +52,10 @@ class Create extends ResourceObject
      * @psalm-taint-source input $charge
      * @psalm-taint-source input $discount
      * @psalm-taint-source input $tax
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[CsrfProtected]
     public function onPost(
         string $customerId,
         int $paymentMethodId,
@@ -65,15 +64,7 @@ class Create extends ResourceObject
         int $charge = 0,
         int $discount = 0,
         int $tax = 0,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new AdminCreateOrderInput(
                 customerId: $customerId,

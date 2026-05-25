@@ -12,7 +12,7 @@ use MyVendor\BeMart\Be\Final\MemberFetched;
  *
  *   GetMemberInput → MemberFetched (Final — Direct, safe read)
  *
- * Admin-only endpoint. AUTHZ at the Final via AdminSessionInterface:
+ * Admin-only endpoint. AUTHZ at the Final via AdminSession:
  * a null admin session raises UnauthorizedAdminAccessException
  * (BEAR maps to 403). Cross-firewall checks before existence:
  *

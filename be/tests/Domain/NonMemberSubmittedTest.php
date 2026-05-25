@@ -48,8 +48,8 @@ final class NonMemberSubmittedTest extends TestCase
         $this->assertSame('田中', $final->name01);
         $this->assertSame('太郎', $final->name02);
         $this->assertSame('guest@example.com', $final->email);
-        // Wave 7W reuses CustomerIdGenerator (32-char hex). Phase 2
-        // will dedicate a PreOrderIdGenerator aligned with the
+        // Wave 7W reuses CustomerIdProvider (32-char hex). Phase 2
+        // will dedicate a PreOrderIdProvider aligned with the
         // PreOrderId Semantic's 40-hex format.
         $this->assertMatchesRegularExpression('/\A[0-9a-f]{32}\z/', $final->preOrderId);
     }

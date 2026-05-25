@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Tests\Sql;
 
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
 use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\ClassCategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Query\ClassCategoryIdQueryInterface;
 
 /**
  * Storage-layer coverage for {@see ClassCategoryStorageInterface} (Phase 2b).
@@ -122,7 +122,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
 
     public function testGetByIdReturnsNullForNonNumericId(): void
     {
-        // The 32-char hex from FakeClassCategoryIdGenerator and seeds
+        // The 32-char hex from FakeClassCategoryIdProvider and seeds
         // like `nonexistent-zzz` can never match an int PK; surface as
         // miss so the ClassCategory Update / Delete Finals fire their
         // 404 paths instead of a PDO error.
@@ -135,8 +135,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         $axis = $this->insertClassName(['name' => 'Color']);
 
-        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->next()->value; // numeric string
+        $ids = $this->sql(ClassCategoryIdQueryInterface::class);
+        $newId = $ids->next()->value; // numeric string
 
         $entity = new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -166,8 +166,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // row scoped to that axis.
         $axis = $this->insertClassName(['name' => 'Size']);
 
-        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(ClassCategoryIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(ClassCategoryStorageInterface::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -186,8 +186,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         // a value. The projection never reads it, so probe the raw
         // column directly. First INSERT on an empty table → 1.
         $axis = $this->insertClassName(['name' => 'Color']);
-        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(ClassCategoryIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(ClassCategoryStorageInterface::class);
 
         $storage->put(new ClassCategoryEntity(
@@ -207,8 +207,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         // The admin slice has no show/hide UI — visible is always 1.
         $axis = $this->insertClassName(['name' => 'Color']);
-        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(ClassCategoryIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(ClassCategoryStorageInterface::class);
 
         $storage->put(new ClassCategoryEntity(
@@ -235,8 +235,8 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
             'sort_no' => 7,
         ]);
 
-        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
-        $newId = $generator->next()->value;
+        $ids = $this->sql(ClassCategoryIdQueryInterface::class);
+        $newId = $ids->next()->value;
         $storage = $this->sql(ClassCategoryStorageInterface::class);
         $storage->put(new ClassCategoryEntity(
             classCategoryId: $newId,
@@ -400,7 +400,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $id = $this->insertClassCategory(['class_name_id' => $axis, 'visible' => 1]);
         $storage = $this->sql(ClassCategoryStorageInterface::class);
 
-        $storage->visible((string) $id, false);
+        $storage->setVisible((string) $id, false);
 
         $stmt = $this->pdo->prepare('SELECT visible FROM dtb_class_category WHERE id = :id');
         $stmt->execute([':id' => $id]);
@@ -408,7 +408,7 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
         $this->assertNotFalse($row);
         $this->assertSame(0, (int) $row['visible']);
 
-        $storage->visible((string) $id, true);
+        $storage->setVisible((string) $id, true);
         $stmt->execute([':id' => $id]);
         $back = $stmt->fetch();
         $this->assertNotFalse($back);
@@ -419,21 +419,21 @@ final class SqlClassCategoryStorageTest extends AbstractSqlTestCase
     {
         $storage = $this->sql(ClassCategoryStorageInterface::class);
         $storage->reorder('nonexistent-zzz', 5);
-        $storage->visible('nonexistent-zzz', false);
+        $storage->setVisible('nonexistent-zzz', false);
         $this->assertTrue(true);
     }
 
-    public function testClassCategoryIdGeneratorAllocatesIncrementingIds(): void
+    public function testClassCategoryIdQueryAllocatesIncrementingIds(): void
     {
-        $generator = $this->sql(ClassCategoryIdGeneratorInterface::class);
+        $ids = $this->sql(ClassCategoryIdQueryInterface::class);
 
         // Empty table → starts at 1.
-        $this->assertSame('1', $generator->next()->value);
+        $this->assertSame('1', $ids->next()->value);
 
         $axis = $this->insertClassName(['name' => 'Color']);
         $firstId = $this->insertClassCategory(['class_name_id' => $axis]);
         $secondId = $this->insertClassCategory(['class_name_id' => $axis]);
-        $this->assertSame((string) ($secondId + 1), $generator->next()->value);
+        $this->assertSame((string) ($secondId + 1), $ids->next()->value);
         $this->assertGreaterThan($firstId, $secondId);
     }
 }

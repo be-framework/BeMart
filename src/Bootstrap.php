@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart;
 
 use BEAR\Resource\Code;
+use BEAR\Resource\Exception\BadRequestException;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Router\RouteMethodNotAllowedException;
 use MyVendor\BeMart\Router\RouteNotFoundException;
@@ -13,6 +14,7 @@ use MyVendor\BeMart\Router\Router;
 use Throwable;
 
 use function array_key_exists;
+use function array_values;
 use function assert;
 use function count;
 use function file_get_contents;
@@ -101,6 +103,7 @@ final class Bootstrap
 
         $params = $matched->params + $request->params;
         $this->normalizeWireAliases($params);
+        $this->normalizeRouteAliases($matched->queryParamMap, $params);
 
         try {
             $resource = Injector::getInstance($context)->getInstance(ResourceInterface::class);
@@ -128,6 +131,15 @@ final class Bootstrap
                 'delete' => $resource->delete($matched->resource, $params),
                 default => null,
             };
+        } catch (BadRequestException $e) {
+            ob_end_clean();
+
+            return $this->fail(
+                $isCli,
+                $this->exceptionStatusCode($e),
+                $e->getMessage() !== '' ? $e->getMessage() : 'Bad Request',
+                $context,
+            );
         } catch (Throwable $e) {
             ob_end_clean();
             if ($isCli) {
@@ -146,7 +158,8 @@ final class Bootstrap
         }
 
         $isRedirect = isset($ro->headers['Location']);
-        $view = $isHtml && ! $isRedirect ? $ro->toString() : null;
+        $isDownload = $isHtml && ! $isRedirect && $this->isDownloadResponse($ro->headers);
+        $view = $isHtml && ! $isRedirect && ! $isDownload ? $ro->toString() : null;
         ob_end_clean();
 
         if ($isCli) {
@@ -180,7 +193,7 @@ final class Bootstrap
                 header('Content-Type: text/html; charset=utf-8');
             }
 
-            echo (string) $view;
+            echo $isDownload ? $this->downloadBody($ro->body) : (string) $view;
 
             return $ro->code >= 400 ? 1 : 0;
         }
@@ -319,6 +332,7 @@ final class Bootstrap
             'login_id' => 'loginId',
             'login_email' => 'email',
             'login_pass' => 'password',
+            'tracking_number' => 'trackingNumber',
         ];
         foreach ($wireAliases as $wire => $canonical) {
             if (array_key_exists($wire, $params) && ! array_key_exists($canonical, $params)) {
@@ -326,6 +340,68 @@ final class Bootstrap
                 unset($params[$wire]);
             }
         }
+    }
+
+    /**
+     * @param array<string, string> $queryParamMap
+     * @param array<string, mixed>  $params
+     */
+    private function normalizeRouteAliases(array $queryParamMap, array &$params): void
+    {
+        foreach ($queryParamMap as $wire => $canonical) {
+            if (array_key_exists($wire, $params) && ! array_key_exists($canonical, $params)) {
+                $value = $params[$wire];
+                if (is_array($value) && ! $this->isListParam($canonical)) {
+                    $values = array_values($value);
+                    $value = $values[0] ?? null;
+                }
+
+                $params[$canonical] = $value;
+                unset($params[$wire]);
+            }
+        }
+    }
+
+    private function isListParam(string $param): bool
+    {
+        return $param === 'columns'
+            || str_ends_with($param, 'Nos')
+            || str_ends_with($param, 'Codes');
+    }
+
+    /** @param array<string, mixed> $headers */
+    private function isDownloadResponse(array $headers): bool
+    {
+        $contentType = $headers['Content-Type'] ?? null;
+        if (! is_string($contentType)) {
+            return false;
+        }
+
+        return ! str_contains($contentType, 'text/html');
+    }
+
+    /** @param mixed $body */
+    private function downloadBody(mixed $body): string
+    {
+        if (! is_array($body)) {
+            return (string) $body;
+        }
+
+        foreach (['csv', 'pdf'] as $key) {
+            $value = $body[$key] ?? null;
+            if (is_string($value)) {
+                return $value;
+            }
+        }
+
+        return json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
+    }
+
+    private function exceptionStatusCode(BadRequestException $e): int
+    {
+        $code = $e->getCode();
+
+        return $code >= 400 && $code < 600 ? $code : Code::BAD_REQUEST;
     }
 
     private function fail(bool $isCli, int $status, string $message, string $context): int

@@ -13,7 +13,7 @@ use Ray\MediaQuery\Annotation\DbQuery;
  * Split from {@see AdminQueryInterface} to keep CQRS boundaries explicit
  * — same convention as customer-side {@see CustomerCommandInterface}.
  * All four mutators are admin-only — AUTHZ lives in the calling Be Final
- * (which checks AdminSessionInterface before reaching this contract).
+ * (which checks AdminSession before reaching this contract).
  *
  * The shape choice (full-entity put for create / replace, scalar surface
  * for soft-delete + authority flip) mirrors the customer-side split:

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -24,14 +24,14 @@ use function is_string;
  * are:
  *
  *  - the storage bindings (ClassCategoryStorageInterface →
- *    SqlClassCategoryStorage, ClassCategoryIdGeneratorInterface →
+ *    SqlClassCategoryStorage, ClassCategoryIdQueryInterface →
  *    direct MediaQuery class-category id proxy, plus the ClassName pairing the
  *    create-Final's referential check needs) are layered via the base
  *    class's sqlOverrideModule; persistence is against the real
  *    dtb_class_category / dtb_class_name tables.
  *
  *  - classCategoryIds / classNameIds are numeric strings drawn from the
- *    table autoinc, not the 32-char hex the Fake generators emit. Both
+ *    table autoinc, not the 32-char hex the FakeQuery fixtures emit. Both
  *    suites assert "the response carries an id" but only the Fake side
  *    ever observes a hex handle — SqlClassCategoryStorage rejects a
  *    non-numeric id as a miss on lookup (the same 404 path as any
@@ -77,7 +77,7 @@ final class AdminClassCategoryResourceSqlTest extends AbstractResourceSqlTestCas
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

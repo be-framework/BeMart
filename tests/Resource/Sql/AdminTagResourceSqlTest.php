@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource\Sql;
 
 use BEAR\Resource\Code;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use Ray\Di\AbstractModule;
@@ -22,11 +22,11 @@ use function is_string;
  * branches. The only differences are:
  *
  *  - the storage binding (TagStorageInterface → SqlTagStorage, +
- *    TagIdGeneratorInterface → direct MediaQuery tag id proxy) is layered via
+ *    TagIdQueryInterface → direct MediaQuery tag id proxy) is layered via
  *    the base class's sqlOverrideModule.
  *
  *  - tagIds are numeric strings drawn from dtb_tag.id, not the
- *    `tg-` prefixed hex the FakeTagIdGenerator emits. The two suites
+ *    `tg-` prefixed hex the FakeTagIdProvider emits. The two suites
  *    therefore both assert "the response carries a tagId" but only
  *    the Fake side ever asserts on the literal seed handles
  *    (`tg-new` / `tg-sale`) — those are Fake-only and SqlTagStorage
@@ -64,7 +64,7 @@ final class AdminTagResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)
+                $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
             }
         };

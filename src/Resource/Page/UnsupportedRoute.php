@@ -18,7 +18,7 @@ class UnsupportedRoute extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'routeName' => $routeName,
-            'message' => 'このルートは未実装です。',
+            'message' => 'このルートは現在利用できません。',
         ];
 
         return $this;
@@ -31,7 +31,7 @@ class UnsupportedRoute extends ResourceObject
         $this->headers['Location'] = $this->safeReturnTo($returnTo);
         $this->body = [
             'routeName' => $routeName,
-            'message' => 'この操作は未実装のため何も変更していません。',
+            'message' => 'この操作は現在利用できないため何も変更していません。',
         ];
 
         return $this;

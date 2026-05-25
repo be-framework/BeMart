@@ -11,7 +11,7 @@ use MyVendor\BeMart\Be\Final\ShoppingFetched;
  * Input for goShopping — render the checkout review page that the
  * customer sees BEFORE submitting doCheckout (Pilot 5).
  *
- * Direct pattern: Input → Final. The Final injects SessionInterface
+ * Direct pattern: Input → Final. The Final injects CustomerSession
  * (AUTHN), CartQueryInterface, CustomerQueryInterface, and
  * PaymentMethodFactoryInterface and assembles the review-page
  * projection (current carts + default shipping address + available

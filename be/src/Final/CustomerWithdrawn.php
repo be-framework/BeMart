@@ -10,7 +10,7 @@ use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -42,7 +42,7 @@ use function sprintf;
  *      (Mailer is non-throwing by contract, so the order matters: the
  *      record-of-truth flip happens first).
  *
- * AUTHN: customerId comes from SessionInterface. A null session — or
+ * AUTHN: customerId comes from CustomerSession. A null session — or
  * a session pointing to a non-existent customer — raises
  * UnauthenticatedException (Pilot 8 lesson: do not leak existence at
  * the AAA boundary). The BEAR layer maps this to 401.
@@ -72,13 +72,13 @@ final readonly class CustomerWithdrawn
 
     public function __construct(
         #[Input] string $sessionPrefix,
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CustomerCommandInterface $customerCommand,
         #[Inject] CartCommandInterface $cartCommand,
         #[Inject] MailerInterface $mailer,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

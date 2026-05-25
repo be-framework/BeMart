@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
 
 /**
@@ -27,8 +27,8 @@ use Ray\Di\AbstractModule;
  *    customer's dtb_cart rows.
  *
  *  - the logged-in customer (alice) is inserted via {@see insertCustomer}
- *    and her numeric dtb_customer.id drives the SessionInterface
- *    binding — CustomerWithdrawn reads `findById(session->customerId())`,
+ *    and her numeric dtb_customer.id drives the CustomerSession
+ *    binding — CustomerWithdrawn reads `findById(session->customerId)`,
  *    so the session id MUST be the real row id. The dummy email is
  *    `withdrawn-{numeric-id}@example.invalid`, derived from that id.
  *
@@ -83,7 +83,7 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)
+                $this->bind(CustomerSession::class)
                     ->toInstance(new FakeSession($this->customerId));
             }
         };

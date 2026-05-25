@@ -38,5 +38,5 @@ interface DeliveryStorageInterface
     public function reorder(string $deliveryId, int $sortNo): void;
 
     #[DbQuery('tdelivery_visible')]
-    public function visible(string $deliveryId, bool $visible): void;
+    public function setVisible(string $deliveryId, bool $visible): void;
 }

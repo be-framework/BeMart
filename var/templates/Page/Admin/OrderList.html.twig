@@ -111,9 +111,9 @@
             // 送り状番号
             var updateTrackingNumber = function(id, url, tracking_number, callback) {
                 $.ajax({
-                    type: 'PUT',
+                    type: 'POST',
                     url: url,
-                    data: {'tracking_number': tracking_number}
+                    data: {'tracking_number': tracking_number, '_token': '{{ csrf_token('admin_order') }}'}
                 }).done(function(data, textStatus, jqXHR) {
                     if (data['status'] == 'OK') {
                         $('#tracking_number_' + id).val(data['tracking_number']);
@@ -363,7 +363,7 @@
                 {% if count %}
 
                     <form id="form_bulk" method="POST" action="">
-                        <input type="hidden" name="_token" value="">
+                        <input type="hidden" name="_token" value="{{ csrf_token('admin_order') }}">
                         <div class="row justify-content-between mb-2">
                             <div class="col-7">
                                 <div class="row justify-content-between">

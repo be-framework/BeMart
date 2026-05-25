@@ -10,7 +10,7 @@ use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerDeleted;
 use MyVendor\BeMart\Be\Input\AdminDeleteCustomerInput;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Module\TestModule;
@@ -52,7 +52,7 @@ final class AdminCustomerDeletedTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -77,12 +77,12 @@ final class AdminCustomerDeletedTest extends TestCase
 
     public function testMailSentToOriginalEmail(): void
     {
-        $before = count($this->mailer->withdrawConfirmations());
+        $before = count($this->mailer->withdrawConfirmations);
         ($this->becoming)(new AdminDeleteCustomerInput(
             customerId: self::ALICE_ID,
         ));
 
-        $after = $this->mailer->withdrawConfirmations();
+        $after = $this->mailer->withdrawConfirmations;
         $this->assertCount($before + 1, $after);
         $last = $after[count($after) - 1];
         $this->assertSame(self::ALICE_EMAIL, $last['email']);

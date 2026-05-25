@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
@@ -45,7 +45,7 @@ final class AdminDeleteCustomerResourceTest extends TestCase
     /**
      * Build a fresh resource client with the given admin session
      * adminId (null = admin-anonymous). Same pattern as
-     * AdminCustomerResourceTest — rebinds AdminSessionInterface so the
+     * AdminCustomerResourceTest — rebinds AdminSession so the
      * admin firewall can be flipped per-test.
      */
     private function rebindAdminSession(string|null $adminId): void
@@ -60,7 +60,7 @@ final class AdminDeleteCustomerResourceTest extends TestCase
 
             protected function configure(): void
             {
-                $this->bind(AdminSessionInterface::class)->toInstance($this->session);
+                $this->bind(AdminSession::class)->toInstance($this->session);
             }
         };
         $base->override($override);
@@ -89,7 +89,7 @@ final class AdminDeleteCustomerResourceTest extends TestCase
         // covered by the SQL suite. This fixture directly exercises the
         // idempotent already-deleted branch.
         $mailer = $this->injector->getInstance(FakeMailer::class);
-        $mailCountBefore = count($mailer->withdrawConfirmations());
+        $mailCountBefore = count($mailer->withdrawConfirmations);
 
         $ro = $this->resource->post('page://self/admin/delete-customer', [
             'customerId' => self::WITHDRAWN_ID,
@@ -101,7 +101,7 @@ final class AdminDeleteCustomerResourceTest extends TestCase
         $this->assertStringContainsString('既に削除', $ro->body['message']);
         $this->assertCount(
             $mailCountBefore,
-            $mailer->withdrawConfirmations(),
+            $mailer->withdrawConfirmations,
             'Already-deleted branch must NOT send a withdrawal mail.',
         );
     }

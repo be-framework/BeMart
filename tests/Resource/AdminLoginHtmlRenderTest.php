@@ -50,7 +50,7 @@ use function trim;
  * a port of EC-CUBE's `login_frame.twig`) — the small unauthenticated
  * frame, NOT the standard sidebar+header `default_frame`. The admin Login
  * resource (`Page/Admin/Login.php`) is anonymous-accessible (the login
- * page is public), so no `AdminSessionInterface` rebind is needed.
+ * page is public), so no `AdminSession` rebind is needed.
  */
 final class AdminLoginHtmlRenderTest extends TestCase
 {
@@ -151,7 +151,7 @@ final class AdminLoginHtmlRenderTest extends TestCase
             '<title>',
             // The hidden CSRF input: EC-CUBE renders a live per-request
             // `csrf_token('authenticate')` value, BeMart renders the
-            // CsrfTokenInterface reference. The token VALUE can never
+            // CsrfToken reference. The token VALUE can never
             // match across the two runtimes — the line is residual by
             // its `_csrf_token` field name regardless of the value.
             'name="_csrf_token"',

@@ -10,7 +10,7 @@ use MyVendor\BeMart\Be\Final\MypageFetched;
 /**
  * Input for goMypage — render the logged-in customer's dashboard.
  *
- * Direct pattern: Input → Final. The Final injects SessionInterface
+ * Direct pattern: Input → Final. The Final injects CustomerSession
  * to resolve the customerId (AUTHN), then aggregates profile + recent
  * orders + favorite count for the dashboard projection.
  *

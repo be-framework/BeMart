@@ -8,8 +8,8 @@ use MyVendor\BeMart\Be\Exception\CategoryNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\CategoryEntity;
 use MyVendor\BeMart\Be\Reason\Query\CategoryStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\CategoryIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\CategoryIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -28,7 +28,7 @@ use Ray\InputQuery\Attribute\Input;
  * shape as {@see AdminCustomerFetched}.
  *
  * The new categoryId is server-generated via
- * {@see CategoryIdGeneratorInterface} so the body cannot collide with
+ * {@see CategoryIdProvider} so the body cannot collide with
  * an existing row.
  */
 final readonly class CategoryCreated
@@ -42,11 +42,11 @@ final readonly class CategoryCreated
         #[Input] string $categoryName,
         #[Input] int $sortNo,
         #[Input] string|null $parentId,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] CategoryStorageInterface $categories,
-        #[Inject] CategoryIdGeneratorInterface $idGenerator,
+        #[Inject] CategoryIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
@@ -55,7 +55,7 @@ final readonly class CategoryCreated
         }
 
         $entity = new CategoryEntity(
-            categoryId: $idGenerator->next()->value,
+            categoryId: $ids->get(),
             categoryName: $categoryName,
             parentId: $parentId,
             sortNo: $sortNo,

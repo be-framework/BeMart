@@ -67,6 +67,7 @@ final class Router
                     $route->resource,
                     $route->dispatchMethodFor($method),
                     $params,
+                    $route->queryParamMap,
                 );
             }
         }

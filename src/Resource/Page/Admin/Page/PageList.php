@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,7 +15,6 @@ use MyVendor\BeMart\Be\Final\AdminPageListFetched;
 use MyVendor\BeMart\Be\Final\PageCreated;
 use MyVendor\BeMart\Be\Input\CreatePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageListInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
 
 use function assert;
 use function sprintf;
@@ -30,7 +30,6 @@ class PageList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -64,22 +63,14 @@ class PageList extends ResourceObject
      * @psalm-taint-source input $pageName
      * @psalm-taint-source input $pageUrl
      * @psalm-taint-source input $pageFileName
-     * @psalm-taint-source input $csrfToken
      */
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
+    #[CsrfProtected]
     public function onPost(
         string $pageName,
         string $pageUrl,
         string $pageFileName,
-        string|null $csrfToken = null,
     ): static {
-        if (! $this->csrf->isValid($csrfToken)) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'Invalid or missing CSRF token.'];
-
-            return $this;
-        }
-
         try {
             $final = ($this->becoming)(new CreatePageInput(
                 pageName: $pageName,

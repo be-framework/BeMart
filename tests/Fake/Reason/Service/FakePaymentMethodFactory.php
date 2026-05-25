@@ -6,13 +6,19 @@ namespace MyVendor\BeMart\Be\Reason\Fake\Service;
 
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\PaymentVerification;
-use MyVendor\BeMart\Be\Reason\Fake\FakeJson;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodInterface;
+use JsonException;
 use Override;
 use RuntimeException;
 
+use function dirname;
+use function file_get_contents;
+use function is_array;
+use function json_decode;
 use function sprintf;
+
+use const JSON_THROW_ON_ERROR;
 
 /**
  * Pilot 3 fake — dispatches by paymentMethodId.
@@ -29,7 +35,7 @@ final class FakePaymentMethodFactory implements PaymentMethodFactoryInterface
     #[Override]
     public function methodFor(int $paymentMethodId): PaymentMethodInterface
     {
-        foreach (FakeJson::rows('payment_methods.json') as $row) {
+        foreach (self::paymentMethodRows() as $row) {
             if ((int) $row['paymentMethodId'] !== $paymentMethodId) {
                 continue;
             }
@@ -84,7 +90,7 @@ final class FakePaymentMethodFactory implements PaymentMethodFactoryInterface
     public function available(): array
     {
         $rows = [];
-        foreach (FakeJson::rows('payment_methods.json') as $row) {
+        foreach (self::paymentMethodRows() as $row) {
             if (! (bool) ($row['available'] ?? false)) {
                 continue;
             }
@@ -93,6 +99,38 @@ final class FakePaymentMethodFactory implements PaymentMethodFactoryInterface
                 'paymentMethodId' => (int) $row['paymentMethodId'],
                 'paymentMethodName' => (string) $row['paymentMethodName'],
             ];
+        }
+
+        return $rows;
+    }
+
+    /** @return list<array<string, mixed>> */
+    private static function paymentMethodRows(): array
+    {
+        $path = dirname(__DIR__, 4) . '/be/var/fake/payment_methods.json';
+        $json = file_get_contents($path);
+        if ($json === false) {
+            throw new RuntimeException(sprintf('Fake payment method fixture missing: %s', $path));
+        }
+
+        try {
+            /** @var mixed $decoded */
+            $decoded = json_decode($json, true, 512, JSON_THROW_ON_ERROR);
+        } catch (JsonException $e) {
+            throw new RuntimeException(sprintf('Fake payment method fixture must be valid JSON: %s', $path), 0, $e);
+        }
+        if (! is_array($decoded)) {
+            throw new RuntimeException(sprintf('Fake payment method fixture must be a JSON array: %s', $path));
+        }
+
+        $rows = [];
+        foreach ($decoded as $row) {
+            if (! is_array($row)) {
+                throw new RuntimeException(sprintf('Fake payment method fixture rows must be objects: %s', $path));
+            }
+
+            /** @var array<string, mixed> $row */
+            $rows[] = $row;
         }
 
         return $rows;

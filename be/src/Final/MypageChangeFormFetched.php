@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
 
 /**
@@ -45,10 +45,10 @@ final readonly class MypageChangeFormFetched
     public array $submitTo;
 
     public function __construct(
-        #[Inject] SessionInterface $session,
+        #[Inject] CustomerSession $session,
         #[Inject] CustomerQueryInterface $customerQuery,
     ) {
-        $sessionCustomerId = $session->customerId();
+        $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
             throw new UnauthenticatedException();
         }

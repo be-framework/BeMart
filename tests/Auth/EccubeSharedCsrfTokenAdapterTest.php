@@ -154,20 +154,20 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
         $this->assertTrue($adapter->isValid('shared-token'));
     }
 
-    public function testGetTokenReturnsStoredSessionReference(): void
+    public function testTokenReturnsStoredSessionReference(): void
     {
         $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'session-token-abc';
 
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $this->assertSame('session-token-abc', $adapter->getToken());
+        $this->assertSame('session-token-abc', $adapter->token);
     }
 
-    public function testGetTokenSeedsAReferenceWhenSessionIsEmpty(): void
+    public function testTokenSeedsAReferenceWhenSessionIsEmpty(): void
     {
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $token = $adapter->getToken();
+        $token = $adapter->token;
 
         // A reference is generated, stored back into the session, and
         // accepted by the matching isValid() call — the form-render ->
@@ -177,24 +177,24 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
         $this->assertTrue($adapter->isValid($token));
     }
 
-    public function testGetTokenDoesNotRotateAnExistingReference(): void
+    public function testTokenDoesNotRotateAnExistingReference(): void
     {
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
-        $first = $adapter->getToken();
-        $second = $adapter->getToken();
+        $first = $adapter->token;
+        $second = $adapter->token;
 
         // Concurrent form pages in one session must all carry the same
-        // valid token — getToken() seeds once, never rotates.
+        // valid token — token seeds once, never rotates.
         $this->assertSame($first, $second);
     }
 
-    public function testGetTokenHonorsACustomSessionKey(): void
+    public function testTokenHonorsACustomSessionKey(): void
     {
         $_SESSION['alt_csrf_field'] = 'alt-token-value';
 
         $adapter = new EccubeSharedCsrfTokenAdapter(sessionKey: 'alt_csrf_field');
 
-        $this->assertSame('alt-token-value', $adapter->getToken());
+        $this->assertSame('alt-token-value', $adapter->token);
     }
 }

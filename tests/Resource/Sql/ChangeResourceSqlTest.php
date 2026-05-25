@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource\Sql;
 use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\SessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\AbstractModule;
 
 /**
@@ -26,8 +26,8 @@ use Ray\Di\AbstractModule;
  *    runs against a real dtb_customer row.
  *
  *  - the logged-in customer (alice) is inserted via {@see insertCustomer}
- *    and her numeric dtb_customer.id drives the SessionInterface
- *    binding — CustomerUpdated reads `findById(session->customerId())`,
+ *    and her numeric dtb_customer.id drives the CustomerSession
+ *    binding — CustomerUpdated reads `findById(session->customerId)`,
  *    so the session id MUST be the real row id (the Fake test
  *    hard-codes the hex customers.json carries; SqlCustomerQuery::findById
  *    rejects non-numeric ids).
@@ -96,7 +96,7 @@ final class ChangeResourceSqlTest extends AbstractResourceSqlTestCase
 
             protected function configure(): void
             {
-                $this->bind(SessionInterface::class)
+                $this->bind(CustomerSession::class)
                     ->toInstance(new FakeSession($this->customerId));
             }
         };

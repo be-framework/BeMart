@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\BlockEntity;
 use MyVendor\BeMart\Be\Reason\Query\BlockStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
-use MyVendor\BeMart\Be\Reason\Service\BlockIdGeneratorInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Provider\BlockIdProvider;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -26,16 +26,16 @@ final readonly class BlockCreated
     public function __construct(
         #[Input] string $blockName,
         #[Input] string $blockFileName,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] BlockStorageInterface $blocks,
-        #[Inject] BlockIdGeneratorInterface $idGenerator,
+        #[Inject] BlockIdProvider $ids,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
         $entity = new BlockEntity(
-            blockId: $idGenerator->next()->value,
+            blockId: $ids->get(),
             blockName: $blockName,
             blockFileName: $blockFileName,
             blockDeletable: true,

@@ -19,7 +19,7 @@ use Ray\MediaQuery\Annotation\DbQuery;
  *
  * State surface (see {@see PluginEntity}):
  *
- *   - listAll()                                    → all plugin rows (any state)
+ *   - list()                                    → all plugin rows (any state)
  *   - findByCode(string $code)                     → one plugin (any state) or null
  *   - install(string $code, string $name, string $version): void
  *         Idempotent: a re-install of an already-installed plugin is
@@ -32,7 +32,7 @@ use Ray\MediaQuery\Annotation\DbQuery;
  *   - uninstall(string $code): void
  *         Silently no-op when the plugin is not installed (idempotent
  *         per ALPS `type=idempotent`). Removes the row entirely so a
- *         subsequent listAll() does not surface the uninstalled stub.
+ *         subsequent list() does not surface the uninstalled stub.
  *   - setEnabled(string $code, bool $enabled): void
  *         Only valid for *installed* plugins. Raises
  *         {@see \MyVendor\BeMart\Be\Exception\PluginNotInstalledException}

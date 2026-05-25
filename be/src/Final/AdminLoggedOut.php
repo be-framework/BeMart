@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 
 /**
@@ -39,9 +39,9 @@ final readonly class AdminLoggedOut
     public string|null $adminId;
 
     public function __construct(
-        #[Inject] AdminSessionInterface $session,
+        #[Inject] AdminSession $session,
     ) {
-        $adminId = $session->adminId();
+        $adminId = $session->adminId;
         $this->adminId = $adminId;
         $this->wasLoggedIn = $adminId !== null;
     }

@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Be\Final;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\TradeLawEntity;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
@@ -17,7 +17,7 @@ use Ray\InputQuery\Attribute\Input;
  *
  *   UpdateTradeLawInput → TradeLawUpdated (Direct, idempotent)
  *
- * AUTHZ — admin firewall: AdminSession::adminId() === null →
+ * AUTHZ — admin firewall: AdminSession::$adminId === null →
  * UnauthorizedAdminAccessException (403).
  *
  * Idempotency: when the new body equals the persisted body, the
@@ -30,10 +30,10 @@ final readonly class TradeLawUpdated
 
     public function __construct(
         #[Input] string $tradeLawBody,
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] TradeLawStorageInterface $tradeLawStorage,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

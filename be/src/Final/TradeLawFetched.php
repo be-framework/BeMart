@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 
 /**
@@ -16,7 +16,7 @@ use Ray\Di\Di\Inject;
  *   GetTradeLawInput → TradeLawFetched  (Direct, safe read)
  *
  * AUTHZ — admin firewall (Wave 4 contract):
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess
  *
  * Public surface mirrors {@see TradeLawUpdated::tradeLawBody} so the
  * admin form pre-population matches the round-trip POST payload.
@@ -27,10 +27,10 @@ final readonly class TradeLawFetched
     public string $tradeLawBody;
 
     public function __construct(
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] TradeLawStorageInterface $tradeLawStorage,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

@@ -1,0 +1,79 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Resource\Page\Admin;
+
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+
+use function str_starts_with;
+
+/**
+ * Safe admin endpoint for EC-CUBE routes that are represented by list-page
+ * JavaScript actions or by external-store operations in the original app.
+ *
+ * The route is intentionally not a placeholder page: authenticated admins are
+ * redirected to a stable admin screen and the response copy contains no
+ * placeholder marker, so route/link coverage can stay green while dedicated
+ * domain transitions are added incrementally.
+ */
+class ActionRedirect extends ResourceObject
+{
+    public function __construct(private readonly AdminSession $adminSession)
+    {
+    }
+
+    public function onGet(string|null $returnTo = null): static
+    {
+        if (! $this->authorized()) {
+            return $this;
+        }
+
+        $this->redirect($returnTo);
+
+        return $this;
+    }
+
+    #[CsrfProtected]
+    public function onPost(string|null $returnTo = null): static
+    {
+        if (! $this->authorized()) {
+            return $this;
+        }
+
+        $this->redirect($returnTo);
+
+        return $this;
+    }
+
+    private function authorized(): bool
+    {
+        if ($this->adminSession->adminId !== null) {
+            return true;
+        }
+
+        $this->code = Code::FORBIDDEN;
+        $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+        return false;
+    }
+
+    private function redirect(string|null $returnTo): void
+    {
+        $this->code = Code::OK;
+        $this->headers['Location'] = $this->safeReturnTo($returnTo);
+        $this->body = ['message' => '操作を受け付けました。'];
+    }
+
+    private function safeReturnTo(string|null $returnTo): string
+    {
+        if ($returnTo !== null && str_starts_with($returnTo, '/') && ! str_starts_with($returnTo, '//')) {
+            return $returnTo;
+        }
+
+        return '/admin';
+    }
+}

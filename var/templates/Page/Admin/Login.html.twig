@@ -33,7 +33,7 @@
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
    - `path('admin_login')` -> deterministic `/{route}` (BeMartTwigExtension).
    - `csrf_token('authenticate')` -> EC-CUBE per-request CSRF widget.
-     BeMart's CSRF is the CsrfTokenInterface (Slice 8); the hidden
+     BeMart's CSRF is the CsrfToken (Slice 8); the hidden
      `_csrf_token` input is kept (structure) with the body's `csrfToken`
      (null in the html context — the EventListener mirrors the live token
      in). EC-CUBE-runtime only — enumerated as residual.

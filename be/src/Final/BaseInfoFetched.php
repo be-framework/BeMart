@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Query\BaseInfoStorageInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
 
 /**
@@ -16,7 +16,7 @@ use Ray\Di\Di\Inject;
  *   GetBaseInfoInput → BaseInfoFetched  (Direct, safe read)
  *
  * AUTHZ — admin firewall (Wave 4 contract):
- *   AdminSessionInterface::adminId() === null → UnauthorizedAdminAccess
+ *   AdminSession::$adminId === null → UnauthorizedAdminAccess
  *
  * Public surface mirrors the Wave 8ε {@see BaseInfoUpdated} Final so the
  * admin form pre-population matches the round-trip POST payload field
@@ -38,10 +38,10 @@ final readonly class BaseInfoFetched
     public string|null $shopMessage;
 
     public function __construct(
-        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminSession $adminSession,
         #[Inject] BaseInfoStorageInterface $baseInfoStorage,
     ) {
-        if ($adminSession->adminId() === null) {
+        if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 

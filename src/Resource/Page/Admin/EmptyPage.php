@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 
 /**
  * EC-CUBE admin プラグイン拡張用スロット — top-level wave, Phase 3.
@@ -25,7 +25,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 class EmptyPage extends ResourceObject
 {
     public function __construct(
-        private readonly AdminSessionInterface $adminSession,
+        private readonly AdminSession $adminSession,
     ) {
     }
 
@@ -37,7 +37,7 @@ class EmptyPage extends ResourceObject
      */
     public function onGet(): static
     {
-        if ($this->adminSession->adminId() === null) {
+        if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
 
