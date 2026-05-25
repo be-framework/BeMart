@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryItemEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryMailEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderHistoryShippingEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderItemEntity;
 
+use function array_map;
 use function array_slice;
 use function strcmp;
 use function usort;
@@ -25,6 +30,15 @@ use function usort;
  * `itemsByOrderNo` read path now. Seeding (see constructor) installs a
  * past order for customer-001 so reorder-style flows have something to
  * read without first running checkout.
+ *
+ * Phase 3 enrichment adds a third parallel map: the order-history detail
+ * (message / paymentMethod / per-shipping address blocks / mail-delivery
+ * log) keyed by orderNo, surfaced via `historyByOrderNo` as the enriched
+ * {@see OrderHistoryEntity}. When an order has no history detail recorded
+ * (e.g. a checkout-created order without shipping rows) the projection
+ * degrades gracefully — empty message / payment, a single address-less
+ * shipping block carrying the flat item list, no mail history — keeping
+ * the Fake parallel to {@see SqlOrderQuery::historyByOrderNo}.
  */
 final class FakeFinalizedOrderStorage
 {
@@ -40,6 +54,21 @@ final class FakeFinalizedOrderStorage
 
     /** @var array<string, list<OrderItemEntity>> */
     private array $items = [];
+
+    /**
+     * Order-history detail keyed by orderNo. Each value carries the
+     * message, payment-method name, per-shipping address blocks and the
+     * mail-delivery log — the data EC-CUBE's history.twig renders beyond
+     * the order header.
+     *
+     * @var array<string, array{
+     *   message: string,
+     *   paymentMethod: string,
+     *   shippings: list<OrderHistoryShippingEntity>,
+     *   mailHistories: list<OrderHistoryMailEntity>
+     * }>
+     */
+    private array $historyDetails = [];
 
     public function __construct()
     {
@@ -104,6 +133,106 @@ final class FakeFinalizedOrderStorage
     public function itemsByOrderNo(string $orderNo): array
     {
         return $this->items[$orderNo] ?? [];
+    }
+
+    /**
+     * Record the order-history detail for an order — message, payment
+     * method, per-shipping address blocks and the mail-delivery log.
+     * Phase 3 enrichment; consumed by `historyByOrderNo`.
+     *
+     * @param list<OrderHistoryShippingEntity> $shippings
+     * @param list<OrderHistoryMailEntity>     $mailHistories
+     */
+    public function putHistoryDetail(
+        string $orderNo,
+        string $message,
+        string $paymentMethod,
+        array $shippings,
+        array $mailHistories,
+    ): void {
+        $this->historyDetails[$orderNo] = [
+            'message' => $message,
+            'paymentMethod' => $paymentMethod,
+            'shippings' => $shippings,
+            'mailHistories' => $mailHistories,
+        ];
+    }
+
+    /**
+     * Build the enriched order-history projection for one finalized order
+     * (Phase 3 enrichment — the screen aggregate behind goMypageHistory).
+     *
+     * Returns null when the orderNo is unknown — same miss semantics as
+     * `getByOrderNo`. When the order exists but has no history detail
+     * recorded, the projection degrades gracefully: empty message /
+     * payment method, no mail history, and a single address-less
+     * shipping block carrying the flat `itemsByOrderNo` list — the same
+     * shape `SqlOrderQuery::historyByOrderNo` returns for an order that
+     * has one dtb_shipping row and no dtb_payment / dtb_mail_history
+     * matches.
+     */
+    public function historyByOrderNo(string $orderNo): OrderHistoryEntity|null
+    {
+        $order = $this->orders[$orderNo] ?? null;
+        if ($order === null) {
+            return null;
+        }
+
+        $detail = $this->historyDetails[$orderNo] ?? null;
+        if ($detail === null) {
+            $detail = [
+                'message' => '',
+                'paymentMethod' => '',
+                'shippings' => [
+                    new OrderHistoryShippingEntity(
+                        name01: '',
+                        name02: '',
+                        kana01: '',
+                        kana02: '',
+                        postalCode: '',
+                        prefName: '',
+                        addr01: '',
+                        addr02: '',
+                        phoneNumber: '',
+                        deliveryName: '',
+                        deliveryDate: '',
+                        deliveryTime: '',
+                        items: array_map(
+                            static fn (OrderItemEntity $i): OrderHistoryItemEntity
+                                => new OrderHistoryItemEntity(
+                                    productCode: $i->productCode,
+                                    productName: $i->productName,
+                                    quantity: $i->quantity,
+                                    unitPrice: $i->unitPrice,
+                                ),
+                            $this->items[$orderNo] ?? [],
+                        ),
+                    ),
+                ],
+                'mailHistories' => [],
+            ];
+        }
+
+        return new OrderHistoryEntity(
+            orderNo: $order->orderNo,
+            customerId: $order->customerId,
+            message: $detail['message'],
+            paymentMethod: $detail['paymentMethod'],
+            subtotal: $order->subtotal,
+            deliveryFeeTotal: $order->deliveryFeeTotal,
+            charge: $order->charge,
+            discount: $order->discount,
+            tax: $order->tax,
+            total: $order->total,
+            paymentTotal: $order->paymentTotal,
+            addPoint: $order->addPoint,
+            usePoint: $order->usePoint,
+            orderStatus: $order->orderStatus,
+            orderDate: $order->orderDate,
+            paymentDate: $order->paymentDate,
+            shippings: $detail['shippings'],
+            mailHistories: $detail['mailHistories'],
+        );
     }
 
     /**
@@ -172,6 +301,53 @@ final class FakeFinalizedOrderStorage
                 quantity: 1,
                 unitPrice: 9800,
             ),
+        ];
+
+        // Phase 3 enrichment — the order-history detail the
+        // goMypageHistory screen renders beyond the order header: the
+        // customer's order message, the payment method, one shipping
+        // address block carrying both line items, and the order's
+        // mail-delivery log. Mirrors a single-shipping past order.
+        $this->historyDetails[$orderNo] = [
+            'message' => '配送は平日希望です。',
+            'paymentMethod' => '銀行振込',
+            'shippings' => [
+                new OrderHistoryShippingEntity(
+                    name01: '山田',
+                    name02: '太郎',
+                    kana01: 'ヤマダ',
+                    kana02: 'タロウ',
+                    postalCode: '530-0001',
+                    prefName: '大阪府',
+                    addr01: '大阪市北区梅田',
+                    addr02: '1-2-3',
+                    phoneNumber: '0612345678',
+                    deliveryName: 'サンプル宅配便',
+                    deliveryDate: '2026-04-03',
+                    deliveryTime: '午前中',
+                    items: [
+                        new OrderHistoryItemEntity(
+                            productCode: 'sample-001',
+                            productName: 'サンプル商品 A',
+                            quantity: 1,
+                            unitPrice: 1200,
+                        ),
+                        new OrderHistoryItemEntity(
+                            productCode: 'sample-002',
+                            productName: 'Sample Product B',
+                            quantity: 1,
+                            unitPrice: 9800,
+                        ),
+                    ],
+                ),
+            ],
+            'mailHistories' => [
+                new OrderHistoryMailEntity(
+                    sendDate: '2026-04-01 10:05:00',
+                    mailSubject: 'ご注文ありがとうございます',
+                    mailBody: "この度はご注文いただきありがとうございます。\n商品の発送まで今しばらくお待ちください。",
+                ),
+            ],
         ];
     }
 }

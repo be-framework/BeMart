@@ -1,0 +1,118 @@
+{#
+  BeMart Contact-confirm page — EC-CUBE goContactConfirm.
+
+  PORT of EC-CUBE 4.3 default-theme `Contact/confirm.twig`
+  (src/Eccube/Resource/template/default/Contact/confirm.twig).
+
+  FORM page (Ray.WebFormModule — the form-page recipe, see
+  var/templates/README.md). The inquiry-confirm screen re-shows the
+  submitted inquiry as plain text AND carries it forward as HIDDEN inputs
+  so the final "送信する" submit re-posts the inquiry to
+  `doSubmitContact`. Markup skeleton, `ec-contactConfirmRole` /
+  `ec-pageHeader` / `ec-off1Grid` / `ec-borderedDefs` /
+  `ec-RegisterRole__actions` / `ec-off4Grid` classes + the <dl>/<dt>/<dd>
+  definition-list structure are kept verbatim from EC-CUBE.
+
+  The hidden carriers are rendered through a real `ContactConfirmForm`
+  (an AbstractForm whose every field is declared `hidden`) exposed by the
+  Confirm resource as `body.form`:
+
+    {{ form.input('contactEmail')|raw }}   <- real <input type="hidden">
+
+  EC-CUBE renders the same hidden inputs through the Symfony FormView
+  (`form_widget(form.email, { type : 'hidden' })`); the render-diff test
+  stubs EC-CUBE's `form_widget` to delegate to the SAME ContactConfirmForm
+  so the hidden inputs diff to ZERO.
+
+  MISSING-FIELD NOTE — EC-CUBE's contact-confirm screen re-shows MORE
+  fields than BeMart's Contact resource carries. EC-CUBE re-shows name /
+  kana / address (postal_code / pref / addr01 / addr02) / phone_number /
+  email / contents; BeMart's `SubmitContactInput` (and the ALPS
+  `ContactForm` descriptor) model ONLY contactName01 / contactName02 /
+  contactEmail / contactContents. Per the Phase-3 recipe a template wave
+  does NOT enrich the Input/ALPS — the kana / address / phone <dl> rows
+  are therefore OMITTED from this port (never invented) and enumerated as
+  an EC-CUBE-only missing-body-field residual in the render test. Flagged
+  for a follow-up vertical-slice enrichment.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `form_label` — Symfony FormView <label>; BeMart authors the plain
+     `<label class="ec-label">ja</label>` carrying the same label text.
+   - `form.<field>.vars.data` — the submitted value re-shown as plain
+     text. The Confirm resource is a thin pure renderer with no submitted
+     payload, so the body carries no field values and the value cells
+     render empty. MISSING BODY FIELD residual — flagged for a follow-up
+     vertical slice.
+   - `form._token` — Symfony CSRF widget; kept as a hidden input with an
+     empty value (BeMart's html context has no CSRF widget).
+   - the entity-extension `{% for f in form|filter(...) %}` loop is
+     OMITTED (a core install has no entity extensions — emits nothing).
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'other_page' %}
+{% set route = 'contact_confirm' %}
+{% set title = 'お問い合わせ' %}
+
+{% block main %}
+    <div class="ec-contactConfirmRole">
+        <div class="ec-pageHeader">
+            <h1>お問い合わせ</h1>
+        </div>
+        <div class="ec-off1Grid">
+            <div class="ec-off1Grid__cell">
+                <form method="post" action="{{ url('contact') }}" class="h-adr">
+                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <p>{{ "内容によっては回答をさしあげるのにお時間をいただくこともございます。\nまた、休業日は翌営業日以降の対応となりますのでご了承ください。\n"|nl2br }}</p>
+                    <div class="ec-borderedDefs">
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お名前</label>
+                            </dt>
+                            <dd>
+                                {{ contactName01|default('') }} {{ contactName02|default('') }}
+                                {{ form.input('contactName01')|raw }}
+                                {{ form.input('contactName02')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">メールアドレス</label>
+                            </dt>
+                            <dd>
+                                {{ contactEmail|default('') }}
+                                {{ form.input('contactEmail')|raw }}
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt>
+                                <label class="ec-label">お問い合わせ内容</label>
+                            </dt>
+                            <dd>
+                                {{ contactContents|default('')|nl2br }}
+                                {{ form.input('contactContents')|raw }}
+                            </dd>
+                        </dl>
+                    </div>
+                    <div class="ec-RegisterRole__actions">
+                        <div class="ec-off4Grid">
+                            <div class="ec-off4Grid__cell">
+                                <button type="submit"
+                                        class="ec-blockBtn--action"
+                                        name="mode"
+                                        value="complete">送信する
+                                </button>
+                                <button type="submit"
+                                        class="ec-blockBtn--cancel"
+                                        name="mode"
+                                        value="back">戻る
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

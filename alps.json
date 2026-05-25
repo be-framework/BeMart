@@ -40,6 +40,8 @@
       {"id": "pointRate", "title": "ポイント付与率","tag": "src-entity", "doc": {"value": "この商品規格固有のポイント付与率（%）。未設定時はbasicPointRateが適用"}},
       {"id": "fileName", "title": "ファイル名","tag": "src-entity", "doc": {"value": "商品画像のファイル名"}},
       {"id": "sortNo", "title": "表示順","tag": "src-entity", "doc": {"value": "一覧における並び順"}},
+      {"id": "productId", "title": "商品ID","tag": "src-template", "doc": {"value": "dtb_product.id — 商品ヘッダの代理キー。商品詳細リンク（EC-CUBE の url('product_detail', {id})）のターゲットとして画面に露出する。自然キー productCode（dtb_product_class 側）とは別物で、こちらは商品ヘッダ単位の識別子"}},
+      {"id": "productClassId", "title": "商品規格ID","tag": "src-template", "doc": {"value": "dtb_product_class.id — 特定 SKU（規格バリエーション行）の代理キー。EC-CUBE のカート画面では削除/数量増減リンク（cart_handle_item の productClassId パラメータ）のキーとして使われる。CartItem 1件は default class ではなく購入された具体的な product_class を指す"}},
 
       {"id": "categoryId", "title": "カテゴリID","tag": "src-entity", "doc": {"value": "dtb_category.id の不透明な文字列ハンドル。BeMart の CategoryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_category.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlCategoryStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (CategoryUpdated / CategoryDeleted / CategoryCreated の親解決) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。parentId（自己参照 FK parent_category_id）も同じ文字列ハンドルで表現され、非数値 parentId は SQL では NULL（ルート）に倒れる。blockId / pageId / tagId と同じ Fake↔SQL 二重性"}},
       {"id": "categoryName", "title": "カテゴリ名","tag": "src-entity", "doc": {"value": "カテゴリの表示名"}},
@@ -333,6 +335,7 @@
           {"href": "#goProductList"},
           {"href": "#doAddCartItem"},
           {"href": "#doAddFavorite"},
+          {"href": "#doRemoveFavorite"},
           {"href": "#goCategory"},
           {"href": "#doCreateProduct"},
           {"href": "#doUpdateProduct"},
@@ -345,7 +348,8 @@
           {"href": "#goProduct"},
           {"href": "#goProductList"},
           {"href": "#goCategoryList"},
-          {"href": "#doCreateProduct"}
+          {"href": "#doCreateProduct"},
+          {"href": "#doCopyProduct"}
         ]
       },
 
@@ -386,7 +390,8 @@
         "descriptor": [
           {"href": "#Tag"},
           {"href": "#goTagList"},
-          {"href": "#doCreateTag"}
+          {"href": "#doCreateTag"},
+          {"href": "#doSortNoMove"}
         ]
       },
 
@@ -407,7 +412,8 @@
         "descriptor": [
           {"href": "#ClassName"},
           {"href": "#goClassNameList"},
-          {"href": "#doCreateClassName"}
+          {"href": "#doCreateClassName"},
+          {"href": "#doSortNoMove"}
         ]
       },
 
@@ -430,16 +436,25 @@
         "descriptor": [
           {"href": "#ClassCategory"},
           {"href": "#goClassCategoryList"},
-          {"href": "#doCreateClassCategory"}
+          {"href": "#doCreateClassCategory"},
+          {"href": "#doSortNoMove"},
+          {"href": "#doToggleVisible"}
         ]
       },
 
-      {"id": "CartItem", "title": "カート明細","tag": "cart src-entity",
-        "doc": {"value": "dtb_cart_item 由来の明細1件。BeMart の CartItemEntity と1:1 (productCode / quantity / unitPrice の3項目)。unitPrice はカート追加時点での price02 のスナップショット — マスタ改定の影響を受けない。dtb_cart_item.product_class_id（FK to dtb_product_class）は BeMart 側では surface に出さず、productCode で正規化"},
+      {"id": "CartItem", "title": "カート明細","tag": "cart src-template",
+        "doc": {"value": "EC-CUBE のショッピングカート画面（Cart/index.twig の ec-cartRow）が1明細あたり描画する情報構造。dtb_cart_item の実カラム（product_class_id / price / quantity）に加え、カート行を描画するために CartItem.ProductClass → Product / ClassCategory を辿って表示する商品名・商品画像・規格バリエーションを含む — このディスクリプタは画面から再導出された投影であり、Entity から逆生成したものではない。productClassId は購入された具体的 SKU（dtb_product_class.id）で、削除/数量増減リンクのキー。productId は商品詳細リンクのターゲット（dtb_product.id）。mainImage は dtb_product_image の最小 sort_no 行のファイル名（バリエーション無し・画像無し商品では NULL）。classCategoryName1/2 と className1/2 は ProductClass.ClassCategory1/2 のバリエーション値とその軸名（例『色：赤』、規格無し商品では NULL）。unitPrice はカート追加時点での price02 のスナップショット。明細小計（unitPrice × quantity）はテンプレートで算出"},
         "descriptor": [
+          {"href": "#productClassId"},
+          {"href": "#productId"},
           {"href": "#productCode"},
+          {"href": "#productName"},
+          {"href": "#fileName"},
+          {"href": "#classNameLabel"},
+          {"href": "#classCategoryName"},
           {"href": "#quantity"},
-          {"href": "#unitPrice"}
+          {"href": "#unitPrice"},
+          {"href": "#goProduct"}
         ]
       },
 
@@ -647,6 +662,8 @@
           {"href": "#doUpdateOrder"},
           {"href": "#doUpdateOrderStatus"},
           {"href": "#doSendOrderMail"},
+          {"href": "#doUpdateTrackingNumber"},
+          {"href": "#doSendShippingNotifyMail"},
           {"href": "#doReorder"}
         ]
       },
@@ -716,7 +733,8 @@
           {"href": "#Customer"},
           {"href": "#goCustomer"},
           {"href": "#goCustomerList"},
-          {"href": "#doCreateCustomer"}
+          {"href": "#doCreateCustomer"},
+          {"href": "#doResendActivationMail"}
         ]
       },
 
@@ -754,8 +772,8 @@
         ]
       },
 
-      {"id": "Favorite", "title": "お気に入り","tag": "favorite src-entity",
-        "doc": {"value": "dtb_customer_favorite_product 1行を平坦化した投影。BeMart の FavoriteEntity と1:1 (customerId / productCode / productName / unitPrice の4項目)。productName と unitPrice は表示用スナップショットで、dtb_product / dtb_product_class への JOIN で取得（default class 規約: class_category_id1 IS NULL AND class_category_id2 IS NULL）。所有者キーは customerId のみで、productCode が同じでも customerId が異なれば別行。EC-CUBE 4.3 には (customer_id, product_id) UNIQUE が無く、SqlFavoriteStorage は ON DUPLICATE KEY UPDATE id=id でベストエフォート冪等にしている"},
+      {"id": "Favorite", "title": "お気に入り","tag": "favorite src-template",
+        "doc": {"value": "EC-CUBE のお気に入り一覧画面（Mypage/favorite.twig）が1行あたり描画する情報構造。dtb_customer_favorite_product の実カラム（customer_id / product_id）に加え、お気に入り行を描画するために dtb_product / dtb_product_class を辿って表示する商品名・単価を含む — このディスクリプタは画面から再導出された投影であり、Entity から逆生成したものではない（CartItem と同型）。productCode と customerId のみが dtb_customer_favorite_product 由来の真の leaf 列（customerId は所有者 FK、productCode は default class 規約 class_category_id1 IS NULL AND class_category_id2 IS NULL で解決する自然キー）。productName と unitPrice は dtb_product / dtb_product_class への JOIN で取得する表示用投影フィールド。所有者キーは customerId のみで、productCode が同じでも customerId が異なれば別行。EC-CUBE 4.3 には (customer_id, product_id) UNIQUE が無く、SqlFavoriteStorage は ON DUPLICATE KEY UPDATE id=id でベストエフォート冪等にしている"},
         "descriptor": [
           {"href": "#customerId"},
           {"href": "#productCode"},
@@ -783,7 +801,8 @@
         "descriptor": [
           {"href": "#email"},
           {"href": "#password"},
-          {"href": "#doLogin"}
+          {"href": "#doLogin"},
+          {"href": "#goCustomerRegistration"}
         ]
       },
       {"id": "PasswordReset", "title": "パスワードリセット","tag": "account src-template",
@@ -834,18 +853,57 @@
         ]
       },
       {"id": "MypageHistory", "title": "注文履歴詳細","tag": "account src-router src-template",
-        "doc": {"value": "個別の注文履歴詳細画面"},
+        "doc": {"value": "個別の注文履歴詳細画面（goMypageHistory）。EC-CUBE の Mypage/history.twig が描画する画面投影。受注ヘッダ（注文番号 / 注文日時 / 注文状況 / ポイント増減）、金額サマリ（subtotal / charge / deliveryFeeTotal / discount / tax / total / paymentTotal）、支払方法（paymentMethod）、注文メッセージ（message）に加え、配送ブロック（HistoryShipping の配列：お届け先住所 + 配送方法/日時 + その配送に紐づく明細行）とメール配信履歴（HistoryMailHistory の配列）を合成する。明細は dtb_order_item を shipping_id でグルーピングして各 HistoryShipping 配下に配置し、画面の per-Shipping 描画に一致させる。Phase 3 で MypageHistoryFetched 投影として実装され、SqlOrderQuery が dtb_order / dtb_order_item / dtb_shipping / dtb_payment / dtb_mail_history を JOIN して充填する。"},
         "descriptor": [
           {"href": "#orderNo"},
           {"href": "#orderDate"},
           {"href": "#orderStatus"},
           {"href": "#paymentMethod"},
+          {"href": "#message"},
           {"href": "#subtotal"},
           {"href": "#deliveryFeeTotal"},
           {"href": "#charge"},
           {"href": "#discount"},
+          {"href": "#tax"},
           {"href": "#total"},
           {"href": "#paymentTotal"},
+          {"href": "#addPoint"},
+          {"href": "#usePoint"},
+          {"id": "HistoryShipping", "title": "注文履歴の配送ブロック",
+            "doc": {"value": "注文履歴詳細画面に描画する1配送先ブロック。dtb_shipping 1行を平坦化したお届け先住所（氏名/カナ/郵便番号/都道府県/住所/電話番号）と配送方法・お届け希望日時、およびその配送に紐づく受注明細行（HistoryOrderItem の配列）から成る。EC-CUBE の Order.Shippings 各要素に対応。"},
+            "descriptor": [
+              {"href": "#name01"},
+              {"href": "#name02"},
+              {"href": "#kana01"},
+              {"href": "#kana02"},
+              {"href": "#postalCode"},
+              {"href": "#pref"},
+              {"href": "#addr01"},
+              {"href": "#addr02"},
+              {"href": "#phoneNumber"},
+              {"href": "#deliveryName"},
+              {"href": "#deliveryDate"},
+              {"href": "#deliveryTime"},
+              {"id": "HistoryOrderItem", "title": "注文履歴の明細行",
+                "doc": {"value": "注文履歴詳細画面に描画する1明細行。dtb_order_item の注文時点スナップショット（商品名 / 商品コード / 数量 / 単価）。"},
+                "descriptor": [
+                  {"href": "#productName"},
+                  {"href": "#productCode"},
+                  {"href": "#quantity"},
+                  {"href": "#unitPrice"}
+                ]
+              }
+            ]
+          },
+          {"id": "HistoryMailHistory", "title": "注文履歴のメール配信履歴",
+            "doc": {"value": "注文履歴詳細画面に描画する1メール配信履歴。dtb_mail_history の送信済みメール（件名 / 本文 / 送信日時）。"},
+            "descriptor": [
+              {"href": "#mailSubject"},
+              {"href": "#mailBody"},
+              {"href": "#sendDate"}
+            ]
+          },
+          {"href": "#goProduct"},
           {"href": "#goMypage"},
           {"href": "#doReorder"}
         ]
@@ -972,7 +1030,9 @@
         "descriptor": [
           {"href": "#Payment"},
           {"href": "#goPaymentList"},
-          {"href": "#doCreatePayment"}
+          {"href": "#doCreatePayment"},
+          {"href": "#doSortNoMove"},
+          {"href": "#doToggleVisible"}
         ]
       },
 
@@ -1015,7 +1075,9 @@
         "descriptor": [
           {"href": "#Delivery"},
           {"href": "#goDeliveryList"},
-          {"href": "#doCreateDelivery"}
+          {"href": "#doCreateDelivery"},
+          {"href": "#doSortNoMove"},
+          {"href": "#doToggleVisible"}
         ]
       },
 
@@ -1062,7 +1124,9 @@
           {"href": "#News"},
           {"href": "#goNewsList"},
           {"href": "#goNews"},
-          {"href": "#doCreateNews"}
+          {"href": "#doCreateNews"},
+          {"href": "#doSortNoMove"},
+          {"href": "#doToggleVisible"}
         ]
       },
 
@@ -1468,6 +1532,13 @@
       {"id": "doImportShippingCsv", "title": "配送CSVをインポートする", "type": "unsafe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router",
         "doc": {"value": "配送CSVから伝票番号・出荷日を一括登録する。配送業者から受領した出荷情報の取り込み用。"}},
+      {"id": "doUpdateTrackingNumber", "title": "伝票番号を更新する", "type": "idempotent", "rt": "#Order",
+        "tag": "order flow-manage-order actor-admin src-router",
+        "doc": {"value": "受注一覧画面（admin/Order/index.twig）から配送（Shipping）の伝票番号をインラインで更新する。EC-CUBE の admin_shipping_update_tracking_number ルートから導出。doImportShippingCsv の CSV 一括版に対する1配送行単位の手動更新。同一伝票番号の再送は同一状態となる冪等操作。"},
+        "descriptor": [{"href": "#trackingNumber"}]},
+      {"id": "doSendShippingNotifyMail", "title": "出荷通知メールを送信する", "type": "unsafe", "rt": "#Order",
+        "tag": "order flow-manage-order actor-admin src-router",
+        "doc": {"value": "受注一覧画面（admin/Order/index.twig）から配送（Shipping）単位の出荷通知メールを顧客へ送信する。EC-CUBE の admin_shipping_notify_mail ルートから導出。受注メール手動送信（doSendOrderMail）とは別物で、出荷済みの配送に対する顧客通知。送信のたびにメールが発生するため unsafe。"}},
       {"id": "goExportOrderPdf", "title": "帳票PDFをエクスポートする", "type": "safe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router",
         "doc": {"value": "選択受注の納品書・領収書PDFを出力する。テンプレートは設定で変更可能。"}},
@@ -1552,6 +1623,10 @@
         "tag": "account flow-manage-customer actor-admin src-router",
         "doc": {"value": "会員を物理削除する。受注は会員IDをNULLにして保持。"},
         "descriptor": [{"href": "#email"}]},
+      {"id": "doResendActivationMail", "title": "認証メールを再送する", "type": "unsafe", "rt": "#CustomerList",
+        "tag": "account flow-manage-customer actor-admin src-router",
+        "doc": {"value": "会員一覧画面（admin/Customer/index.twig）から仮会員へメール認証（本登録）メールを再送する。EC-CUBE の admin_customer_resend ルートから導出。secretKey を含む認証リンクを再送し、顧客は doActivateCustomer で本会員に昇格する。送信のたびにメールが発生するため unsafe。"},
+        "descriptor": [{"href": "#email"}]},
       {"id": "goExportCustomer", "title": "会員CSVをエクスポートする", "type": "safe", "rt": "#CustomerList",
         "tag": "account flow-manage-customer actor-admin src-router",
         "doc": {"value": "会員データをCSV形式でダウンロードする。検索条件で絞り込み可能。"}},
@@ -1612,6 +1687,12 @@
       {"id": "doUpdateBaseInfo", "title": "基本情報を更新する", "type": "idempotent", "rt": "#BaseInfo",
         "tag": "shop flow-manage-shop actor-admin src-router",
         "doc": {"value": "店舗基本情報を更新する。`BaseInfo` テーブルは 1 レコードのみで全店舗共通設定として参照される。"}},
+      {"id": "doSortNoMove", "title": "並び順を変更する", "type": "idempotent", "rt": "#AdminTop",
+        "tag": "admin-system flow-manage-shop actor-admin src-router",
+        "doc": {"value": "管理画面の一覧画面で行をドラッグ＆ドロップして表示順（sort_no）を更新する汎用インライン操作。EC-CUBE の *_sort_no_move ルート群（admin_setting_shop_payment_sort_no_move / admin_setting_shop_delivery_sort_no_move / admin_product_tag_sort_no_move / admin_product_class_name_sort_no_move / admin_product_class_category_sort_no_move / admin_content_news 等、10+ ルート）から導出した抽象遷移。並べ替え結果は冪等（同一順序の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
+      {"id": "doToggleVisible", "title": "表示・非表示を切り替える", "type": "idempotent", "rt": "#AdminTop",
+        "tag": "admin-system flow-manage-shop actor-admin src-router",
+        "doc": {"value": "管理画面の一覧画面で行の表示／非表示（visible）をインラインでトグルする汎用操作。EC-CUBE の *_visible(ity) ルート群（admin_setting_shop_payment_visible / admin_setting_shop_delivery_visibility 等）から導出した抽象遷移。トグルは可視状態を明示値に設定する冪等操作（同一値の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
       {"id": "goPaymentList", "title": "支払方法一覧を見る", "type": "safe", "rt": "#PaymentList",
         "tag": "shop flow-manage-shop actor-admin src-router",
         "doc": {"value": "支払方法のマスタ一覧を表示する。各支払方法には対応する PaymentMethod クラス（クレカ/コンビニ/代引等）が紐づく。"}},

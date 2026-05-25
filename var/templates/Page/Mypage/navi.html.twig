@@ -1,0 +1,50 @@
+{#
+  BeMart Mypage account-nav fragment — EC-CUBE Mypage/navi.twig.
+
+  PORT of EC-CUBE 4.3 default-theme `Mypage/navi.twig`
+  (src/Eccube/Resource/template/default/Mypage/navi.twig).
+
+  Included by every Mypage screen as the shared account-nav + welcome
+  block. The Mypage pages pass two variables when including it:
+   - `mypageno` — the active-tab key (`index` / `favorite` / `change` /
+     `delivery` / `withdraw`), exactly as EC-CUBE's templates `{% set %}`
+     it; drives the `active` class.
+   - `name01` / `name02` — the logged-in customer's name, from the page
+     resource body (EC-CUBE reads `app.user.name01/02`).
+
+  EC-CUBE-ism rebinding (see var/templates/README.md):
+   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
+   - `BaseInfo.option_favorite_product` — the favorites nav item is
+     gated on this store option. BeMart's favorites IS a shipped
+     feature (FavoriteList resource), so the item is rendered
+     unconditionally; the render-diff test sets the EC-CUBE stub's
+     `option_favorite_product` truthy so both sides emit the item.
+   - `BaseInfo.option_point` — the welcome__point line is gated on the
+     points option. BeMart has no points feature, so the line is
+     OMITTED (never invented); the render-diff stub sets
+     `option_point` falsy so EC-CUBE omits it too — no residual.
+   - `app.user.name01/02` -> the resource body's `name01` / `name02`.
+#}
+<div class="ec-navlistRole">
+    <ul class="ec-navlistRole__navlist">
+        <li class="ec-navlistRole__item {% if mypageno|default('') == 'index' %}active{% endif %}">
+            <a href="{{ url('mypage') }}">ご注文履歴</a>
+        </li>
+        <li class="ec-navlistRole__item {% if mypageno|default('') == 'favorite' %}active{% endif %}">
+            <a href="{{ url('mypage_favorite') }}">お気に入り一覧</a>
+        </li>
+        <li class="ec-navlistRole__item {% if mypageno|default('') == 'change' %}active{% endif %}">
+            <a href="{{ url('mypage_change') }}">会員情報編集</a>
+        </li>
+        <li class="ec-navlistRole__item {% if mypageno|default('') == 'delivery' %}active{% endif %}">
+            <a href="{{ url('mypage_delivery') }}">お届け先一覧</a>
+        </li>
+        <li class="ec-navlistRole__item {% if mypageno|default('') == 'withdraw' %}active{% endif %}">
+            <a href="{{ url('mypage_withdraw') }}">退会手続き</a>
+        </li>
+    </ul>
+</div>
+
+<div class="ec-welcomeMsg">
+    <p>ようこそ{{ name01|default('') }} {{ name02|default('') }}さん</p>
+</div>

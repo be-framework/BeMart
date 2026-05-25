@@ -13,7 +13,10 @@ use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\EntryForm;
+use Ray\WebFormModule\FormFactory;
 
+use function array_filter;
 use function assert;
 use function sprintf;
 
@@ -32,6 +35,14 @@ use function sprintf;
  * single transition `goTop`. The verification-ON branch (provisional →
  * email confirm → activate) is deferred to a future Branching pilot.
  *
+ * Phase 3 — HTML FORM page. The resource builds an {@see EntryForm}
+ * (Ray.WebFormModule AbstractForm) and exposes it as `body['form']` so
+ * the HTML port renders real `<input>`s via `{{ form.input(...) }}`. The
+ * form is a field-definition + renderer only — VALIDATION AUTHORITY STAYS
+ * WITH the Be Framework Becoming chain. On a domain rejection the
+ * resource bridges the verdict onto the form (repopulated values + inline
+ * error). The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
+ *
  * @see RegisterCustomerInput  Pilot 4 scope note
  */
 class Entry extends ResourceObject
@@ -39,6 +50,7 @@ class Entry extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -82,6 +94,9 @@ class Entry extends ResourceObject
                 'href' => 'page://self/entry',
             ],
             'csrfToken' => null,
+            // Phase 3: an empty EntryForm for the HTML port to render via
+            // `{{ form.input(...) }}`. JSON contexts ignore it.
+            'form' => $this->formFactory->newInstance(EntryForm::class),
         ];
 
         return $this;
@@ -155,18 +170,25 @@ class Entry extends ResourceObject
                 job: $job,
             ));
         } catch (SemanticVariableException $e) {
+            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
             $this->code = Code::BAD_REQUEST;
             $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
+                'message' => $message,
                 'email' => $email,
+                'form' => $this->failedForm($email, $name01, $name02, $message),
             ];
 
             return $this;
         } catch (EmailAlreadyRegisteredException) {
             // BEAR\Resource\Code lacks CONFLICT; use the integer literal
             // (same convention as Pilot 2's OutOfStockException).
+            $message = 'The email is already registered.';
             $this->code = 409;
-            $this->body = ['message' => 'The email is already registered.', 'email' => $email];
+            $this->body = [
+                'message' => $message,
+                'email' => $email,
+                'form' => $this->failedForm($email, $name01, $name02, $message),
+            ];
 
             return $this;
         }
@@ -185,5 +207,34 @@ class Entry extends ResourceObject
         ];
 
         return $this;
+    }
+
+    /**
+     * Builds an EntryForm reflecting a rejected POST.
+     *
+     * The Becoming chain has already reached the verdict; this only
+     * transports it onto the form so the HTML page re-renders with the
+     * entered values and the inline error. Validation authority remains
+     * with Be — the form is a renderer here, never a validator.
+     */
+    private function failedForm(
+        string $email,
+        string $name01,
+        string $name02,
+        string $message,
+    ): EntryForm {
+        $form = $this->formFactory->newInstance(EntryForm::class);
+        assert($form instanceof EntryForm);
+
+        // Repopulate the safe-to-echo values (password fields excluded).
+        $form->fillValues(array_filter([
+            'email' => $email,
+            'name01' => $name01,
+            'name02' => $name02,
+        ], static fn (string $v): bool => $v !== ''));
+        // Bridge the Be-domain verdict onto the form's error state.
+        $form->setDomainError('email', $message);
+
+        return $form;
     }
 }

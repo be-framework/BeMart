@@ -121,4 +121,83 @@ final class SqlCartQueryTest extends AbstractSqlTestCase
         );
         $this->assertSame(['ORD-C', 'ORD-A', 'ORD-B'], $codes);
     }
+
+    public function testItemsCarryJoinedDisplayFields(): void
+    {
+        // A product with a name, a main image (lowest sort_no wins) and
+        // a two-axis variation — the cart-row display fields the
+        // re-derived ALPS CartItem descriptor composes.
+        $productId = $this->insertProduct([
+            'name' => 'Display Tee',
+            'product_code' => 'DISP-TEE',
+        ]);
+        $this->insertProductImage($productId, ['file_name' => 'late.jpg', 'sort_no' => 9]);
+        $this->insertProductImage($productId, ['file_name' => 'hero.jpg', 'sort_no' => 2]);
+
+        $colour = $this->insertClassName(['name' => 'Colour']);
+        $size = $this->insertClassName(['name' => 'Size']);
+        $red = $this->insertClassCategory(['class_name_id' => $colour, 'name' => 'Red']);
+        $large = $this->insertClassCategory(['class_name_id' => $size, 'name' => 'L']);
+        $sku = $this->insertProductClassVariation($productId, [
+            'product_code' => 'DISP-TEE-RED-L',
+            'class_category_id1' => $red,
+            'class_category_id2' => $large,
+            'price02' => 2500,
+        ]);
+
+        $cart = $this->insertCart(['cart_key' => 'display_1']);
+        // The cart item references the SPECIFIC variation SKU.
+        $this->insertCartItem($cart['id'], $sku, ['price' => 2500, 'quantity' => 4]);
+
+        $query = new SqlCartQuery($this->pdo);
+        $result = $query->byCartKey('display_1');
+
+        $this->assertNotNull($result);
+        $this->assertCount(1, $result->items);
+        $item = $result->items[0];
+        $this->assertSame('DISP-TEE-RED-L', $item->productCode);
+        $this->assertSame(4, $item->quantity);
+        $this->assertSame(2500, $item->price);
+        $this->assertSame($sku, $item->productClassId);
+        $this->assertSame($productId, $item->productId);
+        $this->assertSame('Display Tee', $item->productName);
+        // The image join picks the lowest sort_no.
+        $this->assertSame('hero.jpg', $item->mainImage);
+        // Both variation axes resolved.
+        $this->assertSame('Red', $item->classCategoryName1);
+        $this->assertSame('Colour', $item->className1);
+        $this->assertSame('L', $item->classCategoryName2);
+        $this->assertSame('Size', $item->className2);
+    }
+
+    public function testItemsYieldNullDisplayFieldsWhenImageAndVariationAbsent(): void
+    {
+        // A plain product: default class, no image, no variation.
+        $productId = $this->insertProduct([
+            'name' => 'Plain Mug',
+            'product_code' => 'PLAIN-MUG',
+        ]);
+        $cart = $this->insertCart(['cart_key' => 'plain_1']);
+        $this->insertCartItem(
+            $cart['id'],
+            $this->defaultProductClassId($productId),
+            ['price' => 600, 'quantity' => 1],
+        );
+
+        $query = new SqlCartQuery($this->pdo);
+        $result = $query->byCartKey('plain_1');
+
+        $this->assertNotNull($result);
+        $item = $result->items[0];
+        $this->assertSame('Plain Mug', $item->productName);
+        $this->assertSame($productId, $item->productId);
+        // No dtb_product_image rows — the sub-select yields null.
+        $this->assertNull($item->mainImage);
+        // Default class: class_category_id1/2 both NULL — the LEFT
+        // JOINs onward to dtb_class_category / dtb_class_name yield null.
+        $this->assertNull($item->classCategoryName1);
+        $this->assertNull($item->className1);
+        $this->assertNull($item->classCategoryName2);
+        $this->assertNull($item->className2);
+    }
 }

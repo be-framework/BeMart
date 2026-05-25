@@ -1,0 +1,127 @@
+{#
+  BeMart Top page — EC-CUBE goTop.
+
+  PORT of EC-CUBE 4.3 default-theme `index.twig`
+  (src/Eccube/Resource/template/default/index.twig).
+
+  The storefront top page. EC-CUBE's `index.twig` `block main` is a
+  purely-static main-visual slider (three `asset()` image paths, no data
+  binding) — there is no resource body field driving it, so the markup
+  is ported verbatim. The `block stylesheet` / `block javascript` slick
+  styling + init script are kept verbatim too.
+
+  The Index resource body (src/Resource/Page/Index.php) carries only the
+  hypermedia link surface and a `staticContent` = null stub; EC-CUBE's
+  top-page main visual is template-static, so the port renders the same
+  markup with no data residual. Shop message / news / recommended
+  products / category nav are NOT part of EC-CUBE's `index.twig` itself
+  (they are configurable layout blocks), so they are out of scope here
+  the same way they are for EC-CUBE's `index.twig`.
+
+  See var/templates/README.md for the port + residual-diff method.
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'front_page' %}
+{% set route = 'homepage' %}
+
+{% block stylesheet %}
+    <style>
+        .slick-slider {
+            margin-bottom: 30px;
+        }
+
+        .slick-dots {
+            position: absolute;
+            bottom: -45px;
+            display: block;
+            width: 100%;
+            padding: 0;
+            list-style: none;
+            text-align: center;
+        }
+
+        .slick-dots li {
+            position: relative;
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin: 0 5px;
+            padding: 0;
+
+            cursor: pointer;
+        }
+
+        .slick-dots li button {
+            font-size: 0;
+            line-height: 0;
+            display: block;
+            width: 20px;
+            height: 20px;
+            padding: 5px;
+            cursor: pointer;
+            color: transparent;
+            border: 0;
+            outline: none;
+            background: transparent;
+        }
+
+        .slick-dots li button:hover,
+        .slick-dots li button:focus {
+            outline: none;
+        }
+
+        .slick-dots li button:hover:before,
+        .slick-dots li button:focus:before {
+            opacity: 1;
+        }
+
+        .slick-dots li button:before {
+            content: " ";
+            line-height: 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 12px;
+            height: 12px;
+            text-align: center;
+            opacity: .25;
+            background-color: black;
+            border-radius: 50%;
+
+        }
+
+        .slick-dots li.slick-active button:before {
+            opacity: .75;
+            background-color: black;
+        }
+
+        .slick-dots li button.thumbnail img {
+            width: 0;
+            height: 0;
+        }
+    </style>
+{% endblock %}
+
+{% block javascript %}
+    <script>
+        $(function() {
+            $('.main_visual').slick({
+                dots: true,
+                arrows: false,
+                autoplay: true,
+                speed: 300
+            });
+        });
+    </script>
+{% endblock javascript %}
+
+{% block main %}
+    <div class="ec-sliderRole">
+        <div class="main_visual">
+            <div class="item slick-slide"><img src="{{ asset('assets/img/top/img_hero_pc01.jpg') }}"></div>
+            <div class="item slick-slide"><img src="{{ asset('assets/img/top/img_hero_pc02.jpg') }}"></div>
+            <div class="item slick-slide"><img src="{{ asset('assets/img/top/img_hero_pc03.jpg') }}"></div>
+        </div>
+    </div>
+{% endblock %}
