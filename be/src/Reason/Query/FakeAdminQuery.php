@@ -25,4 +25,22 @@ final class FakeAdminQuery implements AdminQueryInterface
     {
         return $this->storage->getById($adminId);
     }
+
+    /**
+     * @return list<AdminEntity>
+     */
+    #[Override]
+    public function listAll(int $limit = 50, int $offset = 0): array
+    {
+        return $this->storage->listAll($limit, $offset);
+    }
+
+    /**
+     * @return list<AdminEntity>
+     */
+    #[Override]
+    public function search(string|null $nameKeyword): array
+    {
+        return $this->storage->search($nameKeyword);
+    }
 }

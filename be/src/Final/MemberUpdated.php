@@ -1,0 +1,83 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Be\Final;
+
+use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
+use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
+use Ray\Di\Di\Inject;
+use Ray\InputQuery\Attribute\Input;
+
+/**
+ * Member updated — Final, proof an admin's profile fields were edited
+ * in place by another admin (Wave 8 doUpdateMember).
+ *
+ *   UpdateMemberInput → MemberUpdated  (Direct, idempotent)
+ *
+ * AUTHZ — cross-firewall ladder:
+ *
+ *   1. No admin session     → UnauthorizedAdminAccessException  (403)
+ *   2. Unknown loginId      → AdminNotFoundException            (404)
+ *
+ * Merge semantics: only `name` and `mailAddress` are part of this
+ * transition's scope. Null leaves the existing value untouched.
+ * loginId / authority / work / passwordHash are preserved verbatim
+ * — those go through their own dedicated transitions
+ * (doUpdateAuthorityRole / doDeleteMember / future password-change).
+ *
+ * Mass-assignment safety (Pilot 5 F-2 lesson): the target is selected
+ * by loginId (a non-secret identifier) but the path only touches the
+ * editable fields; there is no way to reach passwordHash or work
+ * through this Final.
+ */
+final readonly class MemberUpdated
+{
+    public string $adminId;
+    public string $loginId;
+    public string $name;
+    public string $mailAddress;
+    public int $authority;
+    public int $work;
+
+    public function __construct(
+        #[Input] string $loginId,
+        #[Input] string|null $name,
+        #[Input] string|null $mailAddress,
+        #[Inject] AdminSessionInterface $adminSession,
+        #[Inject] AdminQueryInterface $adminQuery,
+        #[Inject] AdminCommandInterface $adminCommand,
+    ) {
+        if ($adminSession->adminId() === null) {
+            throw new UnauthorizedAdminAccessException();
+        }
+
+        $current = $adminQuery->findByLoginId($loginId);
+        if ($current === null) {
+            throw new AdminNotFoundException();
+        }
+
+        $merged = new AdminEntity(
+            adminId: $current->adminId,
+            loginId: $current->loginId,
+            passwordHash: $current->passwordHash,
+            name: $name ?? $current->name,
+            mailAddress: $mailAddress ?? $current->mailAddress,
+            authority: $current->authority,
+            work: $current->work,
+        );
+
+        $adminCommand->update($merged);
+
+        $this->adminId = $merged->adminId;
+        $this->loginId = $merged->loginId;
+        $this->name = $merged->name;
+        $this->mailAddress = $merged->mailAddress;
+        $this->authority = $merged->authority;
+        $this->work = $merged->work;
+    }
+}
