@@ -33,15 +33,16 @@
 |------------------|------|-----|-----------|
 | pay | NEW(1) | PAID(6) | 入金日登録 |
 | packing | NEW(1), PAID(6) | IN_PROGRESS(4) | 対応中へ |
-| cancel | NEW(1), IN_PROGRESS(4), PAID(6) | CANCEL(3) | 在庫・ポイント戻し |
+| cancel | NEW(1), IN_PROGRESS(4), PAID(6) | CANCEL(3) | 在庫・利用ポイント戻し・加算予定ポイント取消 |
 | back_to_in_progress | CANCEL(3) | IN_PROGRESS(4) | キャンセル取消 |
 | ship | NEW(1), PAID(6), IN_PROGRESS(4) | DELIVERED(5) | 加算ポイント付与 |
-| return | DELIVERED(5) | RETURNED(9) | ポイント戻し |
+| return | DELIVERED(5) | RETURNED(9) | 加算ポイント取消 |
 | cancel_return | RETURNED(9) | DELIVERED(5) | 返品取消 |
 
 PENDING(7)とPROCESSING(8)はステートマシンの places に含まれるがtransitionsには含まれない。購入フロー内で直接セットされる。
 
 #### 典型的なフロー
+
 ```text
 PROCESSING(8) -> PENDING(7) -> NEW(1) -> PAID(6) -> IN_PROGRESS(4) -> DELIVERED(5)
 ```
