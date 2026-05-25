@@ -1,0 +1,83 @@
+{#
+  BeMart admin shipping-CSV upload — EC-CUBE admin-theme
+  `Order/csv_shipping.twig`.
+
+  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/csv_shipping.twig`
+  — the 出荷CSV登録 upload screen. It extends the admin frame
+  (`admin-base.html.twig`).
+
+  Tier-2 port note: EC-CUBE uploads a shipping CSV (tracking numbers
+  filled offline) and parses it. The Be import transition
+  ({@see \MyVendor\BeMart\Resource\Page\Admin\Order\ImportShipping}) is
+  a Phase 2 stub; this page renders the upload form so the screen is
+  faithful. EC-CUBE's `form_widget(form.import_file)` is a Symfony
+  FileType — BeMart has no file-upload form object, so the `<input
+  type="file">` is ported as a plain static input (no value/error
+  binding); enumerated as a residual.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_order_csv_shipping' %}
+{% set title = '出荷CSV登録' %}
+{% set sub_title = '受注管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_order_csv_shipping') }}" id="csv_shipping_form" name="form1" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">CSVファイルアップロード</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3">
+                                    <span>CSVファイル</span>
+                                    <span class="badge bg-primary ms-1">必須</span>
+                                </div>
+                                <div class="col">
+                                    <input type="file" id="csv_shipping_import_file" name="import_file" class="form-control" accept=".csv">
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"></div>
+                                <div class="col">
+                                    <p class="mb-1">出荷CSVの形式に沿ったファイルをアップロードしてください。</p>
+                                    <a href="{{ url('admin_order_export_shipping') }}">現在の出荷データをCSVでダウンロード</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_order') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>受注一覧へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

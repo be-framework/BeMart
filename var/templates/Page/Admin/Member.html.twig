@@ -1,0 +1,218 @@
+{#
+  BeMart admin Member edit — EC-CUBE goMember (メンバー登録/編集).
+
+  PORT of EC-CUBE 4.3 admin-theme `Setting/System/member_edit.twig`
+  (src/Eccube/Resource/template/admin/Setting/System/member_edit.twig).
+
+  Setting/System section, FORM/CRUD page. It extends the admin frame
+  (`admin-base.html.twig`), not the storefront `base.html.twig`. The
+  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
+  from EC-CUBE; only the dynamic bindings are rebound.
+
+  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
+  the Member resource (src/Resource/Page/Admin/Member.php) exposes an
+  {@see \MyVendor\BeMart\Form\AdminMemberForm} as `body['form']`,
+  pre-filled with the persisted row. The inputs render through that real
+  form object:
+
+    {{ form.input('name')|raw }}        <- real <input> w/ id/attrs/value
+    {{ form.error('name') }}            <- inline Be-domain error, if any
+
+  EC-CUBE renders the same inputs through the Symfony FormView
+  (`form_widget(form.name)`); Ray.WebFormModule is BeMart's
+  BEAR-idiomatic equivalent. `AdminMemberForm::init()` ports the field
+  names / ids / attributes from EC-CUBE's `MemberType` (block prefix
+  `admin_member`).
+
+  VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
+  form is a field-definition + renderer.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
+     hidden `_token` input is kept (structure) with an empty value;
+     EC-CUBE-runtime only — enumerated as residual.
+   - `form_widget(form.Authority)` (権限 entity select) -> the
+     MemberFetched projection carries `authority` only as a bare int
+     (mtb_authority id) with no option set; AdminMemberForm omits the
+     control. The 権限 row renders without an input. FLAGGED
+     missing-body-field — enumerated as residual.
+   - `form_widget(form.Work)` (稼働 radio) -> likewise `work` is a bare
+     int (mtb_work id) with no option set; the control is omitted. The
+     稼働 row renders without an input. FLAGGED missing-body-field.
+   - `form.department` -> NOT carried by the MemberFetched projection
+     (dtb_member.department out of the Wave 8 slice); the input renders
+     empty. FLAGGED missing-body-field.
+   - The `auto_render` entity-extension loop + `{% form_theme %}` ->
+     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_system_member_edit' %}
+{% set title = 'メンバー登録' %}
+{% set sub_title = 'システム設定' %}
+
+{% block main %}
+    <form name="member_form" role="form" id="member_form" method="post" action="" novalidate>
+        <input type="hidden" id="member__token" name="_token" value="{{ csrfToken|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8"><span class="card-title">メンバー登録</span></div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#memberInfo" aria-expanded="false" aria-controls="memberInfo">
+                                        <i class="fa fa-angle-up fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="memberInfo">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <span>名前</span>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                {{ form.input('name')|raw }}
+                                            </div>
+                                            {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <span>所属</span>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                {{ form.input('department')|raw }}
+                                            </div>
+                                            {% if form.error('department') %}<span class="invalid-feedback d-block">{{ form.error('department') }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <span>ログインID</span>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                {{ form.input('login_id')|raw }}
+                                            </div>
+                                            {% if form.error('login_id') %}<span class="invalid-feedback d-block">{{ form.error('login_id') }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <span>パスワード</span>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                {{ form.input('plain_password_first')|raw }}
+                                            </div>
+                                            {% if form.error('plain_password_first') %}<span class="invalid-feedback d-block">{{ form.error('plain_password_first') }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <span>パスワード(確認)</span>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                {{ form.input('plain_password_second')|raw }}
+                                            </div>
+                                            {% if form.error('plain_password_second') %}<span class="invalid-feedback d-block">{{ form.error('plain_password_second') }}</span>{% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="権限管理で設定した権限を選択できます。">
+                                            <span>権限</span>
+                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="一時的に非稼働にすることが可能です。必要ない場合はメンバー一覧より削除してください。">
+                                            <span>稼働</span>
+                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                        <span class="badge bg-primary ms-1">必須</span>
+                                    </div>
+                                    <div class="col">
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="有効にすると2段階認証でのログインが必要になります。2段階認証のデバイス設定をしていない状態でログインした場合、設定後にログインできるようになります。">
+                                            <span>2段階認証</span>
+                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        {{ form.input('two_factor_auth_enabled')|raw }}
+                                        {% if form.error('two_factor_auth_enabled') %}<span class="invalid-feedback d-block">{{ form.error('two_factor_auth_enabled') }}</span>{% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink"
+                               href="{{ url('admin_setting_system_member') }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>メンバー管理</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion px-5"
+                                        type="submit">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    {% if message is defined and message %}
+        <p class="ec-errorMessage">{{ message }}</p>
+    {% endif %}
+{% endblock %}

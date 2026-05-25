@@ -1,0 +1,111 @@
+{#
+  BeMart admin member 2FA edit — EC-CUBE Setting/System/two_factor_auth_edit.twig.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_setting_system_two_factor_auth_edit' %}
+{% set title = '2段階認証' %}
+{% set sub_title = 'システム設定' %}
+
+{% block javascript %}
+<script>
+$(function () {
+    $("#qrcode").qrcode({
+        size: 200,
+        fill: '#000',
+        text: 'otpauth://totp/{{ ('EC-CUBE:' ~ shopName|default('') ~ ' - ' ~ memberName|default(''))|url_encode }}?secret={{ authKey|default('') }}&issuer={{ 'EC-CUBE'|url_encode }}',
+        radius: 0,
+        quiet: 0,
+        mode: 0,
+        mSize: 0.1,
+        mPosX: 0.5,
+        mPosY: 0.5,
+        label: 'no label',
+        fontname: 'sans',
+        fontcolor: '#000',
+        image: null
+    });
+});
+</script>
+{% endblock %}
+
+{% block stylesheet %}
+<style>
+#qrcode canvas { width: 150px; }
+</style>
+{% endblock %}
+
+{% block main %}
+    <form name="two_factor_auth_form" role="form" id="two_factor_auth_form" method="post" action="" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        {{ form.input('auth_key')|raw }}
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-8"><span class="card-title">2段階認証</span></div>
+                                <div class="col-4 text-end">
+                                    <a data-bs-toggle="collapse" href="#memberInfo" aria-expanded="false" aria-controls="memberInfo">
+                                        <i class="fa fa-angle-up fa-lg"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="collapse show ec-cardCollapse" id="memberInfo">
+                            <div class="card-body">
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <span>QRコード</span>
+                                    </div>
+                                    <div class="col">
+                                        <div id="qrcode"></div>
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3">
+                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="認証アプリに表示されたトークンを入力してください。">
+                                            <span>トークン</span>
+                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
+                                            <span class="badge bg-primary ms-1">必須</span>
+                                        </div>
+                                    </div>
+                                    <div class="col">
+                                        <div class="row">
+                                            <div class="col">
+                                                {{ form.input('device_token')|raw }}
+                                            </div>
+                                            {% if form.error('device_token') %}
+                                                <span class="invalid-feedback d-block">{{ form.error('device_token') }}</span>
+                                            {% endif %}
+                                            {% if message is defined and message %}
+                                                <div class="text-danger mb-3 text-start small">{{ message }}</div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem"></div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

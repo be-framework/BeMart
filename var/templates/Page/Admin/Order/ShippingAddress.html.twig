@@ -1,0 +1,100 @@
+{#
+  BeMart admin order-shipping editor — EC-CUBE admin-theme
+  `Order/shipping.twig`.
+
+  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Order/shipping.twig`
+  — the ~709-line per-order 出荷登録 / 配送先編集 screen. It extends the
+  admin frame (`admin-base.html.twig`).
+
+  Tier-2 port note: EC-CUBE's editor wires a Shipping collection (one
+  panel per shipment), each with a delivery-slot / delivery-date select
+  and an OrderItem collection. The Be domain edits the order's single
+  shipping target ({@see \MyVendor\BeMart\Be\Input\AdminUpdateShippingAddressInput}:
+  name / postalCode / pref / addr01 / addr02 / phoneNumber), so the
+  port renders the shipping-address panel. The per-shipment delivery
+  slot / date / item collection is Phase 2 scope — dropped as an
+  enumerated residual.
+
+  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
+   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
+   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
+     AdminOrderShippingForm leaf fields (Ray.WebFormModule).
+   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_order_shipping' %}
+{% set title = '出荷登録' %}
+{% set sub_title = '受注管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="{{ url('admin_order_shipping', { id: orderNo }) }}" id="shipping_form" name="form1" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">お届け先</span>
+                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-3"><span>お名前</span><span class="badge bg-primary ms-1">必須</span></div>
+                                <div class="col">
+                                    <div class="row">
+                                        <div class="col-6">{{ form.input('name01')|raw }}</div>
+                                        <div class="col-6">{{ form.input('name02')|raw }}</div>
+                                    </div>
+                                    {% if form.error('name01') %}<span class="invalid-feedback d-block">{{ form.error('name01') }}</span>{% endif %}
+                                </div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>郵便番号</span></div>
+                                <div class="col-4">{{ form.input('postal_code')|raw }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>都道府県</span></div>
+                                <div class="col-4">{{ form.input('pref')|raw }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>市区町村名</span></div>
+                                <div class="col">{{ form.input('addr01')|raw }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>番地・ビル名</span></div>
+                                <div class="col">{{ form.input('addr02')|raw }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-3"><span>電話番号</span></div>
+                                <div class="col-4">{{ form.input('phone_number')|raw }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="{{ url('admin_order_edit', { id: orderNo }) }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>受注編集へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

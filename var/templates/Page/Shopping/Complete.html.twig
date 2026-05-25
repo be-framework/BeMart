@@ -9,6 +9,13 @@
   `ec-reportHeading` / `ec-off3Grid` / `ec-off4Grid` classes and the
   block structure are kept verbatim from EC-CUBE.
 
+  Phase 3 ENRICHMENT — the Complete resource
+  (src/Resource/Page/Shopping/Complete.php) resolves the finalized order
+  by the `orderNo` the post-checkout redirect carries, so the body now
+  exposes `orderNo` and `completeMessage`. The `{% if Order.id %}`
+  order-number block and the `Order.complete_message` block are wired to
+  those body fields (see var/templates/README.md).
+
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
    - `is_granted('ROLE_USER')` — EC-CUBE auth-state runtime. The
@@ -17,14 +24,18 @@
      (the member-checkout path, where it does not render either). The
      step numbering ({{ step }}) advances accordingly — identical to
      EC-CUBE's member-checkout output.
+   - `Order.id` — EC-CUBE gates the order-number block on the order
+     entity existing; BeMart's body carries `orderNo` directly, so the
+     port gates on `orderNo` being non-empty instead (an empty string
+     for a direct visit / unknown order — the block stays empty, exactly
+     as EC-CUBE renders it for a missing Order).
+   - `Order.complete_message` — the per-order custom complete message.
+     BeMart's finalized-order header carries no plugin-appended message
+     (CheckoutCompleted produces an empty string in Pilot 5), so the
+     body's `completeMessage` is `''` and the block renders empty,
+     matching EC-CUBE's plugin-less output.
 
-  MISSING BODY FIELD follow-ups (this resource is a thin pure renderer
-  — see src/Resource/Page/Shopping/Complete.php):
-   - `Order.id` / `Order.orderNo` — the placed order's number. The
-     `{% if Order.id %}` block is OMITTED; the body carries no `orderNo`
-     (a post-redirect order-id transport is an enrichment-backlog item).
-   - `Order.complete_message` — the per-order custom complete message;
-     OMITTED for the same reason.
+  MISSING BODY FIELD follow-ups:
    - `hasNextCart` — whether a second cart remains. Absent from the
      body; the port renders the `goTop` branch (the common case — no
      remaining cart), recorded as a residual in the render test.
@@ -83,6 +94,12 @@
             <p class="ec-reportDescription">
                 {{ "ただいま、ご注文の確認メールをお送りさせていただきました。\n万一、ご確認メールが届かない場合は、トラブルの可能性もありますので大変お手数ではございますがお問い合わせくださいますようお願いいたします。\n"|nl2br }}
             </p>
+            {% if orderNo is defined and orderNo %}
+            <p class="ec-reportDescription">ご注文番号：{{ orderNo }}</p>
+            {% endif %}
+            {% if completeMessage is defined and completeMessage %}
+            <p class="ec-reportDescription">{{ completeMessage|nl2br }}</p>
+            {% endif %}
         </div>
     </div>
     <div class="ec-off4Grid">

@@ -12,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Query\FakeDeliveryStorage;
 use MyVendor\BeMart\Be\Reason\Service\AdminSessionInterface;
 use MyVendor\BeMart\Be\Reason\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
+use MyVendor\BeMart\Form\AdminDeliveryForm;
 use MyVendor\BeMart\Module\AppModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -172,5 +173,43 @@ final class AdminDeliveryResourceTest extends TestCase
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
         $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
+    }
+
+    public function testOnGetNewReturnsBlankForm(): void
+    {
+        $ro = $this->resource->get('page://self/admin/delivery/delivery');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminDeliveryForm::class, $ro->body['form']);
+        $this->assertSame('', $ro->body['deliveryId']);
+        $this->assertNull($ro->body['delivery']);
+    }
+
+    public function testOnGetReturnsDeliveryForm(): void
+    {
+        $id = $this->seed('ヤマト宅急便');
+
+        $ro = $this->resource->get('page://self/admin/delivery/delivery', ['deliveryId' => $id]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertInstanceOf(AdminDeliveryForm::class, $ro->body['form']);
+        $this->assertSame($id, $ro->body['deliveryId']);
+        $this->assertSame('ヤマト宅急便', $ro->body['delivery']['deliveryName']);
+    }
+
+    public function testOnGetUnknownIdReturns404(): void
+    {
+        $ro = $this->resource->get('page://self/admin/delivery/delivery', ['deliveryId' => 'nonexistent-zzz']);
+
+        $this->assertSame(Code::NOT_FOUND, $ro->code);
+    }
+
+    public function testOnGetRejectsAnonymousAdmin(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->get('page://self/admin/delivery/delivery');
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

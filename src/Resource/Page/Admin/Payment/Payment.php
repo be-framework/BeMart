@@ -11,11 +11,15 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\PaymentMethodAdminNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\AdminPaymentListFetched;
 use MyVendor\BeMart\Be\Final\PaymentMethodAdminDeleted;
 use MyVendor\BeMart\Be\Final\PaymentMethodAdminUpdated;
 use MyVendor\BeMart\Be\Input\DeletePaymentMethodAdminInput;
+use MyVendor\BeMart\Be\Input\GetAdminPaymentListInput;
 use MyVendor\BeMart\Be\Input\UpdatePaymentMethodAdminInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminPaymentForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
@@ -23,6 +27,7 @@ use function assert;
  * EC-CUBE doUpdatePayment + doDeletePayment — single-row endpoint
  * (Wave 9θ).
  *
+ *   - GET    → goPaymentEdit (safe read, admin AUTHZ, Setting/Shop Tier-2)
  *   - PUT    → doUpdatePayment (admin edits a payment master — idempotent)
  *   - DELETE → doDeletePayment (admin removes a payment master — idempotent)
  */
@@ -31,7 +36,70 @@ class Payment extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
+    }
+
+    /**
+     * EC-CUBE 支払方法設定（編集） — Setting/Shop Tier-2.
+     *
+     * Thin GET renderer for `Setting/Shop/payment_edit.twig`. An empty
+     * `$paymentId` renders a blank "new payment" form; a known id
+     * pre-fills the editor; an unknown id is 404. The payment-master
+     * list doubles as the AUTHZ gate — no admin session → 403.
+     *
+     * @psalm-taint-source input $paymentId
+     */
+    #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
+    public function onGet(string $paymentId = ''): static
+    {
+        try {
+            $final = ($this->becoming)(new GetAdminPaymentListInput());
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof AdminPaymentListFetched);
+
+        $payment = null;
+        foreach ($final->payments as $row) {
+            if ($row['paymentId'] === $paymentId) {
+                $payment = $row;
+
+                break;
+            }
+        }
+
+        if ($paymentId !== '' && $payment === null) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => '指定された支払方法は見つかりませんでした。'];
+
+            return $this;
+        }
+
+        $form = $this->formFactory->newInstance(AdminPaymentForm::class);
+        assert($form instanceof AdminPaymentForm);
+        if ($payment !== null) {
+            $form->fillValues([
+                'method' => $payment['paymentMethodName'],
+                'charge' => $payment['charge'],
+                'rule_min' => $payment['ruleMin'],
+                'rule_max' => $payment['ruleMax'],
+                'visible' => $payment['visible'] ? '1' : null,
+            ]);
+        }
+
+        $this->code = Code::OK;
+        $this->body = [
+            'form' => $form,
+            'paymentId' => $paymentId,
+            'payment' => $payment,
+        ];
+
+        return $this;
     }
 
     /**

@@ -10,7 +10,7 @@ EC-CUBE 4.3 の ALPS プロファイル (`alps.json`) と、それを契約と�
 - **BeMart 移植**: Be ドメイン層 (`be/`) + BEAR.Sunday アプリ層 (`src/`) + SQL 永続化 (`sql/`) + HTML 層 (`var/templates/`)
 - **移植ワークフロー**: `.claude/` 以下の `/run` コマンド + JSON workflow + prompts
 
-移植の現状（レイヤ別ステータスマトリクス・残作業）は `docs/migration-status.md` が正。構築プロセスの決定ログは `HANDOVER.md`。
+移植の現状（レイヤ別ステータスマトリクス・残作業）は `docs/migration-status.md` が正。構築プロセスの決定ログは `docs/HANDOVER.md`。
 
 ## Commands
 
@@ -41,7 +41,7 @@ HTML / SVG 再生成時は `docs/` 配下のコピーも同期すること。
 
 ### 2 層構造
 
-1. **ALPS 層** — `alps.json` が正（source of truth）。`openapi.yaml`, HTML は生成物。`tag.md` がタグ分類体系、`HANDOVER.md` が構築プロセス記録（Pilot 1/2 完了報告含む）
+1. **ALPS 層** — `alps.json` が正（source of truth）。`openapi.yaml`, HTML は生成物。`docs/tag.md` がタグ分類体系、`docs/HANDOVER.md` が構築プロセス記録（Pilot 1/2 完了報告含む）
 2. **ワークフロー層** — `.claude/` 配下に、Claude Code のネイティブ機能（custom command + subagent + prompts）でワークフローを定義
 
 ### BeMart 実装レイヤ（ALPS を実装する側）

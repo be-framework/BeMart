@@ -91,6 +91,8 @@ final class AddressListHtmlRenderTest extends TestCase
 
         // Seed one address for alice — fed identically to the EC-CUBE
         // side below. Resolved via the interface (the singleton seam).
+        // Phase 3 enrichment — the address carries `prefName` (東京都),
+        // the prefecture DISPLAY name the address line now renders.
         $storage = $injector->getInstance(AddressStorageInterface::class);
         $storage->put(new AddressEntity(
             addressId: 'addr00000000000000000000000000a1',
@@ -105,6 +107,7 @@ final class AddressListHtmlRenderTest extends TestCase
             pref: 13,
             addr01: '渋谷区',
             addr02: '神宮前1-1-1',
+            prefName: '東京都',
         ));
 
         $this->resource = $injector->getInstance(ResourceInterface::class);
@@ -171,8 +174,12 @@ final class AddressListHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
+        // Phase 3 enrichment shrank the residual: the address line's
+        // prefecture name is now a real body field (`prefName`) and
+        // diffs to zero. The remaining ~11 lines are the EC-CUBE <head>
+        // furniture only.
         $this->assertLessThanOrEqual(
-            16,
+            13,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -188,12 +195,6 @@ final class AddressListHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
-            // EC-CUBE renders `CustomerAddress.Pref` as the prefecture's
-            // display NAME (mtb_pref master); BeMart's AddressEntity
-            // carries `pref` as the integer master id only. The address
-            // line therefore differs by the pref token — match the line
-            // family. Follow-up: a pref-name join would close this.
-            '〒1500001',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -217,9 +218,10 @@ final class AddressListHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // The same logical address as BeMart's seed. EC-CUBE renders
-        // `CustomerAddress.Pref` as the prefecture display name; BeMart
-        // renders the integer master id (13) — enumerated residual. The
+        // The same logical address as BeMart's seed. Phase 3 enrichment
+        // — both sides now render the prefecture DISPLAY name: EC-CUBE's
+        // `CustomerAddress.Pref` and BeMart's `prefName` are fed the same
+        // value (東京都), so the address line diffs to zero. The
         // address-count cap is fed equal on both sides so the add-button
         // branch is taken.
         $address = new EcCubeStub([
@@ -249,10 +251,10 @@ final class AddressListHtmlRenderTest extends TestCase
                 'meta_robots' => '',
             ]),
             'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [0 => 'x'],
+                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
                 'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
                 'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [0 => 'x'], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
+                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
                 'ColumnNum' => 1,
             ]),
             'app' => new EcCubeStub([

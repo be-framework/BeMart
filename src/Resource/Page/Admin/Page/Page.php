@@ -18,18 +18,27 @@ use MyVendor\BeMart\Be\Input\DeletePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageInput;
 use MyVendor\BeMart\Be\Input\UpdatePageInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfTokenInterface;
+use MyVendor\BeMart\Form\AdminPageForm;
+use Ray\WebFormModule\FormFactory;
 
 use function assert;
 
 /**
  * EC-CUBE goPage + doUpdatePage + doDeletePage — single-row endpoint
  * (Wave 9 CMS).
+ *
+ * Phase 3 — HTML FORM page. `onGet` exposes an {@see AdminPageForm}
+ * (Ray.WebFormModule AbstractForm) as `body['form']` pre-filled with the
+ * persisted row, so the admin page editor (`Content/page_edit.twig`
+ * port) can render real `<input>`s via `{{ form.input(...) }}`. The JSON
+ * contexts (`app`, `prod`, `test`) ignore `body['form']`.
  */
 class Page extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
@@ -63,6 +72,12 @@ class Page extends ResourceObject
             'pageFileName' => $final->pageFileName,
             'pageEditType' => $final->pageEditType,
         ];
+        // Phase 3: an AdminPageForm pre-filled with the persisted row,
+        // for the HTML edit page to render via `{{ form.input(...) }}`.
+        $form = $this->formFactory->newInstance(AdminPageForm::class);
+        assert($form instanceof AdminPageForm);
+        $form->fillValues($this->body);
+        $this->body['form'] = $form;
 
         return $this;
     }

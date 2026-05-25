@@ -2,7 +2,7 @@
 
 This directory captures conventions discovered during the EC-CUBE -> Be Framework + BEAR.Sunday migration of BeMart. Each entry is a self-contained rule that future projects building on Be Framework should know.
 
-Source repo: `koriym/ec-cube-alps`. The full discovery narrative is in `HANDOVER.md` at the project root; each file links back to the Pilot or Wave that surfaced the rule.
+Source repo: `koriym/ec-cube-alps`. The full discovery narrative is in `docs/HANDOVER.md`; each file links back to the Pilot or Wave that surfaced the rule.
 
 Every entry follows the same shape: **Context -> Problem -> Solution -> Code example -> Anti-pattern -> Where this matters -> Related**. Files are intended to be readable in isolation, without prior project context.
 

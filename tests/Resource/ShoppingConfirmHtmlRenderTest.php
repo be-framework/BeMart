@@ -38,24 +38,25 @@ use function trim;
  *
  * `Shopping/confirm.twig` is a DATA page (+ a checkout submit form /
  * button) — the order-review screen the customer confirms before
- * `doCheckout`. The Confirm resource
- * (src/Resource/Page/Shopping/Confirm.php) is a thin pure renderer (a
- * NEW resource — EC-CUBE's `doConfirmOrder` → `ShoppingConfirm` flow had
- * no BEAR resource backing it; Pilot 5 collapsed the flow). The confirm
- * screen reads off a fully-aggregated `Order` entity; the Confirm
- * resource's body carries NONE of it (a `doConfirmOrder` Be Becoming
- * chain producing an `OrderConfirmed` Final is an enrichment-backlog
- * item — see the resource docblock). This test feeds EC-CUBE's
- * confirm.twig an EMPTY `Order` so both sides render the empty
- * order-detail loops + empty-scalar cells, and `is_granted` is stubbed
- * TRUE (member checkout) to match the member-path port. The residual is
- * the genuinely EC-CUBE-runtime-only `<head>` frame material.
+ * `doCheckout`.
  *
- * MISSING BODY FIELD follow-up: the aggregated `Order` projection
- * (shippings / orderItems / payment / the tax-rate-broken-down totals).
- * With both sides fed an empty Order the order-detail loops emit
- * nothing and the totals show ￥0 — the difference contributes nothing
- * to the diff; it is recorded here as the page's known data gap.
+ * Phase 3 ENRICHMENT — the Confirm resource
+ * (src/Resource/Page/Shopping/Confirm.php) now drives the doConfirmOrder
+ * Be Becoming chain (ConfirmOrderInput → … → OrderConfirmed) rather than
+ * being a thin pure renderer. The body carries the full confirm-screen
+ * projection: the customer-info block, the order's line items, the
+ * payment method and the tax-inclusive totals. This test feeds EC-CUBE's
+ * confirm.twig the SAME logical order (the alice confirm-screen pre-order
+ * fixture `aceface…a11ce` — sample-001 ×2 @￥1,200 + 2026 春予約バッグ ×1
+ * @￥13,500, クレジットカード) so the previously-empty order-detail loops
+ * now diff to zero. `is_granted` is stubbed TRUE (member checkout) to
+ * match the member-path port. The residual is the genuinely
+ * EC-CUBE-runtime-only `<head>` frame material.
+ *
+ * Known data gap — the per-tax-rate breakdown rows: BeMart's PurchaseFlow
+ * folds tax into one `tax` total, so the reduced-tax-rate mark and the
+ * per-rate sub-rows are omitted; EC-CUBE is fed empty `total_by_tax_rate`
+ * so neither side renders them and the diff stays zero.
  */
 final class ShoppingConfirmHtmlRenderTest extends TestCase
 {
@@ -74,6 +75,54 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         '<title>BeMart / ご注文内容のご確認</title>',
         '<title>EC-CUBE / ご注文内容のご確認</title>',
         '<meta name="author" content="">',
+
+        // --- order-delivery item: product thumbnail --------------------
+        // EC-CUBE's confirm.twig (L92-93) renders an `ec-imageGrid__img`
+        // wrapping the product image (no_image_product fallback when the
+        // product carries none). BeMart's confirm projection (the
+        // OrderConfirmed Final → Confirm.php body `items[]`) carries only
+        // productCode / productName / quantity / unitPrice / totalPrice —
+        // the厳密移植 Grade-C scope dropped the Product/ProductClass image
+        // joins, exactly as the Cart row port did (see CartHtmlRenderTest).
+        // The ported template renders only `ec-imageGrid__content`; the
+        // `__img` wrapper is omitted, never invented.
+        '<div class="ec-imageGrid__img"><img src="/assets/img/common/no_image_product.png" alt="サンプル商品 A"></div>',
+        '<div class="ec-imageGrid__img"><img src="/assets/img/common/no_image_product.png" alt="2026 春予約バッグ"></div>',
+
+        // --- order-delivery item: reduced-tax-rate notice --------------
+        // confirm.twig L108 emits `<p>{{ isShowReducedTaxMess ? ... }}</p>`
+        // — an empty <p> unless an item is reduced-tax-rate (the
+        // `is_reduced_tax_rate()` EC-CUBE runtime helper, stubbed false).
+        // BeMart's PurchaseFlow folds tax into one `tax` total and carries
+        // no per-item reduced-rate flag, so the reduced-tax mark and this
+        // <p> are omitted (documented in the file docblock + the port
+        // template header). EC-CUBE still emits the empty <p>.
+        '<p></p>',
+
+        // --- order-delivery: the per-shipping delivery method/date/time -
+        // confirm.twig L115-134 renders `ec-orderDelivery__actions` — the
+        // delivery method (+ delivery fee), the delivery date and the
+        // delivery time, read from `Order.Shippings[idx]` (Delivery /
+        // shipping_delivery_date / shipping_delivery_time). BeMart's
+        // confirm projection is single-shipping with the delivery fee
+        // FOLDED into one `deliveryFeeTotal`; the OrderConfirmed Final
+        // carries no delivery-method name and no per-shipping date/time
+        // selection (those are chosen on the prior goShopping screen, not
+        // re-modelled in the confirm body). The ported template therefore
+        // omits the whole `ec-orderDelivery__actions` block rather than
+        // inventing empty selects. The delivery fee itself is still shown
+        // in the `ec-totalBox` 送料 row (diffs to zero). `指定なし`
+        // appears twice — once for date, once for time.
+        '<div class="ec-orderDelivery__actions">',
+        '<div class="ec-selects">',
+        '<div class="ec-select">',
+        '<label>配送方法</label>',
+        '(￥800)',
+        '<div class="ec-select ec-select__delivery">',
+        '<label>お届け日</label>',
+        '<div class="ec-select ec-select__time">',
+        '<label>お届け時間</label>',
+        '指定なし',
     ];
 
     private ResourceInterface $resource;
@@ -150,8 +199,18 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
+        // Sanity bound on the raw diff size. The residual is the 11-line
+        // EC-CUBE-runtime <head> family (CSRF meta + jQuery $.ajaxSetup
+        // script + shop-name <title>) plus the 14 genuinely-unmodelled
+        // confirm-screen lines enumerated in RESIDUAL_ALLOWLIST — the
+        // product thumbnails, the empty reduced-tax <p>, and the whole
+        // `ec-orderDelivery__actions` per-shipping method/date/time block
+        // (BeMart's confirm projection is single-shipping with the
+        // delivery fee folded into `deliveryFeeTotal`). Every diff line is
+        // accounted for in the allowlist; the bound just guards against an
+        // unexplained balloon.
         $this->assertLessThan(
-            14,
+            27,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -192,15 +251,72 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
+        // The alice confirm-screen pre-order (orders.json `aceface…a11ce`):
+        // sample-001 ×2 @￥1,200 + 2026 春予約バッグ ×1 @￥13,500. The
+        // FakePurchaseFlow folds these to subtotal 15900 / tax 1590 /
+        // delivery 800 / total 18290 / paymentTotal 18290 — fed identically
+        // to BeMart's body so the order-detail loops + totals diff to zero.
+        $items = [
+            new EcCubeStub([
+                'productName' => 'サンプル商品 A',
+                'priceIncTax' => 1200,
+                'quantity' => 2,
+                'totalPrice' => 2400,
+            ]),
+            new EcCubeStub([
+                'productName' => '2026 春予約バッグ',
+                'priceIncTax' => 13500,
+                'quantity' => 1,
+                'totalPrice' => 13500,
+            ]),
+        ];
+        // The confirm screen renders a single Shipping carrying the order's
+        // items + the recipient address (alice's default address — the
+        // BeMart confirm projection is single-shipping, EC-CUBE's
+        // default-theme checkout norm).
+        //
+        // `shipping.order_items` (confirm.twig L120) is the FULL ordered-item
+        // set for the shipping — product lines plus the delivery-fee line.
+        // The template filters it (`|filter(item => item.isDeliveryFee)`) to
+        // pull the delivery charge out. BeMart's confirm projection folds the
+        // delivery fee into one `deliveryFeeTotal` (￥800), so the reference
+        // fixture carries the product lines (isDeliveryFee=false) plus one
+        // delivery-fee line (isDeliveryFee=true, total_price 800). The
+        // BeMart-side template reads `order.deliveryFeeTotal` directly; both
+        // sides therefore render the same ￥800 next to the delivery method.
+        $shippingOrderItems = [
+            new EcCubeStub(['isDeliveryFee' => false, 'total_price' => 2400]),
+            new EcCubeStub(['isDeliveryFee' => false, 'total_price' => 13500]),
+            new EcCubeStub(['isDeliveryFee' => true, 'total_price' => 800]),
+        ];
+        $shipping = new EcCubeStub([
+            'productOrderItems' => $items,
+            'order_items' => $shippingOrderItems,
+            'name01' => '山田', 'name02' => 'アリス',
+            'kana01' => 'ヤマダ', 'kana02' => 'アリス',
+            'postal_code' => '1500001', 'pref' => 13,
+            'addr01' => '渋谷区', 'addr02' => '神宮前1-1-1',
+            'phone_number' => '0312345678',
+        ]);
+
         return $twig->render('Shopping/confirm.twig', [
-            // Empty Order — the confirm screen reads a fully-aggregated
-            // Order; the thin-renderer port carries none of it, so both
-            // sides render the empty order-detail loops + ￥0 totals.
             'Order' => new EcCubeStub([
-                'shippings' => [],
-                'order_items' => [],
+                'shippings' => [$shipping],
+                'order_items' => $items,
                 'tax_free_discount_items' => [],
                 'total_by_tax_rate' => [],
+                // customer-info block — alice's profile.
+                'name01' => '山田', 'name02' => 'アリス',
+                'kana01' => 'ヤマダ', 'kana02' => 'アリス',
+                'companyName' => '', 'email' => 'alice@example.com',
+                'phone_number' => '0312345678',
+                'postal_code' => '1500001', 'pref' => 13,
+                'addr01' => '渋谷区', 'addr02' => '神宮前1-1-1',
+                // payment + tax-inclusive totals.
+                'Payment' => 'クレジットカード',
+                'subtotal' => 15900, 'charge' => 0, 'deliveryFeeTotal' => 800,
+                'taxable_total' => 18290, 'payment_total' => 18290,
+                'message' => '',
             ]),
             'form' => new EcCubeStub(['_token' => '__token__']),
             'activeTradeLaws' => [],
@@ -211,10 +327,10 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
                 'keyword' => '', 'meta_robots' => '',
             ]),
             'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [0 => 'x'],
+                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
                 'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
                 'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [0 => 'x'], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
+                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
                 'ColumnNum' => 1,
             ]),
             'app' => new EcCubeStub(['session' => new EcCubeStub([

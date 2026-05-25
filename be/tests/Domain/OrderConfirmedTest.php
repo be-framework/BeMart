@@ -71,6 +71,49 @@ final class OrderConfirmedTest extends TestCase
         $this->assertSame(96, $final->addPoint);
     }
 
+    /**
+     * Phase 3 enrichment — the confirm-screen pre-order (alice) carries a
+     * resolvable customer fixture, so OrderConfirmed composes the
+     * customer-info block, the line items (with product names resolved
+     * from the product-class fixture) and the payment-method label.
+     */
+    public function testConfirmScreenProjectionIsComposed(): void
+    {
+        // aceface…a11ce — alice, クレジットカード(2): sample-001 ×2 @1200
+        // + preorder-2026-spring-bag ×1 @13500.
+        $final = ($this->becoming)(new ConfirmOrderInput(
+            preOrderId: 'aceface0000000000000000000000000000a11ce',
+            paymentMethodId: 2,
+        ));
+
+        $this->assertInstanceOf(OrderConfirmed::class, $final);
+
+        // totals: subtotal 15900, tax 1590, delivery 800, total 18290.
+        $this->assertSame(15900, $final->subtotal);
+        $this->assertSame(1590, $final->tax);
+        $this->assertSame(800, $final->deliveryFeeTotal);
+        $this->assertSame(18290, $final->total);
+        $this->assertSame(18290, $final->paymentTotal);
+
+        // payment-method label resolved from the factory's selectable list.
+        $this->assertSame('クレジットカード', $final->paymentMethodName);
+
+        // customer-info block — read for the pre-order's customerId.
+        $this->assertSame('山田', $final->customer['name01']);
+        $this->assertSame('アリス', $final->customer['name02']);
+        $this->assertSame('alice@example.com', $final->customer['email']);
+        $this->assertSame('1500001', $final->customer['postalCode']);
+        $this->assertSame(13, $final->customer['pref']);
+
+        // line items — product names resolved from the product-class fixture.
+        $this->assertCount(2, $final->items);
+        $this->assertSame('サンプル商品 A', $final->items[0]['productName']);
+        $this->assertSame(2, $final->items[0]['quantity']);
+        $this->assertSame(2400, $final->items[0]['totalPrice']);
+        $this->assertSame('2026 春予約バッグ', $final->items[1]['productName']);
+        $this->assertSame(13500, $final->items[1]['totalPrice']);
+    }
+
     public function testVerifyFailureBranchesToOrderConfirmFailed(): void
     {
         // paymentMethodId=9 routes to FakeVerifyFailing.

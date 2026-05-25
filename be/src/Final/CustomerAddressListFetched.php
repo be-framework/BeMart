@@ -33,7 +33,7 @@ final readonly class CustomerAddressListFetched
     public string $customerId;
     public int $count;
 
-    /** @var list<array{addressId: string, name01: string, name02: string, kana01: string|null, kana02: string|null, companyName: string|null, phoneNumber: string|null, postalCode: string, pref: int, addr01: string, addr02: string}> */
+    /** @var list<array{addressId: string, name01: string, name02: string, kana01: string|null, kana02: string|null, companyName: string|null, phoneNumber: string|null, postalCode: string, pref: int, prefName: string|null, addr01: string, addr02: string}> */
     public array $addresses;
 
     public function __construct(
@@ -60,6 +60,7 @@ final readonly class CustomerAddressListFetched
                 'phoneNumber' => $row->phoneNumber,
                 'postalCode' => $row->postalCode,
                 'pref' => $row->pref,
+                'prefName' => $row->prefName,
                 'addr01' => $row->addr01,
                 'addr02' => $row->addr02,
             ],
