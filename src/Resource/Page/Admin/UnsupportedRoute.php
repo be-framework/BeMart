@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 
 use function str_starts_with;
@@ -39,6 +40,7 @@ class UnsupportedRoute extends ResourceObject
         return $this;
     }
 
+    #[CsrfProtected]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
     {
         if ($this->adminSession->adminId === null) {
