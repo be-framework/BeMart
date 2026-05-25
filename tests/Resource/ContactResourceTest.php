@@ -42,10 +42,12 @@ final class ContactResourceTest extends TestCase
         );
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/contact', $ro->body['submitTo']['href']);
-        $this->assertNull($ro->body['csrfToken']);
+        // `csrfToken` carries the trusted reference the HTML form must
+        // echo back so the doSubmitContact POST passes CSRF validation.
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
-    public function testOnPostSubmitsContactAndReturns201(): void
+    public function testOnPostSubmitsContactAndRedirectsToComplete(): void
     {
         $ro = $this->resource->post('page://self/contact', [
             'contactName01' => '山田',
@@ -55,7 +57,11 @@ final class ContactResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::CREATED, $ro->code);
+        // Post/Redirect/Get: a successful submit returns Code::OK + a
+        // Location header to the completion page (the HTTP layer turns
+        // that into a browser redirect).
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('/contact/complete', $ro->headers['Location']);
         $this->assertSame('yamada@example.com', $ro->body['contactEmail']);
 
         $sent = $this->mailer->contactInquiries();

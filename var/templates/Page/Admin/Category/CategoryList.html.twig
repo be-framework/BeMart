@@ -1,0 +1,66 @@
+{# EC-CUBE admin category list — product category management screen. #}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_product_category' %}
+{% set title = 'カテゴリ管理' %}
+{% set sub_title = '商品管理' %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header"><span class="card-title">カテゴリ登録</span></div>
+                    <div class="card-body">
+                        <form method="post" action="{{ url('admin_product_category') }}" class="row g-3 align-items-end">
+                            <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category') }}">
+                            <div class="col-6">
+                                <label class="form-label" for="categoryName">カテゴリ名</label>
+                                <input class="form-control" id="categoryName" name="categoryName" required>
+                            </div>
+                            <div class="col-2">
+                                <label class="form-label" for="sortNo">並び順</label>
+                                <input class="form-control" id="sortNo" name="sortNo" type="number" value="1" min="1">
+                            </div>
+                            <div class="col-auto">
+                                <button class="btn btn-ec-conversion" type="submit">登録</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header"><span class="card-title">カテゴリ一覧</span></div>
+                    <div class="card-body p-0">
+                        <table class="table mb-0">
+                            <thead>
+                            <tr>
+                                <th class="ps-3">ID</th>
+                                <th>カテゴリ名</th>
+                                <th>親カテゴリ</th>
+                                <th>並び順</th>
+                                <th class="pe-3"></th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for Category in categories %}
+                                <tr>
+                                    <td class="ps-3">{{ Category.categoryId }}</td>
+                                    <td>{{ Category.categoryName }}</td>
+                                    <td>{{ Category.parentId|default('') }}</td>
+                                    <td>{{ Category.sortNo }}</td>
+                                    <td class="text-end pe-3">
+                                        <a class="btn btn-ec-regular" href="{{ url('admin_product_category_edit', { id: Category.categoryId }) }}">編集</a>
+                                    </td>
+                                </tr>
+                            {% else %}
+                                <tr><td colspan="5" class="text-center text-muted p-4">カテゴリがありません</td></tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

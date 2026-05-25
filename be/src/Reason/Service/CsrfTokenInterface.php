@@ -22,11 +22,11 @@ namespace MyVendor\BeMart\Be\Reason\Service;
  * is (Slice 6 pattern), without coupling Be domain to the validation
  * site.
  *
- * Token issuance (form-render / session-store seeding) is intentionally
- * out of scope for this interface. Phase 2 (EC-CUBE migration) will
- * mirror EC-CUBE / Symfony Forms's existing CSRF token into the flat
- * session key this adapter reads, in the same shape as Slice 7.2's
- * planned session mirror.
+ * Token issuance ({@see getToken()}) seeds the trusted reference so an
+ * HTML form can echo it back. The dev {@see FakeCsrfToken} returns a
+ * fixed reference; the production {@see EccubeSharedCsrfTokenAdapter}
+ * returns the session-bound reference, generating one if absent so a
+ * form render and its subsequent POST agree without an external mirror.
  */
 interface CsrfTokenInterface
 {
@@ -38,4 +38,16 @@ interface CsrfTokenInterface
      * because production tokens are secrets.
      */
     public function isValid(string|null $token): bool;
+
+    /**
+     * Returns the trusted CSRF reference token for the current request —
+     * the value an HTML form page must render into its hidden `_token` /
+     * `_csrf_token` input so the subsequent {@see isValid()} call on the
+     * form POST passes.
+     *
+     * The returned token is stable for the lifetime of the request /
+     * session: calling it on form render and validating the same value
+     * on the POST is the round-trip this interface guarantees.
+     */
+    public function getToken(): string;
 }

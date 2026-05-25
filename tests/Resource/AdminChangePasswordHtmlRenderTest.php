@@ -263,13 +263,8 @@ final class AdminChangePasswordHtmlRenderTest extends TestCase
 
         $twig->addFunction(new TwigFunction('trans', $trans));
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p, string ...$rest): string => '/' . $p));
-        $twig->addFunction(new TwigFunction('url', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
-        $twig->addFunction(new TwigFunction('path', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
+        EcCubeAssetStub::register($twig);
+        EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));

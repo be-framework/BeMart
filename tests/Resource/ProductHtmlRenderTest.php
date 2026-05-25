@@ -158,7 +158,9 @@ final class ProductHtmlRenderTest extends TestCase
             '<div class="ec-price">',
             'class="ec-price__price"',
             '<div class="ec-productRole__code">',
-            '<form action="/product_add_cart?id=sample-001" method="post" id="form1"',
+            // Slice 9: url('product_add_cart', {id}) now resolves through
+            // the shared RouteTable to EC-CUBE's real path pattern.
+            '<form action="/products/add_cart/sample-001" method="post" id="form1"',
             '<div class="ec-numberInput">',
             'class="ec-blockBtn--action add-cart"',
             '<div class="ec-modal">',
@@ -253,6 +255,12 @@ final class ProductHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
+            // The add-to-cart form's hidden CSRF input. EC-CUBE's
+            // detail.twig drives add-cart through AJAX with the
+            // `eccube-csrf-token` meta; BeMart's ported form carries the
+            // token as a hidden `_token` input (CsrfTokenInterface
+            // reference). Residual by its `_token` field name.
+            'name="_token"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -434,13 +442,8 @@ final class ProductHtmlRenderTest extends TestCase
 
         $twig->addFunction(new TwigFunction('trans', $trans));
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p, $x = null): string => '/' . $p));
-        $twig->addFunction(new TwigFunction('url', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
-        $twig->addFunction(new TwigFunction('path', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
+        EcCubeAssetStub::register($twig);
+        EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));

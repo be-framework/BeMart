@@ -1,0 +1,33 @@
+{#
+  BeMart storefront Block widget — product search.
+
+  PORT/SIMPLIFIED of EC-CUBE 4.3 default-theme `Block/search_product.twig`.
+
+  In EC-CUBE's default layout, the top page reaches Product/list through
+  the header search block: submitting the search form with no keyword
+  performs an all-products search and navigates to `product_list`.
+  BeMart does not yet carry EC-CUBE's Symfony FormView or category tree in
+  the shared frame, so this block keeps the same route-level affordance
+  with static markup only.
+#}
+<div class="ec-headerSearch">
+    <form method="get" action="{{ url('product_list') }}">
+        <div class="ec-headerSearch__category">
+            <div class="ec-select ec-select_search">
+                <select name="category_id" id="category_id">
+                    <option value="">全ての商品</option>
+                </select>
+            </div>
+        </div>
+        <div class="ec-headerSearch__keyword">
+            <div class="ec-input">
+                <input type="search" name="name" maxlength="50" placeholder="キーワードを入力">
+                <button class="ec-headerSearch__keywordBtn" type="submit" aria-label="商品を検索">
+                    <div class="ec-icon">
+                        <img src="{{ asset('assets/icon/search-dark.svg') }}" alt="">
+                    </div>
+                </button>
+            </div>
+        </div>
+    </form>
+</div>

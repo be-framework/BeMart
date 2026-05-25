@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Form;
 
+use MyVendor\BeMart\Be\Reason\Service\FakeCsrfToken;
 use Override;
 use Ray\WebFormModule\AbstractForm;
 
@@ -78,6 +79,9 @@ final class AddCartForm extends AbstractForm
     public function init(): void
     {
         $this->setField('product_id', 'hidden');
+        $this->setField('csrfToken', 'hidden')->setAttribs([
+            'value' => FakeCsrfToken::TOKEN,
+        ]);
 
         $this->setField('quantity', 'number')->setAttribs([
             'id' => 'quantity',

@@ -10,27 +10,29 @@
   to the Products resource body (src/Resource/Page/Products.php):
     transitionId, totalItemCount, products[]
 
-  NOTE — scope. The Products resource is a Phase 3 pure renderer (same
-  shape as Index): it declares the hypermedia surface and an EMPTY
-  product list. A faithful product LISTING needs a real catalog query
-  (filter + pagination) — a vertical slice (Entity + SQL) that is out of
-  scope for this template-porting wave. So this port renders the
-  `totalItemCount > 0` ELSE branch of EC-CUBE's `Product/list.twig`: the
-  search-nav with the topicpath and the "お探しの商品は見つかりませんでした"
-  empty-result counter. The populated `ec-shelfGrid` branch + the
-  `eccube.productsClassCategories` JS + the add-cart modal are kept in
-  EC-CUBE's template behind `if pagination.totalItemCount > 0`; with an
-  empty list EC-CUBE emits none of them, so the port omits them too and
-  they contribute nothing to the diff. The populated-list branch is
-  flagged for a follow-up ProductList vertical-slice enrichment.
+  NOTE — scope. The Products resource is now backed by the storefront
+  catalog query (GetStorefrontProductListInput -> StorefrontProductListFetched):
+  it projects every STATUS_VISIBLE product as `{id, name, price02}`. So
+  this port renders the populated `ec-shelfGrid` branch of EC-CUBE's
+  `Product/list.twig` when `totalItemCount > 0`, and the
+  "お探しの商品は見つかりませんでした" empty-result branch otherwise.
+
+  This is a SIMPLIFIED port (厳密移植 Grade-C, parity with the Cart port):
+  the catalog row carries only the bare name + a single `price02`, with
+  the `product_detail` link and the placeholder thumbnail. EC-CUBE's row
+  additionally renders a per-item add-cart `<form>` (ProductClass selects
+  + quantity), an `.ec-modal` add-cart dialog, the `disp_number` /
+  `orderby` sort controls and an `.ec-pagerRole` pager — all of which
+  need data the resource body does not carry (ProductClass joins, a
+  Symfony FormView, pagination metadata). Those omissions are the
+  enumerated residuals in ProductsHtmlRenderTest; category / keyword
+  filtering + pagination are deferred to Phase 2.
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `search_form` is the Symfony search FormView; it is only iterated /
-     widget-rendered inside the `totalItemCount > 0` branch, which the
-     empty list never enters, so no FormView markup is emitted.
-   - the `block javascript` `class_categories_as_json` loop iterates
-     `pagination` — empty here, so it emits an empty JS object literal.
+   - the `block javascript` loop emits `eccube.productsClassCategories`
+     keyed by the js-escaped product id; BeMart carries no ProductClass
+     data so each value is an empty object literal.
 #}
 {% extends 'base.html.twig' %}
 
@@ -42,7 +44,7 @@
     <script>
         eccube.productsClassCategories = {
             {% for product in products %}
-            "{{ product.id }}": {}{% if loop.last == false %}, {% endif %}
+            "{{ product.id|escape('js') }}": {}{% if loop.last == false %}, {% endif %}
             {% endfor %}
         };
 
@@ -126,11 +128,26 @@
 {% block main %}
     <div class="ec-searchnavRole">
         <form name="form1" id="form1" method="get" action="?">
+            <input type="hidden" id="category_id" name="category_id" value="{{ filters.category_id|default('') }}">
+            <input type="hidden" id="name" name="name" value="{{ filters.name|default('') }}">
+            <input type="hidden" id="pageno" name="pageno" value="{{ filters.pageno|default('1') }}">
+            <input type="hidden" id="disp_number" name="disp_number" value="{{ filters.disp_number|default('20') }}">
+            <input type="hidden" id="orderby" name="orderby" value="{{ filters.orderby|default('') }}">
         </form>
         <div class="ec-searchnavRole__topicpath">
             <ol class="ec-topicpath">
                 <li class="ec-topicpath__item"><a href="{{ url('product_list') }}">全て</a>
                 </li>
+                {% if filters.categoryName|default(null) %}
+                    <li class="ec-topicpath__divider">|</li>
+                    <li class="ec-topicpath__item--active">
+                        <a href="{{ url('product_list') }}?category_id={{ filters.category_id }}">{{ filters.categoryName }}</a>
+                    </li>
+                {% endif %}
+                {% if filters.name|default('') %}
+                    <li class="ec-topicpath__divider">|</li>
+                    <li class="ec-topicpath__item">「{{ filters.name }}」の検索結果</li>
+                {% endif %}
             </ol>
         </div>
         <div class="ec-searchnavRole__infos">
@@ -141,6 +158,22 @@
                     <span>お探しの商品は見つかりませんでした</span>
                 {% endif %}
             </div>
+            {% if totalItemCount > 0 %}
+                <div class="ec-searchnavRole__actions">
+                    <div class="ec-select">
+                        <select class="disp-number" aria-label="表示件数">
+                            <option value="20"{% if filters.disp_number == '20' %} selected{% endif %}>20件</option>
+                            <option value="40"{% if filters.disp_number == '40' %} selected{% endif %}>40件</option>
+                            <option value="60"{% if filters.disp_number == '60' %} selected{% endif %}>60件</option>
+                        </select>
+                        <select class="order-by" aria-label="並び順">
+                            <option value=""{% if filters.orderby == '' %} selected{% endif %}>新着順</option>
+                            <option value="price_low"{% if filters.orderby == 'price_low' %} selected{% endif %}>価格が低い順</option>
+                            <option value="price_high"{% if filters.orderby == 'price_high' %} selected{% endif %}>価格が高い順</option>
+                        </select>
+                    </div>
+                </div>
+            {% endif %}
         </div>
     </div>
     {% if totalItemCount > 0 %}
@@ -150,16 +183,76 @@
                     <li class="ec-shelfGrid__item">
                         <a href="{{ url('product_detail', {'id': product.id}) }}">
                             <p class="ec-shelfGrid__item-image">
-                                <img src="{{ asset(product.mainListImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ product.name }}">
+                                <img src="{{ asset(product.mainListImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ product.name }}" {% if loop.index > 5 %} loading="lazy"{% endif %}>
                             </p>
                             <p>{{ product.name }}</p>
+                            {% if product.categoryNames|default([]) is not empty %}
+                                <p class="ec-shelfGrid__item-category">{{ product.categoryNames|join(' / ') }}</p>
+                            {% endif %}
+                            {% if product.tagNames|default([]) is not empty %}
+                                <p class="ec-shelfGrid__item-tags">{{ product.tagNames|join(' ') }}</p>
+                            {% endif %}
                             <p class="price02-default">
                                 {{ product.price02|price }}
                             </p>
                         </a>
+                        {% if product.stockFind %}
+                            <form name="form{{ product.id }}" id="productForm{{ product.id }}" action="{{ url('product_add_cart', { id: product.id }) }}" method="post">
+                                <div class="ec-productRole__actions">
+                                    <div class="ec-numberInput">
+                                        <span>数量</span>
+                                        <input type="number" name="quantity" value="1" min="1" maxlength="9" class="quantity">
+                                    </div>
+                                </div>
+                                <input type="hidden" name="product_id" value="{{ product.id }}">
+                                <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+                            </form>
+                            <div class="ec-productRole__btn">
+                                <button type="submit" class="ec-blockBtn--action add-cart" data-cartid="{{ product.id }}" form="productForm{{ product.id }}">
+                                    カートに入れる
+                                </button>
+                            </div>
+                        {% else %}
+                            <div class="ec-productRole__btn">
+                                <button type="button" class="ec-blockBtn--action" disabled="disabled">
+                                    ただいま品切れ中です。
+                                </button>
+                            </div>
+                        {% endif %}
                     </li>
                 {% endfor %}
             </ul>
         </div>
+        <div class="ec-modal">
+            <div class="ec-modal-overlay">
+                <div class="ec-modal-wrap">
+                    <span class="ec-modal-close"><span class="ec-icon"><img src="{{ asset('assets/icon/cross-dark.svg') }}" alt=""/></span></span>
+                    <div id="ec-modal-header" class="text-center">カートに追加しました。</div>
+                    <div class="ec-modal-box">
+                        <div class="ec-role">
+                            <span class="ec-inlineBtn--cancel">お買い物を続ける</span>
+                            <a href="{{ url('cart') }}" class="ec-inlineBtn--action">カートへ進む</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% if pager.pageCount > 1 %}
+            <div class="ec-pagerRole">
+                <ul class="ec-pager">
+                    {% if pager.previous %}
+                        <li class="ec-pager__item"><a href="?category_id={{ filters.category_id }}&name={{ filters.name }}&disp_number={{ filters.disp_number }}&orderby={{ filters.orderby }}&pageno={{ pager.previous }}">前へ</a></li>
+                    {% endif %}
+                    {% for page in pager.pages %}
+                        <li class="ec-pager__item{% if page == pager.current %}--active{% endif %}">
+                            <a href="?category_id={{ filters.category_id }}&name={{ filters.name }}&disp_number={{ filters.disp_number }}&orderby={{ filters.orderby }}&pageno={{ page }}">{{ page }}</a>
+                        </li>
+                    {% endfor %}
+                    {% if pager.next %}
+                        <li class="ec-pager__item"><a href="?category_id={{ filters.category_id }}&name={{ filters.name }}&disp_number={{ filters.disp_number }}&orderby={{ filters.orderby }}&pageno={{ pager.next }}">次へ</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        {% endif %}
     {% endif %}
 {% endblock %}

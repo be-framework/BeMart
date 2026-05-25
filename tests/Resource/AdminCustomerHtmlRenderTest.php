@@ -265,10 +265,12 @@ final class AdminCustomerHtmlRenderTest extends TestCase
             // `admin_customer_page` with the session-resumed page number
             // (`?page_no=...&resume=1`); BeMart's port links to the bare
             // `admin_customer` list route (no server-side paging /
-            // session resume in scope). Same `c-baseLink` anchor + 会員一覧
-            // label, different href.
+            // session resume in scope). Both names now resolve through the
+            // shared RouteTable, so BeMart's href is the real `/admin/customer`
+            // list path. Same `c-baseLink` anchor + 会員一覧 label, different
+            // href.
             'admin_customer_page',
-            'href="/admin_customer"',
+            'href="/admin/customer"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -391,13 +393,8 @@ final class AdminCustomerHtmlRenderTest extends TestCase
 
         $twig->addFunction(new TwigFunction('trans', $trans));
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        $twig->addFunction(new TwigFunction('asset', static fn (string $p, string ...$rest): string => '/' . $p));
-        $twig->addFunction(new TwigFunction('url', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
-        $twig->addFunction(new TwigFunction('path', static function (string $r, array $p = []): string {
-            return '/' . $r . ($p ? '?' . http_build_query($p) : '');
-        }));
+        EcCubeAssetStub::register($twig);
+        EcCubeRouteStub::register($twig);
         $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
