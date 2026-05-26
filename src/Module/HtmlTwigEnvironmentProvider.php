@@ -33,6 +33,12 @@ final class HtmlTwigEnvironmentProvider implements ProviderInterface
         private readonly Environment $twig,
         private readonly CsrfToken $csrf,
     ) {
+        // HTML migration work edits Twig templates and static assets while the
+        // local server is running. Madapaja.TwigModule caches compiled
+        // templates by default, so without auto_reload the browser can keep
+        // rendering stale markup/CSS links until var/tmp is manually cleared.
+        $twig->enableAutoReload();
+
         if (! $twig->hasExtension(BeMartTwigExtension::class)) {
             $twig->addExtension(new BeMartTwigExtension(csrf: $this->csrf));
         }

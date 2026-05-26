@@ -138,6 +138,7 @@ final class HtmlLinkCrawlTest extends TestCase
         $assets = [
             '/assets/css/style.css' => ['text/css', 'normalize.css'],
             '/assets/css/customize.css' => ['text/css', 'カスタマイズ用CSS'],
+            '/assets/js/customize.js' => ['javascript', 'カスタマイズ用Javascript'],
             '/template/admin/assets/css/app.css' => ['text/css', 'background: #eff0f4'],
             '/bundle/front.bundle.js' => ['javascript', 'front.bundle.js.LICENSE.txt'],
             '/bundle/admin.bundle.js' => ['javascript', 'admin.bundle.js.LICENSE.txt'],
@@ -147,9 +148,14 @@ final class HtmlLinkCrawlTest extends TestCase
             $response = $this->get($path);
 
             self::assertSame(200, $response['status'], $path);
-            self::assertStringContainsString($contentTypeNeedle, strtolower(implode("\n", $response['headers'])), $path);
+            $headers = strtolower(implode("\n", $response['headers']));
+            self::assertStringContainsString($contentTypeNeedle, $headers, $path);
             self::assertStringContainsString($bodyNeedle, $response['body'], $path);
             self::assertStringNotContainsString('<html', strtolower($response['body']), $path);
+
+            if ($path === '/assets/css/customize.css' || $path === '/assets/js/customize.js') {
+                self::assertStringContainsString('cache-control: no-store, no-cache, must-revalidate, max-age=0', $headers, $path);
+            }
         }
     }
 

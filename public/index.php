@@ -37,12 +37,23 @@ if (
         default => 'application/octet-stream',
     };
 
+    if ($requestPath === '/assets/css/customize.css' || $requestPath === '/assets/js/customize.js') {
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+    }
+
     header('Content-Type: ' . $contentType);
     header('Content-Length: ' . (string) filesize($publicFile));
     readfile($publicFile);
 
     return true;
 }
+
+// Keep browser HTML free from vendor deprecation banners. PHP 8.5 emits
+// deprecations from third-party helpers used while rendering forms; they are
+// useful in CLI analysis but break visible pages when sent to the browser.
+error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
