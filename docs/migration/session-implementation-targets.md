@@ -74,6 +74,10 @@
 - `vendor/bin/phpunit --filter 'ProductResourceTest|Favorite|Reorder|Withdraw|ShoppingNonMember|Cart' --colors=never`
 - `vendor/bin/phpunit tests/Resource --filter HtmlRender --colors=never`
 
+次PR/作業単位:
+
+- [ActionRedirect 45件の ALPS-first 実装計画](action-redirect-alps-first-plan.md)
+
 ## 今回終了対象 A: original path 互換
 
 ### 対象
