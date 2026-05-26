@@ -67,6 +67,30 @@ use function trim;
  */
 final class EntryConfirmHtmlRenderTest extends TestCase
 {
+    /** @var array<string, int|string> */
+    private const CONFIRM_PAYLOAD = [
+        'name01' => '山田',
+        'name02' => '太郎',
+        'kana01' => 'ヤマダ',
+        'kana02' => 'タロウ',
+        'companyName' => 'テスト商事',
+        'postalCode' => '1000001',
+        'pref' => 13,
+        'addr01' => '千代田区千代田',
+        'addr02' => '1-1',
+        'phoneNumber' => '0312345678',
+        'email' => 'entry-confirm@example.test',
+        'email_confirm' => 'entry-confirm@example.test',
+        'password' => 'entry-confirm-password-2026',
+        'password_confirm' => 'entry-confirm-password-2026',
+        'birth_year' => '1991',
+        'birth_month' => '8',
+        'birth_day' => '1',
+        'sex' => 1,
+        'job' => 18,
+        'user_policy_check' => '1',
+    ];
+
     /** @var list<string> */
     private const RESIDUAL_ALLOWLIST = [
         // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
@@ -119,7 +143,7 @@ final class EntryConfirmHtmlRenderTest extends TestCase
 
     public function testEntryConfirmPagePreservesEcCubeMarkupStructure(): void
     {
-        $html = $this->resource->get('page://self/entry/confirm')->toString();
+        $html = $this->resource->get('page://self/entry/confirm', self::CONFIRM_PAYLOAD)->toString();
 
         foreach ([
             '<div class="ec-registerRole">',
@@ -144,7 +168,7 @@ final class EntryConfirmHtmlRenderTest extends TestCase
      */
     public function testEntryConfirmPageRendersHiddenFormCarriers(): void
     {
-        $html = $this->resource->get('page://self/entry/confirm')->toString();
+        $html = $this->resource->get('page://self/entry/confirm', self::CONFIRM_PAYLOAD)->toString();
 
         $this->assertStringContainsString('<input type="hidden" name="name01"', $html);
         $this->assertStringContainsString('<input type="hidden" name="email"', $html);
@@ -154,8 +178,8 @@ final class EntryConfirmHtmlRenderTest extends TestCase
 
     public function testEntryConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        $beMart = $this->resource->get('page://self/entry/confirm')->toString();
-        $ecCube = $this->renderEcCube();
+        $beMart = $this->resource->get('page://self/entry/confirm', self::CONFIRM_PAYLOAD)->toString();
+        $ecCube = $this->renderEcCube(self::CONFIRM_PAYLOAD);
 
         $beMartLines = $this->normalize($beMart);
         $ecCubeLines = $this->normalize($ecCube);
@@ -233,7 +257,8 @@ final class EntryConfirmHtmlRenderTest extends TestCase
      * the EntryConfirmForm field name (`__fieldName`) and an empty
      * `vars.data` (the plain-text value cell — empty for a pure renderer).
      */
-    private function renderEcCube(): string
+    /** @param array<string, int|string> $payload */
+    private function renderEcCube(array $payload): string
     {
         $ecCubeTemplates = dirname(__DIR__, 2)
             . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
@@ -245,44 +270,44 @@ final class EntryConfirmHtmlRenderTest extends TestCase
             'autoescape' => 'html',
             'strict_variables' => false,
         ]);
-        $this->registerEcCubeStubs($twig);
+        $this->registerEcCubeStubs($twig, $payload);
 
         return $twig->render('Entry/confirm.twig', [
             'form' => new EcCubeStub([
                 'name' => new EcCubeStub([
-                    'name01' => self::leaf('name01'),
-                    'name02' => self::leaf('name02'),
+                    'name01' => self::leaf('name01', $payload),
+                    'name02' => self::leaf('name02', $payload),
                 ]),
                 'kana' => new EcCubeStub([
-                    'kana01' => self::leaf('kana01'),
-                    'kana02' => self::leaf('kana02'),
+                    'kana01' => self::leaf('kana01', $payload),
+                    'kana02' => self::leaf('kana02', $payload),
                 ]),
-                'company_name' => self::leaf('companyName'),
-                'postal_code' => self::leaf('postalCode'),
+                'company_name' => self::leaf('companyName', $payload),
+                'postal_code' => self::leaf('postalCode', $payload),
                 'address' => new EcCubeStub([
-                    'pref' => self::leaf('pref'),
-                    'addr01' => self::leaf('addr01'),
-                    'addr02' => self::leaf('addr02'),
+                    'pref' => self::leaf('pref', $payload),
+                    'addr01' => self::leaf('addr01', $payload),
+                    'addr02' => self::leaf('addr02', $payload),
                 ]),
-                'phone_number' => self::leaf('phoneNumber'),
+                'phone_number' => self::leaf('phoneNumber', $payload),
                 'email' => new EcCubeStub([
-                    'vars' => new EcCubeStub(['data' => '']),
-                    'first' => self::leaf('email'),
-                    'second' => self::leaf('email_confirm'),
+                    'vars' => new EcCubeStub(['data' => (string) $payload['email']]),
+                    'first' => self::leaf('email', $payload),
+                    'second' => self::leaf('email_confirm', $payload),
                 ]),
                 'plain_password' => new EcCubeStub([
-                    'first' => self::leaf('password'),
-                    'second' => self::leaf('password_confirm'),
+                    'first' => self::leaf('password', $payload),
+                    'second' => self::leaf('password_confirm', $payload),
                 ]),
                 'birth' => new EcCubeStub([
-                    'vars' => new EcCubeStub(['data' => '']),
-                    'year' => self::leaf('birth_year'),
-                    'month' => self::leaf('birth_month'),
-                    'day' => self::leaf('birth_day'),
+                    'vars' => new EcCubeStub(['data' => $payload['birth_year'] . '-' . $payload['birth_month'] . '-' . $payload['birth_day']]),
+                    'year' => self::leaf('birth_year', $payload),
+                    'month' => self::leaf('birth_month', $payload),
+                    'day' => self::leaf('birth_day', $payload),
                 ]),
-                'sex' => self::leaf('sex'),
-                'job' => self::leaf('job'),
-                'user_policy_check' => self::leaf('user_policy_check'),
+                'sex' => self::leaf('sex', $payload),
+                'job' => self::leaf('job', $payload),
+                'user_policy_check' => self::leaf('user_policy_check', $payload),
                 '_token' => '__token__',
             ]),
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
@@ -311,15 +336,17 @@ final class EntryConfirmHtmlRenderTest extends TestCase
      * `form_widget` delegation) and an empty `vars.data` (the plain-text
      * value cell — empty for the pure renderer).
      */
-    private static function leaf(string $fieldName): EcCubeStub
+    /** @param array<string, int|string> $payload */
+    private static function leaf(string $fieldName, array $payload): EcCubeStub
     {
         return new EcCubeStub([
             '__fieldName' => $fieldName,
-            'vars' => new EcCubeStub(['data' => '']),
+            'vars' => new EcCubeStub(['data' => (string) ($payload[$fieldName] ?? '')]),
         ]);
     }
 
-    private function registerEcCubeStubs(Environment $twig): void
+    /** @param array<string, int|string> $payload */
+    private function registerEcCubeStubs(Environment $twig, array $payload): void
     {
         $trans = static function (string $key, array $params = []): string {
             $messages = EcCubeStub::jaMessages();
@@ -357,6 +384,13 @@ final class EntryConfirmHtmlRenderTest extends TestCase
         // compound-leaf stub carrying `__fieldName`. `__token__` is the
         // hidden CSRF widget — rendered as the plain empty hidden input.
         $confirmForm = (new FormFactory())->newInstance(EntryConfirmForm::class);
+        $stringPayload = [];
+        foreach ($payload as $field => $value) {
+            $stringPayload[$field] = (string) $value;
+        }
+        if ($confirmForm instanceof EntryConfirmForm) {
+            $confirmForm->fillValues($stringPayload);
+        }
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($confirmForm): Markup {
             if ($field === '__token__') {
                 return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');

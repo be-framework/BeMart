@@ -28,7 +28,7 @@
                             <div class="row mb-3">
                                 <label class="col-3 col-form-label required" for="productCode">商品コード</label>
                                 <div class="col">
-                                    <input class="form-control" type="text" id="productCode" name="productCode" required maxlength="64" autocomplete="off">
+                                    <input class="form-control" type="text" id="productCode" name="productCode" value="{{ suggestedProductCode|default('') }}" required maxlength="64" autocomplete="off">
                                 </div>
                             </div>
                             <div class="row mb-3">

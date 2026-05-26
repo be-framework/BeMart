@@ -19,6 +19,9 @@ use Ray\WebFormModule\FormFactory;
 
 use function array_filter;
 use function assert;
+use function bin2hex;
+use function random_bytes;
+use function substr;
 
 /**
  * EC-CUBE doRegisterCustomer —会員登録 (Entry/Register).
@@ -68,6 +71,14 @@ class Entry extends ResourceObject
     #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
     public function onGet(): static
     {
+        $suggestedEmail = 'entry-' . substr(bin2hex(random_bytes(4)), 0, 8) . '@example.test';
+        $form = $this->formFactory->newInstance(EntryForm::class);
+        assert($form instanceof EntryForm);
+        $form->fillValues([
+            'email' => $suggestedEmail,
+            'email_confirm' => $suggestedEmail,
+        ]);
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goCustomerRegistration',
@@ -94,9 +105,11 @@ class Entry extends ResourceObject
                 'href' => 'page://self/entry',
             ],
             'csrfToken' => $this->csrfTokenForForm(),
-            // Phase 3: an empty EntryForm for the HTML port to render via
-            // `{{ form.input(...) }}`. JSON contexts ignore it.
-            'form' => $this->formFactory->newInstance(EntryForm::class),
+            // Phase 3: an EntryForm for the HTML port to render via
+            // `{{ form.input(...) }}`. The demo email is unique so browser
+            // smoke submissions exercise the success transition instead of
+            // colliding with fixture customers. JSON contexts ignore it.
+            'form' => $form,
         ];
 
         return $this;

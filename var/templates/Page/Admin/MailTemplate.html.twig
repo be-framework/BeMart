@@ -39,6 +39,7 @@
 {% block main %}
     <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="">
         <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
+        <input type="hidden" name="mailTemplateId" value="{{ Mail.id|default(1) ?: 1 }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

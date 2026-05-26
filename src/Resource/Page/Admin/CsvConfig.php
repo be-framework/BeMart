@@ -82,7 +82,9 @@ class CsvConfig extends ResourceObject
      * Semantic; the column entries themselves carry user-supplied
      * column names so the taint mark applies to the whole payload.
      *
-     * @param list<array{columnName: string, enabled: bool, sortNo: int}> $columns
+     * @param list<array{columnName: string, enabled: bool, sortNo: int}>|null $columns
+     * @param list<string> $csv_output
+     * @param list<string> $csv_not_output
      *
      * @psalm-taint-source input $csvType
      * @psalm-taint-source input $columns
@@ -91,8 +93,12 @@ class CsvConfig extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         int $csvType,
-        array $columns,
+        array|null $columns = null,
+        array $csv_output = [],
+        array $csv_not_output = [],
     ): static {
+        $columns ??= $this->columnsFromEcCubeForm($csv_output, $csv_not_output);
+
         try {
             $final = ($this->becoming)(new UpdateCsvInput(
                 csvType: $csvType,
@@ -120,5 +126,26 @@ class CsvConfig extends ResourceObject
         ];
 
         return $this;
+    }
+
+    /**
+     * @param list<string> $output
+     * @param list<string> $notOutput
+     *
+     * @return list<array{columnName: string, enabled: bool, sortNo: int}>
+     */
+    private function columnsFromEcCubeForm(array $output, array $notOutput): array
+    {
+        $columns = [];
+        $sortNo = 1;
+        foreach ($output as $columnName) {
+            $columns[] = ['columnName' => $columnName, 'enabled' => true, 'sortNo' => $sortNo++];
+        }
+
+        foreach ($notOutput as $columnName) {
+            $columns[] = ['columnName' => $columnName, 'enabled' => false, 'sortNo' => $sortNo++];
+        }
+
+        return $columns;
     }
 }

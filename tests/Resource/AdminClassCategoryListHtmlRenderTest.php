@@ -133,7 +133,9 @@ final class AdminClassCategoryListHtmlRenderTest extends TestCase
 
     public function testClassCategoryListRendersRealCreateForm(): void
     {
-        $html = $this->resource->get('page://self/admin/class-category/class-category-list')->toString();
+        $html = $this->resource
+            ->get('page://self/admin/class-category/class-category-list', ['classNameId' => 'cn-color'])
+            ->toString();
 
         $this->assertStringContainsString('id="admin_class_category_name"', $html);
         $this->assertStringContainsString('id="admin_class_category_backend_name"', $html);

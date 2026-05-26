@@ -453,7 +453,7 @@ final readonly class RouteTable
             self::adminGet('admin_setting_shop_calendar_new', 'page://self/admin/calendar'),
             self::adminPost('admin_setting_shop_calendar_new', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_shop_calendar']),
             self::adminGetPost('admin_setting_shop_calendar_delete', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin_setting_shop_calendar']),
-            self::adminGetPost('admin_setting_shop_csv', 'page://self/admin/csv-config'),
+            self::adminGetPost('admin_setting_shop_csv', 'page://self/admin/csv-config', ['csv_type' => 'csvType']),
             self::adminGet('admin_setting_shop_delivery_new', 'page://self/admin/delivery/delivery'),
             self::adminPost('admin_setting_shop_delivery_new', 'page://self/admin/delivery/delivery-list', null, ['name' => 'deliveryName']),
             self::adminGet('admin_setting_shop_delivery_edit', 'page://self/admin/delivery/delivery', ['id' => 'deliveryId']),
@@ -464,7 +464,7 @@ final readonly class RouteTable
             self::adminPost('admin_setting_shop_delivery_sort_no_move', 'page://self/admin/sort-no-move', 'put', [], ['masterType' => 'delivery']),
             self::adminGet('admin_setting_shop_delivery_visibility', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/setting/shop/delivery']),
             self::adminPost('admin_setting_shop_delivery_visibility', 'page://self/admin/toggle-visible', 'put', ['id' => 'rowId'], ['masterType' => 'delivery']),
-            self::adminGetPost('admin_setting_shop_mail', 'page://self/admin/mail-template'),
+            self::adminGetPost('admin_setting_shop_mail', 'page://self/admin/mail-template', ['mail_subject' => 'mailSubject']),
             self::adminGetPost('admin_setting_shop_mail_delete', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin_setting_shop_mail']),
             self::adminGet('admin_setting_shop_order_status', 'page://self/admin/order-status'),
             self::adminPost('admin_setting_shop_order_status', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_shop_order_status']),
@@ -485,7 +485,8 @@ final readonly class RouteTable
             self::adminPost('admin_setting_shop_tradelaw', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_shop_tradelaw']),
 
             // System settings.
-            self::adminGetPost('admin_setting_system_authority', 'page://self/admin/authority-role'),
+            self::adminGet('admin_setting_system_authority', 'page://self/admin/authority-role'),
+            self::adminPost('admin_setting_system_authority', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_authority']),
             self::adminGet('admin_setting_system_masterdata', 'page://self/admin/master-data'),
             self::adminPost('admin_setting_system_masterdata', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_masterdata']),
             self::adminGet('admin_setting_system_masterdata_edit', 'page://self/admin/master-data'),

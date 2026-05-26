@@ -201,9 +201,9 @@
                             規格：{{ classNames|join(' / ') }}
                         </div>
                     {% endif %}
-                    <form action="{{ url('product_add_cart', {id: productCode}) }}" method="post" id="form1" name="form1">
-                        <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
-                        {% if stockFind %}
+                    {% if stockFind %}
+                        <form action="{{ url('product_add_cart', {id: productCode}) }}" method="post" id="form1" name="form1">
+                            <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                             <div class="ec-productRole__actions">
                                 <div class="ec-numberInput"><span>数量</span>
                                     {{ form.input('quantity')|raw }}
@@ -215,17 +215,16 @@
                                     カートに入れる
                                 </button>
                             </div>
-                        {% else %}
-                            <div class="ec-productRole__btn">
-                                <button type="button" class="ec-blockBtn--action" disabled="disabled">
-                                    ただいま品切れ中です。
-                                </button>
-                            </div>
-                        {% endif %}
-
-                        {{ form.input('product_id')|raw }}
-                        {{ form.input('csrfToken')|raw }}
-                    </form>
+                            {{ form.input('product_id')|raw }}
+                            {{ form.input('csrfToken')|raw }}
+                        </form>
+                    {% else %}
+                        <div class="ec-productRole__btn">
+                            <button type="button" class="ec-blockBtn--action" disabled="disabled">
+                                ただいま品切れ中です。
+                            </button>
+                        </div>
+                    {% endif %}
                     <div class="ec-modal">
                         <div class="ec-modal-overlay">
                             <div class="ec-modal-wrap">

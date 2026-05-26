@@ -47,6 +47,7 @@
 {% set body_class = 'registration_page' %}
 {% set route = 'entry_confirm' %}
 {% set title = '新規会員登録(確認)' %}
+{% set hasRegistrationPayload = email|default('') is not empty and name01|default('') is not empty and name02|default('') is not empty %}
 
 {% block main %}
     <div class="ec-registerRole">
@@ -55,6 +56,16 @@
         </div>
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
+                {% if not hasRegistrationPayload %}
+                    <p>登録内容がありません。新規会員登録画面から入力してください。</p>
+                    <div class="ec-registerRole__actions">
+                        <div class="ec-off4Grid">
+                            <div class="ec-off4Grid__cell">
+                                <a class="ec-blockBtn--action" href="{{ url('entry') }}">新規会員登録へ戻る</a>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
                 <form method="post" action="{{ url('entry') }}">
                     <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                     <p>{{ "下記の内容で登録してもよろしいでしょうか？\nよろしければ、一番下の「会員登録をする」ボタンをクリックしてください。\n"|nl2br }}</p>
@@ -169,6 +180,7 @@
                         </div>
                     </div>
                 </form>
+                {% endif %}
             </div>
         </div>
     </div>

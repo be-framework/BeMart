@@ -23,12 +23,12 @@ final class AdminPaymentForm extends AbstractForm
     {
         $this->setField('method', 'text')
             ->setAttribs(['id' => 'payment_method', 'class' => 'form-control']);
-        $this->setField('charge', 'text')
-            ->setAttribs(['id' => 'payment_charge', 'class' => 'form-control']);
-        $this->setField('rule_min', 'text')
-            ->setAttribs(['id' => 'payment_rule_min', 'class' => 'form-control']);
-        $this->setField('rule_max', 'text')
-            ->setAttribs(['id' => 'payment_rule_max', 'class' => 'form-control']);
+        $this->setField('charge', 'number')
+            ->setAttribs(['id' => 'payment_charge', 'class' => 'form-control', 'min' => '0', 'step' => '1']);
+        $this->setField('rule_min', 'number')
+            ->setAttribs(['id' => 'payment_rule_min', 'class' => 'form-control', 'min' => '0', 'step' => '1']);
+        $this->setField('rule_max', 'number')
+            ->setAttribs(['id' => 'payment_rule_max', 'class' => 'form-control', 'min' => '0', 'step' => '1']);
         $this->setField('visible', 'checkbox')
             ->setAttribs(['id' => 'payment_visible'])
             ->setOptions(['1' => '']);

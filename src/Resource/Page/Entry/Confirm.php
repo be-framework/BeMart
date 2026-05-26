@@ -10,6 +10,8 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Form\EntryConfirmForm;
 use Ray\WebFormModule\FormFactory;
 
+use function assert;
+
 /**
  * EC-CUBE goCustomerRegistrationConfirm — 新規会員登録(確認)
  * (Phase 3 — thin pure renderer).
@@ -60,10 +62,63 @@ class Confirm extends ResourceObject
      */
     #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
     #[Link(rel: 'goTop', href: 'page://self/')]
-    public function onGet(): static
+    public function onGet(
+        string|null $name01 = null,
+        string|null $name02 = null,
+        string|null $kana01 = null,
+        string|null $kana02 = null,
+        string|null $companyName = null,
+        string|null $postalCode = null,
+        int|null $pref = null,
+        string|null $addr01 = null,
+        string|null $addr02 = null,
+        string|null $phoneNumber = null,
+        string|null $email = null,
+        string|null $email_confirm = null,
+        string|null $password = null,
+        string|null $password_confirm = null,
+        string|null $birth_year = null,
+        string|null $birth_month = null,
+        string|null $birth_day = null,
+        int|null $sex = null,
+        int|null $job = null,
+        string|null $user_policy_check = null,
+    ): static
     {
+        $payload = [];
+        foreach ([
+            'name01' => $name01,
+            'name02' => $name02,
+            'kana01' => $kana01,
+            'kana02' => $kana02,
+            'companyName' => $companyName,
+            'postalCode' => $postalCode,
+            'pref' => $pref,
+            'addr01' => $addr01,
+            'addr02' => $addr02,
+            'phoneNumber' => $phoneNumber,
+            'email' => $email,
+            'email_confirm' => $email_confirm,
+            'password' => $password,
+            'password_confirm' => $password_confirm,
+            'birth_year' => $birth_year,
+            'birth_month' => $birth_month,
+            'birth_day' => $birth_day,
+            'sex' => $sex,
+            'job' => $job,
+            'user_policy_check' => $user_policy_check,
+        ] as $field => $value) {
+            if ($value !== null && $value !== '') {
+                $payload[$field] = (string) $value;
+            }
+        }
+
+        $form = $this->formFactory->newInstance(EntryConfirmForm::class);
+        assert($form instanceof EntryConfirmForm);
+        $form->fillValues($payload);
+
         $this->code = Code::OK;
-        $this->body = [
+        $this->body = $payload + [
             'transitionId' => 'goCustomerRegistrationConfirm',
             'fields' => [],
             'submitTo' => [
@@ -81,7 +136,7 @@ class Confirm extends ResourceObject
             // Phase 3: the confirm screen carries the registration payload
             // as hidden inputs — an EntryConfirmForm (every field `hidden`).
             // JSON contexts ignore `body['form']`.
-            'form' => $this->formFactory->newInstance(EntryConfirmForm::class),
+            'form' => $form,
         ];
 
         return $this;

@@ -10,6 +10,10 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 
+use function bin2hex;
+use function random_bytes;
+use function substr;
+
 /**
  * EC-CUBE admin Product/new — 商品登録フォーム。
  *
@@ -40,6 +44,7 @@ final class ProductNew extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'csrfToken' => $this->csrf->token,
+            'suggestedProductCode' => 'new-' . substr(bin2hex(random_bytes(4)), 0, 8),
             'productStatusOptions' => [
                 1 => '公開',
                 2 => '非公開',

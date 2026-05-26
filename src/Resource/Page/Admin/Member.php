@@ -28,7 +28,10 @@ use MyVendor\BeMart\Form\AdminMemberForm;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
+use function bin2hex;
+use function random_bytes;
 use function sprintf;
+use function substr;
 use function urlencode;
 
 /**
@@ -89,18 +92,20 @@ class Member extends ResourceObject
                 return $this;
             }
 
+            $suggestedLoginId = 'admin-' . substr(bin2hex(random_bytes(4)), 0, 8);
             $form = $this->formFactory->newInstance(AdminMemberForm::class);
             assert($form instanceof AdminMemberForm);
             $this->code = Code::OK;
             $this->body = [
                 'adminId' => '',
-                'loginId' => '',
+                'loginId' => $suggestedLoginId,
                 'name' => '',
                 'authority' => 0,
                 'work' => 0,
                 'csrfToken' => $this->csrf->token,
                 'form' => $form,
             ];
+            $form->fillValues($this->body);
 
             return $this;
         }
