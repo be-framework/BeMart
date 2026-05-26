@@ -161,7 +161,7 @@
                             <ul class="list-group list-group-flush sortable-container">
                                 <li class="list-group-item">
                                     <form role="form" class="row" method="post" action="{{ url('admin_product_tag') }}">
-                                        <input type="hidden" id="admin_tag__token" name="_token" value="{{ csrfToken|default('') }}">
+                                        <input type="hidden" id="admin_tag__token" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                                         <div class="col-auto align-items-center">
                                             {{ form.input('name')|raw }}
                                         </div>
@@ -209,7 +209,7 @@
                                             </div>
                                         </div>
                                         <form class="row d-none mode-edit" method="post" action="{{ url('admin_product_tag') }}">
-                                            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                                            <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                                             <div class="col-auto align-items-center">
                                                 <input type="text" class="form-control" name="name" value="{{ Tag.tagName }}" data-origin-value="{{ Tag.tagName }}">
                                             </div>

@@ -51,13 +51,16 @@ class Layout extends ResourceObject
      * The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
      */
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
-    public function onGet(): static
+    public function onGet(string|null $layoutId = null): static
     {
         $form = $this->formFactory->newInstance(AdminLayoutForm::class);
         assert($form instanceof AdminLayoutForm);
 
         $this->code = Code::OK;
-        $this->body = ['form' => $form];
+        $this->body = [
+            'layoutId' => $layoutId,
+            'form' => $form,
+        ];
 
         return $this;
     }

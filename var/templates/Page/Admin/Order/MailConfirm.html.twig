@@ -25,7 +25,7 @@
 
 {% block main %}
     <form role="form" method="post" action="{{ url('admin_order_mail', { id: orderNo }) }}" id="mail_confirm_form" name="form1" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
         <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
         <input type="hidden" name="mode" value="complete">
         <div class="c-contentsArea__cols">

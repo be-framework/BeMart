@@ -66,7 +66,7 @@
                     <div class="ec-off1Grid__cell">
                         <form method="post" action="{{ url('mypage_change') }}" novalidate class="h-adr">
                             <span class="p-country-name" style="display:none;">Japan</span>
-                            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                            <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                             <div class="ec-borderedDefs">
                                 <dl>
                                     <dt>

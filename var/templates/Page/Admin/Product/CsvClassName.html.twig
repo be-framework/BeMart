@@ -29,7 +29,7 @@
 
 {% block main %}
     <form role="form" method="post" action="{{ url('admin_product_csv_class_name') }}" id="csv_class_name_form" enctype="multipart/form-data" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

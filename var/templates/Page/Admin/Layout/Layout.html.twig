@@ -73,8 +73,8 @@
 {% endblock javascript %}
 
 {% block main %}
-    <form name="form1" id="form1" method="post" action="{{ url('admin_content_layout_new') }}">
-        <input type="hidden" id="admin_layout__token" name="_token" value="{{ csrfToken|default('') }}">
+    <form name="form1" id="form1" method="post" action="{{ layoutId|default('') ? url('admin_content_layout_edit', {id: layoutId}) : url('admin_content_layout_new') }}">
+        <input type="hidden" id="admin_layout__token" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

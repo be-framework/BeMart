@@ -53,13 +53,16 @@ class Block extends ResourceObject
      * The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
      */
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
-    public function onGet(): static
+    public function onGet(string|null $blockId = null): static
     {
         $form = $this->formFactory->newInstance(AdminBlockForm::class);
         assert($form instanceof AdminBlockForm);
 
         $this->code = Code::OK;
-        $this->body = ['form' => $form];
+        $this->body = [
+            'blockId' => $blockId,
+            'form' => $form,
+        ];
 
         return $this;
     }

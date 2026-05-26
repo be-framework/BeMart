@@ -57,7 +57,7 @@
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
                 <form id="form1" method="post" novalidate>
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                     <input type="hidden" name="resetKey" value="{{ resetKey|default('') }}">
                     <div class="ec-borderedDefs">
                         <dl>

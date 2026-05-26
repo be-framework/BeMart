@@ -110,7 +110,7 @@
     </div>
 
     <form id="shopping-form" method="post" action="{{ url('shopping_confirm') }}">
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
         <input type="hidden" id="shopping_order_redirect_to" name="redirect_to" value="">
         <div class="ec-orderRole">
             <div class="ec-orderRole__detail">

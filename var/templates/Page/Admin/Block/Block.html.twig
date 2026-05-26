@@ -81,8 +81,8 @@
 
 {% block main %}
     <form name="content_block_form" id="content_block_form" method="post"
-          action="{{ url('admin_content_block_new') }}">
-        <input type="hidden" id="block__token" name="_token" value="{{ csrfToken|default('') }}">
+          action="{{ blockId|default('') ? url('admin_content_block_edit', {id: blockId}) : url('admin_content_block_new') }}">
+        <input type="hidden" id="block__token" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

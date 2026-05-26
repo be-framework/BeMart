@@ -61,7 +61,7 @@
                 <form name="shopping_login" id="shopping_login" method="post" action="{{ url('mypage_login') }}">
                     <input type="hidden" name="_target_path" value="{{ url('shopping') }}" />
                     <input type="hidden" name="_failure_path" value="{{ url('shopping_login') }}" />
-                    <input type="hidden" name="_csrf_token" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                     <div class="ec-login">
                         <div class="ec-login__icon">
                             <div class="ec-icon"><img src="{{ asset('assets/icon/user.svg') }}" alt=""></div>

@@ -8,8 +8,8 @@
 {% set sub_title = '店舗設定' %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ url('admin_setting_shop_payment_edit') }}" id="payment_edit_form" name="form1" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form role="form" method="post" action="{{ paymentId|default('') ? url('admin_setting_shop_payment_edit', {id: paymentId}) : url('admin_setting_shop_payment_new') }}" id="payment_edit_form" name="form1" novalidate>
+        <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
         <input type="hidden" name="paymentId" value="{{ paymentId|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">

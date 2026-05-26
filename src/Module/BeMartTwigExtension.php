@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Module;
 
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Router\RouteTable;
 use NumberFormatter;
 use Override;
@@ -64,15 +65,17 @@ use function random_bytes;
 final class BeMartTwigExtension extends AbstractExtension
 {
     private readonly RouteTable $routes;
+    private readonly CsrfToken|null $csrf;
 
     /**
      * @param RouteTable|null $routes The shared route map. Defaults to
      *     {@see RouteTable::default()} so the extension can be constructed
      *     with no arguments (render tests, the Twig provider).
      */
-    public function __construct(RouteTable|null $routes = null)
+    public function __construct(RouteTable|null $routes = null, CsrfToken|null $csrf = null)
     {
         $this->routes = $routes ?? RouteTable::default();
+        $this->csrf = $csrf;
     }
 
     /** @return list<TwigFilter> */
@@ -144,6 +147,10 @@ final class BeMartTwigExtension extends AbstractExtension
      */
     public function csrfToken(string $tokenId = ''): string
     {
+        if ($this->csrf instanceof CsrfToken) {
+            return $this->csrf->token;
+        }
+
         /** @var mixed $stored */
         $stored = $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] ?? null;
         if (is_string($stored) && $stored !== '') {

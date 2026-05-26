@@ -50,7 +50,7 @@
 
 {% block main %}
     <form role="form" class="form-horizontal" name="form1" id="form1" method="post" action="{{ newsId|default('') ? url('admin_content_news_edit', {id: newsId}) : url('admin_content_news_new') }}">
-        <input type="hidden" id="news__token" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" id="news__token" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

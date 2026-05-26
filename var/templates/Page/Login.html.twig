@@ -84,7 +84,7 @@
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" name="_csrf_token" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                 </form>
             </div>
         </div>

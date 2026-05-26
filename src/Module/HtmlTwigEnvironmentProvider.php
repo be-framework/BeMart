@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Override;
 use Ray\Di\Di\Named;
 use Ray\Di\ProviderInterface;
@@ -30,9 +31,10 @@ final class HtmlTwigEnvironmentProvider implements ProviderInterface
     public function __construct(
         #[Named('original')]
         private readonly Environment $twig,
+        private readonly CsrfToken $csrf,
     ) {
         if (! $twig->hasExtension(BeMartTwigExtension::class)) {
-            $twig->addExtension(new BeMartTwigExtension());
+            $twig->addExtension(new BeMartTwigExtension(csrf: $this->csrf));
         }
     }
 

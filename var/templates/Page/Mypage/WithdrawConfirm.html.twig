@@ -65,7 +65,7 @@
                     </div>
                 </div>
                 <form method="post" action="{{ url('mypage_withdraw') }}">
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                     <div class="ec-off4Grid">
                         <div class="ec-off4Grid__cell">
                             <a class="ec-withdrawConfirmRole__cancel ec-blockBtn--cancel" href="{{ url('mypage') }}">

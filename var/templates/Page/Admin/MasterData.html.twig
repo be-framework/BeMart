@@ -12,7 +12,7 @@
         <div class="c-contentsArea__primaryCol">
             <div class="c-primaryCol">
                 <form id="form1" name="form1" method="post" action="{{ url('admin_setting_system_masterdata') }}">
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                     <div class="card rounded border-0 mb-4">
                         <div class="card-header">
                             <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="各種マスターデータを管理します。">
@@ -36,7 +36,7 @@
                 {% if rows is not empty %}
                     <form id="form2" name="form2" method="post" action="{{ url('admin_setting_system_masterdata_edit') }}">
                         {{ form.input('masterdata_name')|raw }}
-                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                        <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                         <div class="card rounded border-0 mb-4">
                             <div class="card-header">
                                 <div class="read">

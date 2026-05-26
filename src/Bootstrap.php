@@ -47,6 +47,8 @@ use const PHP_EOL;
 use const PHP_SAPI;
 use const PHP_SESSION_ACTIVE;
 use const PHP_URL_PATH;
+use const PHP_URL_SCHEME;
+use const PHP_URL_HOST;
 use const PHP_URL_QUERY;
 use const STDERR;
 
@@ -104,6 +106,7 @@ final class Bootstrap
         $params = $matched->params + $request->params;
         $this->normalizeWireAliases($params);
         $this->normalizeRouteAliases($matched->queryParamMap, $params);
+        $this->normalizeScalarArrayParams($params);
 
         try {
             $resource = Injector::getInstance($context)->getInstance(ResourceInterface::class);
@@ -159,6 +162,11 @@ final class Bootstrap
 
         $isRedirect = isset($ro->headers['Location']);
         $isDownload = $isHtml && ! $isRedirect && $this->isDownloadResponse($ro->headers);
+        if ($isHtml && ! $isRedirect && ! $isDownload && $request->method !== 'get' && $ro->code < 400) {
+            $ro->headers['Location'] = $this->htmlMutationRedirectTarget($server);
+            $isRedirect = true;
+        }
+
         $view = $isHtml && ! $isRedirect && ! $isDownload ? $ro->toString() : null;
         ob_end_clean();
 
@@ -217,6 +225,29 @@ final class Bootstrap
         }
 
         return $resourceCode;
+    }
+
+
+    /** @param array<string, mixed> $server */
+    private function htmlMutationRedirectTarget(array $server): string
+    {
+        $referer = (string) ($server['HTTP_REFERER'] ?? '');
+        if ($referer === '') {
+            return '/';
+        }
+
+        $scheme = parse_url($referer, PHP_URL_SCHEME);
+        if (is_string($scheme) && $scheme !== '') {
+            $host = parse_url($referer, PHP_URL_HOST);
+            if ($host !== '127.0.0.1' && $host !== 'localhost') {
+                return '/';
+            }
+        }
+
+        $path = (string) (parse_url($referer, PHP_URL_PATH) ?? '/');
+        $query = (string) (parse_url($referer, PHP_URL_QUERY) ?? '');
+
+        return $query === '' ? $path : $path . '?' . $query;
     }
 
     /**
@@ -362,9 +393,28 @@ final class Bootstrap
         }
     }
 
+    /** @param array<string, mixed> $params */
+    private function normalizeScalarArrayParams(array &$params): void
+    {
+        foreach ($params as $param => $value) {
+            if (! is_array($value) || $this->isListParam($param)) {
+                continue;
+            }
+
+            $values = array_values($value);
+            if (is_array($values[0] ?? null)) {
+                continue;
+            }
+
+            $params[$param] = $values[0] ?? null;
+        }
+    }
+
     private function isListParam(string $param): bool
     {
         return $param === 'columns'
+            || $param === 'csv_output'
+            || $param === 'csv_not_output'
             || str_ends_with($param, 'Nos')
             || str_ends_with($param, 'Codes');
     }

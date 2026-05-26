@@ -67,7 +67,7 @@
 
         <div class="c-contentsArea__secondaryCol">
             <form role="form" method="post" action="{{ url('admin_product_category') }}" id="category_form" name="form1" novalidate>
-                <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                 <input type="hidden" name="categoryId" value="{{ categoryId|default('') }}">
                 <div class="card rounded border-0 mb-4">
                     <div class="card-header">

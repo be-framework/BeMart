@@ -43,7 +43,7 @@
         </div>
         <div class="ec-withdrawRole">
             <form method="post" action="{{ url('mypage_withdraw') }}">
-                <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                 <div class="ec-off3Grid">
                     <div class="ec-off3Grid__cell">
                         <div style="font-size:100px;text-align:center;">
