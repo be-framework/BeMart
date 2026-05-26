@@ -82,6 +82,24 @@ final class EntryResourceTest extends TestCase
         $this->assertSame(Code::CREATED, $ro->code);
     }
 
+    public function testOnPostAcceptsBlankHtmlOptionalSelectValues(): void
+    {
+        $ro = $this->resource->post('page://self/entry', [
+            'email' => 'html-select-blank@example.com',
+            'email_confirm' => 'html-select-blank@example.com',
+            'password' => 'html-select-blank-2026',
+            'password_confirm' => 'html-select-blank-2026',
+            'name01' => '三郎',
+            'name02' => '田中',
+            'pref' => '',
+            'sex' => '1',
+            'job' => '',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+    }
+
     public function testOnPostDuplicateEmailReturns409(): void
     {
         $ro = $this->resource->post('page://self/entry', [

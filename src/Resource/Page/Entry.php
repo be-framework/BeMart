@@ -20,6 +20,8 @@ use Ray\WebFormModule\FormFactory;
 use function array_filter;
 use function assert;
 use function bin2hex;
+use function ctype_digit;
+use function is_int;
 use function random_bytes;
 use function substr;
 
@@ -149,12 +151,12 @@ class Entry extends ResourceObject
         string|null $companyName = null,
         string|null $phoneNumber = null,
         string|null $postalCode = null,
-        int|null $pref = null,
+        int|string|null $pref = null,
         string|null $addr01 = null,
         string|null $addr02 = null,
         string|null $birth = null,
-        int|null $sex = null,
-        int|null $job = null,
+        int|string|null $sex = null,
+        int|string|null $job = null,
     ): static {
         try {
             $final = ($this->becoming)(new RegisterCustomerInput(
@@ -167,12 +169,12 @@ class Entry extends ResourceObject
                 companyName: $companyName,
                 phoneNumber: $phoneNumber,
                 postalCode: $postalCode,
-                pref: $pref,
+                pref: self::optionalInt($pref),
                 addr01: $addr01,
                 addr02: $addr02,
                 birth: $birth,
-                sex: $sex,
-                job: $job,
+                sex: self::optionalInt($sex),
+                job: self::optionalInt($job),
             ));
         } catch (SemanticVariableException $e) {
             $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
@@ -248,5 +250,18 @@ class Entry extends ResourceObject
     private function csrfTokenForForm(): string
     {
         return $this->csrf->token;
+    }
+
+    private static function optionalInt(int|string|null $value): int|null
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        if (is_int($value)) {
+            return $value;
+        }
+
+        return ctype_digit($value) ? (int) $value : 0;
     }
 }
