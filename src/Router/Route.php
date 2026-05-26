@@ -165,6 +165,13 @@ final class Route
             $query[$key] = $value;
         }
 
+        foreach ($this->defaults as $key => $value) {
+            $placeholder = '{' . $key . '}';
+            if (str_contains($path, $placeholder)) {
+                $path = str_replace($placeholder, rawurlencode($value), $path);
+            }
+        }
+
         if ($query !== []) {
             return $path . '?' . http_build_query($query);
         }

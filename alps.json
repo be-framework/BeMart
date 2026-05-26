@@ -474,6 +474,7 @@
           {"href": "#doAddCartItem"},
           {"href": "#doUpdateCartItemQuantity"},
           {"href": "#doRemoveCartItem"},
+          {"href": "#doSelectCartForCheckout"},
           {"href": "#goShopping"}
         ]
       },
@@ -517,6 +518,7 @@
           {"href": "#goShoppingShipping"},
           {"href": "#goShoppingShippingEdit"},
           {"href": "#goShoppingShippingMultiple"},
+          {"href": "#doShoppingRedirectTo"},
           {"href": "#doConfirmOrder"},
           {"href": "#goShoppingError"}
         ]
@@ -969,7 +971,15 @@
       {"id": "MypageWithdraw", "title": "退会","tag": "account src-router src-template",
         "doc": {"value": "退会確認・退会処理画面"},
         "descriptor": [
+          {"href": "#goMypageWithdrawConfirm"},
           {"href": "#doWithdrawCustomer"}
+        ]
+      },
+      {"id": "MypageWithdrawConfirm", "title": "退会実行確認","tag": "account src-router src-template",
+        "doc": {"value": "退会処理を実行する直前の最終確認画面"},
+        "descriptor": [
+          {"href": "#doWithdrawCustomer"},
+          {"href": "#goMypage"}
         ]
       },
 
@@ -1493,6 +1503,10 @@
         "tag": "cart flow-purchase actor-customer src-router",
         "doc": {"value": "カート明細を1件削除する。PurchaseFlowで送料・手数料・合計が再計算される。"},
         "descriptor": [{"href": "#productCode"}]},
+      {"id": "doSelectCartForCheckout", "title": "購入対象カートを選択する", "type": "idempotent", "rt": "#Shopping",
+        "tag": "cart checkout flow-purchase actor-customer src-router src-controller",
+        "doc": {"value": "販売種別ごとに分かれたカートから購入手続きへ進めるカートを選択する。EC-CUBE の cart_buystep に対応。"},
+        "descriptor": [{"href": "#cartKey"}]},
 
       {"id": "goShopping", "title": "注文手続きへ進む", "type": "safe", "rt": "#Shopping",
         "tag": "checkout flow-purchase actor-customer src-router src-controller",
@@ -1507,6 +1521,9 @@
         "tag": "checkout flow-purchase actor-customer src-router src-controller",
         "doc": {"value": "非会員購入の入力情報をセッションに保存し注文手続き画面へ進む。会員登録は行わない。"},
         "descriptor": [{"href": "#name01"}, {"href": "#name02"}, {"href": "#email"}]},
+      {"id": "doShoppingRedirectTo", "title": "購入フロー内で遷移する", "type": "unsafe", "rt": "#Shopping",
+        "tag": "checkout flow-purchase actor-customer src-router src-controller",
+        "doc": {"value": "注文手続きフォームの入力を保持しつつ、指定された購入フロー内画面へ遷移する。EC-CUBE の shopping_redirect_to に対応。"}},
       {"id": "goShoppingShipping", "title": "お届け先を選択する画面を見る", "type": "safe", "rt": "#ShoppingShipping",
         "tag": "checkout flow-purchase actor-customer src-router src-template",
         "doc": {"value": "登録済みのお届け先一覧から配送先を選択する画面。新規追加・複数配送先指定への導線を含む。"}},
@@ -1637,6 +1654,9 @@
       {"id": "goMypageWithdraw", "title": "退会画面を見る", "type": "safe", "rt": "#MypageWithdraw",
         "tag": "account flow-account actor-customer src-router",
         "doc": {"value": "退会確認画面を表示する。退会の影響（履歴削除・ポイント失効）の案内を含む。"}},
+      {"id": "goMypageWithdrawConfirm", "title": "退会実行確認を見る", "type": "safe", "rt": "#MypageWithdrawConfirm",
+        "tag": "account flow-account actor-customer src-router src-template",
+        "doc": {"value": "退会処理を実行する直前の最終確認画面を表示する。"}},
       {"id": "doUpdateCustomer", "title": "会員情報を更新する", "type": "idempotent", "rt": "#MypageChange",
         "tag": "account flow-account actor-customer src-router",
         "doc": {"value": "会員自身がマイページから氏名・連絡先・メールアドレス・パスワード・基本住所を更新する。メール変更時は再認証は行わない。"},

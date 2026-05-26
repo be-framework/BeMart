@@ -7,6 +7,7 @@ namespace MyVendor\BeMart;
 use BEAR\Resource\Code;
 use BEAR\Resource\Exception\BadRequestException;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Router\MatchedRoute;
 use MyVendor\BeMart\Router\RouteMethodNotAllowedException;
 use MyVendor\BeMart\Router\RouteNotFoundException;
 use MyVendor\BeMart\Router\RouteTable;
@@ -104,6 +105,17 @@ final class Bootstrap
         }
 
         $params = $matched->params + $request->params;
+        if ($matched->name === 'mypage_withdraw' && ($params['mode'] ?? null) === 'confirm') {
+            $matched = new MatchedRoute(
+                'mypage_withdraw_confirm',
+                'page://self/mypage/withdraw-confirm',
+                'get',
+                'goMypageWithdrawConfirm',
+                [],
+                [],
+            );
+        }
+
         $this->normalizeWireAliases($params);
         $this->normalizeRouteAliases($matched->queryParamMap, $params);
         $this->normalizeScalarArrayParams($params);

@@ -122,14 +122,14 @@
                                                                 <a href="#" class="btn btn-ec-actionIcon"
                                                                    data-bs-toggle="modal"
                                                                    data-bs-target="#localPluginDeleteModal"
-                                                                   data-delete-url="{{ url('admin_store_plugin_uninstall', { code: Plugin.pluginCode }) }}">
+                                                                   data-delete-url="{{ url('admin_store_plugin_uninstall', { id: Plugin.pluginCode }) }}">
                                                                     <i class="fa fa-close fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="削除"></i>
                                                                 </a>
                                                             </div>
                                                             {% endif %}
                                                             {% if Plugin.enabled %}
                                                             <div class="col-6 px-0">
-                                                                <form method="post" action="{{ url('admin_store_plugin_disable', { code: Plugin.pluginCode }) }}">
+                                                                <form method="post" action="{{ url('admin_store_plugin_disable', { id: Plugin.pluginCode }) }}">
                                                                     <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                                                                     <button type="submit" class="btn btn-ec-actionIcon" data-confirm="false">
                                                                         <i class="fa fa-pause fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="無効にする"></i>
@@ -138,7 +138,7 @@
                                                             </div>
                                                             {% else %}
                                                             <div class="col-6 px-0">
-                                                                <form method="post" action="{{ url('admin_store_plugin_enable', { code: Plugin.pluginCode }) }}">
+                                                                <form method="post" action="{{ url('admin_store_plugin_enable', { id: Plugin.pluginCode }) }}">
                                                                     <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                                                                     <button type="submit" class="btn btn-ec-actionIcon" data-confirm="false">
                                                                         <i class="fa fa-play fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="有効にする"></i>

@@ -98,7 +98,7 @@ final class AdminTwoFactorAuthHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('id="admin_two_factor_auth_device_token"', $html);
         $this->assertStringContainsString('name="device_token"', $html);
-        $this->assertStringContainsString('action="/admin_two_factor_auth"', $html);
+        $this->assertStringContainsString('action="/admin/two_factor_auth"', $html);
     }
 
     public function testTwoFactorAuthHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
