@@ -148,6 +148,12 @@ final class RouterTest extends TestCase
 
         $this->assertSame('entry_confirm', $matched->name);
         $this->assertSame('page://self/entry/confirm', $matched->resource);
+
+        $posted = $this->router->match('POST', '/entry/confirm');
+
+        $this->assertSame('entry_confirm', $posted->name);
+        $this->assertSame('page://self/entry/confirm', $posted->resource);
+        $this->assertSame('get', $posted->dispatchMethod);
     }
 
 

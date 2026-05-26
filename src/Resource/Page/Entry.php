@@ -102,7 +102,7 @@ class Entry extends ResourceObject
             ],
             'submitTo' => [
                 'method' => 'POST',
-                'href' => 'page://self/entry',
+                'href' => 'page://self/entry/confirm',
             ],
             'csrfToken' => $this->csrfTokenForForm(),
             // Phase 3: an EntryForm for the HTML port to render via

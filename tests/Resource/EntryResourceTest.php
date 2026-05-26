@@ -41,7 +41,7 @@ final class EntryResourceTest extends TestCase
         $this->assertContains('phoneNumber', $ro->body['fields']);
         $this->assertContains('csrfToken', $ro->body['fields']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
-        $this->assertSame('page://self/entry', $ro->body['submitTo']['href']);
+        $this->assertSame('page://self/entry/confirm', $ro->body['submitTo']['href']);
         $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 

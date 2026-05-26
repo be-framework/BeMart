@@ -65,7 +65,7 @@
         </div>
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
-                <form method="post" action="{{ url('entry') }}" novalidate class="h-adr">
+                <form method="post" action="{{ url('entry_confirm') }}" novalidate class="h-adr">
                     <span class="p-country-name" style="display:none;">Japan</span>
                     <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
                     <div class="ec-borderedDefs">

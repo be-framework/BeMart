@@ -162,7 +162,7 @@ final class Bootstrap
 
         $isRedirect = isset($ro->headers['Location']);
         $isDownload = $isHtml && ! $isRedirect && $this->isDownloadResponse($ro->headers);
-        if ($isHtml && ! $isRedirect && ! $isDownload && $request->method !== 'get' && $ro->code < 400) {
+        if ($isHtml && ! $isRedirect && ! $isDownload && $matched->dispatchMethod !== 'get' && $ro->code < 400) {
             $ro->headers['Location'] = $this->htmlMutationRedirectTarget($server);
             $isRedirect = true;
         }

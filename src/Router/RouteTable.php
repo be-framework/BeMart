@@ -107,7 +107,7 @@ final readonly class RouteTable
 
             // ---- Storefront: customer registration ----
             new Route('entry', ['GET', 'POST'], '/entry', 'page://self/entry'),
-            new Route('entry_confirm', ['GET'], '/entry/confirm', 'page://self/entry/confirm'),
+            new Route('entry_confirm', ['GET', 'POST'], '/entry/confirm', 'page://self/entry/confirm', [], 'get'),
             new Route('entry_complete', ['GET'], '/entry/complete', 'page://self/entry/complete'),
             new Route(
                 'entry_activate',
