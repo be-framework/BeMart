@@ -13,6 +13,7 @@ Symfony版EC-CUBEの fork や controller 書き換えではなく、EC-CUBEの�
 | [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI export and HTML documentation |
 | [`docs/migration-status.md`](docs/migration-status.md) | current migration status |
 | [`docs/html-screen-migration-matrix.md`](docs/html-screen-migration-matrix.md) | HTML screen/route migration matrix |
+| [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ implementation status |
 | [`docs/tag.md`](docs/tag.md) | ALPS tag taxonomy |
 | [`docs/README.md`](docs/README.md) | documentation map |
 
@@ -64,7 +65,7 @@ Fake は後付けmockではなく、最初の契約実装です。SQL は後か�
 
 HTML は EC-CUBE 4.3 の Twig 構造をできるだけ忠実に移植します。ただし、BeMartに存在しないデータは捏造せず、差分は residual として明示します。
 
-未対応機能のリンクやボタンは隠しません。JS有効時は alert で未対応を説明し、JS無効時は安全な `501 Not Implemented` にフォールバックします。これはEC-CUBEの情報構造と affordance を画面上に残すためです。
+画面から参照される EC-CUBE route は `RouteTable` と `AlpsRouteMap` で ALPS descriptor に紐付けます。`unsupported-route` は使いません。完全な業務処理がまだ無い mutation は `ActionRedirect` で安全な戻り遷移として受け、`docs/eccube-feature-alps-status.html` で「部分」として追跡します。
 
 ハイパーメディアテストの考え方は [`docs/methodology/hypermedia-test-principle.md`](docs/methodology/hypermedia-test-principle.md) を参照してください。
 

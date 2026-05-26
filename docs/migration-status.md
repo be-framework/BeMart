@@ -1,7 +1,7 @@
 # Migration Status — EC-CUBE 4.3 → BEAR.Sunday + Be Framework
 
 > **Living document.** Update the relevant row/cell whenever a layer's status changes.
-> Audited 2026-05-22 against `alps.json`, `be/src`, `src/Resource`, `var/templates`, and git history.
+> Audited 2026-05-26 against `alps.json`, `src/Router/RouteTable.php`, `src/Router/AlpsRouteMap.php`, `be/src`, `src/Resource`, `var/templates`, and git history.
 
 The migration runs through **5 layers**. ALPS is the source of truth; the lower
 layers implement it. "Done / partial / pending" is judged against the ALPS spec,
@@ -13,13 +13,13 @@ not optimistically.
 
 | Layer | Done | State |
 |---|---|---|
-| 1. ALPS spec (`alps.json`) | 144/144 transitions, 444 descriptors | Complete. 144 transitions (135 flow-tagged + 9 untagged), 276+ data descriptors. Post-Phase-A remediation added 5 transitions. |
-| 2. Be domain (`be/src`) | 144/144 transitions | Complete. Phase A migrated 139 transitions; Phase-3 remediation implemented all 5 added transitions (`doSortNoMove` / `doToggleVisible` / `doUpdateTrackingNumber` / `doSendShippingNotifyMail` / `doResendActivationMail`). 7 Phase-A transitions remain functional **stubs**. 129 Final / 128 Input / 137 Semantic / 14 Being / 38 Entity. |
-| 3. BEAR Resource | 139 Page resources | Every transition exposed as a resource (`src/Resource/Page/**`): 93 admin + 46 storefront. Phase 3 admin-HTML waves added page resources + GET renderers (`onGet`) to formerly action-only resources; the HTTP router (Phase B) maps every EC-CUBE route name ↔ URL path ↔ resource URI. |
+| 1. ALPS spec (`alps.json`) | 204 transitions, 539 descriptors | Complete for the current contract. The original Be-domain use-case coverage remains 144/144; the extra descriptors are route/page-gate transitions that bind HTML routes back to ALPS. |
+| 2. Be domain (`be/src`) | 144/144 domain transitions | Complete for domain use-cases. Phase A migrated 139 transitions; Phase-3 remediation implemented all 5 added transitions (`doSortNoMove` / `doToggleVisible` / `doUpdateTrackingNumber` / `doSendShippingNotifyMail` / `doResendActivationMail`). 7 Phase-A transitions remain functional **stubs**. Route/page-gate descriptors are tracked at Router/Resource/HTML level, not counted as Be-domain chains. |
+| 3. BEAR Resource / Router | 236 RouteTable entries / 270 method entries | Every public HTML route method has an ALPS descriptor (`270/270`). Concrete Resource dispatch is available for 215 method entries; 55 method entries intentionally use `ActionRedirect` as a safe fallback/return transition and are marked partial in the feature table. |
 | 4. SQL persistence (`be/src/Reason/Query/Sql*`) | 34/34 storage interfaces | Phase 2 complete. Every Fake storage has a SQL twin; prod context binds SQL Reasons; reproducible prod DB seed script exists. |
-| 5. HTML presentation (`var/templates`) | 110 page templates | Phase 3 complete for the in-scope migration. **Storefront done** — 41 page templates (all storefront pages) + 2 Block widgets (logo/footer) + the `base.html.twig` frame. **Admin 63 of 77 page templates ported** — Tier-1 (34, 8 section-waves) + every Tier-2 editor: Order (edit/shipping/mail/mail_confirm/order_pdf/csv_shipping), Product (product/product_class/category/csv×4), Setting/System & Setting/Shop Tier-2, Customer delivery-edit, Store template_add. The ~14 unported admin pages are the **Store/Plugin install/search subtree — out of scope** (plug-ins are excluded from this migration). |
+| 5. HTML presentation (`var/templates`) | 110 page templates + route gate | Phase 3 complete for the in-scope migration. Storefront and in-scope admin templates are ported. `unsupported-route` is 0, HTML `PUT`/`DELETE` dependency is 0, and the current HTTP crawl baseline is 238 pages / 0 problems. Detailed route/function status is published as `docs/eccube-feature-alps-status.html`. |
 
-**Test count:** `vendor/bin/phpunit` → **1893 tests, 4002 assertions**. The non-SQL suites (`--testsuite bemart,bemart-be`) all pass without a database. The `bemart-sql` suite needs a local MariaDB — without one, 745 tests skip and 3 prod-DB-context tests fail (documented, MariaDB-dependent: `ProdModuleTest::testProdContextDoesNotWriteLogFileOnBecoming`, `AppEntryPointTest::testProdContextDoesNotWriteLogFile` / `testProdContextRejectsAnonymousCli`).
+**Current route/ALPS gate:** `asd --validate alps.json`, `vendor/bin/phpunit --filter 'RouterTest|TemplateRouteCoverageTest|AlpsRouteCoverageTest'`, `composer test:fake`, `composer test:http`, and `composer psalm` pass. `composer test:sql` is green with the documented MariaDB skip baseline when no local MariaDB is available.
 
 ---
 
@@ -50,6 +50,7 @@ Counts are ALPS transitions per flow. `✓` done · `~` partial · `✗` pending
 
 Layer-specific notes:
 
+- **Route/ALPS gate: 270/270** — every RouteTable method entry resolves to an ALPS descriptor. See the generated HTML table: [`docs/eccube-feature-alps-status.html`](eccube-feature-alps-status.html).
 - **SQL: 34/34** — every storage interface listed in `be/src/Reason/Query/` has a `Sql*` implementation.
 - **HTML: storefront ✓ / admin ✓ (in scope)** — `var/templates` holds **110 page `.html.twig` files**: 41 storefront page templates + 2 `Block/` widgets (logo/footer) + 64 admin page templates + the 3 frames (`base.html.twig`, `admin-base.html.twig`, `admin-login-base.html.twig`). All EC-CUBE storefront pages are ported. **63 of 77 admin page templates ported** — Tier-1 (34, across 8 section-waves) + every Tier-2 editor wave (flow-manage-system 6, Customer delivery-edit 1, Setting/Shop Tier-2 5 + edit-page 3, Order Tier-2 6, Product Tier-2 7, Store template_add 1). The remaining ~14 unported admin pages are the **Store/Plugin install/search subtree** — out of scope (plug-ins excluded). The render-diff fidelity tests (`tests/Resource/*HtmlRenderTest.php`) activate only when the gitignored `tools/ec-cube-source/` 4.3 clone is present.
 - **flow-manage-cms Resource** — `Admin/Template/TemplateList.php` + `TemplateAdd` exist for the CMS template feature; layout/block resources are present but the CMS template-management surface is partial — *unverified* in full.
@@ -75,13 +76,15 @@ now implemented in `be/src` — Be-domain coverage is **144/144** (`f9c5580`).
 
 Punch-list, roughly highest-effort first:
 
-1. **Admin HTML Tier-2 — done (in scope).** ✓ Done. Admin Tier-1 (34 page templates) plus every Tier-2 editor wave is ported: flow-manage-system (6: system/log/security/masterdata/authority/2FA-edit), Customer delivery-edit (1), Setting/Shop Tier-2 (5) + edit-page (3), Order Tier-2 (6: edit/shipping/mail/mail_confirm/order_pdf/csv_shipping), Product Tier-2 (7: product/product_class/category/csv×4), Store template_add (1) — **63 of 77 admin page templates.** The ~14 unported pages are the **Store/Plugin install/search subtree, which is out of scope** (plug-ins excluded from this migration). Per-section history: `docs/phases/admin-fanout-plan.md` and `var/templates/README.md` "Fan-out status".
-2. **HTML enrichment backlog.** Phase 3 flagged data pages whose resource bodies are too thin for a faithful EC-CUBE port; each needs the Cart-style re-derive (ALPS → Entity/SQL/Fake enrich → template wiring). Done: **Mypage History** (`a31f8d8`/`3c1b03d`), **Shopping confirm/complete** (`1177e0d`/`2f8d17a`). Still open: **Mypage dashboard**, **Favorite**, **Address**, **Contact**.
-3. **`Block/*` widget templates — done.** ✓ Done. The `logo` and `footer` Block widgets are ported (`var/templates/Block/`, `f3df0d4`). The remaining Block regions (cart/login/search) stay EC-CUBE-runtime residuals; Block is intentionally not modelled in ALPS.
-4. **Phase-3 remediation transitions — all implemented.** ✓ Done. All 5 transitions the Phase-3 ALPS remediation added are now implemented in `be/src` (`doSortNoMove`, `doToggleVisible`, `doUpdateTrackingNumber`, `doSendShippingNotifyMail`, `doResendActivationMail` — domain + storage/mailer + JSON resource + tests). Domain coverage is **144 of 144**.
-5. **7 Phase-A stub transitions.** Functional but stubbed in Phase A, deferred to Phase 2, still open (see PR #2 / HANDOVER Wave 8-9): `doImportProductCsv`, `doImportCategoryCsv`, `doImportShippingCsv`, `doInstallPlugin`, `goExportOrderPdf`, `doCreateOrder`, `doUpdateCsv`.
-6. **`#[Input]`-vs-Form refactor.** Noted from MyVendor.Cms issue #37 — reconcile Be Framework `#[Input]` with the `Ray.WebFormModule` `AbstractForm`. *Unverified here* — confirm against that issue before acting.
-7. **Production DB bring-up.** Phase 2c shipped the seed script and prod `SqlModule` binding; an actual production database bring-up / cutover is still pending.
+1. **ALPS route gate — done.** ✓ Done. `RouteTable` has 236 entries / 270 method entries; all 270 have an ALPS descriptor and every descriptor exists in `alps.json`. `unsupported-route` is 0 and template `PUT`/`DELETE` usage is 0.
+2. **ActionRedirect functionalization.** 55 method entries still use `page://self/action-redirect`. They are no longer broken links: each has an ALPS ID and safe return semantics. They are still marked **partial** until the corresponding business operation is implemented as a concrete Resource/Final path. The generated status table is the working list.
+3. **Admin HTML Tier-2 — done (in scope).** ✓ Done. Admin Tier-1 (34 page templates) plus every Tier-2 editor wave is ported: flow-manage-system (6: system/log/security/masterdata/authority/2FA-edit), Customer delivery-edit (1), Setting/Shop Tier-2 (5) + edit-page (3), Order Tier-2 (6: edit/shipping/mail/mail_confirm/order_pdf/csv_shipping), Product Tier-2 (7: product/product_class/category/csv×4), Store template_add (1) — **63 of 77 admin page templates.** The ~14 unported admin pages are the **Store/Plugin install/search subtree, which is out of scope** (plug-ins excluded from this migration). Per-section history: `docs/phases/admin-fanout-plan.md` and `var/templates/README.md` "Fan-out status".
+4. **HTML enrichment backlog.** Phase 3 flagged data pages whose resource bodies are too thin for a faithful EC-CUBE port; each needs the Cart-style re-derive (ALPS → Entity/SQL/Fake enrich → template wiring). Done: **Mypage History** (`a31f8d8`/`3c1b03d`), **Shopping confirm/complete** (`1177e0d`/`2f8d17a`). Still open: **Mypage dashboard**, **Favorite**, **Address**, **Contact**.
+5. **`Block/*` widget templates — done.** ✓ Done. The `logo` and `footer` Block widgets are ported (`var/templates/Block/`, `f3df0d4`). The remaining Block regions (cart/login/search) stay EC-CUBE-runtime residuals; Block is intentionally not modelled in ALPS.
+6. **Phase-3 remediation transitions — all implemented.** ✓ Done. All 5 transitions the Phase-3 ALPS remediation added are now implemented in `be/src` (`doSortNoMove`, `doToggleVisible`, `doUpdateTrackingNumber`, `doSendShippingNotifyMail`, `doResendActivationMail` — domain + storage/mailer + JSON resource + tests). Domain coverage is **144 of 144**.
+7. **7 Phase-A stub transitions.** Functional but stubbed in Phase A, deferred to Phase 2, still open (see PR #2 / HANDOVER Wave 8-9): `doImportProductCsv`, `doImportCategoryCsv`, `doImportShippingCsv`, `doInstallPlugin`, `goExportOrderPdf`, `doCreateOrder`, `doUpdateCsv`.
+8. **`#[Input]`-vs-Form refactor.** Noted from MyVendor.Cms issue #37 — reconcile Be Framework `#[Input]` with the `Ray.WebFormModule` `AbstractForm`. *Unverified here* — confirm against that issue before acting.
+9. **Production DB bring-up.** Phase 2c shipped the seed script and prod `SqlModule` binding; an actual production database bring-up / cutover is still pending.
 
 ---
 
@@ -90,6 +93,7 @@ Punch-list, roughly highest-effort first:
 | You want… | Look at |
 |---|---|
 | The feature list (source of truth) | `alps.json` · `docs/alps.json.html` · `docs/alps.svg` |
+| EC-CUBE route/function ↔ ALPS ↔ implementation status | `docs/eccube-feature-alps-status.html` |
 | Tag taxonomy (`flow-*`, `src-*`) | `docs/tag.md` |
 | Phase A detail (Be domain + JSON) | `docs/HANDOVER.md` |
 | Phase 2 detail (SQL) | `sql/diff/entity-vs-eccube.md` · PR #2 |
