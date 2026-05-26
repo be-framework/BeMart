@@ -23,8 +23,7 @@
                     </div>
                 {% else %}
                 <form method="post" action="{{ url('admin_product_product_edit', {'id': productCode}) }}" id="admin_product_form">
-                    <input type="hidden" name="_method" value="put">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+                                <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
                     <input type="hidden" name="productCode" value="{{ productCode }}">
 
                     <div class="card rounded border-0 mb-4">

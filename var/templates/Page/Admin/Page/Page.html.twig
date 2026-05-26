@@ -84,7 +84,7 @@
 
 {% block main %}
     <form id="content_page_form" method="post"
-          action="{{ url('admin_content_page_edit', {id: pageId}) }}">
+          action="{{ pageId|default('') ? url('admin_content_page_edit', {id: pageId}) : url('admin_content_page_new') }}">
         <input type="hidden" id="main_edit__token" name="_token" value="{{ csrfToken|default('') }}">
 
         <div class="c-contentsArea__cols">
