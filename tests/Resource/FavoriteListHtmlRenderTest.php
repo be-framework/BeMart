@@ -137,6 +137,15 @@ final class FavoriteListHtmlRenderTest extends TestCase
         }
     }
 
+    public function testFavoriteDeleteTransitionIsPostFormOnly(): void
+    {
+        $html = $this->resource->get('page://self/mypage/favorite-list')->toString();
+
+        $this->assertStringContainsString('<form method="post" action="/mypage/favorite/delete">', $html);
+        $this->assertStringContainsString('name="id" value="sample-001"', $html);
+        $this->assertStringNotContainsString('href="/mypage/favorite/delete', $html);
+    }
+
     /**
      * The honesty test: diff BeMart's rendered favorites list against
      * EC-CUBE's own rendering of the same logical list.

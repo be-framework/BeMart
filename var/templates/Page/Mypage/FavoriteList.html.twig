@@ -33,9 +33,10 @@
    - `pagination` -> the resource body's flat `favorites` list; BeMart's
      FavoriteList is not a paged view, so the `ec-pagerRole` +
      `pager.twig` include is OMITTED.
-   - `csrf_token_for_anchor()` — EC-CUBE per-request CSRF widget on the
-     delete anchor; BeMart's html context has no CSRF widget, so the
-     attribute is absent. EC-CUBE-runtime only — enumerated as residual.
+   - EC-CUBE renders deletion as an anchor plus JavaScript token helper.
+     BeMart exposes only GET/POST to the browser, so destructive deletion
+     is rendered as a POST form with a hidden CSRF field; the router
+     dispatches it internally to the resource `DELETE` transition.
    - MISSING BODY FIELD — EC-CUBE's favorite.twig renders a price RANGE
      (`price02_inc_tax_min`～`price02_inc_tax_max`). BeMart's
      FavoriteEntity carries a single `unitPrice`, so the min/max range
@@ -66,13 +67,15 @@
                         <ul class="ec-favoriteRole__itemList">
                             {% for FavoriteProduct in favorites %}
                                 <li class="ec-favoriteRole__item">
-                                    <a class="ec-closeBtn--circle"
-                                       href="{{ url('mypage_favorite_delete', { id : FavoriteProduct.productCode }) }}"
-                                      >
+                                    <form method="post" action="{{ url('mypage_favorite_delete') }}">
+                                      <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
+                                      <input type="hidden" name="id" value="{{ FavoriteProduct.productCode }}">
+                                      <button class="ec-closeBtn--circle" type="submit" style="border:0;padding:0;">
                                         <div class="ec-icon">
                                             <img src="{{ asset('assets/icon/cross-white.svg') }}" alt="close">
                                         </div>
-                                    </a>
+                                      </button>
+                                    </form>
                                     <a class="ec-favoriteRole__itemThumb" href="{{ url('product_detail', {'id': FavoriteProduct.productCode}) }}">
                                         <p class="ec-favoriteRole__item-image">
                                             <img src="{{ asset(FavoriteProduct.fileName|default('assets/img/common/no_image_product.png'), 'save_image') }}">

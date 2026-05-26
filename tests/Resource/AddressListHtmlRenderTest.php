@@ -125,6 +125,15 @@ final class AddressListHtmlRenderTest extends TestCase
         }
     }
 
+    public function testAddressDeleteTransitionIsPostFormOnly(): void
+    {
+        $html = $this->resource->get('page://self/mypage/address-list')->toString();
+
+        $this->assertStringContainsString('<form method="post" action="/mypage/delivery/delete">', $html);
+        $this->assertStringContainsString('name="id" value="addr00000000000000000000000000a1"', $html);
+        $this->assertStringNotContainsString('href="/mypage/delivery/delete', $html);
+    }
+
     /**
      * The honesty test: diff BeMart's rendered address book against
      * EC-CUBE's own rendering of the same logical list.

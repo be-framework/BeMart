@@ -159,10 +159,8 @@ final readonly class RouteTable
                 ['id' => 'addressId'],
                 'put',
             ),
-            new Route('mypage_delivery_delete', ['GET'], '/mypage/delivery/delete', 'page://self/action-redirect', [], null, ['returnTo' => '/mypage/delivery']),
             new Route('mypage_delivery_delete', ['POST'], '/mypage/delivery/delete', 'page://self/mypage/address', [], 'delete', [], ['id' => 'addressId']),
             new Route('mypage_favorite', ['GET'], '/mypage/favorite', 'page://self/mypage/favorite-list'),
-            new Route('mypage_favorite_delete', ['GET'], '/mypage/favorite/delete', 'page://self/action-redirect', [], null, ['returnTo' => '/mypage/favorite']),
             new Route('mypage_favorite_delete', ['POST'], '/mypage/favorite/delete', 'page://self/mypage/favorite', [], 'delete', [], ['id' => 'productCode']),
             new Route(
                 'mypage_history',
