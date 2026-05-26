@@ -338,7 +338,7 @@ final readonly class RouteTable
             self::adminGet('admin_content_cache', 'page://self/admin/content/cache'),
             self::adminPost('admin_content_cache', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_content_cache']),
             self::adminGet('admin_content_css', 'page://self/admin/content/css'),
-            self::adminPost('admin_content_css', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_content_css']),
+            self::adminPost('admin_content_css', 'page://self/admin/content/css'),
             self::adminGet('admin_content_js', 'page://self/admin/content/js'),
             self::adminPost('admin_content_js', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_content_js']),
             self::adminGet('admin_content_layout_new', 'page://self/admin/layout/layout'),

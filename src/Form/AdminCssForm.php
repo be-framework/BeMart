@@ -32,6 +32,8 @@ final class AdminCssForm extends AbstractForm
             ->setAttribs([
                 'id' => 'form_css',
                 'class' => 'form-control',
+                'style' => 'height: 480px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;',
+                'spellcheck' => 'false',
             ]);
     }
 

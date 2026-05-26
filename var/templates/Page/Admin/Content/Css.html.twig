@@ -25,10 +25,10 @@
      EC-CUBE-runtime only — enumerated as residual.
    - `has_errors(form.css)` -> always-false here (no domain error on a
      fresh GET); the `is-invalid` class is omitted.
-   - the ACE editor `css` source — the customize-CSS file is not modelled
-     in any ALPS wave (see the Css resource port header), so the editor
-     renders empty (the AdminCssForm `css` field has no persisted value).
-     The `<div id="editor">` shell + hidden textarea are kept.
+   - EC-CUBE uses ACE for the visible editor and a hidden textarea for the
+     submitted value. BeMart does not ship ACE in the port, so the real
+     Ray.WebFormModule textarea is shown directly and populated from
+     `public/assets/css/customize.css`.
 #}
 {% extends 'admin-base.html.twig' %}
 
@@ -75,8 +75,7 @@
                                         <span class="badge bg-primary ms-1">必須</span>
                                     </div>
                                     <div class="col-10">
-                                        <div id="editor" style="height: 480px" class="form-control"></div>
-                                        <div style="display: none">{{ form.input('css')|raw }}</div>
+                                        {{ form.input('css')|raw }}
                                         {% if form.error('css') %}<span class="invalid-feedback d-block">{{ form.error('css') }}</span>{% endif %}
                                     </div>
                                 </div>
