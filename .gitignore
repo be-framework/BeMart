@@ -14,3 +14,6 @@
 
 # EC-CUBE source clone for schema extraction (Phase 2a)
 /tools/ec-cube-source/
+
+# Local browser screenshots and diagnostics
+/output/
