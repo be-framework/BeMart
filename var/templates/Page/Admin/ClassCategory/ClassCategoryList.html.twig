@@ -33,7 +33,7 @@
      `ClassCategory.visible` -> the AdminClassCategoryListFetched
      projection carries only `classCategoryId` / `classNameId` / `name`;
      the backend label, sort_no and visible flag are NOT projected
-     (Wave 7 shallow-list slice). The backend label / `data-sort-no` /
+     (Wave 7 shallow-list slice). The backend label / persisted `data-sort-no` /
      the visible-toggle state render empty / default. FLAGGED for
      enrichment follow-up.
    - per-row `forms[ClassCategory.id]` inline-EDIT form -> the per-row
@@ -71,17 +71,22 @@
             }).reverse();
             // 並び替え後にsort noを更新
             var updateSortNo = function() {
-                var newSortNos = {};
+                var requests = [];
+                var csrfToken = $('meta[name="eccube-csrf-token"]').attr('content');
                 var i = 0;
                 $('.sortable-item').each(function() {
-                    newSortNos[this.dataset.id] = oldSortNos[i];
+                    requests.push($.ajax({
+                        url: '{{ url('admin_product_class_category_sort_no_move') }}',
+                        type: 'POST',
+                        data: { rowId: this.dataset.id, sortNo: oldSortNos[i], _token: csrfToken }
+                    }));
                     i++;
                 });
-                $.ajax({
-                    url: '{{ url('admin_product_class_category_sort_no_move') }}',
-                    type: 'POST',
-                    data: newSortNos
-                }).always(function() {
+                if (!requests.length) {
+                    $(".modal-backdrop").remove();
+                    return;
+                }
+                $.when.apply($, requests).always(function() {
                     $(".modal-backdrop").remove();
                 });
             };
@@ -228,7 +233,7 @@
                                     </div>
                                 </li>
                                 {% for ClassCategory in classCategories %}
-                                    <li id="ex-class_category-{{ ClassCategory.classCategoryId }}" class="list-group-item sortable-item" data-classname-id="{{ ClassCategory.classNameId }}" data-id="{{ ClassCategory.classCategoryId }}" data-sort-no="">
+                                    <li id="ex-class_category-{{ ClassCategory.classCategoryId }}" class="list-group-item sortable-item" data-classname-id="{{ ClassCategory.classNameId }}" data-id="{{ ClassCategory.classCategoryId }}" data-sort-no="{{ ClassCategory.sortNo|default(loop.revindex) }}">
                                         <div class="row justify-content-around mode-view">
                                             <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
                                             <div class="col-auto d-flex align-items-center">{{ ClassCategory.classCategoryId }}</div>

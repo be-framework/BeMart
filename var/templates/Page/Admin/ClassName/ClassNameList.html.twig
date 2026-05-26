@@ -29,7 +29,7 @@
      enrichment follow-up.
    - `ClassName.sortNo` -> dtb_class_name has the column but
      ClassNameEntity does not project it (storage-internal sort_no — see
-     FakeClassNameStorage). `data-sort-no` renders empty. FLAGGED.
+     FakeClassNameStorage). `data-sort-no` falls back to the visible loop order when the storage projection has no sort number.
    - `ClassName.ClassCategories|length` -> the projection does not carry
      the child-class-category COUNT; the `({n})` suffix and the
      delete-disabled branch render with 0. FLAGGED for enrichment
@@ -81,24 +81,24 @@
 
             var updateSortNo = function() {
                 // 並び替え後にsortNoを更新
-                var newSortNos = {};
+                var requests = [];
+                var csrfToken = $('meta[name="eccube-csrf-token"]').attr('content');
                 var i = 0;
                 $('.sortable-item').each(function() {
-                    newSortNos[this.dataset.classNameId] = oldSortNos[i];
+                    requests.push($.ajax({
+                        url: '{{ url('admin_product_class_name_sort_no_move') }}',
+                        type: 'POST',
+                        data: { rowId: this.dataset.classNameId, sortNo: oldSortNos[i], _token: csrfToken }
+                    }));
                     i++;
                 });
 
-                $.ajax({
-                    url: '{{ url('admin_product_class_name_sort_no_move') }}',
-                    type: 'POST',
-                    data: newSortNos
-                }).done(function() {
-                    // remove class disable
-                    $('a.up.disabled').removeClass('disabled');
-                    $('a.down.disabled').removeClass('disabled');
-                    // First element
-                    $('.sortable-item > li:nth-child(2) > div > div.col-auto.text-end > a.up').addClass('disabled');
-                }).always(function() {
+                if (!requests.length) {
+                    $('.modal-backdrop').remove();
+                    return;
+                }
+
+                $.when.apply($, requests).always(function() {
                     redrawDisableAllows();
                     $('.modal-backdrop').remove();
                 });
@@ -115,18 +115,28 @@
 
             $('.sortable-item a.up').click(function(e) {
                 e.preventDefault();
+                if ($(this).hasClass('disabled')) {
+                    return;
+                }
                 var current = $(this).parents('.list-group-item');
-                current.prev().before(current);
-                $('body').append($('<div class="modal-backdrop show"></div>'));
-                updateSortNo();
+                if (current.prev().hasClass('sortable-item')) {
+                    current.prev().before(current);
+                    $('body').append($('<div class="modal-backdrop show"></div>'));
+                    updateSortNo();
+                }
             });
 
             $('.sortable-item a.down').click(function(e) {
                 e.preventDefault();
+                if ($(this).hasClass('disabled')) {
+                    return;
+                }
                 var current = $(this).parents('.list-group-item');
-                current.next().after(current);
-                $('body').append($('<div class="modal-backdrop show"></div>'));
-                updateSortNo();
+                if (current.next().hasClass('sortable-item')) {
+                    current.next().after(current);
+                    $('body').append($('<div class="modal-backdrop show"></div>'));
+                    updateSortNo();
+                }
             });
 
             // 編集
@@ -218,7 +228,7 @@
                                     </div>
                                 </li>
                                 {% for ClassName in classNames %}
-                                    <li id="ex-class_name-{{ ClassName.classNameId }}" class="list-group-item sortable-item" data-class-name-id="{{ ClassName.classNameId }}" data-sort-no="">
+                                    <li id="ex-class_name-{{ ClassName.classNameId }}" class="list-group-item sortable-item" data-class-name-id="{{ ClassName.classNameId }}" data-sort-no="{{ ClassName.sortNo|default(loop.revindex) }}">
                                         <div class="row justify-content-around mode-view">
                                             <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
                                             <div class="col-auto d-flex align-items-center">{{ ClassName.classNameId }}</div>

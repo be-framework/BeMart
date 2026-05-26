@@ -29,7 +29,7 @@
      — enumerated as residual.
    - `Delivery.sortNo` -> the AdminDeliveryListFetched projection does
      NOT carry the sort_no column (dtb_delivery.sort_no is tracked
-     inside DeliveryStorage, not projected). The `data-sort-no`
+     inside DeliveryStorage, not projected). The persisted `data-sort-no`
      attribute renders empty. FLAGGED missing-body-field.
    - `csrf_token_for_anchor()` on the visible-toggle / delete `<a>` ->
      EC-CUBE per-request CSRF widget. OMITTED exactly as the storefront
@@ -53,17 +53,22 @@
             }).reverse();
             // 並び替え後にsort noを更新
             var updateSortNo = function() {
-                var newSortNos = {};
+                var requests = [];
+                var csrfToken = $('meta[name="eccube-csrf-token"]').attr('content');
                 var i = 0;
                 $('.sortable-item').each(function() {
-                    newSortNos[this.dataset.id] = oldSortNos[i];
+                    requests.push($.ajax({
+                        url: '{{ url('admin_setting_shop_delivery_sort_no_move') }}',
+                        type: 'POST',
+                        data: { rowId: this.dataset.id, sortNo: oldSortNos[i], _token: csrfToken }
+                    }));
                     i++;
                 });
-                $.ajax({
-                    url: '{{ url('admin_setting_shop_delivery_sort_no_move') }}',
-                    type: 'POST',
-                    data: newSortNos
-                }).always(function() {
+                if (!requests.length) {
+                    $(".modal-backdrop").remove();
+                    return;
+                }
+                $.when.apply($, requests).always(function() {
                     $(".modal-backdrop").remove();
                 });
             };
@@ -141,7 +146,7 @@
                                     </li>
                                     {% if deliveries|length > 0 %}
                                         {% for Delivery in deliveries %}
-                                            <li id="ex-delivery-{{ Delivery.deliveryId }}" class="list-group-item sortable-item" data-id="{{ Delivery.deliveryId }}" data-sort-no="{{ Delivery.sortNo|default('') }}">
+                                            <li id="ex-delivery-{{ Delivery.deliveryId }}" class="list-group-item sortable-item" data-id="{{ Delivery.deliveryId }}" data-sort-no="{{ Delivery.sortNo|default(loop.revindex) }}">
                                                 <div class="row justify-content-around">
                                                     <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
                                                     <div class="col-auto d-flex align-items-center">{{ Delivery.deliveryId }}</div>
