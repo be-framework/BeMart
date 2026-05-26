@@ -5,12 +5,44 @@ declare(strict_types=1);
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 
-// Let PHP's built-in server serve real public assets (CSS/JS/images)
-// instead of routing them through Bootstrap as page URLs.
+// Serve real public assets (CSS/JS/images) before routing pages. Koriym's
+// test server invokes this script as a router without necessarily setting
+// public/ as the document root, so `return false` is not enough here: the
+// browser would receive a 404 for /assets/css/style.css and render pages
+// without CSS.
 $requestPath = (string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
-$publicFile = __DIR__ . '/../../public' . $requestPath;
-if (PHP_SAPI === 'cli-server' && $requestPath !== '/' && is_file($publicFile)) {
-    return false;
+$publicRoot = realpath(__DIR__ . '/../../public');
+$publicFile = realpath(__DIR__ . '/../../public' . $requestPath);
+if (
+    PHP_SAPI === 'cli-server'
+    && $requestPath !== '/'
+    && is_string($publicRoot)
+    && is_string($publicFile)
+    && str_starts_with($publicFile, $publicRoot . DIRECTORY_SEPARATOR)
+    && is_file($publicFile)
+) {
+    $extension = strtolower((string) pathinfo($publicFile, PATHINFO_EXTENSION));
+    $contentType = match ($extension) {
+        'css' => 'text/css; charset=UTF-8',
+        'js', 'mjs' => 'application/javascript',
+        'json', 'map' => 'application/json',
+        'svg' => 'image/svg+xml',
+        'png' => 'image/png',
+        'jpg', 'jpeg' => 'image/jpeg',
+        'gif' => 'image/gif',
+        'ico' => 'image/x-icon',
+        'webp' => 'image/webp',
+        'woff' => 'font/woff',
+        'woff2' => 'font/woff2',
+        'ttf' => 'font/ttf',
+        default => 'application/octet-stream',
+    };
+
+    header('Content-Type: ' . $contentType);
+    header('Content-Length: ' . (string) filesize($publicFile));
+    readfile($publicFile);
+
+    return true;
 }
 
 require __DIR__ . '/../../vendor/autoload.php';
