@@ -5,6 +5,14 @@ declare(strict_types=1);
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 
+// Let PHP's built-in server serve real public assets (CSS/JS/images)
+// instead of routing them through Bootstrap as page URLs.
+$requestPath = (string) parse_url((string) ($_SERVER['REQUEST_URI'] ?? '/'), PHP_URL_PATH);
+$publicFile = __DIR__ . '/../../public' . $requestPath;
+if (PHP_SAPI === 'cli-server' && $requestPath !== '/' && is_file($publicFile)) {
+    return false;
+}
+
 require __DIR__ . '/../../vendor/autoload.php';
 
 putenv('APP_CONTEXT=html-test-hal-api-app');
