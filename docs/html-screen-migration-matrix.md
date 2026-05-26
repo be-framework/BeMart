@@ -22,8 +22,8 @@ EC-CUBE 4.3 の routable な storefront/admin 画面と、画面から参照さ�
 | RouteTable entries | 259 |
 | RouteTable method entries | 293 |
 | ALPS mapped method entries | 293 / 293 |
-| concrete Resource dispatch | 234 |
-| `ActionRedirect` partial dispatch | 59 |
+| concrete Resource dispatch | 235 |
+| `ActionRedirect` partial dispatch | 58 |
 | `unsupported-route` | 0 |
 | HTML `method="put/delete"` / `data-method="put/delete"` | 0 |
 | HTTP crawl baseline | 238 pages / 0 problems (`composer test:http`) |

@@ -25,10 +25,10 @@
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
      EC-CUBE-runtime only — enumerated as residual.
-   - the ACE editor `js` source — the customize-JS file is not modelled
-     in any ALPS wave (see the Js resource port header), so the editor
-     renders empty (the AdminJsForm `js` field has no persisted value).
-     The `<div id="editor">` shell + hidden textarea are kept.
+   - EC-CUBE uses ACE for the visible editor and a hidden textarea for the
+     submitted value. BeMart does not ship ACE in the port, so the real
+     Ray.WebFormModule textarea is shown directly and populated from
+     `public/assets/js/customize.js`.
 #}
 {% extends 'admin-base.html.twig' %}
 
@@ -75,8 +75,7 @@
                                         <span class="badge bg-primary ms-1">必須</span>
                                     </div>
                                     <div class="col-10">
-                                        <div id="editor" style="height: 480px" class="form-control"></div>
-                                        <div style="display: none">{{ form.input('js')|raw }}</div>
+                                        {{ form.input('js')|raw }}
                                         {% if form.error('js') %}<span class="invalid-feedback d-block">{{ form.error('js') }}</span>{% endif %}
                                     </div>
                                 </div>

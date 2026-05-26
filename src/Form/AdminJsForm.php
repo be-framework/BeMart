@@ -32,6 +32,8 @@ final class AdminJsForm extends AbstractForm
             ->setAttribs([
                 'id' => 'form_js',
                 'class' => 'form-control',
+                'style' => 'height: 480px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;',
+                'spellcheck' => 'false',
             ]);
     }
 
