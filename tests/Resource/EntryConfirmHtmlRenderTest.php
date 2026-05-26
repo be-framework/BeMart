@@ -141,6 +141,23 @@ final class EntryConfirmHtmlRenderTest extends TestCase
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
+    public function testEntryConfirmAcceptsBlankPostPayloadFromEntryForm(): void
+    {
+        $ro = $this->resource->get('page://self/entry/confirm', [
+            'name01' => '',
+            'name02' => '',
+            'pref' => '',
+            'sex' => '',
+            'job' => '',
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $html = $ro->toString();
+
+        $this->assertStringContainsString('登録内容がありません。新規会員登録画面から入力してください。', $html);
+        $this->assertStringNotContainsString('Invalid parameter type', $html);
+    }
+
     public function testEntryConfirmPagePreservesEcCubeMarkupStructure(): void
     {
         $html = $this->resource->get('page://self/entry/confirm', self::CONFIRM_PAYLOAD)->toString();

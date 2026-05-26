@@ -69,7 +69,7 @@ class Confirm extends ResourceObject
         string|null $kana02 = null,
         string|null $companyName = null,
         string|null $postalCode = null,
-        int|null $pref = null,
+        string|null $pref = null,
         string|null $addr01 = null,
         string|null $addr02 = null,
         string|null $phoneNumber = null,
@@ -80,8 +80,8 @@ class Confirm extends ResourceObject
         string|null $birth_year = null,
         string|null $birth_month = null,
         string|null $birth_day = null,
-        int|null $sex = null,
-        int|null $job = null,
+        string|null $sex = null,
+        string|null $job = null,
         string|null $user_policy_check = null,
     ): static
     {
@@ -109,7 +109,7 @@ class Confirm extends ResourceObject
             'user_policy_check' => $user_policy_check,
         ] as $field => $value) {
             if ($value !== null && $value !== '') {
-                $payload[$field] = (string) $value;
+                $payload[$field] = $value;
             }
         }
 
