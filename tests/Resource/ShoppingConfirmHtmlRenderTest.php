@@ -162,6 +162,7 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
             '<ul class="ec-progress">',
             // Slice 9: url('shopping_checkout') now resolves through RouteTable.
             '<form id="shopping-form" method="post" action="/shopping/checkout">',
+            '<input type="hidden" name="preOrderId" value="aceface0000000000000000000000000000a11ce">',
             '<div class="ec-orderRole">',
             '<div class="ec-orderAccount">',
             '<div class="ec-orderDelivery">',

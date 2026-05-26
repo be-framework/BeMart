@@ -91,6 +91,7 @@
 
     <form id="shopping-form" method="post" action="{{ url('shopping_checkout') }}">
     <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
+    <input type="hidden" name="preOrderId" value="{{ preOrderId }}">
     <div class="ec-orderRole">
         <div class="ec-orderRole__detail">
             <div class="ec-orderAccount">
