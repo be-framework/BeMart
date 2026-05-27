@@ -45,7 +45,7 @@ final class AlpsRouteCoverageTest extends TestCase
     /** @return array<string, true> */
     private function alpsDescriptorIds(): array
     {
-        $json = file_get_contents('alps.json');
+        $json = file_get_contents(__DIR__ . '/../../alps.json');
         self::assertIsString($json);
         $profile = json_decode($json, true);
         self::assertIsArray($profile);
