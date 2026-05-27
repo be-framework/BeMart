@@ -266,7 +266,7 @@ final class AdminCustomerHtmlRenderTest extends TestCase
             // (`?page_no=...&resume=1`); BeMart's port links to the bare
             // `admin_customer` list route (no server-side paging /
             // session resume in scope). Both names now resolve through the
-            // shared RouteTable, so BeMart's href is the real `/admin/customer`
+            // shared Aura route map, so BeMart's href is the real `/admin/customer`
             // list path. Same `c-baseLink` anchor + 会員一覧 label, different
             // href.
             'admin_customer_page',

@@ -6,8 +6,8 @@ namespace MyVendor\BeMart\Module;
 
 use Aura\Router\Exception\RouteNotFound as AuraRouteNotFound;
 use Aura\Router\Generator as AuraGenerator;
+use Aura\Router\RouterContainer;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
-use MyVendor\BeMart\Router\RouteTable;
 use NumberFormatter;
 use Override;
 use Twig\Extension\AbstractExtension;
@@ -59,15 +59,15 @@ use function random_bytes;
  */
 final class BeMartTwigExtension extends AbstractExtension
 {
-    private readonly RouteTable $routes;
+    private readonly RouterContainer $routes;
 
     private readonly AuraGenerator $generator;
 
-    /** Defaults to the shared EC-CUBE Aura route table. */
-    public function __construct(RouteTable|null $routes = null)
+    /** Defaults to the shared EC-CUBE Aura route map. */
+    public function __construct(RouterContainer|null $routes = null)
     {
-        $this->routes = $routes ?? RouteTable::default();
-        $this->generator = $this->routes->generator();
+        $this->routes = $routes ?? self::routerContainer();
+        $this->generator = $this->routes->getGenerator();
     }
 
     /** @return list<TwigFilter> */
@@ -213,7 +213,7 @@ final class BeMartTwigExtension extends AbstractExtension
     /** @return array<string, true> */
     private function pathParamNames(string $route): array
     {
-        $auraRoute = $this->routes->map()->getRoute($route);
+        $auraRoute = $this->routes->getMap()->getRoute($route);
         preg_match_all(AuraGenerator::REGEX, (string) $auraRoute->path, $matches);
 
         $names = [];
@@ -222,5 +222,15 @@ final class BeMartTwigExtension extends AbstractExtension
         }
 
         return $names;
+    }
+
+    private static function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(\Aura\Router\Map): null $routes */
+        $routes = require __DIR__ . '/../../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
     }
 }

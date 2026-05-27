@@ -6,9 +6,9 @@ namespace MyVendor\BeMart\Tests\Router;
 
 use Aura\Router\Map;
 use Aura\Router\Route as AuraRoute;
+use Aura\Router\RouterContainer;
 use Aura\Router\Rule\Allows;
 use MyVendor\BeMart\Module\BeMartTwigExtension;
-use MyVendor\BeMart\Router\RouteTable;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 
@@ -16,17 +16,17 @@ use function rtrim;
 use function strtoupper;
 
 /**
- * Proves the Aura route table used by the front controller and Twig helpers:
+ * Proves the Aura route map used by the front controller and Twig helpers:
  * route resolution, path-parameter extraction with EC-CUBE-name -> resource-param
  * renaming, trailing-slash normalisation, and Aura's 404 / 405 failure signals.
  */
 final class RouterTest extends TestCase
 {
-    private RouteTable $routes;
+    private RouterContainer $routes;
 
     protected function setUp(): void
     {
-        $this->routes = RouteTable::default();
+        $this->routes = self::routerContainer();
     }
 
     public function testResolvesStorefrontTop(): void
@@ -98,7 +98,7 @@ final class RouterTest extends TestCase
 
     public function testUnknownPathFailsAs404Candidate(): void
     {
-        $matcher = $this->routes->matcher();
+        $matcher = $this->routes->getMatcher();
 
         $this->assertFalse($matcher->match(new ServerRequest('GET', '/no/such/path')));
         $failed = $matcher->getFailedRoute();
@@ -162,17 +162,23 @@ final class RouterTest extends TestCase
 
     public function testPostRouteCanDispatchToInternalResourceMethod(): void
     {
-        $routes = RouteTable::fromMapBuilder(static function (Map $map): null {
-            RouteTable::addRoute(
-                $map,
-                'delete_example',
-                ['POST'],
-                '/example/delete',
-                'page://self/example',
-                [],
-                'delete',
-                ['routeName' => 'delete_example'],
-            );
+        $routes = new RouterContainer();
+        $routes->setMapBuilder(static function (Map $map): null {
+            $map->route('delete_example', '/example/delete', 'delete_example')
+                ->allows(['POST'])
+                ->extras([
+                    'bemart' => [
+                        'methods' => [
+                            'POST' => [
+                                'resource' => 'page://self/example',
+                                'dispatchMethod' => 'delete',
+                                'paramMap' => [],
+                                'defaults' => ['routeName' => 'delete_example'],
+                                'queryParamMap' => [],
+                            ],
+                        ],
+                    ],
+                ]);
 
             return null;
         });
@@ -184,9 +190,9 @@ final class RouterTest extends TestCase
         $this->assertSame(['routeName' => 'delete_example'], $params);
     }
 
-    public function testDefaultHtmlRouteTablePublishesGetOrPostOnly(): void
+    public function testDefaultHtmlRouteMapPublishesGetOrPostOnly(): void
     {
-        foreach ($this->routes->routes as $route) {
+        foreach ($this->routes->getMap()->getRoutes() as $route) {
             foreach ($route->allows as $method) {
                 $this->assertContains($method, ['GET', 'POST'], (string) $route->name);
             }
@@ -223,27 +229,59 @@ final class RouterTest extends TestCase
     /**
      * @return array{0: AuraRoute, 1: array<string, mixed>, 2: array<string, string>}
      */
-    private function match(string $method, string $path, RouteTable|null $routes = null): array
+    private function match(string $method, string $path, RouterContainer|null $routes = null): array
     {
         $routes ??= $this->routes;
         $method = strtoupper($method);
-        $route = $routes->matcher()->match(new ServerRequest($method, self::normalizeRoutePath($path)));
+        $route = $routes->getMatcher()->match(new ServerRequest($method, self::normalizeRoutePath($path)));
         $this->assertInstanceOf(AuraRoute::class, $route);
 
-        $metadata = RouteTable::metadataFor($route, $method);
-        $params = RouteTable::resourceParams($route, $metadata);
+        $metadata = self::routeMetadata($route, $method);
+        $params = self::resourceParams($route, $metadata);
 
         return [$route, $metadata, $params];
     }
 
     private function assertMethodNotAllowed(string $method, string $path): void
     {
-        $matcher = $this->routes->matcher();
+        $matcher = $this->routes->getMatcher();
 
         $this->assertFalse($matcher->match(new ServerRequest(strtoupper($method), self::normalizeRoutePath($path))));
         $failed = $matcher->getFailedRoute();
         $this->assertInstanceOf(AuraRoute::class, $failed);
         $this->assertSame(Allows::class, $failed->failedRule);
+    }
+
+    /** @return array<string, mixed> */
+    private static function routeMetadata(AuraRoute $route, string $method): array
+    {
+        /** @var mixed $metadata */
+        $metadata = $route->extras['bemart']['methods'][$method] ?? null;
+        self::assertIsArray($metadata);
+
+        /** @var array<string, mixed> */
+        return $metadata;
+    }
+
+    /**
+     * @param array<string, mixed> $metadata
+     * @return array<string, string>
+     */
+    private static function resourceParams(AuraRoute $route, array $metadata): array
+    {
+        /** @var array<string, string> $defaults */
+        $defaults = $metadata['defaults'];
+        /** @var array<string, string> $paramMap */
+        $paramMap = $metadata['paramMap'];
+        $params = $defaults;
+        /** @var array<string, mixed> $attributes */
+        $attributes = $route->attributes;
+        foreach ($attributes as $key => $value) {
+            $resourceParam = $paramMap[$key] ?? $key;
+            $params[$resourceParam] = (string) $value;
+        }
+
+        return $params;
     }
 
     private static function normalizeRoutePath(string $path): string
@@ -255,5 +293,15 @@ final class RouterTest extends TestCase
         $trimmed = rtrim($path, '/');
 
         return $trimmed === '' ? '/' : $trimmed;
+    }
+
+    private static function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(Map): null $routes */
+        $routes = require __DIR__ . '/../../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
     }
 }

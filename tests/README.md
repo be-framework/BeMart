@@ -12,11 +12,11 @@ tests/
 ├── Resource/      resource-unit tests (page://*, app://*)
 ├── Auth/          session-adapter tests
 ├── Module/        Ray.Di wiring tests
-├── Router/        Aura.Router-backed RouteTable tests
+├── Router/        Aura.Router route-map tests
 ├── EntryPoint/    bin/app.php CLI entry-point tests
 ├── Hypermedia/    in-process workflow tests
 │   ├── WorkflowTest.php      storefront purchase-spine workflow (base class)
-│   └── RoutedResource.php    ResourceInterface over the Aura RouteTable
+│   └── RoutedResource.php    ResourceInterface over Aura.Router
 ├── Http/          real-HTTP workflow tests
 │   ├── WorkflowTest.php      extends Hypermedia\WorkflowTest, swaps the transport
 │   ├── HttpResource.php      ResourceInterface over a koriym/php-server + curl
@@ -86,7 +86,7 @@ targets stateless JSON APIs and omits cookie handling.
 These work today but are candidates for future consolidation:
 
 - **`RoutedResource` is a shim.** The hypermedia tier follows links
-  through the Aura-backed `RouteTable`, not BEAR's native `#[Link]` / `crawl`
+  through Aura.Router, not BEAR's native `#[Link]` / `crawl`
   hypermedia.
 - **`canonicalizeFormFields` maps field names.** The workflow test
   translates HTML wire field names (`_token`, `product_id`) into resource
