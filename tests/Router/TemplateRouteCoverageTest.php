@@ -32,8 +32,10 @@ final class TemplateRouteCoverageTest extends TestCase
     {
         $unsupported = [];
         foreach (RouteTable::default()->routes as $route) {
-            if (str_contains($route->resource, 'unsupported-route')) {
-                $unsupported[] = $route->name . ' => ' . $route->resource;
+            foreach (RouteTable::methodMetadataFor($route) as $metadata) {
+                if (str_contains($metadata['resource'], 'unsupported-route')) {
+                    $unsupported[] = $route->name . ' => ' . $metadata['resource'];
+                }
             }
         }
 

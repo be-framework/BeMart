@@ -6,7 +6,6 @@ namespace MyVendor\BeMart\Router;
 
 use Aura\Router\Exception\RouteNotFound as AuraRouteNotFound;
 use Aura\Router\Generator as AuraGenerator;
-use Aura\Router\Map;
 
 use function array_key_exists;
 use function http_build_query;
@@ -23,13 +22,13 @@ use function preg_match_all;
 final class RouteUrlGenerator
 {
     private readonly AuraGenerator $generator;
-    private readonly Map $map;
+
+    private readonly RouteTable $table;
 
     public function __construct(RouteTable|null $table = null)
     {
-        $container = (new AuraRouteMap($table ?? RouteTable::default()))->newContainer();
-        $this->map = $container->getMap();
-        $this->generator = $container->getGenerator();
+        $this->table = $table ?? RouteTable::default();
+        $this->generator = $this->table->generator();
     }
 
     /** @param array<string, mixed> $params */
@@ -70,7 +69,7 @@ final class RouteUrlGenerator
     /** @return array<string, true> */
     private function pathParamNames(string $route): array
     {
-        $auraRoute = $this->map->getRoute($route);
+        $auraRoute = $this->table->map()->getRoute($route);
         preg_match_all(AuraGenerator::REGEX, (string) $auraRoute->path, $matches);
 
         $names = [];
