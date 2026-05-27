@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Router;
 
 /**
- * The route map — single source of truth shared by the HTTP front
- * controller ({@see Router}) and the `url()` / `path()` Twig helpers
- * ({@see \MyVendor\BeMart\Module\BeMartTwigExtension}).
+ * BeMart route metadata — the single source used to build the Aura.Router
+ * map for both the HTTP front controller ({@see Router}) and the `url()` /
+ * `path()` Twig helpers ({@see \MyVendor\BeMart\Module\BeMartTwigExtension}).
  *
  * ## Why one table, two consumers
  *
@@ -15,9 +15,10 @@ namespace MyVendor\BeMart\Router;
  * EC-CUBE route NAME, not a path. An HTTP request, conversely, arrives as
  * a PATH. If the helper and the router each carried their own idea of the
  * mapping they would drift; a template would emit an href the router
- * cannot resolve. So both pull from this one table: `url('product_detail',
- * {id: 5})` produces `/products/detail/5`, and a GET of `/products/detail/5`
- * resolves back to `page://self/product` — guaranteed agreement.
+ * cannot resolve. So both build the Aura map from this metadata:
+ * `url('product_detail', {id: 5})` produces `/products/detail/5`, and a
+ * GET of `/products/detail/5` resolves back to `page://self/product` —
+ * guaranteed agreement.
  *
  * ## Three vocabularies reconciled
  *
