@@ -13,7 +13,6 @@ use DOMXPath;
 use MyVendor\BeMart\Auth\HtmlCartSession;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Router\RouteTable;
-use MyVendor\BeMart\Router\Router;
 use PHPUnit\Framework\TestCase;
 
 use function array_key_exists;
@@ -57,7 +56,7 @@ class WorkflowTest extends TestCase
         $resource = Injector::getInstance('html-test-hal-api-app')->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
 
-        $this->resource = new RoutedResource($resource, new Router(RouteTable::default()));
+        $this->resource = new RoutedResource($resource, RouteTable::default());
     }
 
     protected function tearDown(): void
