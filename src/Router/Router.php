@@ -26,7 +26,7 @@ final class Router
 
     public function __construct(RouteTable $table)
     {
-        $this->matcher = (new AuraRouteMap($table))->newContainer()->getMatcher();
+        $this->matcher = $table->matcher();
     }
 
     /**
@@ -59,7 +59,7 @@ final class Router
             throw new RouteNotFoundException(sprintf('No route matches "%s".', $normalizedPath));
         }
 
-        $metadata = AuraRouteMap::metadataFor($route, $method);
+        $metadata = RouteTable::metadataFor($route, $method);
 
         return new MatchedRoute(
             (string) $route->name,
