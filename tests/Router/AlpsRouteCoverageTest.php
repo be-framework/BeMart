@@ -9,6 +9,7 @@ use Aura\Router\RouterContainer;
 use PHPUnit\Framework\TestCase;
 
 use function array_key_exists;
+use function array_keys;
 use function file_get_contents;
 use function is_array;
 use function json_decode;
@@ -24,9 +25,12 @@ final class AlpsRouteCoverageTest extends TestCase
         $missing = [];
 
         foreach ($this->routerContainer()->getMap()->getRoutes() as $route) {
-            foreach ($route->allows as $method) {
+            /** @var mixed $methods */
+            $methods = $route->extras['bemart']['methods'] ?? [];
+            self::assertIsArray($methods);
+            foreach (array_keys($methods) as $method) {
                 /** @var mixed $metadata */
-                $metadata = $route->extras['bemart']['methods'][$method] ?? null;
+                $metadata = $methods[$method] ?? null;
                 self::assertIsArray($metadata, sprintf('%s %s has no BeMart metadata.', $method, (string) $route->name));
                 $alpsId = (string) ($metadata['alpsId'] ?? '');
                 if (($metadata['alpsExplicit'] ?? false) !== true) {

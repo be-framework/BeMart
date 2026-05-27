@@ -7,18 +7,22 @@ namespace MyVendor\BeMart\Tests\Router;
 use Aura\Router\Map;
 use Aura\Router\Route as AuraRoute;
 use Aura\Router\RouterContainer;
-use Aura\Router\Rule\Allows;
 use MyVendor\BeMart\Module\BeMartTwigExtension;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 
+use function array_key_first;
+use function array_keys;
+use function is_array;
 use function rtrim;
+use function strtolower;
 use function strtoupper;
 
 /**
  * Proves the Aura route map used by the front controller and Twig helpers:
  * route resolution, path-parameter extraction with EC-CUBE-name -> resource-param
- * renaming, trailing-slash normalisation, and Aura's 404 / 405 failure signals.
+ * renaming, and trailing-slash normalisation. Aura does not gate by HTTP
+ * method; BEAR\Resource owns 405.
  */
 final class RouterTest extends TestCase
 {
@@ -101,16 +105,18 @@ final class RouterTest extends TestCase
         $matcher = $this->routes->getMatcher();
 
         $this->assertFalse($matcher->match(new ServerRequest('GET', '/no/such/path')));
-        $failed = $matcher->getFailedRoute();
-        if ($failed instanceof AuraRoute) {
-            $this->assertNotSame(Allows::class, $failed->failedRule);
-        }
     }
 
-    public function testKnownPathWrongMethodFailsOnAuraAllowsRule(): void
+    public function testKnownPathWrongMethodStillMatchesForBearResource405(): void
     {
-        // `/products/list` exists but is GET-only.
-        $this->assertMethodNotAllowed('POST', '/products/list');
+        // `/products/list` exists. Aura should match the path and leave
+        // method support to BEAR\Resource, which will answer 405 if the
+        // ProductList resource has no onPost().
+        [$route, $metadata] = $this->match('POST', '/products/list');
+
+        $this->assertSame('product_list', $route->name);
+        $this->assertSame('page://self/products', $metadata['resource']);
+        $this->assertSame('post', $metadata['dispatchMethod']);
     }
 
     public function testAddCartIsPostOnly(): void
@@ -119,7 +125,11 @@ final class RouterTest extends TestCase
         $this->assertSame('page://self/cart/item', $metadata['resource']);
         $this->assertSame(['productCode' => '7'], $params);
 
-        $this->assertMethodNotAllowed('GET', '/products/add_cart/7');
+        [$getRoute, $getMetadata, $getParams] = $this->match('GET', '/products/add_cart/7');
+        $this->assertSame('product_add_cart', $getRoute->name);
+        $this->assertSame('page://self/cart/item', $getMetadata['resource']);
+        $this->assertSame('get', $getMetadata['dispatchMethod']);
+        $this->assertSame(['productCode' => '7'], $getParams);
     }
 
     public function testMethodMatchingIsCaseInsensitive(): void
@@ -141,7 +151,9 @@ final class RouterTest extends TestCase
         $this->assertSame('page://self/cart/item', $postMetadata['resource']);
         $this->assertSame('post', $postMetadata['dispatchMethod']);
 
-        $this->assertMethodNotAllowed('PUT', '/cart/item');
+        [$put, $putMetadata] = $this->match('PUT', '/cart/item');
+        $this->assertSame('cart_handle_item', $put->name);
+        $this->assertSame('put', $putMetadata['dispatchMethod']);
     }
 
     public function testEntryFormPostsToRegisterResource(): void
@@ -165,7 +177,6 @@ final class RouterTest extends TestCase
         $routes = new RouterContainer();
         $routes->setMapBuilder(static function (Map $map): null {
             $map->route('delete_example', '/example/delete', 'delete_example')
-                ->allows(['POST'])
                 ->extras([
                     'bemart' => [
                         'methods' => [
@@ -193,7 +204,10 @@ final class RouterTest extends TestCase
     public function testDefaultHtmlRouteMapPublishesGetOrPostOnly(): void
     {
         foreach ($this->routes->getMap()->getRoutes() as $route) {
-            foreach ($route->allows as $method) {
+            /** @var mixed $methods */
+            $methods = $route->extras['bemart']['methods'] ?? [];
+            $this->assertIsArray($methods);
+            foreach (array_keys($methods) as $method) {
                 $this->assertContains($method, ['GET', 'POST'], (string) $route->name);
             }
         }
@@ -242,21 +256,24 @@ final class RouterTest extends TestCase
         return [$route, $metadata, $params];
     }
 
-    private function assertMethodNotAllowed(string $method, string $path): void
-    {
-        $matcher = $this->routes->getMatcher();
-
-        $this->assertFalse($matcher->match(new ServerRequest(strtoupper($method), self::normalizeRoutePath($path))));
-        $failed = $matcher->getFailedRoute();
-        $this->assertInstanceOf(AuraRoute::class, $failed);
-        $this->assertSame(Allows::class, $failed->failedRule);
-    }
-
     /** @return array<string, mixed> */
     private static function routeMetadata(AuraRoute $route, string $method): array
     {
         /** @var mixed $metadata */
         $metadata = $route->extras['bemart']['methods'][$method] ?? null;
+        if (! is_array($metadata)) {
+            /** @var mixed $methods */
+            $methods = $route->extras['bemart']['methods'] ?? [];
+            if (is_array($methods)) {
+                $metadata = $methods[array_key_first($methods)] ?? null;
+            }
+
+            if (is_array($metadata)) {
+                $metadata['dispatchMethod'] = strtolower($method);
+                $metadata['queryParamMap'] = [];
+            }
+        }
+
         self::assertIsArray($metadata);
 
         /** @var array<string, mixed> */

@@ -37,7 +37,7 @@ EC-CUBE 由来テンプレートは route 名でリンクを生成するため�
 ## 主要実装ポイント
 
 - `/Users/akihito/git/be-bemart/src/Bootstrap.php`
-  - HTTP method ではなく Aura route metadata の `dispatchMethod` で Resource を呼ぶ
+  - route metadata の `dispatchMethod` で内部 Resource method を呼ぶ。未登録 method は BEAR\Resource に委譲して 405 を返す
   - wire alias と route alias を Resource param に正規化
   - `BadRequestException` を HTTP response に変換し、HTML 上の raw Fatal を避ける
   - CSV/PDF 等の download response は Twig render せず body を返す

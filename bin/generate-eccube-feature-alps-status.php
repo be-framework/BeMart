@@ -50,10 +50,16 @@ $methodEntries = 0;
 
 foreach ($routes as $route) {
     $uniqueRouteNames[$route->name] = true;
-    foreach ($route->allows as $method) {
+    /** @var mixed $methods */
+    $methods = $route->extras['bemart']['methods'] ?? [];
+    if (! is_array($methods)) {
+        $methods = [];
+    }
+
+    foreach (array_keys($methods) as $method) {
         $methodEntries++;
         /** @var mixed $metadata */
-        $metadata = $route->extras['bemart']['methods'][$method] ?? [];
+        $metadata = $methods[$method] ?? [];
         if (! is_array($metadata)) {
             $metadata = [];
         }
@@ -163,7 +169,7 @@ $html = <<<HTML
   <p class="meta">Generated {$date} from Aura route extras and <code>alps.json</code>.</p>
 </header>
 <main>
-  <p class="note">この表はEC-CUBE route名を「機能リスト」として扱い、各HTTP methodごとに対応するALPS descriptorとBeMart側の到達状態を示します。URLやHTTP methodはAura.Routerの責務です。</p>
+  <p class="note">この表はEC-CUBE route名を「機能リスト」として扱い、各HTTP methodごとに対応するALPS descriptorとBeMart側の到達状態を示します。URLはAura.Router、method dispatch / 405 はBEAR\Resourceの責務です。</p>
   <section class="cards" aria-label="summary">
     <div class="card"><strong>{$totalNames}</strong>EC-CUBE route names</div>
     <div class="card"><strong>{$totalRoutes}</strong>Aura routes</div>
