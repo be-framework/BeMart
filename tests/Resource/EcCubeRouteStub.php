@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource;
 
-use MyVendor\BeMart\Router\RouteUrlGenerator;
+use MyVendor\BeMart\Module\BeMartTwigExtension;
 use Twig\Environment;
 use Twig\TwigFunction;
 
@@ -24,9 +24,9 @@ use Twig\TwigFunction;
  * EC-CUBE's `url()` is its Symfony router: `url('homepage')` is `/`,
  * `url('product_detail', {id: 5})` is `/products/detail/5`. BeMart's
  * {@see \MyVendor\BeMart\Module\BeMartTwigExtension::url()} now resolves
- * names through the Aura.Router-backed {@see RouteUrlGenerator} and produces
+ * names through Aura.Router and produces
  * those same real paths. So the EC-CUBE-side stub must resolve through the
- * SAME generator — otherwise the test would grade BeMart's correct port
+ * SAME helper — otherwise the test would grade BeMart's correct port
  * against a deliberately wrong simplification.
  *
  * An unmapped route name falls back to the legacy `/{name}` form, exactly
@@ -35,13 +35,13 @@ use Twig\TwigFunction;
  */
 final class EcCubeRouteStub
 {
-    /** Register `url` and `path` on $twig, both resolving through {@see RouteUrlGenerator}. */
+    /** Register `url` and `path` on $twig, both resolving like BeMart's Twig extension. */
     public static function register(Environment $twig): void
     {
-        $urls = new RouteUrlGenerator();
+        $routes = new BeMartTwigExtension();
 
         /** @param array<string, mixed> $params */
-        $resolve = static fn (string $route, array $params = []): string => $urls->generate($route, $params);
+        $resolve = static fn (string $route, array $params = []): string => $routes->path($route, $params);
 
         $twig->addFunction(new TwigFunction('url', $resolve));
         $twig->addFunction(new TwigFunction('path', $resolve));

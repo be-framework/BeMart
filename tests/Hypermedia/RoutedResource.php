@@ -4,19 +4,24 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
+use Aura\Router\Route as AuraRoute;
 use BEAR\Resource\Method;
 use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Router\Router;
+use MyVendor\BeMart\Router\RouteTable;
 use MyVendor\BeMart\Tests\Support\UnsupportedResourceOperationException;
+use Nyholm\Psr7\ServerRequest;
 use Override;
+
+use function rtrim;
+use function strtoupper;
 
 final class RoutedResource implements ResourceInterface
 {
     public function __construct(
         private readonly ResourceInterface $resource,
-        private readonly Router $router,
+        private readonly RouteTable $routes,
     ) {
     }
 
@@ -59,41 +64,31 @@ final class RoutedResource implements ResourceInterface
     #[Override]
     public function get(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('GET', $uri);
-
-        return $this->resource->get($matched->resource, $matched->params + $query);
+        return $this->dispatch('GET', $uri, $query);
     }
 
     #[Override]
     public function post(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('POST', $uri);
-
-        return $this->resource->post($matched->resource, $matched->params + $query);
+        return $this->dispatch('POST', $uri, $query);
     }
 
     #[Override]
     public function put(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('PUT', $uri);
-
-        return $this->resource->put($matched->resource, $matched->params + $query);
+        return $this->dispatch('PUT', $uri, $query);
     }
 
     #[Override]
     public function patch(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('PATCH', $uri);
-
-        return $this->resource->patch($matched->resource, $matched->params + $query);
+        return $this->dispatch('PATCH', $uri, $query);
     }
 
     #[Override]
     public function delete(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('DELETE', $uri);
-
-        return $this->resource->delete($matched->resource, $matched->params + $query);
+        return $this->dispatch('DELETE', $uri, $query);
     }
 
     #[Override]
@@ -106,5 +101,40 @@ final class RoutedResource implements ResourceInterface
     public function options(string $uri, array $query = []): ResourceObject
     {
         throw new UnsupportedResourceOperationException('options is not used by workflow tests.');
+    }
+
+    /** @param array<string, mixed> $query */
+    private function dispatch(string $method, string $uri, array $query): ResourceObject
+    {
+        $method = strtoupper($method);
+        $route = $this->routes->matcher()->match(new ServerRequest($method, self::normalizeRoutePath($uri)));
+        if (! $route instanceof AuraRoute) {
+            throw new UnsupportedResourceOperationException('No workflow route matches ' . $method . ' ' . $uri);
+        }
+
+        $metadata = RouteTable::metadataFor($route, $method);
+        $params = RouteTable::resourceParams($route, $metadata) + $query;
+
+        return match ($metadata['dispatchMethod']) {
+            'get' => $this->resource->get($metadata['resource'], $params),
+            'post' => $this->resource->post($metadata['resource'], $params),
+            'put' => $this->resource->put($metadata['resource'], $params),
+            'patch' => $this->resource->patch($metadata['resource'], $params),
+            'delete' => $this->resource->delete($metadata['resource'], $params),
+            default => throw new UnsupportedResourceOperationException(
+                'Unsupported workflow dispatch method: ' . $metadata['dispatchMethod'],
+            ),
+        };
+    }
+
+    private static function normalizeRoutePath(string $path): string
+    {
+        if ($path === '' || $path === '/') {
+            return '/';
+        }
+
+        $trimmed = rtrim($path, '/');
+
+        return $trimmed === '' ? '/' : $trimmed;
     }
 }

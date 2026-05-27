@@ -364,6 +364,30 @@ final class RouteTable
         return $methods[$method];
     }
 
+    /**
+     * Convert Aura path attributes into BEAR resource parameters.
+     *
+     * Aura extracts placeholders with EC-CUBE's route names (`id`,
+     * `order_no`, ...). The route metadata only records the few names that
+     * need to be exposed to resources differently (`productCode`, `orderNo`,
+     * ...).
+     *
+     * @param MethodMetadata $metadata
+     * @return array<string, string>
+     */
+    public static function resourceParams(AuraRoute $route, array $metadata): array
+    {
+        $params = $metadata['defaults'];
+        /** @var array<string, mixed> $attributes */
+        $attributes = $route->attributes;
+        foreach ($attributes as $key => $value) {
+            $resourceParam = $metadata['paramMap'][$key] ?? $key;
+            $params[$resourceParam] = (string) $value;
+        }
+
+        return $params;
+    }
+
     /** @return array<string, MethodMetadata> */
     public static function methodMetadataFor(AuraRoute $route): array
     {
