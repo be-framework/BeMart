@@ -6,7 +6,7 @@
 ## 目的
 
 BeMart の HTML 画面で、テンプレートから参照される route が 404 / 405 / Fatal / 未実装表示に落ちない状態を維持する。
-EC-CUBE 由来テンプレートは route 名でリンクを生成するため、`RouteTable` を front controller と Twig helper の単一 source of truth とする。
+EC-CUBE 由来テンプレートは route 名でリンクを生成するため、Aura.Router の route map を front controller と Twig helper の単一 source of truth とする。
 
 ## 方針
 
@@ -22,8 +22,8 @@ EC-CUBE 由来テンプレートは route 名でリンクを生成するため�
 
 2026-05-26 時点で次を満たす。
 
-- `RouteTable` 内の `unsupported-route`: 0
-- `RouteTable` dispatch 欠落: 0
+- Aura route extras 内の `unsupported-route`: 0
+- Aura route extras の dispatch 欠落: 0
 - `var/templates/**/*.twig` の `url()` / `path()` route 欠落: 0
 - HTML 内の `PUT` / `DELETE` method 参照: 0
 - 通常画面の「未実装」表示: 0
@@ -41,7 +41,7 @@ EC-CUBE 由来テンプレートは route 名でリンクを生成するため�
   - wire alias と route alias を Resource param に正規化
   - `BadRequestException` を HTTP response に変換し、HTML 上の raw Fatal を避ける
   - CSV/PDF 等の download response は Twig render せず body を返す
-- `~/git/be-bemart/src/Router/RouteTable.php`
+- `~/git/be-bemart/config/aura-routes.php`
   - Aura.Router の route map と BeMart 固有 metadata を定義
   - admin alias route を補完
   - HTML 公開 method を GET/POST に限定
@@ -74,7 +74,7 @@ composer psalm -- --output-format=console
 
 ## 今後の注意
 
-- 新しい Twig route を追加したら、必ず `RouteTable` に route name を追加する。
+- 新しい Twig route を追加したら、必ず Aura route map に route name を追加する。
 - 更新/削除リンクを `<a>` で追加しない。POST form にする。
 - `PUT` / `DELETE` を HTML に露出させない。
 - Resource 側の `onPut()` / `onDelete()` を消す必要はない。HTML 入口だけ GET/POST にする。

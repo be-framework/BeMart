@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace MyVendor\BeMart;
 
 use Aura\Router\Route as AuraRoute;
+use Aura\Router\RouterContainer;
 use Aura\Router\Rule\Allows;
 use BEAR\Resource\Code;
 use BEAR\Resource\Exception\BadRequestException;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Router\RouteTable;
+use LogicException;
 use Nyholm\Psr7\ServerRequest;
 use Throwable;
 
@@ -94,8 +95,8 @@ final class Bootstrap
             return 2;
         }
 
-        $routes = RouteTable::default();
-        $matcher = $routes->matcher();
+        $routes = $this->routerContainer();
+        $matcher = $routes->getMatcher();
         $requestMethod = strtoupper($request->method);
         $route = $matcher->match(new ServerRequest($requestMethod, $this->normalizeRoutePath($request->path)));
         if (! $route instanceof AuraRoute) {
@@ -111,8 +112,8 @@ final class Bootstrap
             );
         }
 
-        $metadata = RouteTable::metadataFor($route, $requestMethod);
-        $params = RouteTable::resourceParams($route, $metadata) + $request->params;
+        $metadata = $this->routeMetadata($route, $requestMethod);
+        $params = $this->resourceParams($route, $metadata) + $request->params;
         $this->normalizeWireAliases($params);
         $this->normalizeRouteAliases($metadata['queryParamMap'], $params);
 
@@ -228,6 +229,60 @@ final class Bootstrap
         }
 
         return $resourceCode;
+    }
+
+    private function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(\Aura\Router\Map): null $routes */
+        $routes = require __DIR__ . '/../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
+    }
+
+    /**
+     * @return array{
+     *     resource: string,
+     *     dispatchMethod: string,
+     *     paramMap: array<string, string>,
+     *     defaults: array<string, string>,
+     *     queryParamMap: array<string, string>
+     * }
+     */
+    private function routeMetadata(AuraRoute $route, string $method): array
+    {
+        /** @var mixed $metadata */
+        $metadata = $route->extras['bemart']['methods'][$method] ?? null;
+        if (! is_array($metadata)) {
+            throw new LogicException(sprintf('Aura route "%s" has no BeMart metadata for %s.', (string) $route->name, $method));
+        }
+
+        /** @var array{resource: string, dispatchMethod: string, paramMap: array<string, string>, defaults: array<string, string>, queryParamMap: array<string, string>} */
+        return $metadata;
+    }
+
+    /**
+     * @param array{
+     *     resource: string,
+     *     dispatchMethod: string,
+     *     paramMap: array<string, string>,
+     *     defaults: array<string, string>,
+     *     queryParamMap: array<string, string>
+     * } $metadata
+     * @return array<string, string>
+     */
+    private function resourceParams(AuraRoute $route, array $metadata): array
+    {
+        $params = $metadata['defaults'];
+        /** @var array<string, mixed> $attributes */
+        $attributes = $route->attributes;
+        foreach ($attributes as $key => $value) {
+            $resourceParam = $metadata['paramMap'][$key] ?? $key;
+            $params[$resourceParam] = (string) $value;
+        }
+
+        return $params;
     }
 
     /** Strip a trailing slash, but never reduce the site root to empty. */
