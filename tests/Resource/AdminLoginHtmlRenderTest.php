@@ -104,7 +104,7 @@ final class AdminLoginHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="admin_login_password"', $html);
         $this->assertStringContainsString('type="password"', $html);
         $this->assertStringContainsString('value="local-dev-admin-password"', $html);
-        // Slice 9: path('admin_login') now resolves through RouteTable.
+        // Slice 9: path('admin_login') now resolves through Aura route map.
         $this->assertStringContainsString('action="/admin/login"', $html);
     }
 
