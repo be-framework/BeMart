@@ -88,7 +88,7 @@ foreach (RouteTable::default()->routes as $route) {
 usort($rows, static fn (array $a, array $b): int => [$a['route'], $a['method'], $a['path']] <=> [$b['route'], $b['method'], $b['path']]);
 
 $h = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-$date = '2026-05-26';
+$date = date('Y-m-d');
 $totalRoutes = count(RouteTable::default()->routes);
 $totalNames = count($uniqueRouteNames);
 
@@ -216,5 +216,10 @@ implementationStatus.addEventListener('change', applyFilter);
 </html>
 HTML;
 
-file_put_contents($repo . '/docs/eccube-feature-alps-status.html', $html);
+$outputPath = $repo . '/docs/eccube-feature-alps-status.html';
+if (file_put_contents($outputPath, $html) === false) {
+    fwrite(STDERR, "Failed to write {$outputPath}" . PHP_EOL);
+    exit(1);
+}
+
 fprintf(STDERR, "Generated docs/eccube-feature-alps-status.html (%d rows)\n", count($rows));
