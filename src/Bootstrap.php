@@ -6,7 +6,6 @@ namespace MyVendor\BeMart;
 
 use Aura\Router\Route as AuraRoute;
 use Aura\Router\RouterContainer;
-use Aura\Router\Rule\Allows;
 use BEAR\Resource\Code;
 use BEAR\Resource\Exception\BadRequestException;
 use BEAR\Resource\ResourceInterface;
@@ -15,6 +14,7 @@ use Nyholm\Psr7\ServerRequest;
 use Throwable;
 
 use function array_key_exists;
+use function array_key_first;
 use function array_values;
 use function assert;
 use function count;
@@ -100,16 +100,7 @@ final class Bootstrap
         $requestMethod = strtoupper($request->method);
         $route = $matcher->match(new ServerRequest($requestMethod, $this->normalizeRoutePath($request->path)));
         if (! $route instanceof AuraRoute) {
-            $failed = $matcher->getFailedRoute();
-
-            return $this->fail(
-                $isCli,
-                $failed instanceof AuraRoute && $failed->failedRule === Allows::class ? 405 : 404,
-                $failed instanceof AuraRoute && $failed->failedRule === Allows::class
-                    ? 'Method Not Allowed'
-                    : 'Not Found',
-                $context,
-            );
+            return $this->fail($isCli, 404, 'Not Found', $context);
         }
 
         $metadata = $this->routeMetadata($route, $requestMethod);
@@ -140,7 +131,10 @@ final class Bootstrap
                 'get' => $resource->get($metadata['resource'], $params),
                 'post' => $resource->post($metadata['resource'], $params),
                 'put' => $resource->put($metadata['resource'], $params),
+                'patch' => $resource->patch($metadata['resource'], $params),
                 'delete' => $resource->delete($metadata['resource'], $params),
+                'head' => $resource->head($metadata['resource'], $params),
+                'options' => $resource->options($metadata['resource'], $params),
                 default => null,
             };
         } catch (BadRequestException $e) {
@@ -254,6 +248,20 @@ final class Bootstrap
     {
         /** @var mixed $metadata */
         $metadata = $route->extras['bemart']['methods'][$method] ?? null;
+        if (! is_array($metadata)) {
+            /** @var mixed $methods */
+            $methods = $route->extras['bemart']['methods'] ?? [];
+            if (is_array($methods)) {
+                $firstMethod = array_key_first($methods);
+                $metadata = $firstMethod === null ? null : ($methods[$firstMethod] ?? null);
+            }
+
+            if (is_array($metadata)) {
+                $metadata['dispatchMethod'] = strtolower($method);
+                $metadata['queryParamMap'] = [];
+            }
+        }
+
         if (! is_array($metadata)) {
             throw new LogicException(sprintf('Aura route "%s" has no BeMart metadata for %s.', (string) $route->name, $method));
         }
