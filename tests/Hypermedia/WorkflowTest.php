@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
+use Aura\Router\RouterContainer;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
@@ -12,7 +13,6 @@ use DOMElement;
 use DOMXPath;
 use MyVendor\BeMart\Auth\HtmlCartSession;
 use MyVendor\BeMart\Injector;
-use MyVendor\BeMart\Router\RouteTable;
 use PHPUnit\Framework\TestCase;
 
 use function array_key_exists;
@@ -56,7 +56,7 @@ class WorkflowTest extends TestCase
         $resource = Injector::getInstance('html-test-hal-api-app')->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
 
-        $this->resource = new RoutedResource($resource, RouteTable::default());
+        $this->resource = new RoutedResource($resource, self::routerContainer());
     }
 
     protected function tearDown(): void
@@ -80,6 +80,16 @@ class WorkflowTest extends TestCase
         }
 
         putenv('APP_CONTEXT=' . $this->appContextBefore);
+    }
+
+    private static function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(\Aura\Router\Map): null $routes */
+        $routes = require __DIR__ . '/../../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
     }
 
     public function testCustomerCanFollowStorefrontPurchaseSpineToCart(): void

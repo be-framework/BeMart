@@ -3,13 +3,18 @@
 
 declare(strict_types=1);
 
-use MyVendor\BeMart\Router\AlpsRouteMap;
-use MyVendor\BeMart\Router\RouteTable;
+use Aura\Router\Map;
+use Aura\Router\RouterContainer;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
 $repo = dirname(__DIR__);
 $alps = json_decode((string) file_get_contents($repo . '/alps.json'), true, flags: JSON_THROW_ON_ERROR);
+$container = new RouterContainer();
+/** @var callable(Map): null $routesBuilder */
+$routesBuilder = require $repo . '/config/aura-routes.php';
+$container->setMapBuilder($routesBuilder);
+$routes = $container->getMap()->getRoutes();
 
 /** @var array<string, array{title:string,type?:string,rt?:string}> $descriptorById */
 $descriptorById = [];
@@ -43,19 +48,27 @@ $implemented = 0;
 $actionRedirect = 0;
 $methodEntries = 0;
 
-foreach (RouteTable::default()->routes as $route) {
+foreach ($routes as $route) {
     $uniqueRouteNames[$route->name] = true;
-    foreach ($route->methods as $method) {
+    foreach ($route->allows as $method) {
         $methodEntries++;
-        $alpsId = AlpsRouteMap::forRouteMethod($route, $method);
+        /** @var mixed $metadata */
+        $metadata = $route->extras['bemart']['methods'][$method] ?? [];
+        if (! is_array($metadata)) {
+            $metadata = [];
+        }
+
+        $alpsId = (string) ($metadata['alpsId'] ?? '');
         $hasAlpsDescriptor = isset($descriptorById[$alpsId]);
         $descriptor = $descriptorById[$alpsId] ?? ['title' => '(missing)', 'type' => null, 'rt' => null];
-        $isActionRedirect = str_contains($route->resource, 'action-redirect');
+        $resource = (string) ($metadata['resource'] ?? '');
+        $dispatch = (string) ($metadata['dispatchMethod'] ?? strtolower((string) $method));
+        $isActionRedirect = str_contains($resource, 'action-redirect');
         $alpsStatus = $hasAlpsDescriptor ? '対応済み' : '未対応';
         $implementationStatus = $isActionRedirect ? '安全退避(ActionRedirect)' : '実装済み';
         $implementationDetail = $isActionRedirect
-            ? 'RouteTableはActionRedirectへ到達。業務処理Resourceへの接続は後続タスク。'
-            : 'RouteTableから具体Resourceへ到達。';
+            ? 'Aura route extrasはActionRedirectへ到達。業務処理Resourceへの接続は後続タスク。'
+            : 'Aura route extrasから具体Resourceへ到達。';
 
         if ($hasAlpsDescriptor) {
             $alpsMapped++;
@@ -76,8 +89,8 @@ foreach (RouteTable::default()->routes as $route) {
             'alpsId' => $alpsId,
             'alpsTitle' => $descriptor['title'],
             'alpsType' => $descriptor['type'] ?? '',
-            'resource' => $route->resource,
-            'dispatch' => $route->dispatchMethodFor($method),
+            'resource' => $resource,
+            'dispatch' => $dispatch,
             'alpsStatus' => $alpsStatus,
             'implementationStatus' => $implementationStatus,
             'implementationDetail' => $implementationDetail,
@@ -89,7 +102,7 @@ usort($rows, static fn (array $a, array $b): int => [$a['route'], $a['method'], 
 
 $h = static fn (string $value): string => htmlspecialchars($value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 $date = date('Y-m-d');
-$totalRoutes = count(RouteTable::default()->routes);
+$totalRoutes = count($routes);
 $totalNames = count($uniqueRouteNames);
 
 $tableRows = '';
@@ -147,13 +160,13 @@ $html = <<<HTML
 <body>
 <header>
   <h1>EC-CUBE機能リスト ↔ ALPS ID ↔ BeMart実装状態</h1>
-  <p class="meta">Generated {$date} from <code>RouteTable</code>, <code>AlpsRouteMap</code>, and <code>alps.json</code>.</p>
+  <p class="meta">Generated {$date} from Aura route extras and <code>alps.json</code>.</p>
 </header>
 <main>
-  <p class="note">この表はEC-CUBE route名を「機能リスト」として扱い、各HTTP methodごとに対応するALPS descriptorとBeMart側の到達状態を示します。URLやHTTP methodはALPSではなくRouteTableの責務です。</p>
+  <p class="note">この表はEC-CUBE route名を「機能リスト」として扱い、各HTTP methodごとに対応するALPS descriptorとBeMart側の到達状態を示します。URLやHTTP methodはAura.Routerの責務です。</p>
   <section class="cards" aria-label="summary">
     <div class="card"><strong>{$totalNames}</strong>EC-CUBE route names</div>
-    <div class="card"><strong>{$totalRoutes}</strong>RouteTable entries</div>
+    <div class="card"><strong>{$totalRoutes}</strong>Aura routes</div>
     <div class="card"><strong>{$methodEntries}</strong>method entries</div>
     <div class="card"><strong>{$alpsMapped}</strong>ALPS対応済み</div>
     <div class="card"><strong>{$alpsMissing}</strong>ALPS未対応</div>

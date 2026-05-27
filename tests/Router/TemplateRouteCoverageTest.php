@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Router;
 
-use MyVendor\BeMart\Router\RouteTable;
+use Aura\Router\Exception\RouteNotFound as AuraRouteNotFound;
+use Aura\Router\Map;
+use Aura\Router\RouterContainer;
 use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
@@ -12,29 +14,33 @@ use SplFileInfo;
 
 use function array_keys;
 use function file_get_contents;
+use function is_array;
 use function preg_match_all;
 use function sort;
 use function str_contains;
 
 final class TemplateRouteCoverageTest extends TestCase
 {
-    public function testAdminTemplateRouteReferencesExistInRouteTable(): void
+    public function testAdminTemplateRouteReferencesExistInAuraRouteMap(): void
     {
         $this->assertTemplateRouteCoverage('var/templates/Page/Admin');
     }
 
-    public function testAllTemplateRouteReferencesExistInRouteTable(): void
+    public function testAllTemplateRouteReferencesExistInAuraRouteMap(): void
     {
         $this->assertTemplateRouteCoverage('var/templates');
     }
 
-    public function testRouteTableDoesNotExposeUnsupportedRoutes(): void
+    public function testAuraRouteMapDoesNotExposeUnsupportedRoutes(): void
     {
         $unsupported = [];
-        foreach (RouteTable::default()->routes as $route) {
-            foreach (RouteTable::methodMetadataFor($route) as $metadata) {
-                if (str_contains($metadata['resource'], 'unsupported-route')) {
-                    $unsupported[] = $route->name . ' => ' . $metadata['resource'];
+        foreach ($this->routerContainer()->getMap()->getRoutes() as $route) {
+            /** @var mixed $methods */
+            $methods = $route->extras['bemart']['methods'] ?? [];
+            self::assertIsArray($methods);
+            foreach ($methods as $metadata) {
+                if (is_array($metadata) && str_contains((string) ($metadata['resource'] ?? ''), 'unsupported-route')) {
+                    $unsupported[] = (string) $route->name . ' => ' . (string) $metadata['resource'];
                 }
             }
         }
@@ -45,7 +51,7 @@ final class TemplateRouteCoverageTest extends TestCase
 
     private function assertTemplateRouteCoverage(string $directory): void
     {
-        $table = RouteTable::default();
+        $map = $this->routerContainer()->getMap();
         $refs = [];
         $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory));
         foreach ($files as $file) {
@@ -63,12 +69,24 @@ final class TemplateRouteCoverageTest extends TestCase
 
         $missing = [];
         foreach (array_keys($refs) as $routeName) {
-            if ($table->byName($routeName) === null) {
+            try {
+                $map->getRoute($routeName);
+            } catch (AuraRouteNotFound) {
                 $missing[] = $routeName;
             }
         }
 
         sort($missing);
         self::assertSame([], $missing);
+    }
+
+    private function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(Map): null $routes */
+        $routes = require __DIR__ . '/../../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
     }
 }
