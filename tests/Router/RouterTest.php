@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Router;
 
-use MyVendor\BeMart\Router\Route;
+use Aura\Router\Map;
 use MyVendor\BeMart\Router\RouteMethodNotAllowedException;
 use MyVendor\BeMart\Router\RouteNotFoundException;
 use MyVendor\BeMart\Router\RouteTable;
@@ -154,8 +154,9 @@ final class RouterTest extends TestCase
 
     public function testPostRouteCanDispatchToInternalResourceMethod(): void
     {
-        $router = new Router(new RouteTable([
-            new Route(
+        $router = new Router(RouteTable::fromMapBuilder(static function (Map $map): null {
+            RouteTable::addRoute(
+                $map,
                 'delete_example',
                 ['POST'],
                 '/example/delete',
@@ -163,8 +164,10 @@ final class RouterTest extends TestCase
                 [],
                 'delete',
                 ['routeName' => 'delete_example'],
-            ),
-        ]));
+            );
+
+            return null;
+        }));
 
         $matched = $router->match('POST', '/example/delete');
 
@@ -176,7 +179,7 @@ final class RouterTest extends TestCase
     public function testDefaultHtmlRouteTablePublishesGetOrPostOnly(): void
     {
         foreach (RouteTable::default()->routes as $route) {
-            foreach ($route->methods as $method) {
+            foreach ($route->allows as $method) {
                 $this->assertContains($method, ['GET', 'POST'], $route->name);
             }
         }

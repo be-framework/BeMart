@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Router;
 
+use Aura\Router\Route as AuraRoute;
+
 use function array_key_exists;
 use function preg_replace_callback;
 use function str_contains;
@@ -200,16 +202,17 @@ final class AlpsRouteMap
     ];
 
     /** @return non-empty-string */
-    public static function forRouteMethod(Route $route, string $method): string
+    public static function forRouteMethod(AuraRoute $route, string $method): string
     {
-        $id = self::for($route->name, $route->methods, $route->dispatchMethod);
+        $metadata = RouteTable::metadataFor($route, $method);
+        $id = self::for((string) $route->name, $route->allows, $metadata['dispatchMethod']);
         if (! is_array($id)) {
             return $id;
         }
 
         $method = strtoupper($method);
 
-        return $id[$method] ?? self::fallback($route->name, $method, $route->dispatchMethod);
+        return $id[$method] ?? self::fallback((string) $route->name, $method, $metadata['dispatchMethod']);
     }
 
     /** @return non-empty-string|MethodAlpsMap */
