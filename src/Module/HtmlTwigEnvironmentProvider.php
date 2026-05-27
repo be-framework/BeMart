@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use Aura\Router\RouterContainer;
 use Override;
 use Ray\Di\Di\Named;
 use Ray\Di\ProviderInterface;
@@ -19,9 +20,9 @@ use Twig\Environment;
  * call), and serves it as the unqualified Environment so TwigRenderer
  * gets an extension-equipped instance.
  *
- * The extension defaults to an Aura.Router-backed route-name generator built
- * from the same route metadata the HTTP front controller dispatches with, so
- * the `url()` / `path()` hrefs it emits are URLs the router can resolve.
+ * The extension receives the same Aura.Router container the application
+ * router uses, so the `url()` / `path()` hrefs it emits are URLs the router
+ * can resolve.
  *
  * @implements ProviderInterface<Environment>
  */
@@ -30,9 +31,10 @@ final class HtmlTwigEnvironmentProvider implements ProviderInterface
     public function __construct(
         #[Named('original')]
         private readonly Environment $twig,
+        RouterContainer $routes,
     ) {
         if (! $twig->hasExtension(BeMartTwigExtension::class)) {
-            $twig->addExtension(new BeMartTwigExtension());
+            $twig->addExtension(new BeMartTwigExtension($routes));
         }
     }
 
