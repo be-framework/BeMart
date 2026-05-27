@@ -2036,10 +2036,11 @@ Tier-1 完了後、defer した Tier-2 を section 単位で回収。Tier-2 は
 - **静的アセット配備**（`a002097`）— EC-CUBE 4.3 の `default` + `admin` テーマの
   静的アセットを `public/` に配備。served URL（`/assets`・`/template/admin/assets`・
   `/bundle`）を忠実にミラー。
-- **HTTP ルーター**（`53e587e`/`39f1117`）— `RouteTable`（EC-CUBE ルート名 ↔ URL
-  パス ↔ リソース URI のマップ）+ `Router`（`(method, path)` 照合）。
-  `public/index.php` が 404/405 セマンティクス付きでディスパッチ。
-  `BeMartTwigExtension::url()/path()` は共有 `RouteTable` 経由で解決。
+- **HTTP ルーター**（`53e587e`/`39f1117`）— `config/aura-routes.php` の Aura route map（EC-CUBE ルート名 ↔ URL
+  パス ↔ リソース URI の extras）で定義。
+  `public/index.php` は BEAR.Sunday `RouterInterface` 経由で `RouterMatch` を dispatch し、
+  missing resource 404 / method 405 は BEAR\Resource に委譲。
+  `BeMartTwigExtension::url()/path()` は Aura.Generator 経由で解決。
 - **render-diff スタブのアセットパッケージ対応**（`16e8c9d`）— EC-CUBE の
   `asset(path, package)` パッケージマップ（`admin`→`/template/admin/`・
   `bundle`→`/bundle/`）を `EcCubeAssetStub` 経由で両サイド同一に評価。
@@ -2075,7 +2076,7 @@ Phase 3 の ALPS 監査（`8d93500`/`f01e1ae`）で追加した 5 遷移は当�
     silent success ではなく明示的な 4xx で返す。
   - リソース `Page\Admin\Customer\ResendActivationMail`
     （`page://self/admin/customer/resend-activation-mail`、POST、CSRF ガード）。
-    `RouteTable` に `admin_customer_resend` を登録。
+    Aura route map に `admin_customer_resend` を登録。
     Final の公開面は `customerId` / `email` のみ — `secretKey` はメール本文
     専用トークンなので echo しない。
   - テストは Fake のみ（モック禁止）。seed `provisional@example.com`
@@ -2118,7 +2119,7 @@ scaffold されておらず、ワークフロー assertion が in-process でし
   （`aura/input` 経由の旧 Composer プラグイン）は `allow-plugins` で
   明示的に無効化（`false`）して install ブロックを解消。
 - **暫定事項**（将来の整理候補）— `RoutedResource` は BEAR ネイティブの
-  `#[Link]` / `crawl` でなく自前 Router の shim、`canonicalizeFormFields` が
+  `#[Link]` / `crawl` でなくAura.Router の shim、`canonicalizeFormFields` が
   wire フィールド名（`_token` / `product_id`）をリソース引数名へ手で
   詰め替えている。
 
@@ -2172,7 +2173,7 @@ This section closes the long HTML-migration session and records the exact reposi
 The local save was first split into meaningful commits, then rebased over the upstream work that had landed during the side session. Static assets and the large test commit overlapped with upstream and were dropped/skipped where upstream already carried the better version. The final pushed delta is:
 
 - `d0a9587 Stabilize HTTP route dispatch and sessions`
-  - After rebase, this mostly contributes the shared unsupported-feature JS fallback because upstream already contains the shared `RouteTable`/`Router` front-controller implementation.
+  - After rebase, this mostly contributes the shared unsupported-feature JS fallback because upstream already contains the shared Aura.Router front-controller implementation.
 - `bc7825e Improve storefront product and customer flows`
   - Product list/detail enrichment, storefront blocks, images/categories/tags, cart/session fixes preserved where not already upstream.
 - `da5a2fd Add admin product customer order screen slices`
@@ -2233,7 +2234,7 @@ docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.
 
 ### 完了事項
 
-- `RouteTable` の `unsupported-route` 到達を 0 に整理。
+- Aura route extras の `unsupported-route` 到達を 0 に整理。
 - HTML 入口の公開 method を GET / POST のみに統一。
 - HTML POST から内部 Resource の PUT / DELETE へ dispatch する設計を固定。
 - 管理画面 route alias と query/form param map を補完。
@@ -2258,6 +2259,6 @@ docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.
 
 ### 次回注意
 
-- Twig に route name を追加したら `RouteTable` と coverage test を同時に更新する。
+- Twig に route name を追加したら Aura route map と coverage test を同時に更新する。
 - HTML には PUT / DELETE を出さない。更新・削除は POST form で送る。
 - SQL suite の green 判定は MariaDB で行う。MySQL 8/9 での大量失敗は baseline 違いとして扱う。

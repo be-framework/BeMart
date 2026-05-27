@@ -4,19 +4,24 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
+use Aura\Router\Route as AuraRoute;
+use Aura\Router\RouterContainer;
 use BEAR\Resource\Method;
 use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Router\Router;
 use MyVendor\BeMart\Tests\Support\UnsupportedResourceOperationException;
+use Nyholm\Psr7\ServerRequest;
 use Override;
+
+use function rtrim;
+use function strtoupper;
 
 final class RoutedResource implements ResourceInterface
 {
     public function __construct(
         private readonly ResourceInterface $resource,
-        private readonly Router $router,
+        private readonly RouterContainer $routes,
     ) {
     }
 
@@ -59,41 +64,31 @@ final class RoutedResource implements ResourceInterface
     #[Override]
     public function get(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('GET', $uri);
-
-        return $this->resource->get($matched->resource, $matched->params + $query);
+        return $this->dispatch('GET', $uri, $query);
     }
 
     #[Override]
     public function post(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('POST', $uri);
-
-        return $this->resource->post($matched->resource, $matched->params + $query);
+        return $this->dispatch('POST', $uri, $query);
     }
 
     #[Override]
     public function put(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('PUT', $uri);
-
-        return $this->resource->put($matched->resource, $matched->params + $query);
+        return $this->dispatch('PUT', $uri, $query);
     }
 
     #[Override]
     public function patch(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('PATCH', $uri);
-
-        return $this->resource->patch($matched->resource, $matched->params + $query);
+        return $this->dispatch('PATCH', $uri, $query);
     }
 
     #[Override]
     public function delete(string $uri, array $query = []): ResourceObject
     {
-        $matched = $this->router->match('DELETE', $uri);
-
-        return $this->resource->delete($matched->resource, $matched->params + $query);
+        return $this->dispatch('DELETE', $uri, $query);
     }
 
     #[Override]
@@ -106,5 +101,77 @@ final class RoutedResource implements ResourceInterface
     public function options(string $uri, array $query = []): ResourceObject
     {
         throw new UnsupportedResourceOperationException('options is not used by workflow tests.');
+    }
+
+    /** @param array<string, mixed> $query */
+    private function dispatch(string $method, string $uri, array $query): ResourceObject
+    {
+        $method = strtoupper($method);
+        $route = $this->routes->getMatcher()->match(new ServerRequest($method, self::normalizeRoutePath($uri)));
+        if (! $route instanceof AuraRoute) {
+            throw new UnsupportedResourceOperationException('No workflow route matches ' . $method . ' ' . $uri);
+        }
+
+        $metadata = self::routeMetadata($route, $method);
+        $params = self::resourceParams($route, $metadata) + $query;
+
+        return match ($metadata['dispatchMethod']) {
+            'get' => $this->resource->get($metadata['resource'], $params),
+            'post' => $this->resource->post($metadata['resource'], $params),
+            'put' => $this->resource->put($metadata['resource'], $params),
+            'patch' => $this->resource->patch($metadata['resource'], $params),
+            'delete' => $this->resource->delete($metadata['resource'], $params),
+            default => throw new UnsupportedResourceOperationException(
+                'Unsupported workflow dispatch method: ' . $metadata['dispatchMethod'],
+            ),
+        };
+    }
+
+    private static function normalizeRoutePath(string $path): string
+    {
+        if ($path === '' || $path === '/') {
+            return '/';
+        }
+
+        $trimmed = rtrim($path, '/');
+
+        return $trimmed === '' ? '/' : $trimmed;
+    }
+
+    /**
+     * @return array{
+     *     resource: string,
+     *     dispatchMethod: string,
+     *     paramMap: array<string, string>,
+     *     defaults: array<string, string>
+     * }
+     */
+    private static function routeMetadata(AuraRoute $route, string $method): array
+    {
+        /** @var mixed $metadata */
+        $metadata = $route->extras['bemart']['methods'][$method] ?? null;
+        if (! is_array($metadata)) {
+            throw new UnsupportedResourceOperationException('Missing workflow route metadata.');
+        }
+
+        /** @var array{resource: string, dispatchMethod: string, paramMap: array<string, string>, defaults: array<string, string>} */
+        return $metadata;
+    }
+
+    /**
+     * @param array{paramMap: array<string, string>, defaults: array<string, string>} $metadata
+     * @return array<string, string>
+     */
+    private static function resourceParams(AuraRoute $route, array $metadata): array
+    {
+        $params = $metadata['defaults'];
+        /** @var array<string, mixed> $attributes */
+        $attributes = $route->attributes;
+        foreach ($attributes as $key => $value) {
+            $resourceParam = $metadata['paramMap'][$key] ?? $key;
+            $params[$resourceParam] = (string) $value;
+        }
+
+        return $params;
     }
 }

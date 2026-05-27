@@ -6,15 +6,12 @@ namespace MyVendor\BeMart;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\Exception\BadRequestException;
-use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Router\RouteMethodNotAllowedException;
-use MyVendor\BeMart\Router\RouteNotFoundException;
-use MyVendor\BeMart\Router\RouteTable;
-use MyVendor\BeMart\Router\Router;
+use BEAR\Resource\Method;
+use BEAR\Resource\ResourceObject;
+use BEAR\Sunday\Extension\Application\AppInterface;
+use MyVendor\BeMart\Module\App;
 use Throwable;
 
-use function array_key_exists;
-use function array_values;
 use function assert;
 use function count;
 use function file_get_contents;
@@ -92,22 +89,9 @@ final class Bootstrap
             return 2;
         }
 
-        $router = new Router(RouteTable::default());
         try {
-            $matched = $router->match($request->method, $request->path);
-        } catch (RouteNotFoundException) {
-            return $this->fail($isCli, 404, 'Not Found', $context);
-        } catch (RouteMethodNotAllowedException) {
-            return $this->fail($isCli, 405, 'Method Not Allowed', $context);
-        }
-
-        $params = $matched->params + $request->params;
-        $this->normalizeWireAliases($params);
-        $this->normalizeRouteAliases($matched->queryParamMap, $params);
-
-        try {
-            $resource = Injector::getInstance($context)->getInstance(ResourceInterface::class);
-            assert($resource instanceof ResourceInterface);
+            $app = Injector::getInstance($context)->getInstance(AppInterface::class);
+            assert($app instanceof App);
         } catch (AppContextModuleNotFoundException $e) {
             if ($isCli) {
                 fwrite(STDERR, sprintf('Unknown APP_CONTEXT="%s".%s', $context, PHP_EOL));
@@ -122,15 +106,16 @@ final class Bootstrap
             return 1;
         }
 
+        [$routingGlobals, $routingServer] = $this->routingInput($request, $server);
+        $route = $app->router->match($routingGlobals, $routingServer);
+        if (Method::tryFrom($route->method) === null) {
+            return $this->fail($isCli, 405, 'Method Not Allowed', $context);
+        }
+
         ob_start();
         try {
-            $ro = match ($matched->dispatchMethod) {
-                'get' => $resource->get($matched->resource, $params),
-                'post' => $resource->post($matched->resource, $params),
-                'put' => $resource->put($matched->resource, $params),
-                'delete' => $resource->delete($matched->resource, $params),
-                default => null,
-            };
+            $ro = $app->resource->{$route->method}->uri($route->path)($route->query);
+            assert($ro instanceof ResourceObject);
         } catch (BadRequestException $e) {
             ob_end_clean();
 
@@ -151,12 +136,6 @@ final class Bootstrap
             throw $e;
         }
 
-        if ($ro === null) {
-            ob_end_clean();
-
-            return $this->fail($isCli, 405, 'Method Not Allowed', $context);
-        }
-
         $isRedirect = isset($ro->headers['Location']);
         $isDownload = $isHtml && ! $isRedirect && $this->isDownloadResponse($ro->headers);
         $view = $isHtml && ! $isRedirect && ! $isDownload ? $ro->toString() : null;
@@ -171,9 +150,9 @@ final class Bootstrap
 
             echo json_encode([
                 'context' => $context,
-                'method' => $request->method,
+                'method' => $route->method,
                 'path' => $request->target,
-                'uri' => $matched->resource,
+                'uri' => $route->path,
                 'code' => $ro->code,
                 'body' => $ro->body,
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . PHP_EOL;
@@ -217,6 +196,36 @@ final class Bootstrap
         }
 
         return $resourceCode;
+    }
+
+    /**
+     * @param array<string, mixed> $server
+     * @return array{
+     *     0: array{_GET: array<string, mixed>, _POST: array<string, mixed>},
+     *     1: array{REQUEST_URI: string, REQUEST_METHOD: string, CONTENT_TYPE?: string, HTTP_CONTENT_TYPE?: string, HTTP_RAW_POST_DATA?: string}
+     * }
+     */
+    private function routingInput(BootstrapRequest $request, array $server): array
+    {
+        $method = strtolower($request->method);
+        $routingServer = [
+            'REQUEST_METHOD' => $method,
+            'REQUEST_URI' => $request->target,
+        ];
+        foreach (['CONTENT_TYPE', 'HTTP_CONTENT_TYPE', 'HTTP_RAW_POST_DATA'] as $key) {
+            if (isset($server[$key]) && is_string($server[$key])) {
+                $routingServer[$key] = $server[$key];
+            }
+        }
+
+        $globals = ['_GET' => [], '_POST' => []];
+        if ($method === 'get' || $method === 'head') {
+            $globals['_GET'] = $request->params;
+        } else {
+            $globals['_POST'] = $request->params;
+        }
+
+        return [$globals, $routingServer];
     }
 
     /**
@@ -320,53 +329,6 @@ final class Bootstrap
         $params = $body + $query;
 
         return new BootstrapRequest($method, $target, $path, $params);
-    }
-
-    /** @param array<string, mixed> $params */
-    private function normalizeWireAliases(array &$params): void
-    {
-        $wireAliases = [
-            '_token' => 'csrfToken',
-            '_csrf_token' => 'csrfToken',
-            'product_id' => 'productCode',
-            'login_id' => 'loginId',
-            'login_email' => 'email',
-            'login_pass' => 'password',
-            'tracking_number' => 'trackingNumber',
-        ];
-        foreach ($wireAliases as $wire => $canonical) {
-            if (array_key_exists($wire, $params) && ! array_key_exists($canonical, $params)) {
-                $params[$canonical] = $params[$wire];
-                unset($params[$wire]);
-            }
-        }
-    }
-
-    /**
-     * @param array<string, string> $queryParamMap
-     * @param array<string, mixed>  $params
-     */
-    private function normalizeRouteAliases(array $queryParamMap, array &$params): void
-    {
-        foreach ($queryParamMap as $wire => $canonical) {
-            if (array_key_exists($wire, $params) && ! array_key_exists($canonical, $params)) {
-                $value = $params[$wire];
-                if (is_array($value) && ! $this->isListParam($canonical)) {
-                    $values = array_values($value);
-                    $value = $values[0] ?? null;
-                }
-
-                $params[$canonical] = $value;
-                unset($params[$wire]);
-            }
-        }
-    }
-
-    private function isListParam(string $param): bool
-    {
-        return $param === 'columns'
-            || str_ends_with($param, 'Nos')
-            || str_ends_with($param, 'Codes');
     }
 
     /** @param array<string, mixed> $headers */
