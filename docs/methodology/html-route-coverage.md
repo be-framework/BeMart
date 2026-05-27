@@ -13,9 +13,9 @@ EC-CUBE 由来テンプレートは route 名でリンクを生成するため�
 - HTML で公開する HTTP method は **GET / POST のみ**。
 - ブラウザ向け HTML には `PUT` / `DELETE` / `data-method="put"` / `data-method="delete"` を出さない。
 - BEAR Resource の `onPut()` / `onDelete()` は残す。
-- 破壊的操作や更新操作は **HTML POST → Router の `dispatchMethod` → 内部 Resource PUT/DELETE** に変換する。
+- 破壊的操作や更新操作は **HTML POST → Aura route metadata の `dispatchMethod` → 内部 Resource PUT/DELETE** に変換する。
 - route name は EC-CUBE テンプレート互換のため維持する。
-- route の query/form param 名と Resource param 名が違う場合は `Route::$queryParamMap` で明示的に変換する。
+- route の query/form param 名と Resource param 名が違う場合は Aura route metadata の `queryParamMap` で明示的に変換する。
 - 未実装 placeholder に逃がすのではなく、既存 Resource か安全な redirect/no-op Resource に接続する。
 
 ## 完了 baseline
@@ -36,17 +36,13 @@ EC-CUBE 由来テンプレートは route 名でリンクを生成するため�
 
 ## 主要実装ポイント
 
-- `/Users/akihito/git/be-bemart/src/Router/Route.php`
-  - `dispatchMethod`
-  - `queryParamMap`
-- `/Users/akihito/git/be-bemart/src/Router/MatchedRoute.php`
-  - dispatch method と query param map を保持
 - `/Users/akihito/git/be-bemart/src/Bootstrap.php`
-  - HTTP method ではなく matched route の `dispatchMethod` で Resource を呼ぶ
+  - HTTP method ではなく Aura route metadata の `dispatchMethod` で Resource を呼ぶ
   - wire alias と route alias を Resource param に正規化
   - `BadRequestException` を HTTP response に変換し、HTML 上の raw Fatal を避ける
   - CSV/PDF 等の download response は Twig render せず body を返す
 - `/Users/akihito/git/be-bemart/src/Router/RouteTable.php`
+  - Aura.Router の route map と BeMart 固有 metadata を定義
   - admin alias route を補完
   - HTML 公開 method を GET/POST に限定
 - `/Users/akihito/git/be-bemart/src/Resource/Page/ActionRedirect.php`

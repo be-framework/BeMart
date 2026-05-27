@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart;
 
+use Aura\Router\Route as AuraRoute;
+use Aura\Router\Rule\Allows;
 use BEAR\Resource\Code;
 use BEAR\Resource\Exception\BadRequestException;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Router\RouteMethodNotAllowedException;
-use MyVendor\BeMart\Router\RouteNotFoundException;
 use MyVendor\BeMart\Router\RouteTable;
-use MyVendor\BeMart\Router\Router;
+use Nyholm\Psr7\ServerRequest;
 use Throwable;
 
 use function array_key_exists;
@@ -32,10 +32,12 @@ use function ob_start;
 use function parse_str;
 use function parse_url;
 use function putenv;
+use function rtrim;
 use function session_start;
 use function session_status;
 use function sprintf;
 use function strtolower;
+use function strtoupper;
 use function str_contains;
 use function str_starts_with;
 
@@ -92,18 +94,27 @@ final class Bootstrap
             return 2;
         }
 
-        $router = new Router(RouteTable::default());
-        try {
-            $matched = $router->match($request->method, $request->path);
-        } catch (RouteNotFoundException) {
-            return $this->fail($isCli, 404, 'Not Found', $context);
-        } catch (RouteMethodNotAllowedException) {
-            return $this->fail($isCli, 405, 'Method Not Allowed', $context);
+        $routes = RouteTable::default();
+        $matcher = $routes->matcher();
+        $requestMethod = strtoupper($request->method);
+        $route = $matcher->match(new ServerRequest($requestMethod, $this->normalizeRoutePath($request->path)));
+        if (! $route instanceof AuraRoute) {
+            $failed = $matcher->getFailedRoute();
+
+            return $this->fail(
+                $isCli,
+                $failed instanceof AuraRoute && $failed->failedRule === Allows::class ? 405 : 404,
+                $failed instanceof AuraRoute && $failed->failedRule === Allows::class
+                    ? 'Method Not Allowed'
+                    : 'Not Found',
+                $context,
+            );
         }
 
-        $params = $matched->params + $request->params;
+        $metadata = RouteTable::metadataFor($route, $requestMethod);
+        $params = RouteTable::resourceParams($route, $metadata) + $request->params;
         $this->normalizeWireAliases($params);
-        $this->normalizeRouteAliases($matched->queryParamMap, $params);
+        $this->normalizeRouteAliases($metadata['queryParamMap'], $params);
 
         try {
             $resource = Injector::getInstance($context)->getInstance(ResourceInterface::class);
@@ -124,11 +135,11 @@ final class Bootstrap
 
         ob_start();
         try {
-            $ro = match ($matched->dispatchMethod) {
-                'get' => $resource->get($matched->resource, $params),
-                'post' => $resource->post($matched->resource, $params),
-                'put' => $resource->put($matched->resource, $params),
-                'delete' => $resource->delete($matched->resource, $params),
+            $ro = match ($metadata['dispatchMethod']) {
+                'get' => $resource->get($metadata['resource'], $params),
+                'post' => $resource->post($metadata['resource'], $params),
+                'put' => $resource->put($metadata['resource'], $params),
+                'delete' => $resource->delete($metadata['resource'], $params),
                 default => null,
             };
         } catch (BadRequestException $e) {
@@ -173,7 +184,7 @@ final class Bootstrap
                 'context' => $context,
                 'method' => $request->method,
                 'path' => $request->target,
-                'uri' => $matched->resource,
+                'uri' => $metadata['resource'],
                 'code' => $ro->code,
                 'body' => $ro->body,
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR) . PHP_EOL;
@@ -217,6 +228,18 @@ final class Bootstrap
         }
 
         return $resourceCode;
+    }
+
+    /** Strip a trailing slash, but never reduce the site root to empty. */
+    private function normalizeRoutePath(string $path): string
+    {
+        if ($path === '' || $path === '/') {
+            return '/';
+        }
+
+        $trimmed = rtrim($path, '/');
+
+        return $trimmed === '' ? '/' : $trimmed;
     }
 
     /**
