@@ -10,7 +10,8 @@ use Aura\Router\Route as AuraRoute;
 /**
  * Aura.Router map builder for EC-CUBE-compatible HTML routes.
  *
- * Aura owns path/method matching, placeholder extraction, and URL generation.
+ * Aura owns path matching, placeholder extraction, and URL generation.
+ * BEAR\Resource owns method dispatch and 405 responses.
  * BeMart adds only route extras Aura does not know about: BEAR resource URI,
  * internal dispatch method, parameter-name aliases, and ALPS descriptor IDs.
  *
@@ -311,7 +312,6 @@ $route = static function (
         ];
     }
 
-    $route->allows(array_keys($newMethods));
     $route->extras([
         'bemart' => [
             'methods' => $newMethods,
