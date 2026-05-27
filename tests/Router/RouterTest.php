@@ -216,4 +216,40 @@ final class RouterTest extends TestCase
         $matched = $this->router->match('GET', '/mypage/history/ORDER%2D001');
         $this->assertSame(['orderNo' => 'ORDER-001'], $matched->params);
     }
+
+    public function testMypageWithdrawStagesUseDedicatedPaths(): void
+    {
+        // Semantic Router (#19): each withdraw stage has its own URL.
+        // Stage 1 (warning) and Stage 3 (execute) share `/mypage/withdraw`
+        // but split by HTTP method; Stage 2 (final confirm) and Stage 4
+        // (complete) get path-segment children — no `mode` discriminator,
+        // no Bootstrap-side route rewriting.
+        $warning = $this->router->match('GET', '/mypage/withdraw');
+        $this->assertSame('mypage_withdraw', $warning->name);
+        $this->assertSame('page://self/mypage/withdraw', $warning->resource);
+        $this->assertSame('get', $warning->dispatchMethod);
+
+        $confirm = $this->router->match('GET', '/mypage/withdraw/confirm');
+        $this->assertSame('mypage_withdraw_confirm', $confirm->name);
+        $this->assertSame('page://self/mypage/withdraw-confirm', $confirm->resource);
+        $this->assertSame('get', $confirm->dispatchMethod);
+
+        $execute = $this->router->match('POST', '/mypage/withdraw');
+        $this->assertSame('mypage_withdraw', $execute->name);
+        $this->assertSame('page://self/mypage/withdraw', $execute->resource);
+        $this->assertSame('post', $execute->dispatchMethod);
+
+        $complete = $this->router->match('GET', '/mypage/withdraw/complete');
+        $this->assertSame('mypage_withdraw_complete', $complete->name);
+        $this->assertSame('page://self/mypage/withdraw-complete', $complete->resource);
+        $this->assertSame('get', $complete->dispatchMethod);
+    }
+
+    public function testMypageWithdrawConfirmRejectsPostAfter19(): void
+    {
+        // #19 collapses Stage 2 to GET-only — the only POST under
+        // `/mypage/withdraw*` is Stage 3, hitting the parent path.
+        $this->expectException(RouteMethodNotAllowedException::class);
+        $this->router->match('POST', '/mypage/withdraw/confirm');
+    }
 }

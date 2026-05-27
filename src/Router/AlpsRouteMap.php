@@ -175,7 +175,7 @@ final class AlpsRouteMap
         'mypage_login' => ['GET' => 'goLogin', 'POST' => 'doLogin'],
         'mypage_order' => 'doReorder',
         'mypage_withdraw' => ['GET' => 'goMypageWithdraw', 'POST' => 'doWithdrawCustomer'],
-        'mypage_withdraw_confirm' => ['GET' => 'goMypageWithdrawConfirm', 'POST' => 'doWithdrawCustomer'],
+        'mypage_withdraw_confirm' => 'goMypageWithdrawConfirm',
         'mypage_withdraw_complete' => 'goMypageWithdrawComplete',
         'cart_buystep' => 'doSelectCartForCheckout',
         'product_add_cart' => 'doAddCartItem',

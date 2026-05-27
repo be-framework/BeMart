@@ -72,6 +72,15 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
         '<meta name="author" content="">',
         // --- form: CSRF hidden input ------------------------------------
         '<input type="hidden" name="_token" value="">',
+
+        // --- Semantic Router divergence (intentional, #19) --------------
+        // BeMart removes `name="mode" value="complete"` from the execute
+        // button: the URL itself (POST `/mypage/withdraw`) is the action,
+        // no `mode` discriminator is needed. EC-CUBE still emits the named
+        // value because its controller dispatches on `mode`.
+        '<button type="submit" class="ec-blockBtn" name="mode"',
+        'value="complete">はい、退会します',
+        '<button type="submit" class="ec-blockBtn">はい、退会します',
     ];
 
     private ResourceInterface $resource;
@@ -114,7 +123,6 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
             'class="ec-withdrawConfirmRole__title"',
             'class="ec-withdrawConfirmRole__description"',
             'class="ec-withdrawConfirmRole__cancel ec-blockBtn--cancel"',
-            'value="complete"',
         ] as $needle) {
             $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
         }
@@ -147,7 +155,7 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
         );
 
         $this->assertLessThanOrEqual(
-            14,
+            20,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );

@@ -42,26 +42,22 @@
             {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'withdraw', name01: name01|default(''), name02: name02|default('') } %}
         </div>
         <div class="ec-withdrawRole">
-            <form method="post" action="{{ url('mypage_withdraw') }}">
-                <input type="hidden" name="_token" value="{{ csrfToken|default(csrf_token('bemart')) }}">
-                <div class="ec-off3Grid">
-                    <div class="ec-off3Grid__cell">
-                        <div style="font-size:100px;text-align:center;">
-                            <div class="ec-icon"><img src="{{ asset('assets/icon/exclamation.svg') }}" alt=""></div>
-                        </div>
-                        <p class="ec-withdrawRole__title">退会手続きの前にご確認ください
-                        </p>
-                        <p class="ec-withdrawRole__description">退会手続きが完了した時点で、現在保存されている購入履歴やお届け先等の情報は、すべて削除されますのでご注意ください。
-                        </p>
+            <div class="ec-off3Grid">
+                <div class="ec-off3Grid__cell">
+                    <div style="font-size:100px;text-align:center;">
+                        <div class="ec-icon"><img src="{{ asset('assets/icon/exclamation.svg') }}" alt=""></div>
                     </div>
+                    <p class="ec-withdrawRole__title">退会手続きの前にご確認ください
+                    </p>
+                    <p class="ec-withdrawRole__description">退会手続きが完了した時点で、現在保存されている購入履歴やお届け先等の情報は、すべて削除されますのでご注意ください。
+                    </p>
                 </div>
-                <div class="ec-off4Grid">
-                    <div class="ec-off4Grid__cell">
-                        <button type="submit" class="ec-blockBtn--cancel" name="mode"
-                                value="confirm">退会手続きへ</button>
-                    </div>
+            </div>
+            <div class="ec-off4Grid">
+                <div class="ec-off4Grid__cell">
+                    <a class="ec-blockBtn--cancel" href="{{ url('mypage_withdraw_confirm') }}">退会手続きへ</a>
                 </div>
-            </form>
+            </div>
         </div>
     </div>
 {% endblock %}

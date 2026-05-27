@@ -81,6 +81,20 @@ final class WithdrawHtmlRenderTest extends TestCase
         // a live CSRF value; BeMart's html context has no CSRF widget, so
         // the value is empty.
         '<input type="hidden" name="_token" value="">',
+
+        // --- Semantic Router divergence (intentional, #19) --------------
+        // BeMart routes the "go to confirm" transition as a GET link to a
+        // dedicated URL (`/mypage/withdraw/confirm`) so the mutation surface
+        // stays at POST `/mypage/withdraw`. EC-CUBE's template still wraps
+        // the warning page in a POST form whose button submits `mode=confirm`
+        // back to the same path. The diff below captures the four EC-CUBE
+        // form lines that no longer have BeMart counterparts, plus the one
+        // BeMart `<a>` link that no longer has an EC-CUBE counterpart.
+        '<form method="post" action="/mypage/withdraw">',
+        '<button type="submit" class="ec-blockBtn--cancel" name="mode"',
+        'value="confirm">退会手続きへ</button>',
+        '</form>',
+        '<a class="ec-blockBtn--cancel" href="/mypage/withdraw/confirm">退会手続きへ</a>',
     ];
 
     private ResourceInterface $resource;
@@ -168,7 +182,7 @@ final class WithdrawHtmlRenderTest extends TestCase
         );
 
         $this->assertLessThanOrEqual(
-            14,
+            20,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
