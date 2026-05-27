@@ -8,6 +8,7 @@ use MyVendor\BeMart\Router\Route;
 use MyVendor\BeMart\Router\RouteMethodNotAllowedException;
 use MyVendor\BeMart\Router\RouteNotFoundException;
 use MyVendor\BeMart\Router\RouteTable;
+use MyVendor\BeMart\Router\RouteUrlGenerator;
 use MyVendor\BeMart\Router\Router;
 use PHPUnit\Framework\TestCase;
 
@@ -185,11 +186,9 @@ final class RouterTest extends TestCase
     {
         // A route a template links to must be a route the router resolves:
         // generate() then match() must round-trip.
-        $table = RouteTable::default();
-        $route = $table->byName('product_detail');
-        $this->assertInstanceOf(Route::class, $route);
+        $urls = new RouteUrlGenerator();
 
-        $url = $route->generate(['id' => 99]);
+        $url = $urls->generate('product_detail', ['id' => 99]);
         $this->assertSame('/products/detail/99', $url);
 
         $matched = $this->router->match('GET', $url);
@@ -199,10 +198,9 @@ final class RouterTest extends TestCase
 
     public function testGeneratePutsNonPlaceholderParamsInQueryString(): void
     {
-        $route = RouteTable::default()->byName('product_list');
-        $this->assertInstanceOf(Route::class, $route);
+        $urls = new RouteUrlGenerator();
 
-        $this->assertSame('/products/list?category_id=3', $route->generate(['category_id' => 3]));
+        $this->assertSame('/products/list?category_id=3', $urls->generate('product_list', ['category_id' => 3]));
     }
 
     public function testPathParamValueIsUrlDecoded(): void
