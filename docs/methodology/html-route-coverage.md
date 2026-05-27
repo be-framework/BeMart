@@ -36,9 +36,11 @@ EC-CUBE 由来テンプレートは route 名でリンクを生成するため�
 
 ## 主要実装ポイント
 
+- `/Users/akihito/git/be-bemart/src/Support/Router/AuraRouter.php`
+  - Aura.Router の match/generate を BEAR.Sunday `RouterInterface` に接続する
+  - route metadata の `dispatchMethod` と alias を `RouterMatch` に正規化し、未登録 method は BEAR\Resource に委譲して 405 を返す
 - `/Users/akihito/git/be-bemart/src/Bootstrap.php`
-  - route metadata の `dispatchMethod` で内部 Resource method を呼ぶ。未登録 method は BEAR\Resource に委譲して 405 を返す
-  - wire alias と route alias を Resource param に正規化
+  - `AppInterface` の router/resource を使って `RouterMatch` を dispatch する
   - `BadRequestException` を HTTP response に変換し、HTML 上の raw Fatal を避ける
   - CSV/PDF 等の download response は Twig render せず body を返す
 - `/Users/akihito/git/be-bemart/config/aura-routes.php`

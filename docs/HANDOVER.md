@@ -2038,7 +2038,8 @@ Tier-1 完了後、defer した Tier-2 を section 単位で回収。Tier-2 は
   `/bundle`）を忠実にミラー。
 - **HTTP ルーター**（`53e587e`/`39f1117`）— `config/aura-routes.php` の Aura route map（EC-CUBE ルート名 ↔ URL
   パス ↔ リソース URI の extras）で定義。
-  `public/index.php` は Aura.Matcher で path 404 を判定し、method 405 は BEAR\Resource に委譲。
+  `public/index.php` は BEAR.Sunday `RouterInterface` 経由で `RouterMatch` を dispatch し、
+  missing resource 404 / method 405 は BEAR\Resource に委譲。
   `BeMartTwigExtension::url()/path()` は Aura.Generator 経由で解決。
 - **render-diff スタブのアセットパッケージ対応**（`16e8c9d`）— EC-CUBE の
   `asset(path, package)` パッケージマップ（`admin`→`/template/admin/`・
