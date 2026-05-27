@@ -159,7 +159,7 @@ final class ProductHtmlRenderTest extends TestCase
             'class="ec-price__price"',
             '<div class="ec-productRole__code">',
             // Slice 9: url('product_add_cart', {id}) now resolves through
-            // the shared RouteTable to EC-CUBE's real path pattern.
+            // the shared Aura route map to EC-CUBE's real path pattern.
             '<form action="/products/add_cart/sample-001" method="post" id="form1"',
             '<div class="ec-numberInput">',
             'class="ec-blockBtn--action add-cart"',
