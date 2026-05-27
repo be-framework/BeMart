@@ -170,7 +170,7 @@ final class ShoppingHtmlRenderTest extends TestCase
         foreach ([
             '<h1>ご注文手続き</h1>',
             '<ul class="ec-progress">',
-            // Slice 9: url('shopping_confirm') now resolves through RouteTable.
+            // Slice 9: url('shopping_confirm') now resolves through Aura route map.
             '<form id="shopping-form" method="post" action="/shopping/confirm">',
             '<div class="ec-orderRole">',
             '<div class="ec-orderAccount">',

@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Router;
 
-use MyVendor\BeMart\Router\AlpsRouteMap;
-use MyVendor\BeMart\Router\RouteTable;
+use Aura\Router\Map;
+use Aura\Router\RouterContainer;
 use PHPUnit\Framework\TestCase;
 
 use function array_key_exists;
+use function array_keys;
 use function file_get_contents;
 use function is_array;
 use function json_decode;
@@ -20,26 +21,32 @@ final class AlpsRouteCoverageTest extends TestCase
     public function testEveryDefaultRouteMethodHasExistingAlpsDescriptor(): void
     {
         $descriptorIds = $this->alpsDescriptorIds();
-        $missing = [];
         $implicit = [];
+        $missing = [];
 
-        foreach (RouteTable::default()->routes as $route) {
-            if (! AlpsRouteMap::has($route->name)) {
-                $implicit[] = $route->name;
-            }
+        foreach ($this->routerContainer()->getMap()->getRoutes() as $route) {
+            /** @var mixed $methods */
+            $methods = $route->extras['bemart']['methods'] ?? [];
+            self::assertIsArray($methods);
+            foreach (array_keys($methods) as $method) {
+                /** @var mixed $metadata */
+                $metadata = $methods[$method] ?? null;
+                self::assertIsArray($metadata, sprintf('%s %s has no BeMart metadata.', $method, (string) $route->name));
+                $alpsId = (string) ($metadata['alpsId'] ?? '');
+                if (($metadata['alpsExplicit'] ?? false) !== true) {
+                    $implicit[] = sprintf('%s %s', $method, (string) $route->name);
+                }
 
-            foreach ($route->methods as $method) {
-                $alpsId = AlpsRouteMap::forRouteMethod($route, $method);
                 if (! array_key_exists($alpsId, $descriptorIds)) {
-                    $missing[] = sprintf('%s %s => %s', $method, $route->name, $alpsId);
+                    $missing[] = sprintf('%s %s => %s', $method, (string) $route->name, $alpsId);
                 }
             }
         }
 
         sort($implicit);
         sort($missing);
-        self::assertSame([], $implicit, 'RouteTable routes must be explicitly mapped to ALPS descriptors.');
-        self::assertSame([], $missing, 'RouteTable routes must reference descriptors present in alps.json.');
+        self::assertSame([], $implicit, 'Aura route extras must explicitly map routes to ALPS descriptors.');
+        self::assertSame([], $missing, 'Aura route extras must reference descriptors present in alps.json.');
     }
 
     /** @return array<string, true> */
@@ -77,5 +84,15 @@ final class AlpsRouteCoverageTest extends TestCase
 
             $this->collectDescriptorIds($descriptor['descriptor'] ?? [], $ids);
         }
+    }
+
+    private function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(Map): null $routes */
+        $routes = require __DIR__ . '/../../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
     }
 }
