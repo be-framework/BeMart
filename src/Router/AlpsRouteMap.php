@@ -14,8 +14,9 @@ use function ucfirst;
 /**
  * Maps public HTML routes to ALPS transition descriptors.
  *
- * ALPS remains the semantic source of truth: RouteTable owns URL/method dispatch,
- * while this map names the user-visible state or transition behind each route.
+ * ALPS remains the semantic source of truth. Aura.Router owns URL/method
+ * dispatch mechanics, while this map names the user-visible state or
+ * transition behind each BeMart route.
  *
  * @psalm-type MethodAlpsMap = array<string, non-empty-string>
  */
