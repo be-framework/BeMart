@@ -32,7 +32,7 @@ use function count;
  * port reads: each row is `{id, name, price02}`. `id` carries the
  * productCode (the `product_detail` route's `{id}` placeholder resolves
  * to `productCode`), so every rendered grid link resolves back through
- * the shared RouteTable.
+ * the shared Aura route map.
  *
  * Scope (厳密移植 Grade-C, parity with the Cart port): EC-CUBE's
  * `list.twig` catalog row also carries a thumbnail image, a
