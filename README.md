@@ -13,6 +13,7 @@ Symfony版EC-CUBEの fork や controller 書き換えではなく、EC-CUBEの�
 | [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI export and HTML documentation |
 | [`docs/migration-status.md`](docs/migration-status.md) | current migration status |
 | [`docs/html-screen-migration-matrix.md`](docs/html-screen-migration-matrix.md) | HTML screen/route migration matrix |
+| [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ implementation status |
 | [`docs/tag.md`](docs/tag.md) | ALPS tag taxonomy |
 | [`docs/README.md`](docs/README.md) | documentation map |
 
