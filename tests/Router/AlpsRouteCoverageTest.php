@@ -28,7 +28,7 @@ final class AlpsRouteCoverageTest extends TestCase
                 $implicit[] = $route->name;
             }
 
-            foreach ($route->methods as $method) {
+            foreach ($route->allows as $method) {
                 $alpsId = AlpsRouteMap::forRouteMethod($route, $method);
                 if (! array_key_exists($alpsId, $descriptorIds)) {
                     $missing[] = sprintf('%s %s => %s', $method, $route->name, $alpsId);
