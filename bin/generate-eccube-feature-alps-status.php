@@ -133,6 +133,98 @@ $containsAny = static function (string $haystack, array $needles): bool {
 
 $browserVerificationKeyFor = static fn (string $routeName, string $method): string => $routeName . ' ' . strtoupper($method);
 
+/** @var array<string, array{strategy:string,reason:string}> $hardActionRedirectAudit */
+$hardActionRedirectAudit = [
+    'admin_change_password POST' => [
+        'strategy' => 'native',
+        'reason' => '管理者パスワード変更。credential更新、再認証、CSRF、session境界をBe/BEAR側で安全側に実装する。',
+    ],
+    'admin_content_cache POST' => [
+        'strategy' => 'adapter',
+        'reason' => 'キャッシュ削除はruntime副作用を境界adapterへ隔離する。',
+    ],
+    'admin_content_css POST' => [
+        'strategy' => 'adapter',
+        'reason' => 'CSS更新は公開ファイル副作用を境界adapterへ隔離する。',
+    ],
+    'admin_content_js POST' => [
+        'strategy' => 'adapter',
+        'reason' => 'JavaScript更新は公開ファイル副作用を境界adapterへ隔離する。',
+    ],
+    'admin_content_maintenance POST' => [
+        'strategy' => 'adapter',
+        'reason' => 'メンテナンス切替は運用状態ファイル/runtime副作用を境界adapterへ隔離する。',
+    ],
+    'admin_product_class_category_export GET' => [
+        'strategy' => 'adapter',
+        'reason' => '規格分類CSV exportはEC-CUBE互換フォーマットとdownload境界をadapter化する。',
+    ],
+    'admin_product_class_category_export POST' => [
+        'strategy' => 'adapter',
+        'reason' => '規格分類CSV exportはEC-CUBE互換フォーマットとdownload境界をadapter化する。',
+    ],
+    'admin_product_class_name_export GET' => [
+        'strategy' => 'adapter',
+        'reason' => '規格名CSV exportはEC-CUBE互換フォーマットとdownload境界をadapter化する。',
+    ],
+    'admin_product_class_name_export POST' => [
+        'strategy' => 'adapter',
+        'reason' => '規格名CSV exportはEC-CUBE互換フォーマットとdownload境界をadapter化する。',
+    ],
+    'admin_product_csv_class_category GET' => [
+        'strategy' => 'adapter',
+        'reason' => '規格分類CSV exportはEC-CUBE互換フォーマットとdownload境界をadapter化する。',
+    ],
+    'admin_product_csv_class_category POST' => [
+        'strategy' => 'adapter',
+        'reason' => '規格分類CSV importはアップロード/検証/永続化副作用をadapter化する。',
+    ],
+    'admin_product_csv_class_name GET' => [
+        'strategy' => 'adapter',
+        'reason' => '規格名CSV exportはEC-CUBE互換フォーマットとdownload境界をadapter化する。',
+    ],
+    'admin_product_csv_class_name POST' => [
+        'strategy' => 'adapter',
+        'reason' => '規格名CSV importはアップロード/検証/永続化副作用をadapter化する。',
+    ],
+    'admin_setting_system_masterdata POST' => [
+        'strategy' => 'adapter',
+        'reason' => '任意マスタ選択は対象スキーマ差分と破壊的更新リスクをadapter境界で扱う。',
+    ],
+    'admin_setting_system_masterdata_edit POST' => [
+        'strategy' => 'adapter',
+        'reason' => '任意マスタ更新は対象スキーマ差分と破壊的更新リスクをadapter境界で扱う。',
+    ],
+    'admin_setting_system_security POST' => [
+        'strategy' => 'native',
+        'reason' => 'セキュリティ設定はSymfony互換runtimeではなくBe/BEAR側の安全側動作として実装する。',
+    ],
+    'admin_store_template POST' => [
+        'strategy' => 'adapter',
+        'reason' => 'template選択はファイル配置/asset切替副作用をadapter化する。',
+    ],
+    'admin_store_template_delete POST' => [
+        'strategy' => 'adapter',
+        'reason' => 'template削除はファイル配置/asset削除副作用をadapter化する。',
+    ],
+    'admin_store_template_download POST' => [
+        'strategy' => 'adapter',
+        'reason' => 'template downloadはファイルI/Oとdownload境界をadapter化する。',
+    ],
+    'admin_store_template_install POST' => [
+        'strategy' => 'adapter',
+        'reason' => 'template追加はアップロード/展開/公開asset配置副作用をadapter化する。',
+    ],
+    'admin_two_factor_auth POST' => [
+        'strategy' => 'native',
+        'reason' => '二要素認証確認はsession/認証境界をBe/BEAR側で安全側に実装する。',
+    ],
+    'admin_two_factor_auth_set POST' => [
+        'strategy' => 'native',
+        'reason' => '二要素認証設定はsecret保存/再認証境界をBe/BEAR側で安全側に実装する。',
+    ],
+];
+
 /**
  * @param array<string, mixed>|null $entry
  * @param array<string, mixed>      $global
@@ -205,7 +297,7 @@ $migrationAssessmentFor = static function (
     array $defaults,
     string $source,
     bool $sourceExists,
-) use ($sourceEvidenceFor, $containsAny, $actionRedirectEvidenceFor): array {
+    ) use ($sourceEvidenceFor, $containsAny, $actionRedirectEvidenceFor, $hardActionRedirectAudit): array {
     /** @var array<string, mixed> $defaults */
     $transitionSubject = strtolower($alpsId . ' ' . $alpsTitle . ' ' . $alpsType);
     $featureSubject = strtolower($routeName . ' ' . $transitionSubject . ' ' . $method . ' ' . $dispatch);
@@ -234,6 +326,16 @@ $migrationAssessmentFor = static function (
             'strategy' => 'native',
             'reason' => 'GETの安全退避。実態は一覧/詳細画面へ戻すナビゲーションで、既存Resourceへの接続で解消できる。',
             'evidence' => $evidence,
+        ];
+    }
+
+    $auditKey = $routeName . ' ' . $method;
+    if ($isActionRedirect && isset($hardActionRedirectAudit[$auditKey])) {
+        return [
+            'level' => 'Hard',
+            'strategy' => $hardActionRedirectAudit[$auditKey]['strategy'],
+            'reason' => $hardActionRedirectAudit[$auditKey]['reason'],
+            'evidence' => $evidence . ' / audit: Issue #24 Hard ActionRedirect再分類',
         ];
     }
 
@@ -276,7 +378,7 @@ $migrationAssessmentFor = static function (
     if ($alpsId === 'doInstallPlugin') {
         return [
             'level' => 'Super Hard',
-            'strategy' => 'legacy',
+            'strategy' => 'legacy compatibility',
             'reason' => 'EC-CUBE完全互換ではdownload/unzip/composer/migration/cache/PluginManagerまで必要。現行Resourceもinstall stubを明記。',
             'evidence' => $evidence,
         ];
@@ -293,7 +395,7 @@ $migrationAssessmentFor = static function (
 
     if (str_contains($featureSubject, 'plugin')) {
         $level = $isGet ? 'Normal' : 'Hard';
-        $strategy = $isGet ? 'native' : 'legacy';
+        $strategy = $isGet ? 'native' : 'legacy compatibility';
         $reason = $isGet
             ? '現行はdtb_plugin相当のregistry projection表示で完結。ただし完全互換runtimeは別設計。'
             : 'enable/disable/uninstallは現行flag操作で実装済みだが、完全互換ではPluginManager callback、proxy/cache再生成、schema/assets処理が残る。';
@@ -303,6 +405,15 @@ $migrationAssessmentFor = static function (
             'strategy' => $strategy,
             'reason' => $reason,
             'evidence' => $evidence,
+        ];
+    }
+
+    if ($routeName === 'admin_order_export_pdf') {
+        return [
+            'level' => 'Hard',
+            'strategy' => 'legacy compatibility',
+            'reason' => 'PDF帳票はEC-CUBE互換のTCPDF/FPDIテンプレート描画を隔離service経由で扱う。Be/BEAR本体は小さなinterfaceにのみ依存する。PilotではResource到達・headers・%PDF-実体出力まで完了し、EC-CUBE完全忠実度（帳票レイアウト、dtb_order_pdf保存設定、複数配送テンプレート再現）は意図的に後続残差として残す。',
+            'evidence' => $evidence . ' / pilot: Issue #24 PDF legacy compatibility / residual: fidelity intentionally incomplete',
         ];
     }
 
@@ -541,7 +652,7 @@ foreach ($rows as $row) {
     $alpsClass = $row['alpsStatus'] === '対応済み' ? 'alps-ok' : 'alps-missing';
     $implementationClass = $row['implementationStatus'] === '実装済み' ? 'impl-ok' : 'impl-fallback';
     $difficultyClass = str_replace(' ', '-', strtolower((string) $row['difficulty']));
-    $strategyClass = str_replace('-', '_', (string) $row['migrationStrategy']);
+    $strategyClass = str_replace(' ', '_', str_replace('-', '_', (string) $row['migrationStrategy']));
     /** @var array{status:string,browser:string,url:string,checkedAt:string,evidence:string} $verification */
     $verification = $row['browserVerification'];
     $verificationClass = match ($verification['status']) {
@@ -632,7 +743,7 @@ $html = <<<HTML
     .difficulty.hard { background: var(--hard); }
     .difficulty.super-hard { background: var(--super-hard); }
     .strategy { display:inline-block; margin-left: 4px; padding: 1px 6px; border-radius: 6px; background:#eef2f8; font-size: 12px; font-weight: 700; }
-    .strategy.legacy { background:#fff1f4; color:#a12642; }
+    .strategy.legacy_compatibility { background:#fff1f4; color:#a12642; }
     .strategy.adapter { background:#fff7e6; color:#8a5a00; }
     .strategy.out_of_scope { background:#f4f4f5; color:#555; }
     .legend { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px 16px; margin: 16px 0 20px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: #fff; }
@@ -666,7 +777,7 @@ $html = <<<HTML
     <div><span class="difficulty super-hard">Super Hard</span> Plugin install、Owners Store、Symfony/EC-CUBE互換runtime級。</div>
     <div><span class="strategy native">native</span> Be/BEARに直接移植。</div>
     <div><span class="strategy adapter">adapter</span> ファイル/外部副作用を境界adapterへ隔離。</div>
-    <div><span class="strategy legacy">legacy</span> 既存EC-CUBE/Symfony互換レイヤーで扱う。</div>
+    <div><span class="strategy legacy_compatibility">legacy compatibility</span> 既存EC-CUBE/Symfony互換レイヤーを隔離して扱う。</div>
     <div><span class="strategy out_of_scope">out-of-scope</span> 現行移行スコープ外。</div>
   </section>
   <div class="toolbar">
@@ -692,7 +803,7 @@ $html = <<<HTML
       <option value="">方針すべて</option>
       <option value="native">native</option>
       <option value="adapter">adapter</option>
-      <option value="legacy">legacy</option>
+      <option value="legacy compatibility">legacy compatibility</option>
       <option value="out-of-scope">out-of-scope</option>
     </select>
     <select id="browserVerification" aria-label="browser verification filter">

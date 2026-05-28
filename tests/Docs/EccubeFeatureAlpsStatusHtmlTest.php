@@ -104,6 +104,47 @@ final class EccubeFeatureAlpsStatusHtmlTest extends TestCase
         self::assertSame('Hard', self::difficulty($rows['admin_store_template_download POST']));
     }
 
+    public function testIssue24HardActionRedirectRowsHaveAuditedStrategies(): void
+    {
+        $hardActionRedirectRows = [];
+        foreach (self::rows() as $row) {
+            if (
+                str_contains($row['implementation'], 'ActionRedirect')
+                && in_array(self::difficulty($row), ['Hard', 'Super Hard'], true)
+            ) {
+                $hardActionRedirectRows[] = $row;
+            }
+        }
+
+        self::assertCount(22, $hardActionRedirectRows);
+
+        $strategyCounts = ['native' => 0, 'adapter' => 0, 'legacy compatibility' => 0, 'out-of-scope' => 0];
+        foreach ($hardActionRedirectRows as $row) {
+            $strategyCounts[self::strategy($row)]++;
+            self::assertStringContainsString('Issue #24 Hard ActionRedirect再分類', $row['assessment']);
+        }
+
+        self::assertSame([
+            'native' => 4,
+            'adapter' => 18,
+            'legacy compatibility' => 0,
+            'out-of-scope' => 0,
+        ], $strategyCounts);
+    }
+
+    public function testPdfPilotIsLegacyCompatibility(): void
+    {
+        $rows = self::rowsByRouteAndMethod();
+
+        foreach (['admin_order_export_pdf GET', 'admin_order_export_pdf POST'] as $key) {
+            self::assertArrayHasKey($key, $rows);
+            self::assertSame('Hard', self::difficulty($rows[$key]));
+            self::assertSame('legacy compatibility', self::strategy($rows[$key]));
+            self::assertStringContainsString('Issue #24 PDF legacy compatibility', $rows[$key]['assessment']);
+            self::assertStringNotContainsString('stub明記', $rows[$key]['assessment']);
+        }
+    }
+
     /**
      * @return array<string, array{
      *     route: string,
@@ -232,6 +273,18 @@ final class EccubeFeatureAlpsStatusHtmlTest extends TestCase
         }
 
         self::fail('Unknown difficulty cell: ' . $row['assessment']);
+    }
+
+    /** @param array{assessment: string} $row */
+    private static function strategy(array $row): string
+    {
+        foreach (['legacy compatibility', 'out-of-scope', 'adapter', 'native'] as $strategy) {
+            if (str_contains($row['assessment'], ' ' . $strategy)) {
+                return $strategy;
+            }
+        }
+
+        self::fail('Unknown strategy cell: ' . $row['assessment']);
     }
 
     private static function text(DOMElement|null $cell): string
