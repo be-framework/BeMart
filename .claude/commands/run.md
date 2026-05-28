@@ -63,7 +63,7 @@ prompt: |
   <prompt_file の内容（placeholder 置換済み）>
 
   対象ディスクリプタ: <descriptor>
-  プロジェクトルート: ~/git/ec-cube-alps
+  プロジェクトルート: ~/git/be-bemart
 
   レビュー結果を以下の JSON 形式で返してください:
   {

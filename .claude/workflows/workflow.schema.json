@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://ec-cube-alps.local/schemas/workflow.schema.json",
+  "$id": "https://be-mart.local/schemas/workflow.schema.json",
   "title": "Claude Code Workflow",
   "description": "Claude Code のネイティブ機能で実行されるワークフロー定義。/run コマンドがこのファイルを読み、上から順にステップを解釈する。",
   "type": "object",

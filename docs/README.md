@@ -10,6 +10,7 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 
 | ファイル | 役割 |
 |---|---|
+| [`FINAL-REPORT.md`](FINAL-REPORT.md) | **実証総括**。何を示せたか・知見・限界を一枚に束ねた documentary。各論への入口。 |
 | [`migration-status.md`](migration-status.md) | **移植ステータスの正**。レイヤ別マトリクスと残作業 punch-list。「今どこまで出来ているか」はここが正。 |
 | [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ BeMart実装状態 ↔ 移植難易度の生成HTML表。 |
 | [`HANDOVER.md`](HANDOVER.md) | 構築プロセスの記録。Phase A / Phase 2 / Phase 3 の決定ログ、Pilot/Wave 報告、skill gap 発見の経緯。 |
@@ -27,7 +28,7 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 |---|---|
 | [`methodology/`](methodology/) | 再利用可能な方法論・原則。`hypermedia-test-principle.md`（hypermedia テスト＝移植契約）、`FRAMEWORK_REVIEW.md`（139 transition 規模でのフレームワーク実務レビュー）、`be-bear-ai-era.md`（Be + BEAR の AI コーディング時代における潜在能力の論評）。 |
 | [`phases/`](phases/) | フェーズ別の成果物。`alps-audit-phase3.md`（Phase 3 準備の ALPS 監査）、`admin-fanout-plan.md`（admin 移植のファンアウト計画）。 |
-| [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-23）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |
+| [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-25）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |
 | [`quality/`](quality/) | Phase 1 の ALPS 監査ノート（`verify-*.md` / `improvements-*.md`）。 |
 | [`archive/`](archive/) | superseded された旧トラッカー・初期計画。歴史的記録として保持。現状の判断には使わない。 |
 

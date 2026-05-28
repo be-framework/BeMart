@@ -187,7 +187,7 @@ ALPSプロファイルを「シングルソースオブトゥルース」とし�
 
 ## リンク
 
-- [EC-CUBE 4.3 ALPS Profile](https://github.com/koriym/ec-cube-alps) — リポジトリ
-- [ALPS ドキュメント](https://koriym.github.io/ec-cube-alps/alps.json.html) — 状態遷移図とディスクリプタ一覧
-- [OpenAPI サンプル](https://koriym.github.io/ec-cube-alps/openapi.html) — フロントエンドAPI参考仕様
+- [BeMart](https://github.com/be-framework/be-mart) — リポジトリ
+- [ALPS ドキュメント](https://be-framework.github.io/be-mart/alps.json.html) — 状態遷移図とディスクリプタ一覧
+- [OpenAPI サンプル](https://be-framework.github.io/be-mart/openapi.html) — フロントエンドAPI参考仕様
 - [ALPS 仕様](https://www.app-state-diagram.com/manuals/1.0/ja/index.html)
