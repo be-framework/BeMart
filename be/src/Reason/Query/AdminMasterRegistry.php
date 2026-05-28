@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Exception\MasterOperationNotSupportedException;
 use MyVendor\BeMart\Be\Exception\MasterTypeFormatException;
+use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
 use MyVendor\BeMart\Be\Reason\Entity\ClassCategoryEntity;
 use MyVendor\BeMart\Be\Reason\Entity\ClassNameEntity;
 use MyVendor\BeMart\Be\Reason\Entity\DeliveryEntity;
@@ -34,11 +35,12 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
         ['value' => 'tag', 'label' => 'タグ', 'table' => 'dtb_tag'],
         ['value' => 'className', 'label' => '規格', 'table' => 'dtb_class_name'],
         ['value' => 'classCategory', 'label' => '規格分類', 'table' => 'dtb_class_category'],
+        ['value' => 'member', 'label' => '管理者', 'table' => 'dtb_member'],
         ['value' => 'news', 'label' => '新着情報', 'table' => 'dtb_news'],
     ];
 
     /** @var list<string> masters with a `sort_no` column */
-    private const SORTABLE = ['payment', 'delivery', 'tag', 'className', 'classCategory'];
+    private const SORTABLE = ['payment', 'delivery', 'tag', 'className', 'classCategory', 'member'];
 
     /** @var list<string> masters with a `visible` column */
     private const VISIBLE_TOGGLEABLE = ['payment', 'delivery', 'classCategory', 'news'];
@@ -49,6 +51,8 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
         private readonly TagStorageInterface $tags,
         private readonly ClassNameStorageInterface $classNames,
         private readonly ClassCategoryStorageInterface $classCategories,
+        private readonly AdminQueryInterface $admins,
+        private readonly AdminCommandInterface $adminCommands,
         private readonly NewsStorageInterface $news,
     ) {
     }
@@ -104,6 +108,13 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
                 ],
                 $this->classCategories->list(),
             ),
+            'member' => array_map(
+                static fn (AdminEntity $row): array => [
+                    'id' => $row->adminId,
+                    'name' => $row->name !== '' ? $row->name : $row->loginId,
+                ],
+                $this->admins->list(),
+            ),
             'news' => array_map(
                 static fn (NewsEntity $row): array => [
                     'id' => $row->newsId,
@@ -136,6 +147,7 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
             'tag' => $this->tags->item($rowId) !== null,
             'className' => $this->classNames->item($rowId) !== null,
             'classCategory' => $this->classCategories->item($rowId) !== null,
+            'member' => $this->admins->item($rowId) !== null,
             'news' => $this->news->item($rowId) !== null,
             default => throw new MasterTypeFormatException(),
         };
@@ -158,6 +170,7 @@ final class AdminMasterRegistry implements AdminMasterRegistryInterface
             'tag' => $this->tags->reorder($rowId, $sortNo),
             'className' => $this->classNames->reorder($rowId, $sortNo),
             'classCategory' => $this->classCategories->reorder($rowId, $sortNo),
+            'member' => $this->adminCommands->reorder($rowId, $sortNo),
             default => throw new MasterTypeFormatException(),
         };
     }

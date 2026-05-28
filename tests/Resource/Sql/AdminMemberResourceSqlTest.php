@@ -45,6 +45,9 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
     /** @var non-empty-string numeric dtb_member.id of test-admin */
     private string $testAdminId;
 
+    /** @var non-empty-string numeric dtb_member.id of shop-owner */
+    private string $shopOwnerId;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -60,10 +63,11 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
             'name' => 'テスト管理者',
             'authority_id' => 0, // system admin
         ]);
-        $this->insertAdmin([
+        $this->shopOwnerId = (string) $this->insertAdmin([
             'login_id' => 'shop-owner',
             'name' => '店舗オーナー',
             'authority_id' => 1, // shop owner
+            'sort_no' => 2,
         ]);
         $this->insertAdmin([
             'login_id' => 'deputy',
@@ -204,6 +208,24 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
+    }
+
+    public function testSortNoMoveUpdatesMemberSortNo(): void
+    {
+        $ro = $this->resource->put('page://self/admin/sort-no-move', [
+            'masterType' => 'member',
+            'rowId' => $this->shopOwnerId,
+            'sortNo' => 12,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('member', $ro->body['masterType']);
+        $this->assertSame(12, $ro->body['sortNo']);
+
+        $next = $this->resource->get('page://self/admin/member', ['loginId' => 'shop-owner']);
+        $this->assertSame(Code::OK, $next->code);
+        $this->assertSame(12, $next->body['sortNo']);
     }
 
     public function testOnDeleteSoftDeletesAdmin(): void

@@ -1,0 +1,225 @@
+{
+  "browser": "Codex内ブラウザ",
+  "baseUrl": "http://127.0.0.1:8081",
+  "checkedAt": "2026-05-28T11:11:50.606+09:00",
+  "scope": "Hard/Super Hardではない未実装だったActionRedirect 27件",
+  "note": "実装状態はAura routeの到達先、ブラウザ確認は実ブラウザでの到達/送信確認を表す。業務副作用の完全互換完了とは混同しない。",
+  "targets": {
+    "admin_order_bulk_delete GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_order_bulk_delete",
+      "title": "受注一覧 受注管理 - BeMart",
+      "evidence": "GETで「受注一覧」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_product_bulk_product_status GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_product_bulk_product_status",
+      "title": "商品一覧 商品管理 - BeMart",
+      "evidence": "GETで「商品一覧」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_product_class_category_sort_no_move GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_product_class_category_sort_no_move",
+      "title": "規格分類管理 商品管理 - BeMart",
+      "evidence": "GETで「規格分類」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_product_class_category_visibility GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_product_class_category_visibility",
+      "title": "規格分類管理 商品管理 - BeMart",
+      "evidence": "GETで「規格分類」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_product_class_name_sort_no_move GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_product_class_name_sort_no_move",
+      "title": "規格管理 商品管理 - BeMart",
+      "evidence": "GETで「規格管理」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_product_product_copy GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_product_product_copy?id=sample-001",
+      "title": "商品登録 商品管理 - BeMart",
+      "evidence": "GETで「商品登録」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_product_tag_sort_no_move GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_product_tag_sort_no_move",
+      "title": "タグ管理 商品管理 - BeMart",
+      "evidence": "GETで「タグ管理」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_calendar POST": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_calendar",
+      "title": "定休日カレンダー設定 店舗設定 - BeMart",
+      "evidence": "POST送信後に「定休日カレンダー設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_calendar_delete GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_calendar_delete",
+      "title": "定休日カレンダー設定 店舗設定 - BeMart",
+      "evidence": "GETで「定休日カレンダー設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_calendar_delete POST": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_calendar_delete",
+      "title": "定休日カレンダー設定 店舗設定 - BeMart",
+      "evidence": "POST送信後に「定休日カレンダー設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_calendar_new POST": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_calendar_new",
+      "title": "定休日カレンダー設定 店舗設定 - BeMart",
+      "evidence": "POST送信後に「定休日カレンダー設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_delivery_sort_no_move GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_delivery_sort_no_move",
+      "title": "配送方法一覧 店舗設定 - BeMart",
+      "evidence": "GETで「配送方法設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_delivery_visibility GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_delivery_visibility",
+      "title": "配送方法一覧 店舗設定 - BeMart",
+      "evidence": "GETで「配送方法設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_mail_delete GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_mail_delete",
+      "title": "メール設定 店舗設定 - BeMart",
+      "evidence": "GETで「メール設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_mail_delete POST": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_mail_delete",
+      "title": "メール設定 店舗設定 - BeMart",
+      "evidence": "POST送信後に「メール設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_order_status POST": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_order_status",
+      "title": "受注対応状況設定 店舗設定 - BeMart",
+      "evidence": "POST送信後に「対応状況設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_payment_sort_no_move GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_payment_sort_no_move",
+      "title": "支払方法一覧 店舗設定 - BeMart",
+      "evidence": "GETで「支払方法設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_payment_visible GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_payment_visible",
+      "title": "支払方法一覧 店舗設定 - BeMart",
+      "evidence": "GETで「支払方法設定」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_shop_tradelaw POST": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_shop_tradelaw",
+      "title": "特定商取引法設定 店舗設定 - BeMart",
+      "evidence": "POST送信後に「特定商取引法」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_system_member_down GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_system_member_down",
+      "title": "メンバー管理 システム設定 - BeMart",
+      "evidence": "GETで「メンバー管理」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_system_member_down POST": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_system_member_down",
+      "title": "並び順を変更する 管理画面 - BeMart",
+      "evidence": "POST送信後に「並び順変更Resourceへ到達しました。」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_system_member_up GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_system_member_up",
+      "title": "メンバー管理 システム設定 - BeMart",
+      "evidence": "GETで「メンバー管理」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_setting_system_member_up POST": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_setting_system_member_up",
+      "title": "並び順を変更する 管理画面 - BeMart",
+      "evidence": "POST送信後に「並び順変更Resourceへ到達しました。」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_shipping_notify_mail GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_shipping_notify_mail?id=past0000000000000000000000000001",
+      "title": "受注登録 受注管理 - BeMart",
+      "evidence": "GETで「受注登録」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_shipping_update_order_status GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_shipping_update_order_status",
+      "title": "受注一覧 受注管理 - BeMart",
+      "evidence": "GETで「受注一覧」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_shipping_update_tracking_number GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_shipping_update_tracking_number?id=past0000000000000000000000000001",
+      "title": "受注登録 受注管理 - BeMart",
+      "evidence": "GETで「受注登録」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    },
+    "admin_store_template_download GET": {
+      "status": "確認済み",
+      "browser": "Codex内ブラウザ",
+      "url": "http://127.0.0.1:8081/admin_store_template_download?id=default",
+      "title": "テンプレート一覧 オーナーズストア - BeMart",
+      "evidence": "GETで「テンプレート一覧」を目視確認",
+      "checkedAt": "2026-05-28T11:11:50.606+09:00"
+    }
+  }
+}

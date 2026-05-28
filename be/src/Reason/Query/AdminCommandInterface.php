@@ -57,4 +57,11 @@ interface AdminCommandInterface
      */
     #[DbQuery('admin_update_authority')]
     public function updateAuthority(string $adminId, int $newAuthority): void;
+
+    /**
+     * Move one admin row in the member list — the generic
+     * doSortNoMove transition for `masterType=member`.
+     */
+    #[DbQuery('admin_reorder')]
+    public function reorder(string $adminId, int $sortNo): void;
 }
