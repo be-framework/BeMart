@@ -15,24 +15,25 @@ use MyVendor\BeMart\Be\Final\AdminOrderPdfExported;
 use MyVendor\BeMart\Be\Input\AdminExportOrderPdfInput;
 
 use function assert;
+use function explode;
+use function is_scalar;
+use function is_string;
+use function str_contains;
+use function trim;
 
 /**
- * EC-CUBE goExportOrderPdf — 帳票PDFをエクスポートする (Wave 9η,
- * **Phase 2 stub**).
+ * EC-CUBE goExportOrderPdf — 帳票PDFをエクスポートする.
  *
- *   GET /admin/order/export-order-pdf?orderNo=…
+ *   GET /admin/order/export-order-pdf?orderNos[]=…
  *
- * Real PDF generation (EC-CUBE: TCPDF + a configurable layout) is
- * Phase 2 scope. The stub returns a text/plain placeholder body keyed
- * by the targeted orderNo so the AUTHZ + URL surface can be exercised
- * in isolation. Despite the stubbed body, the response surfaces
- * `Content-Type: application/pdf` so downstream clients can wire the
- * download affordance ahead of the real renderer.
+ * The Resource only normalizes EC-CUBE's `ids[]`/legacy `orderNo`
+ * request shape, then calls the Be Final. TCPDF/FPDI rendering is kept
+ * behind OrderPdfCompatibilityInterface.
  *
  * Failure mapping:
- *   - SemanticVariableException             → 400 (orderNo format)
+ *   - SemanticVariableException             → 400 (orderNos format)
  *   - UnauthorizedAdminAccessException      → 403 (no admin session)
- *   - OrderNotFoundException                → 404
+ *   - OrderNotFoundException                → 404 (unknown orderNo; all-or-nothing)
  */
 class ExportOrderPdf extends ResourceObject
 {
@@ -42,13 +43,18 @@ class ExportOrderPdf extends ResourceObject
     }
 
     /**
+     * @param array<int, mixed>|string $orderNos
+     *
+     * @psalm-taint-source input $orderNos
      * @psalm-taint-source input $orderNo
      */
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
-    public function onGet(string $orderNo): static
+    public function onGet(array|string $orderNos = [], string $orderNo = ''): static
     {
         try {
-            $final = ($this->becoming)(new AdminExportOrderPdfInput(orderNo: $orderNo));
+            $final = ($this->becoming)(new AdminExportOrderPdfInput(
+                orderNos: $this->normalizeOrderNos($orderNos, $orderNo),
+            ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
             $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
@@ -70,13 +76,44 @@ class ExportOrderPdf extends ResourceObject
 
         $this->code = Code::OK;
         $this->headers['Content-Type'] = 'application/pdf';
+        $this->headers['Content-Disposition'] = $final->contentDisposition;
         $this->body = [
             'orderNo' => $final->orderNo,
+            'orderNos' => $final->orderNos,
             'pdf' => $final->pdf,
             'size' => $final->size,
+            'fileName' => $final->fileName,
             'message' => $final->message,
         ];
 
         return $this;
+    }
+
+    /**
+     * @param array<int, mixed>|string $orderNos
+     * @return list<string>
+     */
+    private function normalizeOrderNos(array|string $orderNos, string $orderNo): array
+    {
+        $rawValues = $orderNos === [] && $orderNo !== '' ? [$orderNo] : $orderNos;
+        if (is_string($rawValues)) {
+            $rawValues = str_contains($rawValues, ',')
+                ? explode(',', $rawValues)
+                : [$rawValues];
+        }
+
+        $normalized = [];
+        foreach ($rawValues as $rawValue) {
+            if (! is_scalar($rawValue)) {
+                continue;
+            }
+
+            $value = trim((string) $rawValue);
+            if ($value !== '') {
+                $normalized[] = $value;
+            }
+        }
+
+        return $normalized;
     }
 }
