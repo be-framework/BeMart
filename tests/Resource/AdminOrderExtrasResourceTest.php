@@ -372,23 +372,26 @@ final class AdminOrderExtrasResourceTest extends TestCase
     // goExportOrderPdf
     // ------------------------------------------------------------------
 
-    public function testExportOrderPdfReturnsStub(): void
+    public function testExportOrderPdfReturnsPdfDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
-            'orderNo' => self::ORDER_NO_A,
+            'orderNos' => [self::ORDER_NO_A],
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('application/pdf', $ro->headers['Content-Type']);
+        $this->assertSame('attachment; filename="nouhinsyo-No' . self::ORDER_NO_A . '.pdf"', $ro->headers['Content-Disposition']);
         $this->assertSame(self::ORDER_NO_A, $ro->body['orderNo']);
+        $this->assertSame([self::ORDER_NO_A], $ro->body['orderNos']);
         $this->assertGreaterThan(0, $ro->body['size']);
-        $this->assertStringContainsString('stub', $ro->body['message']);
+        $this->assertStringStartsWith('%PDF-', $ro->body['pdf']);
+        $this->assertStringNotContainsString('PDF STUB', $ro->body['pdf']);
     }
 
     public function testExportOrderPdfUnknownReturns404(): void
     {
         $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
-            'orderNo' => 'nonexistent-zzz000000000000000zz',
+            'orderNos' => ['nonexistent-zzz000000000000000zz'],
         ]);
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
@@ -398,7 +401,7 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $this->rebindAdminSession(null);
         $this->seedOrders();
         $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
-            'orderNo' => self::ORDER_NO_A,
+            'orderNos' => [self::ORDER_NO_A],
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }

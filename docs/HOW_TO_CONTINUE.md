@@ -122,9 +122,13 @@ composer psalm-taint                        # taint mode
 2. **Storefront enrichment backlog** — 商品一覧はカテゴリ/表示件数/並び順/一覧カート投入まで接続済み。残: 商品詳細の規格選択/favorite、Shopping confirm/complete、Mypage dashboard、Favorite、Address、Contactのbody enrichment。
 3. **`Block/*` ウィジェット** — header/search/logo/login/cart/category-nav/footer first sliceは追加済み。残: cart totals/customer-auth/category-treeの動的化。
 4. **1 ALPS-only 遷移のドメイン実装** — Phase 3 の ALPS 是正で追加された 5 遷移のうち、`doSortNoMove` / `doToggleVisible` / `doUpdateTrackingNumber` / `doSendShippingNotifyMail` は実装済み。未実装は `doResendActivationMail` のみ。
-5. **Phase A の stub 7 件** — `doImportProductCsv` / `doImportCategoryCsv` /
-   `doImportShippingCsv` / `doInstallPlugin` / `goExportOrderPdf` / `doCreateOrder` /
-   `doUpdateCsv` の本物実装。
+5. **Phase A の stub / compatibility 残差** — `goExportOrderPdf` は Issue #24 の
+   PDF pilot で ActionRedirect/stub から compatibility service 経由の実PDF
+   `%PDF-` 出力まで進めた。ただし EC-CUBE 完全忠実度（帳票レイアウト、
+   `dtb_order_pdf` 保存設定、複数配送テンプレート再現）は意図的に後続残差として
+   残している。未着手またはstub残りは `doImportProductCsv` /
+   `doImportCategoryCsv` / `doImportShippingCsv` / `doInstallPlugin` /
+   `doCreateOrder` / `doUpdateCsv`。
 
 各項目の詳細・コミット・unverified 注記は `docs/migration-status.md` を参照。
 
