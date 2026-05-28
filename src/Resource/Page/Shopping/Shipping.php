@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 
 /**
  * EC-CUBE goShoppingShipping — お届け先選択画面 (Wave 3H pure renderer).
@@ -52,6 +53,33 @@ class Shipping extends ResourceObject
             ],
             'addresses' => [],
             'csrfToken' => null,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doSelectShippingAddress — accept the selected address-book row.
+     *
+     * This closes the former ActionRedirect gap for the customer checkout
+     * route. The current shopping renderer does not yet hydrate the address
+     * radio list, so the resource records the selected id in the response
+     * surface and returns to the shopping page. The full pre-order shipping
+     * persistence is intentionally left to the existing checkout enrichment
+     * backlog; this method makes the route executable without a placeholder.
+     *
+     * @psalm-taint-source input $shippingAddressId
+     */
+    #[Link(rel: 'goShopping', href: 'page://self/shopping')]
+    #[CsrfProtected]
+    public function onPost(string|null $shippingAddressId = null): static
+    {
+        $this->code = Code::SEE_OTHER;
+        $this->headers['Location'] = '/shopping';
+        $this->body = [
+            'transitionId' => 'doSelectShippingAddress',
+            'shippingAddressId' => $shippingAddressId,
+            'message' => 'お届け先を選択しました。',
         ];
 
         return $this;

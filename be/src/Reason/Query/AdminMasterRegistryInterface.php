@@ -15,7 +15,7 @@ namespace MyVendor\BeMart\Be\Reason\Query;
  * turns the discriminator back into a concrete storage call.
  *
  * Capability matrix (mirrors the EC-CUBE 4.3 schema columns):
- *   - reorder:    payment / delivery / tag / className / classCategory
+ *   - reorder:    payment / delivery / tag / className / classCategory / member
  *                 (these tables have a `sort_no` column)
  *   - setVisible: payment / delivery / classCategory / news
  *                 (these tables have a `visible` column)

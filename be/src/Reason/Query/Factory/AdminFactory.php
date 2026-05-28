@@ -15,7 +15,16 @@ final class AdminFactory
         string $name,
         int|string $authorityId,
         int|string $workId,
+        int|string|null $sortNo = 0,
     ): AdminEntity {
-        return new AdminEntity((string) $id, $loginId, $password, $name, (int) $authorityId, (int) $workId);
+        return new AdminEntity(
+            (string) $id,
+            $loginId,
+            $password,
+            $name,
+            (int) $authorityId,
+            (int) $workId,
+            (int) ($sortNo ?? 0),
+        );
     }
 }

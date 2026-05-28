@@ -43,6 +43,7 @@ final readonly class MemberUpdated
     public string $name;
     public int $authority;
     public int $work;
+    public int $sortNo;
 
     public function __construct(
         #[Input] string $loginId,
@@ -67,6 +68,7 @@ final readonly class MemberUpdated
             name: $name ?? $current->name,
             authority: $current->authority,
             work: $current->work,
+            sortNo: $current->sortNo,
         );
 
         $adminCommand->update($merged);
@@ -76,5 +78,6 @@ final readonly class MemberUpdated
         $this->name = $merged->name;
         $this->authority = $merged->authority;
         $this->work = $merged->work;
+        $this->sortNo = $merged->sortNo;
     }
 }
