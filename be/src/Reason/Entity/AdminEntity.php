@@ -22,6 +22,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * active; Wave 8 keeps the default at WORK_ACTIVE so existing fixtures
  * stay backward-compatible.
  *
+ * Wave 9 route-audit adds `sortNo` so the generic doSortNoMove
+ * transition can handle the EC-CUBE member up/down aliases without
+ * losing dtb_member.sort_no on normal member updates.
+ *
  * Note: this Be project's source-of-truth ALPS profile does not yet
  * carry `doAdminLogin` / `doAdminLogout` transition ids (only customer
  * `doLogin` / `doLogout` are present). The admin actor exists in the
@@ -47,6 +51,7 @@ final readonly class AdminEntity implements \Ray\MediaQuery\ToScalarInterface
         public string $name,
         public int $authority,
         public int $work = self::WORK_ACTIVE,
+        public int $sortNo = 0,
     ) {
     }
 }
