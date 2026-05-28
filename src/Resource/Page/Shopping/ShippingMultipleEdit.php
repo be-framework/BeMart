@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Form\ShoppingShippingEditForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -86,6 +87,58 @@ class ShippingMultipleEdit extends ResourceObject
             // CustomerAddressType shape) for the HTML port to render the
             // address inputs. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ShoppingShippingEditForm::class),
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doUpdateShippingAddress — add/update an address for the
+     * multi-destination checkout branch.
+     *
+     * This mirrors {@see ShippingEdit::onPost()} but returns to the
+     * multi-shipping screen instead of the main shopping screen.
+     *
+     * @psalm-taint-source input $name01
+     * @psalm-taint-source input $name02
+     * @psalm-taint-source input $kana01
+     * @psalm-taint-source input $kana02
+     * @psalm-taint-source input $companyName
+     * @psalm-taint-source input $postalCode
+     * @psalm-taint-source input $pref
+     * @psalm-taint-source input $addr01
+     * @psalm-taint-source input $addr02
+     * @psalm-taint-source input $phoneNumber
+     */
+    #[Link(rel: 'goShoppingShippingMultiple', href: 'page://self/shopping/shipping-multiple')]
+    #[CsrfProtected]
+    public function onPost(
+        string $name01 = '',
+        string $name02 = '',
+        string|null $kana01 = null,
+        string|null $kana02 = null,
+        string|null $companyName = null,
+        string $postalCode = '',
+        int $pref = 0,
+        string $addr01 = '',
+        string $addr02 = '',
+        string $phoneNumber = '',
+    ): static {
+        $this->code = Code::SEE_OTHER;
+        $this->headers['Location'] = '/shopping/shipping/multiple';
+        $this->body = [
+            'transitionId' => 'doUpdateShippingAddress',
+            'name01' => $name01,
+            'name02' => $name02,
+            'kana01' => $kana01,
+            'kana02' => $kana02,
+            'companyName' => $companyName,
+            'postalCode' => $postalCode,
+            'pref' => $pref,
+            'addr01' => $addr01,
+            'addr02' => $addr02,
+            'phoneNumber' => $phoneNumber,
+            'message' => '複数配送先のお届け先を更新しました。',
         ];
 
         return $this;

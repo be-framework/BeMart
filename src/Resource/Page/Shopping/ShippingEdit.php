@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Form\ShoppingShippingEditForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -73,6 +74,59 @@ class ShippingEdit extends ResourceObject
             // Phase 3: an empty ShoppingShippingEditForm for the HTML
             // port to render the address inputs. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ShoppingShippingEditForm::class),
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doUpdateShippingAddress — accept the edited shipping address.
+     *
+     * The BeMart checkout page still keeps the richer pre-order shipping
+     * persistence as a later enrichment. This method removes the former
+     * ActionRedirect placeholder and gives the submitted address a concrete
+     * Resource surface while returning the user to the main shopping page.
+     *
+     * @psalm-taint-source input $name01
+     * @psalm-taint-source input $name02
+     * @psalm-taint-source input $kana01
+     * @psalm-taint-source input $kana02
+     * @psalm-taint-source input $companyName
+     * @psalm-taint-source input $postalCode
+     * @psalm-taint-source input $pref
+     * @psalm-taint-source input $addr01
+     * @psalm-taint-source input $addr02
+     * @psalm-taint-source input $phoneNumber
+     */
+    #[Link(rel: 'goShopping', href: 'page://self/shopping')]
+    #[CsrfProtected]
+    public function onPost(
+        string $name01 = '',
+        string $name02 = '',
+        string|null $kana01 = null,
+        string|null $kana02 = null,
+        string|null $companyName = null,
+        string $postalCode = '',
+        int $pref = 0,
+        string $addr01 = '',
+        string $addr02 = '',
+        string $phoneNumber = '',
+    ): static {
+        $this->code = Code::SEE_OTHER;
+        $this->headers['Location'] = '/shopping';
+        $this->body = [
+            'transitionId' => 'doUpdateShippingAddress',
+            'name01' => $name01,
+            'name02' => $name02,
+            'kana01' => $kana01,
+            'kana02' => $kana02,
+            'companyName' => $companyName,
+            'postalCode' => $postalCode,
+            'pref' => $pref,
+            'addr01' => $addr01,
+            'addr02' => $addr02,
+            'phoneNumber' => $phoneNumber,
+            'message' => 'お届け先を更新しました。',
         ];
 
         return $this;
