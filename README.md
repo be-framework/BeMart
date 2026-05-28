@@ -4,30 +4,21 @@ BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する*
 
 > BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration with explicit boundaries.
 
-## Quick Links
-
-| Document | Purpose |
-|---|---|
-| [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) | 実証総括 — 何を示せたか・知見・限界 |
-| [`alps.json`](alps.json) / [`alps.json.html`](alps.json.html) | ALPS profile and HTML documentation |
-| [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI export and HTML documentation |
-| [`docs/migration-status.md`](docs/migration-status.md) | current migration status |
-| [`docs/html-screen-migration-matrix.md`](docs/html-screen-migration-matrix.md) | HTML screen/route migration matrix |
-| [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ implementation status ↔ migration difficulty |
-| [`docs/tag.md`](docs/tag.md) | ALPS tag taxonomy |
-| [`docs/README.md`](docs/README.md) | documentation map |
+実証の全体像（何を示せたか・知見・限界）は [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) に束ねています。
 
 ## Difference from Symfony EC-CUBE
 
-BeMart は EC-CUBE の機能や画面構造を否定するものではありません。違いは、どこに境界を引くかです。
+BeMart は EC-CUBE の機能や画面構造を否定するものではありません。違いは、振る舞いの定義がどこにあるかです。
 
-| EC-CUBE 4.3 / Symfony版 | BeMart |
-|---|---|
-| Symfony Controller / Service | ALPS transition + Be use case |
-| Doctrine ORM | Ray.MediaQuery + SQL projection |
-| Symfony Router | BEAR.Sunday ResourceObject |
-| Twig route link | Hypermedia affordance |
-| 環境設定 | Context / DI binding |
+| 観点 | EC-CUBE 4.3（Symfony） | BeMart |
+|---|---|---|
+| 振る舞いの定義 | Controller のコード | ALPS の意味論（契約） |
+| 「何ができるか」を知る | コードを読む | 契約を読む |
+| 層の境界 | 慣習として存在する | テストで固定された契約 |
+| 実装の選択 | 環境設定 | Context / DI が選ぶ。コードは知らない |
+| 仕様の所在 | 実装の中 | 実装の外（`alps.json`） |
+
+意味論は実装より長く生きる。EC-CUBE は 2.x → 3.x → 4.x とフレームワークを変えてきたが、「商品」「注文」「顧客」の語彙は変わっていない。
 
 ## Core Ideas
 
@@ -53,13 +44,23 @@ Taint tracking、cache freshness、DIP / ADP も境界制約として扱いま�
 
 ## Migration Workflow
 
-実装順は固定です。
+移植は2つの動きでできています —— 逆算と投影。
+
+**逆算 — レガシーから契約を取り出す。**
+
+まず EC-CUBE 4.3 のソースから情報設計をやり直します。Doctrine Entity（語彙）・`@Route`（状態遷移）・Controller（操作の意味）・Twig テンプレート（画面のデータ）—— 4つの情報源を読み、ソースに散らばっていた「何ができて、データがどう流れるか」を機械可読な契約 `alps.json` に束ねる。全ディスクリプタに情報源タグ（`src-entity` / `src-router` / `src-controller` / `src-template`）が付き、どのフィールドがどのソースに由来するか追跡できる。この逆算の経緯は記事 [ソースコードから情報設計を逆算する](docs/index.md) に詳しい。
+
+**投影 — 契約から実装を起こす。**
+
+確定した ALPS を起点に、下のレイヤを順に実装します。実装順は固定：
 
 ```text
-Fake → EC-CUBE schema alignment → SQL → Resource/Form → HTML/Browser
+ALPS → Fake → EC-CUBE schema alignment → SQL → Resource/Form → HTML/Browser
 ```
 
-Fake は後付けmockではなく、最初の契約実装です。SQL は後から同じ契約を満たすことをテストで証明します。実装の選択は Context / DI binding が行うため、アプリケーションコードは Fake / SQL の違いを知りません。
+Fake は後付け mock ではなく、最初の契約実装。SQL は後から同じ契約を満たすことをテストで証明する。実装の選択は Context / DI binding が行うため、アプリケーションコードは Fake / SQL の違いを知らない。
+
+契約はレガシーから生まれ、実装は契約から生まれる。
 
 ## Hypermedia and HTML Policy
 
@@ -120,18 +121,31 @@ BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・�
 
 最新の詳細は [`docs/migration-status.md`](docs/migration-status.md) §4 Outstanding work、互換隔離の進行は [#24](https://github.com/be-framework/be-mart/issues/24) を参照してください。
 
+## Quick Links
+
+| Document | Purpose |
+|---|---|
+| [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) | 実証総括 — 何を示せたか・知見・限界 |
+| [`alps.json`](alps.json) / [`alps.json.html`](alps.json.html) | ALPS プロファイルと HTML ドキュメント |
+| [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI 出力と HTML ドキュメント |
+| [`docs/migration-status.md`](docs/migration-status.md) | 移植ステータス（正） |
+| [`docs/html-screen-migration-matrix.md`](docs/html-screen-migration-matrix.md) | 画面 / ルート移植マトリクス |
+| [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ 実装状態 ↔ 移植難易度 |
+| [`docs/tag.md`](docs/tag.md) | ALPS タグ分類 |
+| [`docs/README.md`](docs/README.md) | ドキュメント索引 |
+
 ## Repository Map
 
 | Path | Purpose |
 |---|---|
-| `alps.json` | canonical ALPS profile |
-| `be/` | Be Framework domain layer |
-| `src/` | BEAR.Sunday application/resource layer |
-| `var/templates/` | EC-CUBE Twig HTML ports |
-| `public/` | HTTP front controller and static assets |
-| `sql/` | EC-CUBE schema, seed data, SQL setup notes |
-| `docs/` | project documentation and GitHub Pages artifacts |
-| `tests/` | Resource, SQL, HTML render, HTTP hypermedia tests |
+| `alps.json` | 正典 ALPS プロファイル |
+| `be/` | Be Framework ドメイン層 |
+| `src/` | BEAR.Sunday アプリケーション / リソース層 |
+| `var/templates/` | EC-CUBE Twig HTML 移植 |
+| `public/` | HTTP フロントコントローラと静的アセット |
+| `sql/` | EC-CUBE スキーマ・seed データ・SQL setup |
+| `docs/` | プロジェクトドキュメントと GitHub Pages 成果物 |
+| `tests/` | Resource / SQL / HTML render / HTTP hypermedia テスト |
 
 最新ステータスは [`docs/migration-status.md`](docs/migration-status.md)、画面移植状況は [`docs/html-screen-migration-matrix.md`](docs/html-screen-migration-matrix.md) を参照してください。
 
@@ -156,7 +170,7 @@ vendor/bin/phpunit tests/Http/HttpHypermediaTest.php
 vendor/bin/phpunit tests/Resource/Sql
 ```
 
-Runtime entrypoints fix their default context (`bin/fake.php` → `cli-fake-hal-api-app`, `bin/page.php` → `cli-html-hal-app`). `APP_CONTEXT` is only an escape hatch for temporary overrides. SQL tests require a local MariaDB/MySQL database prepared from [`sql/`](sql/).
+各エントリポイントは既定の context を固定します（`bin/fake.php` → `cli-fake-hal-api-app`、`bin/page.php` → `cli-html-hal-app`）。`APP_CONTEXT` は一時的な上書き用の escape hatch にすぎません。SQL テストは [`sql/`](sql/) から用意したローカル MariaDB/MySQL を必要とします。
 
 ## References
 
