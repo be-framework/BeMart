@@ -135,4 +135,37 @@ final class AdminMailTemplateResourceTest extends TestCase
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
+
+    public function testOnDeleteSurfaceReturnsTemplateIdentity(): void
+    {
+        $ro = $this->resource->delete('page://self/admin/mail-template', [
+            'mailTemplateId' => 1,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('doDeleteMailTemplate', $ro->body['transitionId']);
+        $this->assertSame(1, $ro->body['mailTemplateId']);
+        $this->assertSame('Mail/order.twig', $ro->body['fileName']);
+    }
+
+    public function testOnDeleteMissingCsrfReturns403(): void
+    {
+        $ro = $this->resource->delete('page://self/admin/mail-template', [
+            'mailTemplateId' => 1,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('CSRF', $ro->body['message']);
+    }
+
+    public function testOnDeleteUnknownTemplateReturns404(): void
+    {
+        $ro = $this->resource->delete('page://self/admin/mail-template', [
+            'mailTemplateId' => 999,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::NOT_FOUND, $ro->code);
+    }
 }
