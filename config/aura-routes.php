@@ -417,7 +417,7 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
 
             // Order.
             $adminGet($map, 'admin_order_edit', 'page://self/admin/order/edit', ['id' => 'orderNo']);
-            $adminGet($map, 'admin_order_bulk_delete', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/order']);
+            $adminGet($map, 'admin_order_bulk_delete', 'page://self/admin/order-list');
             $adminPost($map, 'admin_order_bulk_delete', 'page://self/admin/order/bulk-delete', 'post', ['ids' => 'orderNos']);
             $adminGet($map, 'admin_order_csv_shipping', 'page://self/admin/order/import-shipping');
             $adminPost($map, 'admin_order_csv_shipping', 'page://self/admin/order/import-shipping', 'post', ['import_file' => 'csv'], ['csv' => '']);
@@ -429,13 +429,13 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminPost($map, 'admin_order_export_shipping', 'page://self/admin/order/export-shipping', 'get');
             $adminGetPost($map, 'admin_order_mail', 'page://self/admin/order/send-mail', ['id' => 'orderNo']);
             $adminGetPost($map, 'admin_order_shipping', 'page://self/admin/order/shipping-address', ['id' => 'orderNo']);
-            $adminGet($map, 'admin_shipping_notify_mail', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/order']);
+            $adminGet($map, 'admin_shipping_notify_mail', 'page://self/admin/order/edit', ['id' => 'orderNo']);
             $adminPost($map, 'admin_shipping_notify_mail', 'page://self/admin/order/shipping-notify-mail', 'post', ['id' => 'orderNo']);
             $adminGet($map, 'admin_shipping_preview_notify_mail', 'page://self/admin/order/mail-confirm', ['id' => 'orderNo']);
             $adminPost($map, 'admin_shipping_preview_notify_mail', 'page://self/admin/order/mail-confirm', 'get', ['id' => 'orderNo']);
-            $adminGet($map, 'admin_shipping_update_order_status', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/order']);
+            $adminGet($map, 'admin_shipping_update_order_status', 'page://self/admin/order-list');
             $adminPost($map, 'admin_shipping_update_order_status', 'page://self/admin/order', 'put', ['id' => 'orderNo']);
-            $adminGet($map, 'admin_shipping_update_tracking_number', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/order']);
+            $adminGet($map, 'admin_shipping_update_tracking_number', 'page://self/admin/order/edit', ['id' => 'orderNo']);
             $adminPost($map, 'admin_shipping_update_tracking_number', 'page://self/admin/order/tracking-number', 'put', ['id' => 'orderNo']);
 
             // Product / catalogue.
@@ -445,11 +445,11 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminPost($map, 'admin_product_product_edit', 'page://self/admin/product', 'put', ['id' => 'productCode']);
             $adminGet($map, 'admin_product_product_delete', 'page://self/admin/product-list');
             $adminPost($map, 'admin_product_product_delete', 'page://self/admin/product', 'delete', ['id' => 'productCode']);
-            $adminGet($map, 'admin_product_product_copy', 'page://self/admin/action-redirect', ['id' => 'productCode'], ['returnTo' => '/admin/product']);
+            $adminGet($map, 'admin_product_product_copy', 'page://self/admin/product/edit', ['id' => 'productCode']);
             $adminPost($map, 'admin_product_product_copy', 'page://self/admin/product-copy', 'post', ['id' => 'productCode']);
             $adminGet($map, 'admin_product_product_class', 'page://self/admin/product/product-class', ['id' => 'productCode']);
             $adminPost($map, 'admin_product_product_class', 'page://self/admin/product/product-class', 'get', ['id' => 'productCode']);
-            $adminGet($map, 'admin_product_bulk_product_status', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product']);
+            $adminGet($map, 'admin_product_bulk_product_status', 'page://self/admin/product-list');
             $adminPost($map, 'admin_product_bulk_product_status', 'page://self/admin/product-bulk-status');
             $adminGet($map, 'admin_product_export', 'page://self/admin/product-csv');
             $adminPost($map, 'admin_product_export', 'page://self/admin/product-csv', 'get');
@@ -465,53 +465,55 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminGet($map, 'admin_product_class_category_delete', 'page://self/admin/class-category/class-category-list', ['class_name_id' => 'classNameId']);
             $adminPost($map, 'admin_product_class_category_delete', 'page://self/admin/class-category/class-category', 'delete', ['id' => 'classCategoryId']);
             $adminGetPost($map, 'admin_product_class_category_export', 'page://self/admin/action-redirect', ['class_name_id' => 'classNameId'], ['returnTo' => '/admin/product/class_name']);
-            $adminGet($map, 'admin_product_class_category_sort_no_move', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product/class_name']);
-            $adminPost($map, 'admin_product_class_category_sort_no_move', 'page://self/admin/sort-no-move', 'put', [], ['masterType' => 'class_category']);
-            $adminGet($map, 'admin_product_class_category_visibility', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product/class_name']);
-            $adminPost($map, 'admin_product_class_category_visibility', 'page://self/admin/toggle-visible', 'put', ['id' => 'rowId'], ['masterType' => 'class_category']);
+            $adminGet($map, 'admin_product_class_category_sort_no_move', 'page://self/admin/class-category/class-category-list', ['class_name_id' => 'classNameId']);
+            $adminPost($map, 'admin_product_class_category_sort_no_move', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'classCategory']);
+            $adminGet($map, 'admin_product_class_category_visibility', 'page://self/admin/class-category/class-category-list', ['class_name_id' => 'classNameId']);
+            $adminPost($map, 'admin_product_class_category_visibility', 'page://self/admin/toggle-visible', 'put', ['id' => 'rowId'], ['masterType' => 'classCategory']);
             $adminGet($map, 'admin_product_class_name_delete', 'page://self/admin/class-name/class-name-list');
             $adminPost($map, 'admin_product_class_name_delete', 'page://self/admin/class-name/class-name', 'delete', ['id' => 'classNameId']);
             $adminGetPost($map, 'admin_product_class_name_export', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product/class_name']);
-            $adminGet($map, 'admin_product_class_name_sort_no_move', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product/class_name']);
-            $adminPost($map, 'admin_product_class_name_sort_no_move', 'page://self/admin/sort-no-move', 'put', [], ['masterType' => 'class_name']);
+            $adminGet($map, 'admin_product_class_name_sort_no_move', 'page://self/admin/class-name/class-name-list');
+            $adminPost($map, 'admin_product_class_name_sort_no_move', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'className']);
             $adminGet($map, 'admin_product_tag_delete', 'page://self/admin/tag/tag-list');
             $adminPost($map, 'admin_product_tag_delete', 'page://self/admin/tag/tag', 'delete', ['id' => 'tagId']);
-            $adminGet($map, 'admin_product_tag_sort_no_move', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product/tag']);
-            $adminPost($map, 'admin_product_tag_sort_no_move', 'page://self/admin/sort-no-move', 'put', [], ['masterType' => 'tag']);
+            $adminGet($map, 'admin_product_tag_sort_no_move', 'page://self/admin/tag/tag-list');
+            $adminPost($map, 'admin_product_tag_sort_no_move', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'tag']);
 
             // Shop settings.
             $adminGetPost($map, 'admin_setting_shop', 'page://self/admin/base-info');
             $adminGet($map, 'admin_setting_shop_calendar', 'page://self/admin/calendar');
-            $adminPost($map, 'admin_setting_shop_calendar', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_shop_calendar']);
+            $adminPost($map, 'admin_setting_shop_calendar', 'page://self/admin/calendar', 'post', [], ['operation' => 'update']);
             $adminGet($map, 'admin_setting_shop_calendar_new', 'page://self/admin/calendar');
-            $adminPost($map, 'admin_setting_shop_calendar_new', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_shop_calendar']);
-            $adminGetPost($map, 'admin_setting_shop_calendar_delete', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin_setting_shop_calendar']);
+            $adminPost($map, 'admin_setting_shop_calendar_new', 'page://self/admin/calendar', 'post', [], ['operation' => 'create']);
+            $adminGet($map, 'admin_setting_shop_calendar_delete', 'page://self/admin/calendar');
+            $adminPost($map, 'admin_setting_shop_calendar_delete', 'page://self/admin/calendar', 'delete', ['id' => 'calendarId']);
             $adminGetPost($map, 'admin_setting_shop_csv', 'page://self/admin/csv-config');
             $adminGet($map, 'admin_setting_shop_delivery_new', 'page://self/admin/delivery/delivery');
             $adminGet($map, 'admin_setting_shop_delivery_edit', 'page://self/admin/delivery/delivery', ['id' => 'deliveryId']);
             $adminGet($map, 'admin_setting_shop_delivery_delete', 'page://self/admin/delivery/delivery-list');
             $adminPost($map, 'admin_setting_shop_delivery_delete', 'page://self/admin/delivery/delivery', 'delete', ['id' => 'deliveryId']);
-            $adminGet($map, 'admin_setting_shop_delivery_sort_no_move', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/setting/shop/delivery']);
-            $adminPost($map, 'admin_setting_shop_delivery_sort_no_move', 'page://self/admin/sort-no-move', 'put', [], ['masterType' => 'delivery']);
-            $adminGet($map, 'admin_setting_shop_delivery_visibility', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/setting/shop/delivery']);
+            $adminGet($map, 'admin_setting_shop_delivery_sort_no_move', 'page://self/admin/delivery/delivery-list');
+            $adminPost($map, 'admin_setting_shop_delivery_sort_no_move', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'delivery']);
+            $adminGet($map, 'admin_setting_shop_delivery_visibility', 'page://self/admin/delivery/delivery-list');
             $adminPost($map, 'admin_setting_shop_delivery_visibility', 'page://self/admin/toggle-visible', 'put', ['id' => 'rowId'], ['masterType' => 'delivery']);
             $adminGetPost($map, 'admin_setting_shop_mail', 'page://self/admin/mail-template');
-            $adminGetPost($map, 'admin_setting_shop_mail_delete', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin_setting_shop_mail']);
+            $adminGet($map, 'admin_setting_shop_mail_delete', 'page://self/admin/mail-template');
+            $adminPost($map, 'admin_setting_shop_mail_delete', 'page://self/admin/mail-template', 'delete', ['id' => 'mailTemplateId']);
             $adminGet($map, 'admin_setting_shop_order_status', 'page://self/admin/order-status');
-            $adminPost($map, 'admin_setting_shop_order_status', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_shop_order_status']);
+            $adminPost($map, 'admin_setting_shop_order_status', 'page://self/admin/order-status', 'put');
             $adminGet($map, 'admin_setting_shop_payment_new', 'page://self/admin/payment/payment');
             $adminGet($map, 'admin_setting_shop_payment_edit', 'page://self/admin/payment/payment', ['id' => 'paymentId']);
             $adminGet($map, 'admin_setting_shop_payment_delete', 'page://self/admin/payment/payment-list');
             $adminPost($map, 'admin_setting_shop_payment_delete', 'page://self/admin/payment/payment', 'delete', ['id' => 'paymentId']);
-            $adminGet($map, 'admin_setting_shop_payment_sort_no_move', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/setting/shop/payment']);
-            $adminPost($map, 'admin_setting_shop_payment_sort_no_move', 'page://self/admin/sort-no-move', 'put', [], ['masterType' => 'payment']);
-            $adminGet($map, 'admin_setting_shop_payment_visible', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/setting/shop/payment']);
+            $adminGet($map, 'admin_setting_shop_payment_sort_no_move', 'page://self/admin/payment/payment-list');
+            $adminPost($map, 'admin_setting_shop_payment_sort_no_move', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'payment']);
+            $adminGet($map, 'admin_setting_shop_payment_visible', 'page://self/admin/payment/payment-list');
             $adminPost($map, 'admin_setting_shop_payment_visible', 'page://self/admin/toggle-visible', 'put', ['id' => 'rowId'], ['masterType' => 'payment']);
             $adminPost($map, 'admin_setting_shop_tax_new', 'page://self/admin/tax-rule/tax-rule-list', 'post', ['tax_rate' => 'taxRate', 'apply_date' => 'applyDate', 'rounding_type' => 'roundingType']);
             $adminGet($map, 'admin_setting_shop_tax_delete', 'page://self/admin/tax-rule/tax-rule-list');
             $adminPost($map, 'admin_setting_shop_tax_delete', 'page://self/admin/tax-rule/tax-rule', 'delete', ['id' => 'taxRuleId']);
             $adminGet($map, 'admin_setting_shop_tradelaw', 'page://self/admin/trade-law');
-            $adminPost($map, 'admin_setting_shop_tradelaw', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_shop_tradelaw']);
+            $adminPost($map, 'admin_setting_shop_tradelaw', 'page://self/admin/trade-law', 'post');
 
             // System settings.
             $adminGetPost($map, 'admin_setting_system_authority', 'page://self/admin/authority-role');
@@ -525,8 +527,10 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminPost($map, 'admin_setting_system_member_edit', 'page://self/admin/member', 'put', ['id' => 'loginId']);
             $adminGet($map, 'admin_setting_system_member_delete', 'page://self/admin/member-list');
             $adminPost($map, 'admin_setting_system_member_delete', 'page://self/admin/member', 'delete', ['id' => 'loginId']);
-            $adminGetPost($map, 'admin_setting_system_member_up', 'page://self/admin/action-redirect', ['id' => 'loginId'], ['returnTo' => '/admin/setting/system/member']);
-            $adminGetPost($map, 'admin_setting_system_member_down', 'page://self/admin/action-redirect', ['id' => 'loginId'], ['returnTo' => '/admin/setting/system/member']);
+            $adminGet($map, 'admin_setting_system_member_up', 'page://self/admin/member-list', ['id' => 'loginId']);
+            $adminPost($map, 'admin_setting_system_member_up', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'member']);
+            $adminGet($map, 'admin_setting_system_member_down', 'page://self/admin/member-list', ['id' => 'loginId']);
+            $adminPost($map, 'admin_setting_system_member_down', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'member']);
             $adminGet($map, 'admin_setting_system_security', 'page://self/admin/security');
             $adminPost($map, 'admin_setting_system_security', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_security']);
             $adminGet($map, 'admin_setting_system_system_phpinfo', 'page://self/admin/system');
@@ -546,7 +550,8 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminPost($map, 'admin_store_template', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_store_template']);
             $adminGet($map, 'admin_store_template_install', 'page://self/admin/template/template-add');
             $adminPost($map, 'admin_store_template_install', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_store_template']);
-            $adminGetPost($map, 'admin_store_template_download', 'page://self/admin/action-redirect', ['id' => 'templateId'], ['returnTo' => '/admin_store_template']);
+            $adminGet($map, 'admin_store_template_download', 'page://self/admin/template/template-list', ['id' => 'templateId']);
+            $adminPost($map, 'admin_store_template_download', 'page://self/admin/action-redirect', 'post', ['id' => 'templateId'], ['returnTo' => '/admin_store_template']);
             $adminGet($map, 'admin_store_template_delete', 'page://self/admin/template/template-list');
             $adminPost($map, 'admin_store_template_delete', 'page://self/admin/action-redirect', 'post', ['id' => 'templateId'], ['returnTo' => '/admin_store_template']);
             $adminGet($map, 'admin_two_factor_auth', 'page://self/admin/two-factor-auth');
@@ -654,10 +659,10 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
                 ['id' => 'addressId'],
                 'put',
             );
-            $route($map, 'mypage_delivery_delete', ['GET'], '/mypage/delivery/delete', 'page://self/action-redirect', [], null, ['returnTo' => '/mypage/delivery']);
+            $route($map, 'mypage_delivery_delete', ['GET'], '/mypage/delivery/delete', 'page://self/mypage/address-list');
             $route($map, 'mypage_delivery_delete', ['POST'], '/mypage/delivery/delete', 'page://self/mypage/address', [], 'delete', [], ['id' => 'addressId']);
             $route($map, 'mypage_favorite', ['GET'], '/mypage/favorite', 'page://self/mypage/favorite-list');
-            $route($map, 'mypage_favorite_delete', ['GET'], '/mypage/favorite/delete', 'page://self/action-redirect', [], null, ['returnTo' => '/mypage/favorite']);
+            $route($map, 'mypage_favorite_delete', ['GET'], '/mypage/favorite/delete', 'page://self/mypage/favorite-list');
             $route($map, 'mypage_favorite_delete', ['POST'], '/mypage/favorite/delete', 'page://self/mypage/favorite', [], 'delete', [], ['id' => 'productCode']);
             $route($map,
                 'mypage_history',
@@ -677,13 +682,13 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
             // ---- Storefront: shopping (checkout flow) ----
             $route($map, 'shopping', ['GET'], '/shopping', 'page://self/shopping');
             $route($map, 'shopping_shipping', ['GET'], '/shopping/shipping', 'page://self/shopping/shipping');
-            $route($map, 'shopping_shipping', ['POST'], '/shopping/shipping', 'page://self/action-redirect', [], null, ['returnTo' => '/shopping']);
+            $route($map, 'shopping_shipping', ['POST'], '/shopping/shipping', 'page://self/shopping/shipping', [], null, [], ['address' => 'shippingAddressId']);
             $route($map, 'shopping_shipping_edit', ['GET'], '/shopping/shipping/edit', 'page://self/shopping/shipping-edit');
-            $route($map, 'shopping_shipping_edit', ['POST'], '/shopping/shipping/edit', 'page://self/action-redirect', [], null, ['returnTo' => '/shopping']);
+            $route($map, 'shopping_shipping_edit', ['POST'], '/shopping/shipping/edit', 'page://self/shopping/shipping-edit');
             $route($map, 'shopping_shipping_multiple', ['GET'], '/shopping/shipping/multiple', 'page://self/shopping/shipping-multiple');
-            $route($map, 'shopping_shipping_multiple', ['POST'], '/shopping/shipping/multiple', 'page://self/action-redirect', [], null, ['returnTo' => '/shopping']);
+            $route($map, 'shopping_shipping_multiple', ['POST'], '/shopping/shipping/multiple', 'page://self/shopping/shipping-multiple');
             $route($map, 'shopping_shipping_multiple_edit', ['GET'], '/shopping/shipping/multiple/edit', 'page://self/shopping/shipping-multiple-edit');
-            $route($map, 'shopping_shipping_multiple_edit', ['POST'], '/shopping/shipping/multiple/edit', 'page://self/action-redirect', [], null, ['returnTo' => '/shopping']);
+            $route($map, 'shopping_shipping_multiple_edit', ['POST'], '/shopping/shipping/multiple/edit', 'page://self/shopping/shipping-multiple-edit');
             $route($map, 'shopping_login', ['GET'], '/shopping/login', 'page://self/shopping/login');
             $route($map, 'shopping_nonmember', ['GET', 'POST'], '/shopping/nonmember', 'page://self/shopping/non-member');
             $route($map, 'shopping_confirm', ['POST'], '/shopping/confirm', 'page://self/shopping/confirm', [], 'get');

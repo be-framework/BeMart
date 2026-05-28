@@ -19,6 +19,7 @@ use function in_array;
  * attaches the two generic transitions to:
  *
  *   - sort_no:  payment / delivery / tag / className / classCategory
+ *               / member
  *   - visible:  payment / delivery / classCategory / news
  *
  * This Semantic only asserts the value is one of the known master
@@ -35,6 +36,7 @@ final class MasterType
         'tag',
         'className',
         'classCategory',
+        'member',
         'news',
     ];
 
