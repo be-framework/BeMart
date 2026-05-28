@@ -38,7 +38,7 @@ use function count;
  */
 final readonly class MemberListFetched
 {
-    /** @var list<array{adminId: string, loginId: string, name: string, authority: int, work: int}> */
+    /** @var list<array{adminId: string, loginId: string, name: string, authority: int, work: int, sortNo: int}> */
     public array $members;
 
     public int $count;
@@ -71,6 +71,7 @@ final readonly class MemberListFetched
                 'name' => $a->name,
                 'authority' => $a->authority,
                 'work' => $a->work,
+                'sortNo' => $a->sortNo,
             ],
             $rows,
         );

@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 
 /**
  * EC-CUBE goShoppingShippingMultiple — 複数配送先設定画面 (Wave 3H pure renderer).
@@ -47,6 +48,30 @@ class ShippingMultiple extends ResourceObject
             ],
             'cartItems' => [],
             'addresses' => [],
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doSelectShippingAddress — accept the multi-shipping allocation.
+     *
+     * The current page exposes the allocation form shape but has no cart-item
+     * rows yet. The POST endpoint is still concrete: CSRF is enforced, the
+     * transition is acknowledged, and the user returns to the shopping page.
+     *
+     * @param array<mixed> $allocations
+     */
+    #[Link(rel: 'goShopping', href: 'page://self/shopping')]
+    #[CsrfProtected]
+    public function onPost(array $allocations = []): static
+    {
+        $this->code = Code::SEE_OTHER;
+        $this->headers['Location'] = '/shopping';
+        $this->body = [
+            'transitionId' => 'doSelectShippingAddress',
+            'allocationCount' => count($allocations),
+            'message' => '複数配送先を選択しました。',
         ];
 
         return $this;

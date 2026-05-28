@@ -1,0 +1,28 @@
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin_homepage' %}
+{% set title = '並び順を変更する' %}
+{% set sub_title = '管理画面' %}
+
+{% block main %}
+    <div class="c-contentsArea__cols">
+        <div class="c-contentsArea__primaryCol">
+            <div class="c-primaryCol">
+                <div class="card rounded border-0 mb-4">
+                    <div class="card-header"><span>並び順を変更する</span></div>
+                    <div class="card-body">
+                        <p class="mb-3">並び順変更Resourceへ到達しました。</p>
+                        <dl class="mb-0">
+                            <dt>masterType</dt>
+                            <dd><code>{{ masterType|default('') }}</code></dd>
+                            <dt>rowId</dt>
+                            <dd><code>{{ rowId|default('') }}</code></dd>
+                            <dt>sortNo</dt>
+                            <dd><code>{{ sortNo|default('') }}</code></dd>
+                        </dl>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
