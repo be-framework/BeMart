@@ -412,7 +412,7 @@ $migrationAssessmentFor = static function (
         return [
             'level' => 'Hard',
             'strategy' => 'legacy compatibility',
-            'reason' => 'PDF帳票はEC-CUBE互換のTCPDF/FPDIテンプレート描画を隔離service経由で扱う。Be/BEAR本体は小さなinterfaceにのみ依存する。PilotではResource到達・headers・%PDF-実体出力まで完了し、EC-CUBE完全忠実度（帳票レイアウト、dtb_order_pdf保存設定、複数配送テンプレート再現）は意図的に後続残差として残す。',
+            'reason' => 'PDF帳票はEC-CUBE互換のTCPDF/FPDIをcompatibility service経由で隔離。Pilot完了（Resource到達・headers・%PDF-出力）。帳票レイアウト・dtb_order_pdf設定・複数配送再現は後続残差。',
             'evidence' => $evidence . ' / pilot: Issue #24 PDF legacy compatibility / residual: fidelity intentionally incomplete',
         ];
     }
