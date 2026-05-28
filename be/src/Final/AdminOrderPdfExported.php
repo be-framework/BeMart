@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
+use MyVendor\BeMart\Be\Exception\OrderNosFormatException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
@@ -39,7 +40,7 @@ final readonly class AdminOrderPdfExported
     public string $contentDisposition;
     public string $message;
 
-    /** @param non-empty-list<string> $orderNos */
+    /** @param list<string> $orderNos */
     public function __construct(
         #[Input] array $orderNos,
         #[Inject] AdminSession $adminSession,
@@ -48,6 +49,10 @@ final readonly class AdminOrderPdfExported
         #[Inject] ShippingAddressStorageInterface $shippingAddresses,
         #[Inject] OrderPdfCompatibilityInterface $pdfCompatibility,
     ) {
+        if ($orderNos === []) {
+            throw new OrderNosFormatException();
+        }
+
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }

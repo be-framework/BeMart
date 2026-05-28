@@ -64,6 +64,16 @@ final class AdminOrderPdfExportResourceTest extends TestCase
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
+    public function testExportOrderPdfEmptyOrderNosReturns400(): void
+    {
+        $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
+            'orderNos' => [],
+        ]);
+
+        $this->assertSame(Code::BAD_REQUEST, $ro->code);
+        $this->assertStringContainsString('注文番号リスト', $ro->body['message']);
+    }
+
     public function testExportOrderPdfWithoutAdminReturns403(): void
     {
         $this->resource = $this->buildResource(null);
