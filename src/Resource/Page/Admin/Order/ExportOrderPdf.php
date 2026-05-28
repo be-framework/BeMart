@@ -52,8 +52,16 @@ class ExportOrderPdf extends ResourceObject
     public function onGet(array|string $orderNos = [], string $orderNo = ''): static
     {
         try {
+            $normalizedOrderNos = $this->normalizeOrderNos($orderNos, $orderNo);
+            if ($normalizedOrderNos === []) {
+                $this->code = Code::BAD_REQUEST;
+                $this->body = ['message' => '注文番号リストが不正です。1〜100件の有効な注文番号を指定してください。'];
+
+                return $this;
+            }
+
             $final = ($this->becoming)(new AdminExportOrderPdfInput(
-                orderNos: $this->normalizeOrderNos($orderNos, $orderNo),
+                orderNos: $normalizedOrderNos,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
