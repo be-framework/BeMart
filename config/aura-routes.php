@@ -423,8 +423,8 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminPost($map, 'admin_order_csv_shipping', 'page://self/admin/order/import-shipping', 'post', ['import_file' => 'csv'], ['csv' => '']);
             $adminGet($map, 'admin_order_export_order', 'page://self/admin/order/export-order');
             $adminPost($map, 'admin_order_export_order', 'page://self/admin/order/export-order', 'get');
-            $adminGet($map, 'admin_order_export_pdf', 'page://self/admin/order/export-order-pdf', ['ids' => 'orderNo']);
-            $adminPost($map, 'admin_order_export_pdf', 'page://self/admin/order/export-order-pdf', 'get', ['ids' => 'orderNo']);
+            $adminGet($map, 'admin_order_export_pdf', 'page://self/admin/order/export-order-pdf', ['ids' => 'orderNos']);
+            $adminPost($map, 'admin_order_export_pdf', 'page://self/admin/order/export-order-pdf', 'get', ['ids' => 'orderNos']);
             $adminGet($map, 'admin_order_export_shipping', 'page://self/admin/order/export-shipping');
             $adminPost($map, 'admin_order_export_shipping', 'page://self/admin/order/export-shipping', 'get');
             $adminGetPost($map, 'admin_order_mail', 'page://self/admin/order/send-mail', ['id' => 'orderNo']);
