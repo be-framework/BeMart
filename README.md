@@ -1,7 +1,6 @@
 # BeMart — EC-CUBE 4.3 Semantic Migration
 
-BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する** 移植プロジェクトです。
-Symfony版EC-CUBEの fork や controller 書き換えではなく、EC-CUBEの意味論とHTML構造を保ちながら、ALPS、Be Framework、Ray.MediaQuery、BEAR.Sunday、ハイパーメディア、境界テストで組み直します。
+BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する** 移植の **実証プロジェクト** です。Be Framework + BEAR.Sunday による移植手法（ALPS → Be → BEAR）の referent implementation であり、Symfony版EC-CUBEの fork や controller 書き換えではなく、EC-CUBEの意味論とHTML構造を保ちながら ALPS・Ray.MediaQuery・ハイパーメディア・境界テストで組み直します。
 
 > BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration with explicit boundaries.
 
@@ -9,6 +8,7 @@ Symfony版EC-CUBEの fork や controller 書き換えではなく、EC-CUBEの�
 
 | Document | Purpose |
 |---|---|
+| [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) | 実証総括 — 何を示せたか・知見・限界 |
 | [`alps.json`](alps.json) / [`alps.json.html`](alps.json.html) | ALPS profile and HTML documentation |
 | [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI export and HTML documentation |
 | [`docs/migration-status.md`](docs/migration-status.md) | current migration status |
@@ -82,6 +82,43 @@ BeMartでは、テストを単なる回帰確認ではなく **境界契約** �
 | Browser smoke | 実ブラウザで主要導線が成立すること |
 
 Static analysis / taint tracking と cache freshness check は導入中の品質ゲートです。
+
+## Scope — 実証完了と「完全代替」への差分
+
+BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・全機能を [`alps.json`](alps.json) と [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) に棚卸しした上で、移植手法（ALPS → Be Framework → BEAR.Sunday）の実証として価値のある範囲はすべて完了しています。
+
+> ALPS 144/144 transition · Be domain 144/144 · BEAR Resource 139 · SQL 34/34 · HTML 110 templates（storefront 全ページ + in-scope admin 63/77）
+
+残るのは「実証としては不要だが、本番 EC-CUBE の **完全代替** には必要」な差分だけです。**これは未知の不足ではなく、私たちが EC-CUBE 全体を把握した上で意図的に保留した既知の残作業**です。下記がすべて fix されれば、BeMart は EC-CUBE 4.3 の完全な代替になります。
+
+### A. ドメイン stub（入力は受理するが永続副作用なし）
+
+- 受注確定 — `doCreateOrder`
+- CSV インポート — `doImportProductCsv` / `doImportCategoryCsv` / `doImportShippingCsv` / `doUpdateCsv`（行数は数えるが永続化しない Phase 2 stub）
+- プラグイン lifecycle — `doInstallPlugin` / enable / disable / uninstall（download・unzip・migrate・container 再生成なし）
+
+### B. EC-CUBE 互換 fidelity 残差（[#24](https://github.com/be-framework/be-mart/issues/24)）
+
+- PDF — 帳票レイアウト完全一致 / `dtb_order_pdf` 保存設定 / 複数配送（到達・download ヘッダ・`%PDF-` 生成は実装済み）
+- CSV — EC-CUBE 互換フォーマット + streaming/download 境界
+- Mail — 本文生成 / テンプレート解決 / 送信の忠実再現
+- Template 管理 — install / download / delete / select の file 副作用
+- MasterData adapter
+
+### C. HTML enrichment backlog（resource body が薄く忠実移植に未到達）
+
+- Mypage dashboard / Favorite / Address / Contact
+
+### D. 設計上の out-of-scope
+
+- プラグイン機構・マーケットプレイス（[#3](https://github.com/be-framework/be-mart/issues/3) — Anti-Corruption Layer による恒久 legacy 同居の研究構想）
+- 管理 Store/Plugin install/search サブツリー（~14 ページ）
+
+### E. 本番移行
+
+- 本番 DB の bring-up / cutover（seed script と prod `SqlModule` binding は実装済み）
+
+最新の詳細は [`docs/migration-status.md`](docs/migration-status.md) §4 Outstanding work、互換隔離の進行は [#24](https://github.com/be-framework/be-mart/issues/24) を参照してください。
 
 ## Repository Map
 
