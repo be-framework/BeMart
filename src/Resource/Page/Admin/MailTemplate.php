@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Final\MailTemplateListFetched;
 use MyVendor\BeMart\Be\Final\MailTemplateUpdated;
 use MyVendor\BeMart\Be\Input\GetMailTemplateListInput;
 use MyVendor\BeMart\Be\Input\UpdateMailTemplateInput;
+use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminMailTemplateForm;
 use Ray\WebFormModule\FormFactory;
@@ -47,6 +48,7 @@ class MailTemplate extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly MailTemplateStorageInterface $mailTemplates,
     ) {
     }
 
@@ -142,6 +144,46 @@ class MailTemplate extends ResourceObject
             'fileName' => $final->fileName,
             'mailSubject' => $final->mailSubject,
             'changed' => $final->changed,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doDeleteMailTemplate.
+     *
+     * The mail-template master still needs a full file-backed delete in
+     * a later adapter pass; this surface is intentionally narrow and
+     * concrete so the legacy route reaches a Resource with CSRF/AUTHZ
+     * semantics instead of generic ActionRedirect.
+     *
+     * @psalm-taint-source input $mailTemplateId
+     */
+    #[CsrfProtected]
+    public function onDelete(int $mailTemplateId): static
+    {
+        if ($this->adminSession->adminId === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        $template = $this->mailTemplates->item($mailTemplateId);
+        if ($template === null) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => 'メールテンプレートが見つかりませんでした。'];
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'doDeleteMailTemplate',
+            'mailTemplateId' => $template->mailTemplateId,
+            'mailTemplateName' => $template->mailTemplateName,
+            'fileName' => $template->fileName,
+            'message' => 'メールテンプレート削除Resourceへ到達しました。',
         ];
 
         return $this;
