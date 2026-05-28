@@ -4,18 +4,22 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use Aura\Router\Exception\RouteNotFound as AuraRouteNotFound;
+use Aura\Router\Generator as AuraGenerator;
+use Aura\Router\RouterContainer;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
-use MyVendor\BeMart\Router\RouteTable;
 use NumberFormatter;
 use Override;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
+use function array_key_exists;
 use function bin2hex;
 use function http_build_query;
 use function is_string;
+use function preg_match_all;
 use function random_bytes;
 
 /**
@@ -45,36 +49,28 @@ use function random_bytes;
  *                        URLs (`/assets`, `/template/admin/assets`,
  *                        `/bundle`), so every package resolves to a real,
  *                        byte-identical EC-CUBE file.
- *  - `url` / `path`    — Symfony routing helpers. These resolve an
- *                        EC-CUBE route NAME through the SAME
- *                        {@see RouteTable} the HTTP front controller's
- *                        {@see \MyVendor\BeMart\Router\Router} resolves
- *                        requests with. Sharing the one table is the point:
- *                        every href a ported template emits is, by
- *                        construction, a URL the router can dispatch back —
- *                        `url('product_detail', {id: 5})` yields
- *                        `/products/detail/5`, and a GET of that path
- *                        resolves to `page://self/product`. A route name
- *                        the table does not carry falls back to the legacy
- *                        `/{name}` form so an as-yet-unmapped EC-CUBE-ism
- *                        still renders a deterministic, diffable href.
+ *  - `url` / `path`    — Symfony routing helpers kept for ported EC-CUBE
+ *                        templates. They delegate path generation directly
+ *                        to Aura.Router, so
+ *                        template links and HTTP dispatch share the same
+ *                        route definitions.
  *
  * Every value produced here is deterministic, so the rendered HTML is
  * diffable against EC-CUBE's output (residual-diff verification).
  */
 final class BeMartTwigExtension extends AbstractExtension
 {
-    private readonly RouteTable $routes;
+    private readonly RouterContainer $routes;
+
+    private readonly AuraGenerator $generator;
+
     private readonly CsrfToken|null $csrf;
 
-    /**
-     * @param RouteTable|null $routes The shared route map. Defaults to
-     *     {@see RouteTable::default()} so the extension can be constructed
-     *     with no arguments (render tests, the Twig provider).
-     */
-    public function __construct(RouteTable|null $routes = null, CsrfToken|null $csrf = null)
+    /** Defaults to the shared EC-CUBE Aura route map. */
+    public function __construct(RouterContainer|null $routes = null, CsrfToken|null $csrf = null)
     {
-        $this->routes = $routes ?? RouteTable::default();
+        $this->routes = $routes ?? self::routerContainer();
+        $this->generator = $this->routes->getGenerator();
         $this->csrf = $csrf;
     }
 
@@ -171,36 +167,78 @@ final class BeMartTwigExtension extends AbstractExtension
         return $this->csrfToken($tokenId);
     }
 
-    /** @param array<string, int|string> $params */
+    /** @param array<string, mixed> $params */
     public function url(string $route, array $params = []): string
     {
         return $this->path($route, $params);
     }
 
     /**
-     * Resolve an EC-CUBE route name to a URL via the shared {@see RouteTable}.
+     * Resolve an EC-CUBE route name to a URL via Aura.Router.
      *
      * A mapped route generates its real EC-CUBE path with placeholders
      * filled (`product_detail` + `{id: 5}` -> `/products/detail/5`); any
      * leftover params become the query string. An unmapped name falls back
-     * to the legacy `/{name}` form — the same deterministic shape the
-     * pre-router helper produced — so a template referencing an EC-CUBE
-     * route not yet in the table still renders a stable, diffable href.
+     * to the legacy `/{name}` form so a template referencing an EC-CUBE
+     * route not yet in the map still renders a stable, diffable href.
      *
-     * @param array<string, int|string> $params
+     * @param array<string, mixed> $params
      */
     public function path(string $route, array $params = []): string
     {
-        $matched = $this->routes->byName($route);
-        if ($matched !== null) {
-            return $matched->generate($params);
+        try {
+            $path = $this->generator->generate($route, $params);
+            $query = $this->queryParams($route, $params);
+        } catch (AuraRouteNotFound) {
+            $path = '/' . $route;
+            $query = $params;
         }
 
-        $url = '/' . $route;
-        if ($params !== []) {
-            $url .= '?' . http_build_query($params);
+        if ($query === []) {
+            return $path;
         }
 
-        return $url;
+        return $path . '?' . http_build_query($query);
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     * @return array<string, mixed>
+     */
+    private function queryParams(string $route, array $params): array
+    {
+        $pathParamNames = $this->pathParamNames($route);
+        $query = [];
+        foreach ($params as $key => $value) {
+            if (! array_key_exists($key, $pathParamNames)) {
+                $query[$key] = $value;
+            }
+        }
+
+        return $query;
+    }
+
+    /** @return array<string, true> */
+    private function pathParamNames(string $route): array
+    {
+        $auraRoute = $this->routes->getMap()->getRoute($route);
+        preg_match_all(AuraGenerator::REGEX, (string) $auraRoute->path, $matches);
+
+        $names = [];
+        foreach ($matches[1] as $name) {
+            $names[$name] = true;
+        }
+
+        return $names;
+    }
+
+    private static function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(\Aura\Router\Map): null $routes */
+        $routes = require __DIR__ . '/../../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
     }
 }

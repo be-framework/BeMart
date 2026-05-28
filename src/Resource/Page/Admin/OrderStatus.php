@@ -19,6 +19,7 @@ use MyVendor\BeMart\Form\AdminOrderStatusForm;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
+use function count;
 
 /**
  * EC-CUBE doUpdateOrderStatus — 受注ステータス変更 (Wave 7).
@@ -85,6 +86,43 @@ class OrderStatus extends ResourceObject
         $this->body = [
             'form' => $form,
             'orderStatuses' => AdminOrderStatusForm::rows(),
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE doUpdateOrderStatusList — settings-side status list update.
+     *
+     * This is intentionally separate from {@see onPost()}, which
+     * updates one order's workflow status. The settings screen submits
+     * the master-list shape; this wave exposes a concrete CSRF/AUTHZ
+     * surface and returns the accepted payload count without claiming
+     * full EC-CUBE master-data persistence yet.
+     *
+     * @param array<array-key, mixed> $orderStatuses
+     *
+     * @psalm-taint-source input $orderStatuses
+     * @psalm-taint-source input $orderStatusRows
+     */
+    #[CsrfProtected]
+    public function onPut(
+        array $orderStatuses = [],
+        string|null $orderStatusRows = null,
+    ): static {
+        if ($this->adminSession->adminId === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'doUpdateOrderStatusList',
+            'count' => count($orderStatuses),
+            'orderStatusRows' => $orderStatusRows,
+            'message' => '対応状況一覧更新Resourceへ到達しました。',
         ];
 
         return $this;

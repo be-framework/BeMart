@@ -9,6 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminCalendarForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -72,5 +73,65 @@ final class AdminCalendarResourceTest extends TestCase
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
         $this->assertStringContainsString('管理者', $ro->body['message']);
+    }
+
+    public function testOnPostUpdateCalendarSurface(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID);
+
+        $ro = $this->resource->post('page://self/admin/calendar', [
+            'operation' => 'update',
+            'calendarId' => 1,
+            'title' => '元日',
+            'holiday' => '2026-01-01',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('doUpdateCalendar', $ro->body['transitionId']);
+        $this->assertSame('元日', $ro->body['title']);
+    }
+
+    public function testOnPostCreateCalendarHolidaySurface(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID);
+
+        $ro = $this->resource->post('page://self/admin/calendar', [
+            'operation' => 'create',
+            'title' => '建国記念の日',
+            'holiday' => '2026-02-11',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+        $this->assertSame('doCreateCalendarHoliday', $ro->body['transitionId']);
+    }
+
+    public function testOnDeleteCalendarHolidaySurface(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID);
+
+        $ro = $this->resource->delete('page://self/admin/calendar', [
+            'calendarId' => 1,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('doDeleteCalendarHoliday', $ro->body['transitionId']);
+        $this->assertSame(1, $ro->body['calendarId']);
+    }
+
+    public function testOnPostMissingCsrfReturns403(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID);
+
+        $ro = $this->resource->post('page://self/admin/calendar', [
+            'operation' => 'update',
+            'title' => '元日',
+            'holiday' => '2026-01-01',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 }

@@ -36,6 +36,7 @@ final readonly class MemberFetched
     public string $name;
     public int $authority;
     public int $work;
+    public int $sortNo;
 
     public function __construct(
         #[Input] string $loginId,
@@ -56,5 +57,6 @@ final readonly class MemberFetched
         $this->name = $admin->name;
         $this->authority = $admin->authority;
         $this->work = $admin->work;
+        $this->sortNo = $admin->sortNo;
     }
 }

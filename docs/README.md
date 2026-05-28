@@ -11,8 +11,7 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 | ファイル | 役割 |
 |---|---|
 | [`migration-status.md`](migration-status.md) | **移植ステータスの正**。レイヤ別マトリクスと残作業 punch-list。「今どこまで出来ているか」はここが正。 |
-| [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ BeMart実装状態の生成HTML表。 |
-| [`html-screen-migration-matrix.md`](html-screen-migration-matrix.md) | HTML画面/route移植の集計と判定基準。詳細表はHTML版へ委譲。 |
+| [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ BeMart実装状態 ↔ 移植難易度の生成HTML表。 |
 | [`HANDOVER.md`](HANDOVER.md) | 構築プロセスの記録。Phase A / Phase 2 / Phase 3 の決定ログ、Pilot/Wave 報告、skill gap 発見の経緯。 |
 | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) | 引き継ぎ手順。再開時に読むファイル順・次にやること・リポジトリ構造。 |
 | [`tag.md`](tag.md) | タグ分類体系（`flow-*` / `src-*` 等、ワークフロー・ドメイン・アクター・情報源の命名規則）。 |

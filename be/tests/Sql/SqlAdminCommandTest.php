@@ -236,6 +236,32 @@ final class SqlAdminCommandTest extends AbstractSqlTestCase
         $this->assertSame(1, $read->authority);
     }
 
+    public function testReorderUpdatesSortNo(): void
+    {
+        $id = $this->insertAdmin(['login_id' => 'sortable-admin', 'sort_no' => 3]);
+
+        $command = $this->sql(AdminCommandInterface::class);
+        $command->reorder((string) $id, 14);
+
+        $query = $this->sql(AdminQueryInterface::class);
+        $read = $query->item((string) $id);
+        $this->assertInstanceOf(AdminEntity::class, $read);
+        $this->assertSame(14, $read->sortNo);
+    }
+
+    public function testReorderIsNoOpForNonNumericId(): void
+    {
+        $id = $this->insertAdmin(['login_id' => 'sort-untouched', 'sort_no' => 5]);
+
+        $command = $this->sql(AdminCommandInterface::class);
+        $command->reorder('ad000000000000000000000000000001', 99);
+
+        $query = $this->sql(AdminQueryInterface::class);
+        $read = $query->item((string) $id);
+        $this->assertInstanceOf(AdminEntity::class, $read);
+        $this->assertSame(5, $read->sortNo);
+    }
+
     public function testAdminIdQueryAllocatesIncrementingIds(): void
     {
         $ids = $this->sql(AdminIdQueryInterface::class);

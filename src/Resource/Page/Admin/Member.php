@@ -102,6 +102,7 @@ class Member extends ResourceObject
                 'name' => '',
                 'authority' => 0,
                 'work' => 0,
+                'sortNo' => 0,
                 'csrfToken' => $this->csrf->token,
                 'form' => $form,
             ];
@@ -140,6 +141,7 @@ class Member extends ResourceObject
             'name' => $final->name,
             'authority' => $final->authority,
             'work' => $final->work,
+            'sortNo' => $final->sortNo,
         ];
         // Phase 3: an AdminMemberForm pre-filled with the persisted row,
         // for the HTML edit page (var/templates/Page/Admin/Member.html.twig)
@@ -213,6 +215,7 @@ class Member extends ResourceObject
             'name' => $final->name,
             'authority' => $final->authority,
             'work' => $final->work,
+            'sortNo' => $final->sortNo,
         ];
 
         return $this;
@@ -267,6 +270,7 @@ class Member extends ResourceObject
             'name' => $final->name,
             'authority' => $final->authority,
             'work' => $final->work,
+            'sortNo' => $final->sortNo,
         ];
 
         return $this;

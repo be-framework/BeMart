@@ -20,10 +20,12 @@ use MyVendor\BeMart\Be\Reason\Service\NativePasswordHasher;
 use MyVendor\BeMart\Be\Reason\Service\NoopInventoryAllocator;
 use MyVendor\BeMart\Be\Reason\Service\NoopMailer;
 use MyVendor\BeMart\Be\Reason\Service\NoopPaymentGateway;
+use MyVendor\BeMart\Be\Reason\Service\OrderPdfCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
+use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
@@ -46,6 +48,7 @@ final class AppModule extends AbstractAppModule
     protected function configure(): void
     {
         $this->install(new PackageModule());
+        $this->override(new AuraRouterModule($this->appMeta->appDir . '/config/aura-routes.php'));
         // PackageModule does not bind @AppName by itself; BEAR\Package\Module
         // factory normally overrides it. Install explicitly so tests can use
         // `new Injector(new *Module(...))` without the factory.
@@ -76,6 +79,7 @@ final class AppModule extends AbstractAppModule
         $this->bind(CustomerInitialPointInterface::class)->to(FixedCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(DefaultPurchaseFlow::class)->in(Scope::SINGLETON);
         $this->bind(PaymentMethodFactoryInterface::class)->to(DefaultPaymentMethodFactory::class)->in(Scope::SINGLETON);
+        $this->bind(OrderPdfCompatibilityInterface::class)->to(OrderPdfCompatibilityService::class)->in(Scope::SINGLETON);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).

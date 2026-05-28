@@ -7,23 +7,23 @@ namespace MyVendor\BeMart\Tests\Http;
 use DOMDocument;
 use DOMElement;
 use DOMXPath;
+use Aura\Router\Generator as AuraGenerator;
+use Aura\Router\Map;
+use Aura\Router\Route as AuraRoute;
+use Aura\Router\RouterContainer;
 use Koriym\PhpServer\PhpServer;
-use MyVendor\BeMart\Router\Route;
-use MyVendor\BeMart\Router\RouteTable;
+use MyVendor\BeMart\Module\BeMartTwigExtension;
 use PHPUnit\Framework\TestCase;
 
 use function array_key_exists;
 use function array_unique;
 use function assert;
 use function escapeshellarg;
-use function explode;
 use function file_put_contents;
-use function http_build_query;
 use function implode;
 use function in_array;
 use function is_array;
 use function is_string;
-use function json_encode;
 use function libxml_clear_errors;
 use function libxml_use_internal_errors;
 use function parse_url;
@@ -49,11 +49,11 @@ use const PHP_URL_PATH;
 use const PHP_URL_SCHEME;
 
 /**
- * End-to-end HTML crawl over the RouteTable GET surface and the local links
+ * End-to-end HTML crawl over the Aura route-map GET surface and the local links
  * rendered from those pages.
  *
  * This is intentionally HTTP-level rather than Resource-level: it exercises
- * public/index.php, Bootstrap, RouteTable, Twig rendering, PHP sessions and
+ * public/index.php, Bootstrap, Aura.Router, Twig rendering, PHP sessions and
  * the generated hrefs together. The companion crawl-index.php seeds stable
  * fake customer/admin identities so authenticated screens can be reached
  * without depending on a previous browser session.
@@ -87,7 +87,7 @@ final class HtmlLinkCrawlTest extends TestCase
         $this->startServer();
     }
 
-    public function testRouteTableGetPagesAndRenderedLocalLinksAreReachable(): void
+    public function testAuraGetPagesAndRenderedLocalLinksAreReachable(): void
     {
         $queue = $this->routeTableGetUrls();
         $seen = [];
@@ -173,13 +173,23 @@ final class HtmlLinkCrawlTest extends TestCase
     /** @return list<string> */
     private function routeTableGetUrls(): array
     {
+        $routes = $this->routerContainer();
         $urls = [];
-        foreach (RouteTable::default()->routes as $route) {
-            if (! in_array('GET', $route->methods, true)) {
+        $urlsHelper = new BeMartTwigExtension($routes);
+        foreach ($routes->getMap()->getRoutes() as $route) {
+            /** @var mixed $methods */
+            $methods = $route->extras['bemart']['methods'] ?? [];
+            if (! is_array($methods) || ! array_key_exists('GET', $methods)) {
                 continue;
             }
 
-            $urls[] = $route->generate($this->sampleParams($route));
+            /** @var mixed $metadata */
+            $metadata = $methods['GET'];
+            if (! is_array($metadata)) {
+                continue;
+            }
+
+            $urls[] = $urlsHelper->path((string) $route->name, $this->sampleParams($route, $metadata));
         }
 
         $urls = array_values(array_unique($urls));
@@ -188,21 +198,38 @@ final class HtmlLinkCrawlTest extends TestCase
         return $urls;
     }
 
-    /** @return array<string, int|string> */
-    private function sampleParams(Route $route): array
+    /**
+     * @param array<string, mixed> $metadata
+     * @return array<string, int|string>
+     */
+    private function sampleParams(AuraRoute $route, array $metadata): array
     {
         $params = [];
-        if (preg_match_all('/\{([^}]+)\}/', $route->path, $matches) === 1) {
+        /** @var array<string, string> $paramMap */
+        $paramMap = is_array($metadata['paramMap'] ?? null) ? $metadata['paramMap'] : [];
+        if (preg_match_all(AuraGenerator::REGEX, (string) $route->path, $matches) === 1) {
             foreach ($matches[1] as $placeholder) {
-                $params[$placeholder] = $this->sampleForWireName($placeholder, $route->paramMap[$placeholder] ?? $placeholder);
+                $params[$placeholder] = $this->sampleForWireName($placeholder, $paramMap[$placeholder] ?? $placeholder);
             }
         }
 
-        foreach ($route->queryParamMap as $wire => $canonical) {
+        /** @var array<string, string> $queryParamMap */
+        $queryParamMap = is_array($metadata['queryParamMap'] ?? null) ? $metadata['queryParamMap'] : [];
+        foreach ($queryParamMap as $wire => $canonical) {
             $params[$wire] = $this->sampleForWireName($wire, $canonical);
         }
 
         return $params;
+    }
+
+    private function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(Map): null $routes */
+        $routes = require __DIR__ . '/../../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
     }
 
     private function sampleForWireName(string $wire, string $canonical): int|string
@@ -219,6 +246,7 @@ final class HtmlLinkCrawlTest extends TestCase
             'loginId' => 'test-admin',
             'newsId' => 'nw-welcome',
             'orderNo' => 'past0000000000000000000000000001',
+            'orderNos' => 'past0000000000000000000000000001',
             'pageId' => 'pg-homepage',
             'paymentId' => 'pay-cod',
             'productCode' => $wire === 'id' && str_contains($canonical, 'product') ? 'admin-active-001' : 'sample-001',

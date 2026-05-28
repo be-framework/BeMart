@@ -7,19 +7,20 @@ namespace MyVendor\BeMart\Tests\Http;
 use DOMDocument;
 use DOMElement;
 use DOMXPath;
+use Aura\Router\Generator as AuraGenerator;
+use Aura\Router\Map;
+use Aura\Router\Route as AuraRoute;
+use Aura\Router\RouterContainer;
 use Koriym\PhpServer\PhpServer;
-use MyVendor\BeMart\Router\Route;
-use MyVendor\BeMart\Router\Router;
-use MyVendor\BeMart\Router\RouteTable;
+use MyVendor\BeMart\Module\BeMartTwigExtension;
+use MyVendor\BeMart\Support\Router\AuraRouter;
 use PHPUnit\Framework\TestCase;
-use Throwable;
 
+use function array_key_exists;
 use function array_unique;
 use function assert;
 use function dirname;
 use function escapeshellarg;
-use function file_get_contents;
-use function http_build_query;
 use function implode;
 use function in_array;
 use function is_array;
@@ -40,11 +41,11 @@ use const PHP_URL_PATH;
 use const PHP_URL_SCHEME;
 
 /**
- * Verifies that every rendered HTML form submits to a RouteTable route.
+ * Verifies that every rendered HTML form submits to an Aura route.
  *
  * HtmlLinkCrawlTest covers anchors. This companion covers browser form
  * transitions: all rendered forms must use GET/POST and their action URL
- * must be dispatchable by the shared Router. It intentionally does not submit
+ * must be dispatchable by the shared AuraRouter. It intentionally does not submit
  * every mutation; the goal here is to catch broken browser transitions such as
  * POST forms pointing at GET-only admin aliases.
  */
@@ -68,7 +69,8 @@ final class HtmlFormActionCoverageTest extends TestCase
 
     public function testRenderedFormActionsAreRoutableGetOrPostTransitions(): void
     {
-        $router = new Router(RouteTable::default());
+        $routes = $this->routerContainer();
+        $router = new AuraRouter($routes);
         $formCount = 0;
         $problems = [];
 
@@ -82,16 +84,16 @@ final class HtmlFormActionCoverageTest extends TestCase
                 }
 
                 $actionPath = $this->actionPath($pagePath, $form->getAttribute('action'));
-                try {
-                    $router->match($method, $actionPath);
-                } catch (Throwable $e) {
+                $match = $router->match(
+                    ['_GET' => [], '_POST' => []],
+                    ['REQUEST_METHOD' => $method, 'REQUEST_URI' => $actionPath],
+                );
+                if ($match->path === '') {
                     $problems[] = sprintf(
-                        '%s form %s %s is not routable: %s %s',
+                        '%s form %s %s is not routable',
                         $pagePath,
                         $method,
                         $actionPath,
-                        $e::class,
-                        $e->getMessage(),
                     );
                 }
             }
@@ -104,13 +106,23 @@ final class HtmlFormActionCoverageTest extends TestCase
     /** @return list<string> */
     private function routeTableGetUrls(): array
     {
+        $routes = $this->routerContainer();
         $urls = [];
-        foreach (RouteTable::default()->routes as $route) {
-            if (! in_array('GET', $route->methods, true)) {
+        $urlsHelper = new BeMartTwigExtension($routes);
+        foreach ($routes->getMap()->getRoutes() as $route) {
+            /** @var mixed $methods */
+            $methods = $route->extras['bemart']['methods'] ?? [];
+            if (! is_array($methods) || ! array_key_exists('GET', $methods)) {
                 continue;
             }
 
-            $urls[] = $route->generate($this->sampleParams($route));
+            /** @var mixed $metadata */
+            $metadata = $methods['GET'];
+            if (! is_array($metadata)) {
+                continue;
+            }
+
+            $urls[] = $urlsHelper->path((string) $route->name, $this->sampleParams($route, $metadata));
         }
 
         $urls = array_values(array_unique($urls));
@@ -119,21 +131,38 @@ final class HtmlFormActionCoverageTest extends TestCase
         return $urls;
     }
 
-    /** @return array<string, int|string> */
-    private function sampleParams(Route $route): array
+    /**
+     * @param array<string, mixed> $metadata
+     * @return array<string, int|string>
+     */
+    private function sampleParams(AuraRoute $route, array $metadata): array
     {
         $params = [];
-        if (preg_match_all('/\{([^}]+)\}/', $route->path, $matches) === 1) {
+        /** @var array<string, string> $paramMap */
+        $paramMap = is_array($metadata['paramMap'] ?? null) ? $metadata['paramMap'] : [];
+        if (preg_match_all(AuraGenerator::REGEX, (string) $route->path, $matches) === 1) {
             foreach ($matches[1] as $placeholder) {
-                $params[$placeholder] = $this->sampleFor($placeholder, $route->paramMap[$placeholder] ?? $placeholder);
+                $params[$placeholder] = $this->sampleFor($placeholder, $paramMap[$placeholder] ?? $placeholder);
             }
         }
 
-        foreach ($route->queryParamMap as $wire => $canonical) {
+        /** @var array<string, string> $queryParamMap */
+        $queryParamMap = is_array($metadata['queryParamMap'] ?? null) ? $metadata['queryParamMap'] : [];
+        foreach ($queryParamMap as $wire => $canonical) {
             $params[$wire] = $this->sampleFor($wire, $canonical);
         }
 
         return $params;
+    }
+
+    private function routerContainer(): RouterContainer
+    {
+        $container = new RouterContainer();
+        /** @var callable(Map): null $routes */
+        $routes = require __DIR__ . '/../../config/aura-routes.php';
+        $container->setMapBuilder($routes);
+
+        return $container;
     }
 
     private function sampleFor(string $wire, string $canonical): int|string
@@ -150,6 +179,7 @@ final class HtmlFormActionCoverageTest extends TestCase
             'loginId' => 'test-admin',
             'newsId' => 'nw-welcome',
             'orderNo' => 'past0000000000000000000000000001',
+            'orderNos' => 'past0000000000000000000000000001',
             'pageId' => 'pg-homepage',
             'paymentId' => 'pay-cod',
             'productCode' => $wire === 'id' ? 'admin-active-001' : 'sample-001',
