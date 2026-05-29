@@ -29,12 +29,15 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testOnGetSeedsAuthKey(): void
+    public function testOnGetRendersFormWithEmptyAuthKeyPlaceholder(): void
     {
+        // authKey stays empty to match the EC-CUBE render baseline (the
+        // QR `secret=` is blank); the real secret is supplied to onPut.
         $ro = $this->resource->get('page://self/admin/two-factor-auth-set');
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertNotSame('', $ro->body['authKey']);
+        $this->assertArrayHasKey('authKey', $ro->body);
+        $this->assertSame('', $ro->body['authKey']);
     }
 
     public function testOnPutConfiguresDevice(): void

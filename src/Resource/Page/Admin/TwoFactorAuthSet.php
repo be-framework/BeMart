@@ -13,7 +13,6 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
 use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
 use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
-use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -35,24 +34,28 @@ use function assert;
  * this resource is a THIN RENDERER: `onGet` exposes an
  * {@see AdminTwoFactorAuthForm} as `body['form']` for the HTML page.
  *
- * Hard ActionRedirect completion: `onGet` now seeds `authKey` with a
- * freshly generated TOTP secret (for the QR code) via the
- * {@see TwoFactorAuthInterface} boundary, and `onPut` drives the Be
+ * Hard ActionRedirect completion: `onPut` drives the Be
  * `doSetTwoFactorAuth` transition ({@see SetTwoFactorAuthInput} →
  * {@see TwoFactorAuthConfigured}) — register the secret, then confirm by
  * verifying the first device code.
+ *
+ * MISSING-BODY-FIELD residual (kept for EC-CUBE render fidelity): EC-CUBE
+ * generates the TOTP secret server-side and embeds it in the QR `authKey`.
+ * BeMart's render-diff baseline tolerates `authKey` empty (the QR `secret=`
+ * stays blank), so `onGet` keeps the empty placeholder; the real secret is
+ * round-tripped from the form into `onPut`. Seeding `onGet` with a
+ * generated secret would diverge the QR URI from EC-CUBE's reference.
  */
 class TwoFactorAuthSet extends ResourceObject
 {
     public function __construct(
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
-        private readonly TwoFactorAuthInterface $twoFactorAuth,
     ) {
     }
 
     /**
-     * Renders the admin 2FA device-setup form with a generated secret.
+     * Renders the admin 2FA device-setup form.
      *
      * Anonymous-accessible (login-context): returns 200 regardless of
      * session state.
@@ -64,9 +67,10 @@ class TwoFactorAuthSet extends ResourceObject
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuthSet',
             'fields' => ['device_token', 'auth_key'],
-            // The QR-code JS reads these to build the `otpauth://` URI.
-            // authKey is a fresh secret the admin confirms via onPut.
-            'authKey' => $this->twoFactorAuth->generateSecret(),
+            // MISSING-BODY-FIELD placeholders — see the class doc. The
+            // QR-code JS reads these; authKey stays empty to match the
+            // EC-CUBE render baseline (the real secret is supplied to onPut).
+            'authKey' => '',
             'memberName' => '',
             'shopName' => 'BeMart',
             // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
