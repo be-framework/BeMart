@@ -92,8 +92,39 @@ grep -oP 'data-implementation-status="安全退避\(ActionRedirect\)" data-diffi
 （→ 既存テスト不変）。columnName→値の対応は「列カタログ（既定列＝単一真実源）」を 1 箇所に持つのを推奨。
 未知 columnName は空セル or 無視（要決定）。新規テストは Fake で設定を与えて列の絞り込み・並び替えを検証。
 
-> このリポジトリで **Plan エージェントに詳細設計を依頼済み**。完了後その出力を
-> 本節へ追記する（または別途共有）。実装前に codex で再レビュー推奨。
+#### 検証済み詳細設計（Plan エージェント出力、実装前に codex 再レビュー推奨）
+
+**対象 4 export Final の現状列（フォールバック時は byte 一致を維持＝絶対に変えない）**:
+
+| Final | csvType | source | public prop | 既定列順 | 細部 |
+|---|---|---|---|---|---|
+| `AdminProductCsvExported` | 3 | `productQuery->listForExport()` | `csv` / `count` | productCode, productName, price02, stock, productStatus, description, searchWord, note | `php://memory`, `=== false` ガード, escape `'\\'`, private `encodeRow()` |
+| `AdminCustomerCsvExported` | 2 | `customerQuery->search(null,null,5000)` | `csv` / `rowCount` | customerId, email, name01, name02, kana01, kana02, companyName, phoneNumber, postalCode, pref, addr01, addr02, customerStatus | `php://temp`, `assert`, escape `''`, 行リテラル inline |
+| `AdminOrderCsvExported` | 1 | `orderQuery->list(1000,0)`（`FinalizedOrderEntity`） | `csv` / `rowCount` | orderNo, customerId, orderStatus, orderDate, total, paymentTotal, subtotal, deliveryFeeTotal, charge, discount, tax | `php://temp`, `assert`, escape `''` |
+| `AdminShippingCsvExported` | 4 | `shippingAddresses->list()` | `csv` / `rowCount` | orderNo, name01, name02, postalCode, pref, addr01, addr02, phoneNumber, trackingNumber | `php://temp`, `assert`, escape `''`（trackingNumber は現状リテラル `''`） |
+
+> **各 Final の差異（escape 文字・stream 種別・`count` vs `rowCount`・nullable の `?? ''`・`(string)` cast）は統一せず温存**すること。統一するとフォールバック byte 一致保証が崩れ diff が膨らむ。
+
+**設計判断（推奨）**:
+1. **列カタログは各 Final 内に閉じる**（global catalog 不採用）。理由: global catalog は 4 つの異なる Entity に紐づく値抽出 closure を 1 クラスに集約し「Final が自分の組み立てを所有する」Be 原則に反し、レビュー面（Order/Customer トリガ）も広がる。各 Final に `private const DEFAULT_COLUMNS = [...]` ＋ `columnMap(Entity $row): array<string,string|int>`（キー=列名、値=現 `encodeRow`/inline と同一式）を置き、**ヘッダと行が同じ map から出る**ことで現状の header/row 二重定義 drift を解消（地味な cleanup）。
+2. **未知 columnName**（map に無い列名）: **ヘッダには出すが各行は空セル**（`$this->columnMap($row)[$name] ?? ''`）。EC-CUBE の寛容 export 準拠・行幅==ヘッダ幅維持・明示有効化列を黙殺しない。
+3. **filter/sort**: `listByType` は sortNo 昇順済みだが結合度低減のため Final 側で `sortNo` 防御的 re-sort → `enabled===true` を `array_filter` → `array_values(array_map(columnName))`。
+
+**実装手順（各 Final 共通）**:
+- ctor に `#[Inject] CsvColumnConfigStorageInterface $csvColumnConfigStorage` 追加（AUTHZ 等不変）。
+- `$config = $csvColumnConfigStorage->listByType(該当csvType);`
+  `$columns = $config === [] ? self::DEFAULT_COLUMNS : array_values(array_map(fn($e)=>$e->columnName, array_filter(sortBySortNo($config), fn($e)=>$e->enabled)));`
+- ヘッダ: `fputcsv($handle, $columns, ...)`、各行: `fputcsv($handle, array_map(fn($n)=>$this->columnMap($row)[$n] ?? '', $columns), ...)`。
+- interface/entity/storage/Resource は**変更なし**（`listByType` 既存、public prop 不変）。
+- psalm: `columnMap` は `@return array<string,string|int>`、行配列は `list<string|int>`。list 推論が崩れたら `array_values()` で包む。
+
+**既存テスト非破壊の根拠**: Fake では `csv_column_list_by_type.jsonl` が空 → 全 csvType で `listByType` が `[]` → 全 Final がフォールバック → 現状と同一 byte。対象既存: `be/tests/Domain/AdminProductCsvExportedTest.php`, `tests/Resource/AdminProductCsvResourceTest.php`, `tests/Resource/AdminCustomerCsvResourceTest.php`。**注: order/shipping/customer の domain test は存在しない**（export domain test は product のみ）。`SqlCsvColumnConfigStorageTest` は影響なし。
+
+**新規テスト方式**: `CsvColumnConfigStorageInterface` は FakeQuery 裏付けで手書き Fake が無い。よって `AdminSession` 差し替えと同じ **`TestModule` + 無名 `AbstractModule` override** で `bind(CsvColumnConfigStorageInterface::class)->toInstance($stub)`（無名クラスで `listByType` が固定ベクトルを返す／`replaceType` no-op）。Ray.Di override が FakeQuery バインドに勝つ。product で「並び替え＋disabled 除外＋未設定列除外」、customer で「`passwordHash` 名の列を設定しても空セル」を assert。共有 jsonl は**空のまま据え置く**（FakeQuery は `replaceType`→`listByType` を永続しないので jsonl-fixture 不採用、実永続化は SQL スイート担保）。
+
+**セキュリティ（Order|Customer→条件付きレビュー発火）事前正当化**: (a) AUTHZ 不変、(b) 機微フィールドは抽出 map に無い＝敵対的設定でも出力不可、(c) 未知列は常に空セル。
+
+**watch-items**: order export は `OrderEntity` でなく `FinalizedOrderEntity`（`order_list_all`＋`FinalizedOrderFactory`）。map を書く前に現 inline 行が参照するフィールド名が当該 entity に在ることを確認。
 
 ### 2. doCreateOrder enrichment（大・購入中核・要丁寧検証）
 
