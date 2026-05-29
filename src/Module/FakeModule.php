@@ -20,6 +20,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMaintenanceMode;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMasterDataWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSecurityConfigWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
@@ -29,6 +30,7 @@ use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
+use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
@@ -99,6 +101,10 @@ final class FakeModule extends AbstractAppModule
         $classCsv = new FakeClassCsvCompatibility();
         $this->bind(FakeClassCsvCompatibility::class)->toInstance($classCsv);
         $this->bind(ClassCsvCompatibilityInterface::class)->toInstance($classCsv);
+
+        $templateCompat = new FakeTemplateCompatibility();
+        $this->bind(FakeTemplateCompatibility::class)->toInstance($templateCompat);
+        $this->bind(TemplateCompatibilityInterface::class)->toInstance($templateCompat);
 
         $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(FakePurchaseFlow::class)->in(Scope::SINGLETON);
