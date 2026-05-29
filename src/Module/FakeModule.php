@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakePurchaseFlow;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCacheClearer;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCustomizeAssetWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMaintenanceMode;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMasterDataWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSecurityConfigWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
@@ -24,6 +25,7 @@ use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
+use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
@@ -87,6 +89,10 @@ final class FakeModule extends AbstractAppModule
         $this->bind(CustomizeAssetWriterInterface::class)->toInstance($assetWriter);
         $this->bind(FakeMaintenanceMode::class)->toInstance($maintenance);
         $this->bind(MaintenanceModeInterface::class)->toInstance($maintenance);
+
+        $masterDataWriter = new FakeMasterDataWriter();
+        $this->bind(FakeMasterDataWriter::class)->toInstance($masterDataWriter);
+        $this->bind(MasterDataWriterInterface::class)->toInstance($masterDataWriter);
 
         $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(FakePurchaseFlow::class)->in(Scope::SINGLETON);
