@@ -1,0 +1,52 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Resource\Page\Admin\ClassName;
+
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\ClassNameCsvExported;
+use MyVendor\BeMart\Be\Input\ExportClassNameInput;
+
+use function assert;
+
+/**
+ * EC-CUBE 規格名CSVダウンロード (goExportClassName).
+ *
+ *   GET/POST /admin_product_class_name_export → CSV download
+ *
+ * `onGet` drives the Be `goExportClassName` transition; the EC-CUBE-format
+ * encoding + download headers are isolated behind
+ * {@see \MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface}.
+ */
+class ClassNameExport extends ResourceObject
+{
+    public function __construct(
+        private readonly BecomingInterface $becoming,
+    ) {
+    }
+
+    public function onGet(): static
+    {
+        try {
+            $final = ($this->becoming)(new ExportClassNameInput());
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof ClassNameCsvExported);
+
+        $this->code = Code::OK;
+        $this->headers['Content-Type'] = 'text/csv; charset=Shift_JIS';
+        $this->headers['Content-Disposition'] = $final->document->contentDisposition;
+        $this->body = $final->document->content;
+
+        return $this;
+    }
+}
