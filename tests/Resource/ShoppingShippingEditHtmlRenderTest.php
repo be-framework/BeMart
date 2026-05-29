@@ -79,8 +79,8 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
         // context — `shippingId` is a MISSING BODY FIELD follow-up — so
         // the port posts to the bare route. Same route, the id param
         // absent. Identical for the back-link below.
-        '<form method="post" action="/shopping_shipping_edit?id=1" class="h-adr">',
-        '<form method="post" action="/shopping_shipping_edit" class="h-adr">',
+        '<form method="post" action="/shopping/shipping/edit?id=1" class="h-adr">',
+        '<form method="post" action="/shopping/shipping/edit" class="h-adr">',
     ];
 
     private ResourceInterface $resource;

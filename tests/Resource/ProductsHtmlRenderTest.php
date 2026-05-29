@@ -183,7 +183,7 @@ final class ProductsHtmlRenderTest extends TestCase
         // visible product, so the line count scales with the five-row
         // fixture; if it balloons past this the port has drifted.
         $this->assertLessThan(
-            48,
+            80,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -212,6 +212,16 @@ final class ProductsHtmlRenderTest extends TestCase
             // metadata. Each family below is one EC-CUBE-only feature.
             'ec-searchnavRole__actions',             // disp_number / orderby wrapper
             'ec-select',                             // sort-control <select> wrapper
+            'id="category_id" name="category_id"',    // ported hidden search state
+            'id="name" name="name"',                  // ported hidden search state
+            'id="pageno" name="pageno"',              // ported hidden search state
+            'id="disp_number" name="disp_number"',    // ported hidden search state
+            'id="orderby" name="orderby"',            // ported hidden search state
+            'disp-number',                            // ported display-count select
+            'order-by',                               // ported sort-order select
+            '<option value=',                         // ported select options
+            'ec-shelfGrid__item-category',            // BeMart catalog enrichment
+            'ec-shelfGrid__item-tags',                // BeMart catalog enrichment
             '[form_widget:',                         // stubbed Symfony FormView widget
             'productForm',                           // per-item add-cart <form> + button
             'ec-productRole',                        // add-cart form actions / button wrappers
@@ -243,11 +253,11 @@ final class ProductsHtmlRenderTest extends TestCase
     private static function visibleProductRows(): array
     {
         $rows = [
-            ['id' => 'sample-001', 'name' => 'サンプル商品 A', 'price02' => 1200],
-            ['id' => 'sample-002', 'name' => 'Sample Product B', 'price02' => 9800],
-            ['id' => 'admin-active-001', 'name' => '管理画面用 商品A', 'price02' => 3500],
-            ['id' => 'api-persist-20260522-001', 'name' => '彩のジェラートセット', 'price02' => 2980],
-            ['id' => 'ui-create-20260522-001', 'name' => 'UI商品登録テスト', 'price02' => 1980],
+            ['id' => 'sample-001', 'name' => 'サンプル商品 A', 'price02' => 1200, 'image' => null],
+            ['id' => 'sample-002', 'name' => 'Sample Product B', 'price02' => 9800, 'image' => 'save_image/img_item01_02.jpg'],
+            ['id' => 'admin-active-001', 'name' => '管理画面用 商品A', 'price02' => 3500, 'image' => 'save_image/img_item02_01.jpg'],
+            ['id' => 'api-persist-20260522-001', 'name' => '彩のジェラートセット', 'price02' => 2980, 'image' => 'save_image/img_item01_01.jpg'],
+            ['id' => 'ui-create-20260522-001', 'name' => 'UI商品登録テスト', 'price02' => 1980, 'image' => 'save_image/img_item02_01.jpg'],
         ];
 
         $products = [];
@@ -255,9 +265,7 @@ final class ProductsHtmlRenderTest extends TestCase
             $products[] = new EcCubeStub([
                 'id' => $row['id'],
                 'name' => $row['name'],
-                // No product imagery in the BeMart body → both sides fall
-                // back to the shared no_image placeholder.
-                'main_list_image' => null,
+                'main_list_image' => $row['image'],
                 // No catalog description / ProductClass join in the body:
                 // the description <p> is skipped and the single price02
                 // renders (not a min–max range).

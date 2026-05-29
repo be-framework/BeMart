@@ -10,7 +10,9 @@ use Twig\Source;
 use function file_exists;
 use function file_get_contents;
 use function in_array;
+use function preg_match;
 use function preg_replace;
+use function str_replace;
 use function str_starts_with;
 use function substr;
 
@@ -30,8 +32,10 @@ use function substr;
  *    template root (the `@admin` namespace maps to
  *    `template/admin/`, `@common` to `template/admin/` too — the only
  *    `@common` include is `lang.twig`, stubbed empty below);
- *  - serves the page template + `@admin/default_frame.twig` +
- *    `@admin/nav.twig` for real — the admin layout being verified;
+ *  - serves the page template + `@admin/default_frame.twig` for real;
+ *  - serves `@admin/nav.twig` from BeMart's static admin nav port, because
+ *    the current BeMart frame intentionally inlines the first-slice menu
+ *    instead of carrying EC-CUBE's dynamic `eccubeNav` runtime tree;
  *  - serves the remaining admin includes EMPTY: `alert.twig`,
  *    `info.twig`, `notice_debug_mode.twig`, `snippet.twig`,
  *    `pager.twig`, `search_items.twig`, `@common/lang.twig`. Those are
@@ -73,9 +77,20 @@ final class EcCubeAdminStubLoader implements LoaderInterface
             return new Source('', $name);
         }
 
+        if ($relative === 'nav.twig') {
+            return new Source($this->portedAdminNav(), $name);
+        }
+
         $path = $this->adminTemplateRoot . '/' . $relative;
         $source = (string) file_get_contents($path);
         $source = (string) preg_replace('/\{%-?\s*form_theme\b.*?-?%\}/s', '', $source);
+        if ($relative === 'default_frame.twig' || $relative === 'login_frame.twig') {
+            $source = (string) str_replace(
+                "<script src=\"{{ asset('assets/js/function.js', 'admin') }}\"></script>",
+                "<script src=\"{{ asset('assets/js/function.js', 'admin') }}\"></script>\n<script src=\"{{ asset('assets/js/bemart-unsupported.js') }}\"></script>",
+                $source,
+            );
+        }
 
         return new Source($source, $name, $path);
     }
@@ -130,5 +145,15 @@ final class EcCubeAdminStubLoader implements LoaderInterface
     private function isStubbed(string $relative): bool
     {
         return in_array($relative, self::STUBBED_EMPTY, true);
+    }
+
+    private function portedAdminNav(): string
+    {
+        $source = (string) file_get_contents(__DIR__ . '/../../var/templates/admin-base.html.twig');
+        if (preg_match('/<nav>.*?<\/nav>/s', $source, $matches) === 1) {
+            return $matches[0];
+        }
+
+        return '';
     }
 }
