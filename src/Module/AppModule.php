@@ -25,6 +25,10 @@ use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
+use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
+use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\ResourceObject;
@@ -80,6 +84,8 @@ final class AppModule extends AbstractAppModule
         $this->bind(PurchaseFlowInterface::class)->to(DefaultPurchaseFlow::class)->in(Scope::SINGLETON);
         $this->bind(PaymentMethodFactoryInterface::class)->to(DefaultPaymentMethodFactory::class)->in(Scope::SINGLETON);
         $this->bind(OrderPdfCompatibilityInterface::class)->to(OrderPdfCompatibilityService::class)->in(Scope::SINGLETON);
+        $this->bind(TwoFactorAuthInterface::class)->to(EccubeTwoFactorAuth::class)->in(Scope::SINGLETON);
+        $this->bind(SecurityConfigWriterInterface::class)->to(EccubeSecurityConfigWriter::class)->in(Scope::SINGLETON);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).
