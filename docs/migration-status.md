@@ -95,7 +95,7 @@ Punch-list, roughly highest-effort first:
 | Phase 2 detail (SQL) | `sql/diff/entity-vs-eccube.md` · PR #2 |
 | Phase 3 detail (HTML) | `docs/phases/alps-audit-phase3.md` · `var/templates/README.md` |
 | Route/function status + migration difficulty | `docs/eccube-feature-alps-status.html` |
-| Migration skills / lessons (G-14…G-23) | `docs/skills/` |
+| Migration skills / lessons (G-14…G-25) | `docs/skills/` |
 | Docs map / index | `docs/README.md` |
 | Continuation guide | `docs/HOW_TO_CONTINUE.md` |
 | Stale older trackers (Phase A era, do not trust for current state) | `docs/archive/progress.md` · `docs/archive/task_plan.md` |
