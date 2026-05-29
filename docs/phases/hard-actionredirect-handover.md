@@ -1,0 +1,126 @@
+# Hard ActionRedirect 完走 + Phase-A stub 実体化 — 引き継ぎ
+
+> このブランチ `claude/gallant-fermat-CpUqD`（PR #28, draft）の作業記録と、
+> **ローカルで続きを実装するための引き継ぎ**。クラウド実行セッションが長くなり
+> ツール出力が不安定になったため、残り2件はローカル（codex 相談可）で実装する。
+
+## 完了済み（PR #28 に push 済み・全 green）
+
+`docs/eccube-feature-alps-status.html` で **難易度 Hard かつ「安全退避(ActionRedirect)」** だった
+**22行（18ユニークルート）を 0 件に**。各ルートを具体 Be/BEAR リソースへ接続し、Be ドメイン
+遷移（Input/Semantic/Final/Reason）まで実装。副作用は Issue #24 PDF pilot 方式の
+**境界サービス（`be/src/Reason/Service/*Interface` + `src/Compatibility/Eccube/` 実装 + Fake）** へ隔離。
+
+コミット（1.x からの 7 本、系統ごと）:
+
+1. 認証系: `doChangePassword` を具体Resourceへ接続
+2. 認証系: 2FA確認/設定・セキュリティ設定（doVerifyTwoFactorAuth / doSetTwoFactorAuth / doUpdateSecurity）
+3. コンテンツ系: cache/css/js/maintenance（doClearCache / doUpdateContentCss / doUpdateContentJs / doToggleMaintenance）
+4. マスタデータ系: select/update（doSelectMasterData / doUpdateMasterData、後者は新規 `MasterDataEdit` へ分離）
+5. 規格CSV系: 規格名/規格分類の export/import（goExportClassName / goExportClassCategory / doImportClassNameCsv / doImportClassCategoryCsv）
+6. ストア/テンプレート系: select/delete/download/install（doSelectTemplate / doDeleteTemplate / doDownloadTemplate / doInstallTemplate）
+7. Phase-A stub 実体化: カテゴリ/配送CSV取込（doImportCategoryCsv / doImportShippingCsv）
+
+導入した境界サービス（`be/src/Reason/Service/` interface ＋ `src/Compatibility/Eccube/` 既定 ＋ `tests/Fake/Reason/Service/` Fake）:
+`TwoFactorAuthInterface` / `SecurityConfigWriterInterface` / `CacheClearerInterface` /
+`CustomizeAssetWriterInterface` / `MaintenanceModeInterface` / `MasterDataWriterInterface` /
+`ClassCsvCompatibilityInterface`(+`CsvDocument`) / `TemplateCompatibilityInterface`(+`TemplateArchive`)。
+
+Phase-A stub 実体化（commit 7）:
+- `be/src/Final/CategoryCsvImported.php` — 4列(id/name/parentId/削除flag)parse → `CategoryStorageInterface::put/delete`、空IDは `CategoryIdQueryInterface::next` 採番。
+- `be/src/Final/AdminShippingCsvImported.php` — 受注番号/お問い合わせ番号 parse → 注文照合 → `ShippingAddressStorageInterface::updateTrackingNumber`（`doUpdateTrackingNumber` と同 surface）。
+
+## ⚠️ 環境セットアップ（必須・ハマりどころ）
+
+`ray/fake-query` は pin された dev ブランチで、**素の `composer install` ではテストが起動しない**
+（`FakeQueryModule` ctor シグネチャ不整合 + fixture 規約差）。リポジトリ同梱の patch を当てて解決する:
+
+- `composer.json` の `extra.patches` で `patches/ray-fake-query-be-bemart.patch` を `cweagans/composer-patches` 経由適用。
+- **ローカル**: 通常 `composer install` で patch が当たる（plugin 有効）。
+- **クラウド/root 実行時のみ**: `COMPOSER_ALLOW_SUPERUSER=1 composer install` でないと plugin が無効化され patch 未適用になる。
+- patch 適用確認: `grep -c fakeDirs vendor/ray/fake-query/src/FakeQueryConfig.php` が `>0`。
+
+## 検証コマンド
+
+```bash
+# DB不要スイート（これが green なら OK）
+./vendor/bin/phpunit --testsuite fake      # 直近: 1317 tests green
+# 静的解析
+composer psalm        # No errors（179 は既存 info 級）
+composer psalm-taint  # No errors
+# ステータスHTML再生成（route 張替後に必須）
+php bin/generate-eccube-feature-alps-status.php
+# Hard ActionRedirect 残数の確認（0 のはず）
+grep -oP 'data-implementation-status="安全退避\(ActionRedirect\)" data-difficulty="Hard"' docs/eccube-feature-alps-status.html | wc -l
+```
+
+ステータス自動判定の要点: `bin/generate-eccube-feature-alps-status.php` は
+`config/aura-routes.php` の resource URI が `action-redirect` を含むか否かで「安全退避/実装済み」を
+判定する。**route を action-redirect → 具体URIへ張り替え + 再生成するだけで「実装済み」に変わる**。
+難易度 Hard は内容ベース判定なので維持される。`tests/Docs/EccubeFeatureAlpsStatusHtmlTest.php` の
+監査テストは「件数非依存（残った Hard ActionRedirect 行が既知監査セットに属するか）」へ更新済み。
+
+## 正準パターン（残作業もこれに従う）
+
+- **Resource→Be起動**: `src/Resource/Page/Admin/ToggleVisible.php` — `BecomingInterface` 注入 →
+  `($this->becoming)(new XxxInput(...))` → ドメイン例外を HTTP コードへマップ → `assert($final instanceof XxxFinal)`。`#[CsrfProtected]` 必須。
+- **Be層**: Input(`#[Be(Final::class)]` readonly + `@psalm-taint-source`)→ Semantic(型検証、全 Input param に対応する Semantic を置く＝「0 notices」規約)→ Final(`#[Input]`/`#[Inject]`、AUTHZ は `AdminSession->adminId===null`)。
+- **境界サービス**: port=`be/src/Reason/Service/`、実装=`src/Compatibility/Eccube/`、Fake=`tests/Fake/Reason/Service/`。`src/Module/AppModule.php` で `->to(Eccube実装)->in(SINGLETON)`、`src/Module/FakeModule.php` で `toInstance(Fake)`。
+- **テスト**: domain=`be/tests/Domain/`、resource=`tests/Resource/`。`TestModule` + `AbstractModule` override で `AdminSession`（や他の Fake）を差し替える。
+
+---
+
+## 残作業（ローカルで実装）
+
+### 1. doUpdateCsv 消費側配線（低リスク・推奨先行）
+
+**現状**: `doUpdateCsv`（`be/src/Final/CsvConfigUpdated.php`）は dtb_csv カラム設定を
+`CsvColumnConfigStorageInterface::replaceType` で**永続化済み**。しかし export Final 群
+（`be/src/Final/AdminProductCsvExported.php` / `AdminCustomerCsvExported.php` / `AdminOrderCsvExported.php` /
+`AdminShippingCsvExported.php`）は**ハードコード列**を出力し、設定を消費していない。
+
+**検証済みの安全策**:
+- `CsvColumnConfigStorageInterface::listByType(int $csvType): list<CsvColumnConfigEntity>` で取得。
+  Entity = `{int csvType, string columnName, bool enabled, int sortNo}`。csvType: order=1/customer=2/product=3/shipping=4。
+- Fake fixture `be/var/fake/query/csv_column_list_by_type.jsonl` は**空** → Fake では `listByType` は `[]`。
+  （patch 済 ray/fake-query の list クエリは未マッチで `[]`、例外は row クエリのみ）
+- 既存テスト（`be/tests/Domain/AdminProductCsvExportedTest.php` / `tests/Resource/AdminProductCsvResourceTest.php`）は
+  現行ハードコード列の先頭 `productCode,productName` 等を assert している。
+
+**設計方針**: 各 export Final に `CsvColumnConfigStorageInterface` を `#[Inject]`、`listByType` の
+`enabled=true` を `sortNo` 昇順で列構成。**設定が空配列なら従来のハードコード列にフォールバック**
+（→ 既存テスト不変）。columnName→値の対応は「列カタログ（既定列＝単一真実源）」を 1 箇所に持つのを推奨。
+未知 columnName は空セル or 無視（要決定）。新規テストは Fake で設定を与えて列の絞り込み・並び替えを検証。
+
+> このリポジトリで **Plan エージェントに詳細設計を依頼済み**。完了後その出力を
+> 本節へ追記する（または別途共有）。実装前に codex で再レビュー推奨。
+
+### 2. doCreateOrder enrichment（大・購入中核・要丁寧検証）
+
+**現状**: `be/src/Final/AdminOrderCreated.php` は受注を**永続化済み**だが、ALPS doc が要求する
+「PurchaseFlow で税・送料・在庫を計算」を**省略**（明細行なし、totals は入力値の素朴な加算）。
+
+**残作業**: 管理画面手動受注に明細行（productClass × 数量）入力を追加し、`PurchaseFlowInterface` で
+小計/税/送料を再計算、`InventoryAllocatorInterface` で在庫引当、明細 snapshot 行を永続化。
+Pilot 5 `doCheckout`（`be/src/Final/` の checkout 系）が同型の正解パターン。既存部品:
+`PurchaseFlowInterface` / `InventoryAllocatorInterface` / `OrderCommandInterface` / `OrderNoProvider`。
+
+**注意**: 購入フロー中核に触れるため影響が大きい。マスアサインメント規律（Pilot 5 F-2）を維持。
+**codex 事前相談 → Plan → 実装 → SQL スイート含む全検証**の順を強く推奨。
+
+### スコープ外（やらない）
+- `doImportProductCsv`: ルートが export 専用で意図的に未モデル化。
+- `doInstallPlugin` / Owners Store（Super Hard 2件）: plugin scope 外（migration-status の方針）。
+- 各副作用の **EC-CUBE 完全互換**（実ファイル書込・TOTP 永続・CSV バイト一致・本番DB bring-up）:
+  production cutover の追跡残作業（PDF pilot と同じ扱い）。
+
+## ローカル引き継ぎ手順
+
+```bash
+git fetch origin claude/gallant-fermat-CpUqD
+git checkout claude/gallant-fermat-CpUqD
+composer install        # ローカルは通常これで patch 適用（要 plugin 有効）
+grep -c fakeDirs vendor/ray/fake-query/src/FakeQueryConfig.php   # >0 を確認
+./vendor/bin/phpunit --testsuite fake                            # green を確認
+# → codex 相談しつつ「残作業 1 → 2」の順で実装
+```
