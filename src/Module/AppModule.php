@@ -31,6 +31,7 @@ use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
+use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeCacheClearer;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeClassCsvCompatibility;
@@ -38,6 +39,7 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeCustomizeAssetWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeMaintenanceMode;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeMasterDataWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use BEAR\Resource\InvokerInterface;
@@ -101,6 +103,7 @@ final class AppModule extends AbstractAppModule
         $this->bind(MaintenanceModeInterface::class)->to(EccubeMaintenanceMode::class)->in(Scope::SINGLETON);
         $this->bind(MasterDataWriterInterface::class)->to(EccubeMasterDataWriter::class)->in(Scope::SINGLETON);
         $this->bind(ClassCsvCompatibilityInterface::class)->to(EccubeClassCsvCompatibility::class)->in(Scope::SINGLETON);
+        $this->bind(TemplateCompatibilityInterface::class)->to(EccubeTemplateCompatibility::class)->in(Scope::SINGLETON);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).
