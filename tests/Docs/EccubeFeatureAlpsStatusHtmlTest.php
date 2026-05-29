@@ -106,30 +106,53 @@ final class EccubeFeatureAlpsStatusHtmlTest extends TestCase
 
     public function testIssue24HardActionRedirectRowsHaveAuditedStrategies(): void
     {
-        $hardActionRedirectRows = [];
+        // The 22 Hard rows that were originally parked on ActionRedirect
+        // (Issue #24 re-classification). They are being connected to
+        // concrete Be/BEAR resources incrementally; as each is wired its
+        // row flips to 実装済み and drops out of this set. The invariant
+        // that must hold at every step: any row STILL on ActionRedirect
+        // at Hard difficulty must be one of these known routes, carry an
+        // audited strategy, and keep the audit note — no NEW unaudited
+        // Hard ActionRedirect rows may appear.
+        $known = [
+            'admin_change_password POST',
+            'admin_content_cache POST',
+            'admin_content_css POST',
+            'admin_content_js POST',
+            'admin_content_maintenance POST',
+            'admin_product_class_category_export GET',
+            'admin_product_class_category_export POST',
+            'admin_product_class_name_export GET',
+            'admin_product_class_name_export POST',
+            'admin_product_csv_class_category GET',
+            'admin_product_csv_class_category POST',
+            'admin_product_csv_class_name GET',
+            'admin_product_csv_class_name POST',
+            'admin_setting_system_masterdata POST',
+            'admin_setting_system_masterdata_edit POST',
+            'admin_setting_system_security POST',
+            'admin_store_template POST',
+            'admin_store_template_delete POST',
+            'admin_store_template_download POST',
+            'admin_store_template_install POST',
+            'admin_two_factor_auth POST',
+            'admin_two_factor_auth_set POST',
+        ];
+        $validStrategies = ['native', 'adapter', 'legacy compatibility', 'out-of-scope'];
+
         foreach (self::rows() as $row) {
             if (
-                str_contains($row['implementation'], 'ActionRedirect')
-                && in_array(self::difficulty($row), ['Hard', 'Super Hard'], true)
+                ! str_contains($row['implementation'], 'ActionRedirect')
+                || ! in_array(self::difficulty($row), ['Hard', 'Super Hard'], true)
             ) {
-                $hardActionRedirectRows[] = $row;
+                continue;
             }
+
+            $key = $row['route'] . ' ' . $row['method'];
+            self::assertContains($key, $known, "Unexpected Hard ActionRedirect row: {$key}");
+            self::assertContains(self::strategy($row), $validStrategies, $key);
+            self::assertStringContainsString('Issue #24 Hard ActionRedirect再分類', $row['assessment'], $key);
         }
-
-        self::assertCount(22, $hardActionRedirectRows);
-
-        $strategyCounts = ['native' => 0, 'adapter' => 0, 'legacy compatibility' => 0, 'out-of-scope' => 0];
-        foreach ($hardActionRedirectRows as $row) {
-            $strategyCounts[self::strategy($row)]++;
-            self::assertStringContainsString('Issue #24 Hard ActionRedirect再分類', $row['assessment']);
-        }
-
-        self::assertSame([
-            'native' => 4,
-            'adapter' => 18,
-            'legacy compatibility' => 0,
-            'out-of-scope' => 0,
-        ], $strategyCounts);
     }
 
     public function testPdfPilotIsLegacyCompatibility(): void
