@@ -1,5 +1,5 @@
 {
-    "name": "my-vendor/be-mart",
+    "name": "be-framework/be-mart",
     "type": "project",
     "license": "MIT",
     "description": "BeMart — AI-driven EC-CUBE → BEAR.Sunday + Be Framework migration. BEAR.Sunday application layer.",
