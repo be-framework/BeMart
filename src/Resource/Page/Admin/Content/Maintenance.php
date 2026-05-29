@@ -6,7 +6,15 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\MaintenanceToggled;
+use MyVendor\BeMart\Be\Input\ToggleMaintenanceInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
+
+use function assert;
 
 /**
  * EC-CUBE メンテナンス管理 — admin CMS thin renderer (Phase 3 HTML).
@@ -29,6 +37,8 @@ class Maintenance extends ResourceObject
 {
     public function __construct(
         private readonly AdminSession $adminSession,
+        private readonly BecomingInterface $becoming,
+        private readonly MaintenanceModeInterface $maintenance,
     ) {
     }
 
@@ -42,7 +52,38 @@ class Maintenance extends ResourceObject
         }
 
         $this->code = Code::OK;
-        $this->body = ['isMaintenance' => false];
+        $this->body = ['isMaintenance' => $this->maintenance->isEnabled()];
+
+        return $this;
+    }
+
+    /**
+     * Toggles maintenance mode to an explicit state (doToggleMaintenance).
+     * ALPS marks it `idempotent` → PUT.
+     *
+     * @psalm-taint-source input $enabled
+     */
+    #[CsrfProtected]
+    public function onPut(bool $enabled): static
+    {
+        try {
+            $final = ($this->becoming)(new ToggleMaintenanceInput(enabled: $enabled));
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof MaintenanceToggled);
+
+        $this->code = Code::OK;
+        $this->headers['Location'] = '/admin_content_maintenance';
+        $this->body = [
+            'transitionId' => 'doToggleMaintenance',
+            'isMaintenance' => $final->enabled,
+            'message' => $final->enabled ? 'メンテナンスモードを有効にしました。' : 'メンテナンスモードを無効にしました。',
+        ];
 
         return $this;
     }

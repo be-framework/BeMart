@@ -16,6 +16,9 @@ use MyVendor\BeMart\Be\Reason\Service\DefaultPurchaseFlow;
 use MyVendor\BeMart\Be\Reason\Service\FixedCustomerInitialPoint;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
+use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
+use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\NativePasswordHasher;
 use MyVendor\BeMart\Be\Reason\Service\NoopInventoryAllocator;
 use MyVendor\BeMart\Be\Reason\Service\NoopMailer;
@@ -27,6 +30,9 @@ use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeCacheClearer;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeCustomizeAssetWriter;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeMaintenanceMode;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
@@ -86,6 +92,9 @@ final class AppModule extends AbstractAppModule
         $this->bind(OrderPdfCompatibilityInterface::class)->to(OrderPdfCompatibilityService::class)->in(Scope::SINGLETON);
         $this->bind(TwoFactorAuthInterface::class)->to(EccubeTwoFactorAuth::class)->in(Scope::SINGLETON);
         $this->bind(SecurityConfigWriterInterface::class)->to(EccubeSecurityConfigWriter::class)->in(Scope::SINGLETON);
+        $this->bind(CacheClearerInterface::class)->to(EccubeCacheClearer::class)->in(Scope::SINGLETON);
+        $this->bind(CustomizeAssetWriterInterface::class)->to(EccubeCustomizeAssetWriter::class)->in(Scope::SINGLETON);
+        $this->bind(MaintenanceModeInterface::class)->to(EccubeMaintenanceMode::class)->in(Scope::SINGLETON);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).
