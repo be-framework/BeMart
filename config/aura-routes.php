@@ -722,10 +722,9 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
                 'admin_change_password',
                 ['POST'],
                 '/admin/change_password',
-                'page://self/admin/action-redirect',
+                'page://self/admin/change-password',
                 [],
-                null,
-                ['returnTo' => '/admin/change_password'],
+                'post',
             );
 
             // ---- Admin: catalogue ----
