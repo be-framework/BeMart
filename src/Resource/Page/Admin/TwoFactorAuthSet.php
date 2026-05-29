@@ -7,6 +7,13 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
+use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
+use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
+use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -28,22 +35,24 @@ use function assert;
  * this resource is a THIN RENDERER: `onGet` exposes an
  * {@see AdminTwoFactorAuthForm} as `body['form']` for the HTML page.
  *
- * MISSING-BODY-FIELD follow-ups (flagged, NOT implemented — the brief
- * freezes be/): the QR-code JS needs `authKey` (the generated TOTP
- * secret), `memberName` and `shopName` to build the `otpauth://` URI.
- * Those require a Be `doSetupTwoFactorAuth` transition (secret
- * generation over the admin storage); `onPost` is not implemented here.
- * The body carries empty placeholders so the page still renders.
+ * Hard ActionRedirect completion: `onGet` now seeds `authKey` with a
+ * freshly generated TOTP secret (for the QR code) via the
+ * {@see TwoFactorAuthInterface} boundary, and `onPut` drives the Be
+ * `doSetTwoFactorAuth` transition ({@see SetTwoFactorAuthInput} →
+ * {@see TwoFactorAuthConfigured}) — register the secret, then confirm by
+ * verifying the first device code.
  */
 class TwoFactorAuthSet extends ResourceObject
 {
     public function __construct(
         private readonly FormFactory $formFactory,
+        private readonly BecomingInterface $becoming,
+        private readonly TwoFactorAuthInterface $twoFactorAuth,
     ) {
     }
 
     /**
-     * Renders the admin 2FA device-setup form.
+     * Renders the admin 2FA device-setup form with a generated secret.
      *
      * Anonymous-accessible (login-context): returns 200 regardless of
      * session state.
@@ -55,16 +64,58 @@ class TwoFactorAuthSet extends ResourceObject
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuthSet',
             'fields' => ['device_token', 'auth_key'],
-            // MISSING-BODY-FIELD placeholders — see the class doc. The
-            // QR-code JS reads these; empty until a Be 2FA transition
-            // feeds them.
-            'authKey' => '',
+            // The QR-code JS reads these to build the `otpauth://` URI.
+            // authKey is a fresh secret the admin confirms via onPut.
+            'authKey' => $this->twoFactorAuth->generateSecret(),
             'memberName' => '',
             'shopName' => 'BeMart',
             // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
             'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
         ];
         assert($this->body['form'] instanceof AdminTwoFactorAuthForm);
+
+        return $this;
+    }
+
+    /**
+     * Registers the TOTP device after confirming the first code
+     * (doSetTwoFactorAuth). ALPS marks this `idempotent` → PUT.
+     *
+     * Failure mapping:
+     *   - Invalid CSRF                  → 403 (interceptor)
+     *   - SemanticVariableException     → 400 (malformed code)
+     *   - TwoFactorAuthFailedException  → 400 (first code mismatch)
+     *
+     * @psalm-taint-source input $loginId
+     * @psalm-taint-source input $authKey
+     * @psalm-taint-source input $deviceToken
+     */
+    #[CsrfProtected]
+    #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
+    public function onPut(string $loginId, string $authKey, string $deviceToken): static
+    {
+        try {
+            $final = ($this->becoming)(new SetTwoFactorAuthInput(
+                loginId: $loginId,
+                authKey: $authKey,
+                deviceToken: $deviceToken,
+            ));
+        } catch (SemanticVariableException | TwoFactorAuthFailedException) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => '認証コードが正しくありません。'];
+
+            return $this;
+        }
+
+        assert($final instanceof TwoFactorAuthConfigured);
+
+        $this->code = Code::OK;
+        $this->headers['Location'] = '/admin';
+        $this->body = [
+            'transitionId' => 'doSetTwoFactorAuth',
+            'loginId' => $final->loginId,
+            'message' => '二要素認証を設定しました。',
+        ];
 
         return $this;
     }
