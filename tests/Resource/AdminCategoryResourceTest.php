@@ -221,16 +221,17 @@ final class AdminCategoryResourceTest extends TestCase
         $this->assertSame('text/csv; charset=UTF-8', $ro->headers['Content-Type']);
     }
 
-    public function testImportCsvIsStubReturning202(): void
+    public function testImportCsvPersistsRows(): void
     {
         $ro = $this->resource->post('page://self/admin/category/csv', [
-            'csv' => "categoryName,sortNo\nFood,10\n",
+            'csv' => "カテゴリID,カテゴリ名,親カテゴリID,カテゴリ削除フラグ\ncat-food,食品,,0\n",
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::ACCEPTED, $ro->code);
-        $this->assertFalse($ro->body['accepted']);
-        $this->assertSame(2, $ro->body['lineCount']);
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('doImportCategoryCsv', $ro->body['transitionId']);
+        $this->assertTrue($ro->body['accepted']);
+        $this->assertSame(1, $ro->body['imported']);
     }
 
     public function testImportCsvRejectsAnonymousAdmin(): void

@@ -407,19 +407,23 @@ final class AdminOrderExtrasResourceTest extends TestCase
     }
 
     // ------------------------------------------------------------------
-    // doImportShippingCsv (stub)
+    // doImportShippingCsv (real ingestion)
     // ------------------------------------------------------------------
 
-    public function testImportShippingIsStubReturning202(): void
+    public function testImportShippingPersistsKnownOrdersAndSkipsUnknown(): void
     {
         $ro = $this->resource->post('page://self/admin/order/import-shipping', [
-            'csv' => "orderNo,trackingNumber\nABC,XY-123\n",
+            'csv' => "受注番号,お問い合わせ番号\n"
+                . "past0000000000000000000000000001,XY-123\n"
+                . "no-such-order,ZZ-999\n",
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::ACCEPTED, $ro->code);
-        $this->assertFalse($ro->body['accepted']);
-        $this->assertSame(2, $ro->body['lineCount']);
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('doImportShippingCsv', $ro->body['transitionId']);
+        $this->assertTrue($ro->body['accepted']);
+        $this->assertSame(1, $ro->body['imported']);
+        $this->assertSame(1, $ro->body['skipped']);
     }
 
     public function testImportShippingWithoutAdminReturns403(): void
