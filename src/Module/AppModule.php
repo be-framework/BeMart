@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Reason\Service\FixedCustomerInitialPoint;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
@@ -32,6 +33,7 @@ use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeCacheClearer;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeClassCsvCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeCustomizeAssetWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeMaintenanceMode;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeMasterDataWriter;
@@ -98,6 +100,7 @@ final class AppModule extends AbstractAppModule
         $this->bind(CustomizeAssetWriterInterface::class)->to(EccubeCustomizeAssetWriter::class)->in(Scope::SINGLETON);
         $this->bind(MaintenanceModeInterface::class)->to(EccubeMaintenanceMode::class)->in(Scope::SINGLETON);
         $this->bind(MasterDataWriterInterface::class)->to(EccubeMasterDataWriter::class)->in(Scope::SINGLETON);
+        $this->bind(ClassCsvCompatibilityInterface::class)->to(EccubeClassCsvCompatibility::class)->in(Scope::SINGLETON);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).

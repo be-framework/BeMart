@@ -14,6 +14,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentGateway;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakePurchaseFlow;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCacheClearer;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeClassCsvCompatibility;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCustomizeAssetWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMaintenanceMode;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMasterDataWriter;
@@ -22,6 +23,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
@@ -93,6 +95,10 @@ final class FakeModule extends AbstractAppModule
         $masterDataWriter = new FakeMasterDataWriter();
         $this->bind(FakeMasterDataWriter::class)->toInstance($masterDataWriter);
         $this->bind(MasterDataWriterInterface::class)->toInstance($masterDataWriter);
+
+        $classCsv = new FakeClassCsvCompatibility();
+        $this->bind(FakeClassCsvCompatibility::class)->toInstance($classCsv);
+        $this->bind(ClassCsvCompatibilityInterface::class)->toInstance($classCsv);
 
         $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(FakePurchaseFlow::class)->in(Scope::SINGLETON);
