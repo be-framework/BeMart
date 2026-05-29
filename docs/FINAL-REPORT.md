@@ -2,7 +2,7 @@
 
 BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday** で組み直す移植の **実証プロジェクト** です。本書は「何を示せたか・何を学んだか・どこに限界を引いたか」を一枚に束ねた総括であり、各論は本文中のリンク先（`migration-status.md` / `HANDOVER.md` / `skills/` / `methodology/`）が正です。
 
-> 主張: 私たちは EC-CUBE 4.3 の全機能を [`alps.json`](alps.json) と [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) に棚卸しし、移植手法の実証として価値のある範囲を完了した。残差分は未知の不足ではなく、意図的に保留した既知の境界である。
+> 主張: 私たちは EC-CUBE 4.3 の全機能を [`alps.json`](../alps.json) と [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) に棚卸しし、移植手法の実証として価値のある範囲を完了した。残差分は未知の不足ではなく、意図的に保留した既知の境界である。
 
 ## 1. 何を実証したか
 
@@ -53,7 +53,7 @@ BeMart は Be Framework + BEAR.Sunday + ALPS による移植手法の **referent
 
 | 知りたいこと | 参照 |
 |---|---|
-| 機能一覧（正） | [`alps.json`](alps.json) · [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) |
+| 機能一覧（正） | [`alps.json`](../alps.json) · [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) |
 | 移植ステータス（正） | [`migration-status.md`](migration-status.md) |
 | 構築プロセスの決定ログ | [`HANDOVER.md`](HANDOVER.md) |
 | 移植知見（G-14〜G-25） | [`skills/`](skills/) |
