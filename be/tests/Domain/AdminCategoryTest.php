@@ -284,18 +284,33 @@ final class AdminCategoryTest extends TestCase
         ($this->becoming)(new DeleteCategoryInput(categoryId: $categoryId));
     }
 
-    // ---- CSV import (Phase 2 stub) ----
+    // ---- CSV import (real ingestion) ----
 
-    public function testCsvImportIsStubButRespectsAuthz(): void
+    public function testCsvImportPersistsRows(): void
     {
+        // EC-CUBE 4-column format: id, name, parentId, deleteFlag.
         $final = ($this->becoming)(new ImportCategoryCsvInput(
-            csv: "categoryName,sortNo\nFood,10\nDrinks,20\n",
+            csv: "カテゴリID,カテゴリ名,親カテゴリID,カテゴリ削除フラグ\n"
+                . "cat-food,食品,,0\n"
+                . "cat-drinks,飲料,cat-food,0\n"
+                . "cat-old,廃止,,1\n",
         ));
 
         $this->assertInstanceOf(CategoryCsvImported::class, $final);
-        $this->assertFalse($final->accepted);
-        $this->assertSame(3, $final->lineCount);
-        $this->assertTrue(str_contains($final->message, 'Phase 2 stub'));
+        $this->assertTrue($final->accepted);
+        $this->assertSame(4, $final->lineCount);
+        $this->assertSame(2, $final->imported);
+        $this->assertSame(1, $final->deleted);
+    }
+
+    public function testCsvImportAllocatesIdForEmptyIdRow(): void
+    {
+        $final = ($this->becoming)(new ImportCategoryCsvInput(
+            csv: "カテゴリID,カテゴリ名,親カテゴリID,カテゴリ削除フラグ\n,新カテゴリ,,0\n",
+        ));
+
+        $this->assertTrue($final->accepted);
+        $this->assertSame(1, $final->imported);
     }
 
     public function testCsvImportRejectsAnonymousAdmin(): void
