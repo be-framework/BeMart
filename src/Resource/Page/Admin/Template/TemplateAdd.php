@@ -7,6 +7,11 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Template;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\TemplateInstalled;
+use MyVendor\BeMart\Be\Input\InstallTemplateInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminTemplateAddForm;
 use Ray\WebFormModule\FormFactory;
@@ -33,6 +38,7 @@ class TemplateAdd extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly BecomingInterface $becoming,
     ) {
     }
 
@@ -51,6 +57,42 @@ class TemplateAdd extends ResourceObject
 
         $this->code = Code::OK;
         $this->body = ['form' => $form];
+
+        return $this;
+    }
+
+    /**
+     * Installs an uploaded design template (doInstallTemplate). ALPS
+     * marks it `unsafe` → POST.
+     *
+     * @psalm-taint-source input $templateCode
+     * @psalm-taint-source input $templateName
+     */
+    #[CsrfProtected]
+    #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
+    public function onPost(string $templateCode, string $templateName): static
+    {
+        try {
+            $final = ($this->becoming)(new InstallTemplateInput(
+                templateCode: $templateCode,
+                templateName: $templateName,
+            ));
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof TemplateInstalled);
+
+        $this->code = Code::OK;
+        $this->headers['Location'] = '/admin_store_template';
+        $this->body = [
+            'transitionId' => 'doInstallTemplate',
+            'templateId' => $final->templateId,
+            'message' => 'テンプレートを追加しました。',
+        ];
 
         return $this;
     }

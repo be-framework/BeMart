@@ -551,13 +551,13 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminGet($map, 'admin_store_plugin_uninstall', 'page://self/admin/plugin-list');
             $adminPost($map, 'admin_store_plugin_uninstall', 'page://self/admin/plugin', 'delete', ['code' => 'pluginCode']);
             $adminGet($map, 'admin_store_template', 'page://self/admin/template/template-list');
-            $adminPost($map, 'admin_store_template', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_store_template']);
+            $adminPost($map, 'admin_store_template', 'page://self/admin/template/template-list', 'put', ['id' => 'templateId']);
             $adminGet($map, 'admin_store_template_install', 'page://self/admin/template/template-add');
-            $adminPost($map, 'admin_store_template_install', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_store_template']);
+            $adminPost($map, 'admin_store_template_install', 'page://self/admin/template/template-add', 'post');
             $adminGet($map, 'admin_store_template_download', 'page://self/admin/template/template-list', ['id' => 'templateId']);
-            $adminPost($map, 'admin_store_template_download', 'page://self/admin/action-redirect', 'post', ['id' => 'templateId'], ['returnTo' => '/admin_store_template']);
+            $adminPost($map, 'admin_store_template_download', 'page://self/admin/template/template-list', 'post', ['id' => 'templateId']);
             $adminGet($map, 'admin_store_template_delete', 'page://self/admin/template/template-list');
-            $adminPost($map, 'admin_store_template_delete', 'page://self/admin/action-redirect', 'post', ['id' => 'templateId'], ['returnTo' => '/admin_store_template']);
+            $adminPost($map, 'admin_store_template_delete', 'page://self/admin/template/template-list', 'delete', ['id' => 'templateId']);
             $adminGet($map, 'admin_two_factor_auth', 'page://self/admin/two-factor-auth');
             $adminPost($map, 'admin_two_factor_auth', 'page://self/admin/two-factor-auth', 'post');
             $adminGet($map, 'admin_two_factor_auth_set', 'page://self/admin/two-factor-auth-set');
