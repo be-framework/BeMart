@@ -64,4 +64,15 @@ interface AdminCommandInterface
      */
     #[DbQuery('admin_reorder')]
     public function reorder(string $adminId, int $sortNo): void;
+
+    /**
+     * Re-hash the password column for one admin — doChangePassword. The
+     * narrowest possible write surface: only `password` is touched, so
+     * the credential-change path cannot reach loginId / authority / work
+     * (mass-assignment safety). The Final has already verified the
+     * current password and applied the new-password policy before
+     * calling this.
+     */
+    #[DbQuery('admin_update_password')]
+    public function updatePasswordHash(string $adminId, string $passwordHash): void;
 }
