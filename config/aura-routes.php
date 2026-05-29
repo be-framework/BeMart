@@ -518,9 +518,9 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             // System settings.
             $adminGetPost($map, 'admin_setting_system_authority', 'page://self/admin/authority-role');
             $adminGet($map, 'admin_setting_system_masterdata', 'page://self/admin/master-data');
-            $adminPost($map, 'admin_setting_system_masterdata', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_masterdata']);
+            $adminPost($map, 'admin_setting_system_masterdata', 'page://self/admin/master-data', 'put');
             $adminGet($map, 'admin_setting_system_masterdata_edit', 'page://self/admin/master-data');
-            $adminPost($map, 'admin_setting_system_masterdata_edit', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_masterdata']);
+            $adminPost($map, 'admin_setting_system_masterdata_edit', 'page://self/admin/master-data-edit', 'put');
             $adminGet($map, 'admin_setting_system_member_new', 'page://self/admin/member');
             $adminPost($map, 'admin_setting_system_member_new', 'page://self/admin/member');
             $adminGet($map, 'admin_setting_system_member_edit', 'page://self/admin/member', ['id' => 'loginId']);
