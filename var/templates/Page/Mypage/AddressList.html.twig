@@ -70,7 +70,7 @@
                         <div class="ec-addressList">
                             {% for CustomerAddress in addresses %}
                                 <div class="ec-addressList__item">
-                                    <a class="ec-addressList__remove" href="{{ url('mypage_delivery_delete', { id : CustomerAddress.addressId }) }}">
+                                    <a class="ec-addressList__remove" href="{{ url('mypage_delivery_delete', { id : CustomerAddress.addressId }) }}" data-method="delete">
                                         <div class="ec-icon">
                                             <img src="{{ asset('assets/icon/cross.svg') }}" alt="remove">
                                         </div>

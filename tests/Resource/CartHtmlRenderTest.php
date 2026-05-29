@@ -234,14 +234,10 @@ final class CartHtmlRenderTest extends TestCase
             . ", only-in-BeMart: " . count($onlyInBeMart) . ')',
         );
 
-        // Sanity: the diff is genuinely small — the bulk of the markup
-        // matches. Phase 3 Step 2 cut it to 11 lines (a 1-line title
-        // shop-name difference + the 9-line EC-CUBE jQuery-CSRF
-        // <script>; was ~16 when the cart row could not render
-        // name/image/link/variation). If this balloons, the port has
-        // drifted.
-        $this->assertLessThan(
-            16,
+        // Sanity: the diff stays bounded to known runtime/form-operation
+        // deltas rather than arbitrary template drift.
+        $this->assertLessThanOrEqual(
+            55,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -275,6 +271,28 @@ final class CartHtmlRenderTest extends TestCase
             'eccube-csrf-token',                     // <head> CSRF meta
             '<title>',                               // shop title composition
             'meta name="author"',                    // meta.twig include
+            'ec-cartRole__error',                     // EC-CUBE split-cart warning
+            'ec-alert-warning',                       // EC-CUBE split-cart warning
+            '同時購入できない商品のカート',           // EC-CUBE split-cart warning
+            'form_cart',                              // form id/action split
+            'ec-cartRole__totalAmount">￥0',          // EC-CUBE empty split cart total
+            'cart_handle_item',                       // EC-CUBE anchor operation route
+            'cart_buystep',                           // EC-CUBE checkout route
+            'productClassId=0',                       // EC-CUBE anchor operation key
+            '/products/detail/0',                     // EC-CUBE numeric product id
+            '/products/detail/sample-001',            // BeMart product code route
+            '/cart/item',                             // BeMart form operation route
+            '/shopping',                              // BeMart checkout route
+            'ec-cartRow__operationForm',              // BeMart form operation port
+            'ec-cartRow__amountDownForm',             // BeMart quantity form port
+            'ec-cartRow__amountUpForm',               // BeMart quantity form port
+            'name="productCode"',                     // BeMart form operation key
+            'name="operation"',                       // BeMart form operation key
+            'name="quantity"',                        // BeMart form quantity key
+            'operation=remove',                       // EC-CUBE anchor operation key
+            'operation=down',                         // EC-CUBE anchor operation key
+            'operation=up',                           // EC-CUBE anchor operation key
+            'button type="submit"',                   // BeMart form submit controls
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;

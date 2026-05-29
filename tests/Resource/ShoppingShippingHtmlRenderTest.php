@@ -74,10 +74,10 @@ final class ShoppingShippingHtmlRenderTest extends TestCase
         // renderer with no per-shipping context — `shippingId` is a
         // MISSING BODY FIELD follow-up — so the port posts to / links
         // the bare routes. Same routes, the id param absent.
-        '<div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping_shipping_edit?id=1">新規お届け先を追加する</a></div>',
-        '<div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping_shipping_edit">新規お届け先を追加する</a></div>',
-        '<form method="post" action="/shopping_shipping?id=1">',
-        '<form method="post" action="/shopping_shipping">',
+        '<div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping/shipping/edit?id=1">新規お届け先を追加する</a></div>',
+        '<div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping/shipping/edit">新規お届け先を追加する</a></div>',
+        '<form method="post" action="/shopping/shipping?id=1">',
+        '<form method="post" action="/shopping/shipping">',
     ];
 
     private ResourceInterface $resource;
