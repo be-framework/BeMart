@@ -9,6 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminSecurityForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -70,5 +71,42 @@ final class AdminSecurityResourceTest extends TestCase
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
         $this->assertStringContainsString('管理者', $ro->body['message']);
+    }
+
+    public function testOnPutUpdatesSettings(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID);
+
+        $ro = $this->resource->put('page://self/admin/security', [
+            'adminAllowHosts' => '192.168.0.0/24',
+            'trustedHosts' => '^example\\.com$',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('doUpdateSecurity', $ro->body['transitionId']);
+    }
+
+    public function testOnPutMissingCsrfReturns403(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID);
+
+        $ro = $this->resource->put('page://self/admin/security', [
+            'adminAllowHosts' => '192.168.0.0/24',
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+
+    public function testOnPutAnonymousReturns403(): void
+    {
+        $this->rebindAdminSession(null);
+
+        $ro = $this->resource->put('page://self/admin/security', [
+            'adminAllowHosts' => '192.168.0.0/24',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

@@ -532,7 +532,7 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminGet($map, 'admin_setting_system_member_down', 'page://self/admin/member-list', ['id' => 'loginId']);
             $adminPost($map, 'admin_setting_system_member_down', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'member']);
             $adminGet($map, 'admin_setting_system_security', 'page://self/admin/security');
-            $adminPost($map, 'admin_setting_system_security', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_security']);
+            $adminPost($map, 'admin_setting_system_security', 'page://self/admin/security', 'put');
             $adminGet($map, 'admin_setting_system_system_phpinfo', 'page://self/admin/system');
             $adminPost($map, 'admin_setting_system_system_phpinfo', 'page://self/admin/system', 'get');
 
@@ -555,9 +555,9 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminGet($map, 'admin_store_template_delete', 'page://self/admin/template/template-list');
             $adminPost($map, 'admin_store_template_delete', 'page://self/admin/action-redirect', 'post', ['id' => 'templateId'], ['returnTo' => '/admin_store_template']);
             $adminGet($map, 'admin_two_factor_auth', 'page://self/admin/two-factor-auth');
-            $adminPost($map, 'admin_two_factor_auth', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_two_factor_auth']);
+            $adminPost($map, 'admin_two_factor_auth', 'page://self/admin/two-factor-auth', 'post');
             $adminGet($map, 'admin_two_factor_auth_set', 'page://self/admin/two-factor-auth-set');
-            $adminPost($map, 'admin_two_factor_auth_set', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_two_factor_auth']);
+            $adminPost($map, 'admin_two_factor_auth_set', 'page://self/admin/two-factor-auth-set', 'put');
 
 };
 

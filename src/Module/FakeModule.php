@@ -13,9 +13,13 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeMailer;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentGateway;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakePaymentMethodFactory;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakePurchaseFlow;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSecurityConfigWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
+use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
@@ -60,6 +64,13 @@ final class FakeModule extends AbstractAppModule
         $this->bind(AdminSession::class)->toInstance($adminSession);
         $this->bind(FakeCsrfToken::class)->toInstance($csrf);
         $this->bind(CsrfToken::class)->toInstance($csrf);
+
+        $twoFactorAuth = new FakeTwoFactorAuth();
+        $securityConfig = new FakeSecurityConfigWriter();
+        $this->bind(FakeTwoFactorAuth::class)->toInstance($twoFactorAuth);
+        $this->bind(TwoFactorAuthInterface::class)->toInstance($twoFactorAuth);
+        $this->bind(FakeSecurityConfigWriter::class)->toInstance($securityConfig);
+        $this->bind(SecurityConfigWriterInterface::class)->toInstance($securityConfig);
 
         $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(FakePurchaseFlow::class)->in(Scope::SINGLETON);
