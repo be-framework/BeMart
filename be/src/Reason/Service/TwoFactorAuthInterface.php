@@ -28,6 +28,15 @@ interface TwoFactorAuthInterface
     public function isEnabled(string $loginId): bool;
 
     /**
+     * Verify a submitted device token against a CANDIDATE secret that is
+     * not (yet) persisted — used by device setup to confirm the first
+     * code BEFORE committing the secret via {@see enable}, so a wrong
+     * code never mutates stored credentials. Returns false on any
+     * mismatch (timing-safety, same contract as {@see verify}).
+     */
+    public function verifySecret(string $secret, string $token): bool;
+
+    /**
      * Verify a submitted device token against the admin's stored secret.
      * Returns false on any mismatch (incl. unknown admin / no secret) —
      * callers MUST NOT branch on a more granular reason (timing-safety,

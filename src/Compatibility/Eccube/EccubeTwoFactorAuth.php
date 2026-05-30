@@ -70,13 +70,8 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
     }
 
     #[Override]
-    public function verify(string $loginId, string $token): bool
+    public function verifySecret(string $secret, string $token): bool
     {
-        $secret = $this->secrets[$loginId] ?? null;
-        if ($secret === null) {
-            return false;
-        }
-
         $timeSlice = (int) (time() / self::PERIOD);
         for ($offset = -1; $offset <= 1; $offset++) {
             if ($this->codeAt($secret, $timeSlice + $offset) === $token) {
@@ -85,6 +80,17 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
         }
 
         return false;
+    }
+
+    #[Override]
+    public function verify(string $loginId, string $token): bool
+    {
+        $secret = $this->secrets[$loginId] ?? null;
+        if ($secret === null) {
+            return false;
+        }
+
+        return $this->verifySecret($secret, $token);
     }
 
     private function codeAt(string $secret, int $timeSlice): string
