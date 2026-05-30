@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Reason\Csv\CsvColumnLayout;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
@@ -39,25 +41,49 @@ use function stream_get_contents;
  * Final itself only assembles the bytes so it stays testable without
  * an HTTP context.
  *
- * Column order (matches the import shape stub when it lands):
+ * Default column order (matches the import shape stub when it lands):
  *   productCode, productName, price02, stock, productStatus,
  *   description, searchWord, note
+ *
+ * The admin's saved doUpdateCsv configuration (dtb_csv, csvType=3)
+ * narrows / reorders this set via {@see CsvColumnLayout}; with no saved
+ * configuration the full default vector is emitted (Wave 9 behaviour).
  *
  * `null` is emitted as an empty cell (EC-CUBE convention).
  */
 final readonly class AdminProductCsvExported
 {
+    /** dtb_csv csv_type_id for the product export. */
+    private const CSV_TYPE = 3;
+
+    /** @var list<string> */
+    private const DEFAULT_COLUMNS = [
+        'productCode',
+        'productName',
+        'price02',
+        'stock',
+        'productStatus',
+        'description',
+        'searchWord',
+        'note',
+    ];
+
     public string $csv;
     public int $count;
 
     public function __construct(
         #[Inject] AdminSession $adminSession,
         #[Inject] ProductQueryInterface $productQuery,
+        #[Inject] CsvColumnConfigStorageInterface $csvColumnConfig,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
+        $layout = CsvColumnLayout::resolve(
+            self::DEFAULT_COLUMNS,
+            $csvColumnConfig->listByType(self::CSV_TYPE),
+        );
         $rows = $productQuery->listForExport();
 
         $handle = fopen('php://memory', 'w+');
@@ -71,19 +97,10 @@ final readonly class AdminProductCsvExported
             return;
         }
 
-        fputcsv($handle, [
-            'productCode',
-            'productName',
-            'price02',
-            'stock',
-            'productStatus',
-            'description',
-            'searchWord',
-            'note',
-        ], ',', '"', '\\');
+        fputcsv($handle, $layout->columns, ',', '"', '\\');
 
         foreach ($rows as $row) {
-            fputcsv($handle, $this->encodeRow($row), ',', '"', '\\');
+            fputcsv($handle, $layout->project($this->encodeRow($row)), ',', '"', '\\');
         }
 
         rewind($handle);
@@ -95,19 +112,19 @@ final readonly class AdminProductCsvExported
     }
 
     /**
-     * @return list<string|int>
+     * @return array<string, string|int>
      */
     private function encodeRow(ProductEntity $row): array
     {
         return [
-            $row->productCode,
-            $row->productName,
-            $row->price02,
-            $row->stock ?? '',
-            $row->productStatus,
-            $row->description ?? '',
-            $row->searchWord ?? '',
-            $row->note ?? '',
+            'productCode' => $row->productCode,
+            'productName' => $row->productName,
+            'price02' => $row->price02,
+            'stock' => $row->stock ?? '',
+            'productStatus' => $row->productStatus,
+            'description' => $row->description ?? '',
+            'searchWord' => $row->searchWord ?? '',
+            'note' => $row->note ?? '',
         ];
     }
 }
