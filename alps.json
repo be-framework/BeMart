@@ -1545,7 +1545,7 @@
         "descriptor": [{"href": "#paymentMethod"}]},
       {"id": "doCheckout", "title": "注文を確定する", "type": "unsafe", "rt": "#ShoppingComplete",
         "tag": "checkout flow-purchase actor-customer src-router src-controller",
-        "doc": {"value": "PurchaseFlow(shoppingフロー)による税計算・送料計算・在庫引当・ポイント減算を実行。PaymentMethod::checkout()で決済確定後、注文確認メールを送信しカートをクリア。処理中はorderStatus=PROCESSING(8)->PENDING(7)->NEW(1)と遷移。"},
+        "doc": {"value": "PurchaseFlow(shoppingフロー)による税計算・送料計算・在庫引当・ポイント減算を実行。PaymentMethod::checkout()で決済確定後、dtb_order を登録し、カート明細を dtb_order_item にスナップショットとして凍結（注文時点の商品名・単価を固定）、注文確認メールを送信しカートをクリア。処理中はorderStatus=PROCESSING(8)->PENDING(7)->NEW(1)と遷移。同じ明細スナップショット凍結は管理画面の doCreateOrder も行う。"},
         "descriptor": [{"href": "#paymentMethod"}]},
       {"id": "goShoppingError", "title": "購入エラー画面を表示する", "type": "safe", "rt": "#ShoppingError",
         "tag": "checkout flow-purchase actor-customer src-router src-controller",
@@ -1564,7 +1564,22 @@
         "descriptor": [{"href": "#email"}]},
       {"id": "doCreateOrder", "title": "受注を作成する", "type": "unsafe", "rt": "#Order",
         "tag": "order flow-manage-order actor-admin src-router",
-        "doc": {"value": "管理画面から手動で受注を新規作成する。PurchaseFlow(orderフロー)で税・送料・在庫を計算。"}},
+        "doc": {"value": "管理画面から手動で受注を新規作成する。明細(productCode/productName/unitPrice/quantity の行)と支払方法・送料・手数料・値引きを受け取り、PurchaseFlow(orderフロー)で小計・税・送料を再計算する（subtotal/tax/total/addPoint はクライアントから信用せず再導出）。確定後に dtb_order を登録し、各明細行を dtb_order_item にスナップショットとして凍結する（注文時点の商品名・単価を固定）。同じ明細スナップショット凍結はストアフロントの doCheckout も行う。"},
+        "descriptor": [
+          {"href": "#customerId"},
+          {"href": "#paymentId"},
+          {"href": "#deliveryFeeTotal"},
+          {"href": "#charge"},
+          {"href": "#discount"},
+          {"id": "OrderItemInput", "title": "受注明細(入力)",
+            "doc": {"value": "doCreateOrder が受け取る購入明細1件。PurchaseFlow の小計/税の再計算入力かつ dtb_order_item スナップショットの行となる。"},
+            "descriptor": [
+              {"href": "#orderItemProductCode"},
+              {"href": "#orderItemProductName"},
+              {"href": "#orderItemPrice"},
+              {"href": "#orderItemQuantity"}
+            ]}
+        ]},
       {"id": "doUpdateOrder", "title": "受注を更新する", "type": "idempotent", "rt": "#Order",
         "tag": "order flow-manage-order actor-admin src-router",
         "doc": {"value": "受注の明細・配送先・支払方法等を編集する。PurchaseFlow(orderフロー)で在庫差分・ポイント差分を再計算。"},
