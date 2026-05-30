@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Reason\Csv\CsvColumnLayout;
+use MyVendor\BeMart\Be\Reason\Entity\ShippingAddressEntity;
+use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ShippingAddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
@@ -35,46 +38,47 @@ use function stream_get_contents;
  */
 final readonly class AdminShippingCsvExported
 {
+    /** dtb_csv csv_type_id for the shipping export. */
+    private const CSV_TYPE = 4;
+
+    /** @var list<string> */
+    private const DEFAULT_COLUMNS = [
+        'orderNo',
+        'name01',
+        'name02',
+        'postalCode',
+        'pref',
+        'addr01',
+        'addr02',
+        'phoneNumber',
+        'trackingNumber',
+    ];
+
     public string $csv;
     public int $rowCount;
 
     public function __construct(
         #[Inject] AdminSession $adminSession,
         #[Inject] ShippingAddressStorageInterface $shippingAddresses,
+        #[Inject] CsvColumnConfigStorageInterface $csvColumnConfig,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
 
+        $layout = CsvColumnLayout::resolve(
+            self::DEFAULT_COLUMNS,
+            $csvColumnConfig->listByType(self::CSV_TYPE),
+        );
         $rows = $shippingAddresses->list();
 
         $handle = fopen('php://temp', 'rb+');
         assert($handle !== false);
 
-        fputcsv($handle, [
-            'orderNo',
-            'name01',
-            'name02',
-            'postalCode',
-            'pref',
-            'addr01',
-            'addr02',
-            'phoneNumber',
-            'trackingNumber',
-        ], ',', '"', '');
+        fputcsv($handle, $layout->columns, ',', '"', '');
 
         foreach ($rows as $row) {
-            fputcsv($handle, [
-                $row->orderNo,
-                $row->name01,
-                $row->name02,
-                $row->postalCode,
-                (string) $row->pref,
-                $row->addr01,
-                $row->addr02,
-                $row->phoneNumber,
-                '',
-            ], ',', '"', '');
+            fputcsv($handle, $layout->project($this->encodeRow($row)), ',', '"', '');
         }
 
         rewind($handle);
@@ -84,5 +88,26 @@ final readonly class AdminShippingCsvExported
 
         $this->csv = $csv;
         $this->rowCount = count($rows);
+    }
+
+    /**
+     * @return array<string, string|int>
+     */
+    private function encodeRow(ShippingAddressEntity $row): array
+    {
+        return [
+            'orderNo' => $row->orderNo,
+            'name01' => $row->name01,
+            'name02' => $row->name02,
+            'postalCode' => $row->postalCode,
+            'pref' => (string) $row->pref,
+            'addr01' => $row->addr01,
+            'addr02' => $row->addr02,
+            'phoneNumber' => $row->phoneNumber,
+            // trackingNumber is exposed empty for this iteration — see
+            // the class docblock; the column stays in the shape so the
+            // export → fill → import round-trip is stable.
+            'trackingNumber' => '',
+        ];
     }
 }
