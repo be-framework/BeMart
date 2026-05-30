@@ -17,17 +17,21 @@ use MyVendor\BeMart\Be\Final\AdminOrderCreated;
  * PurchaseFlow(orderフロー)で税・送料・在庫を計算。" Admin-created
  * orders are an exotic EC-CUBE feature (back-office data-entry for
  * phone / FAX orders) — they bypass Cart, PaymentMethod::verify(), and
- * the customer-side checkout entirely. The Wave 9η iteration covers
- * the AUTHZ + URL surface only; the PurchaseFlow recompute (tax /
- * delivery / stock) is Phase 2 scope.
+ * the customer-side checkout entirely.
  *
- * Editable fields kept narrow: customerId + a handful of money
- * columns. Every other dtb_order column is server-derived (orderNo
- * from {@see \MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider},
- * orderStatus=NEW(1), orderDate=now, addPoint=0, derived totals from
- * subtotal+tax+deliveryFeeTotal+charge-discount) — same mass-
- * assignment discipline as {@see AdminUpdateOrderInput} (Pilot 5 F-2
- * lesson).
+ * The admin posts the purchased line items (`orderItems`) plus the
+ * delivery / charge / discount money columns. `subtotal`, `tax`,
+ * `total`, `paymentTotal` and `addPoint` are NOT trusted from the
+ * client — {@see AdminOrderCreated} recomputes them from the line items
+ * through the shared {@see \MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface}
+ * (the same recompute the storefront checkout runs), then persists the
+ * dtb_order_item snapshot. `orderNo` is server-allocated, orderStatus
+ * fixed to NEW(1) — same mass-assignment discipline as
+ * {@see AdminUpdateOrderInput} (Pilot 5 F-2 lesson).
+ *
+ * Each `orderItems` entry is a 4-tuple of {productCode, productName,
+ * unitPrice, quantity} — validated by the {@see \MyVendor\BeMart\Be\Semantic\OrderItems}
+ * semantic.
  *
  * @link https://schema.org/CreateAction
  */
@@ -35,22 +39,22 @@ use MyVendor\BeMart\Be\Final\AdminOrderCreated;
 final readonly class AdminCreateOrderInput
 {
     /**
+     * @param list<array{productCode: string, productName: string, unitPrice: int, quantity: int}> $orderItems
+     *
      * @psalm-taint-source input $customerId
      * @psalm-taint-source input $paymentMethodId
-     * @psalm-taint-source input $subtotal
+     * @psalm-taint-source input $orderItems
      * @psalm-taint-source input $deliveryFeeTotal
      * @psalm-taint-source input $charge
      * @psalm-taint-source input $discount
-     * @psalm-taint-source input $tax
      */
     public function __construct(
         public string $customerId,
         public int $paymentMethodId,
-        public int $subtotal,
+        public array $orderItems,
         public int $deliveryFeeTotal = 0,
         public int $charge = 0,
         public int $discount = 0,
-        public int $tax = 0,
     ) {
     }
 }

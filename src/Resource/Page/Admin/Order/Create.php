@@ -24,13 +24,13 @@ use function assert;
  *
  * Admin-created orders bypass Cart, PaymentMethod::verify(), and the
  * customer-side checkout entirely (EC-CUBE supports this for phone /
- * FAX orders entered by back-office staff). Wave 9η wires the AUTHZ +
- * URL surface; the PurchaseFlow recompute (tax / delivery / stock) is
- * Phase 2.
- *
- * The Final allocates the orderNo server-side via the existing
- * {@see \MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider}
- * — admins cannot inject a chosen orderNo.
+ * FAX orders entered by back-office staff). The admin posts the
+ * purchased line items (`orderItems`) plus the delivery / charge /
+ * discount columns; {@see AdminOrderCreated} recomputes subtotal / tax /
+ * total via the shared PurchaseFlow and persists the dtb_order_item
+ * snapshot. The orderNo is allocated server-side via the existing
+ * {@see \MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider} — admins
+ * cannot inject a chosen orderNo.
  *
  * Failure mapping:
  *   - Invalid CSRF                          → 403
@@ -45,13 +45,14 @@ class Create extends ResourceObject
     }
 
     /**
+     * @param list<array{productCode: string, productName: string, unitPrice: int, quantity: int}> $orderItems
+     *
      * @psalm-taint-source input $customerId
      * @psalm-taint-source input $paymentMethodId
-     * @psalm-taint-source input $subtotal
+     * @psalm-taint-source input $orderItems
      * @psalm-taint-source input $deliveryFeeTotal
      * @psalm-taint-source input $charge
      * @psalm-taint-source input $discount
-     * @psalm-taint-source input $tax
      */
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
@@ -59,21 +60,19 @@ class Create extends ResourceObject
     public function onPost(
         string $customerId,
         int $paymentMethodId,
-        int $subtotal,
+        array $orderItems,
         int $deliveryFeeTotal = 0,
         int $charge = 0,
         int $discount = 0,
-        int $tax = 0,
     ): static {
         try {
             $final = ($this->becoming)(new AdminCreateOrderInput(
                 customerId: $customerId,
                 paymentMethodId: $paymentMethodId,
-                subtotal: $subtotal,
+                orderItems: $orderItems,
                 deliveryFeeTotal: $deliveryFeeTotal,
                 charge: $charge,
                 discount: $discount,
-                tax: $tax,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
@@ -102,6 +101,8 @@ class Create extends ResourceObject
             'tax' => $final->tax,
             'total' => $final->total,
             'paymentTotal' => $final->paymentTotal,
+            'addPoint' => $final->addPoint,
+            'itemCount' => $final->itemCount,
             'orderStatus' => $final->orderStatus,
             'orderDate' => $final->orderDate,
         ];
