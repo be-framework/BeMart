@@ -41,6 +41,11 @@ final readonly class TwoFactorAuthConfigured
             throw new TwoFactorAuthFailedException();
         }
 
+        // SECURITY CONTRACT: enable() overwrites the secret for $loginId
+        // with no ownership check, so the adapter driving this transition
+        // MUST bind $loginId to the just-authenticated login (see
+        // TwoFactorAuthInterface::enable) — a raw client-supplied $loginId
+        // here would allow overwriting another admin's 2FA device.
         $twoFactorAuth->enable($loginId, $authKey);
 
         $this->loginId = $loginId;
