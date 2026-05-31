@@ -6,7 +6,13 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\MasterTypeFormatException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\MasterDataSelected;
+use MyVendor\BeMart\Be\Input\SelectMasterDataInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminMasterDataForm;
@@ -28,6 +34,7 @@ class MasterData extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly AdminMasterRegistryInterface $masters,
         private readonly FormFactory $formFactory,
+        private readonly BecomingInterface $becoming,
     ) {
     }
 
@@ -63,6 +70,41 @@ class MasterData extends ResourceObject
             'masterTypes' => $masterTypes,
             'selectedMaster' => $masterType,
             'rows' => $rows,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * Selects which master to view (doSelectMasterData). ALPS marks it
+     * `idempotent` → PUT; returns the chosen master's rows.
+     *
+     * @psalm-taint-source input $masterType
+     */
+    #[CsrfProtected]
+    public function onPut(string $masterType = 'tag'): static
+    {
+        try {
+            $final = ($this->becoming)(new SelectMasterDataInput(masterType: $masterType));
+        } catch (SemanticVariableException) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => '指定されたマスタデータは見つかりませんでした。'];
+
+            return $this;
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof MasterDataSelected);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'transitionId' => 'doSelectMasterData',
+            'selectedMaster' => $final->masterType,
+            'rows' => $final->rows,
         ];
 
         return $this;

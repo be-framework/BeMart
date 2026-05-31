@@ -384,15 +384,15 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminGet($map, 'admin_content_block_delete', 'page://self/admin/block/block-list');
             $adminPost($map, 'admin_content_block_delete', 'page://self/admin/block/block', 'delete', ['id' => 'blockId']);
             $adminGet($map, 'admin_content_cache', 'page://self/admin/content/cache');
-            $adminPost($map, 'admin_content_cache', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_content_cache']);
+            $adminPost($map, 'admin_content_cache', 'page://self/admin/content/cache', 'put');
             $adminGet($map, 'admin_content_css', 'page://self/admin/content/css');
-            $adminPost($map, 'admin_content_css', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_content_css']);
+            $adminPost($map, 'admin_content_css', 'page://self/admin/content/css', 'put');
             $adminGet($map, 'admin_content_js', 'page://self/admin/content/js');
-            $adminPost($map, 'admin_content_js', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_content_js']);
+            $adminPost($map, 'admin_content_js', 'page://self/admin/content/js', 'put');
             $adminGet($map, 'admin_content_layout_new', 'page://self/admin/layout/layout');
             $adminGet($map, 'admin_content_layout_edit', 'page://self/admin/layout/layout', ['id' => 'layoutId']);
             $adminGet($map, 'admin_content_maintenance', 'page://self/admin/content/maintenance');
-            $adminPost($map, 'admin_content_maintenance', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_content_maintenance']);
+            $adminPost($map, 'admin_content_maintenance', 'page://self/admin/content/maintenance', 'put');
             $adminGet($map, 'admin_content_news_new', 'page://self/admin/news/news');
             $adminGet($map, 'admin_content_news_edit', 'page://self/admin/news/news', ['id' => 'newsId']);
             $adminGet($map, 'admin_content_news_delete', 'page://self/admin/news/news-list');
@@ -457,21 +457,25 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminPost($map, 'admin_product_csv_product', 'page://self/admin/product-csv', 'get');
             $adminGet($map, 'admin_product_csv_category', 'page://self/admin/category/csv');
             $adminPost($map, 'admin_product_csv_category', 'page://self/admin/category/csv', 'post', ['import_file' => 'csv'], ['csv' => '']);
-            $adminGetPost($map, 'admin_product_csv_class_name', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product/class_name']);
-            $adminGetPost($map, 'admin_product_csv_class_category', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product/class_name']);
+            $adminGet($map, 'admin_product_csv_class_name', 'page://self/admin/product/csv-class-name');
+            $adminPost($map, 'admin_product_csv_class_name', 'page://self/admin/product/csv-class-name', 'post', ['import_file' => 'csv'], ['csv' => '']);
+            $adminGet($map, 'admin_product_csv_class_category', 'page://self/admin/product/csv-class-category');
+            $adminPost($map, 'admin_product_csv_class_category', 'page://self/admin/product/csv-class-category', 'post', ['import_file' => 'csv'], ['csv' => '']);
             $adminGet($map, 'admin_product_category_edit', 'page://self/admin/category/category', ['id' => 'categoryId']);
             $adminGetPost($map, 'admin_product_class_category', 'page://self/admin/class-category/class-category-list', ['class_name_id' => 'classNameId']);
             $adminGet($map, 'admin_product_class_category_edit', 'page://self/admin/class-category/class-category-list', ['class_name_id' => 'classNameId', 'id' => 'classCategoryId']);
             $adminGet($map, 'admin_product_class_category_delete', 'page://self/admin/class-category/class-category-list', ['class_name_id' => 'classNameId']);
             $adminPost($map, 'admin_product_class_category_delete', 'page://self/admin/class-category/class-category', 'delete', ['id' => 'classCategoryId']);
-            $adminGetPost($map, 'admin_product_class_category_export', 'page://self/admin/action-redirect', ['class_name_id' => 'classNameId'], ['returnTo' => '/admin/product/class_name']);
+            $adminGet($map, 'admin_product_class_category_export', 'page://self/admin/class-category/class-category-export', ['class_name_id' => 'classNameId']);
+            $adminPost($map, 'admin_product_class_category_export', 'page://self/admin/class-category/class-category-export', 'get', ['class_name_id' => 'classNameId']);
             $adminGet($map, 'admin_product_class_category_sort_no_move', 'page://self/admin/class-category/class-category-list', ['class_name_id' => 'classNameId']);
             $adminPost($map, 'admin_product_class_category_sort_no_move', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'classCategory']);
             $adminGet($map, 'admin_product_class_category_visibility', 'page://self/admin/class-category/class-category-list', ['class_name_id' => 'classNameId']);
             $adminPost($map, 'admin_product_class_category_visibility', 'page://self/admin/toggle-visible', 'put', ['id' => 'rowId'], ['masterType' => 'classCategory']);
             $adminGet($map, 'admin_product_class_name_delete', 'page://self/admin/class-name/class-name-list');
             $adminPost($map, 'admin_product_class_name_delete', 'page://self/admin/class-name/class-name', 'delete', ['id' => 'classNameId']);
-            $adminGetPost($map, 'admin_product_class_name_export', 'page://self/admin/action-redirect', [], ['returnTo' => '/admin/product/class_name']);
+            $adminGet($map, 'admin_product_class_name_export', 'page://self/admin/class-name/class-name-export');
+            $adminPost($map, 'admin_product_class_name_export', 'page://self/admin/class-name/class-name-export', 'get');
             $adminGet($map, 'admin_product_class_name_sort_no_move', 'page://self/admin/class-name/class-name-list');
             $adminPost($map, 'admin_product_class_name_sort_no_move', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'className']);
             $adminGet($map, 'admin_product_tag_delete', 'page://self/admin/tag/tag-list');
@@ -518,9 +522,9 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             // System settings.
             $adminGetPost($map, 'admin_setting_system_authority', 'page://self/admin/authority-role');
             $adminGet($map, 'admin_setting_system_masterdata', 'page://self/admin/master-data');
-            $adminPost($map, 'admin_setting_system_masterdata', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_masterdata']);
+            $adminPost($map, 'admin_setting_system_masterdata', 'page://self/admin/master-data', 'put');
             $adminGet($map, 'admin_setting_system_masterdata_edit', 'page://self/admin/master-data');
-            $adminPost($map, 'admin_setting_system_masterdata_edit', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_masterdata']);
+            $adminPost($map, 'admin_setting_system_masterdata_edit', 'page://self/admin/master-data-edit', 'put');
             $adminGet($map, 'admin_setting_system_member_new', 'page://self/admin/member');
             $adminPost($map, 'admin_setting_system_member_new', 'page://self/admin/member');
             $adminGet($map, 'admin_setting_system_member_edit', 'page://self/admin/member', ['id' => 'loginId']);
@@ -532,7 +536,7 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminGet($map, 'admin_setting_system_member_down', 'page://self/admin/member-list', ['id' => 'loginId']);
             $adminPost($map, 'admin_setting_system_member_down', 'page://self/admin/sort-no-move', 'put', ['id' => 'rowId'], ['masterType' => 'member']);
             $adminGet($map, 'admin_setting_system_security', 'page://self/admin/security');
-            $adminPost($map, 'admin_setting_system_security', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_setting_system_security']);
+            $adminPost($map, 'admin_setting_system_security', 'page://self/admin/security', 'put');
             $adminGet($map, 'admin_setting_system_system_phpinfo', 'page://self/admin/system');
             $adminPost($map, 'admin_setting_system_system_phpinfo', 'page://self/admin/system', 'get');
 
@@ -547,17 +551,17 @@ $adminAliasRoutes = static function (Map $map) use ($adminGet, $adminPost, $admi
             $adminGet($map, 'admin_store_plugin_uninstall', 'page://self/admin/plugin-list');
             $adminPost($map, 'admin_store_plugin_uninstall', 'page://self/admin/plugin', 'delete', ['code' => 'pluginCode']);
             $adminGet($map, 'admin_store_template', 'page://self/admin/template/template-list');
-            $adminPost($map, 'admin_store_template', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_store_template']);
+            $adminPost($map, 'admin_store_template', 'page://self/admin/template/template-list', 'put', ['id' => 'templateId']);
             $adminGet($map, 'admin_store_template_install', 'page://self/admin/template/template-add');
-            $adminPost($map, 'admin_store_template_install', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_store_template']);
+            $adminPost($map, 'admin_store_template_install', 'page://self/admin/template/template-add', 'post');
             $adminGet($map, 'admin_store_template_download', 'page://self/admin/template/template-list', ['id' => 'templateId']);
-            $adminPost($map, 'admin_store_template_download', 'page://self/admin/action-redirect', 'post', ['id' => 'templateId'], ['returnTo' => '/admin_store_template']);
+            $adminPost($map, 'admin_store_template_download', 'page://self/admin/template/template-list', 'post', ['id' => 'templateId']);
             $adminGet($map, 'admin_store_template_delete', 'page://self/admin/template/template-list');
-            $adminPost($map, 'admin_store_template_delete', 'page://self/admin/action-redirect', 'post', ['id' => 'templateId'], ['returnTo' => '/admin_store_template']);
+            $adminPost($map, 'admin_store_template_delete', 'page://self/admin/template/template-list', 'delete', ['id' => 'templateId']);
             $adminGet($map, 'admin_two_factor_auth', 'page://self/admin/two-factor-auth');
-            $adminPost($map, 'admin_two_factor_auth', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_two_factor_auth']);
+            $adminPost($map, 'admin_two_factor_auth', 'page://self/admin/two-factor-auth', 'post');
             $adminGet($map, 'admin_two_factor_auth_set', 'page://self/admin/two-factor-auth-set');
-            $adminPost($map, 'admin_two_factor_auth_set', 'page://self/admin/action-redirect', 'post', [], ['returnTo' => '/admin_two_factor_auth']);
+            $adminPost($map, 'admin_two_factor_auth_set', 'page://self/admin/two-factor-auth-set', 'put');
 
 };
 
@@ -722,10 +726,9 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
                 'admin_change_password',
                 ['POST'],
                 '/admin/change_password',
-                'page://self/admin/action-redirect',
+                'page://self/admin/change-password',
                 [],
-                null,
-                ['returnTo' => '/admin/change_password'],
+                'post',
             );
 
             // ---- Admin: catalogue ----

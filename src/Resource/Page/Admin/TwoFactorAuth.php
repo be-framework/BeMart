@@ -7,6 +7,12 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
+use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
+use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -27,14 +33,17 @@ use function assert;
  * wave), so this resource is a THIN RENDERER: `onGet` exposes an
  * {@see AdminTwoFactorAuthForm} as `body['form']` for the HTML page.
  *
- * DOMAIN follow-up (flagged, NOT implemented — the brief freezes be/):
- * the token verification needs a Be `doVerifyTwoFactorAuth` transition.
- * `onPost` is intentionally NOT implemented here.
+ * Hard ActionRedirect completion: `onPost` now drives the Be
+ * `doVerifyTwoFactorAuth` transition ({@see VerifyTwoFactorAuthInput} →
+ * {@see TwoFactorAuthVerified}) — the TOTP code is verified against the
+ * member's stored secret behind the
+ * {@see \MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface} boundary.
  */
 class TwoFactorAuth extends ResourceObject
 {
     public function __construct(
         private readonly FormFactory $formFactory,
+        private readonly BecomingInterface $becoming,
     ) {
     }
 
@@ -56,6 +65,50 @@ class TwoFactorAuth extends ResourceObject
             'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
         ];
         assert($this->body['form'] instanceof AdminTwoFactorAuthForm);
+
+        return $this;
+    }
+
+    /**
+     * Verifies the submitted TOTP code (doVerifyTwoFactorAuth).
+     *
+     * Login-context: no admin-firewall guard (the session is elevated by
+     * the adapter only on success). The candidate `loginId` is
+     * round-tripped from the pre-auth step.
+     *
+     * Failure mapping:
+     *   - Invalid CSRF                  → 403 (interceptor)
+     *   - SemanticVariableException     → 400 (malformed code)
+     *   - TwoFactorAuthFailedException  → 400 (code mismatch)
+     *
+     * @psalm-taint-source input $loginId
+     * @psalm-taint-source input $deviceToken
+     */
+    #[CsrfProtected]
+    #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
+    public function onPost(string $loginId, string $deviceToken): static
+    {
+        try {
+            $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
+                loginId: $loginId,
+                deviceToken: $deviceToken,
+            ));
+        } catch (SemanticVariableException | TwoFactorAuthFailedException) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => '認証コードが正しくありません。'];
+
+            return $this;
+        }
+
+        assert($final instanceof TwoFactorAuthVerified);
+
+        $this->code = Code::OK;
+        $this->headers['Location'] = '/admin';
+        $this->body = [
+            'transitionId' => 'doVerifyTwoFactorAuth',
+            'loginId' => $final->loginId,
+            'message' => '二要素認証を確認しました。',
+        ];
 
         return $this;
     }
