@@ -16,6 +16,11 @@ use MyVendor\BeMart\Be\Reason\Service\DefaultPurchaseFlow;
 use MyVendor\BeMart\Be\Reason\Service\FixedCustomerInitialPoint;
 use MyVendor\BeMart\Be\Reason\Service\InventoryAllocatorInterface;
 use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
+use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
+use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
+use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
+use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\NativePasswordHasher;
 use MyVendor\BeMart\Be\Reason\Service\NoopInventoryAllocator;
 use MyVendor\BeMart\Be\Reason\Service\NoopMailer;
@@ -25,6 +30,17 @@ use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentGatewayInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PurchaseFlowInterface;
+use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
+use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
+use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeCacheClearer;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeClassCsvCompatibility;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeCustomizeAssetWriter;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeMaintenanceMode;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeMasterDataWriter;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
+use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\ResourceObject;
@@ -80,6 +96,14 @@ final class AppModule extends AbstractAppModule
         $this->bind(PurchaseFlowInterface::class)->to(DefaultPurchaseFlow::class)->in(Scope::SINGLETON);
         $this->bind(PaymentMethodFactoryInterface::class)->to(DefaultPaymentMethodFactory::class)->in(Scope::SINGLETON);
         $this->bind(OrderPdfCompatibilityInterface::class)->to(OrderPdfCompatibilityService::class)->in(Scope::SINGLETON);
+        $this->bind(TwoFactorAuthInterface::class)->to(EccubeTwoFactorAuth::class)->in(Scope::SINGLETON);
+        $this->bind(SecurityConfigWriterInterface::class)->to(EccubeSecurityConfigWriter::class)->in(Scope::SINGLETON);
+        $this->bind(CacheClearerInterface::class)->to(EccubeCacheClearer::class)->in(Scope::SINGLETON);
+        $this->bind(CustomizeAssetWriterInterface::class)->to(EccubeCustomizeAssetWriter::class)->in(Scope::SINGLETON);
+        $this->bind(MaintenanceModeInterface::class)->to(EccubeMaintenanceMode::class)->in(Scope::SINGLETON);
+        $this->bind(MasterDataWriterInterface::class)->to(EccubeMasterDataWriter::class)->in(Scope::SINGLETON);
+        $this->bind(ClassCsvCompatibilityInterface::class)->to(EccubeClassCsvCompatibility::class)->in(Scope::SINGLETON);
+        $this->bind(TemplateCompatibilityInterface::class)->to(EccubeTemplateCompatibility::class)->in(Scope::SINGLETON);
 
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).

@@ -1,0 +1,79 @@
+<?php
+
+declare(strict_types=1);
+
+namespace MyVendor\BeMart\Tests\Resource;
+
+use BEAR\AppMeta\Meta;
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
+use MyVendor\BeMart\Module\TestModule;
+use PHPUnit\Framework\TestCase;
+use Ray\Di\Injector;
+
+use function dirname;
+
+/**
+ * Resource coverage for the admin 2FA device-setup page
+ * (doSetTwoFactorAuth). Login-context: anonymous-accessible.
+ */
+final class AdminTwoFactorAuthSetResourceTest extends TestCase
+{
+    private ResourceInterface $resource;
+
+    protected function setUp(): void
+    {
+        $injector = new Injector(new TestModule(new Meta('MyVendor\\BeMart', 'test')), dirname(__DIR__, 2) . '/var/tmp/test');
+        $this->resource = $injector->getInstance(ResourceInterface::class);
+    }
+
+    public function testOnGetRendersFormWithEmptyAuthKeyPlaceholder(): void
+    {
+        // authKey stays empty to match the EC-CUBE render baseline (the
+        // QR `secret=` is blank); the real secret is supplied to onPut.
+        $ro = $this->resource->get('page://self/admin/two-factor-auth-set');
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertArrayHasKey('authKey', $ro->body);
+        $this->assertSame('', $ro->body['authKey']);
+    }
+
+    public function testOnPutConfiguresDevice(): void
+    {
+        $ro = $this->resource->put('page://self/admin/two-factor-auth-set', [
+            'loginId' => 'fresh-admin',
+            'authKey' => FakeTwoFactorAuth::FIXED_SECRET,
+            'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('doSetTwoFactorAuth', $ro->body['transitionId']);
+        $this->assertSame('fresh-admin', $ro->body['loginId']);
+    }
+
+    public function testOnPutWrongCodeReturns400(): void
+    {
+        $ro = $this->resource->put('page://self/admin/two-factor-auth-set', [
+            'loginId' => 'fresh-admin-x',
+            'authKey' => FakeTwoFactorAuth::FIXED_SECRET,
+            'deviceToken' => '000000',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::BAD_REQUEST, $ro->code);
+    }
+
+    public function testOnPutMissingCsrfReturns403(): void
+    {
+        $ro = $this->resource->put('page://self/admin/two-factor-auth-set', [
+            'loginId' => 'fresh-admin',
+            'authKey' => FakeTwoFactorAuth::FIXED_SECRET,
+            'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+    }
+}
