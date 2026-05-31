@@ -85,6 +85,21 @@ class TwoFactorAuthSet extends ResourceObject
      * Registers the TOTP device after confirming the first code
      * (doSetTwoFactorAuth). ALPS marks this `idempotent` → PUT.
      *
+     * SECURITY RESIDUAL (tracked — migration-status §4 "Outstanding work"
+     * item 8, the Hard-ActionRedirect / 認証 cutover residual): this page is
+     * reached PRE-AUTH (anonymous, login-context), so `$loginId` and the
+     * candidate `$authKey` secret are taken from the request body rather than
+     * a server-side pre-auth challenge. `enable()` overwrites the secret for
+     * `$loginId` with no ownership check
+     * ({@see \MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface::enable}),
+     * so a caller who passes another admin's `$loginId` could replace that
+     * admin's 2FA device. The production cutover binds a server-generated
+     * secret + the pending login identity into a pre-auth session/challenge
+     * state at credential-verification time and consumes it here; until then
+     * the route relies on CSRF + the documented contract. Do NOT widen this
+     * surface (e.g. expose it post-auth for arbitrary `$loginId`) before the
+     * challenge state lands.
+     *
      * Failure mapping:
      *   - Invalid CSRF                  → 403 (interceptor)
      *   - SemanticVariableException     → 400 (malformed code)
