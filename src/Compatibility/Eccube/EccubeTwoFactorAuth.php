@@ -11,6 +11,7 @@ use function array_key_exists;
 use function bindec;
 use function chr;
 use function decbin;
+use function hash_equals;
 use function hash_hmac;
 use function ord;
 use function pack;
@@ -74,7 +75,9 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
     {
         $timeSlice = (int) (time() / self::PERIOD);
         for ($offset = -1; $offset <= 1; $offset++) {
-            if ($this->codeAt($secret, $timeSlice + $offset) === $token) {
+            // hash_equals: constant-time compare, honouring the
+            // TwoFactorAuthInterface timing-safety contract.
+            if (hash_equals($this->codeAt($secret, $timeSlice + $offset), $token)) {
                 return true;
             }
         }
