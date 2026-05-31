@@ -21,7 +21,19 @@ interface TwoFactorAuthInterface
     /** Generate a fresh base32 TOTP secret (device-setup screen). */
     public function generateSecret(): string;
 
-    /** Register/replace the TOTP secret for an admin (device setup). */
+    /**
+     * Register/replace the TOTP secret for an admin (device setup).
+     *
+     * SECURITY CONTRACT: `$loginId` MUST be the identity established by the
+     * current authentication step, never a raw client-supplied value. This
+     * method overwrites any existing secret for `$loginId` with no ownership
+     * check, so a caller that forwards an attacker-controlled `$loginId`
+     * would let one actor overwrite another admin's 2FA device (lockout /
+     * account takeover). The adapter that drives
+     * {@see \MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured} is responsible
+     * for binding `$loginId` to the just-authenticated login before reaching
+     * this transition.
+     */
     public function enable(string $loginId, string $secret): void;
 
     /** Whether the admin already has a TOTP device configured. */
