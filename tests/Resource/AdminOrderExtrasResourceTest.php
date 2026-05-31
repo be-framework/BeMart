@@ -282,17 +282,23 @@ final class AdminOrderExtrasResourceTest extends TestCase
 
     public function testCreateOrderHappyPathReturns201(): void
     {
+        // PurchaseFlow derives the totals from the line items: subtotal
+        // 2×500 = 1000, tax 10% = 100, +deliveryFeeTotal 100 → total 1200.
         $ro = $this->resource->post('page://self/admin/order/create', [
             'customerId' => self::ALICE_ID,
             'paymentMethodId' => 2,
-            'subtotal' => 1000,
+            'orderItems' => [
+                ['productCode' => 'SKU-1', 'productName' => '商品A', 'unitPrice' => 500, 'quantity' => 2],
+            ],
             'deliveryFeeTotal' => 100,
-            'tax' => 100,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $ro->code);
+        $this->assertSame(1000, $ro->body['subtotal']);
+        $this->assertSame(100, $ro->body['tax']);
         $this->assertSame(1200, $ro->body['total']);
+        $this->assertSame(1, $ro->body['itemCount']);
         $this->assertSame(FinalizedOrderEntity::STATUS_NEW, $ro->body['orderStatus']);
         $this->assertArrayHasKey('Location', $ro->headers);
 
@@ -302,12 +308,45 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $this->assertNotNull($persisted);
     }
 
+    public function testCreateOrderAppliesChargeAndDiscountOnTopOfPurchaseFlow(): void
+    {
+        // subtotal 1000 + tax 100 + delivery 0 = 1100 base; +charge 50
+        // -discount 200 → total 950.
+        $ro = $this->resource->post('page://self/admin/order/create', [
+            'customerId' => self::ALICE_ID,
+            'paymentMethodId' => 2,
+            'orderItems' => [
+                ['productCode' => 'SKU-1', 'productName' => '商品A', 'unitPrice' => 1000, 'quantity' => 1],
+            ],
+            'charge' => 50,
+            'discount' => 200,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+        $this->assertSame(950, $ro->body['total']);
+        $this->assertSame(950, $ro->body['paymentTotal']);
+    }
+
+    public function testCreateOrderWithEmptyItemsReturns400(): void
+    {
+        $ro = $this->resource->post('page://self/admin/order/create', [
+            'customerId' => self::ALICE_ID,
+            'paymentMethodId' => 2,
+            'orderItems' => [],
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+        $this->assertSame(Code::BAD_REQUEST, $ro->code);
+    }
+
     public function testCreateOrderMissingCsrfReturns403(): void
     {
         $ro = $this->resource->post('page://self/admin/order/create', [
             'customerId' => self::ALICE_ID,
             'paymentMethodId' => 2,
-            'subtotal' => 1000,
+            'orderItems' => [
+                ['productCode' => 'SKU-1', 'productName' => '商品A', 'unitPrice' => 500, 'quantity' => 2],
+            ],
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
@@ -319,7 +358,9 @@ final class AdminOrderExtrasResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/order/create', [
             'customerId' => self::ALICE_ID,
             'paymentMethodId' => 2,
-            'subtotal' => 1000,
+            'orderItems' => [
+                ['productCode' => 'SKU-1', 'productName' => '商品A', 'unitPrice' => 500, 'quantity' => 2],
+            ],
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::FORBIDDEN, $ro->code);
@@ -407,19 +448,23 @@ final class AdminOrderExtrasResourceTest extends TestCase
     }
 
     // ------------------------------------------------------------------
-    // doImportShippingCsv (stub)
+    // doImportShippingCsv (real ingestion)
     // ------------------------------------------------------------------
 
-    public function testImportShippingIsStubReturning202(): void
+    public function testImportShippingPersistsKnownOrdersAndSkipsUnknown(): void
     {
         $ro = $this->resource->post('page://self/admin/order/import-shipping', [
-            'csv' => "orderNo,trackingNumber\nABC,XY-123\n",
+            'csv' => "受注番号,お問い合わせ番号\n"
+                . "past0000000000000000000000000001,XY-123\n"
+                . "no-such-order,ZZ-999\n",
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::ACCEPTED, $ro->code);
-        $this->assertFalse($ro->body['accepted']);
-        $this->assertSame(2, $ro->body['lineCount']);
+        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame('doImportShippingCsv', $ro->body['transitionId']);
+        $this->assertTrue($ro->body['accepted']);
+        $this->assertSame(1, $ro->body['imported']);
+        $this->assertSame(1, $ro->body['skipped']);
     }
 
     public function testImportShippingWithoutAdminReturns403(): void

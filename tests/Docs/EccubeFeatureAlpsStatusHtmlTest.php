@@ -104,32 +104,88 @@ final class EccubeFeatureAlpsStatusHtmlTest extends TestCase
         self::assertSame('Hard', self::difficulty($rows['admin_store_template_download POST']));
     }
 
-    public function testIssue24HardActionRedirectRowsHaveAuditedStrategies(): void
+    public function testIssue24HardActionRedirectRowsAreConnected(): void
     {
-        $hardActionRedirectRows = [];
-        foreach (self::rows() as $row) {
-            if (
-                str_contains($row['implementation'], 'ActionRedirect')
-                && in_array(self::difficulty($row), ['Hard', 'Super Hard'], true)
-            ) {
-                $hardActionRedirectRows[] = $row;
-            }
-        }
+        // The 22 Hard rows that Issue #24 re-classification originally
+        // parked on the generic ActionRedirect safe-evacuation. This PR
+        // connects every one to a concrete Be/BEAR resource, so each row
+        // must now read 実装済み (no longer ActionRedirect), keep its Hard
+        // difficulty, and carry an audited migration strategy. This test
+        // pins that headline deliverable positively: a regression that
+        // re-parks any route on ActionRedirect, downgrades its difficulty,
+        // or drops the row from the table fails here. (Note: once a row is
+        // connected it no longer carries the "Issue #24 Hard ActionRedirect
+        // 再分類" planning note, so this asserts the *connected* state, not
+        // that note.)
+        $known = [
+            'admin_change_password POST',
+            'admin_content_cache POST',
+            'admin_content_css POST',
+            'admin_content_js POST',
+            'admin_content_maintenance POST',
+            'admin_product_class_category_export GET',
+            'admin_product_class_category_export POST',
+            'admin_product_class_name_export GET',
+            'admin_product_class_name_export POST',
+            'admin_product_csv_class_category GET',
+            'admin_product_csv_class_category POST',
+            'admin_product_csv_class_name GET',
+            'admin_product_csv_class_name POST',
+            'admin_setting_system_masterdata POST',
+            'admin_setting_system_masterdata_edit POST',
+            'admin_setting_system_security POST',
+            'admin_store_template POST',
+            'admin_store_template_delete POST',
+            'admin_store_template_download POST',
+            'admin_store_template_install POST',
+            'admin_two_factor_auth POST',
+            'admin_two_factor_auth_set POST',
+        ];
+        $validStrategies = ['native', 'adapter', 'legacy compatibility', 'out-of-scope'];
 
-        self::assertCount(22, $hardActionRedirectRows);
-
+        $rows = self::rowsByRouteAndMethod();
         $strategyCounts = ['native' => 0, 'adapter' => 0, 'legacy compatibility' => 0, 'out-of-scope' => 0];
-        foreach ($hardActionRedirectRows as $row) {
-            $strategyCounts[self::strategy($row)]++;
-            self::assertStringContainsString('Issue #24 Hard ActionRedirect再分類', $row['assessment']);
+        foreach ($known as $key) {
+            self::assertArrayHasKey($key, $rows, "Issue #24 route missing from status table: {$key}");
+            $row = $rows[$key];
+            self::assertStringNotContainsString(
+                'ActionRedirect',
+                $row['implementation'],
+                "Issue #24 route is still parked on ActionRedirect (regression): {$key}",
+            );
+            self::assertContains(
+                self::difficulty($row),
+                ['Hard', 'Super Hard'],
+                "Issue #24 route difficulty was downgraded: {$key}",
+            );
+            $strategy = self::strategy($row);
+            self::assertContains($strategy, $validStrategies, "Unaudited strategy: {$key}");
+            $strategyCounts[$strategy]++;
         }
 
+        // All 22 routes connected, with the audited 4 native + 18 adapter split.
         self::assertSame([
             'native' => 4,
             'adapter' => 18,
             'legacy compatibility' => 0,
             'out-of-scope' => 0,
         ], $strategyCounts);
+
+        // Invariant: no Hard ActionRedirect row may exist outside the known
+        // set — guards against a NEW unaudited route appearing on the generic
+        // fallback. Given every known member was just asserted connected,
+        // this loop is expected to find nothing today.
+        foreach (self::rows() as $row) {
+            if (
+                ! str_contains($row['implementation'], 'ActionRedirect')
+                || ! in_array(self::difficulty($row), ['Hard', 'Super Hard'], true)
+            ) {
+                continue;
+            }
+
+            $key = $row['route'] . ' ' . $row['method'];
+            self::assertContains($key, $known, "Unexpected Hard ActionRedirect row: {$key}");
+        }
     }
 
     public function testPdfPilotIsLegacyCompatibility(): void

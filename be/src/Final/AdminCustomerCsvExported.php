@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Reason\Csv\CsvColumnLayout;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
+use MyVendor\BeMart\Be\Reason\Query\CsvColumnConfigStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
@@ -44,16 +46,42 @@ use function stream_get_contents;
  */
 final readonly class AdminCustomerCsvExported
 {
+    /** dtb_csv csv_type_id for the customer export. */
+    private const CSV_TYPE = 2;
+
+    /** @var list<string> */
+    private const DEFAULT_COLUMNS = [
+        'customerId',
+        'email',
+        'name01',
+        'name02',
+        'kana01',
+        'kana02',
+        'companyName',
+        'phoneNumber',
+        'postalCode',
+        'pref',
+        'addr01',
+        'addr02',
+        'customerStatus',
+    ];
+
     public string $csv;
     public int $rowCount;
 
     public function __construct(
         #[Inject] AdminSession $adminSession,
         #[Inject] CustomerQueryInterface $customerQuery,
+        #[Inject] CsvColumnConfigStorageInterface $csvColumnConfig,
     ) {
         if ($adminSession->adminId === null) {
             throw new UnauthorizedAdminAccessException();
         }
+
+        $layout = CsvColumnLayout::resolve(
+            self::DEFAULT_COLUMNS,
+            $csvColumnConfig->listByType(self::CSV_TYPE),
+        );
 
         // No filter (Wave 9 first iteration); reuse the Wave 8β
         // CustomerQueryInterface::search surface with both keywords null.
@@ -64,39 +92,11 @@ final readonly class AdminCustomerCsvExported
 
         // PHP 8.4 deprecates the implicit $escape default; pass '' so
         // RFC 4180 quoting remains stable across versions.
-        fputcsv($handle, [
-            'customerId',
-            'email',
-            'name01',
-            'name02',
-            'kana01',
-            'kana02',
-            'companyName',
-            'phoneNumber',
-            'postalCode',
-            'pref',
-            'addr01',
-            'addr02',
-            'customerStatus',
-        ], ',', '"', '');
+        fputcsv($handle, $layout->columns, ',', '"', '');
 
         foreach ($rows as $row) {
             \assert($row instanceof CustomerEntity);
-            fputcsv($handle, [
-                $row->customerId,
-                $row->email,
-                $row->name01,
-                $row->name02,
-                $row->kana01 ?? '',
-                $row->kana02 ?? '',
-                $row->companyName ?? '',
-                $row->phoneNumber ?? '',
-                $row->postalCode ?? '',
-                $row->pref ?? '',
-                $row->addr01 ?? '',
-                $row->addr02 ?? '',
-                (string) $row->customerStatus,
-            ], ',', '"', '');
+            fputcsv($handle, $layout->project($this->encodeRow($row)), ',', '"', '');
         }
 
         rewind($handle);
@@ -106,5 +106,27 @@ final readonly class AdminCustomerCsvExported
 
         $this->csv = $csv;
         $this->rowCount = count($rows);
+    }
+
+    /**
+     * @return array<string, string|int>
+     */
+    private function encodeRow(CustomerEntity $row): array
+    {
+        return [
+            'customerId' => $row->customerId,
+            'email' => $row->email,
+            'name01' => $row->name01,
+            'name02' => $row->name02,
+            'kana01' => $row->kana01 ?? '',
+            'kana02' => $row->kana02 ?? '',
+            'companyName' => $row->companyName ?? '',
+            'phoneNumber' => $row->phoneNumber ?? '',
+            'postalCode' => $row->postalCode ?? '',
+            'pref' => $row->pref ?? '',
+            'addr01' => $row->addr01 ?? '',
+            'addr02' => $row->addr02 ?? '',
+            'customerStatus' => (string) $row->customerStatus,
+        ];
     }
 }

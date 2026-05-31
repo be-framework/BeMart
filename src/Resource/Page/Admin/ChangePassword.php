@@ -7,6 +7,16 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
+use MyVendor\BeMart\Be\Exception\InvalidCurrentPasswordException;
+use MyVendor\BeMart\Be\Exception\PasswordConfirmationMismatchException;
+use MyVendor\BeMart\Be\Exception\PasswordPolicyViolationException;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\AdminPasswordChanged;
+use MyVendor\BeMart\Be\Input\ChangeAdminPasswordInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminChangePasswordForm;
 use Ray\WebFormModule\FormFactory;
@@ -26,17 +36,18 @@ use function assert;
  * {@see AdminChangePasswordForm} as `body['form']` for the HTML page to
  * render via `{{ form.input(...) }}`.
  *
- * MISSING-BODY-FIELD / domain follow-up (flagged, NOT implemented —
- * the brief freezes be/): the actual password update needs a Be
- * `doChangeAdminPassword` transition (current-password verification +
- * re-hash over the admin storage). `onPost` is intentionally NOT
- * implemented here; adding it requires the be/ domain layer.
+ * Hard ActionRedirect completion: `onPost` now drives the Be
+ * `doChangePassword` transition ({@see ChangeAdminPasswordInput} →
+ * {@see AdminPasswordChanged}) — current-password verification +
+ * re-hash over the admin storage, with the credential/CSRF/session
+ * boundary enforced Be/BEAR-side.
  */
 class ChangePassword extends ResourceObject
 {
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly BecomingInterface $becoming,
     ) {
     }
 
@@ -68,6 +79,81 @@ class ChangePassword extends ResourceObject
             'form' => $this->formFactory->newInstance(AdminChangePasswordForm::class),
         ];
         assert($this->body['form'] instanceof AdminChangePasswordForm);
+
+        return $this;
+    }
+
+    /**
+     * Applies the admin's own password change (doChangePassword).
+     *
+     * Failure mapping:
+     *   - Invalid CSRF                         → 403 (interceptor)
+     *   - SemanticVariableException            → 400
+     *   - InvalidCurrentPasswordException      → 400
+     *   - PasswordConfirmationMismatchException→ 400
+     *   - PasswordPolicyViolationException     → 400
+     *   - UnauthorizedAdminAccessException     → 403 (no admin session)
+     *   - AdminNotFoundException               → 404 (stale session)
+     *
+     * @psalm-taint-source input $currentPassword
+     * @psalm-taint-source input $changePasswordFirst
+     * @psalm-taint-source input $changePasswordSecond
+     */
+    #[CsrfProtected]
+    #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
+    public function onPost(
+        string $currentPassword,
+        string $changePasswordFirst,
+        string $changePasswordSecond,
+    ): static {
+        try {
+            $final = ($this->becoming)(new ChangeAdminPasswordInput(
+                currentPassword: $currentPassword,
+                changePasswordFirst: $changePasswordFirst,
+                changePasswordSecond: $changePasswordSecond,
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
+
+            return $this;
+        } catch (InvalidCurrentPasswordException) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => '現在のパスワードが正しくありません。'];
+
+            return $this;
+        } catch (PasswordConfirmationMismatchException) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => '新しいパスワードと確認用パスワードが一致しません。'];
+
+            return $this;
+        } catch (PasswordPolicyViolationException) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => 'パスワードは8文字以上32文字以下で入力してください。'];
+
+            return $this;
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        } catch (AdminNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => '指定された管理者は見つかりませんでした。'];
+
+            return $this;
+        }
+
+        assert($final instanceof AdminPasswordChanged);
+
+        $this->code = Code::OK;
+        $this->headers['Location'] = '/admin/change_password';
+        $this->body = [
+            'transitionId' => 'doChangePassword',
+            'adminId' => $final->adminId,
+            'loginId' => $final->loginId,
+            'message' => 'パスワードを変更しました。',
+        ];
 
         return $this;
     }

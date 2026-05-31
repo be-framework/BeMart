@@ -6,7 +6,13 @@ namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use Be\Framework\BecomingInterface;
+use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\ContentCssUpdated;
+use MyVendor\BeMart\Be\Input\UpdateContentCssInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Form\AdminCssForm;
 use Ray\WebFormModule\FormFactory;
 
@@ -33,6 +39,8 @@ class Css extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly BecomingInterface $becoming,
+        private readonly CustomizeAssetWriterInterface $assetWriter,
     ) {
     }
 
@@ -47,9 +55,40 @@ class Css extends ResourceObject
 
         $form = $this->formFactory->newInstance(AdminCssForm::class);
         assert($form instanceof AdminCssForm);
+        $form->fillValues(['css' => $this->assetWriter->readCss()]);
 
         $this->code = Code::OK;
         $this->body = ['form' => $form];
+
+        return $this;
+    }
+
+    /**
+     * Saves the customize CSS (doUpdateContentCss). ALPS idempotent → PUT.
+     *
+     * @psalm-taint-source input $css
+     */
+    #[CsrfProtected]
+    public function onPut(string $css = ''): static
+    {
+        try {
+            $final = ($this->becoming)(new UpdateContentCssInput(css: $css));
+        } catch (UnauthorizedAdminAccessException) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+            return $this;
+        }
+
+        assert($final instanceof ContentCssUpdated);
+
+        $this->code = Code::OK;
+        $this->headers['Location'] = '/admin_content_css';
+        $this->body = [
+            'transitionId' => 'doUpdateContentCss',
+            'length' => $final->length,
+            'message' => 'CSSを更新しました。',
+        ];
 
         return $this;
     }
