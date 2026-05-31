@@ -16,24 +16,21 @@ use function array_filter;
 use function array_values;
 use function count;
 use function explode;
-use function fclose;
-use function fopen;
-use function fputcsv;
 use function implode;
 use function max;
-use function rewind;
-use function rtrim;
-use function stream_get_contents;
+use function preg_match;
+use function str_replace;
 use function trim;
 
 /**
  * EC-CUBE-compatible 規格名/規格分類 CSV boundary.
  *
  * Export builds the EC-CUBE-format CSV from the live class-name /
- * class-category storage, encoding every field through {@see fputcsv} so a
- * value containing a comma, double-quote or newline is quoted (RFC 4180)
- * instead of corrupting the column layout — matching the sibling exporters
- * ({@see \MyVendor\BeMart\Be\Final\AdminProductCsvExported} et al.). Import
+ * class-category storage, quoting every field per RFC 4180 so a value
+ * containing a comma, double-quote or newline is enclosed instead of
+ * corrupting the column layout — the same correctness the sibling exporters
+ * get from {@see fputcsv} ({@see \MyVendor\BeMart\Be\Final\AdminProductCsvExported}
+ * et al.), done here with a pure encoder so there is no per-row stream. Import
  * parses + counts the uploaded rows; the destructive persistence (upsert of
  * every parsed row) is the production cutover residual (migration-status §4)
  * — by design the upload is validated/counted on the safe side rather than
@@ -88,28 +85,36 @@ final class EccubeClassCsvCompatibility implements ClassCsvCompatibilityInterfac
     }
 
     /**
-     * Encode one CSV record with RFC-4180 quoting (no record terminator).
+     * Encode one CSV record with RFC-4180 quoting (no record terminator;
+     * record separation is the caller's "\r\n" join — EC-CUBE emits
+     * CRLF-delimited rows).
      *
      * @param list<string> $fields
      */
     private function encodeRow(array $fields): string
     {
-        $handle = fopen('php://memory', 'r+');
-        if ($handle === false) {
-            // php://memory only fails under extreme memory pressure.
-            return implode(',', $fields);
+        $quoted = [];
+        foreach ($fields as $field) {
+            $quoted[] = $this->quoteField($field);
         }
 
-        // escape: '' disables PHP's legacy backslash escaping (deprecated in
-        // 8.4) so embedded quotes are doubled per RFC 4180.
-        fputcsv($handle, $fields, ',', '"', '');
-        rewind($handle);
-        $line = stream_get_contents($handle);
-        fclose($handle);
+        return implode(',', $quoted);
+    }
 
-        // Drop fputcsv's trailing "\n"; record separation is the caller's
-        // "\r\n" join (EC-CUBE emits CRLF-delimited rows).
-        return rtrim($line === false ? '' : $line, "\n");
+    /**
+     * RFC-4180 quote a single field: only when it contains the delimiter,
+     * the enclosure, CR or LF, wrap it in double-quotes and double any
+     * embedded double-quote. Byte-identical to fputcsv(escape: '') for these
+     * inputs, but pure — no per-row php://memory stream and so no
+     * malformed-output fallback path.
+     */
+    private function quoteField(string $field): string
+    {
+        if (preg_match('/[",\r\n]/', $field) === 1) {
+            return '"' . str_replace('"', '""', $field) . '"';
+        }
+
+        return $field;
     }
 
     private function countDataRows(string $csv): int
