@@ -85,7 +85,8 @@ class TwoFactorAuthSet extends ResourceObject
      * Registers the TOTP device after confirming the first code
      * (doSetTwoFactorAuth). ALPS marks this `idempotent` → PUT.
      *
-     * SECURITY RESIDUAL (tracked — migration-status §残作業 #6): this page is
+     * SECURITY RESIDUAL (tracked — migration-status §4 "Outstanding work"
+     * item 8, the Hard-ActionRedirect / 認証 cutover residual): this page is
      * reached PRE-AUTH (anonymous, login-context), so `$loginId` and the
      * candidate `$authKey` secret are taken from the request body rather than
      * a server-side pre-auth challenge. `enable()` overwrites the secret for
