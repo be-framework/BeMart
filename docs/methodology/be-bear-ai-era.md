@@ -2,6 +2,8 @@
 
 EC-CUBE 4.3 を Be Framework + BEAR.Sunday へ移植する BeMart プロジェクトの途中記録として書く論評。フレームワークそのものの実務レビュー（摩擦点・upstream 課題）は [`FRAMEWORK_REVIEW.md`](FRAMEWORK_REVIEW.md) が扱う。本稿はその先 — **「なぜこの 2 つのフレームワークが AI コーディング時代に効くのか」** を、この移植が実証しつつあることから論じる。
 
+> 2026-06-01 注記: 本稿の数値は執筆時点の途中スナップショットです。現在の到達点は [`../migration-status.md`](../migration-status.md) が正で、ALPS route-gate と Ray.MediaQuery cutover 後のプロジェクト規模は拡大しています。本文の価値は数値ではなく、AI エージェントに効いた構造的制約の観察にあります。
+
 論拠は思弁ではない。BeMart の 144 transition・34 storage・34 admin ページは、その大半が並列 AI エージェントの波（wave）で生成された。以下はその実地観察に基づく。
 
 ## 結論
