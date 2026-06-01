@@ -1,10 +1,34 @@
-# BeMart — EC-CUBE 4.3 Semantic Migration
+# BeMart — EC-CUBE 4.3 Application Overhaul
 
-BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する** 移植の **実証プロジェクト** です。Be Framework + BEAR.Sunday による移植手法（ALPS → Be → BEAR）の referent implementation であり、Symfony版EC-CUBEの fork や controller 書き換えではなく、EC-CUBEの意味論とHTML構造を保ちながら ALPS・Ray.MediaQuery・ハイパーメディア・境界テストで組み直します。
+BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する** アプリケーション・オーバーホールの実証プロジェクトです。Symfony版EC-CUBEの fork や controller 書き換えではなく、EC-CUBE が持つ語彙・状態遷移・HTML構造・永続化の制約を `alps.json` に逆算し、Be Framework + BEAR.Sunday + Ray.MediaQuery + Twig HTML へ投影し直します。
 
 > BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration with explicit boundaries.
 
-実証の全体像（何を示せたか・知見・限界）は [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) に束ねています。
+このリポジトリが示したいのは「EC-CUBEを別フレームワークへ移す」ことだけではありません。大きな既存アプリケーションを、**意味論を正、境界を契約、テストを証明**として組み直せるか。その問いへの実装付きの答えです。実証の全体像（何を学び、何を成し遂げ、何をまだ残しているか）は [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) に束ねています。
+
+## Current State
+
+| Boundary | Current evidence |
+|---|---|
+| ALPS | `alps.json` は 532 descriptor / 207 transition descriptor。うち 147 は振る舞いの移植契約、60 は `alps-route-gate` のルート接続契約。 |
+| Be domain | 147 Input / 148 Final / 154 Semantic / 14 Being。Final は状態遷移が成立した証明として扱う。 |
+| BEAR Resource | `src/Resource/Page` に 147 page resource/support resource。Aura route から EC-CUBE route name ↔ URL path ↔ resource URI を接続する。 |
+| SQL | Ray.MediaQuery の 51 interface / 142 `#[DbQuery]` / 142 SQL file。PHP実クラスのPDO adapterではなく、interface + SQL file が永続化境界。 |
+| HTML | `var/templates` に 131 Twig template。storefront 全ページと in-scope admin editor waves を移植済み。 |
+| Tests | `docs/migration-status.md` のベースラインを正とする。非SQL suite はDBなしで動く。SQL suite は MariaDB/MySQL を必要とする。 |
+
+## What We Learned
+
+- **仕様は実装より長く生きる。** EC-CUBE は framework を変えてきたが、「商品」「注文」「顧客」「配送」の語彙と遷移は残る。ALPS はその長寿命な部分を取り出す。
+- **移植は境界の宣言である。** ドメイン、リソース、HTML、SQL、compatibility adapter、production cutover を混ぜないと、残作業が「未知の不足」ではなく「既知の境界」になる。
+- **Fake は mock ではなく最初の実装である。** Fake で契約を固定し、Ray.MediaQuery/SQL が同じ Resource 契約を満たすことを hypermedia test で示す。
+- **AI エージェントには構造が効く。** ALPS、Be の `Input → Being → Final`、BEAR の URI/resource、MediaQuery の interface/SQL は、並列作業でも drift を抑える制約になる。
+
+## What Is Done / Not Done
+
+**Done:** EC-CUBE の機能を ALPS と route-status 表に棚卸しし、Be domain、BEAR resource、Ray.MediaQuery SQL 境界、storefront/admin HTML の主要面を実装した。移植中に得た再利用可能な知見は [`docs/skills/`](docs/skills/) と [`docs/methodology/`](docs/methodology/) に分離した。
+
+**Not done:** 本番 EC-CUBE の完全代替に必要な互換 fidelity と cutover は残る。中心は `doCreateOrder` の PurchaseFlow 完全再現、PDF/CSV/Mail/Template/MasterData の byte/副作用互換、Mypage/Favorite/Address/Contact の HTML enrichment、production DB bring-up。これは未把握の穴ではなく、意図して切った境界です。
 
 ## Difference from Symfony EC-CUBE
 
@@ -23,7 +47,7 @@ BeMart は EC-CUBE の機能や画面構造を否定するものではありま�
 ## Core Ideas
 
 - **Semantics first** — ALPSで descriptor、transition、actor、page role を明示する。
-- **Fake → Schema → SQL** — Fakeで契約を固定し、EC-CUBEスキーマ照合後にSQL実装する。
+- **Fake → Schema → Ray.MediaQuery** — Fakeで契約を固定し、EC-CUBEスキーマ照合後に interface + SQL file として永続化境界を実装する。
 - **Explicit boundaries** — ドメイン、インフラ、リソース、HTML、SQLの境界を隠さない。
 - **Context chooses implementation** — アプリケーションは Fake / SQL のどちらが有効かを知らない。
 - **Hypermedia is a contract** — 画面は表示だけでなく、リンクとフォームが次状態への affordance になって完了。
@@ -34,7 +58,7 @@ BeMart は EC-CUBE の機能や画面構造を否定するものではありま�
 |---|---|
 | ALPS | アプリケーション意味論・情報構造 |
 | Be Framework | ドメイン境界（`Input` / `Being` / `Final`） |
-| Ray.MediaQuery | ドメイン ↔ インフラ境界。技術的には PHP interface / return type ↔ SQL query/result |
+| Ray.MediaQuery | ドメイン ↔ インフラ境界。PHP interface / return type ↔ SQL file / result |
 | BEAR.Sunday | ドメイン ↔ リソース境界（`ResourceObject` / URI / HTTP method） |
 | Hypermedia | リソース ↔ クライアント遷移境界（`#[Link]` / `href` / `form action`） |
 | Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
@@ -55,10 +79,10 @@ Taint tracking、cache freshness、DIP / ADP も境界制約として扱いま�
 確定した ALPS を起点に、下のレイヤを順に実装します。実装順は固定：
 
 ```text
-ALPS → Fake → EC-CUBE schema alignment → SQL → Resource/Form → HTML/Browser
+ALPS → Fake → EC-CUBE schema alignment → Ray.MediaQuery SQL → Resource/Form → HTML/Browser
 ```
 
-Fake は後付け mock ではなく、最初の契約実装。SQL は後から同じ契約を満たすことをテストで証明する。実装の選択は Context / DI binding が行うため、アプリケーションコードは Fake / SQL の違いを知らない。
+Fake は後付け mock ではなく、最初の契約実装。Ray.MediaQuery SQL は後から同じ契約を満たすことをテストで証明する。実装の選択は Context / DI binding が行うため、アプリケーションコードは Fake / SQL の違いを知らない。
 
 契約はレガシーから生まれ、実装は契約から生まれる。
 
@@ -86,17 +110,18 @@ Static analysis / taint tracking と cache freshness check は導入中の品質
 
 ## Scope — 実証完了と「完全代替」への差分
 
-BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・全機能を [`alps.json`](alps.json) と [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) に棚卸しした上で、移植手法（ALPS → Be Framework → BEAR.Sunday）の実証として価値のある範囲はすべて完了しています。
+BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・全機能を [`alps.json`](alps.json) と [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) に棚卸しした上で、移植手法（ALPS → Be Framework → BEAR.Sunday → Ray.MediaQuery → HTML）の実証として価値のある範囲を完了しています。
 
-> ALPS 144/144 transition · Be domain 144/144 · BEAR Resource 139 · SQL 34/34 · HTML 110 templates（storefront 全ページ + in-scope admin 63/77）
+> ALPS 532 descriptor / 207 transition descriptor · Be domain 147 Input / 148 Final · Ray.MediaQuery 51 interface / 142 SQL query · HTML 131 Twig templates
 
 残るのは「実証としては不要だが、本番 EC-CUBE の **完全代替** には必要」な差分だけです。**これは未知の不足ではなく、私たちが EC-CUBE 全体を把握した上で意図的に保留した既知の残作業**です。下記がすべて fix されれば、BeMart は EC-CUBE 4.3 の完全な代替になります。
 
 ### A. ドメイン stub（入力は受理するが永続副作用なし）
 
-- 受注確定 — `doCreateOrder`
-- CSV インポート — `doImportProductCsv` / `doImportCategoryCsv` / `doImportShippingCsv` / `doUpdateCsv`（行数は数えるが永続化しない Phase 2 stub）
-- プラグイン lifecycle — `doInstallPlugin` / enable / disable / uninstall（download・unzip・migrate・container 再生成なし）
+- 受注確定 — `doCreateOrder`（finalized order は作るが、PurchaseFlow の税/配送/在庫再計算と明細 snapshot は未再現）
+- 商品CSV — `doImportProductCsv`（この移植では export-only として扱い、意図的に未移植）
+- CSV設定 — `doUpdateCsv`（column config は保持するが、その設定を消費する全 export Final の互換 fidelity は残る）
+- プラグイン lifecycle — `doInstallPlugin`（download・unzip・migrate・container 再生成なし。plugin scope は out-of-scope）
 
 ### B. EC-CUBE 互換 fidelity 残差（[#24](https://github.com/be-framework/be-mart/issues/24)）
 
@@ -126,6 +151,8 @@ BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・�
 | Document | Purpose |
 |---|---|
 | [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) | 実証総括 — 何を示せたか・知見・限界 |
+| [`docs/skills/`](docs/skills/) | 移植中に発見した再利用可能な境界ルール（G-14〜G-25） |
+| [`docs/methodology/`](docs/methodology/) | Hypermedia test、Ray.MediaQuery、AI時代の Be/BEAR などの方法論 |
 | [`alps.json`](alps.json) / [`alps.json.html`](alps.json.html) | ALPS プロファイルと HTML ドキュメント |
 | [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI 出力と HTML ドキュメント |
 | [`docs/migration-status.md`](docs/migration-status.md) | 移植ステータス（正） |
