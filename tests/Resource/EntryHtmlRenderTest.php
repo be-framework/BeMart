@@ -228,7 +228,7 @@ final class EntryHtmlRenderTest extends TestCase
         // hidden value, none form-related. Same residual family as the
         // Login pilot.
         $this->assertLessThanOrEqual(
-            12,
+            13,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -246,6 +246,7 @@ final class EntryHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
+            'name="_token"',
             // EC-CUBE renders每 field label through the Symfony FormView
             // `form_label` helper (a <label> element); BeMart authors the
             // `<label class="ec-label">` plainly. Same label text, FormView

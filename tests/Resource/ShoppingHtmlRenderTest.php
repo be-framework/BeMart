@@ -94,7 +94,7 @@ final class ShoppingHtmlRenderTest extends TestCase
         '<div class="ec-orderDelivery__title">お届け先 <div class="ec-orderDelivery__change">',
         '<div class="ec-orderDelivery__title">お届け先',
         '<div class="ec-orderDelivery__change">',
-        '<button class="ec-inlineBtn" data-id="1" data-trigger="click" data-path="/shopping_shipping?id=1">変更</button>',
+        '<button class="ec-inlineBtn" data-id="1" data-trigger="click" data-path="/shopping/shipping?id=1">変更</button>',
         '<button class="ec-inlineBtn" type="button">変更</button>',
 
         // --- delivery: the per-shipping order-item rows (MISSING BODY) --
@@ -290,7 +290,7 @@ final class ShoppingHtmlRenderTest extends TestCase
         $this->registerEcCubeStubs($twig);
 
         // Same logical data as the Shopping body (alice, default
-        // shipping, ￥0 carts). The shipping carries postal / pref / addr
+        // shipping, ￥3,600 cart subtotal). The shipping carries postal / pref / addr
         // / phone (pref the raw id 13, exactly the body) but no name /
         // kana — the order-item rows + shipping name are MISSING BODY
         // FIELD residuals.
@@ -307,9 +307,9 @@ final class ShoppingHtmlRenderTest extends TestCase
             'addr01' => '渋谷区', 'addr02' => '神宮前1-1-1', 'phone_number' => '0312345678',
             'email' => 'alice@example.com',
             'shippings' => [$shipping], 'multiple' => false, 'order_items' => [],
-            'subtotal' => 0, 'charge' => 0, 'deliveryFeeTotal' => 0,
-            'taxable_discount' => 0, 'taxable_total' => 0,
-            'tax_free_discount_items' => [], 'payment_total' => 0,
+            'subtotal' => 3600, 'charge' => 0, 'deliveryFeeTotal' => 0,
+            'taxable_discount' => 0, 'taxable_total' => 3600,
+            'tax_free_discount_items' => [], 'payment_total' => 3600,
             'total_by_tax_rate' => [], 'Customer' => null,
             'Shippings' => [new EcCubeStub([])],
         ]);

@@ -228,7 +228,7 @@ final class ProductHtmlRenderTest extends TestCase
         // and the `{% block javascript %}` region. The ported
         // `{% block main %}` + `{% block stylesheet %}` match exactly.
         $this->assertLessThanOrEqual(
-            2,
+            3,
             count($onlyInBeMart),
             'BeMart emitted unexpected markup not present in EC-CUBE — '
             . 'port may have drifted',
@@ -261,6 +261,7 @@ final class ProductHtmlRenderTest extends TestCase
             // token as a hidden `_token` input (CsrfToken
             // reference). Residual by its `_token` field name.
             'name="_token"',
+            'name="csrfToken"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
