@@ -51,4 +51,28 @@ final class TwoFactorAuthConfiguredTest extends TestCase
             deviceToken: '000000',
         ));
     }
+
+    /**
+     * Regression: a wrong first code must NOT persist the candidate secret
+     * (verify-before-enable). Otherwise a bad code could overwrite an
+     * existing 2FA device. See {@see \MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured}.
+     */
+    public function testWrongFirstCodeDoesNotPersistSecret(): void
+    {
+        $this->assertFalse($this->twoFactorAuth->isEnabled('never-enabled-admin'));
+
+        try {
+            ($this->becoming)(new SetTwoFactorAuthInput(
+                loginId: 'never-enabled-admin',
+                authKey: FakeTwoFactorAuth::FIXED_SECRET,
+                deviceToken: '000000',
+            ));
+            self::fail('Expected TwoFactorAuthFailedException.');
+        } catch (TwoFactorAuthFailedException) {
+            // expected
+        }
+
+        // The wrong code left the credential store untouched.
+        $this->assertFalse($this->twoFactorAuth->isEnabled('never-enabled-admin'));
+    }
 }

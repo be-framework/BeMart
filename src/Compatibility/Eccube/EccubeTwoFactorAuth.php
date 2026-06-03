@@ -11,6 +11,7 @@ use function array_key_exists;
 use function bindec;
 use function chr;
 use function decbin;
+use function hash_equals;
 use function hash_hmac;
 use function ord;
 use function pack;
@@ -70,6 +71,21 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
     }
 
     #[Override]
+    public function verifySecret(string $secret, string $token): bool
+    {
+        $timeSlice = (int) (time() / self::PERIOD);
+        for ($offset = -1; $offset <= 1; $offset++) {
+            // hash_equals: constant-time compare, honouring the
+            // TwoFactorAuthInterface timing-safety contract.
+            if (hash_equals($this->codeAt($secret, $timeSlice + $offset), $token)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    #[Override]
     public function verify(string $loginId, string $token): bool
     {
         $secret = $this->secrets[$loginId] ?? null;
@@ -77,14 +93,7 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
             return false;
         }
 
-        $timeSlice = (int) (time() / self::PERIOD);
-        for ($offset = -1; $offset <= 1; $offset++) {
-            if ($this->codeAt($secret, $timeSlice + $offset) === $token) {
-                return true;
-            }
-        }
-
-        return false;
+        return $this->verifySecret($secret, $token);
     }
 
     private function codeAt(string $secret, int $timeSlice): string

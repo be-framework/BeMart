@@ -56,9 +56,10 @@ final class OrderFactory
             }
 
             $items[] = new CartItemEntity(
-                (string) ($row['productCode'] ?? ''),
-                (int) ($row['quantity'] ?? 0),
-                (int) ($row['price'] ?? 0),
+                productCode: (string) ($row['productCode'] ?? ''),
+                quantity: (int) ($row['quantity'] ?? 0),
+                price: (int) ($row['price'] ?? 0),
+                productName: (string) ($row['productName'] ?? ''),
             );
         }
 

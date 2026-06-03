@@ -41,7 +41,10 @@ use function trim;
 final readonly class CategoryCsvImported
 {
     public bool $accepted;
+
+    /** Total non-empty lines INCLUDING the header row; data rows = lineCount - 1. */
     public int $lineCount;
+
     public int $imported;
     public int $deleted;
     public string $message;

@@ -42,6 +42,12 @@ final class FakeTwoFactorAuth implements TwoFactorAuthInterface
     }
 
     #[Override]
+    public function verifySecret(string $secret, string $token): bool
+    {
+        return $secret !== '' && $token === self::VALID_TOKEN;
+    }
+
+    #[Override]
     public function verify(string $loginId, string $token): bool
     {
         return array_key_exists($loginId, $this->secrets) && $token === self::VALID_TOKEN;
