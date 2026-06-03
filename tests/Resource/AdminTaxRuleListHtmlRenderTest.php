@@ -83,8 +83,6 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
         '<span class="col-6 text-end pe-0">10</span><span class="col-6 ps-1">%</span>',
         '<span class="col-6 text-end pe-0">8</span><span class="col-6 ps-1">%</span>',
         '<div class="col-6 text-center">',
-        '</h5>',
-        '</button>',
     ];
 
     private ResourceInterface $resource;
@@ -161,10 +159,16 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
 
         $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
         $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
+        $hasTaxRateRowResidual = in_array('<span class="col-6 text-end pe-0">10</span><span class="col-6 ps-1">%</span>', [...$onlyInEcCube, ...$onlyInBeMart], true)
+            && in_array('<span class="col-6 text-end pe-0">8</span><span class="col-6 ps-1">%</span>', [...$onlyInEcCube, ...$onlyInBeMart], true);
 
         $unexplained = array_values(array_filter(
             [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
+            static fn (string $line): bool => ! self::isResidual($line)
+                // Whitespace normalization leaves these closing tags
+                // orphaned for the fake tax-rate rows; allow them only
+                // when the specific tax-rate row residual is present.
+                && ! ($hasTaxRateRowResidual && in_array($line, ['</h5>', '</button>'], true)),
         ));
 
         $this->assertSame(
