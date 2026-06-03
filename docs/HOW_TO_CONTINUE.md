@@ -166,7 +166,7 @@ commit 済み分は失われない（バッチ 1 で 2 agent がカットオフ�
 ## 4. リポジトリ構造の要点
 
 ```text
-be-mart/
+ec-cube-alps/
 ├── alps.json                 # source of truth（EC-CUBE 4.3 ALPS）
 ├── CLAUDE.md                 # プロジェクト規約
 ├── README.md                 # エントリポイント

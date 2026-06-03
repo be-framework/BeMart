@@ -73,10 +73,8 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
         '<title>店舗設定 支払方法一覧 - EC-CUBE</title>',
         // Payment rows: BeMart fake seeds expose richer payment rows than
         // the sparse EC-CUBE reference fixture used by this render harness.
-        '<span>',
         '￥0',
         '〜 無制限',
-        '</span>',
         '<div class="col-3 text-end">',
     ];
 
@@ -146,10 +144,15 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
 
         $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
         $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
+        $hasPaymentLimitResidual = in_array('￥0', [...$onlyInEcCube, ...$onlyInBeMart], true)
+            && in_array('〜 無制限', [...$onlyInEcCube, ...$onlyInBeMart], true);
 
         $unexplained = array_values(array_filter(
             [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
+            static fn (string $line): bool => ! self::isResidual($line)
+                // Normalization leaves span wrapper lines around the payment
+                // limit cells; allow them only with the payment-limit residual.
+                && ! ($hasPaymentLimitResidual && in_array($line, ['<span>', '</span>'], true)),
         ));
 
         $this->assertSame(
