@@ -191,7 +191,42 @@ final class SqlOrderQueryTest extends AbstractSqlTestCase
         $this->assertSame((string) $customerId, $order->customerId);
         $this->assertSame(0, $order->paymentMethodId);
         $this->assertSame(600, $order->deliveryFeeTotal);
-        $this->assertSame([], $order->items, 'items deferred to Phase 2b cart join');
+        $this->assertSame([], $order->items, 'no cart raised this pre-order → empty item vector');
+    }
+
+    public function testByPreOrderIdAggregatesCartLinesWithProductName(): void
+    {
+        // The pre-order's items are read from the cart it was raised from
+        // (linked by pre_order_id), joined through to the product so the
+        // display name is available for the checkout snapshot.
+        $customerId = $this->insertCustomer();
+        $this->insertOrder([
+            'customer_id' => $customerId,
+            'pre_order_id' => 'PRE-CART-001',
+            'payment_id' => null,
+            'delivery_fee_total' => 500,
+            'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
+        ]);
+
+        $productA = $this->insertProduct(['name' => 'Cart Line A', 'product_code' => 'CART-A', 'price02' => 1000]);
+        $productB = $this->insertProduct(['name' => 'Cart Line B', 'product_code' => 'CART-B', 'price02' => 500]);
+        $cart = $this->insertCart([
+            'cart_key' => 'pre-cart_10',
+            'customer_id' => $customerId,
+            'pre_order_id' => 'PRE-CART-001',
+        ]);
+        $this->insertCartItem($cart['id'], $this->defaultProductClassId($productA), ['price' => 1000, 'quantity' => 2]);
+        $this->insertCartItem($cart['id'], $this->defaultProductClassId($productB), ['price' => 500, 'quantity' => 1]);
+
+        $order = $this->sql(OrderQueryInterface::class)->byPreOrderId('PRE-CART-001');
+        $this->assertInstanceOf(OrderEntity::class, $order);
+        $this->assertCount(2, $order->items);
+        $this->assertSame('CART-A', $order->items[0]->productCode);
+        $this->assertSame('Cart Line A', $order->items[0]->productName);
+        $this->assertSame(2, $order->items[0]->quantity);
+        $this->assertSame(1000, $order->items[0]->price);
+        $this->assertSame('CART-B', $order->items[1]->productCode);
+        $this->assertSame('Cart Line B', $order->items[1]->productName);
     }
 
     public function testByPreOrderIdReturnsNullForFinalizedRows(): void

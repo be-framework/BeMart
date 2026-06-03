@@ -58,7 +58,10 @@ final class AdminClassCsvResourceTest extends TestCase
         $ro = $this->resource->get('page://self/admin/class-name/class-name-export');
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertArrayHasKey('Content-Disposition', $ro->headers);
+        // The download filename must name the class-name export specifically
+        // (regression guard for issue #30: the two exports must not swap
+        // their Content-Disposition filenames).
+        $this->assertSame('attachment; filename="class_name.csv"', $ro->headers['Content-Disposition']);
         $this->assertTrue(is_string($ro->body));
     }
 
@@ -67,7 +70,8 @@ final class AdminClassCsvResourceTest extends TestCase
         $ro = $this->resource->get('page://self/admin/class-category/class-category-export', ['classNameId' => 'cn-color']);
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertArrayHasKey('Content-Disposition', $ro->headers);
+        // Must be class_category.csv, NOT class_name.csv (issue #30).
+        $this->assertSame('attachment; filename="class_category.csv"', $ro->headers['Content-Disposition']);
     }
 
     public function testExportAnonymousReturns403(): void

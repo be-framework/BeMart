@@ -16,11 +16,13 @@ use Ray\InputQuery\Attribute\Input;
  *   SetTwoFactorAuthInput → TwoFactorAuthConfigured   (Direct, idempotent)
  *
  * Login-context transition (no admin-session AUTHZ — the device is set up
- * during the login ladder). The secret is registered first, then the
- * confirmation `deviceToken` is verified against it; a wrong first code
- * raises {@see TwoFactorAuthFailedException} (400) — the secret is only
- * "kept" once a code proves the device is in sync. Idempotent: enabling
- * the same secret again is a no-op.
+ * during the login ladder). The confirmation `deviceToken` is verified
+ * against the CANDIDATE `authKey` FIRST
+ * ({@see TwoFactorAuthInterface::verifySecret}); only on success is the
+ * secret committed via {@see TwoFactorAuthInterface::enable}. A wrong
+ * first code raises {@see TwoFactorAuthFailedException} (400) and leaves
+ * stored credentials untouched — a bad code can never overwrite an
+ * existing 2FA secret. Idempotent: enabling the same secret again is a no-op.
  */
 final readonly class TwoFactorAuthConfigured
 {
@@ -33,10 +35,18 @@ final readonly class TwoFactorAuthConfigured
         #[Input] string $deviceToken,
         #[Inject] TwoFactorAuthInterface $twoFactorAuth,
     ) {
-        $twoFactorAuth->enable($loginId, $authKey);
-        if (! $twoFactorAuth->verify($loginId, $deviceToken)) {
+        // Verify the first code against the candidate secret BEFORE
+        // persisting it, so a wrong code never mutates stored credentials.
+        if (! $twoFactorAuth->verifySecret($authKey, $deviceToken)) {
             throw new TwoFactorAuthFailedException();
         }
+
+        // SECURITY CONTRACT: enable() overwrites the secret for $loginId
+        // with no ownership check, so the adapter driving this transition
+        // MUST bind $loginId to the just-authenticated login (see
+        // TwoFactorAuthInterface::enable) — a raw client-supplied $loginId
+        // here would allow overwriting another admin's 2FA device.
+        $twoFactorAuth->enable($loginId, $authKey);
 
         $this->loginId = $loginId;
         $this->authKey = $authKey;
