@@ -35,18 +35,19 @@ SQL suite の baseline は **MariaDB**。
 
 ## 検証 baseline
 
-2026-05-26 のローカル環境では Malt が MySQL 8.0.45 を起動するため、次の結果が正しい。
+2026-06-04 のローカル環境では Malt が MySQL 8.0.46 を起動するため、次の結果が正しい。
 
 ```bash
-composer test:sql -- --colors=never
+source <(malt env)
+/opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never
 ```
 
 結果:
 
-- Tests: 742
+- Tests: 754
 - Assertions: 0
-- Skipped: 742
-- 理由: current server is MySQL 8.0.45, SQL suite targets MariaDB
+- Skipped: 754
+- 理由: current server is MySQL 8.0.46, SQL suite targets MariaDB
 
 ## MariaDB で実行する場合
 
