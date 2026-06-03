@@ -2,6 +2,8 @@
 
 written after migrating all 139 ALPS transitions of EC-CUBE 4.3 to Be Framework + BEAR.Sunday in a single orchestrated session. this document is the orchestrator's candid take, written for future engineers (and framework authors) who will read it cold.
 
+> 2026-06-01 note: this is a historical framework review of the original 139-transition migration slice. the current BeMart profile is larger after ALPS route-gate additions and Ray.MediaQuery cutover; see [`../migration-status.md`](../migration-status.md) for current counts. the framework observations remain relevant as the original scale test.
+
 session stats: 5 → 139/139 transitions (3.6% → 100%), 90 → 709 tests, 9 wave of worktree-isolated parallel subagents (28 agent invocations total), 11 skill gaps surfaced (G-14 〜 G-24), 10 of them externalized as `docs/skills/`.
 
 ## TL;DR

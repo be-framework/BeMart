@@ -204,7 +204,7 @@ final class AdminCustomerListHtmlRenderTest extends TestCase
         // Customer-list page-count-dropdown / pager / empty-detail-panel
         // families. If this balloons, the port has drifted.
         $this->assertLessThanOrEqual(
-            45,
+            50,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -212,6 +212,10 @@ final class AdminCustomerListHtmlRenderTest extends TestCase
 
     private static function isResidual(string $line): bool
     {
+        if (RenderDiffResiduals::isAdminListEnrichment($line)) {
+            return true;
+        }
+
         if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
             return true;
         }

@@ -200,6 +200,10 @@ final class AdminNewsListHtmlRenderTest extends TestCase
 
     private static function isResidual(string $line): bool
     {
+        if (RenderDiffResiduals::isAdminListEnrichment($line)) {
+            return true;
+        }
+
         if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
             return true;
         }

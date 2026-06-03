@@ -10,6 +10,8 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 
 > このファイルは元 `handover.json` を Markdown 化したもの (2026-05-17)。スキーマ未定義のまま JSON で運用していたが、機械処理する場面がなく自然言語の `note` が多いため Markdown へ移行した。
 
+> 2026-06-01 注記: 本ファイルは構築プロセスの歴史的ログとして残す。現在の到達点・数値・残作業は [`migration-status.md`](migration-status.md) が正。本文中の古い transition 数、storage 数、stub 数は当時のスナップショットとして読む。
+
 ---
 
 ## プロジェクト名と monorepo レイアウト (2026-05-17)
@@ -796,8 +798,8 @@ Slice 5 で entry point が動いたので、Slice 6 は「session という非�
 
 | ファイル | 役割 | 種別 |
 |---|---|---|
-| [be/src/Reason/Service/SessionInterface.php](be/src/Reason/Service/SessionInterface.php) | `customerId(): string\|null` のみを持つ最小 contract。Be Reason として注入される | 新規 |
-| [be/src/Reason/Service/FakeSession.php](be/src/Reason/Service/FakeSession.php) | constructor で渡された customerId をそのまま返す。`null` を渡せば anonymous | 新規 |
+| `be/src/Reason/Service/SessionInterface.php`（旧パス） | `customerId(): string\|null` のみを持つ最小 contract。Be Reason として注入される | 新規 |
+| `be/src/Reason/Service/FakeSession.php`（旧パス） | constructor で渡された customerId をそのまま返す。`null` を渡せば anonymous | 新規 |
 | [be/src/Exception/UnauthorizedPreOrderAccessException.php](be/src/Exception/UnauthorizedPreOrderAccessException.php) | `DomainException` 派生 + `#[Message]` で en/ja を持つ。Resource は HTTP 403 にマップ | 新規 |
 | [be/src/Being/CheckoutPrepared.php](be/src/Being/CheckoutPrepared.php) | `SessionInterface` を `#[Inject]` し、`$session->customerId() !== $order->customerId` で reject。**順序: 存在 → AUTHZ → PurchaseFlow**。理由は本文参照 | 変更 |
 | [src/Resource/Page/Shopping/Checkout.php](src/Resource/Page/Shopping/Checkout.php) | `UnauthorizedPreOrderAccessException` を `Code::FORBIDDEN` (403) にマップ。docblock 更新 | 変更 |

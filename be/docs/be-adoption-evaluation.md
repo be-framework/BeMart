@@ -12,10 +12,10 @@
 
 ## TL;DR
 
-Be の効力は **2 層構造**:
+Pilot 1-3 で観測した Be の効力は **2 層構造**:
 
 - **基層 (Pilot 1 から効く)** — Semantic 型保証によるテスト省略 / 意味ログ自動カバレッジ / i18n 例外標準化 / 自己証明 assert。**単純取得 transition でも採用に値する**。
-- **上層 (Pilot 2 で爆発)** — Cascade で「状態 = 型」 / `#[Input]` の by-name 連結 / Reason 層 IO 局所化 (mock 0 件) / 足し算 refactor / フレームワーク由来の anti-pattern 語彙。**状態変容 transition で本領発揮**。
+- **上層 (Pilot 2 で確認)** — Cascade で「状態 = 型」 / `#[Input]` の by-name 連結 / Reason 層 IO 局所化 (mock 0 件) / 段階追加による refactor。**状態変容 transition で効きが大きい**。
 
 **中間結論**: 全 transition で Be を採用に値する。ただし上層効力は状態変容を伴うものでのみ発生し、単純取得では基層効力のみ。Pilot 3 で **Branching** (`#[Be([A, B])]` + 型付き discriminator) を検証済み、**Cascade Diamond** は be-framework の現行メカニクス上 apex が `#[Input]` を必要とする場合は不成立と判明 (Linear Cascade に縮退する。詳細 §6)。
 
@@ -147,41 +147,41 @@ final class CartResource extends ResourceObject {
 | 観点 | Service Object 版 | Be 版 |
 |---|---|---|
 | 中間状態の表現 | 変数 (`$adjusted`, `$merged`) — 型はプリミティブ or Entity | **型** (`QuantityAdjusted` / `CartMerged`) — 状態そのものが型 |
-| 「数量確定完了」の証明 | 不可 (`$adjusted` は int) | `$x instanceof QuantityAdjusted` で型で証明 |
-| 「永続化完了」の証明 | コメント / ログ | `$final instanceof CartItemAdded` で型で証明 |
+| 「数量確定完了」の証明 | 別途 Result / Value Object を設計しない限り `$adjusted` は int | `$x instanceof QuantityAdjusted` で型で証明 |
+| 「永続化完了」の証明 | 別途 Result / Event を設計しない限り呼び出し規約に依存 | `$final instanceof CartItemAdded` で型で証明 |
 | Stage 間の引数渡し | 自由 (Service の都合) | `#[Input]` の by-name 連結 — 下流は上流の public プロパティ名にしか繋げない |
-| 段階境界の修正 | Controller の引数並びを書き換える | 新しい Being を 1 ファイル足すだけ |
-| テストでの DB 分離 | Service 単位で mock / partial mock | Reason interface に Fake を `#[Inject]`。**mock 0 件で 14 pass** |
+| 段階境界の修正 | Resource / Service の分割単位を再設計する | 新しい Being を挿入し、`#[Be]` の接続先を変更する |
+| テストでの DB 分離 | Repository / Service の差し替え設計が必要 | Reason interface に Fake を `#[Inject]`。Pilot 2 は **mock 0 件で 14 pass** |
 | 抽象の名前 | `CartMerger` (動詞 / 役割) | `CartMerged` (状態) |
-| ALPS との対応 | 1 Resource ↔ N Service — 多対多 | ALPS 表現 ↔ Be 型 — 1:1 写像 |
+| ALPS との対応 | Resource / Service 分割は実装都合に寄りやすい | Transition ごとに Input / Being / Final の型として追跡しやすい |
 
 ---
 
-## 3. 上層の効力 — 状態変容 Pilot (Pilot 2) で爆発した 4 局面
+## 3. 上層の効力 — 状態変容 Pilot (Pilot 2) で確認した 4 局面
 
-これらは **Be chain が複数段ある場合に発生する** 性質。Pilot 1 (1 段) では効力が限定的だが、Pilot 2 (3 段) で爆発した。
+これらは **Be chain が複数段ある場合に観測しやすい** 性質。Pilot 1 (1 段) では表面化しにくく、Pilot 2 (3 段) で確認できた。
 
 ### (a) 「Final が厚い」という違和感が、Service 増設ではなく Being 発見に向かった
 
 Cascade refactor の発端は「`CartItemAdded` の中身に永続化以外のロジックが詰まっている」という違和感。
 
-**Service Object パターンでの自然な解** は `CartMergerService` を分離し Controller から呼ぶ。だがこの解は **「Cart が merge されている状態」を型として作らない**。Controller の中で `$merged = $this->cartMerger->merge(...)` という名前の変数になるだけ。
+**Service Object パターンでの分解例** は `CartMergerService` を分離し Controller / Resource から呼ぶ形になる。この形でも動作は表現できるが、別途 Result 型を設計しない限り **「Cart が merge されている状態」自体は型として残らない**。呼び出し側では `$merged = $this->cartMerger->merge(...)` という変数として扱うことになる。
 
 **Be での解** は `CartMerged` という新しい Being の発見だった。型階層自体が「数量確定 → カート合成 → 永続化完了」というドメイン状態遷移と一致する。「永続化完了の証拠」を `assert($final instanceof CartItemAdded)` で記述できる。
 
-「Final の厚さは Being の不在の証拠」という診断軸は Service Object パターンには存在しない。Service Object では「Service が太い」と「ある状態への到達が型として表現されていない」が区別できないため、状態を発見する圧力が生まれにくい。
+この Pilot では「Final が永続化以外を持ちすぎている」ことを、`CartMerged` という中間状態の不足として整理できた。Service Object でも同等の分割は可能だが、「Service の分割」と「状態型の追加」は別判断になるため、レビュー時に明示的に見る必要がある。
 
 ### (b) `#[Input]` の by-name 連結が層境界を物理的に強制する
 
-Service Object の `merge($cart, $productCode, $adjusted, $productClass)` は、型さえ合えば呼び手が何を渡しても通る。「`$adjusted` は実は調整前の `$quantity` だった」というバグが容易に混入する。
+Service Object の `merge($cart, $productCode, $adjusted, $productClass)` は、引数の意味をメソッド名と変数名に委ねる。`$adjusted` と `$quantity` のように同じ primitive 型が複数ある場合、呼び出し側レビューで意味の取り違えを確認する必要がある。
 
-Be では `CartMerged` の `#[Input] int $adjustedQuantity` は、**上流 `QuantityAdjusted` の `public int $adjustedQuantity` という名前のプロパティにしか繋がらない**。境界を緩める誘惑が技術的に塞がれている。今回の refactor でも、`CartMerged` の `#[Input]` 一覧を埋める作業がそのまま「`QuantityAdjusted` が公開すべき property の決定」になった。
+Be では `CartMerged` の `#[Input] int $adjustedQuantity` は、**上流 `QuantityAdjusted` の `public int $adjustedQuantity` という名前のプロパティに繋がる**。今回の refactor でも、`CartMerged` の `#[Input]` 一覧を決める作業がそのまま「`QuantityAdjusted` が公開すべき property の決定」になった。
 
 ### (c) Reason 層の IO 局所化 — mock 0 件で 14 pass
 
 `CartQueryInterface` / `CartCommandInterface` / `ProductClassQueryInterface` が `#[Inject]` で入る。テストでは `FakeCartQuery` / `FakeCartCommand` / `FakeProductClassQuery` を bind するだけ。
 
-Service Object 版で同じことをやろうとすると、`CartRepository` / `ProductClassService` / `CartMerger` / `QuantityAdjuster` の 4 つを mock するか partial mock を組むか、あるいは全部を「実 DB を初期化して使う」結合テストにするかの選択になりがち。**「mock を使わずに済む」と「Reason 層が物理的に IO 接点として独立している」は別の話で、Be は後者を構造的に保証する**。
+Service Object 版でも Repository / Service を interface 化すれば同様に差し替え可能だが、差し替え境界は個別設計になる。Be 版では Reason interface が IO 接点として揃っており、Pilot 2 のドメインテストは mock なしで通っている。
 
 ### (d) リファクタリングが「足し算」で進んだ
 
@@ -191,9 +191,9 @@ Linear → Cascade の refactor で触ったもの:
 - `QuantityAdjusted.php` の `#[Be]` 1 行変更 (`CartItemAdded` → `CartMerged`)
 - `CartItemAdded.php` の引数を簡略化 (個別フィールドの再計算を `mergedCart: CartEntity` 1 つの受け取りに置換)
 
-**触らなかったもの**: Reason 層 (Query/Command interface とその Fake)、Resource 層、テストコード本体 (アサーション値は変更なし)。
+**触らなかったもの**: Resource 層、テストコード本体 (アサーション値は変更なし)。Reason 層は既存 interface / Fake をそのまま使い、`CartMerged` がそれらを `#[Inject]` する形へ寄せた。
 
-Service Object 版で同じ「途中の状態を取り出す」refactor をやると、通常は Service の分割 + 呼び出し側の修正 + 関連テストの書き直しが必要になる。Be では `#[Input]` 連結が by-name で **新しい段を挿入する点しか変更を要求しない**。
+Service Object 版で同じ「途中の状態を取り出す」refactor をやる場合、Service の分割単位と呼び出し側の契約を再設計する必要がある。Be 版では `#[Input]` 連結が by-name で、今回の変更は中間 Being の挿入として整理できた。
 
 ---
 
@@ -221,9 +221,9 @@ final class ProductCode {
 }
 ```
 
-Input の `#[Input] string $productCode` は Be ランタイムが `ProductCode::validate()` を自動適用する。**「productCode が不正だった場合」を Final 内で再検査する単体テストは不要** — 不正なら Input 構築時に例外が飛んで Final に到達しないことが型で保証される。
+Input の `#[Input] string $productCode` は Be ランタイムが `ProductCode::validate()` を適用する。**「productCode が不正だった場合」を Final 内で再検査する単体テストは不要** — 不正なら Semantic validation で例外になり、Final に到達しない。
 
-Service Object 版で同等の保証を作るには、(1) 値オブジェクトクラスを設計、(2) Controller で値オブジェクトに変換、(3) 不正系のテストを書く、の手作業が必要。**Be では「by-name で Semantic クラスが自動適用される」ので、Validate を書いた瞬間にすべての Input に効く**。
+Service Object 版で同等の保証を作るには、値オブジェクト化・入力変換・例外変換の規約を別途設計する必要がある。Be では `#[Input]` 名と Semantic クラス名の対応で validation が適用されるため、入力検証の配置が一定になる。
 
 ### (b) 意味ログ (`DevBecoming`) — chain 全体の自動 JSON 記録 = 透明性 / 追跡性
 
@@ -233,16 +233,16 @@ Service Object 版で同等の保証を作るには、(1) 値オブジェクト�
 
 | 観点 | Service Object | Be (`DevBecoming`) |
 |---|---|---|
-| chain 全体の記録 | 自前で AOP / 各 Service にロギング差し込み | **自動。コード追加 0 行** |
+| chain 全体の記録 | AOP / middleware / 各 Service でのロギングを設計 | DevBecoming が chain を記録 |
 | 記録内容 | ロガー設計次第 | Input prop / Final inject / close prop が機械可読 JSON |
-| デバッグ時 | `var_dump` / breakpoint | **意味ログを読むだけで chain 復元可能** |
-| 観察可能性のオプトイン | 必要な箇所で個別に手当て | **オプトインなし。常時 ON** |
+| デバッグ時 | ログ設計次第 | Input / Inject / close prop の JSON から chain を追跡可能 |
+| 観察可能性のオプトイン | 必要な箇所で個別に手当て | DevBecoming bind により Be chain 単位で有効化 |
 
-`var_dump` を使わず構造ログから後追いするデバッグ運用を採る現場では、**Be 採用自体がデバッグ運用の前提条件** になる。Pilot 1 段階で既にこの効力が出ている。
+Pilot 1 段階で、Resource / Service ごとに個別ログを仕込まずに Be chain を後追いできることを確認した。
 
-### (c) i18n 例外メッセージの `#[Message]` 必須化
+### (c) i18n 例外メッセージの `#[Message]` 運用
 
-Be Framework は DomainException 継承 + `#[Message(['en'=>..., 'ja'=>...])]` を必須化する。Pilot 1 で 6/6 = 100%、Pilot 2 でも全 DomainException が達成。
+この Pilot では DomainException 継承 + `#[Message(['en'=>..., 'ja'=>...])]` を例外クラスの標準形にした。Pilot 1 で 6/6 = 100%、Pilot 2 でも全 DomainException が達成。
 
 ```php
 #[Message([
@@ -258,7 +258,7 @@ Service Object 版で同等の標準化を作るには:
 - gettext / Symfony Translator / Laravel Lang など別途導入
 - 翻訳ファイル (`.po` / `.yml` / `.json`) と例外クラスを別管理 (同期失敗のリスク)
 
-**Be では「例外クラスに `#[Message]` が並ぶ」ことが ja/en メッセージの単一情報源**。同期失敗が構造的に起きない。
+**Be 版では「例外クラスに `#[Message]` が並ぶ」ことを ja/en メッセージの単一情報源にできる**。翻訳対象を例外クラスに寄せられるため、Pilot の範囲では同期確認がしやすかった。
 
 ### (d) 自己証明 assert — Resource 層から Be の閉鎖原則を裏取り
 
@@ -271,17 +271,17 @@ assert($final instanceof ProductFetched);
 
 Pilot 2 でも Final 内に `assert($adjustedQuantity >= 1 && $adjustedQuantity <= $requestedQuantity)` + Resource 層に `assert($final instanceof CartItemAdded)`。
 
-これらは Service Object パターンでは **そもそも書けない**。なぜなら:
+これらは、Final 型を持たない Service Object 設計では **そのままの形では書けない**。なぜなら:
 
 - Service の戻り値は Entity / array で、「最終状態」を表現する型がない
 - 「Service が成功した = 何が証明されたか」が型に出ない
 - 後続コードが Service の事後条件を信頼するには、コメント / ドキュメント / 単体テストに頼るしかない
 
-**Be では Final 型の到達自体が事後条件の証拠**。Resource 層が `instanceof Final` を assert すれば、開発時にドメイン契約違反を catch できる。
+**Be では Final 型の到達自体を事後条件の証拠として扱える**。Resource 層が `instanceof Final` を assert すれば、開発時にドメイン契約違反を検出しやすい。
 
 ### Pilot 1 でも Be が効いている要約
 
-「単純取得でも Be を採用に値する」のは、上記 4 つが **chain の段数に依らず Be 採用そのものから発生する** から。Cascade による状態 = 型のような華やかな効力は出ないが、**開発速度 (Semantic) / 観察可能性 (意味ログ) / 多言語 (i18n) / ドメイン整合性 (自己証明)** の 4 面で恒常的に効く。
+「単純取得でも Be を採用に値する」のは、上記 4 つが **chain の段数に依らず Be 採用そのものから発生する** から。Cascade による状態 = 型の効力は限定的だが、**入力検証 (Semantic) / 観察可能性 (意味ログ) / 多言語 (i18n) / ドメイン整合性 (自己証明)** の 4 面は Pilot 1 から確認できる。
 
 ---
 
@@ -294,7 +294,7 @@ Pilot 2 でも Final 内に `assert($adjustedQuantity >= 1 && $adjustedQuantity 
 | Branching (分岐先で別 Final) | **◎ 採用** (Pilot 3 検証済み) | 基層 + 上層 + `#[Be([A, B])]` + 型付き discriminator (`PaymentSuccessCase\|PaymentFailureCase $being`) |
 | Cascade Diamond (並列 Reason 収束) | ✗ 構造的に不成立 | Linear Cascade に縮退 (§6 詳細) — apex が `#[Input]` を必要とする場合は Be framework の現行メカニクスで表現不能 |
 
-実運用での目安: **EC-CUBE 137 transition 全てで Be 採用候補**。ただし上層効力は unsafe 35 + idempotent 44 = 79 件で爆発し、safe 58 件では基層効力のみ。「採用するか」ではなく「どのレイヤーの効力を当てにするか」が transition ごとに変わる。
+実運用での目安: **EC-CUBE 137 transition 全てで Be 採用候補**。ただし上層効力は unsafe 35 + idempotent 44 = 79 件で観測しやすく、safe 58 件では主に基層効力を見る。「採用するか」ではなく「どのレイヤーの効力を当てにするか」が transition ごとに変わる。
 
 ---
 
@@ -384,8 +384,8 @@ Be は「BEAR.Sunday + Service Object」の上位互換ではない。両者は 
 Be の効力は 2 層:
 
 - **基層** — Semantic 型保証 / 意味ログ自動カバレッジ / i18n 例外標準化 / 自己証明 assert。**Pilot 1 単純取得から効く**。Service Object パターンで同等を作るには別途の設計と運用負担。
-- **上層** — Cascade で状態 = 型 / `#[Input]` by-name 連結 / Reason 局所化で mock 0 件 / 足し算 refactor。**Pilot 2 状態変容で爆発**。Service Object には構造的に出せない。
+- **上層** — Cascade で状態 = 型 / `#[Input]` by-name 連結 / Reason 局所化で mock 0 件 / 段階追加による refactor。**Pilot 2 状態変容で確認**。Service Object で同等にするには Result 型や状態型を別途設計する必要がある。
 
-「BEAR.Sunday + Service Object で書けば動く」のはその通り。だが Pilot 1 を Service Object 版で書けば基層 4 軸を自前で整備する負担が出て、Pilot 2 を Service Object 版で書けば上層 4 軸が構造的に出てこない。**この差を欲しいかどうか** が Be 採用の判断軸。
+「BEAR.Sunday + Service Object で書けば動く」のはその通り。だが Pilot 1 を Service Object 版で書けば基層 4 軸を別途整備する必要があり、Pilot 2 を Service Object 版で書けば中間状態を型として残す設計を別途導入する必要がある。**この追加設計を Be の標準形として受け取るかどうか** が採用判断の軸になる。
 
-EC-CUBE 移植の文脈では、(a) 全 transition で基層効力が効く、(b) 状態変容を伴う transition (unsafe + idempotent) が大半を占めて上層効力も効く、(c) ALPS 表現と Be 型を 1:1 写像できる、という 3 点から、**Be 採用は全 transition で妥当** と中間判断する。Branching / Cascade Diamond の Pilot で覆る可能性を残しつつ、本評価を Pilot 3+ への入口とする。
+EC-CUBE 移植の文脈では、(a) 全 transition で基層効力が効く、(b) 状態変容を伴う transition (unsafe + idempotent) が大半を占めて上層効力も効く、(c) ALPS transition を Input / Being / Final の型として追跡しやすい、という 3 点から、**Be は全 transition で採用候補として妥当** と中間判断する。Branching / Cascade Diamond の Pilot で覆る可能性を残しつつ、本評価を Pilot 3+ への入口とする。

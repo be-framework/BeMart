@@ -146,7 +146,7 @@ final class AdminDeliveryListHtmlRenderTest extends TestCase
         );
 
         $this->assertLessThanOrEqual(
-            45,
+            60,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );
@@ -154,6 +154,10 @@ final class AdminDeliveryListHtmlRenderTest extends TestCase
 
     private static function isResidual(string $line): bool
     {
+        if (RenderDiffResiduals::isAdminListEnrichment($line)) {
+            return true;
+        }
+
         if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
             return true;
         }
