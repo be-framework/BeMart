@@ -33,9 +33,9 @@
    - `pagination` -> the resource body's flat `favorites` list; BeMart's
      FavoriteList is not a paged view, so the `ec-pagerRole` +
      `pager.twig` include is OMITTED.
-   - `csrf_token_for_anchor()` — EC-CUBE per-request CSRF widget on the
-     delete anchor; BeMart's html context has no CSRF widget, so the
-     attribute is absent. EC-CUBE-runtime only — enumerated as residual.
+   - `csrf_token_for_anchor()` — BeMart renders the token into the
+     `token-for-anchor` attribute expected by EC-CUBE's `function.js`;
+     the router normalizes the generated `_token` field to `csrfToken`.
    - MISSING BODY FIELD — EC-CUBE's favorite.twig renders a price RANGE
      (`price02_inc_tax_min`～`price02_inc_tax_max`). BeMart's
      FavoriteEntity carries a single `unitPrice`, so the min/max range
@@ -68,6 +68,7 @@
                                 <li class="ec-favoriteRole__item">
                                     <a class="ec-closeBtn--circle"
                                        href="{{ url('mypage_favorite_delete', { id : FavoriteProduct.productCode }) }}"
+                                       token-for-anchor="{{ csrf_token_for_anchor() }}"
                                        data-method="delete">
                                         <div class="ec-icon">
                                             <img src="{{ asset('assets/icon/cross-white.svg') }}" alt="close">

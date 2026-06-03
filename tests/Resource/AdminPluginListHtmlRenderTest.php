@@ -100,6 +100,10 @@ final class AdminPluginListHtmlRenderTest extends TestCase
         // plugin_table_official.twig empty-state body (officialPlugins
         // fed empty in the stub):
         'オーナーズストアのプラグインはインストールされていません。',
+        // The owners-store card anchor is split across lines by the EC-CUBE
+        // template; the wrapper is omitted in BeMart because Store/Plugin
+        // install/search is out of scope.
+        '>',
     ];
 
     private ResourceInterface $resource;

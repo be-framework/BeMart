@@ -59,6 +59,10 @@ final class AdminBlockListHtmlRenderTest extends TestCase
         '</script>',
         '<title>ブロック管理 コンテンツ管理 - BeMart</title>',
         '<title>ブロック管理 コンテンツ管理 - EC-CUBE</title>',
+        // Block list: current BeMart fake rows expose the edit/delete action
+        // buttons while the EC-CUBE reference fixture is sparse.
+        '<div class="col-6">',
+        '</button>',
     ];
 
     private ResourceInterface $resource;

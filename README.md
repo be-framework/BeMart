@@ -11,9 +11,9 @@ BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する*
 | Boundary | Current evidence |
 |---|---|
 | ALPS | `alps.json` は 532 descriptor / 207 transition descriptor。うち 147 は振る舞いの移植契約、60 は `alps-route-gate` のルート接続契約。 |
-| Be domain | 147 Input / 148 Final / 154 Semantic / 14 Being。Final は状態遷移が成立した証明として扱う。 |
+| Be domain | 147 Input / 148 Final / 155 Semantic / 14 Being。Final は状態遷移が成立した証明として扱う。 |
 | BEAR Resource | `src/Resource/Page` に 147 page resource/support resource。Aura route から EC-CUBE route name ↔ URL path ↔ resource URI を接続する。 |
-| SQL | Ray.MediaQuery の 51 interface / 142 `#[DbQuery]` / 142 SQL file。PHP実クラスのPDO adapterではなく、interface + SQL file が永続化境界。 |
+| SQL | Ray.MediaQuery の 51 interface / 143 `#[DbQuery]` / 143 SQL file。PHP実クラスのPDO adapterではなく、interface + SQL file が永続化境界。 |
 | HTML | `var/templates` に 131 Twig template。storefront 全ページと in-scope admin editor waves を移植済み。 |
 | Tests | `docs/migration-status.md` のベースラインを正とする。非SQL suite はDBなしで動く。SQL suite は MariaDB/MySQL を必要とする。 |
 
@@ -28,7 +28,7 @@ BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する*
 
 **Done:** EC-CUBE の機能を ALPS と route-status 表に棚卸しし、Be domain、BEAR resource、Ray.MediaQuery SQL 境界、storefront/admin HTML の主要面を実装した。移植中に得た再利用可能な知見は [`docs/skills/`](docs/skills/) と [`docs/methodology/`](docs/methodology/) に分離した。
 
-**Not done:** 本番 EC-CUBE の完全代替に必要な互換 fidelity と cutover は残る。中心は `doCreateOrder` の PurchaseFlow 完全再現、PDF/CSV/Mail/Template/MasterData の byte/副作用互換、Mypage/Favorite/Address/Contact の HTML enrichment、production DB bring-up。これは未把握の穴ではなく、意図して切った境界です。
+**Not done:** 本番 EC-CUBE の完全代替に必要な互換 fidelity と cutover は残る。中心は `doCreateOrder` / `doCheckout` の target-engine SQL 検証、PDF/CSV/Mail/Template/MasterData の byte/副作用互換、Mypage/Favorite/Address/Contact の HTML enrichment、production DB bring-up。これは未把握の穴ではなく、意図して切った境界です。
 
 ## Difference from Symfony EC-CUBE
 
@@ -112,18 +112,18 @@ Static analysis / taint tracking と cache freshness check は導入中の品質
 
 BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・全機能を [`alps.json`](alps.json) と [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) に棚卸しした上で、移植手法（ALPS → Be Framework → BEAR.Sunday → Ray.MediaQuery → HTML）の実証として価値のある範囲を完了しています。
 
-> ALPS 532 descriptor / 207 transition descriptor · Be domain 147 Input / 148 Final · Ray.MediaQuery 51 interface / 142 SQL query · HTML 131 Twig templates
+> ALPS 532 descriptor / 207 transition descriptor · Be domain 147 Input / 148 Final / 155 Semantic · Ray.MediaQuery 51 interface / 143 SQL query · HTML 131 Twig templates
 
 残るのは「実証としては不要だが、本番 EC-CUBE の **完全代替** には必要」な差分だけです。**これは未知の不足ではなく、私たちが EC-CUBE 全体を把握した上で意図的に保留した既知の残作業**です。下記がすべて fix されれば、BeMart は EC-CUBE 4.3 の完全な代替になります。
 
 ### A. ドメイン stub（入力は受理するが永続副作用なし）
 
-- 受注確定 — `doCreateOrder`（finalized order は作るが、PurchaseFlow の税/配送/在庫再計算と明細 snapshot は未再現）
+- 受注確定 — `doCreateOrder` / `doCheckout`（PurchaseFlow + `dtb_order_item` snapshot writes は実装済み。残りは `order_item_register.sql` の MariaDB 10.11 target-engine 検証または `JSON_TABLE` なしの INSERT への置換）
 - 商品CSV — `doImportProductCsv`（この移植では export-only として扱い、意図的に未移植）
 - CSV設定 — `doUpdateCsv`（column config は保持するが、その設定を消費する全 export Final の互換 fidelity は残る）
 - プラグイン lifecycle — `doInstallPlugin`（download・unzip・migrate・container 再生成なし。plugin scope は out-of-scope）
 
-### B. EC-CUBE 互換 fidelity 残差（[#24](https://github.com/be-framework/be-mart/issues/24)）
+### B. EC-CUBE 互換 fidelity 残差（[#24](https://github.com/koriym/ec-cube-alps/issues/24)）
 
 - PDF — 帳票レイアウト完全一致 / `dtb_order_pdf` 保存設定 / 複数配送（到達・download ヘッダ・`%PDF-` 生成は実装済み）
 - CSV — EC-CUBE 互換フォーマット + streaming/download 境界
@@ -137,14 +137,14 @@ BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・�
 
 ### D. 設計上の out-of-scope
 
-- プラグイン機構・マーケットプレイス（[#3](https://github.com/be-framework/be-mart/issues/3) — Anti-Corruption Layer による恒久 legacy 同居の研究構想）
+- プラグイン機構・マーケットプレイス（[#3](https://github.com/koriym/ec-cube-alps/issues/3) — Anti-Corruption Layer による恒久 legacy 同居の研究構想）
 - 管理 Store/Plugin install/search サブツリー（~14 ページ）
 
 ### E. 本番移行
 
 - 本番 DB の bring-up / cutover（seed script と prod `SqlModule` binding は実装済み）
 
-最新の詳細は [`docs/migration-status.md`](docs/migration-status.md) §4 Outstanding work、互換隔離の進行は [#24](https://github.com/be-framework/be-mart/issues/24) を参照してください。
+最新の詳細は [`docs/migration-status.md`](docs/migration-status.md) §4 Outstanding work、互換隔離の進行は [#24](https://github.com/koriym/ec-cube-alps/issues/24) を参照してください。
 
 ## Quick Links
 
