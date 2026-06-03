@@ -70,8 +70,6 @@ final class AdminPageListHtmlRenderTest extends TestCase
         '<title>ページ管理 コンテンツ管理 - EC-CUBE</title>',
         // Page list fake corpus includes user pages whose URL/file-name
         // labels are not present in the sparse EC-CUBE reference fixture.
-        'company',
-        'foo',
     ];
 
     private ResourceInterface $resource;
@@ -139,10 +137,15 @@ final class AdminPageListHtmlRenderTest extends TestCase
 
         $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
         $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
+        $hasUserPageResidual = in_array('company', [...$onlyInEcCube, ...$onlyInBeMart], true)
+            && in_array('foo', [...$onlyInEcCube, ...$onlyInBeMart], true);
 
         $unexplained = array_values(array_filter(
             [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
+            static fn (string $line): bool => ! self::isResidual($line)
+                // Keep bare user-page labels tied to the page-list fixture
+                // seed pair rather than globally allowlisting either label.
+                && ! ($hasUserPageResidual && in_array($line, ['company', 'foo'], true)),
         ));
 
         $this->assertSame(
