@@ -112,24 +112,37 @@ The `bemart-sql` suite drops + recreates `eccubedb_test` on every run
 transaction `tearDown` rolls back.
 
 If `DATABASE_URL` is unset the SQL suites skip cleanly. If it is set but
-the server is unreachable, the suite fails fast (no silent skips).
+the server is unreachable, the suite fails fast (no silent skips). If it
+points at malt's current MySQL 8.0 runtime, the suite skips because the
+target baseline is MariaDB 10.11.
 
 The top-level `phpunit.xml` wires the default `DATABASE_URL`:
 
-```
+```text
 mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14
 ```
 
-## Setting up MariaDB locally
+## Setting up the local DB with malt
 
-The dev environment uses MariaDB 10.11 with a `dbuser` account.
+The dev environment uses `malt` for the local DB. The checked-in
+`malt.json` currently starts MySQL 8.0 on port 3306; this is useful for DB
+reachability and smoke wiring, while MariaDB-target SQL verification is
+kept separate.
 
 ```bash
-sudo service mariadb start
+malt start
+source <(malt env)
 
-# One-time grant for the test DB (CI image already has this):
-sudo mysql -e "GRANT ALL PRIVILEGES ON \`eccubedb_test\`.* TO 'dbuser'@'127.0.0.1';"
-sudo mysql -e "FLUSH PRIVILEGES;"
+# One-time grant for the test DB:
+mysql --protocol=TCP -h127.0.0.1 -P3306 -uroot <<'SQL'
+CREATE USER IF NOT EXISTS 'dbuser'@'localhost' IDENTIFIED BY 'secret';
+CREATE USER IF NOT EXISTS 'dbuser'@'127.0.0.1' IDENTIFIED BY 'secret';
+GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'localhost';
+GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'127.0.0.1';
+FLUSH PRIVILEGES;
+SQL
+
+/opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never
 ```
 
 Defaults: host `127.0.0.1`, port `3306`, user `dbuser`, password `secret`.

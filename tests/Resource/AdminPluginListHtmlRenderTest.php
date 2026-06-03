@@ -174,10 +174,16 @@ final class AdminPluginListHtmlRenderTest extends TestCase
 
         $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
         $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
+        $hasOwnersStoreAnchorResidual = in_array('<a href="/admin_store_plugin_owners_search"', $onlyInEcCube, true)
+            && in_array('class="btn btn-ec-regular me-2 float-end">オーナーズストアから新規追加</a>', $onlyInEcCube, true);
 
         $unexplained = array_values(array_filter(
             [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
+            static fn (string $line): bool => ! self::isResidual($line)
+                // EC-CUBE splits the owners-store anchor opener so the
+                // normalized diff contains a standalone ">"; keep it tied
+                // to the owners-store anchor residual, not globally allowed.
+                && ! ($hasOwnersStoreAnchorResidual && $line === '>'),
         ));
 
         $this->assertSame(

@@ -82,6 +82,9 @@ final class AdminMemberListHtmlRenderTest extends TestCase
         // MemberListFetched projection does not carry the 2FA columns, so
         // BeMart's cell is empty. FLAGGED missing-body-field.
         '無効',
+        // Member list fake corpus includes a deleted operator row label that
+        // the sparse EC-CUBE reference fixture does not carry.
+        '削除済み管理者',
     ];
 
     private ResourceInterface $resource;
