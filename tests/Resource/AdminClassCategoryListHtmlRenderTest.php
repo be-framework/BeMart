@@ -74,6 +74,10 @@ final class AdminClassCategoryListHtmlRenderTest extends TestCase
         '<a class="btn btn-ec-regular" href="/admin_product_class_category_export?">',
         '<form role="form" class="row" name="form1" id="form1" method="post" action="/admin_product_class_category?">',
         'location.href = "/admin_product_class_category?";',
+        // Inline edit rows: BeMart fake rows surface the edit-cancel button
+        // for each class category while the EC-CUBE reference fixture is
+        // intentionally sparse.
+        '<button class="btn btn-ec-sub action-edit-cancel" type="button">キャンセル</button>',
     ];
 
     private ResourceInterface $resource;

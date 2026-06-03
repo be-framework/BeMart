@@ -68,6 +68,10 @@ final class AdminPageListHtmlRenderTest extends TestCase
         '</script>',
         '<title>ページ管理 コンテンツ管理 - BeMart</title>',
         '<title>ページ管理 コンテンツ管理 - EC-CUBE</title>',
+        // Page list fake corpus includes user pages whose URL/file-name
+        // labels are not present in the sparse EC-CUBE reference fixture.
+        'company',
+        'foo',
     ];
 
     private ResourceInterface $resource;

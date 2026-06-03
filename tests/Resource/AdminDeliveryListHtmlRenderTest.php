@@ -61,6 +61,10 @@ final class AdminDeliveryListHtmlRenderTest extends TestCase
         '</script>',
         '<title>配送方法一覧 店舗設定 - BeMart</title>',
         '<title>店舗設定 配送方法一覧 - EC-CUBE</title>',
+        // Delivery list rows: BeMart fake seeds render removable rows; the
+        // standalone EC-CUBE fixture stays sparse, so the close icon is a
+        // row-fixture residual.
+        '<i class="fa fa-close fa-lg"></i>',
     ];
 
     private ResourceInterface $resource;
