@@ -197,21 +197,21 @@ ALPSプロファイルを「シングルソースオブトゥルース」とし�
 
 ### リポジトリ・ドキュメント
 
-- [BeMart](https://github.com/be-framework/be-mart) — リポジトリ
-- [実証総括 — FINAL-REPORT](https://github.com/be-framework/be-mart/blob/main/docs/FINAL-REPORT.md) — 何を実証したか・知見・限界
-- [移植ステータス — migration-status](https://github.com/be-framework/be-mart/blob/main/docs/migration-status.md) — レイヤ別マトリクスと残作業（正）
-- [構築プロセス — HANDOVER](https://github.com/be-framework/be-mart/blob/main/docs/HANDOVER.md) — Pilot / Wave の決定ログ
-- [画面移植マトリクス](https://github.com/be-framework/be-mart/blob/main/docs/html-screen-migration-matrix.md)
-- [移植知見 — skills（G-14〜G-25）](https://github.com/be-framework/be-mart/blob/main/docs/skills/index.md)
-- [方法論 — methodology](https://github.com/be-framework/be-mart/tree/main/docs/methodology)
-- [タグ分類 — tag](https://github.com/be-framework/be-mart/blob/main/docs/tag.md)
-- [ドキュメント索引 — docs/README](https://github.com/be-framework/be-mart/blob/main/docs/README.md) — 全ドキュメントの索引
+- [BeMart](https://github.com/koriym/ec-cube-alps) — リポジトリ
+- [実証総括 — FINAL-REPORT](https://github.com/koriym/ec-cube-alps/blob/be-first-migration-bootstrap/docs/FINAL-REPORT.md) — 何を実証したか・知見・限界
+- [移植ステータス — migration-status](https://github.com/koriym/ec-cube-alps/blob/be-first-migration-bootstrap/docs/migration-status.md) — レイヤ別マトリクスと残作業（正）
+- [構築プロセス — HANDOVER](https://github.com/koriym/ec-cube-alps/blob/be-first-migration-bootstrap/docs/HANDOVER.md) — Pilot / Wave の決定ログ
+- [画面移植マトリクス](https://github.com/koriym/ec-cube-alps/blob/be-first-migration-bootstrap/docs/html-screen-migration-matrix.md)
+- [移植知見 — skills（G-14〜G-25）](https://github.com/koriym/ec-cube-alps/blob/be-first-migration-bootstrap/docs/skills/index.md)
+- [方法論 — methodology](https://github.com/koriym/ec-cube-alps/tree/be-first-migration-bootstrap/docs/methodology)
+- [タグ分類 — tag](https://github.com/koriym/ec-cube-alps/blob/be-first-migration-bootstrap/docs/tag.md)
+- [ドキュメント索引 — docs/README](https://github.com/koriym/ec-cube-alps/blob/be-first-migration-bootstrap/docs/README.md) — 全ドキュメントの索引
 
 ### 生成ドキュメント（GitHub Pages）
 
-- [ALPS ドキュメント](https://be-framework.github.io/be-mart/alps.json.html) — 状態遷移図とディスクリプタ一覧
-- [OpenAPI サンプル](https://be-framework.github.io/be-mart/openapi.html) — フロントエンドAPI参考仕様
-- [EC-CUBE 機能 ↔ ALPS 状態表](https://be-framework.github.io/be-mart/eccube-feature-alps-status.html) — route/function ↔ ALPS ID ↔ 実装状態 ↔ 移植難易度
+- [ALPS ドキュメント](https://koriym.github.io/ec-cube-alps/alps.json.html) — 状態遷移図とディスクリプタ一覧
+- [OpenAPI サンプル](https://koriym.github.io/ec-cube-alps/openapi.html) — フロントエンドAPI参考仕様
+- [EC-CUBE 機能 ↔ ALPS 状態表](https://koriym.github.io/ec-cube-alps/eccube-feature-alps-status.html) — route/function ↔ ALPS ID ↔ 実装状態 ↔ 移植難易度
 
 ### 外部
 

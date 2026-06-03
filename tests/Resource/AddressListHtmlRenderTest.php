@@ -120,6 +120,10 @@ final class AddressListHtmlRenderTest extends TestCase
             '<div class="ec-addressList">',
             'class="ec-addressList__item"',
             'class="ec-addressList__address"',
+            'class="ec-addressList__remove"',
+            'href="/mypage/delivery/delete?id=addr00000000000000000000000000a1"',
+            'token-for-anchor=',
+            'data-method="delete"',
         ] as $needle) {
             $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
         }
@@ -176,6 +180,8 @@ final class AddressListHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
+            'ec-addressList__remove',
+            'token-for-anchor',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;

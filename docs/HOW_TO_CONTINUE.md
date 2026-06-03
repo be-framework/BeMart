@@ -9,15 +9,15 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 ## 0. 現状サマリ
 
 - **ブランチ**: セッションごとに異なる。まず `git branch --show-current` と `git status --short` を確認する。
-- **リモート**: `https://github.com/be-framework/be-mart.git`
+- **リモート**: `https://github.com/koriym/ec-cube-alps.git`
 - **テスト**: `docs/migration-status.md` の現行ベースライン参照。HTTP workflow は `tests/Hypermedia/WorkflowTest.php` と `tests/Http/WorkflowTest.php` で同一シナリオを in-process / 実HTTP の2トランスポートで検証。
 
 移植は ALPS を契約として進行している:
 
 | フェーズ | 内容 | 状態 |
 |---|---|---|
-| **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了。現在の `be/src` は 147 Input / 148 Final / 154 Semantic / 14 Being。 |
-| **Phase 2** | Fake → SQL → Ray.MediaQuery 境界 | 完了。現在は 51 MediaQuery interface / 142 `#[DbQuery]` / 142 SQL file。 |
+| **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了。現在の `be/src` は 147 Input / 148 Final / 155 Semantic / 14 Being。 |
+| **Phase 2** | Fake → SQL → Ray.MediaQuery 境界 | 完了。現在は 51 MediaQuery interface / 143 `#[DbQuery]` / 143 SQL file。 |
 | **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | in-scope 完了。`var/templates` は 131 Twig template。Storefront と admin editor waves は移植済み。Store/Plugin install/search subtree は plugin runtime 除外により out of scope。 |
 | **Route-gate / compatibility** | EC-CUBE route と安全退避 / 互換 adapter 境界の明示 | `alps-route-gate` descriptor と `docs/eccube-feature-alps-status.html` で追跡。Hard ActionRedirect は接続済みだが、byte/fidelity 完全互換は residual。 |
 
@@ -32,8 +32,8 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 ### 1.1 取得
 
 ```bash
-git clone https://github.com/be-framework/be-mart.git
-cd be-mart
+git clone https://github.com/koriym/ec-cube-alps.git
+cd ec-cube-alps
 git checkout <work-branch>
 ```
 
@@ -65,19 +65,26 @@ composer install
 - `ray/web-form-module` — HTML フォームページ（Phase 3）
 - `ray/media-query` — SQL境界の実行基盤。interface + SQL file を direct proxy として解決する。
 
-PHP 8.4 で開発・テストしている（8.5 でも問題なし）。
+PHP 8.5 で開発・テストしている。
 
 `be/` は path repository として参照しているので、`be/` 内でも `composer install` が必要な場合がある（`composer.json` の `repositories` を参照）。
 
 ### 1.3 データベース（Phase 2 以降に必要）
 
-SQL テストスイートと本番 context は MariaDB 10.11 / MySQL を使う。
+SQL テストスイートと本番 context は `malt` の DB を使う。
 `DATABASE_URL` 未設定なら SQL スイートは clean skip するので、ドメイン層だけ触るなら不要。
+現行 `malt.json` は MySQL 8.0 を起動するため、MariaDB target の SQL suite は skip が正しい。
 
 ```bash
-sudo service mariadb start
-sudo mysql -e "GRANT ALL PRIVILEGES ON \`eccubedb_test\`.* TO 'dbuser'@'127.0.0.1';"
-sudo mysql -e "FLUSH PRIVILEGES;"
+malt start
+source <(malt env)
+mysql --protocol=TCP -h127.0.0.1 -P3306 -uroot <<'SQL'
+CREATE USER IF NOT EXISTS 'dbuser'@'localhost' IDENTIFIED BY 'secret';
+CREATE USER IF NOT EXISTS 'dbuser'@'127.0.0.1' IDENTIFIED BY 'secret';
+GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'localhost';
+GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'127.0.0.1';
+FLUSH PRIVILEGES;
+SQL
 ```
 
 本番 DB の再現可能なセットアップ手順・seed は `sql/README.md` と `sql/setup-db.sh` を参照。
@@ -88,7 +95,7 @@ sudo mysql -e "FLUSH PRIVILEGES;"
 ```bash
 vendor/bin/phpunit                          # 全テスト（OK なら緑）
 vendor/bin/phpunit tests/Hypermedia/WorkflowTest.php tests/Http/WorkflowTest.php  # 同一workflowをin-process/実HTTPで検証
-vendor/bin/phpunit --testsuite sql          # Ray.MediaQuery SQL suite（DATABASE_URL 要）
+/opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never  # malt DB 経由
 composer psalm                              # 型解析
 composer psalm-taint                        # taint mode
 ```
@@ -114,7 +121,7 @@ composer psalm-taint                        # taint mode
 おおまかな優先度順:
 
 1. **Compatibility fidelity residuals** — `goExportOrderPdf` は到達・download header・`%PDF-` 生成まで進んだが、帳票レイアウト、`dtb_order_pdf` 保存設定、複数配送テンプレート再現は残る。CSV/Mail/Template/MasterData も byte/副作用互換は別境界として扱う。
-2. **Domain residuals** — `doCreateOrder` は finalized order を作るが、PurchaseFlow の税/配送/在庫再計算と order-item snapshot rows は未再現。`doImportProductCsv` はこの移植では export-only として意図的に未移植。`doInstallPlugin` は plugin runtime out-of-scope。`doUpdateCsv` は column config の保存後、それを消費する export fidelity が残る。
+2. **Domain residuals** — `doCreateOrder` / `doCheckout` は PurchaseFlow + `dtb_order_item` snapshot writes まで実装済み。残るのは `order_item_register.sql` の MariaDB 10.11 target-engine 検証または `JSON_TABLE` なしの INSERT への置換。`doImportProductCsv` はこの移植では export-only として意図的に未移植。`doInstallPlugin` は plugin runtime out-of-scope。`doUpdateCsv` は column config の保存後、それを消費する export fidelity が残る。
 3. **HTML enrichment backlog** — Mypage dashboard、Favorite、Address、Contact。各ページは Cart-style の re-derive（ALPS → Entity/SQL/Fake enrich → template wiring）で進める。
 4. **Production DB bring-up / cutover** — seed script と prod `SqlModule` binding はある。実DBでの bring-up、運用データ投入、cutover 手順の検証は未完。
 5. **Verification when touching presentation** — admin ページ移植のレシピは `var/templates/README.md`、画面マトリクスは `docs/html-screen-migration-matrix.md`、route/function 状態は `docs/eccube-feature-alps-status.html` を参照する。
@@ -159,7 +166,7 @@ commit 済み分は失われない（バッチ 1 で 2 agent がカットオフ�
 ## 4. リポジトリ構造の要点
 
 ```text
-be-mart/
+ec-cube-alps/
 ├── alps.json                 # source of truth（EC-CUBE 4.3 ALPS）
 ├── CLAUDE.md                 # プロジェクト規約
 ├── README.md                 # エントリポイント
@@ -182,7 +189,7 @@ be-mart/
 │   └── src/{Input,Being,Final,Reason,Semantic,Exception}/
 │       └── Reason/Query/*Interface.php   # Ray.MediaQuery interface境界
 ├── sql/                      # EC-CUBE スキーマダンプ・mtb_* seed・setup-db.sh（Phase 2）
-├── var/sql/                  # Ray.MediaQuery SQL files（142 query）
+├── var/sql/                  # Ray.MediaQuery SQL files（143 query）
 ├── var/templates/            # HTML テンプレート（EC-CUBE 移植、Phase 3）
 ├── tests/                    # BEAR 層のテスト（render-diff / hypermedia 含む）
 └── .claude/                  # /run migrate ワークフロー（commands / workflows / prompts）
@@ -216,7 +223,7 @@ asd -f svg -o alps.svg alps.json          # SVG 状態遷移図
 ```bash
 vendor/bin/phpunit                          # 全テスト
 vendor/bin/phpunit --testsuite fake,http,smoke  # DBなしで動く検証
-vendor/bin/phpunit --testsuite sql          # Ray.MediaQuery SQL suite（DATABASE_URL 要）
+/opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never  # malt DB 経由
 composer psalm / composer psalm-taint       # 型 / taint 解析
 ```
 
@@ -243,7 +250,7 @@ composer psalm / composer psalm-taint       # 型 / taint 解析
 ### SQL スイートが skip / fail する
 
 `DATABASE_URL` 未設定なら clean skip（正常）。設定済みでサーバ不達なら fail-fast。
-MariaDB の起動とグラント（§1.3）を確認。
+まず `malt status` と `dbuser` のグラント（§1.3）を確認。malt が MySQL 8.0 の場合、MariaDB target mismatch として全 skip される。
 
 ### テンプレート編集が反映されない
 
