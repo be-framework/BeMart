@@ -71,6 +71,13 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
         // - <shop_name>". Also the shop name differs.
         '<title>支払方法一覧 店舗設定 - BeMart</title>',
         '<title>店舗設定 支払方法一覧 - EC-CUBE</title>',
+        // Payment rows: BeMart fake seeds expose richer payment rows than
+        // the sparse EC-CUBE reference fixture used by this render harness.
+        '<span>',
+        '￥0',
+        '〜 無制限',
+        '</span>',
+        '<div class="col-3 text-end">',
     ];
 
     private ResourceInterface $resource;

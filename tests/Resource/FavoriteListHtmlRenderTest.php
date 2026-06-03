@@ -132,6 +132,9 @@ final class FavoriteListHtmlRenderTest extends TestCase
             'class="ec-favoriteRole__item"',
             'class="ec-favoriteRole__itemTitle"',
             'class="ec-favoriteRole__itemPrice"',
+            'class="ec-closeBtn--circle"',
+            'token-for-anchor=',
+            'data-method="delete"',
         ] as $needle) {
             $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
         }
@@ -189,6 +192,7 @@ final class FavoriteListHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
+            'token-for-anchor',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;

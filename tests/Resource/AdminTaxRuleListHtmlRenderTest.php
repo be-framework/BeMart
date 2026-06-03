@@ -77,6 +77,14 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
         // (structure) with an empty value — the html context has no
         // per-request CSRF widget.
         '<input type="hidden" id="tax_rule__token" name="_token" value="">',
+        // Tax-rule fake rows expose the current percentage/range controls;
+        // the EC-CUBE reference fixture is sparse, so these row fragments are
+        // page-specific residuals rather than common admin markup.
+        '<span class="col-6 text-end pe-0">10</span><span class="col-6 ps-1">%</span>',
+        '<span class="col-6 text-end pe-0">8</span><span class="col-6 ps-1">%</span>',
+        '<div class="col-6 text-center">',
+        '</h5>',
+        '</button>',
     ];
 
     private ResourceInterface $resource;
