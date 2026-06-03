@@ -118,7 +118,7 @@ target baseline is MariaDB 10.11.
 
 The top-level `phpunit.xml` wires the default `DATABASE_URL`:
 
-```
+```text
 mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14
 ```
 

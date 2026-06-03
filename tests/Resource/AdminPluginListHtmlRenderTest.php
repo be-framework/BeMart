@@ -100,10 +100,6 @@ final class AdminPluginListHtmlRenderTest extends TestCase
         // plugin_table_official.twig empty-state body (officialPlugins
         // fed empty in the stub):
         'オーナーズストアのプラグインはインストールされていません。',
-        // The owners-store card anchor is split across lines by the EC-CUBE
-        // template; the wrapper is omitted in BeMart because Store/Plugin
-        // install/search is out of scope.
-        '>',
     ];
 
     private ResourceInterface $resource;
@@ -178,10 +174,16 @@ final class AdminPluginListHtmlRenderTest extends TestCase
 
         $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
         $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
+        $hasOwnersStoreAnchorResidual = in_array('<a href="/admin_store_plugin_owners_search"', $onlyInEcCube, true)
+            && in_array('class="btn btn-ec-regular me-2 float-end">オーナーズストアから新規追加</a>', $onlyInEcCube, true);
 
         $unexplained = array_values(array_filter(
             [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
+            static fn (string $line): bool => ! self::isResidual($line)
+                // EC-CUBE splits the owners-store anchor opener so the
+                // normalized diff contains a standalone ">"; keep it tied
+                // to the owners-store anchor residual, not globally allowed.
+                && ! ($hasOwnersStoreAnchorResidual && $line === '>'),
         ));
 
         $this->assertSame(
