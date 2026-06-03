@@ -14,6 +14,10 @@ final class HtmlTestModule extends AbstractAppModule
     protected function configure(): void
     {
         $this->install(new TestModule($this->appMeta));
-        $this->override(new HtmlModule());
+        $this->override(new HtmlModule([
+            'debug' => true,
+            'cache' => false,
+            'auto_reload' => true,
+        ]));
     }
 }

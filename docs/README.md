@@ -6,15 +6,25 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 プロジェクト全体の入口は repo ルートの [`README.md`](../README.md)、
 規約は [`CLAUDE.md`](../CLAUDE.md) を参照。
 
+## まず読む順
+
+| 目的 | 読むもの |
+|---|---|
+| プロジェクトの意義を知る | [`../README.md`](../README.md) → [`FINAL-REPORT.md`](FINAL-REPORT.md) |
+| 最新の到達点を知る | [`migration-status.md`](migration-status.md) |
+| 残作業を始める | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) → `migration-status.md` §4 |
+| ALPS生成の背景を読む | [`index.md`](index.md) |
+| 境界ルールを再利用する | [`skills/index.md`](skills/index.md) → [`methodology/`](methodology/) |
+
 ## トップレベル（canonical）
 
 | ファイル | 役割 |
 |---|---|
-| [`FINAL-REPORT.md`](FINAL-REPORT.md) | **実証総括**。何を示せたか・知見・限界を一枚に束ねた documentary。各論への入口。 |
-| [`migration-status.md`](migration-status.md) | **移植ステータスの正**。レイヤ別マトリクスと残作業 punch-list。「今どこまで出来ているか」はここが正。 |
+| [`FINAL-REPORT.md`](FINAL-REPORT.md) | **実証総括**。何を学び、何を成し遂げ、どこに限界を引いたかを一枚に束ねた documentary。各論への入口。 |
+| [`migration-status.md`](migration-status.md) | **移植ステータスの正**。ALPS / Be / Resource / Ray.MediaQuery / HTML のレイヤ別マトリクスと残作業 punch-list。「今どこまで出来ているか」はここが正。 |
 | [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ BeMart実装状態 ↔ 移植難易度の生成HTML表。 |
 | [`HANDOVER.md`](HANDOVER.md) | 構築プロセスの記録。Phase A / Phase 2 / Phase 3 の決定ログ、Pilot/Wave 報告、skill gap 発見の経緯。 |
-| [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) | 引き継ぎ手順。再開時に読むファイル順・次にやること・リポジトリ構造。 |
+| [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) | 引き継ぎ手順。再開時に読むファイル順・次にやること・リポジトリ構造。`migration-status.md` を正として読む。 |
 | [`tag.md`](tag.md) | タグ分類体系（`flow-*` / `src-*` 等、ワークフロー・ドメイン・アクター・情報源の命名規則）。 |
 
 ### GitHub Pages 公開物（編集・移動しない）
@@ -26,7 +36,7 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 
 | ディレクトリ | 内容 |
 |---|---|
-| [`methodology/`](methodology/) | 再利用可能な方法論・原則。`hypermedia-test-principle.md`（hypermedia テスト＝移植契約）、`FRAMEWORK_REVIEW.md`（139 transition 規模でのフレームワーク実務レビュー）、`be-bear-ai-era.md`（Be + BEAR の AI コーディング時代における潜在能力の論評）。 |
+| [`methodology/`](methodology/) | 再利用可能な方法論・原則。`hypermedia-test-principle.md`（hypermedia テスト＝移植契約）、`FRAMEWORK_REVIEW.md`（元139 transition sliceの歴史的フレームワーク実務レビュー）、`be-bear-ai-era.md`（Be + BEAR の AI コーディング時代における潜在能力の論評）。 |
 | [`phases/`](phases/) | フェーズ別の成果物。`alps-audit-phase3.md`（Phase 3 準備の ALPS 監査）、`admin-fanout-plan.md`（admin 移植のファンアウト計画）。 |
 | [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-25）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |
 | [`quality/`](quality/) | Phase 1 の ALPS 監査ノート（`verify-*.md` / `improvements-*.md`）。 |

@@ -2,24 +2,24 @@
 
 別マシン / 別セッションでこの **BeMart** プロジェクト（EC-CUBE 4.3 → BEAR.Sunday +
 Be Framework 移植）の作業を再開するための引き継ぎガイド。
-最終更新: 2026-05-23（EC-CUBE実サイト探索 / HTTP導線安定化 / Ray.MediaQuery境界ルール追加）
+最終更新: 2026-06-01（ALPS route-gate / Ray.MediaQuery cutover / documentation refresh）
 
 ---
 
 ## 0. 現状サマリ
 
-- **ブランチ**: `be-first-migration-bootstrap`
+- **ブランチ**: セッションごとに異なる。まず `git branch --show-current` と `git status --short` を確認する。
 - **リモート**: `https://github.com/be-framework/be-mart.git`
-- **PR**: #2（draft、`be-first-migration-bootstrap` → `1.x`）
-- **テスト**: `vendor/bin/phpunit` → `docs/migration-status.md` の現行ベースライン参照。HTTP workflow は `tests/Hypermedia/WorkflowTest.php` と `tests/Http/WorkflowTest.php` で同一シナリオを in-process / 実HTTP の2トランスポートで検証
+- **テスト**: `docs/migration-status.md` の現行ベースライン参照。HTTP workflow は `tests/Hypermedia/WorkflowTest.php` と `tests/Http/WorkflowTest.php` で同一シナリオを in-process / 実HTTP の2トランスポートで検証。
 
-移植は ALPS を契約として 3 フェーズ進行している:
+移植は ALPS を契約として進行している:
 
 | フェーズ | 内容 | 状態 |
 |---|---|---|
-| **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了（139 transition、stub 7 件あり） |
-| **Phase 2** | 全 34 ストレージ Fake → SQL（MariaDB/MySQL）、本番カットオーバー | 完了 |
-| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | Storefrontは全ページ移植済みで、共有Block/商品一覧カート投入まで拡張。Adminは **63 of 77 page templates**（Tier-1 + in-scope Tier-2 editor waves）まで移植済み。残りは主に Store/Plugin install/search subtree（今回スコープ外）と、body enrichment が必要な周辺機能。 |
+| **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了。現在の `be/src` は 147 Input / 148 Final / 154 Semantic / 14 Being。 |
+| **Phase 2** | Fake → SQL → Ray.MediaQuery 境界 | 完了。現在は 51 MediaQuery interface / 142 `#[DbQuery]` / 142 SQL file。 |
+| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | in-scope 完了。`var/templates` は 131 Twig template。Storefront と admin editor waves は移植済み。Store/Plugin install/search subtree は plugin runtime 除外により out of scope。 |
+| **Route-gate / compatibility** | EC-CUBE route と安全退避 / 互換 adapter 境界の明示 | `alps-route-gate` descriptor と `docs/eccube-feature-alps-status.html` で追跡。Hard ActionRedirect は接続済みだが、byte/fidelity 完全互換は residual。 |
 
 > **現在の移植ステータス（レイヤ別マトリクス・残作業 punch-list）の正は
 > [`docs/migration-status.md`](migration-status.md)**。本ファイルは「引き継いだ人が
@@ -34,7 +34,7 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 ```bash
 git clone https://github.com/be-framework/be-mart.git
 cd be-mart
-git checkout be-first-migration-bootstrap
+git checkout <work-branch>
 ```
 
 Phase 3 の render-diff テスト（`tests/Resource/*HtmlRenderTest.php`）は EC-CUBE 4.3 の
@@ -63,7 +63,7 @@ composer install
 - `my-vendor/be-mart-be` — このリポジトリのドメイン層（`be/` サブツリーに同居、path repo 参照）
 - `madapaja/twig-module` — HTML context の Twig レンダリング（Phase 3）
 - `ray/web-form-module` — HTML フォームページ（Phase 3）
-- `ray/media-query` — 今後の新規SQL境界で使うinterface-driven SQL mapper（既存PDO実装の移行は別フェーズ）
+- `ray/media-query` — SQL境界の実行基盤。interface + SQL file を direct proxy として解決する。
 
 PHP 8.4 で開発・テストしている（8.5 でも問題なし）。
 
@@ -88,7 +88,7 @@ sudo mysql -e "FLUSH PRIVILEGES;"
 ```bash
 vendor/bin/phpunit                          # 全テスト（OK なら緑）
 vendor/bin/phpunit tests/Hypermedia/WorkflowTest.php tests/Http/WorkflowTest.php  # 同一workflowをin-process/実HTTPで検証
-vendor/bin/phpunit --testsuite bemart-sql   # SQL ストレージ + Final-direct（DATABASE_URL 要）
+vendor/bin/phpunit --testsuite sql          # Ray.MediaQuery SQL suite（DATABASE_URL 要）
 composer psalm                              # 型解析
 composer psalm-taint                        # taint mode
 ```
@@ -104,7 +104,7 @@ composer psalm-taint                        # taint mode
 3. **`CLAUDE.md`** — プロジェクト規約（ALPS が source of truth、5 レイヤ構成、`/run migrate`）。
 4. **`alps.json`** — EC-CUBE 4.3 のセマンティクス定義。移植の契約。
 5. レイヤ別の詳細: `sql/README.md`（Phase 2）/ `var/templates/README.md`（Phase 3）/
-   `docs/phases/alps-audit-phase3.md`（ALPS 監査）/ `docs/skills/`（G-14 〜 G-24 の skill gap）。
+   `docs/phases/alps-audit-phase3.md`（ALPS 監査）/ `docs/skills/`（G-14 〜 G-25 の skill gap）。
 
 ---
 
@@ -113,24 +113,13 @@ composer psalm-taint                        # taint mode
 残作業の punch-list は `docs/migration-status.md` の「Outstanding work」が正。
 おおまかな優先度順:
 
-1. **Product / Order / Customer の重い編集画面** — `/admin/product/new`、first-slice `/admin/order`、`/admin/customer?customerId=...` は接続済み。次はEC-CUBE実サイト探索で確認した商品規格行列・画像アップロード・受注新規/編集・会員新規/詳細検索を進める。
-   - Product: `Product/product`, `Product/product_class`, 画像、カテゴリ/タグ、在庫無制限、販売種別、通常価格、販売制限、発送日目安。
-   - Order: `Order/edit`, `Order/shipping`, 受注新規、検索条件、配送/明細/支払/対応状況/メール履歴。
-   - Customer: 管理会員新規、詳細検索、購入履歴、配送先一覧、お気に入り、ステータス操作。
-   - Content/Setting: ファイル管理、メンテナンス、特商法、定休日、ログイン履歴、ログ表示、システム情報、マスタデータ。
-   admin ページ移植のレシピは `var/templates/README.md`「Admin pages」節、最新の画面マトリクスは `docs/html-screen-migration-matrix.md` が正。
-2. **Storefront enrichment backlog** — 商品一覧はカテゴリ/表示件数/並び順/一覧カート投入まで接続済み。残: 商品詳細の規格選択/favorite、Shopping confirm/complete、Mypage dashboard、Favorite、Address、Contactのbody enrichment。
-3. **`Block/*` ウィジェット** — header/search/logo/login/cart/category-nav/footer first sliceは追加済み。残: cart totals/customer-auth/category-treeの動的化。
-4. **1 ALPS-only 遷移のドメイン実装** — Phase 3 の ALPS 是正で追加された 5 遷移のうち、`doSortNoMove` / `doToggleVisible` / `doUpdateTrackingNumber` / `doSendShippingNotifyMail` は実装済み。未実装は `doResendActivationMail` のみ。
-5. **Phase A の stub / compatibility 残差** — `goExportOrderPdf` は Issue #24 の
-   PDF pilot で ActionRedirect/stub から compatibility service 経由の実PDF
-   `%PDF-` 出力まで進めた。ただし EC-CUBE 完全忠実度（帳票レイアウト、
-   `dtb_order_pdf` 保存設定、複数配送テンプレート再現）は意図的に後続残差として
-   残している。未着手またはstub残りは `doImportProductCsv` /
-   `doImportCategoryCsv` / `doImportShippingCsv` / `doInstallPlugin` /
-   `doCreateOrder` / `doUpdateCsv`。
+1. **Compatibility fidelity residuals** — `goExportOrderPdf` は到達・download header・`%PDF-` 生成まで進んだが、帳票レイアウト、`dtb_order_pdf` 保存設定、複数配送テンプレート再現は残る。CSV/Mail/Template/MasterData も byte/副作用互換は別境界として扱う。
+2. **Domain residuals** — `doCreateOrder` は finalized order を作るが、PurchaseFlow の税/配送/在庫再計算と order-item snapshot rows は未再現。`doImportProductCsv` はこの移植では export-only として意図的に未移植。`doInstallPlugin` は plugin runtime out-of-scope。`doUpdateCsv` は column config の保存後、それを消費する export fidelity が残る。
+3. **HTML enrichment backlog** — Mypage dashboard、Favorite、Address、Contact。各ページは Cart-style の re-derive（ALPS → Entity/SQL/Fake enrich → template wiring）で進める。
+4. **Production DB bring-up / cutover** — seed script と prod `SqlModule` binding はある。実DBでの bring-up、運用データ投入、cutover 手順の検証は未完。
+5. **Verification when touching presentation** — admin ページ移植のレシピは `var/templates/README.md`、画面マトリクスは `docs/html-screen-migration-matrix.md`、route/function 状態は `docs/eccube-feature-alps-status.html` を参照する。
 
-各項目の詳細・コミット・unverified 注記は `docs/migration-status.md` を参照。
+各項目の詳細・unverified 注記は `docs/migration-status.md` を参照。
 
 ### 3.1 Phase 3 の検証ゲート
 
@@ -161,7 +150,7 @@ commit 済み分は失われない（バッチ 1 で 2 agent がカットオフ�
 - SQLは `{sqlDir}/{sql_id}.sql` に置く。
 - メソッド引数名とSQLの `:named` placeholderを一致させる。
 - return typeでfetch/hydration/exec結果を決める。
-- 既存 `Sql*Query` / `Sql*Command` の移行は別フェーズでまとめて行い、今回の次作業では触らない。
+- non-void query には Fake fixture も追加し、`tests/Smoke/MediaQueryCoverageTest.php` の対応関係を崩さない。
 
 詳細は `docs/skills/G-24-ray-media-query-boundary.md`。
 
@@ -182,7 +171,7 @@ be-mart/
 │   ├── tag.md                #   タグ分類体系
 │   ├── methodology/          #   再利用可能な方法論・原則
 │   ├── phases/               #   フェーズ別の成果物（ALPS 監査・admin fan-out 計画）
-│   ├── skills/               #   G-14 〜 G-23 の skill gap ドキュメント
+│   ├── skills/               #   G-14 〜 G-25 の skill gap ドキュメント
 │   ├── quality/              #   Phase 1 ALPS 監査ノート
 │   └── archive/              #   旧トラッカー・初期計画（参考・現状とは乖離）
 ├── src/                      # BEAR.Sunday アプリ層
@@ -190,15 +179,16 @@ be-mart/
 │   ├── Module/               #   AppModule / SqlModule / HtmlModule
 │   └── Form/                 #   Ray.WebFormModule のフォーム定義（Phase 3）
 ├── be/                       # Be Framework ドメイン層（my-vendor/be-mart-be）
-│   └── src/{Input,Being,Final,Reason,Semantic,Entity,Exception}/
-│       └── Reason/Query/Sql*.php   # SQL 永続化（Phase 2）
+│   └── src/{Input,Being,Final,Reason,Semantic,Exception}/
+│       └── Reason/Query/*Interface.php   # Ray.MediaQuery interface境界
 ├── sql/                      # EC-CUBE スキーマダンプ・mtb_* seed・setup-db.sh（Phase 2）
+├── var/sql/                  # Ray.MediaQuery SQL files（142 query）
 ├── var/templates/            # HTML テンプレート（EC-CUBE 移植、Phase 3）
 ├── tests/                    # BEAR 層のテスト（render-diff / hypermedia 含む）
 └── .claude/                  # /run migrate ワークフロー（commands / workflows / prompts）
 ```
 
-context は `APP_CONTEXT` で切替（`app`/`prod` は JSON、`html` は Twig HTML）。
+主要 entrypoint はそれぞれ context を固定する。`APP_CONTEXT` は一時的な上書き用の escape hatch。
 
 ---
 
@@ -225,7 +215,8 @@ asd -f svg -o alps.svg alps.json          # SVG 状態遷移図
 
 ```bash
 vendor/bin/phpunit                          # 全テスト
-vendor/bin/phpunit --testsuite bemart-sql   # SQL ストレージスイート
+vendor/bin/phpunit --testsuite fake,http,smoke  # DBなしで動く検証
+vendor/bin/phpunit --testsuite sql          # Ray.MediaQuery SQL suite（DATABASE_URL 要）
 composer psalm / composer psalm-taint       # 型 / taint 解析
 ```
 
