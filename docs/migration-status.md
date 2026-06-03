@@ -1,7 +1,7 @@
 # Migration Status — EC-CUBE 4.3 → BEAR.Sunday + Be Framework
 
 > **Living document.** Update the relevant row/cell whenever a layer's status changes.
-> Updated 2026-06-01 against `alps.json`, `be/src`, `src/Resource`, `var/templates`, `var/sql`, and current git worktree.
+> Updated 2026-06-04 against `alps.json`, `be/src`, `src/Resource`, `var/templates`, `var/sql`, and current git worktree.
 
 The migration runs through **5 layers**. ALPS is the source of truth; the lower
 layers implement it. "Done / partial / pending" is judged against the ALPS spec,
@@ -19,7 +19,7 @@ route-gate coverage, and the explicit residual boundary, not optimistically.
 | 4. SQL persistence (`var/sql` + Ray.MediaQuery) | 51 query interfaces, 143 `#[DbQuery]`, 143 SQL files | Phase 2 has been cut over from concrete `Sql*` adapter classes to Ray.MediaQuery direct proxies. Prod SQL binding is `SqlModule` → `MediaQueryRuntimeModule`; reproducible prod DB seed script exists. |
 | 5. HTML presentation (`var/templates`) | 131 Twig templates | Phase 3 complete for the in-scope migration. Current inventory: 42 storefront/non-admin page templates, 71 admin page/partial templates, 15 shared Block templates, 3 frames. Storefront is covered; admin in-scope editor waves are covered; Store/Plugin install/search subtree remains out of scope. |
 
-**Test baseline:** the current PHPUnit suites are `fake`, `sql`, `http`, and `smoke`. `2026-06-01` non-SQL verification (`--testsuite fake,http,smoke`) passes: **1322 tests, 22258 assertions, 220 skipped, 5 deprecations, 2 notices**. The last recorded full baseline was `vendor/bin/phpunit` → **1893 tests, 4002 assertions**. The `sql` suite needs local MariaDB/MySQL through `DATABASE_URL`; without a database, SQL-dependent coverage is skipped or fails at prod-DB-context boundaries by design.
+**Test baseline:** the current PHPUnit suites are `fake`, `sql`, `http`, and `smoke`. `2026-06-04` non-SQL verification (`--testsuite fake,http,smoke`) passes: **1339 tests, 24832 assertions, 222 skipped, 5 deprecations, 2 notices**. SQL verification uses `malt start` + `DATABASE_URL`; the current malt DB is MySQL 8.0.46, so the MariaDB-target SQL suite exits cleanly as **754 skipped, 0 assertions**. A green SQL execution still requires a MariaDB 10.11 target-engine run or removal of MariaDB-incompatible SQL such as `JSON_TABLE`.
 
 ---
 

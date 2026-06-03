@@ -65,19 +65,26 @@ composer install
 - `ray/web-form-module` — HTML フォームページ（Phase 3）
 - `ray/media-query` — SQL境界の実行基盤。interface + SQL file を direct proxy として解決する。
 
-PHP 8.4 で開発・テストしている（8.5 でも問題なし）。
+PHP 8.5 で開発・テストしている。
 
 `be/` は path repository として参照しているので、`be/` 内でも `composer install` が必要な場合がある（`composer.json` の `repositories` を参照）。
 
 ### 1.3 データベース（Phase 2 以降に必要）
 
-SQL テストスイートと本番 context は MariaDB 10.11 / MySQL を使う。
+SQL テストスイートと本番 context は `malt` の DB を使う。
 `DATABASE_URL` 未設定なら SQL スイートは clean skip するので、ドメイン層だけ触るなら不要。
+現行 `malt.json` は MySQL 8.0 を起動するため、MariaDB target の SQL suite は skip が正しい。
 
 ```bash
-sudo service mariadb start
-sudo mysql -e "GRANT ALL PRIVILEGES ON \`eccubedb_test\`.* TO 'dbuser'@'127.0.0.1';"
-sudo mysql -e "FLUSH PRIVILEGES;"
+malt start
+source <(malt env)
+mysql --protocol=TCP -h127.0.0.1 -P3306 -uroot <<'SQL'
+CREATE USER IF NOT EXISTS 'dbuser'@'localhost' IDENTIFIED BY 'secret';
+CREATE USER IF NOT EXISTS 'dbuser'@'127.0.0.1' IDENTIFIED BY 'secret';
+GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'localhost';
+GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'127.0.0.1';
+FLUSH PRIVILEGES;
+SQL
 ```
 
 本番 DB の再現可能なセットアップ手順・seed は `sql/README.md` と `sql/setup-db.sh` を参照。
@@ -88,7 +95,7 @@ sudo mysql -e "FLUSH PRIVILEGES;"
 ```bash
 vendor/bin/phpunit                          # 全テスト（OK なら緑）
 vendor/bin/phpunit tests/Hypermedia/WorkflowTest.php tests/Http/WorkflowTest.php  # 同一workflowをin-process/実HTTPで検証
-vendor/bin/phpunit --testsuite sql          # Ray.MediaQuery SQL suite（DATABASE_URL 要）
+/opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never  # malt DB 経由
 composer psalm                              # 型解析
 composer psalm-taint                        # taint mode
 ```
@@ -216,7 +223,7 @@ asd -f svg -o alps.svg alps.json          # SVG 状態遷移図
 ```bash
 vendor/bin/phpunit                          # 全テスト
 vendor/bin/phpunit --testsuite fake,http,smoke  # DBなしで動く検証
-vendor/bin/phpunit --testsuite sql          # Ray.MediaQuery SQL suite（DATABASE_URL 要）
+/opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never  # malt DB 経由
 composer psalm / composer psalm-taint       # 型 / taint 解析
 ```
 
@@ -243,7 +250,7 @@ composer psalm / composer psalm-taint       # 型 / taint 解析
 ### SQL スイートが skip / fail する
 
 `DATABASE_URL` 未設定なら clean skip（正常）。設定済みでサーバ不達なら fail-fast。
-MariaDB の起動とグラント（§1.3）を確認。
+まず `malt status` と `dbuser` のグラント（§1.3）を確認。malt が MySQL 8.0 の場合、MariaDB target mismatch として全 skip される。
 
 ### テンプレート編集が反映されない
 

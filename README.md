@@ -15,7 +15,7 @@ BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する*
 | BEAR Resource | `src/Resource/Page` に 147 page resource/support resource。Aura route から EC-CUBE route name ↔ URL path ↔ resource URI を接続する。 |
 | SQL | Ray.MediaQuery の 51 interface / 143 `#[DbQuery]` / 143 SQL file。PHP実クラスのPDO adapterではなく、interface + SQL file が永続化境界。 |
 | HTML | `var/templates` に 131 Twig template。storefront 全ページと in-scope admin editor waves を移植済み。 |
-| Tests | `docs/migration-status.md` のベースラインを正とする。非SQL suite はDBなしで動く。SQL suite は MariaDB/MySQL を必要とする。 |
+| Tests | `docs/migration-status.md` のベースラインを正とする。非SQL suite はDBなしで動く。SQL suite は malt DB を使う。現行 malt は MySQL 8.0 のため MariaDB target suite は skip される。 |
 
 ## What We Learned
 
@@ -197,7 +197,7 @@ vendor/bin/phpunit tests/Http/HttpHypermediaTest.php
 vendor/bin/phpunit tests/Resource/Sql
 ```
 
-各エントリポイントは既定の context を固定します（`bin/fake.php` → `cli-fake-hal-api-app`、`bin/page.php` → `cli-html-hal-app`）。`APP_CONTEXT` は一時的な上書き用の escape hatch にすぎません。SQL テストは [`sql/`](sql/) から用意したローカル MariaDB/MySQL を必要とします。
+各エントリポイントは既定の context を固定します（`bin/fake.php` → `cli-fake-hal-api-app`、`bin/page.php` → `cli-html-hal-app`）。`APP_CONTEXT` は一時的な上書き用の escape hatch にすぎません。SQL テストは [`malt.json`](malt.json) の DB を `malt start` で起動し、`DATABASE_URL` で接続します。
 
 ## References
 
