@@ -13,11 +13,6 @@ final class RenderDiffResiduals
     public static function isAdminListEnrichment(string $line): bool
     {
         if (in_array($line, [
-            '>',
-            '<span>',
-            '</span>',
-            '</h5>',
-            '</button>',
             '<div class="list">',
             '<div class="edit">',
             '<div class="row pe-2">',
@@ -27,9 +22,6 @@ final class RenderDiffResiduals
             '削除します',
             'キャンセル',
             '決定',
-            'S',
-            'company',
-            'foo',
         ], true)) {
             return true;
         }
@@ -44,8 +36,10 @@ final class RenderDiffResiduals
 
             // List-row/action markup emitted by current fake seeds.
             'id="ex-', 'sortable-item', 'tax_rule_list_item',
-            'list-group-item', 'btn-ec-', 'fa-', 'modal', 'DeleteModal',
-            'confirmModal', 'row justify-content', 'col-auto', 'col-',
+            'list-group-item', 'btn-ec-actionIcon', 'btn-ec-regular',
+            'btn-ec-conversion', 'fa-angle-', 'fa-bars', 'fa-times',
+            'fa-pencil-alt', 'modal', 'DeleteModal', 'confirmModal',
+            'row justify-content', 'col-auto', 'col-sm-', 'col-md-',
             'text-secondary', 'text-ec-gray', 'align-items-center',
             'mode-view', 'mode-edit', 'edit-form_', 'delete-form',
             '<td class="align-middle text-end"', 'title="削除">',
@@ -53,7 +47,9 @@ final class RenderDiffResiduals
 
             // Route names and fixture ids that differ while the EC-CUBE
             // reference fixtures are intentionally sparse.
-            '/admin_', '/admin/', 'bk-', 'cc-', 'cn-', 'del-', 'pay-',
+            'admin_product_', 'admin_customer_', 'admin_setting_',
+            'admin_content_', 'admin_store_', 'admin_order_',
+            'admin_system_', 'bk-', 'cc-', 'cn-', 'del-', 'pay-',
             'pg-', 'tax-', '0123456789abcdef', 'fedcba9876543210',
             'aaaaaaaa00000000', '10000000', '20000000',
 
@@ -64,8 +60,8 @@ final class RenderDiffResiduals
             'company.twig', 'foo.twig', 'Foo', '商品登録',
             'サンプル商品 A', 'Sample Product B', '管理画面用',
             '彩のジェラートセット', 'UI商品登録テスト', '送料無料',
-            '公開', '非公開', '廃止', '管理', 'テスト', 'プラグイン',
-            '￥', '〜', '%', '2023-10-01T00:00:00+09:00',
+            '公開', '非公開', '廃止', 'プラグイン',
+            '2023-10-01T00:00:00+09:00',
             '2024-04-01T00:00:00+09:00',
         ] as $fragment) {
             if (str_contains($line, $fragment)) {
@@ -75,6 +71,8 @@ final class RenderDiffResiduals
 
         return str_starts_with($line, '<input type="hidden" value=')
             || str_starts_with($line, '<input type="text" class="form-control"')
-            || str_starts_with($line, '<button class="btn ');
+            || str_starts_with($line, '<button class="btn btn-ec-actionIcon')
+            || str_starts_with($line, '<button class="btn btn-ec-regular')
+            || str_starts_with($line, '<button class="btn btn-ec-conversion');
     }
 }

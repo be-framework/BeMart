@@ -7,7 +7,7 @@ BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.Media
 ## 1. 何を実証したか
 
 - **意味論ファースト移植** — `alps.json` を契約（source of truth）とし、Be ドメイン・BEAR リソース・SQL・HTML はその投影として実装する。現行 `alps.json` は 532 descriptor / 207 transition descriptor を持ち、147 の振る舞い契約と 60 の `alps-route-gate` 契約に分かれる。
-- **Fake → Schema → Ray.MediaQuery の契約先行永続化** — まず Fake で契約を固定し、EC-CUBE スキーマ照合の後に同じ契約を満たす SQL を実装。SQL境界は PHP PDO adapter ではなく、51 interface / 142 `#[DbQuery]` / 142 SQL file の Ray.MediaQuery 境界へ切り替えた（[G-23](skills/G-23-hypermedia-test-is-migration-contract.md) / [G-24](skills/G-24-ray-media-query-boundary.md) / [G-25](skills/G-25-bdr-domain-noun-values.md)）。
+- **Fake → Schema → Ray.MediaQuery の契約先行永続化** — まず Fake で契約を固定し、EC-CUBE スキーマ照合の後に同じ契約を満たす SQL を実装。SQL境界は PHP PDO adapter ではなく、51 interface / 143 `#[DbQuery]` / 143 SQL file の Ray.MediaQuery 境界へ切り替えた（[G-23](skills/G-23-hypermedia-test-is-migration-contract.md) / [G-24](skills/G-24-ray-media-query-boundary.md) / [G-25](skills/G-25-bdr-domain-noun-values.md)）。
 - **ハイパーメディア＝移植契約** — リソースの link / form を移植契約として扱い、Final 直叩きの統合テストを書かない（[methodology/hypermedia-test-principle.md](methodology/hypermedia-test-principle.md)）。
 - **Context が実装を選ぶ** — アプリケーションコードは Fake/SQL・HTML/JSON・test/prod の別を知らない。選択は DI binding が行う。
 - **明示的境界** — ドメイン / リソース / HTML / SQL / compatibility adapter / production cutover の境界を隠さず、テストで境界契約を固定する。
@@ -18,9 +18,9 @@ BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.Media
 | レイヤ | 到達 |
 |---|---|
 | ALPS spec | 532 descriptor · 207 transition descriptor（147 behavioral + 60 route-gate） |
-| Be domain (`be/src`) | 147 Input · 148 Final · 154 Semantic · 14 Being |
+| Be domain (`be/src`) | 147 Input · 148 Final · 155 Semantic · 14 Being |
 | BEAR Resource (`src/Resource`) | 147 page/support resource files |
-| SQL persistence (`var/sql` + MediaQuery) | 51 interface · 142 `#[DbQuery]` · 142 SQL file |
+| SQL persistence (`var/sql` + MediaQuery) | 51 interface · 143 `#[DbQuery]` · 143 SQL file |
 | HTML (`var/templates`) | 131 Twig template（storefront + in-scope admin + shared blocks/frames） |
 | Test | `migration-status.md` のベースラインを正とする。SQL suite は MariaDB/MySQL 依存。 |
 
@@ -38,10 +38,10 @@ BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.Media
 
 実証として不要だが本番 EC-CUBE の完全代替には必要な差分は、[README](../README.md) の "Scope" 節と [`migration-status.md`](migration-status.md) §4 が正:
 
-- **ドメイン/互換 residual** — `doCreateOrder` の PurchaseFlow 完全再現、`doImportProductCsv` の意図的未移植、`doUpdateCsv` を消費する export fidelity、`doInstallPlugin` の plugin runtime。
-- **EC-CUBE 互換 fidelity 残差**（[#24](https://github.com/be-framework/be-mart/issues/24)）— PDF 完全一致 / CSV フォーマット / Mail / Template file 副作用 / MasterData adapter。Category CSV と Shipping CSV は永続化面まで実装済みだが、byte-exact な完全互換は別境界として残る。
+- **ドメイン/互換 residual** — `doCreateOrder` / `doCheckout` は PurchaseFlow + `dtb_order_item` snapshot writes まで実装済み。残るのは order-item SQL の MariaDB 10.11 target-engine 検証または `JSON_TABLE` なしの INSERT への置換、`doImportProductCsv` の意図的未移植、`doUpdateCsv` を消費する export fidelity、`doInstallPlugin` の plugin runtime。
+- **EC-CUBE 互換 fidelity 残差**（[#24](https://github.com/koriym/ec-cube-alps/issues/24)）— PDF 完全一致 / CSV フォーマット / Mail / Template file 副作用 / MasterData adapter。Category CSV と Shipping CSV は永続化面まで実装済みだが、byte-exact な完全互換は別境界として残る。
 - **HTML enrichment backlog** — Mypage dashboard / Favorite / Address / Contact
-- **設計上の out-of-scope** — プラグイン機構（[#3](https://github.com/be-framework/be-mart/issues/3)）/ Store・Plugin install・search サブツリー
+- **設計上の out-of-scope** — プラグイン機構（[#3](https://github.com/koriym/ec-cube-alps/issues/3)）/ Store・Plugin install・search サブツリー
 - **本番移行** — 本番 DB の bring-up / cutover
 
 これらが fix されれば BeMart は EC-CUBE 4.3 の完全な代替になる。差分は把握済みであり、未知ではない。

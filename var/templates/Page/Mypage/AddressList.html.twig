@@ -31,9 +31,9 @@
      gates the add-button vs the over-limit message. The render-diff
      stub feeds the same cap on both sides so the add-button branch is
      taken identically (a list under the cap).
-   - `csrf_token_for_anchor()` — EC-CUBE per-request CSRF widget on the
-     delete anchor; BeMart's html context has no CSRF widget, so the
-     attribute is absent. EC-CUBE-runtime only — enumerated as residual.
+   - `csrf_token_for_anchor()` — BeMart renders the token into the
+     `token-for-anchor` attribute expected by EC-CUBE's `function.js`;
+     the router normalizes the generated `_token` field to `csrfToken`.
    - `CustomerAddress.Pref` -> the body's `prefName` (the prefecture
      display name); a null `prefName` (unresolved master) renders empty.
 #}
@@ -70,7 +70,7 @@
                         <div class="ec-addressList">
                             {% for CustomerAddress in addresses %}
                                 <div class="ec-addressList__item">
-                                    <a class="ec-addressList__remove" href="{{ url('mypage_delivery_delete', { id : CustomerAddress.addressId }) }}" data-method="delete">
+                                    <a class="ec-addressList__remove" href="{{ url('mypage_delivery_delete', { id : CustomerAddress.addressId }) }}" token-for-anchor="{{ csrf_token_for_anchor() }}" data-method="delete">
                                         <div class="ec-icon">
                                             <img src="{{ asset('assets/icon/cross.svg') }}" alt="remove">
                                         </div>

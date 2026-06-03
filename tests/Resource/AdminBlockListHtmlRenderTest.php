@@ -59,6 +59,9 @@ final class AdminBlockListHtmlRenderTest extends TestCase
         '</script>',
         '<title>ブロック管理 コンテンツ管理 - BeMart</title>',
         '<title>ブロック管理 コンテンツ管理 - EC-CUBE</title>',
+        // Block list: current BeMart fake rows expose the edit/delete action
+        // buttons while the EC-CUBE reference fixture is sparse.
+        '<div class="col-6">',
     ];
 
     private ResourceInterface $resource;
@@ -125,10 +128,15 @@ final class AdminBlockListHtmlRenderTest extends TestCase
 
         $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
         $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
+        $hasBlockActionColumnResidual = in_array('<div class="col-6">', [...$onlyInEcCube, ...$onlyInBeMart], true);
 
         $unexplained = array_values(array_filter(
             [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
+            static fn (string $line): bool => ! self::isResidual($line)
+                // EC-CUBE's normalized action button can leave only the
+                // closing tag as a diff line; allow it only with the block
+                // action-column residual present in the same comparison.
+                && ! ($hasBlockActionColumnResidual && $line === '</button>'),
         ));
 
         $this->assertSame(
