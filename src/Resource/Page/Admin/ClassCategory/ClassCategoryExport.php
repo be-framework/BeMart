@@ -47,7 +47,11 @@ class ClassCategoryExport extends ResourceObject
         assert($final instanceof ClassCategoryCsvExported);
 
         $this->code = Code::OK;
-        $this->headers['Content-Type'] = 'text/csv; charset=Shift_JIS';
+        // The CsvDocument bytes are UTF-8 (built from PHP UTF-8 strings);
+        // advertise that actual charset — like the sibling CSV exporters
+        // (ProductCsv / CustomerCsv / Category\Csv / Order exports) — so
+        // Japanese 規格分類名 decode correctly instead of mis-declaring Shift_JIS.
+        $this->headers['Content-Type'] = 'text/csv; charset=UTF-8';
         $this->headers['Content-Disposition'] = $final->document->contentDisposition;
         $this->body = $final->document->content;
 

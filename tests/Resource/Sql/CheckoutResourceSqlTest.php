@@ -220,4 +220,82 @@ final class CheckoutResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
         $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
+
+    /**
+     * Seed a PROCESSING(8) pre-order PLUS the cart it was raised from
+     * (linked by pre_order_id), with two real product lines. The enriched
+     * {@see SqlOrderQuery::byPreOrderId} aggregates these cart lines into
+     * the OrderEntity's items, so FakePurchaseFlow computes a real subtotal
+     * and CheckoutCompleted can freeze the dtb_order_item snapshot.
+     *
+     * @return array{customerId: string}
+     */
+    private function seedPreOrderWithCart(int $deliveryFee = 500): array
+    {
+        $customerId = $this->insertCustomer();
+        $this->insertOrder([
+            'customer_id' => $customerId,
+            'pre_order_id' => self::PRE_ORDER_ID,
+            'order_status_id' => FinalizedOrderEntity::STATUS_PROCESSING,
+            'payment_id' => null,
+            'subtotal' => 0,
+            'total' => 0,
+            'payment_total' => 0,
+            'delivery_fee_total' => $deliveryFee,
+        ]);
+
+        $productA = $this->insertProduct(['name' => 'スナップ商品A', 'product_code' => 'SNAP-A', 'price02' => 1000]);
+        $productB = $this->insertProduct(['name' => 'スナップ商品B', 'product_code' => 'SNAP-B', 'price02' => 500]);
+
+        $cart = $this->insertCart([
+            'cart_key' => 'snap-cart_10',
+            'customer_id' => $customerId,
+            'pre_order_id' => self::PRE_ORDER_ID,
+            'delivery_fee_total' => $deliveryFee,
+        ]);
+        $this->insertCartItem($cart['id'], $this->defaultProductClassId($productA), ['price' => 1000, 'quantity' => 2]);
+        $this->insertCartItem($cart['id'], $this->defaultProductClassId($productB), ['price' => 500, 'quantity' => 1]);
+
+        return ['customerId' => (string) $customerId];
+    }
+
+    public function testOnPostCheckoutFreezesOrderItemSnapshot(): void
+    {
+        $seed = $this->seedPreOrderWithCart(deliveryFee: 500);
+        $this->rebindSession($seed['customerId']);
+
+        $ro = $this->resource->post('page://self/shopping/checkout', [
+            'preOrderId' => self::PRE_ORDER_ID,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+        // Totals are now derived from the cart lines: subtotal 2×1000 +
+        // 1×500 = 2500, tax 10% = 250, +delivery 500 → 3250.
+        $this->assertSame(2500, $ro->body['subtotal'] ?? null);
+        $this->assertSame(3250, $ro->body['total']);
+        $this->assertSame(3250, $ro->body['paymentTotal']);
+
+        // The dtb_order_item snapshot froze both lines under the finalized
+        // order, with the display name captured at purchase time.
+        $orderNo = $ro->body['orderNo'];
+        $stmt = $this->pdo->prepare(
+            'SELECT oi.product_code, oi.product_name, oi.price, oi.quantity '
+            . 'FROM dtb_order_item oi '
+            . 'INNER JOIN dtb_order o ON o.id = oi.order_id '
+            . 'WHERE o.order_no = :no ORDER BY oi.id ASC',
+        );
+        $stmt->execute([':no' => $orderNo]);
+        $rows = $stmt->fetchAll();
+
+        $this->assertCount(2, $rows);
+        $this->assertSame('SNAP-A', $rows[0]['product_code']);
+        $this->assertSame('スナップ商品A', $rows[0]['product_name']);
+        $this->assertSame(1000, (int) $rows[0]['price']);
+        $this->assertSame(2, (int) $rows[0]['quantity']);
+        $this->assertSame('SNAP-B', $rows[1]['product_code']);
+        $this->assertSame('スナップ商品B', $rows[1]['product_name']);
+        $this->assertSame(500, (int) $rows[1]['price']);
+        $this->assertSame(1, (int) $rows[1]['quantity']);
+    }
 }

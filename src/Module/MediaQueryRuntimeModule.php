@@ -27,6 +27,7 @@ use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderItemCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderHistoryQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\PageStorageInterface;
@@ -117,6 +118,7 @@ final class MediaQueryRuntimeModule extends AbstractModule
             NewsStorageInterface::class,
             OrderCommandInterface::class,
             OrderHistoryQueryInterface::class,
+            OrderItemCommandInterface::class,
             OrderItemQueryInterface::class,
             OrderQueryInterface::class,
             PageStorageInterface::class,
