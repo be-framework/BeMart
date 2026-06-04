@@ -37,7 +37,9 @@
 ## Published / Generated Files
 
 `index.md`（公開ブログ記事）/ `_config.yml`（Jekyll 設定）/ `alps.json.html` /
-`openapi.html` / `alps.svg` は公開 URL を持つ生成物・設定。手動移動禁止。
+`openapi.html` / `alps.svg` / `api/index.html` / `api/terms.html` /
+`api/openapi.json` / `api/llms.txt` は公開 URL を持つ
+生成物・設定。手動移動禁止。
 
 ## サブディレクトリ
 

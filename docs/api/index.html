@@ -1,0 +1,5137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>BeMart Page Resource API Doc</title>
+<link rel="profile" href="https://bearsunday.github.io/BEAR.ApiDoc/alps/apidoc.xml">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/3.0.1/github-markdown.min.css">
+<link rel="stylesheet" href="https://bearsunday.github.io/BEAR.ApiDoc/apidoc.css">
+</head>
+<body>
+<div class="markdown-body">
+<h1>BeMart Page Resource API Doc</h1>
+<p>BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and available fake data fixtures.</p>
+
+<h2>Endpoints</h2>
+<table>
+<thead>
+<tr>
+  <th>Path</th>
+  <th>Method</th>
+  <th>Params</th>
+  <th>Type</th>
+  <th>Description</th>
+  <th>Meta</th>
+  <th>Response</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-action-redirect">/action-redirect</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">returnTo</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">returnTo</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-cart">/cart</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">sessionPrefix</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="5" class="path-cell" id="path-contact">/contact</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goContactForm — show the contact form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
+logic. Anonymous-accessible (returns 200 regardless of session
+state). `csrfToken` carries the trusted reference
+{@see \CsrfToken::$token} issues — the HTML port
+renders it into the form&#039;s hidden `_token` input so the
+subsequent POST passes CSRF validation.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#contactName01" class="param alps-param" title="お問い合わせ姓">contactName01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">お問い合わせ姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="4"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#contactName02" class="param alps-param" title="お問い合わせ名">contactName02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">お問い合わせ名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#contactEmail" class="param alps-param" title="お問い合わせメール">contactEmail</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">お問い合わせメール</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#contactContents" class="param alps-param" title="お問い合わせ内容">contactContents</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">お問い合わせ内容</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="16" class="path-cell" id="path-entry">/entry</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goCustomerRegistration — show the customer registration
+form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
+logic. Anonymous-accessible (returns 200 regardless of session
+state). Fields mirror RegisterCustomerInput: 4 required + 11
+optional. In the dev/html fake-CSRF environment we expose the fake
+token into the hidden `_token` input so a real browser form submit
+can exercise the POST path instead of failing at the boundary.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="15" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: every form field is user-controlled input. Declared
+as taint sources so Psalm can trace them. Semantic value objects
+format-validate but do not universally escape — sinks downstream
+still need their own defense (bound params, HTML escape on render).</div></td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="15"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">パスワード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">セイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#companyName" class="param alps-param" title="会社名">companyName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会社名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#birth" class="param alps-param" title="生年月日">birth</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">生年月日</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#sex" class="param alps-param" title="性別">sex</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">性別</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#job" class="param alps-param" title="職業">job</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">職業</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-forgot-complete">/forgot-complete</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goForgotComplete — render the reset-mail-sent confirmation
+page scaffolding.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-forgot-password">/forgot-password</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goRequestPasswordReset — show the password-reset-request
+form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework, no domain logic.
+Anonymous-accessible (returns 200 regardless of session state).
+`csrfToken` stays `null` — the EventListener mirrors the Symfony
+token into the session for the subsequent POST (same as Login).</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-index">/index</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goTop — render the top page scaffolding.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-login">/login</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goLogin — show the login form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
+logic. Anonymous-accessible (returns 200 regardless of session
+state). The `csrfToken` body field carries the trusted reference
+{@see \CsrfToken::$token} issues, which the HTML port
+renders into the form&#039;s hidden `_csrf_token` input so the
+subsequent POST passes CSRF validation.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: every form field is user-controlled input.</div></td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">パスワード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-logout">/logout</td>
+  <td class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: the CSRF token is user-controlled input.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-mypage">/mypage</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">orderLimit</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-product">/product</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Phase B Slice 9: `$productCode` is user input (URI / query param);
+declared explicitly so Psalm taint analysis can trace it through
+Becoming into any downstream sink. The Be Semantic\ProductCode
+constructor format-validates but does not escape — sinks downstream
+still need to defend (e.g. bound parameters for SQL).</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="8" class="path-cell" id="path-products">/products</td>
+  <td rowspan="8" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goProductList — render the product-list page.</div><div class="method-desc">`name` is the EC-CUBE header search field. `nameKeyword` is accepted
+as a BeMart/API-friendly alias.</div></td>
+  <td><span class="param">name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="8"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">nameKeyword</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">limit</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">offset</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">category_id</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">pageno</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">disp_number</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">orderby</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-reset">/reset</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goResetPassword — show the new-password form scaffolding
+(EC-CUBE `Forgot/reset.twig`).</div><div class="method-desc">Pure form-info endpoint: no Be Framework, no domain logic.
+Anonymous-accessible (the reset-key check is the POST&#039;s job). The
+`resetKey` arrives as a query param on the emailed reset link and
+is carried into a hidden form field for the subsequent POST.
+`csrfToken` stays `null` — the EventListener mirrors the Symfony
+token into the session for the POST (same as Login).</div></td>
+  <td><a href="../alps.json.html#resetKey" class="param alps-param" title="リセットキー">resetKey</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">リセットキー</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#resetKey" class="param alps-param" title="リセットキー">resetKey</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">リセットキー</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">パスワード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-shopping">/shopping</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">sessionPrefix</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-unsupported-route">/unsupported-route</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">routeName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">routeName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">returnTo</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/action-redirect">/admin/action-redirect</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">returnTo</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">returnTo</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/authority-role">/admin/authority-role</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Phase 3 admin HTML Tier-2: render the authority-rule management
+screen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE
+also has a GET page for editing URL-deny rules. No persisted
+`dtb_authority_role` storage exists in BeMart yet, so this GET
+exposes the stable form body shape the HTML needs and flags the
+rule rows as static placeholders.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: both `loginId` and `authority` are admin-form input
+(loginId from the row selection, authority from a dropdown of
+mtb_authority values).</div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ログインID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#authority" class="param alps-param" title="権限">authority</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">権限</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="13" class="path-cell" id="path-admin/base-info">/admin/base-info</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 9ι: goBaseInfo — admin views the shop base info form data.</div><div class="method-desc">Setting/Shop Tier-2 also renders `shop_master.twig` from this body;
+the `form` key carries an {@see \AdminShopMasterForm} pre-filled
+with the dtb_base_info row for the HTML editor.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="12" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: every shop-info field is admin-form input.</div></td>
+  <td><a href="../alps.json.html#shopName" class="param alps-param" title="ショップ名">shopName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ショップ名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="12"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#shopKana" class="param alps-param" title="ショップ名フリガナ">shopKana</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ショップ名フリガナ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#shopNameEng" class="param alps-param" title="ショップ名英語">shopNameEng</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ショップ名英語</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#companyName" class="param alps-param" title="会社名">companyName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会社名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#businessHour" class="param alps-param" title="営業時間">businessHour</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">営業時間</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#shopEmail01" class="param alps-param" title="送信元/BCC メールアドレス">shopEmail01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">送信元/BCC メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#shopMessage" class="param alps-param" title="ショップメッセージ">shopMessage</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ショップメッセージ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="6" class="path-cell" id="path-admin/calendar">/admin/calendar</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">EC-CUBE doUpdateCalendar / doCreateCalendarHoliday.</div></td>
+  <td><span class="param">operation</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="4"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">title</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">holiday</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">calendarId</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">EC-CUBE doDeleteCalendarHoliday.</div></td>
+  <td><span class="param">calendarId</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="4" class="path-cell" id="path-admin/change-password">/admin/change-password</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the admin password-change form.</div><div class="method-desc">Admin-only: returns 403 for an anonymous request — the same
+firewall contract as the other admin pages, enforced at the
+resource layer (there is no Be Final to raise
+`UnauthorizedAdminAccessException`).</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Applies the admin&#039;s own password change (doChangePassword).</div><div class="method-desc">Failure mapping:
+- Invalid CSRF                         → 403 (interceptor)
+- SemanticVariableException            → 400
+- InvalidCurrentPasswordException      → 400
+- PasswordConfirmationMismatchException→ 400
+- PasswordPolicyViolationException     → 400
+- UnauthorizedAdminAccessException     → 403 (no admin session)
+- AdminNotFoundException               → 404 (stale session)</div></td>
+  <td><span class="param">currentPassword</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">changePasswordFirst</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">changePasswordSecond</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="15" class="path-cell" id="path-admin/create-customer">/admin/create-customer</td>
+  <td rowspan="15" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 5: every form field is user-controlled input — same taint
+discipline as the front-end entry. The admin AUTHZ check lives
+inside the first Being (AdminCustomerCreating), so this method
+can stay free of session lookups; we just map the exception.</div></td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="15"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">パスワード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">セイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#companyName" class="param alps-param" title="会社名">companyName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会社名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#birth" class="param alps-param" title="生年月日">birth</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">生年月日</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#sex" class="param alps-param" title="性別">sex</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">性別</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#job" class="param alps-param" title="職業">job</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">職業</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/csv-config">/admin/csv-config</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE CSV出力項目設定 — Setting/Shop Tier-2.</div><div class="method-desc">Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
+persists a submitted vector; this GET serves the editor body.</div></td>
+  <td><span class="param">id</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 9: admin-form input. The columns list is sanitized by Be /
+Semantic; the column entries themselves carry user-supplied
+column names so the taint mark applies to the whole payload.</div></td>
+  <td><a href="../alps.json.html#csvType" class="param alps-param" title="CSV種別">csvType</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">CSV種別</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">columns</span><span class="req">*</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/customer">/admin/customer</td>
+  <td rowspan="3" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 5: the email comes from the admin UI (typed input or query
+string), so it is user-controlled — same taint discipline as the
+customer-side LoginResource.</div></td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#customerId" class="param alps-param" title="会員ID">customerId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会員ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">id</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/customer-csv">/admin/customer-csv</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/customer-delivery-edit">/admin/customer-delivery-edit</td>
+  <td rowspan="2" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">The customer id comes from the admin UI (route param), so it is
+user-controlled — same taint discipline as the sibling
+{@see Customer} resource.</div></td>
+  <td><a href="../alps.json.html#customerId" class="param alps-param" title="会員ID">customerId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会員ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">id</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/customer-list">/admin/customer-list</td>
+  <td rowspan="3" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 5: filter fields are admin-form input — taint discipline
+mirrors the Wave 4 admin login.</div></td>
+  <td><span class="param">nameKeyword</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">emailKeyword</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">limit</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/delete-customer">/admin/delete-customer</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 6: customerId is user-controlled input from the admin UI
+(admin clicks a customer-list row, the row&#039;s customerId feeds
+this form). Same taint discipline as goCustomer&#039;s email.</div></td>
+  <td><a href="../alps.json.html#customerId" class="param alps-param" title="会員ID">customerId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会員ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/empty-page">/admin/empty-page</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the empty admin extension-slot page.</div><div class="method-desc">Admin-only: returns 403 for an anonymous request — the same
+firewall contract as the other admin pages.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/index">/admin/index</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the admin dashboard scaffolding.</div><div class="method-desc">Admin-only: returns 403 for an anonymous (not-logged-in-as-admin)
+request — the same firewall contract as the News / Customer admin
+pages, enforced here at the resource layer because there is no Be
+Final to raise `UnauthorizedAdminAccessException`.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/log">/admin/log</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/login">/admin/login</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Show the admin login form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
+logic. Anonymous-accessible (returns 200 regardless of session
+state) — the admin firewall guard is on the POST. The `csrfToken`
+body field carries the trusted reference {@see \CsrfToken::$token}
+issues, which the HTML port renders into the form&#039;s hidden
+`_csrf_token` input so the subsequent POST passes CSRF validation.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 4 / Phase B Slice 9: every form field is user-controlled
+input — same taint discipline as the customer login.</div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ログインID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">パスワード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/login-history">/admin/login-history</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">limit</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/logout">/admin/logout</td>
+  <td class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 4 / Phase B Slice 9: the CSRF token is user-controlled
+input — same taint discipline as the customer logout.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="4" class="path-cell" id="path-admin/mail-template">/admin/mail-template</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 9ι: goMailTemplateList — admin lists every mail template.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#mailTemplateId" class="param alps-param" title="メールテンプレートID">mailTemplateId</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">メールテンプレートID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#mailSubject" class="param alps-param" title="メール件名">mailSubject</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メール件名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">EC-CUBE doDeleteMailTemplate.</div><div class="method-desc">The mail-template master still needs a full file-backed delete in
+a later adapter pass; this surface is intentionally narrow and
+concrete so the legacy route reaches a Resource with CSRF/AUTHZ
+semantics instead of generic ActionRedirect.</div></td>
+  <td><a href="../alps.json.html#mailTemplateId" class="param alps-param" title="メールテンプレートID">mailTemplateId</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">メールテンプレートID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/master-data">/admin/master-data</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">masterType</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Selects which master to view (doSelectMasterData). ALPS marks it
+`idempotent` → PUT; returns the chosen master&#039;s rows.</div></td>
+  <td><span class="param">masterType</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/master-data-edit">/admin/master-data-edit</td>
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><span class="param">masterType</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">rows</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="8" class="path-cell" id="path-admin/member">/admin/member</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 8: the loginId comes from the admin UI (typed input or
+query string) — user-controlled.</div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ログインID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: all form fields are user-controlled. The admin AUTHZ
+check lives inside the first Being (MemberCreating), so this
+method just maps the exceptions.</div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ログインID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="4"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">パスワード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">name</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#authority" class="param alps-param" title="権限">authority</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">権限</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Wave 8: doUpdateMember — edits `name` only. The other admin
+fields (authority, work, passwordHash) have their own dedicated
+transitions / are out of scope for Phase 1. EC-CUBE 4.3
+dtb_member has no email column, so no mailAddress field is
+accepted.</div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ログインID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">Wave 8: doDeleteMember — soft-delete (work=0). Idempotent
+replay returns 200 with `alreadyDeleted=true`. Self-target
+raises {@see InsufficientAuthorityException} → 403.</div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ログインID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/member-list">/admin/member-list</td>
+  <td rowspan="3" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 8: filter / paging knobs are admin-form input. Same taint
+discipline as the customer-list and order-list variants.</div></td>
+  <td><span class="param">nameKeyword</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">limit</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">offset</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="5" class="path-cell" id="path-admin/order">/admin/order</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 7: orderNo comes from the admin UI (click on an order-list
+row, or pasted into the URL).</div></td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="4" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Wave 7: every editable field is admin-form input. The orderNo
+selector is also admin-controlled. Same taint discipline as the
+Wave 5 / Wave 6 admin resources.</div></td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="4"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#discount" class="param alps-param" title="値引き額">discount</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">値引き額</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#charge" class="param alps-param" title="手数料">charge</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">手数料</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#usePoint" class="param alps-param" title="使用ポイント">usePoint</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">使用ポイント</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/order-list">/admin/order-list</td>
+  <td rowspan="2" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 7: pagination knobs are admin-form input. Same taint
+discipline as Wave 5 / Wave 6 admin resources.</div></td>
+  <td><span class="param">limit</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">offset</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="5" class="path-cell" id="path-admin/order-status">/admin/order-status</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE 受注対応状況設定 — Setting/Shop Tier-2.</div><div class="method-desc">Thin GET renderer for `Setting/Shop/order_status.twig`. BeMart
+has a per-order status-change transition on POST, but not yet a
+master-data transition for editing status labels/colors.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">EC-CUBE doUpdateOrderStatusList — settings-side status list update.</div><div class="method-desc">This is intentionally separate from {@see \onPost()}, which
+updates one order&#039;s workflow status. The settings screen submits
+the master-list shape; this wave exposes a concrete CSRF/AUTHZ
+surface and returns the accepted payload count without claiming
+full EC-CUBE master-data persistence yet.</div></td>
+  <td><span class="param">orderStatuses</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">orderStatusRows</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 7: both `orderNo` and `orderStatus` are admin-form input
+(orderNo selected from the order-list row, orderStatus picked
+from a dropdown of dtb_order_status values).</div></td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#orderStatus" class="param alps-param" title="受注ステータス">orderStatus</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">受注ステータス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/plugin">/admin/plugin</td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">Wave 8: pluginCode is admin-form input (selected from the grid).</div></td>
+  <td><a href="../alps.json.html#pluginCode" class="param alps-param" title="プラグインコード">pluginCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">プラグインコード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/plugin-disable">/admin/plugin-disable</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#pluginCode" class="param alps-param" title="プラグインコード">pluginCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">プラグインコード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/plugin-enable">/admin/plugin-enable</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#pluginCode" class="param alps-param" title="プラグインコード">pluginCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">プラグインコード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="4" class="path-cell" id="path-admin/plugin-list">/admin/plugin-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: every form field is admin-form input.</div></td>
+  <td><a href="../alps.json.html#pluginCode" class="param alps-param" title="プラグインコード">pluginCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">プラグインコード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pluginName" class="param alps-param" title="プラグイン名">pluginName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">プラグイン名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pluginVersion" class="param alps-param" title="プラグインバージョン">pluginVersion</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">プラグインバージョン</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="18" class="path-cell" id="path-admin/product">/admin/product</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">goProduct (admin variant) — fetch full product detail.</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="8" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">doCreateProduct — create a new product.</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="8"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#productName" class="param alps-param" title="商品名">productName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#price02" class="param alps-param" title="販売価格">price02</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">販売価格</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#stock" class="param alps-param" title="在庫数">stock</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">在庫数</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#productStatus" class="param alps-param" title="商品ステータス">productStatus</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">商品ステータス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">description</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#searchWord" class="param alps-param" title="検索ワード">searchWord</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">検索ワード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">note</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="8" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">doUpdateProduct — edit an existing product (partial overwrite).</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="8"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#productName" class="param alps-param" title="商品名">productName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#price02" class="param alps-param" title="販売価格">price02</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">販売価格</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#stock" class="param alps-param" title="在庫数">stock</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">在庫数</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#productStatus" class="param alps-param" title="商品ステータス">productStatus</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">商品ステータス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">description</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#searchWord" class="param alps-param" title="検索ワード">searchWord</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">検索ワード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">note</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">doDeleteProduct — soft-delete (status=3). Idempotent replay
+surfaces `alreadyDeleted=true`.</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/product-bulk-status">/admin/product-bulk-status</td>
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">productCodes</span><span class="req">*</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#productStatus" class="param alps-param" title="商品ステータス">productStatus</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">商品ステータス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/product-copy">/admin/product-copy</td>
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">newProductCode</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/product-csv">/admin/product-csv</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/product-list">/admin/product-list</td>
+  <td rowspan="3" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">nameKeyword</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">limit</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">offset</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/product-new">/admin/product-new</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="6" class="path-cell" id="path-admin/security">/admin/security</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="5" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Updates the security settings (doUpdateSecurity). ALPS marks this
+`idempotent` → PUT.</div><div class="method-desc">Failure mapping:
+- Invalid CSRF                     → 403 (interceptor)
+- SemanticVariableException        → 400
+- UnauthorizedAdminAccessException → 403 (no admin session)</div></td>
+  <td><span class="param">adminAllowHosts</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="5"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">adminDenyHosts</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">frontAllowHosts</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">frontDenyHosts</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trustedHosts</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/sort-no-move">/admin/sort-no-move</td>
+  <td rowspan="3" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><span class="param">masterType</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">rowId</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#sortNo" class="param alps-param" title="表示順">sortNo</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">表示順</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/system">/admin/system</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/toggle-visible">/admin/toggle-visible</td>
+  <td rowspan="3" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><span class="param">masterType</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">rowId</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">visible</span><span class="req">*</span></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/trade-law">/admin/trade-law</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 9ι: goTradeLawList — admin views the current TradeLaw body.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#tradeLawBody" class="param alps-param" title="特定商取引法本文">tradeLawBody</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">特定商取引法本文</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/two-factor-auth">/admin/two-factor-auth</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the admin 2FA challenge form.</div><div class="method-desc">Anonymous-accessible (login-context): returns 200 regardless of
+session state — the admin firewall guard is downstream of a
+successful challenge.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Verifies the submitted TOTP code (doVerifyTwoFactorAuth).</div><div class="method-desc">Login-context: no admin-firewall guard (the session is elevated by
+the adapter only on success). The candidate `loginId` is
+round-tripped from the pre-auth step.
+
+Failure mapping:
+  - Invalid CSRF                  → 403 (interceptor)
+  - SemanticVariableException     → 400 (malformed code)
+  - TwoFactorAuthFailedException  → 400 (code mismatch)</div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ログインID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">deviceToken</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/two-factor-auth-edit">/admin/two-factor-auth-edit</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="4" class="path-cell" id="path-admin/two-factor-auth-set">/admin/two-factor-auth-set</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the admin 2FA device-setup form.</div><div class="method-desc">Anonymous-accessible (login-context): returns 200 regardless of
+session state.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Registers the TOTP device after confirming the first code
+(doSetTwoFactorAuth). ALPS marks this `idempotent` → PUT.</div><div class="method-desc">SECURITY RESIDUAL (tracked — migration-status §4 &quot;Outstanding work&quot;
+item 8, the Hard-ActionRedirect / 認証 cutover residual): this page is
+reached PRE-AUTH (anonymous, login-context), so `$loginId` and the
+candidate `$authKey` secret are taken from the request body rather than
+a server-side pre-auth challenge. `enable()` overwrites the secret for
+`$loginId` with no ownership check
+({@see \MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface::enable}),
+so a caller who passes another admin&#039;s `$loginId` could replace that
+admin&#039;s 2FA device. The production cutover binds a server-generated
+secret + the pending login identity into a pre-auth session/challenge
+state at credential-verification time and consumes it here; until then
+the route relies on CSRF + the documented contract. Do NOT widen this
+surface (e.g. expose it post-auth for arbitrary `$loginId`) before the
+challenge state lands.
+
+Failure mapping:
+  - Invalid CSRF                  → 403 (interceptor)
+  - SemanticVariableException     → 400 (malformed code)
+  - TwoFactorAuthFailedException  → 400 (first code mismatch)</div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ログインID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">authKey</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">deviceToken</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/unsupported-route">/admin/unsupported-route</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">routeName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">routeName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">returnTo</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="9" class="path-cell" id="path-cart/item">/cart/item</td>
+  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: all three params arrive from the HTTP request body
+and are user-controlled. Declared as taint sources so Psalm can
+trace them through Becoming into any downstream sink (Phase 2 will
+surface real flows once Fake Reasons are swapped for DB-backed
+implementations).</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="4"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#quantity" class="param alps-param" title="数量">quantity</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">数量</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">sessionPrefix</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">operation</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">EC-CUBE doUpdateCartItemQuantity — replace an item&#039;s quantity
+(Pilot 10). Idempotent (PUT semantics), CSRF-guarded.</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#quantity" class="param alps-param" title="数量">quantity</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">数量</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">sessionPrefix</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">EC-CUBE doRemoveCartItem — remove an item from the cart (Pilot 11).</div><div class="method-desc">Idempotent (DELETE), CSRF-guarded.</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">sessionPrefix</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-contact/complete">/contact/complete</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#ticketId" class="param alps-param" title="受付番号">ticketId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">受付番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-contact/confirm">/contact/confirm</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-entry/activate">/entry/activate</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE doActivateCustomer landing — the email-verification-complete
+screen. Pure renderer: the body surfaces only the screen shape + the
+outbound `goTop` transition (ALPS `#CustomerActivationComplete`).</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#secretKey" class="param alps-param" title="認証キー">secretKey</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">認証キー</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-entry/complete">/entry/complete</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-entry/confirm">/entry/confirm</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-help/about">/help/about</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-help/agreement">/help/agreement</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-help/guide">/help/guide</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-help/privacy">/help/privacy</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-help/trade-law">/help/trade-law</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="13" class="path-cell" id="path-mypage/address">/mypage/address</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE お届け先情報編集 — show the address add/edit form.</div><div class="method-desc">Pure form-info endpoint: no Be Framework, no domain logic. Maps
+EC-CUBE&#039;s `mypage_delivery_new` (no `addressId`) and
+`mypage_delivery_edit` (`addressId` given) screens. AUTHN +
+ownership AUTHZ are enforced here directly (mirrors Withdraw::onGet
+— a Resource-level guard on a no-domain form page):
+
+  - no session                    → 401
+  - addressId of an unknown row    → 404
+  - addressId owned by another     → 403
+
+Phase 3 — HTML FORM page. The resource builds an {@see \AddressForm}
+(Ray.WebFormModule AbstractForm) and exposes it as `body[&#039;form&#039;]`.
+For the edit screen the form is pre-populated from the stored
+address; for the new screen it is empty. VALIDATION AUTHORITY
+STAYS WITH the Be Framework Becoming chain (onPost). The JSON
+contexts ignore `body[&#039;form&#039;]`.</div></td>
+  <td><a href="../alps.json.html#addressId" class="param alps-param" title="配送先住所ID">addressId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送先住所ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="11" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#addressId" class="param alps-param" title="配送先住所ID">addressId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送先住所ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="11"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">セイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#companyName" class="param alps-param" title="会社名">companyName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会社名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#addressId" class="param alps-param" title="配送先住所ID">addressId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送先住所ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="11" class="path-cell" id="path-mypage/address-list">/mypage/address-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="10" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="10"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">セイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#companyName" class="param alps-param" title="会社名">companyName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会社名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="12" class="path-cell" id="path-mypage/change">/mypage/change</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">goMypageChange — show the change-customer-info form pre-populated
+with the logged-in customer&#039;s current values.</div><div class="method-desc">Safe read. No CSRF (read-only). AUTHN in the Be layer maps null
+session → 401.
+
+Phase 3 — HTML FORM page. The resource builds a {@see \ChangeForm}
+(Ray.WebFormModule AbstractForm), pre-populates it with the
+fetched profile, and exposes it as `body[&#039;form&#039;]` so the HTML port
+renders real `&lt;input&gt;`s via `{{ form.input(...) }}`. VALIDATION
+AUTHORITY STAYS WITH the Be Framework Becoming chain (onPost). The
+JSON contexts ignore `body[&#039;form&#039;]`; the flat profile keys stay on
+`body` for the JSON-context tests.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="11" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="11"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">セイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#companyName" class="param alps-param" title="会社名">companyName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会社名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-mypage/change-complete">/mypage/change-complete</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-mypage/favorite">/mypage/favorite</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">EC-CUBE doRemoveFavorite — お気に入りから削除 (idempotent inverse
+of Pilot 13). DELETE is idempotent (ALPS type=idempotent):
+re-removing an already-absent item returns 200 with
+alreadyAbsent=true rather than 404. The flag lets the UI
+distinguish first-remove from re-remove without leaking the
+underlying state.</div><div class="method-desc">Unlike onPost, we do NOT validate that productCode resolves to
+a real product — DELETE removes a stored row, not a product.</div></td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-mypage/favorite-list">/mypage/favorite-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-mypage/history">/mypage/history</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-mypage/order-history">/mypage/order-history</td>
+  <td rowspan="2" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">historyLimit</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">offset</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-mypage/reorder">/mypage/reorder</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-mypage/withdraw">/mypage/withdraw</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goMypageWithdraw — show the withdrawal confirmation page.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
+logic. Authenticated (mirrors Pilot 8 behavior): returns 401
+directly from the Resource when no session is present.
+
+Surfaces the current customer&#039;s email + name01/name02 so the
+confirm page can render &quot;退会されるアカウント: name01 name02
+(email)&quot;. `csrfToken` body field stays `null` — EventListener
+mirrors the Symfony token into the session for the subsequent
+POST.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">sessionPrefix</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-mypage/withdraw-complete">/mypage/withdraw-complete</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-mypage/withdraw-confirm">/mypage/withdraw-confirm</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-shopping/checkout">/shopping/checkout</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: the domain parameter arrives from the HTTP request body.</div><div class="method-desc">`$preOrderId` is a 40-hex-char id that PreOrderId Semantic
+format-validates. The CSRF boundary token is enforced declaratively by
+the CsrfProtected attribute.</div></td>
+  <td><a href="../alps.json.html#preOrderId" class="param alps-param" title="仮注文ID">preOrderId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">仮注文ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-shopping/complete">/shopping/complete</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-shopping/confirm">/shopping/confirm</td>
+  <td rowspan="2" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#preOrderId" class="param alps-param" title="仮注文ID">preOrderId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">仮注文ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">paymentMethodId</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-shopping/error">/shopping/error</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-shopping/login">/shopping/login</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="11" class="path-cell" id="path-shopping/non-member">/shopping/non-member</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goShoppingNonMember — show the guest-info entry form.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
+logic. Anonymous-accessible (returns 200 regardless of session
+state). Fields mirror SubmitNonMemberInput. `csrfToken` body
+field stays `null` for the same reason described on Login::onGet
+— EventListener mirrors the Symfony token into the session for
+the subsequent POST.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="10" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">EC-CUBE doSubmitNonMember — accept guest shipping info and return
+the synthesised preOrderId.</div><div class="method-desc">Phase B Slice 9: every guest form field is user-controlled input.
+Declared as taint sources so Psalm can trace them downstream.
+Semantic value objects format-validate but do not universally
+escape — sinks downstream remain responsible for their own
+defence (bound params, HTML escape on render).</div></td>
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="10"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">セイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-shopping/shipping">/shopping/shipping</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">EC-CUBE doSelectShippingAddress — accept the selected address-book row.</div><div class="method-desc">This closes the former ActionRedirect gap for the customer checkout
+route. The current shopping renderer does not yet hydrate the address
+radio list, so the resource records the selected id in the response
+surface and returns to the shopping page. The full pre-order shipping
+persistence is intentionally left to the existing checkout enrichment
+backlog; this method makes the route executable without a placeholder.</div></td>
+  <td><span class="param">shippingAddressId</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="11" class="path-cell" id="path-shopping/shipping-edit">/shopping/shipping-edit</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="10" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">EC-CUBE doUpdateShippingAddress — accept the edited shipping address.</div><div class="method-desc">The BeMart checkout page still keeps the richer pre-order shipping
+persistence as a later enrichment. This method removes the former
+ActionRedirect placeholder and gives the submitted address a concrete
+Resource surface while returning the user to the main shopping page.</div></td>
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="10"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">セイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#companyName" class="param alps-param" title="会社名">companyName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会社名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-shopping/shipping-multiple">/shopping/shipping-multiple</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">EC-CUBE doSelectShippingAddress — accept the multi-shipping allocation.</div><div class="method-desc">The current page exposes the allocation form shape but has no cart-item
+rows yet. The POST endpoint is still concrete: CSRF is enforced, the
+transition is acknowledged, and the user returns to the shopping page.</div></td>
+  <td><span class="param">allocations</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="11" class="path-cell" id="path-shopping/shipping-multiple-edit">/shopping/shipping-multiple-edit</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="10" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">EC-CUBE doUpdateShippingAddress — add/update an address for the
+multi-destination checkout branch.</div><div class="method-desc">This mirrors {@see \ShippingEdit::onPost()} but returns to the
+multi-shipping screen instead of the main shopping screen.</div></td>
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="10"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">セイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メイ</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#companyName" class="param alps-param" title="会社名">companyName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会社名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="5" class="path-cell" id="path-admin/block/block">/admin/block/block</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the block edit form (new-block case).</div><div class="method-desc">The JSON contexts (`app`, `prod`, `test`) ignore `body[&#039;form&#039;]`.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#blockId" class="param alps-param" title="ブロックID">blockId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロックID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#blockName" class="param alps-param" title="ブロック名">blockName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロック名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#blockFileName" class="param alps-param" title="ブロックファイル名">blockFileName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロックファイル名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#blockId" class="param alps-param" title="ブロックID">blockId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロックID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/block/block-list">/admin/block/block-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#blockName" class="param alps-param" title="ブロック名">blockName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロック名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#blockFileName" class="param alps-param" title="ブロックファイル名">blockFileName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロックファイル名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="6" class="path-cell" id="path-admin/category/category">/admin/category/category</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#categoryId" class="param alps-param" title="カテゴリID">categoryId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">カテゴリID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="4" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#categoryId" class="param alps-param" title="カテゴリID">categoryId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">カテゴリID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="4"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#categoryName" class="param alps-param" title="カテゴリ名">categoryName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">カテゴリ名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#sortNo" class="param alps-param" title="表示順">sortNo</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">表示順</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">parentId</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#categoryId" class="param alps-param" title="カテゴリID">categoryId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">カテゴリID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="4" class="path-cell" id="path-admin/category/category-list">/admin/category/category-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#categoryName" class="param alps-param" title="カテゴリ名">categoryName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">カテゴリ名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#sortNo" class="param alps-param" title="表示順">sortNo</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">表示順</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">parentId</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/category/csv">/admin/category/csv</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">csv</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/category/edit">/admin/category/edit</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#categoryId" class="param alps-param" title="カテゴリID">categoryId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">カテゴリID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/class-category/class-category">/admin/class-category/class-category</td>
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#classCategoryId" class="param alps-param" title="規格分類ID">classCategoryId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格分類ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#classCategoryName" class="param alps-param" title="規格分類名">classCategoryName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格分類名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#classCategoryId" class="param alps-param" title="規格分類ID">classCategoryId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格分類ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/class-category/class-category-export">/admin/class-category/class-category-export</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#classNameId" class="param alps-param" title="規格名ID">classNameId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格名ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/class-category/class-category-list">/admin/class-category/class-category-list</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#classNameId" class="param alps-param" title="規格名ID">classNameId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格名ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#classNameId" class="param alps-param" title="規格名ID">classNameId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格名ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#classCategoryName" class="param alps-param" title="規格分類名">classCategoryName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格分類名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/class-name/class-name">/admin/class-name/class-name</td>
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#classNameId" class="param alps-param" title="規格名ID">classNameId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格名ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#classNameLabel" class="param alps-param" title="規格名">classNameLabel</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#classNameId" class="param alps-param" title="規格名ID">classNameId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格名ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/class-name/class-name-export">/admin/class-name/class-name-export</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/class-name/class-name-list">/admin/class-name/class-name-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#classNameLabel" class="param alps-param" title="規格名">classNameLabel</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">規格名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/content/cache">/admin/content/cache</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Clears the application cache (doClearCache).</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/content/css">/admin/content/css</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Saves the customize CSS (doUpdateContentCss). ALPS idempotent → PUT.</div></td>
+  <td><span class="param">css</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/content/file-manager">/admin/content/file-manager</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/content/js">/admin/content/js</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Saves the customize JS (doUpdateContentJs). ALPS idempotent → PUT.</div></td>
+  <td><span class="param">js</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/content/maintenance">/admin/content/maintenance</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Toggles maintenance mode to an explicit state (doToggleMaintenance).</div><div class="method-desc">ALPS marks it `idempotent` → PUT.</div></td>
+  <td><span class="param">enabled</span><span class="req">*</span></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/customer/resend-activation-mail">/admin/customer/resend-activation-mail</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="5" class="path-cell" id="path-admin/delivery/delivery">/admin/delivery/delivery</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE 配送方法設定（編集） — Setting/Shop Tier-2.</div><div class="method-desc">Thin GET renderer for `Setting/Shop/delivery_edit.twig`. An empty
+`$deliveryId` renders a blank &quot;new delivery&quot; form; a known id
+pre-fills the editor; an unknown id is 404. The delivery-master
+list doubles as the AUTHZ gate — no admin session → 403.</div></td>
+  <td><a href="../alps.json.html#deliveryId" class="param alps-param" title="配送方法ID">deliveryId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送方法ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#deliveryId" class="param alps-param" title="配送方法ID">deliveryId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送方法ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#deliveryName" class="param alps-param" title="配送業者名">deliveryName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送業者名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">visible</span></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#deliveryId" class="param alps-param" title="配送方法ID">deliveryId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送方法ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/delivery/delivery-list">/admin/delivery/delivery-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#deliveryName" class="param alps-param" title="配送業者名">deliveryName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送業者名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">visible</span></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/layout/layout">/admin/layout/layout</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the layout editor form (new-layout case).</div><div class="method-desc">The JSON contexts (`app`, `prod`, `test`) ignore `body[&#039;form&#039;]`.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#layoutId" class="param alps-param" title="レイアウトID">layoutId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">レイアウトID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#layoutName" class="param alps-param" title="レイアウト名">layoutName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">レイアウト名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/layout/layout-list">/admin/layout/layout-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="8" class="path-cell" id="path-admin/news/news">/admin/news/news</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#newsId" class="param alps-param" title="ニュースID">newsId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ニュースID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="6" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#newsId" class="param alps-param" title="ニュースID">newsId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ニュースID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="6"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#newsTitle" class="param alps-param" title="ニュースタイトル">newsTitle</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ニュースタイトル</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#newsDescription" class="param alps-param" title="ニュース本文">newsDescription</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ニュース本文</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#newsUrl" class="param alps-param" title="外部URL">newsUrl</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">外部URL</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#publishDate" class="param alps-param" title="公開日">publishDate</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">公開日</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#linkMethod" class="param alps-param" title="新規ウィンドウで開く">linkMethod</a></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc">新規ウィンドウで開く</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#newsId" class="param alps-param" title="ニュースID">newsId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ニュースID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="6" class="path-cell" id="path-admin/news/news-list">/admin/news/news-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="5" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#newsTitle" class="param alps-param" title="ニュースタイトル">newsTitle</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ニュースタイトル</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="5"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#publishDate" class="param alps-param" title="公開日">publishDate</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">公開日</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#newsDescription" class="param alps-param" title="ニュース本文">newsDescription</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ニュース本文</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#newsUrl" class="param alps-param" title="外部URL">newsUrl</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">外部URL</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#linkMethod" class="param alps-param" title="新規ウィンドウで開く">linkMethod</a></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc">新規ウィンドウで開く</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/order/bulk-delete">/admin/order/bulk-delete</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">orderNos</span><span class="req">*</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="6" class="path-cell" id="path-admin/order/create">/admin/order/create</td>
+  <td rowspan="6" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#customerId" class="param alps-param" title="会員ID">customerId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">会員ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="6"></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">paymentMethodId</span><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">orderItems</span><span class="req">*</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#deliveryFeeTotal" class="param alps-param" title="送料合計">deliveryFeeTotal</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">送料合計</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#charge" class="param alps-param" title="手数料">charge</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">手数料</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#discount" class="param alps-param" title="値引き額">discount</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">値引き額</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/order/edit">/admin/order/edit</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/order/export-order">/admin/order/export-order</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/order/export-order-pdf">/admin/order/export-order-pdf</td>
+  <td rowspan="2" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><span class="param">orderNos</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/order/export-shipping">/admin/order/export-shipping</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/order/import-shipping">/admin/order/import-shipping</td>
+  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE 出荷CSV登録 — Order Tier-2.</div><div class="method-desc">Thin GET renderer for `admin/Order/csv_shipping.twig` — the
+shipping-CSV upload form. The POST below accepts the uploaded
+CSV; this GET serves the upload-form shell. AUTHZ is a direct
+admin-session check (Pattern B — no Be transition is invoked on
+the GET path); a non-admin firewall is refused with 403.</div></td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><span class="param">csv</span><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/order/mail-confirm">/admin/order/mail-confirm</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/order/order-pdf">/admin/order/order-pdf</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/order/send-mail">/admin/order/send-mail</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE 受注メール送信 — Order Tier-2.</div><div class="method-desc">Thin GET renderer for `admin/Order/mail.twig` — the order-mail
+composition screen. The POST below re-sends the confirmation
+mail; this GET serves the composition form keyed by the order.
+AUTHZ is a direct admin-session check (Pattern B — no Be
+transition is invoked on the GET path). The composition fields
+render blank so the page is faithful with empty JSON-backed fake storage.</div></td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="11" class="path-cell" id="path-admin/order/shipping-address">/admin/order/shipping-address</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE 出荷登録 / 配送先編集 — Order Tier-2.</div><div class="method-desc">Thin GET renderer for `admin/Order/shipping.twig` (~709 lines).
+The POST / PUT methods below carry the address-book-pick and the
+explicit-overwrite transitions; this GET serves the editor shell
+keyed by the order being shipped. BeMart has no Be transition to
+READ an order&#039;s current shipping target, so the editor renders a
+blank shipping form — the render-smoke test exercises this with
+empty JSON-backed fake storage. AUTHZ is a direct admin-session check
+(Pattern B — no Be transition is invoked on the GET path).</div></td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">doSelectShippingAddress — pick an address-book row for the order.</div></td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addressId" class="param alps-param" title="配送先住所ID">addressId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">配送先住所ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="8" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">doUpdateShippingAddress — overwrite the order&#039;s shipping fields.</div></td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="8"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">姓</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">郵便番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a><span class="req">*</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">都道府県</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">市区町村</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">番地・建物名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">電話番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/order/shipping-notify-mail">/admin/order/shipping-notify-mail</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/order/tracking-number">/admin/order/tracking-number</td>
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#orderNo" class="param alps-param" title="注文番号">orderNo</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">注文番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#trackingNumber" class="param alps-param" title="追跡番号">trackingNumber</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">追跡番号</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="6" class="path-cell" id="path-admin/page/page">/admin/page/page</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#pageId" class="param alps-param" title="ページID">pageId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ページID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="4" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#pageId" class="param alps-param" title="ページID">pageId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ページID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="4"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pageName" class="param alps-param" title="ページ名">pageName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ページ名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pageUrl" class="param alps-param" title="ページURL">pageUrl</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ページURL</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pageFileName" class="param alps-param" title="テンプレートファイル名">pageFileName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレートファイル名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#pageId" class="param alps-param" title="ページID">pageId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ページID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="4" class="path-cell" id="path-admin/page/page-list">/admin/page/page-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#pageName" class="param alps-param" title="ページ名">pageName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ページ名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pageUrl" class="param alps-param" title="ページURL">pageUrl</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ページURL</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#pageFileName" class="param alps-param" title="テンプレートファイル名">pageFileName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレートファイル名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="8" class="path-cell" id="path-admin/payment/payment">/admin/payment/payment</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE 支払方法設定（編集） — Setting/Shop Tier-2.</div><div class="method-desc">Thin GET renderer for `Setting/Shop/payment_edit.twig`. An empty
+`$paymentId` renders a blank &quot;new payment&quot; form; a known id
+pre-fills the editor; an unknown id is 404. The payment-master
+list doubles as the AUTHZ gate — no admin session → 403.</div></td>
+  <td><a href="../alps.json.html#paymentId" class="param alps-param" title="支払方法ID">paymentId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">支払方法ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="6" class="method-cell"><span class="ti idempotent"></span>PUT</td>
+  <td><a href="../alps.json.html#paymentId" class="param alps-param" title="支払方法ID">paymentId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">支払方法ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="6"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#paymentMethodName" class="param alps-param" title="支払方法名">paymentMethodName</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">支払方法名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#charge" class="param alps-param" title="手数料">charge</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">手数料</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">ruleMin</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">ruleMax</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">visible</span></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#paymentId" class="param alps-param" title="支払方法ID">paymentId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">支払方法ID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="6" class="path-cell" id="path-admin/payment/payment-list">/admin/payment/payment-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="5" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#paymentMethodName" class="param alps-param" title="支払方法名">paymentMethodName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">支払方法名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="5"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#charge" class="param alps-param" title="手数料">charge</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">手数料</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">ruleMin</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">ruleMax</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">visible</span></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/product/csv-category">/admin/product/csv-category</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/product/csv-class-category">/admin/product/csv-class-category</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Imports the 規格分類 CSV (doImportClassCategoryCsv).</div></td>
+  <td><span class="param">csv</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/product/csv-class-name">/admin/product/csv-class-name</td>
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Imports the 規格名 CSV (doImportClassNameCsv).</div></td>
+  <td><span class="param">csv</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/product/csv-product">/admin/product/csv-product</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/product/edit">/admin/product/edit</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/product/product-class">/admin/product/product-class</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET</td>
+  <td><a href="../alps.json.html#productCode" class="param alps-param" title="商品コード">productCode</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">商品コード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/tag/tag">/admin/tag/tag</td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#tagId" class="param alps-param" title="タグID">tagId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">タグID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="2" class="path-cell" id="path-admin/tag/tag-list">/admin/tag/tag-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#tagName" class="param alps-param" title="タグ名">tagName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">タグ名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="1" class="path-cell" id="path-admin/tax-rule/tax-rule">/admin/tax-rule/tax-rule</td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE</td>
+  <td><a href="../alps.json.html#taxRuleId" class="param alps-param" title="税率ルールID">taxRuleId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">税率ルールID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+  <td rowspan="4" class="path-cell" id="path-admin/tax-rule/tax-rule-list">/admin/tax-rule/tax-rule-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST</td>
+  <td><a href="../alps.json.html#taxRate" class="param alps-param" title="適用税率">taxRate</a><span class="req">*</span></td>
+  <td><span class="badge type-float">float</span></td>
+  <td class="param-desc">適用税率</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="3"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#applyDate" class="param alps-param" title="適用日">applyDate</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">適用日</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#roundingType" class="param alps-param" title="端数処理">roundingType</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">端数処理</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/template/template-add">/admin/template/template-add</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Installs an uploaded design template (doInstallTemplate). ALPS
+marks it `unsafe` → POST.</div></td>
+  <td><a href="../alps.json.html#templateCode" class="param alps-param" title="テンプレートコード">templateCode</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレートコード</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="2"></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#templateName" class="param alps-param" title="テンプレート名">templateName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレート名</td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="4" class="path-cell" id="path-admin/template/template-list">/admin/template/template-list</td>
+  <td class="method-cell"><span class="ti safe"></span>GET</td>
+  <td></td>
+  <td></td>
+  <td></td>
+  <td></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Activates a template (doSelectTemplate). ALPS idempotent → PUT.</div></td>
+  <td><a href="../alps.json.html#templateId" class="param alps-param" title="テンプレートID">templateId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレートID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">Deletes a template (doDeleteTemplate). ALPS idempotent → DELETE.</div></td>
+  <td><a href="../alps.json.html#templateId" class="param alps-param" title="テンプレートID">templateId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレートID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+<tr>
+
+  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Downloads a template zip (doDownloadTemplate). ALPS unsafe → POST.</div></td>
+  <td><a href="../alps.json.html#templateId" class="param alps-param" title="テンプレートID">templateId</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレートID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"></td>
+</tr>
+
+</tbody>
+</table>
+
+
+
+
+
+<h2>Links</h2>
+<ul class="doc-links"><li><strong>BEAR.Sunday</strong> : <a href="https://bearsunday.github.io/">https://bearsunday.github.io/</a></li><li><strong>profile</strong> : <a href="../alps.json.html">../alps.json.html</a></li><li><strong>existing-openapi</strong> : <a href="../openapi.html">../openapi.html</a></li><li><strong>terms</strong> : <a href="terms.html">terms.html</a></li></ul>
+
+</div>
+</body>
+</html>

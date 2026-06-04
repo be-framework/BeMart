@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<apidoc
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="vendor/bear/api-doc/apidoc.xsd">
+    <appName>MyVendor\BeMart</appName>
+    <scheme>page</scheme>
+    <docDir>docs/api</docDir>
+    <!-- format: html | md | openapi | llms | audit | terms -->
+    <format>html,md,openapi,llms,audit</format>
+    <title>BeMart Page Resource API Doc</title>
+    <description>BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and available fake data fixtures.</description>
+    <alps>alps.json</alps>
+    <fakeData dir="be/var/fake"/>
+    <links>
+        <link rel="BEAR.Sunday" href="https://bearsunday.github.io/"/>
+        <link rel="profile" href="../alps.json.html"/>
+        <link rel="existing-openapi" href="../openapi.html"/>
+    </links>
+</apidoc>
