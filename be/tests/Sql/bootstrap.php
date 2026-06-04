@@ -17,7 +17,9 @@
 
 declare(strict_types=1);
 
-require_once dirname(__DIR__, 2) . '/vendor/autoload.php';
+$beAutoload = dirname(__DIR__, 2) . '/vendor/autoload.php';
+$rootAutoload = dirname(__DIR__, 3) . '/vendor/autoload.php';
+require_once is_file($beAutoload) ? $beAutoload : $rootAutoload;
 
 $databaseUrl = getenv('DATABASE_URL');
 if ($databaseUrl === false || $databaseUrl === '') {
