@@ -53,7 +53,7 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
     #[Depends('testContactForm')]
     public function testDoSubmitContact(ResourceObject $response): ResourceObject
     {
-        $submitted = $this->post($response, [
+        $submitted = $this->follow($response, 'doSubmitContact', [
             'contactName01' => '山田',
             'contactName02' => '太郎',
             'contactEmail' => self::CONTACT_EMAIL,

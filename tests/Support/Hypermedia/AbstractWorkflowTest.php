@@ -30,31 +30,13 @@ abstract class AbstractWorkflowTest extends TestCase
 
     abstract protected function newResource(): ResourceInterface;
 
-    protected function follow(ResourceObject $response, string $rel): ResourceObject
+    /** @param array<string, mixed> $query */
+    protected function follow(ResourceObject $response, string $rel, array $query = []): ResourceObject
     {
-        $next = $this->resource->href($rel, [], $response);
+        $next = $this->resource->href($rel, $query, $response);
         $this->assertSame(Code::OK, $next->code);
 
         return $next;
-    }
-
-    /** @param array<string, mixed> $query */
-    protected function post(ResourceObject $response, array $query): ResourceObject
-    {
-        return $this->resource->post($this->unsafeTarget($response, 'POST'), $query);
-    }
-
-    private function unsafeTarget(ResourceObject $response, string $method): string
-    {
-        $body = $response->body;
-        $this->assertIsArray($body);
-        $submitTo = $body['submitTo'] ?? null;
-        $this->assertIsArray($submitTo);
-        $this->assertSame($method, $submitTo['method'] ?? null);
-        $href = $submitTo['href'] ?? null;
-        $this->assertIsString($href);
-
-        return $href;
     }
 
     protected function bodyValue(ResourceObject $response, string $key): mixed
