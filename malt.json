@@ -4,7 +4,8 @@
     "php@8.4",
     "mysql@8.0",
     "nginx",
-    "composer"
+    "composer",
+    "alps-asd/asd/asd"
   ],
   "ports": {
     "php": [
