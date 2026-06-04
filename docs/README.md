@@ -41,6 +41,7 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 | ディレクトリ | 内容 |
 |---|---|
 | [`methodology/`](methodology/) | 再利用可能な方法論・原則。`hypermedia-test-principle.md`（hypermedia テスト＝移植契約）、`FRAMEWORK_REVIEW.md`（元139 transition sliceの歴史的フレームワーク実務レビュー）、`be-bear-ai-era.md`（Be + BEAR の AI コーディング時代における潜在能力の論評）。 |
+| [`alps-doc/`](alps-doc/) | ALPS descriptor の `link rel="describedby"` から参照される長文補足の公開コピー。root の `../alps-doc/` を canonical とし、GitHub Pages の相対リンク切れを避けるため同期する。 |
 | [`phases/`](phases/) | フェーズ別の成果物。`alps-audit-phase3.md`（Phase 3 準備の ALPS 監査）、`admin-fanout-plan.md`（admin 移植のファンアウト計画）。 |
 | [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-25）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |
 | [`quality/`](quality/) | Phase 1 の ALPS 監査ノート（`verify-*.md` / `improvements-*.md`）。 |

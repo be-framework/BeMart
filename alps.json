@@ -1020,7 +1020,10 @@
       },
 
       {"id": "BaseInfo", "title": "基本情報","tag": "shop src-entity src-template flow-admin-shop-configuration",
-        "doc": {"value": "dtb_base_info 1行を平坦化した投影。EC-CUBE 4.3 の dtb_base_info はインストーラが必ず id=1 の単一行を seed する設計のため、所有者キーなしのシングルトン（`WHERE id = 1` 固定）。BeMart の BaseInfoEntity は Wave 8 / Wave 9 が要求する 12 列 (shopName / shopKana / shopNameEng / companyName / postalCode / pref / addr01 / addr02 / phoneNumber / businessHour / shopEmail01 / shopMessage) のみ保持し、残りの ~25 列（point / tax / option_* / delivery_free_* / invoice_registration_number / company_kana / shop_email02..04 / good_traded / ga_id 等）は Phase 2 スコープ外。FK は pref_id → mtb_pref / country_id → mtb_country の 2 本だが構造ダンプ上は両マスタとも空のため pref を扱うテストは `insertPref()` で先に seed する必要がある。SqlBaseInfoStorage は id=1 の行が無い場合 BaseInfoEntity の null 値で hydrate（installer 前状態を表現）し、update は INSERT-or-UPDATE で id=1 を idempotent に維持する"},
+        "doc": {"value": "ショップ基本情報を表すシングルトン設定。EC-CUBE の dtb_base_info id=1 行を BeMart の管理設定に必要な投影として扱う。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/base-info.md"}
+        ],
         "descriptor": [
           {"href": "#shopName"},
           {"href": "#shopKana"},
@@ -1059,7 +1062,10 @@
       },
 
       {"id": "Payment", "title": "支払方法","tag": "shop src-entity src-template flow-admin-shop-configuration",
-        "doc": {"value": "dtb_payment 1行を平坦化した投影。BeMart の PaymentMethodAdminEntity は 6 項目 (paymentId / paymentMethodName / charge / ruleMin / ruleMax / visible) を保持し、これは dtb_payment の id / payment_method / charge / rule_min / rule_max / visible に対応する。list / getById / put / remove のフル CRUD マスタ (PaymentMethodAdminStorageInterface)。paymentId は PaymentMethodAdminIdQueryInterface が MAX(id)+1 で先行採番（PaymentMethodAdminCreated が Entity 構築前に paymentId を確定するため）。creator_id (FK to dtb_member) は常に NULL を書く（構造ダンプ上 dtb_member が空のため NULL 以外は FK 1452）。sort_no / payment_image / method_class は BeMart 管理スライスに UI がなく常に NULL。fixed は NOT NULL DEFAULT 1 でスキーマ既定値 1 を書く。payment_method は nullable だが Entity は非NULL → read 時に NULL→'' へ coalesce。charge は decimal(12,2) nullable で JPY に小数部はなく read 時に (int) へ truncate（NULL→0）。rule_min / rule_max は decimal nullable で NULL は NULL のまま。visible は tinyint NOT NULL の bidirectional cast。remove は dtb_payment_option（delivery↔payment のリンク表、payment_id が dtb_payment.id への FK）の子行を先に削除して FK 1451 を回避（Block→dtb_block_position と同形の防御的カスケード）。create_date / update_date は NOW() で維持（dtb_payment にタイムゾーン列なし、サーバローカル解釈）。discriminator_type は 'payment'。非数値 paymentId は SQL では miss として 404 経路に倒れる。Phase 2b で SqlPaymentMethodAdminStorage が src-entity として参照"},
+        "doc": {"value": "管理画面で保守する支払方法マスタ。dtb_payment の管理スライスを PaymentMethodAdminEntity として投影する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/payment.md"}
+        ],
         "descriptor": [
           {"href": "#paymentId"},
           {"href": "#paymentMethodName"},
@@ -1087,7 +1093,10 @@
       },
 
       {"id": "Delivery", "title": "配送方法","tag": "shop src-entity src-template flow-admin-shop-configuration",
-        "doc": {"value": "dtb_delivery 1行を平坦化した投影。BeMart の DeliveryEntity は 厳密移植 整合のため 3 項目 (deliveryId / deliveryName / visible) のみ保持し、dtb_delivery の id / name / visible 列と 1:1。dtb_delivery には送料列が存在しないため SqlDeliveryStorage は送料列を一切触らない — 地域別の基本送料は dtb_delivery_fee（都道府県別行）、送料無料閾値はグローバルな dtb_base_info.delivery_free_amount であり、いずれも別モデルとして後フェーズに繰り延べ。creator_id（dtb_member 空）/ sale_type_id（mtb_sale_type 空）は structure-only ダンプで参照先マスタが空のため固定 NULL（非 NULL 値は FK 1452 を発生させる）。name は EC-CUBE 上 nullable だが DeliveryEntity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。visible は tinyint(1) NOT NULL DEFAULT 1。doUpdateDelivery 遷移が存在するため UPDATE 経路は実運用で踏まれる。remove は単純 DELETE（BeMart slice は子 dtb_delivery_fee / dtb_delivery_time / dtb_payment_option 行を INSERT しないため cascade 不要）。DeliveryFee（地域別送料）/ DeliveryTime（配送時間帯）/ DeliveryDuration（発送日目安）の子は dtb_delivery_fee 等のモデル化時に参照する template フレーバとして残置。Phase 2b で SqlDeliveryStorage が src-entity として参照"},
+        "doc": {"value": "管理画面で保守する配送方法マスタ。dtb_delivery の配送方法本体を扱い、送料・時間帯などの子モデルとは分ける。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/delivery.md"}
+        ],
         "descriptor": [
           {"href": "#deliveryId"},
           {"href": "#deliveryMethodName"},
@@ -1132,7 +1141,10 @@
       },
 
       {"id": "TaxRule", "title": "税率ルール","tag": "shop src-entity src-template flow-admin-shop-configuration",
-        "doc": {"value": "dtb_tax_rule 1行を平坦化した投影。BeMart の TaxRuleEntity は 4 項目 (taxRuleId / taxRate / roundingType / applyDate) のみ保持し、EC-CUBE の per-scope 列（product_class_id / product_id / country_id / pref_id）と tax_adjust / creator_id は Phase 2 スコープ外で常に NULL/0 を書く。tax_rate は `decimal(10,0) unsigned` で小数部はスキーマレベルで切り捨てられる（EC-CUBE 4.3 の制約。整数% のみ保持可能）。FK 5本のうち rounding_type_id → mtb_rounding_type, country_id → mtb_country, pref_id → mtb_pref は構造ダンプ上はマスタが空のため、テストでは NULL で seed する（rounding_type_id は SqlTaxRuleStorage が常に NULL を書き、hydrate は roundingType=1（STD_ROUND=四捨五入）にフォールバック。CreateTaxRuleInput の roundingType デフォルト 1 と一致）。apply_date は MySQL `datetime`（タイムゾーン無し）で、SqlTaxRuleStorage は BeMart の ISO-8601 文字列を `Y-m-d H:i:s` に直列化し、read 時に Asia/Tokyo として ISO-8601 (`+09:00`) に戻すことで Fake 投影と同一形を維持。doUpdateTaxRule 遷移は存在せず、編集は delete+create フローで applyDate 進行が監査ログ的に保存される。Phase 2b で SqlTaxRuleStorage が src-entity として参照"},
+        "doc": {"value": "管理画面で保守する税率ルール。dtb_tax_rule の全体適用ルールを BeMart の TaxRuleEntity として投影する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/tax-rule.md"}
+        ],
         "descriptor": [
           {"href": "#taxRuleId"},
           {"href": "#taxRuleRate"},
