@@ -153,7 +153,7 @@ BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・�
 | [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) | 実証総括 — 何を示せたか・知見・限界 |
 | [`docs/skills/`](docs/skills/) | 移植中に発見した再利用可能な境界ルール（G-14〜G-25） |
 | [`docs/methodology/`](docs/methodology/) | Hypermedia test、Ray.MediaQuery、AI時代の Be/BEAR などの方法論 |
-| [`alps-doc/`](alps-doc/) | ALPS descriptor の `doc.href` から参照する長文の意味論・技術補足 |
+| [`alps-doc/`](alps-doc/) | ALPS descriptor の `link rel="describedby"` から参照する長文の意味論・技術補足 |
 | [`alps.json`](alps.json) / [`alps.json.html`](alps.json.html) | ALPS プロファイルと HTML ドキュメント |
 | [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI 出力と HTML ドキュメント |
 | [`docs/migration-status.md`](docs/migration-status.md) | 移植ステータス（正） |
@@ -167,7 +167,7 @@ BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・�
 | Path | Purpose |
 |---|---|
 | `alps.json` | 正典 ALPS プロファイル |
-| `alps-doc/` | `alps.json` の `doc.href` から参照する詳細説明。`doc.value` に収めると読みにくい意味論・境界・実装根拠を置く |
+| `alps-doc/` | `alps.json` の descriptor 内 `link rel="describedby"` から参照する詳細説明。`doc.value` に収めると読みにくい意味論・境界・実装根拠を置く |
 | `be/` | Be Framework ドメイン層 |
 | `src/` | BEAR.Sunday アプリケーション / リソース層 |
 | `var/templates/` | EC-CUBE Twig HTML 移植 |

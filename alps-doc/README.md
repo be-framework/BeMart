@@ -1,15 +1,16 @@
 # ALPS Linked Documentation
 
-`alps-doc/` は、`alps.json` の descriptor から `doc.href` で参照する長文補足の置き場である。
+`alps-doc/` は、`alps.json` の descriptor から `link rel="describedby"` で参照する長文補足の置き場である。
 
 ALPS の `doc.value` は、descriptor を読むための短い要約に留める。意味論、境界判断、SQL / HTML / Resource との対応、実装上の根拠が長くなる場合は、無理に `doc.value` へ詰め込まず、このディレクトリ配下の Markdown へ分離する。
 
 ## Rule
 
 - `doc.value` には、その descriptor が何を意味するかを短く書く。
-- `doc.href` には、追加説明が必要なときだけ Markdown への相対リンクを書く。
+- 追加説明が必要なときは、descriptor 直下の `link` に `rel: "describedby"` と Markdown への `href` を書く。
 - Markdown 側では、背景、制約、実装根拠、残差、検証方法を書いてよい。
-- `doc.href` 先は ALPS の意味を補足するものであり、descriptor の意味を別定義するものではない。
+- `link rel="describedby"` 先は ALPS の意味を補足するものであり、descriptor の意味を別定義するものではない。
+- `describedby` のような公的な link relation はそのまま使う。独自 relation を使う場合は bare token にせず、`rel.alps.json#foo` のように relation の意味を辿れる `href` を使う。
 
 ## Example
 
@@ -18,9 +19,14 @@ ALPS の `doc.value` は、descriptor を読むための短い要約に留める
   "id": "AdminOrderEditPage",
   "title": "管理受注編集画面",
   "doc": {
-    "href": "alps-doc/admin-order-edit.md",
     "value": "管理者が受注を確認・編集し、配送・通知・帳票導線へ進む画面状態。"
-  }
+  },
+  "link": [
+    {
+      "rel": "describedby",
+      "href": "alps-doc/admin-order-edit.md"
+    }
+  ]
 }
 ```
 
