@@ -1,4 +1,4 @@
-# Flow Tag Migration Plan
+# フロータグ移行計画（Flow Tag Migration Plan）
 
 Last updated: 2026-06-04
 
@@ -12,7 +12,7 @@ Current ALPS status:
 
 ---
 
-## Problem
+## 問題（Problem）
 
 移行前の旧 `flow-*` は、ほぼ Feature matrix 用の機能領域として使われていた。
 
@@ -26,7 +26,7 @@ Current ALPS status:
 
 ---
 
-## Target Vocabulary
+## 目標語彙（Target Vocabulary）
 
 | Prefix | Role | Example |
 |---|---|---|
@@ -42,7 +42,7 @@ Current ALPS status:
 
 ---
 
-## Audit Findings
+## 監査結果（Audit Findings）
 
 移行前の旧 `flow-*` は 142 descriptor に 143 回付与されていた。大半は transition descriptor で、状態をまたいだ業務導線ではなく、操作索引や Feature matrix の分類として使われていた。
 
@@ -55,7 +55,7 @@ Current ALPS status:
 
 ---
 
-## Mapping From Current Tags
+## 現行タグからの対応表（Mapping From Current Tags）
 
 | Current tag | Target feature tag |
 |---|---|
@@ -78,9 +78,9 @@ Current ALPS status:
 
 ---
 
-## Migration Phases
+## 移行フェーズ（Migration Phases）
 
-### Phase 1 — Documentation only
+### Phase 1 — ドキュメントのみ（Documentation only）
 
 - Add `docs/flow-ontology.md`.
 - Add this migration plan.
@@ -89,7 +89,7 @@ Current ALPS status:
 
 Status: complete.
 
-### Phase 2 — Feature tag introduction
+### Phase 2 — 機能タグ導入（Feature tag introduction）
 
 - Add `feature-*` tags to `alps.json` alongside existing `flow-*` only where the coverage/reporting layer still needs explicit feature buckets.
 - Prefer domain tag + `actor-*` when that is enough to express the feature area.
@@ -98,7 +98,7 @@ Status: complete.
 
 Status: complete for legacy `flow-*` descriptors.
 
-### Phase 3 — True flow tagging
+### Phase 3 — 真のフロータグ付け（True flow tagging）
 
 - Apply new `flow-*` tags from `docs/flow-ontology.md` to the relevant page and transition descriptors.
 - Flow tags should be attached only when the descriptor participates in the natural-language journey.
@@ -106,20 +106,20 @@ Status: complete for legacy `flow-*` descriptors.
 
 Status: initial ALPS tagging complete. Executable flow fixtures and tests are still future work.
 
-### Phase 4 — Matrix and tests
+### Phase 4 — マトリクスとテスト（Matrix and tests）
 
 - Update Feature matrix to use `feature-*`.
 - Add flow verification matrix based on `flow-*`.
 - Implement corresponding Hypermedia / HTTP / Browser checks.
 
-### Phase 5 — Deprecation cleanup
+### Phase 5 — 非推奨整理（Deprecation cleanup）
 
 - Remove legacy `flow-*` feature-area tags once `feature-*` and true `flow-*` are both in use and all docs/tests have moved.
 - Keep a short migration note in `docs/tag.md`.
 
 ---
 
-## Rules For Applying True Flow Tags
+## 真のフロータグ適用ルール（Rules For Applying True Flow Tags）
 
 - A `flow-*` tag must correspond to a named flow in `docs/flow-ontology.md`.
 - A flow may cross multiple feature areas.
@@ -130,7 +130,7 @@ Status: initial ALPS tagging complete. Executable flow fixtures and tests are st
 
 ---
 
-## First Migration Candidate
+## 最初の移行候補（First Migration Candidate）
 
 Start with `flow-admin-product-publish`.
 
