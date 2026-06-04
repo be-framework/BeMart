@@ -60,8 +60,8 @@ Fake は後付けの mock ではなく、最初の契約実装です。SQL 実�
 | Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
 | SQL schema | 永続化境界（table / column / FK / nullable / id shape） |
 
-入力契約の正は OpenAPI ではなく、Resource の `on*` method parameter と Be `Input`
-schema です。OpenAPI はそれを外部向けに投影した公開契約として扱います。
+入力契約は二層で扱います。実装内の契約は Resource の `on*` method parameter と
+Be `Input` schema に置き、OpenAPI はそれを外部向けに投影した公開契約として扱います。
 
 Taint tracking、DIP / ADP も境界制約として扱いますが、
 README では詳細化しません。背景は [`docs/methodology/`](docs/methodology/) と
