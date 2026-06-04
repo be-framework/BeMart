@@ -38,12 +38,13 @@ EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
 Fake は後付けの mock ではなく、最初の契約実装です。SQL 実装はあとから同じ Resource 契約を
 満たすものとして差し替えられ、Context / DI がどちらを使うかを選びます。
 
-## 境界線
+## アーキテクチャ境界線
 
-ここでいう境界線は DDD の Bounded Context というより、Clean Architecture に近いものです。
+ここでいうアーキテクチャ境界線は DDD の境界づけられたコンテキストではなく、
+Clean Architecture に近いものです。
 依存方向、責務、データ表現の変換点を分ける線として扱います。
 
-| 境界線 | 役割 |
+| アーキテクチャ境界線 | 役割 |
 |---|---|
 | ALPS | アプリケーション意味論・情報構造 |
 | Be Framework | ドメイン境界（`Input` schema / `Being` / `Final`） |
