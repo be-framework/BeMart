@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Findings & Decisions — historical record"
+---
+
 # Findings & Decisions — historical record
 
 > **これは 2026-04-11 の計画セッションの調査記録であり、移植の現状ではない。**

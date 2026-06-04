@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/shopping"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping
 EC-CUBE goShopping — 注文情報入力画面 (Pilot — checkout review).

@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/tax-rule/tax-rule"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/tax-rule/tax-rule
 EC-CUBE doDeleteTaxRule — single-row endpoint (Wave 9θ).

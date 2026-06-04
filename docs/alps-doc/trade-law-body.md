@@ -1,3 +1,8 @@
+---
+layout: default
+title: "tradeLawBody"
+---
+
 # tradeLawBody
 
 `tradeLawBody` は特定商取引法ページ本文の単一ブロブ投影である。EC-CUBE の項目別行をそのまま表すのではなく、Wave 8 の管理画面ではページ全体を 1 本の本文として扱う。

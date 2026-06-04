@@ -1,3 +1,8 @@
+---
+layout: default
+title: "EC-CUBE to BEAR.Sunday + Be Migration Plan"
+---
+
 # EC-CUBE to BEAR.Sunday + Be Migration Plan
 
 ## 目的

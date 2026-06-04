@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/shopping/shipping-multiple-edit"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping/shipping-multiple-edit
 EC-CUBE goShoppingShippingMultipleEdit — 複数配送の新規お届け先追加フォーム

@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/order/mail-confirm"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/order/mail-confirm
 EC-CUBE 受注メール確認 — Order Tier-2 (`admin/Order/mail_confirm.twig`).

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-22: Pagination Semantic is context-specific — `Limit` vs `OrderLimit` vs `HistoryLimit`"
+---
+
 # G-22: Pagination Semantic is context-specific — `Limit` vs `OrderLimit` vs `HistoryLimit`
 
 ## Context

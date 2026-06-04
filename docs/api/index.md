@@ -1,3 +1,9 @@
+---
+layout: default
+title: "BeMart Page Resource API Doc"
+published: false
+---
+
 # BeMart Page Resource API Doc
 
 BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and available fake data fixtures.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "BeMart skill gaps — discovered patterns"
+---
+
 # BeMart skill gaps — discovered patterns
 
 This directory captures conventions discovered during the EC-CUBE -> Be Framework + BEAR.Sunday migration of BeMart. Each entry is a self-contained rule that future projects building on Be Framework should know.

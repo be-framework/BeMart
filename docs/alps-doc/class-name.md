@@ -1,3 +1,8 @@
+---
+layout: default
+title: "ClassName"
+---
+
 # ClassName
 
 ClassName は EC-CUBE の商品規格軸を表す。ALPS の `ClassName` descriptor は、`dtb_class_name` の規格軸本体を BeMart の `ClassNameEntity` として投影する。

@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/entry/confirm"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /entry/confirm
 EC-CUBE goCustomerRegistrationConfirm — 新規会員登録(確認)

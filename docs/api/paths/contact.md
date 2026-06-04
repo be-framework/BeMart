@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/contact"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /contact
 EC-CUBE doSubmitContact — お問い合わせ送信 (Pilot 15).

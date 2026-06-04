@@ -1,3 +1,9 @@
+---
+layout: default
+title: "Term Usage Index"
+published: false
+---
+
 # Term Usage Index
 
 This index reports lexical identifier matches only; it does not prove semantic equivalence.

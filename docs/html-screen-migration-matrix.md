@@ -1,3 +1,8 @@
+---
+layout: default
+title: "HTML画面移植マトリクス（2026-05-22）"
+---
+
 # HTML画面移植マトリクス（2026-05-22）
 
 EC-CUBE 4.3 の **routableなstorefront/admin画面 + 画面表示に必要な共有部品** を対象にした現状ベースラインです。
