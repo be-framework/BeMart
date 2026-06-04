@@ -15,12 +15,16 @@ use PHPUnit\Framework\Attributes\Depends;
 use function assert;
 
 /**
- * flow-customer-inquiry
+ * Semantic workflow identified by {@see self::FLOW_ID}.
  *
  * 顧客が問い合わせフォームを開き、送信し、完了画面から index へ戻る。
  */
 class FlowCustomerInquiryTest extends AbstractWorkflowTest
 {
+    public const FLOW_ID = 'flow-customer-inquiry';
+
+    private const CONTACT_EMAIL = 'yamada@example.com';
+
     protected function newResource(): ResourceInterface
     {
         $resource = Injector::getInstance('test-hal-api-app')->getInstance(ResourceInterface::class);
@@ -52,14 +56,14 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
         $submitted = $this->post($response, [
             'contactName01' => '山田',
             'contactName02' => '太郎',
-            'contactEmail' => 'yamada@example.com',
+            'contactEmail' => self::CONTACT_EMAIL,
             'contactContents' => 'ハイパーメディア workflow pilot の問い合わせ本文です。',
             'csrfToken' => $this->bodyValue($response, 'csrfToken'),
         ]);
 
         $this->assertSame(Code::OK, $submitted->code);
         $this->assertSame('/contact/complete', $this->header($submitted, 'Location'));
-        $this->assertSame('yamada@example.com', $this->bodyValue($submitted, 'contactEmail'));
+        $this->assertSame(self::CONTACT_EMAIL, $this->bodyValue($submitted, 'contactEmail'));
 
         return $submitted;
     }
