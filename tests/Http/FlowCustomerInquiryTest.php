@@ -14,7 +14,7 @@ final class FlowCustomerInquiryTest extends Workflow
         return new HttpResource(
             '127.0.0.1:8081',
             __DIR__ . '/json-index.php',
-            __DIR__ . '/log/' . self::FLOW_ID . '.log',
+            __DIR__ . '/log',
         );
     }
 }

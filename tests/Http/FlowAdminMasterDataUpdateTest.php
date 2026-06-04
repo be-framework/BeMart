@@ -12,9 +12,9 @@ final class FlowAdminMasterDataUpdateTest extends Workflow
     protected function newResource(): ResourceInterface
     {
         return new HttpResource(
-            '127.0.0.1:8081',
-            __DIR__ . '/json-index.php',
-            __DIR__ . '/log/' . self::FLOW_ID . '.log',
+            '127.0.0.1:8082',
+            __DIR__ . '/admin-json-index.php',
+            __DIR__ . '/log',
         );
     }
 }

@@ -31,7 +31,14 @@ abstract class AbstractWorkflowTest extends TestCase
 
     abstract protected function newResource(): ResourceInterface;
 
-    /** @param array<string, mixed> $query */
+    /**
+     * Follows a safe HAL/Resource link with GET.
+     *
+     * Unsafe `do*` transitions call post/put/delete directly in the workflow
+     * step because HAL links do not carry an HTTP method.
+     *
+     * @param array<string, mixed> $query
+     */
     protected function follow(ResourceObject $response, string $rel, array $query = []): ResourceObject
     {
         $next = $this->resource->href($rel, $query, $response);
