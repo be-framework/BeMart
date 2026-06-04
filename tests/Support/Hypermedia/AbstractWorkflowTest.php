@@ -16,7 +16,6 @@ abstract class AbstractWorkflowTest extends TestCase
 {
     /** @var array<class-string, ResourceInterface> */
     private static array $resources = [];
-
     protected ResourceInterface $resource;
 
     protected function setUp(): void

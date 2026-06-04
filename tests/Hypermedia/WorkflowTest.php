@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
+use Aura\Router\Map;
 use Aura\Router\RouterContainer;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
@@ -49,6 +50,7 @@ class WorkflowTest extends AbstractWorkflowTest
         $this->appContextBefore = getenv('APP_CONTEXT');
         putenv('APP_CONTEXT=html-test-hal-api-app');
         $this->startActiveSession();
+
         parent::setUp();
     }
 
@@ -86,7 +88,7 @@ class WorkflowTest extends AbstractWorkflowTest
     private static function routerContainer(): RouterContainer
     {
         $container = new RouterContainer();
-        /** @var callable(\Aura\Router\Map): null $routes */
+        /** @var callable(Map): null $routes */
         $routes = require __DIR__ . '/../../config/aura-routes.php';
         $container->setMapBuilder($routes);
 
@@ -202,16 +204,19 @@ class WorkflowTest extends AbstractWorkflowTest
 
     /**
      * @param array<string, string> $fields
+     *
      * @return array<string, int|string>
      */
     private function canonicalizeFormFields(array $fields): array
     {
         $body = $fields;
         foreach (['_token' => 'csrfToken', 'product_id' => 'productCode'] as $wire => $canonical) {
-            if (array_key_exists($wire, $body) && ! array_key_exists($canonical, $body)) {
-                $body[$canonical] = $body[$wire];
-                unset($body[$wire]);
+            if (! array_key_exists($wire, $body) || array_key_exists($canonical, $body)) {
+                continue;
             }
+
+            $body[$canonical] = $body[$wire];
+            unset($body[$wire]);
         }
 
         if (array_key_exists('quantity', $body)) {
