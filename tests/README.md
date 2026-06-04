@@ -15,14 +15,16 @@ tests/
 ├── Router/        Aura.Router route-map tests
 ├── EntryPoint/    bin/app.php CLI entry-point tests
 ├── Hypermedia/    in-process workflow tests
-│   ├── WorkflowTest.php      storefront purchase-spine workflow (base class)
+│   ├── FlowCustomerInquiryTest.php  semantic inquiry workflow
+│   ├── WorkflowTest.php      storefront purchase-spine workflow
 │   └── RoutedResource.php    ResourceInterface over Aura.Router
 ├── Http/          real-HTTP workflow tests
+│   ├── FlowCustomerInquiryTest.php  extends Hypermedia\FlowCustomerInquiryTest
 │   ├── WorkflowTest.php      extends Hypermedia\WorkflowTest, swaps the transport
 │   ├── HttpResource.php      ResourceInterface over a koriym/php-server + curl
 │   ├── index.php             server entry — sets APP_CONTEXT=html, requires public/index.php
 │   └── log/                  per-run request/response log (git-ignored)
-└── Support/       shared test exceptions
+└── Support/       shared workflow base and test exceptions
 ```
 
 `be/tests/` holds the Be-domain layer tests and runs in the `resource`
@@ -38,13 +40,41 @@ suite.
 | `hypermedia` | `tests/Hypermedia` | a full user workflow holds **in-process** |
 | `http` | `tests/Http` | the same workflow holds over a **real HTTP / cookie boundary** |
 
+## Workflow postconditions
+
+A workflow test is not just "no exception while clicking through".
+It should prove the semantic postcondition of the flow whenever that
+postcondition is visible through public affordances.
+
+Default patterns:
+
+- CRUD: create, read back, update, read back, delete, then read none.
+- Registration: register, complete, then behave as the registered
+  customer through sign-in, signed-in Top, or MyPage.
+- Publish/edit flows: write in the admin surface, then read the result
+  from the customer-facing or management surface.
+- Notification/send flows: the workflow closes through complete and the
+  next public affordance; mail body, storage, and hidden side effects are
+  asserted in Be / Resource / SQL contract tests.
+
+Do not add DB reads to a workflow test only to prove persistence. If the
+saved state is not observable through a public resource, put that proof
+in the command/storage/SQL contract layer and keep the workflow focused
+on the hypermedia journey.
+
 ## Write once, run at two transports
 
-`tests/Http/WorkflowTest` **extends** `tests/Hypermedia/WorkflowTest` and
-overrides only `setUp()` — it swaps `$this->resource` for an
-`HttpResource`. Every workflow assertion in the base class therefore runs
-again, unchanged, over real HTTP. A new workflow added to the hypermedia
-base is automatically covered at the HTTP tier too.
+Workflow tests extend `tests/Support/Hypermedia/AbstractWorkflowTest`.
+The PHP projection implements `newResource()` with an in-process
+`ResourceInterface`; the HTTP projection extends the same workflow class
+and swaps only `newResource()` for `HttpResource`. Every workflow
+assertion in the base class therefore runs again, unchanged, over real
+HTTP.
+
+`tests/Http/WorkflowTest` is the older storefront HTML spine and still
+overrides `setUp()` directly because it uses a routed HTML adapter. New
+semantic workflows should prefer the `newResource()` swap pattern used by
+`FlowCustomerInquiryTest`.
 
 The two tiers are not redundant. The `hypermedia` tier runs the whole
 workflow in one process against one injector — its DI singletons live

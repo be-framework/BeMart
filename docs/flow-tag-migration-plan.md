@@ -123,7 +123,7 @@ Status: initial ALPS tagging complete. Executable flow fixtures and tests are st
 
 - A `flow-*` tag must correspond to a named flow in `docs/flow-ontology.md`.
 - A flow may cross multiple feature areas.
-- A flow must have a natural-language actor, intent, start condition, goal condition, and verification target.
+- A flow must have a natural-language actor, intent, start condition, goal condition, semantic postcondition, and verification target.
 - A flow tag is not a replacement for `actor-*`, `page-*`, `domain`, or `feature-*`; it is an additional acceptance-journey axis.
 - If a descriptor can belong to many journeys, tag it only when it is part of the minimal acceptance path for that flow.
 - Avoid umbrella flows that only say "maintain data" or "operate admin". CSV exchange, master data update, template lifecycle, and mail template maintenance are separate flows because their evidence and failure modes are different.
