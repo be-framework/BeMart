@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "41a5e8b473bab236328fee5fdf266f39",
+    "content-hash": "ae3bcb7aae62075461f71bdc9e1b7e6d",
     "packages": [
         {
             "name": "aura/cli",
@@ -5086,6 +5086,79 @@
             "time": "2024-08-03T19:31:26+00:00"
         },
         {
+            "name": "bear/api-doc",
+            "version": "1.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bearsunday/BEAR.ApiDoc.git",
+                "reference": "51dcc344ded36e53f2fac65d78ca3f73b5230d81"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.ApiDoc/zipball/51dcc344ded36e53f2fac65d78ca3f73b5230d81",
+                "reference": "51dcc344ded36e53f2fac65d78ca3f73b5230d81",
+                "shasum": ""
+            },
+            "require": {
+                "bear/app-meta": "^1.7",
+                "bear/package": "^1.9",
+                "bear/resource": "^1.16.2",
+                "bear/sunday": "^1.4",
+                "ext-dom": "*",
+                "ext-filter": "*",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "ext-simplexml": "*",
+                "koriym/app-state-diagram": "^0.11 ",
+                "koriym/psr4list": "^1.0.1",
+                "michelf/php-markdown": "^1.9.1 || ^2.0",
+                "php": "^8.2",
+                "phpdocumentor/reflection-docblock": "^5.2 || ^6.0",
+                "ray/aop": "^2.10",
+                "ray/di": "^2.16",
+                "ray/input-query": "^1.0",
+                "rize/uri-template": "^0.3.3 || ^0.4"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8.2",
+                "bear/aura-router-module": "^2.0.3",
+                "justinrainbow/json-schema": "^5.3 || ^6.0",
+                "koriym/attributes": "^1.0.5",
+                "phpunit/phpunit": "^11.0"
+            },
+            "default-branch": true,
+            "bin": [
+                "bin/apidoc"
+            ],
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BEAR\\ApiDoc\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/bearsunday/BEAR.ApiDoc/issues",
+                "source": "https://github.com/bearsunday/BEAR.ApiDoc/tree/1.x"
+            },
+            "time": "2026-06-03T23:26:56+00:00"
+        },
+        {
             "name": "composer/pcre",
             "version": "3.3.2",
             "source": {
@@ -5664,6 +5737,125 @@
             "time": "2023-02-03T21:26:53+00:00"
         },
         {
+            "name": "koriym/app-state-diagram",
+            "version": "0.11.12",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/alps-asd/app-state-diagram.git",
+                "reference": "5d1bb2a27dc17ff7774745031a17cea752a72fd3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/alps-asd/app-state-diagram/zipball/5d1bb2a27dc17ff7774745031a17cea752a72fd3",
+                "reference": "5d1bb2a27dc17ff7774745031a17cea752a72fd3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-filter": "*",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "ext-simplexml": "*",
+                "koriym/data-file": "^1.0",
+                "michelf/php-markdown": "^1.9",
+                "php": "^8.1",
+                "seld/jsonlint": "^1.8"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "phpunit/phpunit": "^9.6.10",
+                "rector/rector": "^1.1"
+            },
+            "bin": [
+                "bin/asd"
+            ],
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true
+                }
+            },
+            "autoload": {
+                "files": [
+                    "vendor-xml2json/xml2json.php"
+                ],
+                "psr-4": {
+                    "Koriym\\XmlLoader\\": "src-xml",
+                    "Koriym\\AppStateDiagram\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "An Application Diagram Generator",
+            "support": {
+                "issues": "https://github.com/alps-asd/app-state-diagram/issues",
+                "source": "https://github.com/alps-asd/app-state-diagram/tree/0.11.12"
+            },
+            "time": "2024-12-23T12:27:10+00:00"
+        },
+        {
+            "name": "koriym/data-file",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/koriym/Koriym.DataFile.git",
+                "reference": "917b7db5e4aacd2909c7579f396d4d77959129ad"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/koriym/Koriym.DataFile/zipball/917b7db5e4aacd2909c7579f396d4d77959129ad",
+                "reference": "917b7db5e4aacd2909c7579f396d4d77959129ad",
+                "shasum": ""
+            },
+            "require": {
+                "ext-dom": "*",
+                "ext-libxml": "*",
+                "ext-simplexml": "*",
+                "php": "^7.2 || ^8.0"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": false
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Koriym\\DataFile\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "description": "Load XML file with XSD validation",
+            "support": {
+                "issues": "https://github.com/koriym/Koriym.DataFile/issues",
+                "source": "https://github.com/koriym/Koriym.DataFile/tree/1.0.1"
+            },
+            "time": "2024-06-09T05:14:00+00:00"
+        },
+        {
             "name": "koriym/php-server",
             "version": "1.0.1",
             "source": {
@@ -5890,6 +6082,59 @@
                 }
             ],
             "time": "2026-03-08T20:05:35+00:00"
+        },
+        {
+            "name": "michelf/php-markdown",
+            "version": "1.9.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/michelf/php-markdown.git",
+                "reference": "5024d623c1a057dcd2d076d25b7d270a1d0d55f3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/michelf/php-markdown/zipball/5024d623c1a057dcd2d076d25b7d270a1d0d55f3",
+                "reference": "5024d623c1a057dcd2d076d25b7d270a1d0d55f3",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": ">=4.3 <5.8"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Michelf\\": "Michelf/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Michel Fortin",
+                    "email": "michel.fortin@michelf.ca",
+                    "homepage": "https://michelf.ca/",
+                    "role": "Developer"
+                },
+                {
+                    "name": "John Gruber",
+                    "homepage": "https://daringfireball.net/"
+                }
+            ],
+            "description": "PHP Markdown",
+            "homepage": "https://michelf.ca/projects/php-markdown/",
+            "keywords": [
+                "markdown"
+            ],
+            "support": {
+                "issues": "https://github.com/michelf/php-markdown/issues",
+                "source": "https://github.com/michelf/php-markdown/tree/1.9.1"
+            },
+            "time": "2021-11-24T02:52:38+00:00"
         },
         {
             "name": "myclabs/deep-copy",
@@ -7695,6 +7940,70 @@
             "time": "2023-02-07T11:34:05+00:00"
         },
         {
+            "name": "seld/jsonlint",
+            "version": "1.11.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Seldaek/jsonlint.git",
+                "reference": "1748aaf847fc731cfad7725aec413ee46f0cc3a2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Seldaek/jsonlint/zipball/1748aaf847fc731cfad7725aec413ee46f0cc3a2",
+                "reference": "1748aaf847fc731cfad7725aec413ee46f0cc3a2",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^5.3 || ^7.0 || ^8.0"
+            },
+            "require-dev": {
+                "phpstan/phpstan": "^1.11",
+                "phpunit/phpunit": "^4.8.35 || ^5.7 || ^6.0 || ^8.5.13"
+            },
+            "bin": [
+                "bin/jsonlint"
+            ],
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Seld\\JsonLint\\": "src/Seld/JsonLint/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jordi Boggiano",
+                    "email": "j.boggiano@seld.be",
+                    "homepage": "https://seld.be"
+                }
+            ],
+            "description": "JSON Linter",
+            "keywords": [
+                "json",
+                "linter",
+                "parser",
+                "validator"
+            ],
+            "support": {
+                "issues": "https://github.com/Seldaek/jsonlint/issues",
+                "source": "https://github.com/Seldaek/jsonlint/tree/1.11.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Seldaek",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/seld/jsonlint",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-07-11T14:55:45+00:00"
+        },
+        {
             "name": "spatie/array-to-xml",
             "version": "3.4.4",
             "source": {
@@ -8595,6 +8904,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "be-framework/be": 20,
+        "bear/api-doc": 20,
         "my-vendor/be-mart-be": 20,
         "ray/fake-query": 20
     },
