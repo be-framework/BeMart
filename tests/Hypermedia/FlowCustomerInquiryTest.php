@@ -13,11 +13,13 @@ use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
 use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
+use function rawurlencode;
 
 /**
  * Semantic workflow identified by {@see self::FLOW_ID}.
  *
  * 顧客が問い合わせフォームを開き、送信し、完了画面から index へ戻る。
+ * 完了状態では public receipt として ticketId が発行される。
  */
 class FlowCustomerInquiryTest extends AbstractWorkflowTest
 {
@@ -61,8 +63,11 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
             'csrfToken' => $this->bodyValue($response, 'csrfToken'),
         ]);
 
+        $ticketId = $this->bodyValue($submitted, 'ticketId');
+        $this->assertIsString($ticketId);
+        $this->assertNotSame('', $ticketId);
         $this->assertSame(Code::OK, $submitted->code);
-        $this->assertSame('/contact/complete', $this->header($submitted, 'Location'));
+        $this->assertSame('/contact/complete?ticketId=' . rawurlencode($ticketId), $this->header($submitted, 'Location'));
         $this->assertSame(self::CONTACT_EMAIL, $this->bodyValue($submitted, 'contactEmail'));
 
         return $submitted;
@@ -72,11 +77,25 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
     #[Depends('testDoSubmitContact')]
     public function testContactComplete(ResourceObject $response): ResourceObject
     {
-        return $this->followLocation($response, '/contact/complete');
+        $location = $this->header($response, 'Location');
+        $this->assertIsString($location);
+
+        return $this->followLocation($response, $location);
+    }
+
+    #[Alps('ticketId')]
+    #[Depends('testContactComplete')]
+    public function testIssuesTicket(ResourceObject $response): ResourceObject
+    {
+        $ticketId = $this->bodyValue($response, 'ticketId');
+        $this->assertIsString($ticketId);
+        $this->assertNotSame('', $ticketId);
+
+        return $response;
     }
 
     #[Alps('goTop')]
-    #[Depends('testContactComplete')]
+    #[Depends('testIssuesTicket')]
     public function testReturnsToIndex(ResourceObject $response): void
     {
         $this->follow($response, 'goTop');

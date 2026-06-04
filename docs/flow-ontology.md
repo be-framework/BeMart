@@ -37,7 +37,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 - CRUD 系: `create -> read -> update -> read -> delete -> read none`。
 - 登録系: `register -> complete -> signIn -> myPage`、または登録後の signed-in Top / MyPage affordance。
 - 公開・編集系: 管理画面で保存した内容を storefront / 管理表示で読む。
-- 送信・通知系: ユーザー flow は `complete -> goTop` で閉じ、送信境界・メール本文・履歴は Be / Mail / SQL contract test で保証する。
+- 送信・通知系: ユーザー flow は `complete -> receipt/ticket -> public closure link` で閉じ、送信境界・メール本文・履歴は Be / Mail / SQL contract test で保証する。`flow-customer-inquiry` は問い合わせ本文の readback resource を持たないため、完了状態が `ticketId` を public receipt として表明するショーケースとして扱う。
 
 公開された affordance で確認できる postcondition は workflow 内で辿る。外部副作用や非公開副作用は workflow に DB 直読みを混ぜず、Be / SQL / storage / mail の contract test に委譲し、flow の success evidence に明記する。
 
@@ -127,9 +127,9 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Actor | customer |
 | Intent | 問い合わせを入力し、確認して送信する。 |
 | Start condition | storefront visitor。 |
-| Goal condition | 問い合わせ完了画面に到達し、送信境界が呼ばれる。 |
+| Goal condition | 問い合わせ完了画面に到達し、受付番号 `ticketId` が発行され、そこから公開された終端リンクを辿れる。送信境界の成立は Be / Mail contract で確認する。 |
 | Success evidence | Hypermedia test、HTTP test、mail body fixture、browser smoke。 |
-| Out of scope | 本番 SMTP 到達性。 |
+| Out of scope | 問い合わせ本文の readback resource、本番 SMTP 到達性。 |
 
 ### `flow-admin-content-publish`
 

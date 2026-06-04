@@ -53,9 +53,11 @@ Default patterns:
   customer through sign-in, signed-in Top, or MyPage.
 - Publish/edit flows: write in the admin surface, then read the result
   from the customer-facing or management surface.
-- Notification/send flows: the workflow closes through complete and the
-  next public affordance; mail body, storage, and hidden side effects are
-  asserted in Be / Resource / SQL contract tests.
+- Notification/send flows: the workflow closes through complete,
+  receipt/ticket evidence, and a public closure link; mail body, storage,
+  and hidden side effects are asserted in Be / Resource / SQL contract
+  tests. `flow-customer-inquiry` intentionally shows this shape with a
+  public `ticketId` because there is no inquiry body readback resource.
 
 Do not add DB reads to a workflow test only to prove persistence. If the
 saved state is not observable through a public resource, put that proof
