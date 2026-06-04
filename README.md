@@ -1,207 +1,136 @@
-# BeMart — EC-CUBE 4.3 Application Overhaul
+# BeMart — EC-CUBE セマンティックオーバーホール
 
-BeMart は、EC-CUBE 4.3 を **意味論と境界へ分解し、再構成する** アプリケーション・オーバーホールの実証プロジェクトです。Symfony版EC-CUBEの fork や controller 書き換えではなく、EC-CUBE が持つ語彙・状態遷移・HTML構造・永続化の制約を `alps.json` に逆算し、Be Framework + BEAR.Sunday + Ray.MediaQuery + Twig HTML へ投影し直します。
+BeMart は、EC-CUBE 4.3 を意味論と境界へ分解し、ALPS / Be Framework /
+BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ再構成する実証プロジェクトです。
 
-> BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration with explicit boundaries.
+Symfony 版 EC-CUBE の controller rewrite ではありません。EC-CUBE が持つ業務語彙、
+状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装から取り出して読める契約
+として配置し直すことが目的です。
 
-このリポジトリが示したいのは「EC-CUBEを別フレームワークへ移す」ことだけではありません。大きな既存アプリケーションを、**意味論を正、境界を契約、テストを証明**として組み直せるか。その問いへの実装付きの答えです。実証の全体像（何を学び、何を成し遂げ、何をまだ残しているか）は [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) に束ねています。
+> BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration
+> with explicit boundaries.
 
-## Current State
+## 現時点の答え
 
-| Boundary | Current evidence |
+このプロジェクトの問いは、単に「EC-CUBE を別フレームワークで動かせるか」ではありません。
+
+> 巨大な既存 EC アプリケーションを、実装の移し替えではなく、意味の分解と境界の再構成として
+> 移植できるか。
+
+現時点の答えは、かなり強く「可能」です。ALPS に逆算した意味を、ドメイン、Resource、
+SQL、HTML、workflow test へ投影できることは示せました。
+
+残っている中心は、もう広い機能カバー率の問題ではありません。本番 EC-CUBE の完全代替に必要な
+互換 fidelity と production verification の問題です。
+
+## まず読む順
+
+| 知りたいこと | 読むもの |
 |---|---|
-| ALPS | `alps.json` は 532 descriptor / 207 transition descriptor。うち 147 は振る舞いの移植契約、60 は `alps-route-gate` のルート接続契約。 |
-| Be domain | 147 Input / 148 Final / 155 Semantic / 14 Being。Final は状態遷移が成立した証明として扱う。 |
-| BEAR Resource | `src/Resource/Page` に 147 page resource/support resource。Aura route から EC-CUBE route name ↔ URL path ↔ resource URI を接続する。 |
-| SQL | Ray.MediaQuery の 51 interface / 143 `#[DbQuery]` / 143 SQL file。PHP実クラスのPDO adapterではなく、interface + SQL file が永続化境界。 |
-| HTML | `var/templates` に 131 Twig template。storefront 全ページと in-scope admin editor waves を移植済み。 |
-| Tests | `docs/migration-status.md` のベースラインを正とする。非SQL suite はDBなしで動く。SQL suite は malt DB を使う。現行 malt は MySQL 8.0 のため MariaDB target suite は skip される。 |
+| プロジェクトのゴール | [`docs/migration-goal-review.md`](docs/migration-goal-review.md) |
+| 実証として何を示せたか | [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) |
+| 現在の到達点 | [`docs/migration-status.md`](docs/migration-status.md) |
+| 完全代替への残差 | [`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) |
+| flow / workflow の考え方 | [`docs/flow-ontology.md`](docs/flow-ontology.md) |
+| ドキュメント全体の索引 | [`docs/README.md`](docs/README.md) |
 
-## What We Learned
+## リポジトリの見方
 
-- **仕様は実装より長く生きる。** EC-CUBE は framework を変えてきたが、「商品」「注文」「顧客」「配送」の語彙と遷移は残る。ALPS はその長寿命な部分を取り出す。
-- **移植は境界の宣言である。** ドメイン、リソース、HTML、SQL、compatibility adapter、production cutover を混ぜないと、残作業が「未知の不足」ではなく「既知の境界」になる。
-- **Fake は mock ではなく最初の実装である。** Fake で契約を固定し、Ray.MediaQuery/SQL が同じ Resource 契約を満たすことを hypermedia test で示す。
-- **AI エージェントには構造が効く。** ALPS、Be の `Input → Being → Final`、BEAR の URI/resource、MediaQuery の interface/SQL は、並列作業でも drift を抑える制約になる。
-
-## What Is Done / Not Done
-
-**Done:** EC-CUBE の機能を ALPS と route-status 表に棚卸しし、Be domain、BEAR resource、Ray.MediaQuery SQL 境界、storefront/admin HTML の主要面を実装した。移植中に得た再利用可能な知見は [`docs/skills/`](docs/skills/) と [`docs/methodology/`](docs/methodology/) に分離した。
-
-**Not done:** 本番 EC-CUBE の完全代替に必要な互換 fidelity と cutover は残る。中心は `doCreateOrder` / `doCheckout` の target-engine SQL 検証、PDF/CSV/Mail/Template/MasterData の byte/副作用互換、Mypage/Favorite/Address/Contact の HTML enrichment、production DB bring-up。これは未把握の穴ではなく、意図して切った境界です。
-
-## Difference from Symfony EC-CUBE
-
-BeMart は EC-CUBE の機能や画面構造を否定するものではありません。違いは、振る舞いの定義がどこにあるかです。
-
-| 観点 | EC-CUBE 4.3（Symfony） | BeMart |
-|---|---|---|
-| 振る舞いの定義 | Controller のコード | ALPS の意味論（契約） |
-| 「何ができるか」を知る | コードを読む | 契約を読む |
-| 層の境界 | 慣習として存在する | テストで固定された契約 |
-| 実装の選択 | 環境設定 | Context / DI が選ぶ。コードは知らない |
-| 仕様の所在 | 実装の中 | 実装の外（`alps.json`） |
-
-意味論は実装より長く生きる。EC-CUBE は 2.x → 3.x → 4.x とフレームワークを変えてきたが、「商品」「注文」「顧客」の語彙は変わっていない。
-
-## Core Ideas
-
-- **Semantics first** — ALPSで descriptor、transition、actor、page role を明示する。
-- **Fake → Schema → Ray.MediaQuery** — Fakeで契約を固定し、EC-CUBEスキーマ照合後に interface + SQL file として永続化境界を実装する。
-- **Explicit boundaries** — ドメイン、インフラ、リソース、HTML、SQLの境界を隠さない。
-- **Context chooses implementation** — アプリケーションは Fake / SQL のどちらが有効かを知らない。
-- **Hypermedia is a contract** — 画面は表示だけでなく、リンクとフォームが次状態への affordance になって完了。
-
-## Architecture Boundaries
-
-| Boundary | Role |
+| レイヤ | 主な成果物 |
 |---|---|
-| ALPS | アプリケーション意味論・情報構造 |
-| Be Framework | ドメイン境界（`Input` / `Being` / `Final`） |
-| Ray.MediaQuery | ドメイン ↔ インフラ境界。PHP interface / return type ↔ SQL file / result |
-| BEAR.Sunday | ドメイン ↔ リソース境界（`ResourceObject` / URI / HTTP method） |
-| Hypermedia | リソース ↔ クライアント遷移境界（`#[Link]` / `href` / `form action`） |
-| Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
-| SQL schema | 永続化境界（table / column / FK / nullable / id shape） |
+| 意味論 | [`alps.json`](alps.json), [`alps.json.html`](alps.json.html), [`alps-doc/`](alps-doc/) |
+| ドメイン | [`be/src`](be/src) |
+| Resource | [`src/Resource`](src/Resource) |
+| SQL 境界 | [`var/sql`](var/sql), [`sql/`](sql) |
+| HTML | [`var/templates`](var/templates), [`public/`](public) |
+| テスト | [`tests`](tests), [`tests/README.md`](tests/README.md) |
+| 文書 | [`docs`](docs), [`docs/README.md`](docs/README.md) |
 
-Taint tracking、cache freshness、DIP / ADP も境界制約として扱いますが、READMEでは詳細化しません。背景は [`docs/methodology/`](docs/methodology/) と [`docs/skills/`](docs/skills/) を参照してください。
+正典の ALPS profile は [`alps.json`](alps.json) です。`alps.json.html` や
+`docs/alps.json.html` は生成物です。
 
-## Migration Workflow
+## ステータス要約
 
-移植は2つの動きでできています —— 逆算と投影。
+詳細な数値と判断は [`docs/migration-status.md`](docs/migration-status.md) を正とします。
+README では全体像だけを示します。
 
-**逆算 — レガシーから契約を取り出す。**
-
-まず EC-CUBE 4.3 のソースから情報設計をやり直します。Doctrine Entity（語彙）・`@Route`（状態遷移）・Controller（操作の意味）・Twig テンプレート（画面のデータ）—— 4つの情報源を読み、ソースに散らばっていた「何ができて、データがどう流れるか」を機械可読な契約 `alps.json` に束ねる。全ディスクリプタに情報源タグ（`src-entity` / `src-router` / `src-controller` / `src-template`）が付き、どのフィールドがどのソースに由来するか追跡できる。この逆算の経緯は記事 [ソースコードから情報設計を逆算する](docs/index.md) に詳しい。
-
-**投影 — 契約から実装を起こす。**
-
-確定した ALPS を起点に、下のレイヤを順に実装します。実装順は固定：
-
-```text
-ALPS → Fake → EC-CUBE schema alignment → Ray.MediaQuery SQL → Resource/Form → HTML/Browser
-```
-
-Fake は後付け mock ではなく、最初の契約実装。Ray.MediaQuery SQL は後から同じ契約を満たすことをテストで証明する。実装の選択は Context / DI binding が行うため、アプリケーションコードは Fake / SQL の違いを知らない。
-
-契約はレガシーから生まれ、実装は契約から生まれる。
-
-## Hypermedia and HTML Policy
-
-HTML は EC-CUBE 4.3 の Twig 構造をできるだけ忠実に移植します。ただし、BeMartに存在しないデータは捏造せず、差分は residual として明示します。
-
-未対応機能のリンクやボタンは隠しません。JS有効時は alert で未対応を説明し、JS無効時は安全な `501 Not Implemented` にフォールバックします。これはEC-CUBEの情報構造と affordance を画面上に残すためです。
-
-ハイパーメディアテストの考え方は [`docs/methodology/hypermedia-test-principle.md`](docs/methodology/hypermedia-test-principle.md) を参照してください。
-
-## Testing
-
-BeMartでは、テストを単なる回帰確認ではなく **境界契約** として扱います。
-
-| Test | Checks |
+| 境界 | 証拠 |
 |---|---|
-| Resource tests | ResourceObject status / body / headers / links |
-| SQL tests | SQL実装がFake契約と同型であること |
-| HTML render tests | EC-CUBE Twig忠実度とresidual |
-| Hypermedia tests | PHP内と実HTTPで link / form / route が解決されること |
-| Browser smoke | 実ブラウザで主要導線が成立すること |
+| ALPS | 532 descriptor / 207 transition descriptor |
+| Be domain | Input / Being / Final が状態遷移の意味を表す |
+| BEAR Resource | EC-CUBE route が ResourceObject 境界へ接続されている |
+| SQL | Ray.MediaQuery interface と SQL file が永続化境界を分離する |
+| HTML | storefront と in-scope admin の Twig 構造を移植済み |
+| Tests | Resource / SQL / HTML render / Hypermedia / HTTP / Browser 系で境界を検証する |
 
-Static analysis / taint tracking と cache freshness check は導入中の品質ゲートです。
+重要な区別は次の通りです。
 
-## Scope — 実証完了と「完全代替」への差分
+- セマンティック移植の実証: ほぼ成立。
+- EC-CUBE 完全代替: 互換 fidelity と production proof が残る。
 
-BeMart は **実証プロジェクト** です。EC-CUBE 4.3 の全ルート・全機能を [`alps.json`](alps.json) と [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) に棚卸しした上で、移植手法（ALPS → Be Framework → BEAR.Sunday → Ray.MediaQuery → HTML）の実証として価値のある範囲を完了しています。
+残差の詳細は
+[`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) に分離しています。
+PDF、CSV、Mail、Template、MasterData、SQL target-engine 検証、production DB bring-up、
+一部 HTML enrichment が主な対象です。
 
-> ALPS 532 descriptor / 207 transition descriptor · Be domain 147 Input / 148 Final / 155 Semantic · Ray.MediaQuery 51 interface / 143 SQL query · HTML 131 Twig templates
+## 基本方針
 
-残るのは「実証としては不要だが、本番 EC-CUBE の **完全代替** には必要」な差分だけです。**これは未知の不足ではなく、私たちが EC-CUBE 全体を把握した上で意図的に保留した既知の残作業**です。下記がすべて fix されれば、BeMart は EC-CUBE 4.3 の完全な代替になります。
+- ALPS を意味論の source of truth とする。
+- Be Framework でドメイン状態遷移を表す。
+- BEAR.Sunday Resource で HTTP / PHP 共通の Resource 境界を作る。
+- Ray.MediaQuery で SQL を interface 境界に閉じ込める。
+- Twig HTML は EC-CUBE の affordance をできるだけ保持する。
+- Hypermedia test は controller 内部ではなく、link / form を辿って workflow を証明する。
 
-### A. ドメイン stub（入力は受理するが永続副作用なし）
+workflow test の方針は
+[`docs/methodology/hypermedia-test-principle.md`](docs/methodology/hypermedia-test-principle.md) と
+[`tests/README.md`](tests/README.md) を参照してください。
 
-- 受注確定 — `doCreateOrder` / `doCheckout`（PurchaseFlow + `dtb_order_item` snapshot writes は実装済み。残りは `order_item_register.sql` の MariaDB 10.11 target-engine 検証または `JSON_TABLE` なしの INSERT への置換）
-- 商品CSV — `doImportProductCsv`（この移植では export-only として扱い、意図的に未移植）
-- CSV設定 — `doUpdateCsv`（column config は保持するが、その設定を消費する全 export Final の互換 fidelity は残る）
-- プラグイン lifecycle — `doInstallPlugin`（download・unzip・migrate・container 再生成なし。plugin scope は out-of-scope）
-
-### B. EC-CUBE 互換 fidelity 残差（[#24](https://github.com/koriym/ec-cube-alps/issues/24)）
-
-- PDF — 帳票レイアウト完全一致 / `dtb_order_pdf` 保存設定 / 複数配送（到達・download ヘッダ・`%PDF-` 生成は実装済み）
-- CSV — EC-CUBE 互換フォーマット + streaming/download 境界
-- Mail — 本文生成 / テンプレート解決 / 送信の忠実再現
-- Template 管理 — install / download / delete / select の file 副作用
-- MasterData adapter
-
-### C. HTML enrichment backlog（resource body が薄く忠実移植に未到達）
-
-- Mypage dashboard / Favorite / Address / Contact
-
-### D. 設計上の out-of-scope
-
-- プラグイン機構・マーケットプレイス（[#3](https://github.com/koriym/ec-cube-alps/issues/3) — Anti-Corruption Layer による恒久 legacy 同居の研究構想）
-- 管理 Store/Plugin install/search サブツリー（~14 ページ）
-
-### E. 本番移行
-
-- 本番 DB の bring-up / cutover（seed script と prod `SqlModule` binding は実装済み）
-
-最新の詳細は [`docs/migration-status.md`](docs/migration-status.md) §4 Outstanding work、互換隔離の進行は [#24](https://github.com/koriym/ec-cube-alps/issues/24) を参照してください。
-
-## Quick Links
-
-| Document | Purpose |
-|---|---|
-| [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) | 実証総括 — 何を示せたか・知見・限界 |
-| [`docs/skills/`](docs/skills/) | 移植中に発見した再利用可能な境界ルール（G-14〜G-25） |
-| [`docs/methodology/`](docs/methodology/) | Hypermedia test、Ray.MediaQuery、AI時代の Be/BEAR などの方法論 |
-| [`alps-doc/`](alps-doc/) | ALPS descriptor の `link rel="describedby"` から参照する長文の意味論・技術補足 |
-| [`alps.json`](alps.json) / [`alps.json.html`](alps.json.html) | ALPS プロファイルと HTML ドキュメント |
-| [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI 出力と HTML ドキュメント |
-| [`docs/migration-status.md`](docs/migration-status.md) | 移植ステータス（正） |
-| [`docs/html-screen-migration-matrix.md`](docs/html-screen-migration-matrix.md) | 画面 / ルート移植マトリクス |
-| [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ 実装状態 ↔ 移植難易度 |
-| [`docs/tag.md`](docs/tag.md) | ALPS タグ分類 |
-| [`docs/README.md`](docs/README.md) | ドキュメント索引 |
-
-## Repository Map
-
-| Path | Purpose |
-|---|---|
-| `alps.json` | 正典 ALPS プロファイル |
-| `alps-doc/` | `alps.json` の descriptor 内 `link rel="describedby"` から参照する詳細説明。`doc.value` に収めると読みにくい意味論・境界・実装根拠を置く |
-| `be/` | Be Framework ドメイン層 |
-| `src/` | BEAR.Sunday アプリケーション / リソース層 |
-| `var/templates/` | EC-CUBE Twig HTML 移植 |
-| `public/` | HTTP フロントコントローラと静的アセット |
-| `sql/` | EC-CUBE スキーマ・seed データ・SQL setup |
-| `docs/` | プロジェクトドキュメントと GitHub Pages 成果物 |
-| `tests/` | Resource / SQL / HTML render / HTTP hypermedia テスト |
-
-最新ステータスは [`docs/migration-status.md`](docs/migration-status.md)、画面移植状況は [`docs/html-screen-migration-matrix.md`](docs/html-screen-migration-matrix.md) を参照してください。
-
-## Commands
+## よく使うコマンド
 
 ```bash
-# Validate ALPS
+# ALPS validation
 asd --validate alps.json
 
-# Generate ALPS HTML / SVG
+# ALPS generated docs
 asd -f html -o alps.json.html alps.json
 asd -f svg -o alps.svg alps.json
 
-# Serverless request runner (method + path/query)
+# Serverless request runner
 composer fake -- get '/products/list'
-composer dev -- post '/shopping/checkout?preOrderId=aaaa00000000000000000000000000000000aaaa&csrfToken=fake-csrf-token-bemart-2026'
 composer page -- get '/'
 
-# Run tests
+# Tests
 vendor/bin/phpunit
-vendor/bin/phpunit tests/Http/HttpHypermediaTest.php
 vendor/bin/phpunit tests/Resource/Sql
+composer test:http
 ```
 
-各エントリポイントは既定の context を固定します（`bin/fake.php` → `cli-fake-hal-api-app`、`bin/page.php` → `cli-html-hal-app`）。`APP_CONTEXT` は一時的な上書き用の escape hatch にすぎません。SQL テストは [`malt.json`](malt.json) の DB を `malt start` で起動し、`DATABASE_URL` で接続します。
+この環境では PHP 8.5 を使います。
 
-## References
+```bash
+zsh -ic 'sphp85; composer tests'
+```
+
+SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
+[`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) と
+[`docs/migration-status.md`](docs/migration-status.md) を参照してください。
+
+## 生成・公開物
+
+GitHub Pages root: <https://koriym.github.io/ec-cube-alps/>
+
+| 成果物 | 役割 |
+|---|---|
+| [`alps.json.html`](alps.json.html) | ALPS 生成ドキュメント |
+| [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI projection |
+| [`docs/alps.json.html`](docs/alps.json.html) | GitHub Pages 用 ALPS ドキュメント |
+| [`docs/openapi.html`](docs/openapi.html) | GitHub Pages 用 OpenAPI ドキュメント |
+| [`docs/index.md`](docs/index.md) | 初期記事: EC-CUBE ソースから ALPS を逆算した記録 |
+
+生成 HTML は、生成元がある場合は手で編集しません。
+
+## 外部参照
 
 - [ALPS manual](https://www.app-state-diagram.com/manuals/1.0/ja/index.html)
 - [app-state-diagram](https://github.com/alps-asd/app-state-diagram)
