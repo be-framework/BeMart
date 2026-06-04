@@ -32,7 +32,7 @@ class CustomerInquiryWorkflowTest extends AbstractWorkflowTest
     {
         $top = $this->resource->get('page://self/');
         $this->assertSame(Code::OK, $top->code);
-        $this->assertSame('goTop', $this->bodyString($top, 'transitionId'));
+        $this->assertSame('goTop', $this->transitionId($top));
         $this->assertSame('page://self/contact', $this->link($top, 'goContactForm'));
 
         return $top;
@@ -43,7 +43,7 @@ class CustomerInquiryWorkflowTest extends AbstractWorkflowTest
     public function testContactForm(ResourceObject $response): ResourceObject
     {
         $contact = $this->follow($response, 'goContactForm');
-        $this->assertSame('goContactForm', $this->bodyString($contact, 'transitionId'));
+        $this->assertSame('goContactForm', $this->transitionId($contact));
         $this->assertSame('page://self/contact', $this->submitTo($contact, 'POST'));
 
         return $contact;
@@ -75,7 +75,7 @@ class CustomerInquiryWorkflowTest extends AbstractWorkflowTest
         $this->assertSame('/contact/complete', $this->header($response, 'Location'));
         $complete = $this->resource->get('page://self/contact/complete');
         $this->assertSame(Code::OK, $complete->code);
-        $this->assertSame('goContactComplete', $this->bodyString($complete, 'transitionId'));
+        $this->assertSame('goContactComplete', $this->transitionId($complete));
         $this->assertSame('page://self/', $this->link($complete, 'goTop'));
 
         return $complete;
@@ -86,6 +86,6 @@ class CustomerInquiryWorkflowTest extends AbstractWorkflowTest
     public function testGoTop(ResourceObject $response): void
     {
         $top = $this->follow($response, 'goTop');
-        $this->assertSame('goTop', $this->bodyString($top, 'transitionId'));
+        $this->assertSame('goTop', $this->transitionId($top));
     }
 }
