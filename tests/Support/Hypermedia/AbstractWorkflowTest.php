@@ -38,6 +38,12 @@ abstract class AbstractWorkflowTest extends TestCase
         return $next;
     }
 
+    /** @param array<string, mixed> $query */
+    protected function post(ResourceObject $response, array $query): ResourceObject
+    {
+        return $this->resource->post($this->unsafeTarget($response, 'POST'), $query);
+    }
+
     protected function link(ResourceObject $response, string $rel): string
     {
         $body = $response->body;
@@ -50,7 +56,7 @@ abstract class AbstractWorkflowTest extends TestCase
         return $href;
     }
 
-    protected function submitTo(ResourceObject $response, string $method): string
+    private function unsafeTarget(ResourceObject $response, string $method): string
     {
         $body = $response->body;
         $this->assertIsArray($body);
