@@ -40,6 +40,7 @@ final class ContactResourceTest extends TestCase
             ['contactName01', 'contactName02', 'contactEmail', 'contactContents', 'csrfToken'],
             $ro->body['fields'],
         );
+        $this->assertSame('doSubmitContact', $ro->body['submitTo']['rel']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/contact', $ro->body['submitTo']['href']);
         // `csrfToken` carries the trusted reference the HTML form must

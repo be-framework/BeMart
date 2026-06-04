@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use Be\Framework\BecomingInterface;
-use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Final\ContactSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitContactInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
@@ -64,6 +64,7 @@ class Contact extends ResourceObject
                 'csrfToken',
             ],
             'submitTo' => [
+                'rel' => 'doSubmitContact',
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],

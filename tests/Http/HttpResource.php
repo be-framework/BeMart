@@ -136,13 +136,14 @@ final class HttpResource implements ResourceInterface
         }
 
         $submitTo = $body['submitTo'] ?? null;
-        if (! str_starts_with($rel, 'do') || ! is_array($submitTo)) {
+        if (! is_array($submitTo)) {
             throw new UnsupportedResourceOperationException(sprintf('Link rel `%s` is not available.', $rel));
         }
 
+        $submitRel = $submitTo['rel'] ?? null;
         $method = $submitTo['method'] ?? null;
         $href = $submitTo['href'] ?? null;
-        if (! is_string($method) || ! is_string($href)) {
+        if ($submitRel !== $rel || ! is_string($method) || ! is_string($href)) {
             throw new UnsupportedResourceOperationException(sprintf('Unsafe rel `%s` has no submit target.', $rel));
         }
 
