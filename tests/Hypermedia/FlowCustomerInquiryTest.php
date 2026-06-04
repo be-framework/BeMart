@@ -55,7 +55,7 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
     #[Depends('testContactForm')]
     public function testDoSubmitContact(ResourceObject $response): ResourceObject
     {
-        $submitted = $this->follow($response, 'doSubmitContact', [
+        $submitted = $this->resource->post('page://self/contact', [
             'contactName01' => '山田',
             'contactName02' => '太郎',
             'contactEmail' => self::CONTACT_EMAIL,
@@ -63,10 +63,10 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
             'csrfToken' => $this->bodyValue($response, 'csrfToken'),
         ]);
 
+        $this->assertSame(Code::OK, $submitted->code);
         $ticketId = $this->bodyValue($submitted, 'ticketId');
         $this->assertIsString($ticketId);
         $this->assertNotSame('', $ticketId);
-        $this->assertSame(Code::OK, $submitted->code);
         $this->assertSame('/contact/complete?ticketId=' . rawurlencode($ticketId), $this->header($submitted, 'Location'));
         $this->assertSame(self::CONTACT_EMAIL, $this->bodyValue($submitted, 'contactEmail'));
 

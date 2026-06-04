@@ -178,14 +178,18 @@ final class Bootstrap
             return $ro->code >= 400 ? 1 : 0;
         }
 
-        header('Content-Type: application/json; charset=utf-8');
+        $view = $ro->toString();
         foreach ($ro->headers as $name => $value) {
             if (is_string($value)) {
                 $this->emitHeader($name, $value, $statusCode);
             }
         }
 
-        echo json_encode($ro->body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
+        if (! isset($ro->headers['Content-Type'])) {
+            header('Content-Type: application/json; charset=utf-8');
+        }
+
+        echo $view;
 
         return $ro->code >= 400 ? 1 : 0;
     }

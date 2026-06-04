@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -41,6 +42,7 @@ class MasterData extends ResourceObject
     /**
      * @psalm-taint-source input $masterType
      */
+    #[Link(rel: 'doSelectMasterData', href: 'page://self/admin/master-data', method: 'put')]
     public function onGet(string $masterType = 'tag'): static
     {
         if ($this->adminSession->adminId === null) {
@@ -81,6 +83,7 @@ class MasterData extends ResourceObject
      *
      * @psalm-taint-source input $masterType
      */
+    #[Link(rel: 'doUpdateMasterData', href: 'page://self/admin/master-data-edit', method: 'put')]
     #[CsrfProtected]
     public function onPut(string $masterType = 'tag'): static
     {
