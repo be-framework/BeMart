@@ -10,7 +10,7 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 
 | 目的 | 読むもの |
 |---|---|
-| プロジェクトの意義を知る | [`../README.md`](../README.md) → [`FINAL-REPORT.md`](FINAL-REPORT.md) |
+| プロジェクトの意義を知る | [`../README.md`](../README.md) → [`migration-goal-review.md`](migration-goal-review.md) → [`FINAL-REPORT.md`](FINAL-REPORT.md) |
 | 最新の到達点を知る | [`migration-status.md`](migration-status.md) |
 | 残作業を始める | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) → `migration-status.md` §4 |
 | ALPS生成の背景を読む | [`index.md`](index.md) |
@@ -20,6 +20,10 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 
 | ファイル | 役割 |
 |---|---|
+| [`migration-goal-review.md`](migration-goal-review.md) | **ゴール再確認**。BeMart を semantic overhaul として再定義し、達成証拠・残差分類・実証結論・次フェーズ計画を整理する。 |
+| [`complete-replacement-residuals.md`](complete-replacement-residuals.md) | **完全代替残差台帳**。カバー率ではなく互換 fidelity と production verification として残っている項目を詳細化する。 |
+| [`flow-ontology.md`](flow-ontology.md) | **Flow ontology**。自然言語で定義された業務導線としての新しい `flow-*` 語彙を整理する。 |
+| [`flow-tag-migration-plan.md`](flow-tag-migration-plan.md) | **Flow tag 移行計画**。現行 `flow-*` を feature-area usage として扱い、`feature-*` と新しい `flow-*` に分離する手順。 |
 | [`FINAL-REPORT.md`](FINAL-REPORT.md) | **実証総括**。何を学び、何を成し遂げ、どこに限界を引いたかを一枚に束ねた documentary。各論への入口。 |
 | [`migration-status.md`](migration-status.md) | **移植ステータスの正**。ALPS / Be / Resource / Ray.MediaQuery / HTML のレイヤ別マトリクスと残作業 punch-list。「今どこまで出来ているか」はここが正。 |
 | [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) | EC-CUBE route/function ↔ ALPS ID ↔ BeMart実装状態 ↔ 移植難易度の生成HTML表。 |
