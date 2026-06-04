@@ -16,7 +16,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 
 ## プロジェクト名と monorepo レイアウト (2026-05-17)
 
-旧 `MyVendor.EcCube` (移植 pilot 用の作業 repo) を **BeMart** へ改称し、ALPS repo (`ec-cube-alps`) 内の monorepo に統合した。
+旧 `MyVendor.EcCube` (移植 pilot 用の作業 repo) を **BeMart** へ改称し、BeMart repo 内の monorepo に統合した。
 
 - **製品コンセプト:** BeMart = AI 駆動の EC-CUBE → BEAR.Sunday + Be Framework 全置換プロダクト。「Be (変容による存在) で生まれ変わる Mart」
 - **改称理由:** (a) 旧名は EC-CUBE 商標を連想させる、(b) Pilot 1+2 完了で「単発の参照実装」から「製品候補」へ昇格した
@@ -24,7 +24,7 @@ EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday �
 ### レイアウト
 
 ```
-ec-cube-alps/                            ← BEAR.Sunday アプリ (top)
+BeMart/                            ← BEAR.Sunday アプリ (top)
 ├── composer.json                        ← my-vendor/be-mart (path repo で be-mart-be を ref)
 ├── phpunit.xml                          ← bemart + bemart-be 2 testsuite
 ├── src/
@@ -52,7 +52,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 ### Pilot 1/2 履歴の参照先
 
 - **旧パス:** `~/git/MyVendor.EcCube/` (削除済み)
-- **新パス:** `~/git/ec-cube-alps/` (BEAR top) + `be/` (Be domain)
+- **新パス:** `~/git/BeMart/` (BEAR top) + `be/` (Be domain)
 - 以下 Pilot 1/2 セクションの「リポジトリ」欄も新パス前提で読む
 
 ---
@@ -142,7 +142,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 | 項目 | 値 |
 |---|---|
-| リポジトリ | `~/git/ec-cube-alps` |
+| リポジトリ | `~/git/BeMart` |
 | スコープ | Product container を ProductClass 平坦化形まで縮小 (`#[Embed]` による子リソース合成は別 Phase)。URL param は `productCode` (schema.org/sku 由来、ユニーク性) |
 | テスト | 8 passed (Domain 5 + Resource 3), 20 assertions |
 
@@ -186,7 +186,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 | 項目 | 値 |
 |---|---|
-| リポジトリ | `~/git/ec-cube-alps` |
+| リポジトリ | `~/git/BeMart` |
 | パターン | Cascade (3 段の Being chain + Final convergence)。`AddCartItemInput → QuantityAdjusted (Being) → CartMerged (Being) → CartItemAdded (Final)`。Stage 1 = ProductClass lookup + Stock cap + SaleLimit cap + SaleType 解決, Stage 2 = 既存 cart 検索 + item merge + delivery fee 集計, Stage 3 = 永続化のみ |
 | テスト | 21 passed (Pilot 1 既存 8 + Pilot 2 新規 13), 51 assertions, **0 notices** (Cascade refactor で導入された全 Semantic 変数を登録: `SessionPrefix` / `RequestedQuantity` / `AdjustedQuantity` / `UnitPrice` / `SaleTypeId` / `SaleTypeName` / `DeliveryFee` / `StockUnlimited` / `SaleLimit` / `CartKey` / `TotalPrice` / `DeliveryFeeTotal` / `MergedCart` の 13 件) |
 | Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (local dogfooding。Pilot 3 + 本番移植 10 件後に `be-framework-skills` plugin marketplace へ promote 候補) |
@@ -300,7 +300,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 | 項目 | 値 |
 |---|---|
-| リポジトリ | `~/git/ec-cube-alps` |
+| リポジトリ | `~/git/BeMart` |
 | パターン | **Linear Cascade (4 段) + Branching (1 段)**。`ConfirmOrderInput → PreOrderResolved (Being: 注文引き当て) → PurchaseFlowApplied (Being: 金額計算) → PaymentVerified (Being: 決済検証) → OrderConfirming (Being: discriminator 計算) → OrderConfirmed \| OrderConfirmFailed (Branching Final)`。`OrderConfirming::$being` の union 型 (`PaymentSuccessCase\|PaymentFailureCase`) を `BecomingType::match()` が読み、`#[Be([OrderConfirmed::class, OrderConfirmFailed::class])]` から型一致する Final を選択 |
 | テスト | 27 passed (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 新規 6), 79 assertions, **0 notices** |
 | Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (Cascade Diamond の成立条件と Linear 縮退ルール追記が必要) |
@@ -366,7 +366,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 | 項目 | 値 |
 |---|---|
-| リポジトリ | `~/git/ec-cube-alps` |
+| リポジトリ | `~/git/BeMart` |
 | パターン | **Multi-Reason Being (1 段) + Final (永続化)**。`RegisterCustomerInput → CustomerRegistering (Being: 4 つの独立 Reason 並列起動) → CustomerRegistered (Final: 永続化のみ)`。Being は (1) `EmailUniquenessCheckerInterface` (uniqueness fail-fast), (2) `CustomerIdQueryInterface` (32-char opaque hex), (3) `PasswordHasherInterface` (bcrypt), (4) `CustomerInitialPointInterface` (welcome bonus) を `#[Inject]` で並列に呼ぶ。各 Reason の結果 (customerId / passwordHash / initialPoint / customerStatus=2 固定) は Being 自身の readonly プロパティに格納され、`#[Input]` 経由で Final に forward |
 | テスト | 39 passed (Pilot 1 既存 8 + Pilot 2 既存 13 + Pilot 3 既存 6 + Pilot 4 新規 12), 111 assertions, **0 notices** (Pilot 4 で 19 件の Semantic 変数を新規登録: client-input 15 件 `Email` / `Password` / `Name01` / `Name02` / `Kana01` / `Kana02` / `CompanyName` / `PhoneNumber` / `PostalCode` / `Pref` / `Addr01` / `Addr02` / `Birth` / `Sex` / `Job` + server-derived 4 件 `CustomerId` / `PasswordHash` / `InitialPoint` / `CustomerStatus` を MergedCart パターン (空 `#[Validate]` body) で登録) |
 | Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (Multi-Reason Being テンプレ追加が必要) |
@@ -459,7 +459,7 @@ namespace 関係: `MyVendor\BeMart\` (BEAR) ⊃ `MyVendor\BeMart\Be\` (Be domain
 
 | 項目 | 値 |
 |---|---|
-| リポジトリ | `~/git/ec-cube-alps` |
+| リポジトリ | `~/git/BeMart` |
 | パターン | **Diamond-Cascade (2 段 Being + Multi-side-effect Final)**。`CheckoutInput → CheckoutPrepared (Being: pre-order 取得 + 金額確定) → CheckoutSettled (Being: 在庫引当 → 決済 → 注文番号発番、3 Reason の strict sequence) → CheckoutCompleted (Final: 注文永続化 + メール送信 + カートクリアの 3 副作用収束)`。失敗時は Branching Final を使わず Reason 内 DomainException → Resource 層 HTTP code マッピング (Pilot 3 で Branching は検証済みのため重複を避けた) |
 | テスト | 52 passed (Pilot 1-4 既存 39 + Pilot 5 新規 13), 149 assertions, **0 notices** (Pilot 5 で server-derived Semantic 3 件 `OrderNo` / `OrderDate` / `PaymentDate` を MergedCart パターン (空 `#[Validate]` body) で追加。client-input 側は Pilot 3 の `PreOrderId` / `PaymentMethodId` を再利用) |
 | Skill 配置 | `~/.claude/skills/alps-to-be-bear/` (Multi-side-effect Final テンプレ + Ray.Di `toInstance` 注意書きの追加が必要) |
@@ -2164,9 +2164,9 @@ This section closes the long HTML-migration session and records the exact reposi
 
 ### Repository state
 
-- Working directory: `~/git/be-bemart`
+- Working directory: `~/git/BeMart`
 - Branch: `be-first-migration-bootstrap`
-- Remote: `origin https://github.com/koriym/ec-cube-alps.git`
+- Remote: `origin https://github.com/be-framework/BeMart.git`
 - Pushed head: `e651b5e Align template upload screen with upstream port`
 - Push completed: `origin/be-first-migration-bootstrap` is in sync with local `be-first-migration-bootstrap` at close time.
 
@@ -2224,7 +2224,7 @@ Result: ALPS valid; selected PHPUnit green — `23 tests / 114 assertions`, with
 ### Recommended first prompt for the next session
 
 ```text
-~/git/be-bemart で作業します。branch は be-first-migration-bootstrap です。
+~/git/BeMart で作業します。branch は be-first-migration-bootstrap です。
 前セッションは e651b5e まで push 済みです。
 まず docs/HANDOVER.md, docs/HOW_TO_CONTINUE.md, docs/migration-status.md,
 docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.md を読んで、
@@ -2246,8 +2246,8 @@ docs/html-screen-migration-matrix.md, docs/skills/G-24-ray-media-query-boundary.
 
 ### 追加ドキュメント
 
-- `~/git/be-bemart/docs/methodology/html-route-coverage.md`
-- `~/git/be-bemart/docs/methodology/sql-test-baseline.md`
+- `~/git/BeMart/docs/methodology/html-route-coverage.md`
+- `~/git/BeMart/docs/methodology/sql-test-baseline.md`
 
 ### 検証結果
 
