@@ -125,12 +125,12 @@ SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 
 | 成果物 | 役割 |
 |---|---|
-| [ALPS docs](https://koriym.github.io/ec-cube-alps/alps.json.html) | ALPS 生成ドキュメント |
-| [BEAR.ApiDoc](https://koriym.github.io/ec-cube-alps/api/) | BEAR.Sunday Page Resource API ドキュメント |
-| [API terms](https://koriym.github.io/ec-cube-alps/api/terms.html) | BEAR.ApiDoc の Term Usage Index |
-| [API OpenAPI JSON](https://koriym.github.io/ec-cube-alps/api/openapi.json) | BEAR.ApiDoc から生成される OpenAPI 3.1 JSON |
-| [API llms.txt](https://koriym.github.io/ec-cube-alps/api/llms.txt) | BEAR.ApiDoc から生成される LLM 向け API 要約 |
-| [初期記事](https://koriym.github.io/ec-cube-alps/) | EC-CUBE ソースから ALPS を逆算した記録 |
+| [ALPS docs](https://be-framework.github.io/BeMart/alps.json.html) | ALPS 生成ドキュメント |
+| [BEAR.ApiDoc](https://be-framework.github.io/BeMart/api/) | BEAR.Sunday Page Resource API ドキュメント |
+| [API terms](https://be-framework.github.io/BeMart/api/terms.html) | BEAR.ApiDoc の Term Usage Index |
+| [API OpenAPI JSON](https://be-framework.github.io/BeMart/api/openapi.json) | BEAR.ApiDoc から生成される OpenAPI 3.1 JSON |
+| [API llms.txt](https://be-framework.github.io/BeMart/api/llms.txt) | BEAR.ApiDoc から生成される LLM 向け API 要約 |
+| [初期記事](https://be-framework.github.io/BeMart/) | EC-CUBE ソースから ALPS を逆算した記録 |
 
 生成 HTML は、生成元がある場合は手で編集しません。
 
