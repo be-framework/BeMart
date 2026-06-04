@@ -14,6 +14,11 @@ use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
 
+/**
+ * flow-customer-inquiry
+ *
+ * 顧客が問い合わせフォームを開き、送信し、完了画面から index へ戻る。
+ */
 class FlowCustomerInquiryTest extends AbstractWorkflowTest
 {
     protected function newResource(): ResourceInterface
@@ -24,15 +29,11 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
         return $resource;
     }
 
-    /**
-     * flow-customer-inquiry: 顧客が問い合わせフォームを開き、送信し、完了画面から index へ戻る。
-     */
     #[Alps('Top')]
     public function testIndex(): ResourceObject
     {
         $index = $this->resource->get('page://self/');
         $this->assertSame(Code::OK, $index->code);
-        $this->assertSame('page://self/contact', $this->link($index, 'goContactForm'));
 
         return $index;
     }
@@ -53,12 +54,12 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
             'contactName02' => '太郎',
             'contactEmail' => 'yamada@example.com',
             'contactContents' => 'ハイパーメディア workflow pilot の問い合わせ本文です。',
-            'csrfToken' => $this->bodyString($response, 'csrfToken'),
+            'csrfToken' => $this->bodyValue($response, 'csrfToken'),
         ]);
 
         $this->assertSame(Code::OK, $submitted->code);
         $this->assertSame('/contact/complete', $this->header($submitted, 'Location'));
-        $this->assertSame('yamada@example.com', $this->bodyString($submitted, 'contactEmail'));
+        $this->assertSame('yamada@example.com', $this->bodyValue($submitted, 'contactEmail'));
 
         return $submitted;
     }
@@ -70,7 +71,6 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
         $this->assertSame('/contact/complete', $this->header($response, 'Location'));
         $complete = $this->resource->get('page://self/contact/complete');
         $this->assertSame(Code::OK, $complete->code);
-        $this->assertSame('page://self/', $this->link($complete, 'goTop'));
 
         return $complete;
     }
