@@ -181,8 +181,7 @@ SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 | [API terms](https://be-framework.github.io/BeMart/api/terms.html) | BEAR.ApiDoc の Term Usage Index |
 | [API OpenAPI JSON](https://be-framework.github.io/BeMart/api/openapi.json) | BEAR.ApiDoc から生成される OpenAPI 3.1 JSON |
 | [API llms.txt](https://be-framework.github.io/BeMart/api/llms.txt) | BEAR.ApiDoc から生成される LLM 向け API 要約 |
-| [GitHub Pages index](https://be-framework.github.io/BeMart/) | ALPS / ApiDoc / review documents への profile-declared 入口 |
-| [初期記事](https://be-framework.github.io/BeMart/archive/alps-profile-generation.html) | EC-CUBE ソースから ALPS を逆算した記録 |
+| [初期記事](https://be-framework.github.io/BeMart/) | EC-CUBE ソースから ALPS を逆算した記録 |
 
 生成 HTML は、生成元がある場合は手で編集しません。
 
