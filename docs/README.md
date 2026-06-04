@@ -1,7 +1,7 @@
 # docs/ — ドキュメント索引
 
 `docs/` はプロジェクト文書の置き場であり、同時に GitHub Pages の publish root
-（`docs/_config.yml`）でもある。GitHub Pages root: <https://koriym.github.io/ec-cube-alps/>
+（`docs/_config.yml`）でもある。
 
 全体の入口は repo ルートの [`README.md`](../README.md)。このファイルは
 `docs/` 配下の文書を「何を知りたいか」で引けるようにする索引である。
