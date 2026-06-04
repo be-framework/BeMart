@@ -72,11 +72,7 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
     #[Depends('testDoSubmitContact')]
     public function testContactComplete(ResourceObject $response): ResourceObject
     {
-        $this->assertSame('/contact/complete', $this->header($response, 'Location'));
-        $complete = $this->resource->get('page://self/contact/complete');
-        $this->assertSame(Code::OK, $complete->code);
-
-        return $complete;
+        return $this->followLocation($response, '/contact/complete');
     }
 
     #[Alps('goTop')]
