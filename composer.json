@@ -29,6 +29,7 @@
         "tecnickcom/tcpdf": "^6.2"
     },
     "require-dev": {
+        "bear/api-doc": "1.x-dev",
         "cweagans/composer-patches": "^1.7",
         "koriym/php-server": "^1.0",
         "phpunit/phpunit": "^10.0",

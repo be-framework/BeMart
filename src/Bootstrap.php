@@ -160,11 +160,12 @@ final class Bootstrap
             return $ro->code >= 400 ? 1 : 0;
         }
 
-        http_response_code($this->httpStatusCode($ro->code, $isHtml, $isRedirect));
+        $statusCode = $this->httpStatusCode($ro->code, $isHtml, $isRedirect);
+        http_response_code($statusCode);
         if ($isHtml) {
             foreach ($ro->headers as $name => $value) {
                 if (is_string($value)) {
-                    header($name . ': ' . $value);
+                    $this->emitHeader($name, $value, $statusCode);
                 }
             }
 
@@ -180,13 +181,24 @@ final class Bootstrap
         header('Content-Type: application/json; charset=utf-8');
         foreach ($ro->headers as $name => $value) {
             if (is_string($value)) {
-                header($name . ': ' . $value);
+                $this->emitHeader($name, $value, $statusCode);
             }
         }
 
         echo json_encode($ro->body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         return $ro->code >= 400 ? 1 : 0;
+    }
+
+    private function emitHeader(string $name, string $value, int $statusCode): void
+    {
+        if (strtolower($name) === 'location') {
+            header($name . ': ' . $value, true, $statusCode);
+
+            return;
+        }
+
+        header($name . ': ' . $value);
     }
 
     private function httpStatusCode(int $resourceCode, bool $isHtml, bool $isRedirect): int
