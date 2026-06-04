@@ -14,11 +14,19 @@ use function strtolower;
 
 abstract class AbstractWorkflowTest extends TestCase
 {
+    /** @var array<class-string, ResourceInterface> */
+    private static array $resources = [];
+
     protected ResourceInterface $resource;
 
     protected function setUp(): void
     {
-        $this->resource = $this->newResource();
+        $this->resource = self::$resources[static::class] ??= $this->newResource();
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        unset(self::$resources[static::class]);
     }
 
     abstract protected function newResource(): ResourceInterface;
@@ -64,6 +72,11 @@ abstract class AbstractWorkflowTest extends TestCase
         $this->assertIsString($value);
 
         return $value;
+    }
+
+    protected function transitionId(ResourceObject $response): string
+    {
+        return $this->bodyString($response, 'transitionId');
     }
 
     protected function header(ResourceObject $response, string $name): string|null
