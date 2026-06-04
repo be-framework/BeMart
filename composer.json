@@ -59,8 +59,13 @@
             "@test"
         ],
         "sa": [
+            "@cs",
             "@psalm"
         ],
+        "cs": [
+            "@cs:alps"
+        ],
+        "cs:alps": "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
         "psalm": "./vendor/bin/psalm --no-cache --no-progress",
         "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
         "coverage": "php -dzend_extension=xdebug.so -dxdebug.mode=coverage ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage",
@@ -114,6 +119,8 @@
         "test:http": "Run the HTTP PHPUnit suite.",
         "test:smoke": "Run smoke tests.",
         "sa": "Run static analysis.",
+        "cs": "Run lightweight consistency checks.",
+        "cs:alps": "Validate the canonical ALPS profile with asd.",
         "psalm": "Run Psalm without cache/progress output.",
         "psalm-taint": "Run Psalm taint analysis.",
         "coverage": "Run PHPUnit with Xdebug coverage output.",
