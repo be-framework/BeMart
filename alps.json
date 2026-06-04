@@ -5,7 +5,7 @@
     "title": "EC-CUBE 4.3 アプリケーションプロファイル",
     "doc": {"value": "EC-CUBE 4.3 — Symfony 6.4 ベースの日本語ECオープンプラットフォーム。顧客向けフロントと管理画面の両方の操作を統一データモデル上で定義する。"},
     "link": [
-      {"rel": "describedby", "href": "tag.md", "title": "タグ分類体系"}
+      {"rel": "describedby", "href": "tag.html", "title": "タグ分類体系"}
     ],
     "descriptor": [
 
@@ -2209,6 +2209,6 @@
         "tag": "admin-system flow-manage-system actor-admin src-router feature-admin-system flow-admin-csv-exchange",
         "doc": {"value": "CSV 出力フォーマット設定を更新する。受注・商品・顧客 CSV 各種について列の表示有無と順序を構成。"}}
     ],
-    "ext": [{"id": "tags", "href": "tag.md", "value": "タグ分類体系の説明"}]
+    "ext": [{"id": "tags", "href": "tag.html", "value": "タグ分類体系の説明"}]
   }
 }
