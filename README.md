@@ -27,11 +27,16 @@ Symfony 版 EC-CUBE の controller rewrite ではありません。EC-CUBE が�
 > 巨大な既存 EC アプリケーションを、実装の移し替えではなく、意味の分解と境界の再構成として
 > 移植できるか。
 
-現時点の答えは、かなり強く「可能」です。ALPS に逆算した意味を、ドメイン、Resource、
-SQL、HTML、workflow test へ投影できることは示せました。
+現時点で確認できたのは、EC-CUBE の実装に埋め込まれた語彙、状態遷移、永続化制約、
+HTTP affordance、HTML 表現を `alps.json` へ逆算し、それを Be domain、BEAR Resource、
+Ray.MediaQuery SQL、Twig HTML、workflow test へ接続できることです。移植後の実装が
+動くだけでなく、移植の根拠を ALPS、型、SQL、Resource、test の各境界に残せることを
+示しています。
 
-残っている中心は、もう広い機能カバー率の問題ではありません。本番 EC-CUBE の完全代替に必要な
-互換 fidelity と production verification の問題です。
+一方で、完全代替の結論は別問題です。残っている中心は、機能カバー率の粗い穴ではなく、
+HTML 忠実度、業務詳細、運用データ、production bring-up、実環境での検証です。したがって
+現時点の結論は、セマンティック移植の方法は成立したが、完全代替には互換 fidelity と
+production verification を詰める必要がある、というものです。
 
 ## 移植の型
 
