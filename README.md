@@ -98,6 +98,9 @@ composer doc:alps
 # BEAR.ApiDoc only
 composer doc:api
 
+# Lightweight consistency checks
+composer cs
+
 # Serverless request runner
 composer fake -- get '/products/list'
 composer page -- get '/'
