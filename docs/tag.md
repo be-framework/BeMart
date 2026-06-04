@@ -12,7 +12,7 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 | `route-` | 外部/EC-CUBEルート対応 | route-ec-cube |
 | （なし） | ドメイン | catalog, order, checkout |
 
-## Feature area（現行 `flow-*` と `feature-*` の移行期間）
+## 機能領域（Feature area、現行 `flow-*` と `feature-*` の移行期間）
 
 既存 `alps.json` の旧 `flow-*` は、実態としては Feature matrix 用の機能領域タグとして使われてきた。これはカバー率を見るには有効だが、ハイパーメディアとして意味ある遷移列を表す「flow」ではない。
 
@@ -22,7 +22,7 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 
 現在の `alps.json` では、旧 `flow-*` を互換用に残しつつ、対応する `feature-*` を併記している。自然言語で定義された新しい業務導線も `flow-*` として追加済みである。移行計画は [`flow-tag-migration-plan.md`](flow-tag-migration-plan.md)、新しい flow 語彙は [`flow-ontology.md`](flow-ontology.md) を参照する。
 
-### Legacy feature-area tags（互換用に残す旧 `flow-*`）
+### 旧機能領域タグ（Legacy feature-area tags、互換用に残す旧 `flow-*`）
 
 | タグ | 説明 |
 |------|------|
@@ -43,7 +43,7 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 | flow-manage-mail | 管理：メール（テンプレート編集） |
 | flow-manage-plugin | 管理：プラグイン（インストール・有効化・無効化） |
 
-### Target feature tags
+### 目標機能タグ（Target feature tags）
 
 | タグ | 説明 |
 |------|------|
@@ -64,13 +64,13 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 | feature-admin-mail | 管理：メール |
 | feature-admin-plugin | 管理：プラグイン |
 
-## Flow（新しい `flow-*`）
+## フロー（Flow、新しい `flow-*`）
 
 `flow-*` は、あるアクターが意味ある目的を達成するまでに辿るハイパーメディア遷移のまとまりを表す。単発操作や単なる機能領域には使わない。flow は複数 feature を跨いでよい。
 
 初期語彙は [`flow-ontology.md`](flow-ontology.md) が正。
 
-## Domain
+## ドメイン（Domain）
 
 ### ドメイン領域（プレフィックスなし）
 

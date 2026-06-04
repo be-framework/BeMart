@@ -1,4 +1,4 @@
-# Flow Ontology
+# フローオントロジー（Flow Ontology）
 
 Last updated: 2026-06-04
 
@@ -18,7 +18,7 @@ Last updated: 2026-06-04
 
 Feature tag は coverage report のための補助軸である。正準の領域表現は、既存の domain tag と `actor-*` を優先する。
 
-## Verification Scope
+## 検証範囲（Verification Scope）
 
 この文書は自然言語の flow ontology であり、実行可能な step list ではない。後続フェーズでは `tests/SemanticFlow/flows/*.json` のようなテスト fixture に、HTTP method/path、期待する `alpsId`、画面 affordance を具体化できる。
 
@@ -26,7 +26,7 @@ Feature tag は coverage report のための補助軸である。正準の領域
 
 ---
 
-## Flow List
+## フロー一覧（Flow List）
 
 | Flow ID | Actor | Natural language flow | Goal | Spans |
 |---|---|---|---|---|
@@ -46,7 +46,7 @@ Feature tag は coverage report のための補助軸である。正準の領域
 
 ---
 
-## Flow Definitions
+## フロー定義（Flow Definitions）
 
 ### `flow-admin-product-publish`
 

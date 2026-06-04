@@ -1,4 +1,4 @@
-# Migration Goal Review — EC-CUBE semantic overhaul
+# EC-CUBE セマンティックオーバーホール：移行目標レビュー
 
 Last updated: 2026-06-04
 Evidence snapshot: `1ccc7d5` (`origin/be-first-migration-bootstrap` after PR #34)
@@ -133,26 +133,26 @@ BeMart は前者に対して、実装とテストと文書で肯定的な答え�
 
 次は新機能を増やす前に、プロジェクトを方法論として提示できる状態へ整える。
 
-### Phase 1 — Evidence alignment
+### Phase 1 — 証拠整合（Evidence alignment）
 
 - `migration-status.md`、`README.md`、`docs/README.md`、`html-screen-migration-matrix.md` の数値を現棚卸しへ揃える。
 - Semantic / SQL file 数の差分を調べ、正しいカウントルールを文書化する。
 - `eccube-feature-alps-status.html` の route/function status と `migration-status.md` §4 の残差分類を対応させる。
 
-### Phase 2 — Verification gate
+### Phase 2 — 検証ゲート（Verification gate）
 
 - `DATABASE_URL` ありの MariaDB 10.11 で SQL suite を実行する。
 - `order_item_register.sql` の `JSON_TABLE` portability を確認し、必要なら MariaDB 互換の INSERT に書き換える。
 - `tools/ec-cube-source/` ありで render-diff tests を再実行する。
 - Hypermedia / HTTP / smoke suite を最新 base で再実行する。
 
-### Phase 3 — Residual hardening
+### Phase 3 — 残差ハードニング（Residual hardening）
 
 - 本質的残差から優先順位を付ける。最初は PDF/CSV/Mail より、SQL durability と production DB bring-up を先に置く。
 - 薄い実装は Mypage dashboard / Favorite / Address / Contact の順で body enrichment する。
 - 2FA pre-auth challenge state を production cutover の security residual として閉じる。
 
-### Phase 4 — Methodology packaging
+### Phase 4 — 方法論パッケージ化（Methodology packaging）
 
 - `FINAL-REPORT.md`、本書、`skills/`、`methodology/` を、外部読者が追える順序へ整理する。
 - 「semantic migration の実行手順」と「完全代替へ残る互換作業」を分けて説明する。
