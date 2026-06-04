@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping
@@ -46,3 +47,4 @@ the JSON-context tests assert key-wise on `body` and are unaffected.
 ### Response
 
 _Not available_
+{% endraw %}
