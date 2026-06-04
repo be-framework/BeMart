@@ -32,7 +32,7 @@ abstract class AbstractWorkflowTest extends TestCase
 
     protected function follow(ResourceObject $response, string $rel): ResourceObject
     {
-        $next = $this->resource->get($this->link($response, $rel));
+        $next = $this->resource->href($rel, [], $response);
         $this->assertSame(Code::OK, $next->code);
 
         return $next;
@@ -42,18 +42,6 @@ abstract class AbstractWorkflowTest extends TestCase
     protected function post(ResourceObject $response, array $query): ResourceObject
     {
         return $this->resource->post($this->unsafeTarget($response, 'POST'), $query);
-    }
-
-    protected function link(ResourceObject $response, string $rel): string
-    {
-        $body = $response->body;
-        $this->assertIsArray($body);
-        $links = $body['links'] ?? null;
-        $this->assertIsArray($links);
-        $href = $links[$rel] ?? null;
-        $this->assertIsString($href);
-
-        return $href;
     }
 
     private function unsafeTarget(ResourceObject $response, string $method): string
@@ -69,14 +57,13 @@ abstract class AbstractWorkflowTest extends TestCase
         return $href;
     }
 
-    protected function bodyString(ResourceObject $response, string $key): string
+    protected function bodyValue(ResourceObject $response, string $key): mixed
     {
         $body = $response->body;
         $this->assertIsArray($body);
-        $value = $body[$key] ?? null;
-        $this->assertIsString($value);
+        $this->assertArrayHasKey($key, $body);
 
-        return $value;
+        return $body[$key];
     }
 
     protected function header(ResourceObject $response, string $name): string|null
