@@ -303,7 +303,7 @@
       },
 
       {"id": "Product", "title": "商品","tag": "catalog src-entity src-template flow-admin-product-publish flow-customer-purchase",
-        "doc": {"value": "dtb_product と既定 dtb_product_class 1行を平坦化した投影。BeMart の ProductEntity は productName / productStatus / description / searchWord / note を dtb_product から、productCode / price02 / stock を既定 dtb_product_class 行（class_category_id1 IS NULL AND class_category_id2 IS NULL — SqlProductClassQuery / SqlFavoriteStorage と同じ規約）から取得する。product_code 列は dtb_product 側に存在せず dtb_product_class 側にあるため、自然キー productCode はクラス表経由で解決する。厳密移植 整合: dtb_product には sort_no 列が無い — 商品の並び順は dtb_product_category.sort_no（カテゴリ別）にあり、ProductEntity::sortNo は schema から乖離した BeMart 固有フィールドだったため削除。create / copy は ProductEntity が2表平坦化行のため dtb_product ヘッダ行と既定 dtb_product_class 行の両方を1つのアトミック単位（SAVEPOINT 対応、SqlCsvColumnConfigStorage と同形）で INSERT する。delete は論理削除 — dtb_product.product_status_id を STATUS_WITHDRAWN=3 に変更（物理 DELETE はしない、受注履歴スナップショットは frozen copy を参照するため）、replay は冪等。product_status_id は空の mtb_product_status マスタへの nullable FK（非 NULL 値は FK 1452 を発生させるため seedProductStatus でシード）。ProductEntity は呼び出し元供給の productCode 文字列でキーされ dtb_product.id は autoinc 内部用のため ID generator は不要。Phase 2b で SqlProductQuery / SqlProductCommand が src-entity として参照"},
+        "doc": {"href": "alps-doc/product.md", "value": "EC-CUBE の商品。商品ヘッダと既定の商品規格行を合わせて、販売・表示・管理の単位として扱う。商品コード、販売価格、在庫は既定の商品規格から取得する。"},
         "descriptor": [
           {"href": "#productName"},
           {"href": "#descriptionList"},
