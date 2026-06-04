@@ -33,11 +33,6 @@ Ray.MediaQuery SQL、Twig HTML、workflow test へ接続できることです。
 動くだけでなく、移植の根拠を ALPS、型、SQL、Resource、test の各境界に残せることを
 示しています。
 
-一方で、完全代替の結論は別問題です。残っている中心は、機能カバー率の粗い穴ではなく、
-HTML 忠実度、業務詳細、運用データ、production bring-up、実環境での検証です。したがって
-現時点の結論は、セマンティック移植の方法は成立したが、完全代替には互換 fidelity と
-production verification を詰める必要がある、というものです。
-
 ## 移植の型
 
 移植は 2 つの動きでできています。まず EC-CUBE の Entity、Route、Controller、Twig から
