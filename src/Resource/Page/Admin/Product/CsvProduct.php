@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use MyVendor\BeMart\Support\Resource\AbstractCsvUpload;
 use Override;
 
 /**
