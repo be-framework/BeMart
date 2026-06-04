@@ -46,6 +46,22 @@ EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
 Fake は後付けの mock ではなく、最初の契約実装です。SQL 実装はあとから同じ Resource 契約を
 満たすものとして差し替えられ、Context / DI がどちらを使うかを選びます。
 
+## Architecture Boundaries
+
+| Boundary | Role |
+|---|---|
+| ALPS | アプリケーション意味論・情報構造 |
+| Be Framework | ドメイン境界（`Input` / `Being` / `Final`） |
+| Ray.MediaQuery | ドメイン ↔ インフラ境界。PHP interface / return type ↔ SQL file / result |
+| BEAR.Sunday | ドメイン ↔ リソース境界（`ResourceObject` / URI / HTTP method） |
+| Hypermedia | リソース ↔ クライアント遷移境界（`#[Link]` / `href` / `form action`） |
+| Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
+| SQL schema | 永続化境界（table / column / FK / nullable / id shape） |
+
+Taint tracking、cache freshness、DIP / ADP も境界制約として扱いますが、
+README では詳細化しません。背景は [`docs/methodology/`](docs/methodology/) と
+[`docs/skills/`](docs/skills/) を参照してください。
+
 ## 学び
 
 - 仕様は実装より長く生きる。Framework が変わっても「商品」「注文」「顧客」の語彙は残る。
