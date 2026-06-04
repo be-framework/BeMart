@@ -73,11 +73,6 @@ abstract class AbstractWorkflowTest extends TestCase
         return $value;
     }
 
-    protected function transitionId(ResourceObject $response): string
-    {
-        return $this->bodyString($response, 'transitionId');
-    }
-
     protected function header(ResourceObject $response, string $name): string|null
     {
         foreach ($response->headers as $header => $value) {
