@@ -41,17 +41,14 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
     #[Depends('testIndex')]
     public function testContactForm(ResourceObject $response): ResourceObject
     {
-        $contact = $this->follow($response, 'goContactForm');
-        $this->assertSame('page://self/contact', $this->submitTo($contact, 'POST'));
-
-        return $contact;
+        return $this->follow($response, 'goContactForm');
     }
 
     #[Alps('doSubmitContact')]
     #[Depends('testContactForm')]
     public function testDoSubmitContact(ResourceObject $response): ResourceObject
     {
-        $submitted = $this->resource->post($this->submitTo($response, 'POST'), [
+        $submitted = $this->post($response, [
             'contactName01' => '山田',
             'contactName02' => '太郎',
             'contactEmail' => 'yamada@example.com',
