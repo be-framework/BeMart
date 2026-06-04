@@ -242,6 +242,7 @@
       {"id": "contactKana02", "title": "お問い合わせメイ","tag": "src-entity", "doc": {"value": "お問い合わせフォームの名カナ"}},
       {"id": "contactEmail", "title": "お問い合わせメール","def": "https://schema.org/email", "tag": "src-entity", "doc": {"value": "お問い合わせフォームのメールアドレス"}},
       {"id": "contactContents", "title": "お問い合わせ内容","tag": "src-entity", "doc": {"value": "お問い合わせフォームの本文"}},
+      {"id": "ticketId", "title": "受付番号","tag": "contact src-entity", "doc": {"value": "問い合わせ送信後に発行される公開受付番号。問い合わせ本文の readback resource ではなく、完了状態の成立証拠として使う。"}},
 
       {"id": "addPoint", "title": "付与ポイント","tag": "src-entity", "doc": {"value": "注文により付与されるポイント数。商品単価(税抜) x pointRate x 数量で明細ごとに計算し合算。利用ポイント分を控除。発送済み(DELIVERED)遷移時に会員のpointに加算"}},
       {"id": "usePoint", "title": "使用ポイント","tag": "src-entity", "doc": {"value": "注文で使用するポイント数。実際の値引き額は usePoint x pointConversionRate（切り捨て）で計算され、不課税のポイント値引き明細として受注に追加"}},
@@ -1230,7 +1231,8 @@
       },
       {"id": "ContactComplete", "title": "お問い合わせ完了","tag": "contact src-template flow-customer-inquiry",
         "descriptor": [
-          {"href": "#goProductList"}
+          {"href": "#ticketId"},
+          {"href": "#goTop"}
         ]
       },
 
