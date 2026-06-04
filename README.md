@@ -54,11 +54,13 @@ Fake は後付けの mock ではなく、最初の契約実装です。SQL 実�
 | Be Framework | ドメイン境界（`Input` / `Being` / `Final`） |
 | Ray.MediaQuery | ドメイン ↔ インフラ境界。PHP interface / return type ↔ SQL file / result |
 | BEAR.Sunday | ドメイン ↔ リソース境界（`ResourceObject` / URI / HTTP method） |
+| OpenAPI / API schema | 公開 HTTP 契約境界（URI / method / parameter / status / representation shape） |
 | Hypermedia | リソース ↔ クライアント遷移境界（`#[Link]` / `href` / `form action`） |
+| Cache / freshness | Resource 表現 ↔ browser / proxy / CDN の鮮度境界（`CacheableResponse` / `Cache-Control` / `ETag` / `Vary` / invalidation） |
 | Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
 | SQL schema | 永続化境界（table / column / FK / nullable / id shape） |
 
-Taint tracking、cache freshness、DIP / ADP も境界制約として扱いますが、
+Taint tracking、DIP / ADP も境界制約として扱いますが、
 README では詳細化しません。背景は [`docs/methodology/`](docs/methodology/) と
 [`docs/skills/`](docs/skills/) を参照してください。
 
