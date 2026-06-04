@@ -181,7 +181,7 @@
       {"id": "pageName", "title": "ページ名","tag": "src-entity", "doc": {"value": "管理画面でのページ表示名"}},
       {"id": "pageEditType", "title": "ページ編集区分","tag": "src-entity", "doc": {"value": "ページ編集レベル。0=EDIT_TYPE_USER（ユーザー作成、完全編集/削除可）, 1=EDIT_TYPE_PREVIEW（プレビュー）, 2=EDIT_TYPE_DEFAULT（システムページ、構造ロック・削除不可）, 3=EDIT_TYPE_DEFAULT_CONFIRM（内容編集可能なシステムページ、利用規約等）。editType>=2は削除不可"}},
 
-      {"id": "adminId", "title": "管理者ID","tag": "src-entity", "doc": {"value": "dtb_member.id の不透明な文字列ハンドル。BeMart の AdminEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を `ad` プレフィックス付きで生成し（シード `ad000000000000000000000000000001` 等、customerId と同形だが識別空間は別）、SQL 実装は dtb_member.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlAdminQuery::findById では miss として扱われ、SqlAdminCommand の create / update / delete / updateAuthority のいずれも no-op に倒すため、Fake ハンドルを SQL バックエンドに渡しても 404 / 403 経路（MemberDeleted / AuthorityRoleUpdated）が同形。addressId / pageId / blockId / tagId と同じ Fake↔SQL 二重性"}},
+      {"id": "adminId", "title": "管理者ID","tag": "src-entity", "doc": {"value": "管理者メンバーを識別する不透明な文字列ハンドル。Fake と SQL の ID 形状差を隠す。"}, "link": [{"rel": "describedby", "href": "alps-doc/admin-id.md"}]},
       {"id": "memberName", "title": "管理者名","tag": "src-entity", "doc": {"value": "管理者メンバーの表示名"}},
       {"id": "department", "title": "所属","tag": "src-entity", "doc": {"value": "管理者の所属部署名"}},
       {"id": "loginId", "title": "ログインID","tag": "src-entity", "doc": {"value": "管理画面ログイン用のID。一意"}},
@@ -223,7 +223,7 @@
       {"id": "templateName", "title": "テンプレート名","tag": "src-entity", "doc": {"value": "テンプレートの表示名"}},
       {"id": "deviceType", "title": "デバイス種別","tag": "src-entity", "doc": {"value": "デバイス種別マスタ（EC-CUBE 2.xからの名残）。値: 2=モバイル, 10=PC。非連番のIDは旧バージョンのデバイスサポート（ガラケー等）に由来。ページレイアウトのデバイス別表示に使用"}},
 
-      {"id": "layoutId", "title": "レイアウトID","tag": "src-entity", "doc": {"value": "dtb_layout.id の不透明な文字列ハンドル。BeMart の LayoutEntity 層は数値ではなく文字列として保持する。Fake 実装は `lo-` プレフィックス付きのシードハンドル（lo-pc-default / lo-sp-default）を持ち、SQL 実装は dtb_layout.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。Layout には作成・削除アフォーダンスが無い（goLayoutList + doUpdateLayout のみ）ため ID ジェネレータは存在せず、レイアウトはインストーラ/fixture が seed した行から読み出すのみ。非数値 ID は SqlLayoutStorage では miss として扱われ getById / put のいずれも 404 経路 (LayoutUpdated) を踏むため、シードハンドル `lo-pc-default` や `nonexistent` は Fake / SQL 双方で 404 が同形。blockId / categoryId と同じ Fake↔SQL 二重性"}},
+      {"id": "layoutId", "title": "レイアウトID","tag": "src-entity", "doc": {"value": "CMSレイアウトを識別する不透明な文字列ハンドル。seed 済みレイアウトを Fake/SQL 同型に扱う。"}, "link": [{"rel": "describedby", "href": "alps-doc/layout-id.md"}]},
       {"id": "layoutName", "title": "レイアウト名","tag": "src-entity", "doc": {"value": "レイアウトの表示名"}},
 
       {"id": "blockId", "title": "ブロックID","tag": "src-entity", "doc": {"value": "dtb_block.id の不透明な文字列ハンドル。BeMart の BlockEntity 層は数値ではなく文字列として保持する。Fake 実装は `bk-` プレフィックス付きの英数字を生成し（シード `bk-header` を含む）、SQL 実装は dtb_block.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlBlockStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (BlockUpdated / BlockDeleted) を踏むため、シードハンドル `bk-header` や `nonexistent-zzz` は Fake / SQL 双方で 404 が同形"}},
@@ -234,7 +234,7 @@
       {"id": "tradeLawName", "title": "項目名","tag": "src-entity", "doc": {"value": "特定商取引法に基づく表記の項目名"}},
       {"id": "tradeLawDescription", "title": "項目説明","tag": "src-entity", "doc": {"value": "特定商取引法に基づく表記の項目内容。HTML入力可能でHTMLPurifierによる浄化あり"}},
       {"id": "displayOrderScreen", "title": "注文画面表示","tag": "src-entity", "doc": {"value": "注文確認画面にこの項目を表示するか"}},
-      {"id": "tradeLawBody", "title": "特定商取引法本文","tag": "src-entity", "doc": {"value": "Wave 8 単一ブロブ投影での特定商取引法ページ本文。EC-CUBE 4.3 では dtb_tradelaw が項目ごとの行（最大15行、tradeLawName / tradeLawDescription / sortNo / displayOrderScreen を持つ）だが、Wave 8 の TradeLawStorageInterface はページ全体を 1 本のテキスト本文として扱う（get は現在の全文を返し、update は全文を置換）。非空・65535文字以内（防御的な MySQL TEXT 上限）。FakeTradeLawStorage はインストーラ既定本文（販売業者 / 所在地 / 連絡先 の3行）をシードする。SQL 実装 SqlTradeLawStorage はこの本文ブロブを単一キャリア行 dtb_tradelaw.id=1 の description 列に格納し（SqlBaseInfoStorage が dtb_base_info.id=1 に対して行うのと同じ単一行シングルトンパターン）、行不在時は Fake と同一のインストーラ既定本文へフォールバックするため Fake/SQL 双方のハイパーメディア契約が同形。TradeLawUpdated の冪等判定（get()->body !== newBody）はバイト単位ロスレス往復を要求するため、改行・コロンを含む本文も単一列格納で完全往復する。Phase 2 で項目ごとの行へ分割予定（その時点で tradeLawName / sortNo / displayOrderScreen が独立して投影される）"}},
+      {"id": "tradeLawBody", "title": "特定商取引法本文","tag": "src-entity", "doc": {"value": "特定商取引法ページ本文の単一ブロブ投影。項目別行ではなく、ページ全体を1本の本文として扱う。"}, "link": [{"rel": "describedby", "href": "alps-doc/trade-law-body.md"}]},
 
       {"id": "contactName01", "title": "お問い合わせ姓","tag": "src-entity", "doc": {"value": "お問い合わせフォームの姓。内部的にはNameTypeのname01と同じ仕組み"}},
       {"id": "contactName02", "title": "お問い合わせ名","tag": "src-entity", "doc": {"value": "お問い合わせフォームの名。内部的にはNameTypeのname02と同じ仕組み"}},
@@ -358,7 +358,10 @@
       },
 
       {"id": "Category", "title": "カテゴリ","tag": "catalog src-entity src-template",
-        "doc": {"value": "dtb_category 1行を平坦化した投影。BeMart の CategoryEntity は 4 項目 (categoryId / categoryName / parentId / sortNo) のみ保持し、EC-CUBE の hierarchy / creator_id / create_date / update_date は投影外。hierarchy（int unsigned NOT NULL、深さキャッシュ）は INSERT/UPDATE 時に親から導出（ルート=1、子=親.hierarchy+1）して書くが投影は読まない — サブツリー再親付け時に孫へカスケードはしない（平坦 admin slice のスコープ外）。creator_id は dtb_member が structure-only ダンプで空のため固定 NULL（非 NULL は FK 1452）。parent_category_id は自己参照 FK (FK_5ED2C2B796A8F92 → dtb_category.id) で、子行は親の INSERT 後でなければ挿入できない — Be 層 (CategoryCreated) が put 前に getById(parentId) で親存在を検証し未知なら CategoryNotFoundException(404)。dtb_product_category（FK category_id → dtb_category.id、商品割当の結合表）の行は Wave 7 admin slice では INSERT しないが、remove 時のみ防御的に DELETE して FK 1451 を回避（外部投入された割当行があっても DELETE 成功）— SqlBlockStorage が dtb_block_position に対して行うのと同形。子を持つ親の削除は自己 FK 1451 を踏ませる（EC-CUBE 同様の正しい挙動、空でない親は削除不可）。Phase 2b で SqlCategoryStorage が src-entity として参照"},
+        "doc": {"value": "商品カテゴリ。親子階層と表示順を持つ catalog taxonomy の管理単位。商品割当との結合表は別スコープとして扱う。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/category.md"}
+        ],
         "descriptor": [
           {"href": "#categoryId"},
           {"href": "#categoryName"},
@@ -400,7 +403,10 @@
       },
 
       {"id": "ClassName", "title": "規格名","tag": "catalog src-entity src-template",
-        "doc": {"value": "dtb_class_name 1行を平坦化した投影。商品バリエーションの軸（例: カラー・サイズ）を表す — EC-CUBE の \"class\" は OOP のクラスではなく商品規格の意味。BeMart の ClassNameEntity は 2 項目 (classNameId / name) のみ保持し、EC-CUBE の backend_name / sort_no / creator_id / create_date / update_date は投影外。sort_no（int unsigned NOT NULL、表示順、DEFAULT なし）は INSERT 時に MAX(sort_no)+1 で末尾追加スロットを導出して書くが投影は読まず、UPDATE 時は触らない（リネームで表示位置を保持）。backend_name は nullable のため固定 NULL（admin slice に編集 UI なし）。creator_id は dtb_member が structure-only ダンプで空のため固定 NULL（非 NULL は FK 1452）。dtb_class_category（FK class_name_id → dtb_class_name.id、規格軸の具体値）の子行は Wave 7 admin slice では INSERT しないが、remove 時のみ防御的に DELETE して FK 1451 を回避（外部投入された子行があっても DELETE 成功）— SqlCategoryStorage が dtb_product_category に対して行うのと同形。Phase 2b で SqlClassNameStorage が src-entity として参照"},
+        "doc": {"value": "商品規格の軸名。カラー・サイズなど、商品バリエーションの分類軸を表す。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/class-name.md"}
+        ],
         "descriptor": [
           {"href": "#classNameId"},
           {"href": "#classNameLabel"},
@@ -422,7 +428,10 @@
       },
 
       {"id": "ClassCategory", "title": "規格分類","tag": "catalog src-entity src-template",
-        "doc": {"value": "dtb_class_category 1行を平坦化した投影。商品バリエーション軸（ClassName）の具体値（例: 「カラー」軸の「赤」「青」、「サイズ」軸の S/M/L）を表す。BeMart の ClassCategoryEntity は 3 項目 (classCategoryId / classNameId / name) のみ保持し、EC-CUBE の backend_name / sort_no / visible / creator_id / create_date / update_date は投影外。classNameId は所属する規格軸（FK class_name_id → dtb_class_name.id）を示し NOT NULL — SQL 実装は put 時に親 dtb_class_name 行の存在を前提とする（fixture は親 class_name を先に INSERT）。sort_no（int unsigned NOT NULL、表示順、DEFAULT なし）は INSERT 時に MAX(sort_no)+1 で末尾追加スロットを導出して書くが投影は読まず、UPDATE 時は触らない（リネームで表示位置を保持）。visible は固定 1（admin slice に表示切替 UI なし）。backend_name は nullable のため固定 NULL。creator_id は dtb_member が structure-only ダンプで空のため固定 NULL（非 NULL は FK 1452）。dtb_product_class（FK class_category_id1/2 → dtb_class_category.id）が子参照を持つが Wave 7 admin slice では INSERT しないため remove はその FK を防御的にケアしない（外部投入があれば FK 1451 が表面化 — 契約テストはこのケースをシードしない）。Phase 2b で SqlClassCategoryStorage が src-entity として参照"},
+        "doc": {"value": "商品規格軸に属する具体値。カラーの赤・青、サイズのS/M/Lなどを表す。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/class-category.md"}
+        ],
         "descriptor": [
           {"href": "#classCategoryId"},
           {"href": "#classNameId"},
@@ -447,7 +456,10 @@
       },
 
       {"id": "CartItem", "title": "カート明細","tag": "cart src-template flow-customer-purchase",
-        "doc": {"value": "EC-CUBE のショッピングカート画面（Cart/index.twig の ec-cartRow）が1明細あたり描画する情報構造。dtb_cart_item の実カラム（product_class_id / price / quantity）に加え、カート行を描画するために CartItem.ProductClass → Product / ClassCategory を辿って表示する商品名・商品画像・規格バリエーションを含む — このディスクリプタは画面から再導出された投影であり、Entity から逆生成したものではない。productClassId は購入された具体的 SKU（dtb_product_class.id）で、削除/数量増減リンクのキー。productId は商品詳細リンクのターゲット（dtb_product.id）。mainImage は dtb_product_image の最小 sort_no 行のファイル名（バリエーション無し・画像無し商品では NULL）。classCategoryName1/2 と className1/2 は ProductClass.ClassCategory1/2 のバリエーション値とその軸名（例『色：赤』、規格無し商品では NULL）。unitPrice はカート追加時点での price02 のスナップショット。明細小計（unitPrice × quantity）はテンプレートで算出"},
+        "doc": {"value": "カート内の1明細を描画する画面投影。購入SKU、数量、単価、商品表示情報を合わせて扱う。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/cart-item.md"}
+        ],
         "descriptor": [
           {"href": "#productClassId"},
           {"href": "#productId"},
@@ -674,7 +686,10 @@
         ]
       },
       {"id": "ShippingAddress", "title": "配送先住所エンティティ","tag": "order src-entity",
-        "doc": {"value": "dtb_shipping 1行を平坦化した投影。BeMart の ShippingAddressEntity と1:1 (8項目: orderNo / name01 / name02 / postalCode / pref / addr01 / addr02 / phoneNumber)。受注単位の単一お届け先を表し、orderNo をキーに doSelectShippingAddress / doUpdateShippingAddress が put、goExportShipping が listAll で全件取得する。dtb_shipping は order_id で dtb_order を参照するため、SQL 層は order_no → order_id を解決して読み書きする。Order 配下のインライン Shipping 記述子は EC-CUBE スキーマ全列を写すテンプレート視点で、こちらは storage source-of-truth の src-entity 視点。Entity vs schema の差: name01/name02 は column NOT NULL（直接）、postalCode/addr01/addr02 は Entity 非 null だが column NULL 可（hydrator で空文字に正規化）、pref は Entity int だが pref_id NULL 可 FK→空の mtb_pref（pref=0 は NULL 書き込み、読み出し時 NULL→0）、phoneNumber は 14 文字上限。dtb_shipping は単一受注に複数行（複数配送先）を許すが BeMart は order_id 単一行を前提（put は order_id で既存行を探索し UPDATE か INSERT）。Phase 2b で SqlShippingAddressStorage が src-entity として参照"},
+        "doc": {"value": "受注に紐づく配送先住所。orderNo から dtb_order を解決し、単一お届け先の住所を読み書きする。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/shipping-address.md"}
+        ],
         "descriptor": [
           {"href": "#orderNo"},
           {"href": "#name01"},
@@ -778,7 +793,10 @@
       },
 
       {"id": "Address", "title": "配送先住所エンティティ","tag": "account src-entity",
-        "doc": {"value": "dtb_customer_address 1行を平坦化した投影。BeMart の AddressEntity と1:1 (12項目: addressId / customerId / name01 / name02 / kana01 / kana02 / companyName / phoneNumber / postalCode / pref / addr01 / addr02)。所有者キーは customerId のみで、AUTHZ は CustomerAddressUpdated / CustomerAddressDeleted が getById → 一致確認の順で実施。Entity vs schema の差: postalCode/addr01/addr02 は Entity 非 null だが column NULL 可（hydrator で空文字に正規化）、pref は Entity int だが pref_id NULL 可（hydrator で 0 に正規化）、addressId は Entity string だが id は int auto-increment（cast (string) で対応）。Phase 2b で SqlAddressStorage が src-entity として参照"},
+        "doc": {"value": "会員の配送先住所帳の1行。customerId を所有者キーとして、住所・氏名・連絡先を扱う。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/address.md"}
+        ],
         "descriptor": [
           {"href": "#addressId"},
           {"href": "#customerId"},
@@ -814,7 +832,10 @@
       },
 
       {"id": "Favorite", "title": "お気に入り","tag": "favorite src-template",
-        "doc": {"value": "EC-CUBE のお気に入り一覧画面（Mypage/favorite.twig）が1行あたり描画する情報構造。dtb_customer_favorite_product の実カラム（customer_id / product_id）に加え、お気に入り行を描画するために dtb_product / dtb_product_class / dtb_product_image を辿って表示する商品名・単価・商品画像を含む — このディスクリプタは画面から再導出された投影であり、Entity から逆生成したものではない（CartItem と同型）。productCode と customerId のみが dtb_customer_favorite_product 由来の真の leaf 列（customerId は所有者 FK、productCode は default class 規約 class_category_id1 IS NULL AND class_category_id2 IS NULL で解決する自然キー）。productName と unitPrice は dtb_product / dtb_product_class への JOIN で取得する表示用投影フィールド。fileName は dtb_product_image の最小 sort_no 行のファイル名（画像無し商品では NULL）— Phase 3 enrichment で追加、CartItem.fileName と同規約。所有者キーは customerId のみで、productCode が同じでも customerId が異なれば別行。EC-CUBE 4.3 には (customer_id, product_id) UNIQUE が無く、SqlFavoriteStorage は ON DUPLICATE KEY UPDATE id=id でベストエフォート冪等にしている"},
+        "doc": {"value": "顧客のお気に入り商品行。customerId と商品を結び、一覧表示に必要な商品情報を JOIN 投影する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/favorite.md"}
+        ],
         "descriptor": [
           {"href": "#customerId"},
           {"href": "#productCode"},
@@ -895,7 +916,10 @@
         ]
       },
       {"id": "MypageHistory", "title": "注文履歴詳細","tag": "account src-router src-template flow-customer-account-maintenance",
-        "doc": {"value": "個別の注文履歴詳細画面（goMypageHistory）。EC-CUBE の Mypage/history.twig が描画する画面投影。受注ヘッダ（注文番号 / 注文日時 / 注文状況 / ポイント増減）、金額サマリ（subtotal / charge / deliveryFeeTotal / discount / tax / total / paymentTotal）、支払方法（paymentMethod）、注文メッセージ（message）に加え、配送ブロック（HistoryShipping の配列：お届け先住所 + 配送方法/日時 + その配送に紐づく明細行）とメール配信履歴（HistoryMailHistory の配列）を合成する。明細は dtb_order_item を shipping_id でグルーピングして各 HistoryShipping 配下に配置し、画面の per-Shipping 描画に一致させる。Phase 3 で MypageHistoryFetched 投影として実装され、SqlOrderQuery が dtb_order / dtb_order_item / dtb_shipping / dtb_payment / dtb_mail_history を JOIN して充填する。"},
+        "doc": {"value": "マイページの注文履歴詳細画面。受注ヘッダ、金額、配送、明細、メール履歴を合成して表示する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/mypage-history.md"}
+        ],
         "descriptor": [
           {"href": "#orderNo"},
           {"href": "#orderDate"},
@@ -1165,7 +1189,10 @@
       },
 
       {"id": "News", "title": "ニュース","tag": "content src-entity src-template flow-admin-content-publish",
-        "doc": {"value": "dtb_news 1行を平坦化した投影。BeMart の NewsEntity は 6 項目 (newsId / newsTitle / newsDescription / newsUrl / publishDate / linkMethod) のみ保持し、EC-CUBE の creator_id（FK to dtb_member）と visible は Phase 2 スコープ外で常に NULL/1 を書く。creator_id は構造ダンプ上 dtb_member が空のため NULL 以外は FK 1452 を起こすため固定 NULL。visible はデフォルト表示（インストーラ既定）として 1 を書く。publish_date は MySQL `datetime`（タイムゾーン無し）で、SqlNewsStorage は BeMart の ISO-8601 文字列を `Y-m-d H:i:s` に直列化し、read 時に Asia/Tokyo として ISO-8601 (`+09:00`) に戻すことで Fake 投影と同一形を維持（同パターン: SqlTaxRuleStorage の apply_date）。link_method は tinyint(1) と bool の bidirectional cast。doUpdateNews 遷移が存在するため UPDATE 経路は実運用で踏まれる（TaxRule との差）。Phase 2b で SqlNewsStorage が src-entity として参照"},
+        "doc": {"value": "管理画面で保守するニュース記事。dtb_news の公開日時、本文、リンク方式を扱う。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/news.md"}
+        ],
         "descriptor": [
           {"href": "#newsId"},
           {"href": "#newsTitle"},
@@ -1192,7 +1219,10 @@
       },
 
       {"id": "Page", "title": "ページ","tag": "content src-entity src-template flow-admin-content-publish",
-        "doc": {"value": "dtb_page 1行を平坦化した投影。BeMart の PageEntity は 5 項目 (pageId / pageName / pageUrl / pageFileName / pageEditType) のみ保持し、EC-CUBE の master_page_id / author / description / keyword / meta_robots / meta_tags / create_date / update_date は Phase 2 スコープ外で常に NULL を書く（dtb_page_layout 関連は別スコープ）。master_page_id はEC-CUBEのデフォルトテンプレ上書き機構（self-FK）で BeMart 管理 UI 非対応のため固定 NULL。page_name / file_name は EC-CUBE 上 nullable だが PageEntity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。edit_type は smallint(5) unsigned NOT NULL DEFAULT 1（PageCreated は EDIT_TYPE_USER=0 を書く / システム seed は 2）。doUpdatePage 遷移が存在するため UPDATE 経路は実運用で踏まれる。dtb_page_layout（FK page_id → dtb_page.id）の placement 行は Wave 9 admin slice では INSERT しないが、remove 時のみ防御的に DELETE して FK 1451 を回避（外部投入された placement 行があっても DELETE 成功）。Phase 2b で SqlPageStorage が src-entity として参照"},
+        "doc": {"value": "CMSで保守するページ定義。dtb_page のページ本体を扱い、レイアウト配置は別スコープとして分ける。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/page.md"}
+        ],
         "descriptor": [
           {"href": "#pageId"},
           {"href": "#pageName"},
@@ -1273,7 +1303,10 @@
       },
 
       {"id": "MailTemplate", "title": "メールテンプレート","tag": "mail src-entity src-template flow-admin-mail-template-maintenance",
-        "doc": {"value": "dtb_mail_template 1行を平坦化した投影。BeMart の MailTemplateEntity は 厳密移植 整合のため 4 項目 (mailTemplateId / mailTemplateName / fileName / mailSubject) のみ保持し、dtb_mail_template の id / name / file_name / mail_subject 列と 1:1。dtb_mail_template には本文列が存在しない — EC-CUBE 4.3 はメール本文をディスク上の Twig ファイルとして保持し file_name がそのパス。BeMart 由来で schema から乖離していた body / htmlBody は削除済み。name / file_name / mail_subject は EC-CUBE 上 nullable だが Entity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。creator_id（dtb_member 空）は structure-only ダンプで参照先が空のため固定 NULL。update は mail_subject（+ update_date）のみ書き込み、file_name は作成時固定で更新不可。更新専用契約のため INSERT 経路はなく ID 生成器も存在しない（未知 id は MailTemplateNotFoundException）。Phase 2b で SqlMailTemplateStorage が src-entity として参照"},
+        "doc": {"value": "管理画面で保守するメールテンプレート設定。本文ファイルではなく、テンプレート名・ファイル名・件名の登録情報を扱う。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/mail-template.md"}
+        ],
         "descriptor": [
           {"href": "#mailTemplateId"},
           {"href": "#mailTemplateName"},
@@ -1301,7 +1334,10 @@
       },
 
       {"id": "LoginHistory", "title": "ログイン履歴","tag": "admin-system src-entity src-template flow-admin-system-operation",
-        "doc": {"value": "dtb_login_history 1行を平坦化した投影。BeMart の LoginHistoryEntity は 4 項目 (timestamp / loginId / success / clientIp) のみ保持し、これは dtb_login_history の create_date / user_name / login_history_status_id / client_ip に対応する。append + list の追記専用監査ログで、getById / update / delete はない（監査行はクライアント可視のハンドルを持たず、変更もされない）ため LoginHistoryIdProvider は存在しない。EC-CUBE の member_id（FK to dtb_member）は Phase 2 スコープ外で常に NULL を書く（構造ダンプ上 dtb_member が空のため NULL 以外は FK 1452 を起こす。loginId→member_id 解決は Phase 2）。login_history_status_id は smallint unsigned NOT NULL で mtb_login_history_status への FK（0=失敗, 1=成功）。当該マスタは構造ダンプ上空のため、append には seedLoginHistoryStatus で 2 行を先行投入する必要がある（seedAdminMasters と同じ空マスタ FK 対応の先例）。success(bool) ↔ login_history_status_id の bidirectional cast。create_date は MySQL `datetime`（タイムゾーン無し）で、SqlLoginHistoryStorage は BeMart の ISO-8601 文字列を `Y-m-d H:i:s` に直列化し、read 時に Asia/Tokyo として ISO-8601 (`+09:00`) に戻すことで Fake 投影と同一形を維持（同パターン: SqlNewsStorage の publish_date）。update_date は append 時に create_date と同値（監査行は更新されない）。Phase 2b で SqlLoginHistoryStorage が src-entity として参照"},
+        "doc": {"value": "管理者ログインの監査ログ。ログインID、成功/失敗、IP、日時を追記専用で記録する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/login-history.md"}
+        ],
         "descriptor": [
           {"href": "#userName"},
           {"href": "#clientIp"},
@@ -1328,7 +1364,10 @@
       },
 
       {"id": "CsvColumnConfig", "title": "CSV列設定","tag": "admin-system src-entity flow-admin-csv-exchange",
-        "doc": {"value": "dtb_csv 1行を平坦化した投影 — 1つの CSV 出力列の設定エントリ。BeMart の CsvColumnConfigEntity と1:1（csvType / columnName / enabled / sortNo の4項目）。1つの csvType（mtb_csv_type への FK）が複数の dtb_csv 行を所有し、各行が「この列を出力に含めるか」(enabled) と列順 (sortNo) を保持する。columnName は dtb_csv.field_name に対応し、EC-CUBE の NOT NULL 列 entity_name / disp_name は Wave 9 の投影外（SqlCsvColumnConfigStorage の INSERT は field_name をエコー、実体の値を供給する列カタログは Phase 2）。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、ストレージは per-type 行集合をアトミックに置換する（DELETE all rows for the csvType → INSERT the new vector、savepoint 対応トランザクション内 — SqlCartCommand と同形）。csv_type_id は mtb_csv_type への enforced FK で、structure-only ダンプではマスタが空のため SQL テストは seedCsvTypes でシード（seedSaleTypes と同じ空マスタ FK シード規約）。Phase 2b で SqlCsvColumnConfigStorage が src-entity として参照"},
+        "doc": {"value": "CSV出力の列設定。csvType ごとに出力列、表示有無、列順を保持する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/csv-column-config.md"}
+        ],
         "descriptor": [
           {"href": "#csvType"},
           {"href": "#csvColumnName"},
@@ -1360,7 +1399,10 @@
       },
 
       {"id": "Template", "title": "デザインテンプレート","tag": "plugin src-entity src-template flow-admin-template-lifecycle",
-        "doc": {"value": "dtb_template 1行を平坦化した投影。EC-CUBE 管理画面のデザインテンプレート（installed flavour）の登録レジストリを表す。テンプレート本体はファイルシステム上に存在し dtb_template は登録レジストリのみ。BeMart の TemplateEntity は 3 項目 (templateId / templateName / deviceType) のみ保持し、EC-CUBE の templateCode / createDate / updateDate / discriminator_type は投影外。TemplateStorageInterface は list() のみ — ALPS 上 goTemplateList のみで作成・更新・削除アフォーダンスが無いため TemplateIdProvider も getById / put / remove も存在せず、FK cascade 問題は発生しない（テンプレートはこのスライスから変更されない）。dtb_template の列形状は dtb_layout と同一（id / device_type_id / *_code / *_name / create_date / update_date / discriminator_type）。device_type_id は smallint(5) unsigned nullable で FK → mtb_device_type.id（FK_94C12A694FFA550E）。TemplateEntity::deviceType は non-null int（10=PC, 2=モバイル）で read 時 NULL → 0 に coalesce。template_name は EC-CUBE 上 NOT NULL。Phase 2b で SqlTemplateStorage が src-entity として参照"},
+        "doc": {"value": "インストール済みデザインテンプレートの登録レジストリ。テンプレート本体ファイルではなく、管理画面で参照する登録情報を表す。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/template.md"}
+        ],
         "descriptor": [
           {"href": "#templateId"},
           {"href": "#templateCode"},
@@ -1378,7 +1420,10 @@
       },
 
       {"id": "Layout", "title": "レイアウト","tag": "cms src-entity src-template flow-admin-content-publish",
-        "doc": {"value": "dtb_layout 1行を平坦化した投影。EC-CUBE 管理画面 CMS のレイアウト（PC標準 / スマホ標準など）を表す。BeMart の LayoutEntity は 3 項目 (layoutId / layoutName / deviceType) のみ保持し、EC-CUBE の create_date / update_date / discriminator_type は投影外。LayoutStorageInterface は list / getById / put のみ — 作成・削除アフォーダンスは無い（ALPS 上 goLayoutList + doUpdateLayout のみ）ため LayoutIdProvider も remove メソッドも存在せず、dtb_block_position / dtb_page_layout への cascade 問題はこのインターフェイスでは発生しない（レイアウトは削除されないため FK 参照先の事前クリアが不要）。layout_name は EC-CUBE 上 nullable だが LayoutEntity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。device_type_id は smallint(5) unsigned nullable で FK → mtb_device_type.id（FK_5A62AA7C4FFA550E）。LayoutEntity::deviceType は non-null int（10=PC, 2=モバイル）だが mtb_device_type が structure-only ダンプで空のため INSERT は常に device_type_id = NULL を書き（非 NULL 値は FK 1452 を発生）、read 時 NULL → 0 に coalesce。fixture は device_type_id を直接 seed（10/2）するため実運用で踏まれる唯一の書き経路（doUpdateLayout 経由の UPDATE）は device_type_id を触らず deviceType 投影は EC-CUBE enum を round-trip する。put は SELECT 1 で probe し hit → UPDATE（layout_name のみ、device_type_id は不変）/ miss → 明示 id で INSERT（防御的 — Layout 作成 Final は存在しないため未到達）。Phase 2b で SqlLayoutStorage が src-entity として参照"},
+        "doc": {"value": "CMSで保守するページレイアウト。PC標準・スマホ標準などのレイアウト名とデバイス種別を管理する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/layout.md"}
+        ],
         "descriptor": [
           {"href": "#layoutId"},
           {"href": "#layoutName"},
@@ -1396,7 +1441,10 @@
       },
 
       {"id": "Block", "title": "ブロック","tag": "cms src-entity src-template flow-admin-content-publish",
-        "doc": {"value": "dtb_block 1行を平坦化した投影。BeMart の BlockEntity は 4 項目 (blockId / blockName / blockFileName / blockDeletable) のみ保持し、EC-CUBE の device_type_id / use_controller / create_date / update_date は Phase 2 スコープ外で常に NULL / 0 を書く（dtb_block_position 関連は別スコープ）。device_type_id はEC-CUBEのデバイス別バリアント機構で BeMart 管理 UI 非対応かつ mtb_device_type が structure-only ダンプで空のため固定 NULL（非 NULL 値は FK 1452 を発生させる）。use_controller は 0 固定（プレーンテンプレ／管理 UI 非対応）。block_name は EC-CUBE 上 nullable だが BlockEntity 上 non-null — read 時 NULL → '' に coalesce して投影形を維持。deletable は tinyint(1) NOT NULL DEFAULT 1（BlockCreated は true=1 を書く / システム seed は 0=false）。doUpdateBlock 遷移が存在するため UPDATE 経路は実運用で踏まれる。dtb_block_position（FK block_id → dtb_block.id）の placement 行は Wave 9 admin slice では INSERT しないが、remove 時のみ防御的に DELETE して FK 1451 を回避（外部投入された placement 行があっても DELETE 成功）— SqlPageStorage が dtb_page_layout に対して行うのと同形。Phase 2b で SqlBlockStorage が src-entity として参照"},
+        "doc": {"value": "CMSで保守する画面ブロック。ブロック本体を扱い、レイアウト上の配置情報は別スコープとして分ける。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/block.md"}
+        ],
         "descriptor": [
           {"href": "#blockId"},
           {"href": "#blockName"},
@@ -1775,7 +1823,10 @@
         "doc": {"value": "店舗基本情報を更新する。`BaseInfo` テーブルは 1 レコードのみで全店舗共通設定として参照される。"}},
       {"id": "doSortNoMove", "title": "並び順を変更する", "type": "idempotent", "rt": "#AdminTop",
         "tag": "admin-system flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
-        "doc": {"value": "管理画面の一覧画面で行をドラッグ＆ドロップして表示順（sort_no）を更新する汎用インライン操作。EC-CUBE の *_sort_no_move ルート群（admin_setting_shop_payment_sort_no_move / admin_setting_shop_delivery_sort_no_move / admin_product_tag_sort_no_move / admin_product_class_name_sort_no_move / admin_product_class_category_sort_no_move 等）から導出した抽象遷移。sort_no カラムを持つマスタ（dtb_payment / dtb_delivery / dtb_tag / dtb_class_name / dtb_class_category）の一覧でのみ参照される — dtb_news には sort_no カラムが無いため NewsList は本遷移を参照しない。並べ替え結果は冪等（同一順序の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
+        "doc": {"value": "管理画面の一覧で表示順を並べ替える汎用遷移。sort_no を持つ複数マスタで共有する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/do-sort-no-move.md"}
+        ]},
       {"id": "doToggleVisible", "title": "表示・非表示を切り替える", "type": "idempotent", "rt": "#AdminTop",
         "tag": "admin-system flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
         "doc": {"value": "管理画面の一覧画面で行の表示／非表示（visible）をインラインでトグルする汎用操作。EC-CUBE の *_visible(ity) ルート群（admin_setting_shop_payment_visible / admin_setting_shop_delivery_visibility 等）から導出した抽象遷移。トグルは可視状態を明示値に設定する冪等操作（同一値の再送は同一状態）。マスタごとの専用遷移ではなく、各 admin 一覧 src-template ディスクリプタから共有参照される。"}},
