@@ -29,7 +29,7 @@
         "tecnickcom/tcpdf": "^6.2"
     },
     "require-dev": {
-        "bear/api-doc": "1.x-dev",
+        "bear/api-doc": "^1.11",
         "cweagans/composer-patches": "^1.7",
         "koriym/php-server": "^1.0",
         "phpunit/phpunit": "^10.0",
@@ -59,12 +59,39 @@
             "@test"
         ],
         "sa": [
+            "@cs",
             "@psalm"
         ],
+        "cs": [
+            "@cs:alps"
+        ],
+        "cs:alps": "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
         "psalm": "./vendor/bin/psalm --no-cache --no-progress",
         "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
         "coverage": "php -dzend_extension=xdebug.so -dxdebug.mode=coverage ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage",
         "pcov": "php -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage --coverage-clover=coverage.xml",
+        "doc": [
+            "@doc:alps",
+            "@doc:api"
+        ],
+        "doc:alps": [
+            "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
+            "PATH=${PATH#$PWD/vendor/bin:} asd -f html -o alps.json.html alps.json",
+            "PATH=${PATH#$PWD/vendor/bin:} asd -f svg -o alps.svg alps.json",
+            "@doc:sync-alps"
+        ],
+        "doc:api": [
+            "@apidoc",
+            "@doc:normalize"
+        ],
+        "doc:sync-alps": [
+            "cp alps.json.html docs/alps.json.html",
+            "cp alps.svg docs/alps.svg"
+        ],
+        "doc:normalize": "perl -pi -e 's/[ \\t]+$//' docs/api/index.html",
+        "apidoc": "./vendor/bin/apidoc",
+        "apidoc:audit": "./vendor/bin/apidoc audit",
+        "apidoc:terms": "./vendor/bin/apidoc terms",
         "clean": [
             "./vendor/bin/psalm --clear-cache",
             "rm -rf .phpunit.cache var/tmp/*/*.php"
@@ -92,10 +119,20 @@
         "test:http": "Run the HTTP PHPUnit suite.",
         "test:smoke": "Run smoke tests.",
         "sa": "Run static analysis.",
+        "cs": "Run lightweight consistency checks.",
+        "cs:alps": "Validate the canonical ALPS profile with asd.",
         "psalm": "Run Psalm without cache/progress output.",
         "psalm-taint": "Run Psalm taint analysis.",
         "coverage": "Run PHPUnit with Xdebug coverage output.",
         "pcov": "Run PHPUnit with PCOV coverage output.",
+        "doc": "Generate all published documentation artifacts.",
+        "doc:alps": "Generate ALPS HTML/SVG artifacts with asd and sync them to docs/.",
+        "doc:api": "Generate BEAR.ApiDoc artifacts into docs/api.",
+        "doc:sync-alps": "Copy root ALPS artifacts into docs/ for GitHub Pages.",
+        "doc:normalize": "Normalize generated documentation whitespace.",
+        "apidoc": "Generate BEAR.ApiDoc documentation into docs/api.",
+        "apidoc:audit": "Print BEAR.ApiDoc documentation coverage audit.",
+        "apidoc:terms": "Print BEAR.ApiDoc term usage index.",
         "clean": "Clear analysis and generated test caches.",
         "build": "Clean, run static analysis, and run tests.",
         "serve": "Serve the API entrypoint.",

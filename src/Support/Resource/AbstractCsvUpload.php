@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace MyVendor\BeMart\Resource\Page\Admin\Product;
+namespace MyVendor\BeMart\Support\Resource;
 
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;

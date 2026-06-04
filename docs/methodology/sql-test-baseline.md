@@ -25,7 +25,7 @@ SQL suite の baseline は **MariaDB**。
 
 ## 現在の挙動
 
-`~/git/be-bemart/be/tests/Sql/bootstrap.php` は次のように動く。
+`~/git/BeMart/be/tests/Sql/bootstrap.php` は次のように動く。
 
 - `DATABASE_URL` が未設定なら skip marker を設定する。
 - `DATABASE_URL` に接続できなければ skip marker を設定する。
