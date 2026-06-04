@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /login
@@ -71,3 +72,4 @@ Phase B Slice 9: every form field is user-controlled input.
 ### Response
 
 _Not available_
+{% endraw %}
