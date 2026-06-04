@@ -10,6 +10,7 @@ use BEAR\Resource\ResourceObject;
 use PHPUnit\Framework\TestCase;
 
 use function is_string;
+use function str_starts_with;
 use function strtolower;
 
 abstract class AbstractWorkflowTest extends TestCase
@@ -39,6 +40,20 @@ abstract class AbstractWorkflowTest extends TestCase
         return $next;
     }
 
+    protected function followLocation(ResourceObject $response, string|null $expectedLocation = null): ResourceObject
+    {
+        $location = $this->header($response, 'Location');
+        $this->assertIsString($location);
+        if ($expectedLocation !== null) {
+            $this->assertSame($expectedLocation, $location);
+        }
+
+        $next = $this->resource->get($this->resourceUriForLocation($location));
+        $this->assertSame(Code::OK, $next->code);
+
+        return $next;
+    }
+
     protected function bodyValue(ResourceObject $response, string $key): mixed
     {
         $body = $response->body;
@@ -63,5 +78,14 @@ abstract class AbstractWorkflowTest extends TestCase
         }
 
         return null;
+    }
+
+    private function resourceUriForLocation(string $location): string
+    {
+        if (str_starts_with($location, '/')) {
+            return 'page://self' . $location;
+        }
+
+        return $location;
     }
 }
