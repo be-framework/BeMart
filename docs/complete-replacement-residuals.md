@@ -1,4 +1,4 @@
-# Complete Replacement Residuals
+# 完全置換残差（Complete Replacement Residuals）
 
 Last updated: 2026-06-04
 Evidence snapshot: `1ccc7d5` (`origin/be-first-migration-bootstrap` after PR #34)
@@ -11,7 +11,7 @@ BeMart は、EC-CUBE 4.3 の機能領域をほぼ横断的にカバーしてい�
 
 ---
 
-## 1. 互換 fidelity 残差
+## 1. 互換忠実度（fidelity）残差
 
 機能の意味、ルート、Resource 到達、または暫定 adapter は存在するが、EC-CUBE 4.3 の完全代替としては byte-level / side-effect-level / UI-data-level の忠実度がまだ不足しているもの。
 
@@ -32,7 +32,7 @@ BeMart は、EC-CUBE 4.3 の機能領域をほぼ横断的にカバーしてい�
 
 ---
 
-## 2. Production verification 残差
+## 2. 本番検証（production verification）残差
 
 実装または設計は存在するが、完全代替として宣言するには本番想定環境での強い証拠が必要なもの。
 
@@ -50,7 +50,7 @@ BeMart は、EC-CUBE 4.3 の機能領域をほぼ横断的にカバーしてい�
 
 ---
 
-## 3. Out of scope
+## 3. スコープ外（out of scope）
 
 以下は完全代替の残差ではなく、明示的に切った境界である。完全代替の定義を変更しない限り、この台帳の「残作業」としては数えない。
 
