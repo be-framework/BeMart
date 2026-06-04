@@ -95,6 +95,13 @@
         "doc": {"value": "Open the document that defines BeMart as a semantic overhaul experiment."}
       },
       {
+        "id": "goFinalReport",
+        "type": "safe",
+        "rt": "#documentationResource",
+        "title": "Open the final report",
+        "doc": {"value": "Open the final report describing what the BeMart experiment demonstrated."}
+      },
+      {
         "id": "goMigrationStatus",
         "type": "safe",
         "rt": "#documentationResource",
@@ -109,11 +116,32 @@
         "doc": {"value": "Open the residual list for compatibility fidelity and production verification."}
       },
       {
+        "id": "goFlowOntology",
+        "type": "safe",
+        "rt": "#documentationResource",
+        "title": "Open the flow ontology",
+        "doc": {"value": "Open the document describing natural-language scenarios, flow tags, and workflow tests."}
+      },
+      {
+        "id": "goDocsReadme",
+        "type": "safe",
+        "rt": "#documentationResource",
+        "title": "Open the documentation index",
+        "doc": {"value": "Open the maintainer-facing documentation index under docs."}
+      },
+      {
         "id": "goFeatureMatrix",
         "type": "safe",
         "rt": "#documentationResource",
         "title": "Open the feature and ALPS status matrix",
         "doc": {"value": "Open the generated feature matrix connecting EC-CUBE routes, ALPS IDs, implementation status, and difficulty."}
+      },
+      {
+        "id": "goHypermediaTestPrinciple",
+        "type": "safe",
+        "rt": "#documentationResource",
+        "title": "Open the hypermedia test principle",
+        "doc": {"value": "Open the methodology note for proving workflows by following links and forms."}
       },
       {
         "id": "goInitialArticle",

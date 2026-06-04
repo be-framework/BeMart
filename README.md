@@ -44,15 +44,12 @@ Fake は後付けの mock ではなく、最初の契約実装です。SQL 実�
 | Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
 | SQL schema | 永続化境界（table / column / FK / nullable / id shape） |
 
-BeMart では、ALPS を意味論の source of truth とします。Be Framework はドメイン状態遷移を表し、
-BEAR.Sunday Resource は HTTP / PHP 共通の Resource 境界を作ります。Ray.MediaQuery は SQL を
-interface 境界に閉じ込め、Context / DI が Fake / SQL、HTML / JSON、test / prod の実装選択を担います。
-Fake は最初の契約実装であり、SQL 実装は同じ Resource 契約を満たすものとして検証されます。
-Twig HTML は EC-CUBE の affordance をできるだけ保持し、Hypermedia test は controller 内部ではなく、
-link / form を辿って workflow を証明します。
-
-OpenAPI の契約は PHP の Resource `on*` method から生成されます。入力 shape は
-`on*` method parameter と Be `Input` schema で表します。
+まず EC-CUBE から集めた意味論・情報構造を ALPS に固定します。そこから Be Framework が
+ドメイン状態遷移を表し、BEAR.Sunday Resource が HTTP / PHP 共通の Resource 境界を作ります。
+Ray.MediaQuery は SQL を interface 境界に閉じ込め、Context / DI が Fake / SQL、HTML / JSON、
+test / prod の実装選択を担います。Fake は最初の契約実装であり、SQL 実装は同じ Resource 契約を
+満たすものとして検証されます。Twig HTML は EC-CUBE の affordance をできるだけ保持し、
+Hypermedia test は controller 内部ではなく、link / form を辿って workflow を証明します。
 
 Taint tracking、DIP / ADP も境界制約として扱いますが、
 README では詳細化しません。背景は [`docs/methodology/`](docs/methodology/) と
@@ -65,16 +62,10 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 - Hypermedia は UI 補助ではなく契約である。link / form が次状態への affordance になる。
 - ALPS、Be、Resource、SQL file は、AI エージェントによる並列作業でも drift を抑える制約になる。
 
-## まず読む順
+## ドキュメント
 
-| 知りたいこと | 読むもの |
-|---|---|
-| プロジェクトのゴール | [`docs/migration-goal-review.md`](docs/migration-goal-review.md) |
-| 実証として何を示せたか | [`docs/FINAL-REPORT.md`](docs/FINAL-REPORT.md) |
-| 現在の到達点 | [`docs/migration-status.md`](docs/migration-status.md) |
-| 完全代替への残差 | [`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) |
-| flow / workflow の考え方 | [`docs/flow-ontology.md`](docs/flow-ontology.md) |
-| ドキュメント全体の索引 | [`docs/README.md`](docs/README.md) |
+読む順、生成物、補助資料は [GitHub Pages](https://be-framework.github.io/BeMart/) を入口とします。
+メンテナ向けの索引は [`docs/README.md`](docs/README.md) です。
 
 ## リポジトリの見方
 
@@ -90,81 +81,40 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 
 正典の ALPS profile は [`alps.json`](alps.json) です。HTML ドキュメントは生成物です。
 
-## ステータス要約
+## 起動
 
-詳細な数値と判断は [`docs/migration-status.md`](docs/migration-status.md) を正とします。
-README では全体像だけを示します。
-
-| 境界 | 証拠 |
-|---|---|
-| ALPS | descriptor と transition descriptor で語彙と状態遷移を機械可読にする |
-| Be domain | Input / Being / Final が状態遷移の意味を表す |
-| BEAR Resource | EC-CUBE route が ResourceObject 境界へ接続されている |
-| SQL | Ray.MediaQuery interface と SQL file が永続化境界を分離する |
-| HTML | storefront と in-scope admin の Twig 構造を移植済み |
-| Tests | Resource / SQL / HTML render / Hypermedia / HTTP / Browser 系で境界を検証する |
-
-重要な区別は次の通りです。
-
-- セマンティック移植の実証: ほぼ成立。
-- EC-CUBE 完全代替: 互換 fidelity と production proof が残る。
-
-残差の詳細は
-[`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) に分離しています。
-PDF、CSV、Mail、Template、MasterData、SQL target-engine 検証、production DB bring-up、
-一部 HTML enrichment が主な対象です。
-
-workflow test の方針は
-[`docs/methodology/hypermedia-test-principle.md`](docs/methodology/hypermedia-test-principle.md) と
-[`tests/README.md`](tests/README.md) を参照してください。
-
-## コマンド
+SQL-backed context は `DATABASE_URL` と MySQL / MariaDB を必要とします。
+この repository には Docker Compose は含めず、ローカル DB は
+[`malt`](https://github.com/koriym/homebrew-malt) で起動します。
+DB 初期化の詳細は [`sql/README.md`](sql/README.md) を参照してください。
 
 ```bash
-# All generated docs
-composer doc
+# First-time setup
+brew tap shivammathur/php
+brew tap shivammathur/extensions
+brew tap koriym/malt
+brew install malt
+malt install
+malt create
 
-# ALPS only
-composer doc:alps
-
-# BEAR.ApiDoc only
-composer doc:api
-
-# Lightweight consistency checks
-composer cs
-
-# Serverless request runner
-composer fake -- get '/products/list'
-composer page -- get '/'
-
-# Tests
-vendor/bin/phpunit
-vendor/bin/phpunit tests/Resource/Sql
-composer test:http
+# SQL-backed local site
+malt start
+source <(malt env)
+export DATABASE_URL='mysql://dbuser:secret@127.0.0.1:3306/eccubedb?charset=utf8mb4'
+sql/setup-db.sh "$DATABASE_URL"  # drops + recreates the target DB
+composer serve                   # http://127.0.0.1:8080 JSON/API
+composer serve:page              # http://127.0.0.1:8081 HTML
 ```
 
-この環境では PHP 8.5 を使います。
+## その他のコマンド
 
 ```bash
-zsh -ic 'sphp85; composer tests'
+composer run -l
 ```
 
 SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 [`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) と
 [`docs/migration-status.md`](docs/migration-status.md) を参照してください。
-
-## 生成・公開物
-
-| 成果物 | 役割 |
-|---|---|
-| [ALPS docs](https://be-framework.github.io/BeMart/alps.json.html) | ALPS 生成ドキュメント |
-| [BEAR.ApiDoc](https://be-framework.github.io/BeMart/api/) | BEAR.Sunday Page Resource API ドキュメント |
-| [API terms](https://be-framework.github.io/BeMart/api/terms.html) | BEAR.ApiDoc の Term Usage Index |
-| [API OpenAPI JSON](https://be-framework.github.io/BeMart/api/openapi.json) | BEAR.ApiDoc から生成される OpenAPI 3.1 JSON |
-| [API llms.txt](https://be-framework.github.io/BeMart/api/llms.txt) | BEAR.ApiDoc から生成される LLM 向け API 要約 |
-| [初期記事](https://be-framework.github.io/BeMart/) | EC-CUBE ソースから ALPS を逆算した記録 |
-
-生成 HTML は、生成元がある場合は手で編集しません。
 
 ## 外部参照
 
