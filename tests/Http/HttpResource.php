@@ -33,6 +33,7 @@ use function str_contains;
 use function str_starts_with;
 use function strlen;
 use function strtolower;
+use function strtoupper;
 use function substr;
 use function sys_get_temp_dir;
 use function tempnam;
@@ -127,16 +128,25 @@ final class HttpResource implements ResourceInterface
         }
 
         $links = $body['links'] ?? null;
-        if (! is_array($links)) {
-            throw new UnsupportedResourceOperationException('href requires response body links.');
+        if (is_array($links)) {
+            $href = $links[$rel] ?? null;
+            if (is_string($href)) {
+                return $this->get($href, $query);
+            }
         }
 
-        $href = $links[$rel] ?? null;
-        if (! is_string($href)) {
+        $submitTo = $body['submitTo'] ?? null;
+        if (! str_starts_with($rel, 'do') || ! is_array($submitTo)) {
             throw new UnsupportedResourceOperationException(sprintf('Link rel `%s` is not available.', $rel));
         }
 
-        return $this->get($href, $query);
+        $method = $submitTo['method'] ?? null;
+        $href = $submitTo['href'] ?? null;
+        if (! is_string($method) || ! is_string($href)) {
+            throw new UnsupportedResourceOperationException(sprintf('Unsafe rel `%s` has no submit target.', $rel));
+        }
+
+        return $this->request(strtoupper($method), $href, $query);
     }
 
     /** @param array<string, mixed> $query */
