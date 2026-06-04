@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/admin/page/page"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/page/page
 EC-CUBE goPage + doUpdatePage + doDeletePage — single-row endpoint

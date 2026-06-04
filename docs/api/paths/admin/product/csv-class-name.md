@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/product/csv-class-name"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/product/csv-class-name
 EC-CUBE 規格CSV登録 — Product Tier-2

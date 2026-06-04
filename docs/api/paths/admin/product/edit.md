@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/product/edit"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/product/edit
 EC-CUBE 商品登録 / 商品編集 — Product Tier-2 (`admin/Product/product.twig`,

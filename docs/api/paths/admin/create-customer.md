@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/create-customer"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/create-customer
 EC-CUBE doCreateCustomer — 会員を作成する (管理画面).

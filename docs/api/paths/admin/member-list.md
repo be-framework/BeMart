@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/member-list"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/member-list
 EC-CUBE goMemberList — 管理者一覧 (Wave 8, admin member grid).

@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/mypage/withdraw"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /mypage/withdraw
 EC-CUBE doWithdrawCustomer — マイページから自分の会員アカウントを退会する.

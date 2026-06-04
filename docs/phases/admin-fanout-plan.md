@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Admin HTML Fan-out Manifest"
+---
+
 {% raw %}
 # Admin HTML Fan-out Manifest
 

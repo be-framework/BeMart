@@ -11,7 +11,7 @@ title: EC-CUBEのALPSプロファイルを作った — ソースコードから
 
 この記事は BeMart の出発点、つまり **EC-CUBE 4.3 の意味論をソースコードから逆算した時点** の記録です。その後、このプロジェクトは ALPS プロファイル生成に留まらず、Be Framework ドメイン、BEAR.Sunday Resource、Ray.MediaQuery SQL、Twig HTML へ展開するアプリケーション・オーバーホールへ進みました。
 
-現在の BeMart は、単なる移植ではありません。EC-CUBE の語彙・状態遷移・HTML 構造を保ちながら、ドメイン / リソース / SQL / HTML / compatibility adapter / production cutover の境界を明示する実証です。最新の到達点と残作業は [実証総括](FINAL-REPORT.md) と [移植ステータス](migration-status.md) が正です。
+現在の BeMart は、単なる移植ではありません。EC-CUBE の語彙・状態遷移・HTML 構造を保ちながら、ドメイン / リソース / SQL / HTML / compatibility adapter / production cutover の境界を明示する実証です。最新の到達点と残作業は [実証総括](../FINAL-REPORT.md) と [移植ステータス](../migration-status.md) が正です。
 
 この追記以降の本文は、プロジェクトがどのように「意味論」を取り出したかを説明する初期記録として読んでください。
 

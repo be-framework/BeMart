@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/mypage/withdraw-complete"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /mypage/withdraw-complete
 EC-CUBE goMypageWithdrawComplete — 退会手続き(完了)

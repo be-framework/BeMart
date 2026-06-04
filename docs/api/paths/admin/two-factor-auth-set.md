@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/two-factor-auth-set"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/two-factor-auth-set
 EC-CUBE admin 2段階認証 デバイス登録 — top-level wave, Phase 3.

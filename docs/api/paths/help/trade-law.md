@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/help/trade-law"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /help/trade-law
 EC-CUBE goHelpTradeLaw — 特定商取引法に基づく表記 (Wave 3H pure renderer).

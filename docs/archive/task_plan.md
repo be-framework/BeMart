@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Task Plan — superseded"
+---
+
 # Task Plan — superseded
 
 > **このファイルは古い計画フェーズの記録で、現状を表していない。**

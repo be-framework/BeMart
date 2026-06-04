@@ -1,3 +1,8 @@
+---
+layout: default
+title: "LoginHistory"
+---
+
 # LoginHistory
 
 LoginHistory は EC-CUBE の管理者ログイン監査ログを表す。ALPS の `LoginHistory` descriptor は、`dtb_login_history` を BeMart の `LoginHistoryEntity` として投影する。

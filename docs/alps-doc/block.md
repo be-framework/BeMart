@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Block"
+---
+
 # Block
 
 Block は EC-CUBE 管理画面 CMS の画面ブロックを表す。ALPS の `Block` descriptor は、`dtb_block` のブロック本体を BeMart の `BlockEntity` として投影し、レイアウト上の配置情報とは境界を分ける。

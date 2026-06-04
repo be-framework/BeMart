@@ -1,3 +1,8 @@
+---
+layout: default
+title: "BeMart 実証総括 — Final Report"
+---
+
 # BeMart 実証総括 — Final Report
 
 BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.MediaQuery → HTML** で組み直すアプリケーション・オーバーホールの実証プロジェクトです。本書は「何を示せたか・何を学んだか・どこに限界を引いたか」を一枚に束ねた総括であり、各論は本文中のリンク先（`migration-status.md` / `HANDOVER.md` / `skills/` / `methodology/`）が正です。

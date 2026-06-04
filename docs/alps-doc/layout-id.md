@@ -1,3 +1,8 @@
+---
+layout: default
+title: "layoutId"
+---
+
 # layoutId
 
 `layoutId` は EC-CUBE の CMS レイアウトを識別する不透明な文字列ハンドルである。ALPS では `dtb_layout.id` を直接露出するのではなく、Fake と SQL の差を隠す semantic identifier として扱う。

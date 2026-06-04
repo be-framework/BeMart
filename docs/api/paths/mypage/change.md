@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/mypage/change"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /mypage/change
 EC-CUBE doUpdateCustomer — マイページから会員情報を更新 (Pilot 8).

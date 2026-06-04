@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Hard ActionRedirect 完走 + Phase-A stub 実体化 — 引き継ぎ"
+---
+
 # Hard ActionRedirect 完走 + Phase-A stub 実体化 — 引き継ぎ
 
 > このブランチ `claude/gallant-fermat-CpUqD`（PR #28, draft）の作業記録と、

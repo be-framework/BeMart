@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/shopping/shipping-edit"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping/shipping-edit
 EC-CUBE goShoppingShippingEdit — お届け先変更フォーム (Wave 3H pure renderer).

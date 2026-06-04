@@ -4,3 +4,8 @@ description: EC-CUBE 4.3 → BEAR.Sunday + Be Framework 移植の実証プロジ
 url: https://be-framework.github.io
 baseurl: /BeMart
 repository: be-framework/BeMart
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true

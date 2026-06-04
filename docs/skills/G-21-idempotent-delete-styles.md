@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-21: Idempotent DELETE has two styles — silent (200 + `alreadyAbsent`) vs 404-on-miss"
+---
+
 # G-21: Idempotent DELETE has two styles — silent (200 + `alreadyAbsent`) vs 404-on-miss
 
 ## Context

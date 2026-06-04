@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-23: Hypermedia tests are the migration contract — never write Final-direct \"integration\" tests"
+---
+
 # G-23: Hypermedia tests are the migration contract — never write Final-direct "integration" tests
 
 ## Context

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "doc4.ec-cube.net 調査結果とALPS改善案"
+---
+
 # doc4.ec-cube.net 調査結果とALPS改善案
 
 ## 調査したページ

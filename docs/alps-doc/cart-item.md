@@ -1,3 +1,8 @@
+---
+layout: default
+title: "CartItem"
+---
+
 # CartItem
 
 CartItem は EC-CUBE のカート画面で 1 明細あたり描画される情報構造である。ALPS の `CartItem` descriptor は、`dtb_cart_item` の実カラムだけでなく、カート行の表示に必要な商品情報を合成した画面投影として定義する。

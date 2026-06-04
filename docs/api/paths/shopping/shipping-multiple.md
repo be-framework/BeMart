@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/shopping/shipping-multiple"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping/shipping-multiple
 EC-CUBE goShoppingShippingMultiple — 複数配送先設定画面 (Wave 3H pure renderer).

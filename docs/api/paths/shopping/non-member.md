@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/shopping/non-member"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping/non-member
 EC-CUBE goShoppingNonMember / doSubmitNonMember —非会員購入 (Wave 7W).

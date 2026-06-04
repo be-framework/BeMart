@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/admin/empty-page"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/empty-page
 EC-CUBE admin プラグイン拡張用スロット — top-level wave, Phase 3.

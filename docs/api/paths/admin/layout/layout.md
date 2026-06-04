@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/admin/layout/layout"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/layout/layout
 EC-CUBE doUpdateLayout — single-row endpoint (Wave 9 CMS). Only PUT

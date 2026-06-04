@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/admin/change-password"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/change-password
 EC-CUBE admin パスワード変更 — top-level wave, Phase 3.

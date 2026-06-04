@@ -1,3 +1,8 @@
+---
+layout: default
+title: "AdminCustomerEditPage — 管理会員編集画面"
+---
+
 # AdminCustomerEditPage — 管理会員編集画面
 
 - ALPS ID: `AdminCustomerEditPage`
