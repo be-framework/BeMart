@@ -6,30 +6,22 @@
 
 BeMart は、EC-CUBE 4.3 を意味論と境界へ分解し、ALPS / Be Framework /
 BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ再構成する
-アプリケーション・オーバーホールの実証プロジェクトです。
-
-Symfony 版 EC-CUBE の controller rewrite ではありません。EC-CUBE が持つ業務語彙、
-状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装から取り出して読める契約
-として配置し直すことが目的です。外から見える振る舞いは残したまま、各要素を分解して
-境界と責任を確かめ、一つずつ組み直す——いわば意味論のオーバーホールです。
+アプリケーション・オーバーホールの実証プロジェクトです。Symfony 版 EC-CUBE の
+controller rewrite ではありません。
 
 > BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration
 > with explicit boundaries.
 
-このリポジトリが示すのは「EC-CUBE を別フレームワークへ移す」ことだけではありません。
-大きな既存アプリケーションを、意味論を正、境界を契約、テストを証明として組み直せるか。
-その問いへの実装付きの答えです。
+## 意義
 
-## 現時点の答え
-
-このプロジェクトの問いは、単に「EC-CUBE を別フレームワークで動かせるか」ではありません。
+BeMart の意義は、単に EC-CUBE を別フレームワークで動かすことではありません。
 
 > 巨大な既存 EC アプリケーションを、実装の移し替えではなく、意味の分解と境界の再構成として
-> 移植できるか。
+> 移植する。
 
-現時点で確認できたのは、EC-CUBE の実装に埋め込まれた語彙、状態遷移、永続化制約、
+この宣言に従い、EC-CUBE の実装に埋め込まれた語彙、状態遷移、永続化制約、
 HTTP affordance、HTML 表現を `alps.json` へ逆算し、それを Be domain、BEAR Resource、
-Ray.MediaQuery SQL、Twig HTML、workflow test へ接続できることです。移植後の実装が
+Ray.MediaQuery SQL、Twig HTML、workflow test へ接続しています。移植後の実装が
 動くだけでなく、移植の根拠を ALPS、型、SQL、Resource、test の各境界に残せることを
 示しています。
 
@@ -46,9 +38,12 @@ EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
 Fake は後付けの mock ではなく、最初の契約実装です。SQL 実装はあとから同じ Resource 契約を
 満たすものとして差し替えられ、Context / DI がどちらを使うかを選びます。
 
-## Architecture Boundaries
+## 境界線
 
-| Boundary | Role |
+ここでいう境界線は DDD の Bounded Context というより、Clean Architecture に近いものです。
+依存方向、責務、データ表現の変換点を分ける線として扱います。
+
+| 境界線 | 役割 |
 |---|---|
 | ALPS | アプリケーション意味論・情報構造 |
 | Be Framework | ドメイン境界（`Input` schema / `Being` / `Final`） |
@@ -137,7 +132,7 @@ workflow test の方針は
 [`docs/methodology/hypermedia-test-principle.md`](docs/methodology/hypermedia-test-principle.md) と
 [`tests/README.md`](tests/README.md) を参照してください。
 
-## よく使うコマンド
+## コマンド
 
 ```bash
 # All generated docs
