@@ -16,6 +16,8 @@ Last updated: 2026-06-04
 
 `flow-*` は「あるアクターが意味ある目的を達成するまでに辿るハイパーメディア遷移のまとまり」として扱う。単なる機能領域、単発操作、実装都合の画面グループには使わない。
 
+Flow は `transition chain + semantic postcondition` である。最後の画面へ到達するだけでは足りない。作成したものが読める、編集結果が反映される、削除後に読めない、登録済み顧客として扱われる、問い合わせ送信境界が呼ばれる、という「成立保証」までを goal condition として定義する。
+
 Feature tag は coverage report のための補助軸である。正準の領域表現は、既存の domain tag と `actor-*` を優先する。
 
 ## 検証範囲（Verification Scope）
@@ -23,6 +25,21 @@ Feature tag は coverage report のための補助軸である。正準の領域
 この文書は自然言語の flow ontology であり、実行可能な step list ではない。後続フェーズでは `tests/SemanticFlow/flows/*.json` のようなテスト fixture に、HTTP method/path、期待する `alpsId`、画面 affordance を具体化できる。
 
 それらの fixture はこの ontology を検証するための実行形式であり、`alps.json` の意味語彙を置き換えるものではない。
+
+---
+
+## 成立保証（Semantic Postcondition）
+
+Flow の検証は「エラーなく遷移できた」ではなく、「その業務操作が成立した」と言える観測点まで含める。
+
+標準パターン:
+
+- CRUD 系: `create -> read -> update -> read -> delete -> read none`。
+- 登録系: `register -> complete -> signIn -> myPage`、または登録後の signed-in Top / MyPage affordance。
+- 公開・編集系: 管理画面で保存した内容を storefront / 管理表示で読む。
+- 送信・通知系: ユーザー flow は `complete -> receipt/ticket -> public closure link` で閉じ、送信境界・メール本文・履歴は Be / Mail / SQL contract test で保証する。`flow-customer-inquiry` は問い合わせ本文の readback resource を持たないため、完了状態が `ticketId` を public receipt として表明するショーケースとして扱う。
+
+公開された affordance で確認できる postcondition は workflow 内で辿る。外部副作用や非公開副作用は workflow に DB 直読みを混ぜず、Be / SQL / storage / mail の contract test に委譲し、flow の success evidence に明記する。
 
 ---
 
@@ -110,9 +127,9 @@ Feature tag は coverage report のための補助軸である。正準の領域
 | Actor | customer |
 | Intent | 問い合わせを入力し、確認して送信する。 |
 | Start condition | storefront visitor。 |
-| Goal condition | 問い合わせ完了画面に到達し、送信境界が呼ばれる。 |
+| Goal condition | 問い合わせ完了画面に到達し、受付番号 `ticketId` が発行され、そこから公開された終端リンクを辿れる。送信境界の成立は Be / Mail contract で確認する。 |
 | Success evidence | Hypermedia test、HTTP test、mail body fixture、browser smoke。 |
-| Out of scope | 本番 SMTP 到達性。 |
+| Out of scope | 問い合わせ本文の readback resource、本番 SMTP 到達性。 |
 
 ### `flow-admin-content-publish`
 
