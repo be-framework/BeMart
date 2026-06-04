@@ -1,11 +1,12 @@
-# BeMart — EC-CUBE セマンティックオーバーホール
+# BeMart — EC-CUBE セマンティック再構築
 
 BeMart は、EC-CUBE 4.3 を意味論と境界へ分解し、ALPS / Be Framework /
 BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ再構成する実証プロジェクトです。
 
 Symfony 版 EC-CUBE の controller rewrite ではありません。EC-CUBE が持つ業務語彙、
 状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装から取り出して読める契約
-として配置し直すことが目的です。
+として配置し直すことが目的です。外から見える振る舞いは残したまま、各要素を分解して
+境界と責任を確かめ、一つずつ組み直す——いわば意味論のオーバーホールです。
 
 > BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration
 > with explicit boundaries.
@@ -46,8 +47,7 @@ SQL、HTML、workflow test へ投影できることは示せました。
 | テスト | [`tests`](tests), [`tests/README.md`](tests/README.md) |
 | 文書 | [`docs`](docs), [`docs/README.md`](docs/README.md) |
 
-正典の ALPS profile は [`alps.json`](alps.json) です。`alps.json.html` や
-`docs/alps.json.html` は生成物です。
+正典の ALPS profile は [`alps.json`](alps.json) です。HTML ドキュメントは生成物です。
 
 ## ステータス要約
 
@@ -56,7 +56,7 @@ README では全体像だけを示します。
 
 | 境界 | 証拠 |
 |---|---|
-| ALPS | 532 descriptor / 207 transition descriptor |
+| ALPS | descriptor と transition descriptor で語彙と状態遷移を機械可読にする |
 | Be domain | Input / Being / Final が状態遷移の意味を表す |
 | BEAR Resource | EC-CUBE route が ResourceObject 境界へ接続されている |
 | SQL | Ray.MediaQuery interface と SQL file が永続化境界を分離する |
@@ -118,15 +118,12 @@ SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 
 ## 生成・公開物
 
-GitHub Pages root: <https://koriym.github.io/ec-cube-alps/>
-
 | 成果物 | 役割 |
 |---|---|
-| [`alps.json.html`](alps.json.html) | ALPS 生成ドキュメント |
-| [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html) | OpenAPI projection |
-| [`docs/alps.json.html`](docs/alps.json.html) | GitHub Pages 用 ALPS ドキュメント |
-| [`docs/openapi.html`](docs/openapi.html) | GitHub Pages 用 OpenAPI ドキュメント |
-| [`docs/index.md`](docs/index.md) | 初期記事: EC-CUBE ソースから ALPS を逆算した記録 |
+| [ALPS docs](https://koriym.github.io/ec-cube-alps/alps.json.html) | ALPS 生成ドキュメント |
+| [OpenAPI docs](https://koriym.github.io/ec-cube-alps/openapi.html) | OpenAPI HTML |
+| [`openapi.yaml`](openapi.yaml) | root に置く OpenAPI YAML 生成物 |
+| [初期記事](https://koriym.github.io/ec-cube-alps/) | EC-CUBE ソースから ALPS を逆算した記録 |
 
 生成 HTML は、生成元がある場合は手で編集しません。
 
