@@ -6,29 +6,19 @@
 
 BeMart は、EC-CUBE 4.3 を意味論と境界へ分解し、ALPS / Be Framework /
 BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ再構成する
-アプリケーション・オーバーホールの実証プロジェクトです。Symfony 版 EC-CUBE の
-controller rewrite ではありません。
+アプリケーション・オーバーホールの実証プロジェクトです。
 
-> BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration
-> with explicit boundaries.
+Symfony 版 EC-CUBE の単なる書き直しではありません。EC-CUBE が持つ業務語彙、
+状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装から取り出して読める契約
+として配置し直すことが目的です。外から見える振る舞いは残したまま、各要素を分解して
+境界と責任を確かめ、一つずつ組み直す——いわば意味論のオーバーホールです。
 
-## 意義
+機械のオーバーホールのように、分解、点検、再配置を通じて、元のプロジェクトをより高品質で持続性の高いものにすることを目標としました。
 
-BeMart の意義は、単に EC-CUBE を別フレームワークで動かすことではありません。
+## 2パスマイグレーション
 
-> 巨大な既存 EC アプリケーションを、実装の移し替えではなく、意味の分解と境界の再構成として
-> 移植する。
-
-この宣言に従い、EC-CUBE の実装に埋め込まれた語彙、状態遷移、永続化制約、
-HTTP affordance、HTML 表現を `alps.json` へ逆算し、それを Be domain、BEAR Resource、
-Ray.MediaQuery SQL、Twig HTML、workflow test へ接続しています。移植後の実装が
-動くだけでなく、移植の根拠を ALPS、型、SQL、Resource、test の各境界に残せることを
-示しています。
-
-## 移植の型
-
-移植は 2 つの動きでできています。まず EC-CUBE の Entity、Route、Controller、Twig から
-語彙と状態遷移を逆算し、`alps.json` という契約へ束ねる。次に、その契約を Be domain、
+移植は 2 つの動きでできています。最初に EC-CUBE の Entity、Route、Controller、Twig から
+語彙と状態遷移を逆算し、`alps.json` という意味構造の契約へ束ねます。次に、その契約を Be domain、
 BEAR Resource、Ray.MediaQuery SQL、Twig HTML、Hypermedia test へ投影します。
 
 ```text
@@ -38,13 +28,11 @@ EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
 Fake は後付けの mock ではなく、最初の契約実装です。SQL 実装はあとから同じ Resource 契約を
 満たすものとして差し替えられ、Context / DI がどちらを使うかを選びます。
 
-## アーキテクチャ境界線
+## アーキテクチャの境界線
 
-ここでいうアーキテクチャ境界線は DDD の境界づけられたコンテキストではなく、
-Clean Architecture に近いものです。
-依存方向、責務、データ表現の変換点を分ける線として扱います。
+各境界線は、意味論を実装へ写像するときの依存方向、責務、表現変換の接続点です。
 
-| アーキテクチャ境界線 | 役割 |
+| 境界 | 役割 |
 |---|---|
 | ALPS | アプリケーション意味論・情報構造 |
 | Be Framework | ドメイン境界（`Input` schema / `Being` / `Final`） |
@@ -55,6 +43,13 @@ Clean Architecture に近いものです。
 | Cache / freshness | Resource 表現 ↔ browser / proxy / CDN の鮮度境界（`CacheableResponse` / `Cache-Control` / `ETag` / `Vary` / invalidation） |
 | Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
 | SQL schema | 永続化境界（table / column / FK / nullable / id shape） |
+
+BeMart では、ALPS を意味論の source of truth とします。Be Framework はドメイン状態遷移を表し、
+BEAR.Sunday Resource は HTTP / PHP 共通の Resource 境界を作ります。Ray.MediaQuery は SQL を
+interface 境界に閉じ込め、Context / DI が Fake / SQL、HTML / JSON、test / prod の実装選択を担います。
+Fake は最初の契約実装であり、SQL 実装は同じ Resource 契約を満たすものとして検証されます。
+Twig HTML は EC-CUBE の affordance をできるだけ保持し、Hypermedia test は controller 内部ではなく、
+link / form を辿って workflow を証明します。
 
 OpenAPI の契約は PHP の Resource `on*` method から生成されます。入力 shape は
 `on*` method parameter と Be `Input` schema で表します。
@@ -118,16 +113,6 @@ README では全体像だけを示します。
 [`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) に分離しています。
 PDF、CSV、Mail、Template、MasterData、SQL target-engine 検証、production DB bring-up、
 一部 HTML enrichment が主な対象です。
-
-## 基本方針
-
-- ALPS を意味論の source of truth とする。
-- Be Framework でドメイン状態遷移を表す。
-- BEAR.Sunday Resource で HTTP / PHP 共通の Resource 境界を作る。
-- Ray.MediaQuery で SQL を interface 境界に閉じ込める。
-- Fake を最初の契約実装とし、SQL 実装が同じ契約を満たすことを検証する。
-- Twig HTML は EC-CUBE の affordance をできるだけ保持する。
-- Hypermedia test は controller 内部ではなく、link / form を辿って workflow を証明する。
 
 workflow test の方針は
 [`docs/methodology/hypermedia-test-principle.md`](docs/methodology/hypermedia-test-principle.md) と
