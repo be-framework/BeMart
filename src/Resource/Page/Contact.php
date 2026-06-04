@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use Be\Framework\BecomingInterface;
-use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Final\ContactSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitContactInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
@@ -18,6 +18,7 @@ use Ray\WebFormModule\FormFactory;
 
 use function array_filter;
 use function assert;
+use function rawurlencode;
 
 /**
  * EC-CUBE doSubmitContact — お問い合わせ送信 (Pilot 15).
@@ -64,6 +65,7 @@ class Contact extends ResourceObject
                 'csrfToken',
             ],
             'submitTo' => [
+                'rel' => 'doSubmitContact',
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],
@@ -123,11 +125,12 @@ class Contact extends ResourceObject
         // projected body. Rendering Contact.html.twig against this body
         // is never attempted: the redirect supersedes it.
         $this->code = Code::OK;
-        $this->headers['Location'] = '/contact/complete';
+        $this->headers['Location'] = '/contact/complete?ticketId=' . rawurlencode($final->ticketId);
         $this->body = [
             'contactName01' => $final->contactName01,
             'contactName02' => $final->contactName02,
             'contactEmail' => $final->contactEmail,
+            'ticketId' => $final->ticketId,
         ];
 
         return $this;
