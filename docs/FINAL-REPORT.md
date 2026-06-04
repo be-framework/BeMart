@@ -39,9 +39,9 @@ BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.Media
 実証として不要だが本番 EC-CUBE の完全代替には必要な差分は、[README](../README.md) の "Scope" 節と [`migration-status.md`](migration-status.md) §4 が正:
 
 - **ドメイン/互換 residual** — `doCreateOrder` / `doCheckout` は PurchaseFlow + `dtb_order_item` snapshot writes まで実装済み。残るのは order-item SQL の MariaDB 10.11 target-engine 検証または `JSON_TABLE` なしの INSERT への置換、`doImportProductCsv` の意図的未移植、`doUpdateCsv` を消費する export fidelity、`doInstallPlugin` の plugin runtime。
-- **EC-CUBE 互換 fidelity 残差**（[#24](https://github.com/koriym/ec-cube-alps/issues/24)）— PDF 完全一致 / CSV フォーマット / Mail / Template file 副作用 / MasterData adapter。Category CSV と Shipping CSV は永続化面まで実装済みだが、byte-exact な完全互換は別境界として残る。
+- **EC-CUBE 互換 fidelity 残差**（[#24](https://github.com/be-framework/BeMart/issues/24)）— PDF 完全一致 / CSV フォーマット / Mail / Template file 副作用 / MasterData adapter。Category CSV と Shipping CSV は永続化面まで実装済みだが、byte-exact な完全互換は別境界として残る。
 - **HTML enrichment backlog** — Mypage dashboard / Favorite / Address / Contact
-- **設計上の out-of-scope** — プラグイン機構（[#3](https://github.com/koriym/ec-cube-alps/issues/3)）/ Store・Plugin install・search サブツリー
+- **設計上の out-of-scope** — プラグイン機構（[#3](https://github.com/be-framework/BeMart/issues/3)）/ Store・Plugin install・search サブツリー
 - **本番移行** — 本番 DB の bring-up / cutover
 
 これらが fix されれば BeMart は EC-CUBE 4.3 の完全な代替になる。差分は把握済みであり、未知ではない。
