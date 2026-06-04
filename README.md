@@ -54,14 +54,14 @@ Fake は後付けの mock ではなく、最初の契約実装です。SQL 実�
 | Be Framework | ドメイン境界（`Input` schema / `Being` / `Final`） |
 | Ray.MediaQuery | ドメイン ↔ インフラ境界。PHP interface / return type ↔ SQL file / result |
 | BEAR.Sunday | HTTP request ↔ リソース境界（URI / HTTP method / `on*` method parameter / `ResourceObject`） |
-| OpenAPI / API schema | 公開 HTTP 契約の投影（`on*` method parameter / `Input` schema / status / representation shape） |
+| OpenAPI / API schema | PHP の `on*` method から生成される公開 HTTP 契約（parameter / status / representation shape） |
 | Hypermedia | リソース ↔ クライアント遷移境界（`#[Link]` / `href` / `form action`） |
 | Cache / freshness | Resource 表現 ↔ browser / proxy / CDN の鮮度境界（`CacheableResponse` / `Cache-Control` / `ETag` / `Vary` / invalidation） |
 | Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
 | SQL schema | 永続化境界（table / column / FK / nullable / id shape） |
 
-入力契約は二層で扱います。実装内の契約は Resource の `on*` method parameter と
-Be `Input` schema に置き、OpenAPI はそれを外部向けに投影した公開契約として扱います。
+OpenAPI の契約は PHP の Resource `on*` method から生成されます。入力 shape は
+`on*` method parameter と Be `Input` schema で表します。
 
 Taint tracking、DIP / ADP も境界制約として扱いますが、
 README では詳細化しません。背景は [`docs/methodology/`](docs/methodology/) と
