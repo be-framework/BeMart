@@ -89,12 +89,14 @@ workflow test の方針は
 ## よく使うコマンド
 
 ```bash
-# ALPS validation
-asd --validate alps.json
+# All generated docs
+composer doc
 
-# ALPS generated docs
-asd -f html -o alps.json.html alps.json
-asd -f svg -o alps.svg alps.json
+# ALPS only
+composer doc:alps
+
+# BEAR.ApiDoc only
+composer doc:api
 
 # Serverless request runner
 composer fake -- get '/products/list'
