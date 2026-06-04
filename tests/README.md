@@ -87,6 +87,21 @@ as in production. Bugs where state lives in a request-scoped singleton
 instead of the session — e.g. an in-memory cart — are invisible to the
 `hypermedia` tier and caught only by the `http` tier.
 
+## HAL follow contract
+
+`follow()` is a GET navigation DSL. It follows a rel from the current
+resource response and asserts the next response is `200 OK`.
+
+For the in-process tier, `follow()` delegates to `ResourceInterface::href()`
+and BEAR.Resource resolves the rel declared by `#[Link]`. For the HTTP tier,
+`HttpResource::href()` reads the rendered HAL representation and follows
+`_links.<rel>.href` with GET. HAL links do not carry an HTTP method.
+
+Unsafe or idempotent action transitions such as `do*` therefore do not use
+`follow()`. The workflow step calls `post()`, `put()`, `patch()`, or
+`delete()` directly with the request payload it knows from the ALPS/profile
+contract.
+
 ## Running
 
 The suites that need no database run with `DATABASE_URL` emptied:

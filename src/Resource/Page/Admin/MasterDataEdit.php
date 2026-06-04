@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -37,6 +38,7 @@ class MasterDataEdit extends ResourceObject
      * @psalm-taint-source input $masterType
      * @psalm-taint-source input $rows
      */
+    #[Link(rel: 'goMasterData', href: 'page://self/admin/master-data')]
     #[CsrfProtected]
     public function onPut(string $masterType, array $rows = []): static
     {
