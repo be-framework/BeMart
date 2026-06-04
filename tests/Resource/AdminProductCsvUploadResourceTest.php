@@ -22,7 +22,7 @@ use function dirname;
  * pages — `csv_product`, `csv_category`, `csv_class_name`,
  * `csv_class_category`.
  *
- * The four resources share {@see \MyVendor\BeMart\Resource\Page\Admin\Product\AbstractCsvUpload}:
+ * The four resources share {@see \MyVendor\BeMart\Support\Resource\AbstractCsvUpload}:
  * a thin Pattern-B GET renderer for EC-CUBE's `csv_*.twig` upload
  * screens. Each renders a CSV-upload form + a format-description table
  * with no Be transition invoked; the AUTHZ guard rejects anonymous

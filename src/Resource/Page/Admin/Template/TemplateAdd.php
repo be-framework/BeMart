@@ -22,7 +22,7 @@ use function assert;
  * a template code, a template name and a zip-archive file-upload form.
  * The matching `doTemplateInstall` write transition is a Phase-A stub —
  * this port renders the upload shell only, mirroring the Product
- * CSV-upload Tier-2 wave ({@see \MyVendor\BeMart\Resource\Page\Admin\Product\AbstractCsvUpload}).
+ * CSV-upload Tier-2 wave ({@see \MyVendor\BeMart\Support\Resource\AbstractCsvUpload}).
  *
  * AUTHZ is a direct admin-session check (Pattern B — no Be transition is
  * invoked on the GET path; an anonymous admin → 403). The form renders

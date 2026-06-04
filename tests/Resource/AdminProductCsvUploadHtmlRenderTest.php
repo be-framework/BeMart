@@ -23,7 +23,7 @@ use function dirname;
  *
  * Render-smoke standard: each page renders a full admin-frame HTML
  * document through {@see HtmlModule} with the body shape supplied by
- * the {@see \MyVendor\BeMart\Resource\Page\Admin\Product\AbstractCsvUpload}
+ * the {@see \MyVendor\BeMart\Support\Resource\AbstractCsvUpload}
  * subclasses. The EC-CUBE residual-diff fidelity check is a follow-up
  * gated on the EC-CUBE 4.3 reference clone (`tools/ec-cube-source/`).
  */
