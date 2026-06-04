@@ -16,7 +16,7 @@
 | 完全代替への残差を知る | [`complete-replacement-residuals.md`](complete-replacement-residuals.md) |
 | 次の作業を始める | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) → [`migration-status.md`](migration-status.md) §4 |
 | flow / workflow の意味を知る | [`flow-ontology.md`](flow-ontology.md) → [`../tests/README.md`](../tests/README.md) |
-| ALPS 生成の背景を読む | [`index.md`](index.md) |
+| ALPS 生成の背景を読む | [`archive/alps-profile-generation.md`](archive/alps-profile-generation.md) |
 | 境界ルールを再利用する | [`skills/index.md`](skills/index.md) → [`methodology/`](methodology/) |
 
 ## Canonical Documents
@@ -36,10 +36,10 @@
 
 ## Published / Generated Files
 
-`index.md`（公開ブログ記事）/ `_config.yml`（Jekyll 設定）/ `alps.json.html` /
-`openapi.html` / `alps.svg` / `api/index.html` / `api/terms.html` /
-`api/openapi.json` / `api/llms.txt` は公開 URL を持つ
-生成物・設定。手動移動禁止。
+`index.html`（GitHub Pages 入口）/ `index.alps.json`（入口ページの profile）/
+`archive/alps-profile-generation.md`（旧公開ブログ記事）/ `_config.yml`（Jekyll 設定）/
+`alps.json.html` / `openapi.html` / `alps.svg` / `api/index.html` / `api/terms.html` /
+`api/openapi.json` / `api/llms.txt` は公開 URL を持つ生成物・設定。手動移動禁止。
 
 ## サブディレクトリ
 
