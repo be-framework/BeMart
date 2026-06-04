@@ -1,3 +1,8 @@
+---
+layout: default
+title: "News"
+---
+
 # News
 
 News は EC-CUBE のニュース記事を表す。ALPS の `News` descriptor は、`dtb_news` を BeMart の `NewsEntity` として投影する。

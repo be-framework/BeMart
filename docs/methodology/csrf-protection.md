@@ -1,3 +1,8 @@
+---
+layout: default
+title: "CSRF protection"
+---
+
 # CSRF protection
 
 BeMart の mutating Resource method は、手書き guard ではなく `#[CsrfProtected]` で CSRF 必須を宣言する。

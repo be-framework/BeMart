@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/login"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /login
 EC-CUBE doLogin — 会員ログイン (Pilot 6).

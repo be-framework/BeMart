@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/entry/activate"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /entry/activate
 EC-CUBE doActivateCustomer — provisional → active (Pilot 7).

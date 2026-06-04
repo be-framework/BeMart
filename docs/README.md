@@ -1,3 +1,8 @@
+---
+layout: default
+title: "docs/ — ドキュメント索引"
+---
+
 # docs/ — ドキュメント索引
 
 `docs/` はプロジェクト文書の置き場であり、同時に GitHub Pages の publish root

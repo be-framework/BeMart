@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Why hypermedia (Resource-layer) tests are the underrated foundation"
+---
+
 # Why hypermedia (Resource-layer) tests are the underrated foundation
 
 The companion essay to `docs/skills/G-23-hypermedia-test-is-migration-contract.md`. G-23 is the operational rule for storage migration. This document captures **why** the rule exists — the underlying argument for treating hypermedia (Resource-layer) tests as the central test abstraction.

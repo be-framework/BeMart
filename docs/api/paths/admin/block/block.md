@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/admin/block/block"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/block/block
 EC-CUBE doUpdateBlock + doDeleteBlock — single-row endpoint (Wave 9).

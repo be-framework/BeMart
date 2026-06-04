@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Address"
+---
+
 # Address
 
 Address は会員の配送先住所帳の 1 行を表す。ALPS の `Address` descriptor は、`dtb_customer_address` を BeMart の `AddressEntity` として投影する。

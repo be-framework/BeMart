@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/admin/news/news"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/news/news
 EC-CUBE goNews + doUpdateNews + doDeleteNews — single-row endpoint

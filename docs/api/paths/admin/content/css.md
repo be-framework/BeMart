@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/admin/content/css"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/content/css
 EC-CUBE カスタマイズCSS編集 — admin CMS thin renderer (Phase 3 HTML).

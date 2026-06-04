@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/order/shipping-notify-mail"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/order/shipping-notify-mail
 EC-CUBE doSendShippingNotifyMail — 出荷通知メールを送信する (Phase 3

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "HTML Route Coverage Baseline"
+---
+
 # HTML Route Coverage Baseline
 
 作成日: 2026-05-26

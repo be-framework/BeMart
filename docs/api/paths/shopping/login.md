@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/shopping/login"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping/login
 EC-CUBE goShoppingLogin — 購入ログイン (Wave 3H pure renderer).

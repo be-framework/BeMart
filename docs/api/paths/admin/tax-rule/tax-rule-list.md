@@ -1,4 +1,9 @@
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+---
+layout: default
+title: "/admin/tax-rule/tax-rule-list"
+---
+
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/tax-rule/tax-rule-list
 EC-CUBE goTaxRuleList + doCreateTaxRule — collection endpoint

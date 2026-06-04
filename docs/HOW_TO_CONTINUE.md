@@ -1,3 +1,8 @@
+---
+layout: default
+title: "HOW_TO_CONTINUE.md"
+---
+
 # HOW_TO_CONTINUE.md
 
 別マシン / 別セッションでこの **BeMart** プロジェクト（EC-CUBE 4.3 → BEAR.Sunday +

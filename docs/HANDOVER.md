@@ -1,3 +1,8 @@
+---
+layout: default
+title: "HANDOVER"
+---
+
 # HANDOVER
 
 EC-CUBE 4.3 の ALPS プロファイル構築と、Be Framework + BEAR.Sunday への移植 Pilot の進行記録。次の AI セッション (および人間レビュアー) への引き継ぎメモ。

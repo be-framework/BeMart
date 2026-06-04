@@ -1,5 +1,10 @@
+---
+layout: default
+title: "/entry"
+---
+
 {% raw %}
-<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /entry
 EC-CUBE doRegisterCustomer —会員登録 (Entry/Register).

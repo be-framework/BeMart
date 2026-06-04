@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Template"
+---
+
 # Template
 
 Template は EC-CUBE のインストール済みデザインテンプレートを表す。ALPS の `Template` descriptor は、テンプレート本体ファイルではなく `dtb_template` の登録レジストリを BeMart の `TemplateEntity` として投影する。
