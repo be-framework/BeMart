@@ -29,7 +29,10 @@ use function preg_split;
 use function shell_exec;
 use function sprintf;
 use function str_contains;
+use function str_starts_with;
+use function strlen;
 use function strtolower;
+use function substr;
 use function sys_get_temp_dir;
 use function tempnam;
 use function trim;
@@ -47,7 +50,8 @@ use const PHP_EOL;
  */
 final class HttpResource implements ResourceInterface
 {
-    private static PhpServer|null $server = null;
+    /** @var array<string, PhpServer> */
+    private static array $servers = [];
 
     private readonly string $baseUri;
     private readonly string $cookieJar;
@@ -65,13 +69,14 @@ final class HttpResource implements ResourceInterface
 
     private function startServer(string $host, string $index): void
     {
-        if (self::$server instanceof PhpServer) {
+        $serverKey = $host . ' ' . $index;
+        if (array_key_exists($serverKey, self::$servers)) {
             return;
         }
 
         $server = new PhpServer($host, $index);
         $server->start();
-        self::$server = $server;
+        self::$servers[$serverKey] = $server;
     }
 
     #[Override]
@@ -175,6 +180,7 @@ final class HttpResource implements ResourceInterface
     /** @param array<string, mixed> $query */
     private function url(string $method, string $uri, array $query): string
     {
+        $uri = self::httpPath($uri);
         if ($method !== 'GET' || $query === []) {
             return $this->baseUri . $uri;
         }
@@ -182,6 +188,17 @@ final class HttpResource implements ResourceInterface
         $separator = str_contains($uri, '?') ? '&' : '?';
 
         return $this->baseUri . $uri . $separator . http_build_query($query);
+    }
+
+    private static function httpPath(string $uri): string
+    {
+        if (! str_starts_with($uri, 'page://self')) {
+            return $uri;
+        }
+
+        $path = substr($uri, strlen('page://self'));
+
+        return $path === '' ? '/' : $path;
     }
 
     /** @param array<string, mixed> $query */
