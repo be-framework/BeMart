@@ -4,6 +4,8 @@
 /var/tmp/
 /tests/Http/log/*.log
 .DS_Store
+*.swp
+*.swo
 /.claude/worktrees/
 
 # Malt local runtime state
