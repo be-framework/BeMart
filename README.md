@@ -52,7 +52,7 @@ Fake は後付けの mock ではなく、最初の契約実装です。SQL 実�
 |---|---|
 | ALPS | アプリケーション意味論・情報構造 |
 | Be Framework | ドメイン境界（`Input` schema / `Being` / `Final`） |
-| Ray.MediaQuery | ドメイン ↔ インフラ境界。PHP interface / return type ↔ SQL file / result |
+| Ray.MediaQuery | ドメイン ↔ インフラ境界。PHP interface ↔ SQL file、SQL row/result ↔ domain object |
 | BEAR.Sunday | HTTP request ↔ リソース境界（URI / HTTP method / `on*` method parameter / `ResourceObject`） |
 | OpenAPI / API schema | PHP の `on*` method から生成される公開 HTTP 契約（parameter / status / representation shape） |
 | Hypermedia | リソース ↔ クライアント遷移境界（`#[Link]` / `href` / `form action`） |
