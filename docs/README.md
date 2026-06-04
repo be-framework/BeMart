@@ -50,6 +50,7 @@
 | [`phases/`](phases/) | フェーズ別の成果物。`alps-audit-phase3.md`（Phase 3 準備の ALPS 監査）、`admin-fanout-plan.md`（admin 移植のファンアウト計画）。 |
 | [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-25）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |
 | [`quality/`](quality/) | Phase 1 の ALPS 監査ノート（`verify-*.md` / `improvements-*.md`）。 |
+| [`assets/`](assets/) | README / GitHub Pages で使う BeMart branding 画像。 |
 | [`archive/`](archive/) | superseded された旧トラッカー・初期計画。歴史的記録として保持。現状の判断には使わない。 |
 
 ## archive/ の中身

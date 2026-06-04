@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/bemart-title.png" alt="BeMart" width="760">
+</p>
+
 # BeMart — EC-CUBE セマンティック再構築
 
 BeMart は、EC-CUBE 4.3 を意味論と境界へ分解し、ALPS / Be Framework /
