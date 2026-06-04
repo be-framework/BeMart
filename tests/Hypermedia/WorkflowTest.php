@@ -13,17 +13,15 @@ use DOMElement;
 use DOMXPath;
 use MyVendor\BeMart\Auth\HtmlCartSession;
 use MyVendor\BeMart\Injector;
-use PHPUnit\Framework\TestCase;
+use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
 
 use function array_key_exists;
 use function assert;
 use function getenv;
 use function is_array;
 use function is_int;
-use function is_string;
 use function libxml_clear_errors;
 use function libxml_use_internal_errors;
-use function preg_match;
 use function putenv;
 use function session_cache_limiter;
 use function session_destroy;
@@ -33,6 +31,7 @@ use function session_start;
 use function session_status;
 use function session_write_close;
 use function sprintf;
+use function str_starts_with;
 use function strtolower;
 use function sys_get_temp_dir;
 use function trim;
@@ -40,10 +39,8 @@ use function uniqid;
 
 use const PHP_SESSION_ACTIVE;
 
-class WorkflowTest extends TestCase
+class WorkflowTest extends AbstractWorkflowTest
 {
-    protected ResourceInterface $resource;
-
     private string|false|null $appContextBefore = null;
     private bool $startedSession = false;
 
@@ -52,11 +49,15 @@ class WorkflowTest extends TestCase
         $this->appContextBefore = getenv('APP_CONTEXT');
         putenv('APP_CONTEXT=html-test-hal-api-app');
         $this->startActiveSession();
+        parent::setUp();
+    }
 
+    protected function newResource(): ResourceInterface
+    {
         $resource = Injector::getInstance('html-test-hal-api-app')->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
 
-        $this->resource = new RoutedResource($resource, self::routerContainer());
+        return new RoutedResource($resource, self::routerContainer());
     }
 
     protected function tearDown(): void
@@ -283,23 +284,6 @@ class WorkflowTest extends TestCase
         }
 
         $this->fail("Cart body does not contain product {$productCode}");
-    }
-
-    private function header(ResourceObject $ro, string $name): string|null
-    {
-        foreach ($ro->headers as $header => $value) {
-            if (! is_string($header) || ! is_string($value)) {
-                continue;
-            }
-
-            if (strtolower($header) !== strtolower($name)) {
-                continue;
-            }
-
-            return $value;
-        }
-
-        return null;
     }
 
     private function document(string $html): DOMDocument
