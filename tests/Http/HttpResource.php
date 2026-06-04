@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Http;
 
+use BEAR\Resource\AbstractUri;
 use BEAR\Resource\Method;
 use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceInterface;
@@ -29,7 +30,11 @@ use function preg_split;
 use function shell_exec;
 use function sprintf;
 use function str_contains;
+use function str_starts_with;
+use function strlen;
 use function strtolower;
+use function strtoupper;
+use function substr;
 use function sys_get_temp_dir;
 use function tempnam;
 use function trim;
@@ -47,8 +52,8 @@ use const PHP_EOL;
  */
 final class HttpResource implements ResourceInterface
 {
-    private static PhpServer|null $server = null;
-
+    /** @var array<string, PhpServer> */
+    private static array $servers = [];
     private readonly string $baseUri;
     private readonly string $cookieJar;
 
@@ -65,15 +70,17 @@ final class HttpResource implements ResourceInterface
 
     private function startServer(string $host, string $index): void
     {
-        if (self::$server instanceof PhpServer) {
+        $serverKey = $host . ' ' . $index;
+        if (array_key_exists($serverKey, self::$servers)) {
             return;
         }
 
         $server = new PhpServer($host, $index);
         $server->start();
-        self::$server = $server;
+        self::$servers[$serverKey] = $server;
     }
 
+    /** @param AbstractUri|string $uri */
     #[Override]
     public function newInstance($uri): ResourceObject
     {
@@ -86,66 +93,106 @@ final class HttpResource implements ResourceInterface
         throw new UnsupportedResourceOperationException('object is not used by workflow tests.');
     }
 
+    /** @param AbstractUri|string $uri */
     #[Override]
     public function uri($uri): RequestInterface
     {
         throw new UnsupportedResourceOperationException('uri is not used by workflow tests.');
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function newRequest(Method $method, string $uri, array $query = []): RequestInterface
     {
         throw new UnsupportedResourceOperationException('newRequest is not used by workflow tests.');
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function crawl(string $uri, string $linkKey, array $query = []): ResourceObject
     {
         throw new UnsupportedResourceOperationException('crawl is not used by workflow tests.');
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function href(string $rel, array $query = [], ResourceObject|null $ro = null): ResourceObject
     {
-        throw new UnsupportedResourceOperationException('href is not used by workflow tests.');
+        if ($ro === null) {
+            throw new UnsupportedResourceOperationException('href requires a source response.');
+        }
+
+        $body = $ro->body;
+        if (! is_array($body)) {
+            throw new UnsupportedResourceOperationException('href requires an array response body.');
+        }
+
+        $links = $body['links'] ?? null;
+        if (is_array($links)) {
+            $href = $links[$rel] ?? null;
+            if (is_string($href)) {
+                return $this->get($href, $query);
+            }
+        }
+
+        $submitTo = $body['submitTo'] ?? null;
+        if (! is_array($submitTo)) {
+            throw new UnsupportedResourceOperationException(sprintf('Link rel `%s` is not available.', $rel));
+        }
+
+        $submitRel = $submitTo['rel'] ?? null;
+        $method = $submitTo['method'] ?? null;
+        $href = $submitTo['href'] ?? null;
+        if ($submitRel !== $rel || ! is_string($method) || ! is_string($href)) {
+            throw new UnsupportedResourceOperationException(sprintf('Unsafe rel `%s` has no submit target.', $rel));
+        }
+
+        return $this->request(strtoupper($method), $href, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function get(string $uri, array $query = []): ResourceObject
     {
         return $this->request('GET', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function post(string $uri, array $query = []): ResourceObject
     {
         return $this->request('POST', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function put(string $uri, array $query = []): ResourceObject
     {
         return $this->request('PUT', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function patch(string $uri, array $query = []): ResourceObject
     {
         return $this->request('PATCH', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function delete(string $uri, array $query = []): ResourceObject
     {
         return $this->request('DELETE', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function head(string $uri, array $query = []): ResourceObject
     {
         throw new UnsupportedResourceOperationException('head is not used by workflow tests.');
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function options(string $uri, array $query = []): ResourceObject
     {
@@ -175,6 +222,7 @@ final class HttpResource implements ResourceInterface
     /** @param array<string, mixed> $query */
     private function url(string $method, string $uri, array $query): string
     {
+        $uri = self::httpPath($uri);
         if ($method !== 'GET' || $query === []) {
             return $this->baseUri . $uri;
         }
@@ -182,6 +230,17 @@ final class HttpResource implements ResourceInterface
         $separator = str_contains($uri, '?') ? '&' : '?';
 
         return $this->baseUri . $uri . $separator . http_build_query($query);
+    }
+
+    private static function httpPath(string $uri): string
+    {
+        if (! str_starts_with($uri, 'page://self')) {
+            return $uri;
+        }
+
+        $path = substr($uri, strlen('page://self'));
+
+        return $path === '' ? '/' : $path;
     }
 
     /** @param array<string, mixed> $query */
@@ -237,6 +296,7 @@ final class HttpResource implements ResourceInterface
 
     /**
      * @param list<string> $responseHeaders
+     *
      * @return array<string, string>
      */
     private function headers(array $responseHeaders): array
@@ -266,7 +326,10 @@ final class HttpResource implements ResourceInterface
         return [];
     }
 
-    /** @param array<string, mixed> $query */
+    /**
+     * @param array<string, mixed> $query
+     * @param array<int, string>   $headers
+     */
     private function log(string $method, string $url, array $query, array $headers, string $view): void
     {
         $log = sprintf(

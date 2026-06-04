@@ -21,29 +21,28 @@ use BEAR\Resource\ResourceObject;
  * is added: no Be Framework, no domain logic, no Reasons. It exposes
  * only the complete-screen shape + the outbound `goTop` transition.
  *
- * `Contact/complete.twig` is a static inquiry-sent confirmation (the
- * completion message + a top-page button) — it reads no dynamic data,
- * so the thin-renderer body carries nothing to surface.
+ * `Contact/complete.twig` is mostly static (the completion message +
+ * a top-page button), but the Resource also carries the public receipt
+ * `ticketId` issued by doSubmitContact.
  *
  * Maps to `page://self/contact/complete`.
  */
 class Complete extends ResourceObject
 {
     #[Link(rel: 'goTop', href: 'page://self/')]
-    public function onGet(): static
+    public function onGet(string $ticketId = ''): static
     {
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goContactComplete',
-            'fields' => [],
+            'fields' => ['ticketId'],
+            'ticketId' => $ticketId,
             'submitTo' => null,
             'staticContent' => [
                 'page' => 'contact-complete',
                 'title' => 'お問い合わせ(完了)',
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
+            'links' => ['goTop' => 'page://self/'],
         ];
 
         return $this;
