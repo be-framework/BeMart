@@ -2,10 +2,11 @@
   <img src="docs/assets/bemart-title.png" alt="BeMart" width="760">
 </p>
 
-# BeMart — EC-CUBE セマンティック再構築
+# BeMart — EC-CUBE 4.3 Application Overhaul
 
 BeMart は、EC-CUBE 4.3 を意味論と境界へ分解し、ALPS / Be Framework /
-BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ再構成する実証プロジェクトです。
+BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ再構成する
+アプリケーション・オーバーホールの実証プロジェクトです。
 
 Symfony 版 EC-CUBE の controller rewrite ではありません。EC-CUBE が持つ業務語彙、
 状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装から取り出して読める契約
@@ -14,6 +15,10 @@ Symfony 版 EC-CUBE の controller rewrite ではありません。EC-CUBE が�
 
 > BeMart is not a controller rewrite of EC-CUBE. It is a semantic migration
 > with explicit boundaries.
+
+このリポジトリが示すのは「EC-CUBE を別フレームワークへ移す」ことだけではありません。
+大きな既存アプリケーションを、意味論を正、境界を契約、テストを証明として組み直せるか。
+その問いへの実装付きの答えです。
 
 ## 現時点の答え
 
@@ -27,6 +32,26 @@ SQL、HTML、workflow test へ投影できることは示せました。
 
 残っている中心は、もう広い機能カバー率の問題ではありません。本番 EC-CUBE の完全代替に必要な
 互換 fidelity と production verification の問題です。
+
+## 移植の型
+
+移植は 2 つの動きでできています。まず EC-CUBE の Entity、Route、Controller、Twig から
+語彙と状態遷移を逆算し、`alps.json` という契約へ束ねる。次に、その契約を Be domain、
+BEAR Resource、Ray.MediaQuery SQL、Twig HTML、Hypermedia test へ投影します。
+
+```text
+EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
+```
+
+Fake は後付けの mock ではなく、最初の契約実装です。SQL 実装はあとから同じ Resource 契約を
+満たすものとして差し替えられ、Context / DI がどちらを使うかを選びます。
+
+## 学び
+
+- 仕様は実装より長く生きる。Framework が変わっても「商品」「注文」「顧客」の語彙は残る。
+- 移植は境界の宣言である。残作業は未知の不足ではなく、既知の境界として分類できる。
+- Hypermedia は UI 補助ではなく契約である。link / form が次状態への affordance になる。
+- ALPS、Be、Resource、SQL file は、AI エージェントによる並列作業でも drift を抑える制約になる。
 
 ## まず読む順
 
@@ -83,6 +108,7 @@ PDF、CSV、Mail、Template、MasterData、SQL target-engine 検証、production
 - Be Framework でドメイン状態遷移を表す。
 - BEAR.Sunday Resource で HTTP / PHP 共通の Resource 境界を作る。
 - Ray.MediaQuery で SQL を interface 境界に閉じ込める。
+- Fake を最初の契約実装とし、SQL 実装が同じ契約を満たすことを検証する。
 - Twig HTML は EC-CUBE の affordance をできるだけ保持する。
 - Hypermedia test は controller 内部ではなく、link / form を辿って workflow を証明する。
 
