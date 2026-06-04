@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/content/css
@@ -44,3 +45,4 @@ Saves the customize CSS (doUpdateContentCss). ALPS idempotent → PUT.
 ### Response
 
 _Not available_
+{% endraw %}

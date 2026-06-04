@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /entry
@@ -78,3 +79,4 @@ still need their own defense (bound params, HTML escape on render).
 ### Response
 
 _Not available_
+{% endraw %}

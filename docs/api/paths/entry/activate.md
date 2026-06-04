@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /entry/activate
@@ -59,3 +60,4 @@ _Not available_
 ### Response
 
 _Not available_
+{% endraw %}

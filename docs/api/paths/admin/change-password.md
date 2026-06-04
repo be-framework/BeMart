@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/change-password
@@ -65,3 +66,4 @@ Failure mapping:
 ### Response
 
 _Not available_
+{% endraw %}

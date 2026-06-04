@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /product
@@ -45,3 +46,4 @@ still need to defend (e.g. bound parameters for SQL).
 ### Response
 
 _Not available_
+{% endraw %}

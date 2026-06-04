@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping/shipping-multiple-edit
@@ -71,3 +72,4 @@ multi-shipping screen instead of the main shopping screen.
 ### Response
 
 _Not available_
+{% endraw %}

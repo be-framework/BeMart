@@ -1,3 +1,4 @@
+{% raw %}
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping/shipping-edit
@@ -59,3 +60,4 @@ Resource surface while returning the user to the main shopping page.
 ### Response
 
 _Not available_
+{% endraw %}
