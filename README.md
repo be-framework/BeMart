@@ -64,28 +64,30 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 
 ## ドキュメント
 
-読む順、生成物、補助資料は [GitHub Pages](https://be-framework.github.io/BeMart/) を入口とします。
-メンテナ向けの索引は [`docs/README.md`](docs/README.md) です。
+詳細なドキュメントは [`docs/`](docs/) にまとめています。
+公開版は [GitHub Pages](https://be-framework.github.io/BeMart/) で確認できます。
 
-## リポジトリの見方
+## ディレクトリ
 
-| レイヤ | 主な成果物 |
-|---|---|
-| 意味論 | [`alps.json`](alps.json), [`alps.json.html`](alps.json.html), [`alps-doc/`](alps-doc/) |
-| ドメイン | [`be/src`](be/src) |
-| Resource | [`src/Resource`](src/Resource) |
-| SQL 境界 | [`var/sql`](var/sql), [`sql/`](sql) |
-| HTML | [`var/templates`](var/templates), [`public/`](public) |
-| テスト | [`tests`](tests), [`tests/README.md`](tests/README.md) |
-| 文書 | [`docs`](docs), [`docs/README.md`](docs/README.md) |
+```text
+.
+├── alps.json        # SSOT: ALPS profile
+├── alps-doc/        # descriptor ごとの補足ドキュメント
+├── be/src/          # Be Framework domain
+├── src/Resource/    # BEAR.Sunday Resource
+├── var/sql/         # Ray.MediaQuery SQL files
+├── sql/             # EC-CUBE schema / seed / SQL bring-up
+├── var/templates/   # Twig HTML ports
+├── public/          # HTTP entrypoints
+├── tests/           # Resource / SQL / HTML / HTTP / workflow tests
+└── docs/            # Project documentation
+```
 
-正典の ALPS profile は [`alps.json`](alps.json) です。HTML ドキュメントは生成物です。
+生成 HTML / SVG / API docs は生成物です。生成元がある場合は手で編集しません。
 
 ## 起動
 
-SQL-backed context は `DATABASE_URL` と MySQL / MariaDB を必要とします。
-この repository には Docker Compose は含めず、ローカル DB は
-[`malt`](https://github.com/koriym/homebrew-malt) で起動します。
+SQL-backed context は [`malt`](https://github.com/koriym/homebrew-malt) と `DATABASE_URL` を使います。
 DB 初期化の詳細は [`sql/README.md`](sql/README.md) を参照してください。
 
 ```bash
@@ -95,7 +97,6 @@ brew tap shivammathur/extensions
 brew tap koriym/malt
 brew install malt
 malt install
-malt create
 
 # SQL-backed local site
 malt start
