@@ -303,7 +303,10 @@
       },
 
       {"id": "Product", "title": "商品","tag": "catalog src-entity src-template flow-admin-product-publish flow-customer-purchase",
-        "doc": {"href": "alps-doc/product.md", "value": "EC-CUBE の商品。商品ヘッダと既定の商品規格行を合わせて、販売・表示・管理の単位として扱う。商品コード、販売価格、在庫は既定の商品規格から取得する。"},
+        "doc": {"value": "EC-CUBE の商品。商品ヘッダと既定の商品規格行を合わせて、販売・表示・管理の単位として扱う。商品コード、販売価格、在庫は既定の商品規格から取得する。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/product.md"}
+        ],
         "descriptor": [
           {"href": "#productName"},
           {"href": "#descriptionList"},
