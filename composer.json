@@ -29,7 +29,7 @@
         "tecnickcom/tcpdf": "^6.2"
     },
     "require-dev": {
-        "bear/api-doc": "1.x-dev",
+        "bear/api-doc": "^1.11",
         "cweagans/composer-patches": "^1.7",
         "koriym/php-server": "^1.0",
         "phpunit/phpunit": "^10.0",
@@ -65,6 +65,9 @@
         "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
         "coverage": "php -dzend_extension=xdebug.so -dxdebug.mode=coverage ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage",
         "pcov": "php -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage --coverage-clover=coverage.xml",
+        "apidoc": "./vendor/bin/apidoc",
+        "apidoc:audit": "./vendor/bin/apidoc audit",
+        "apidoc:terms": "./vendor/bin/apidoc terms",
         "clean": [
             "./vendor/bin/psalm --clear-cache",
             "rm -rf .phpunit.cache var/tmp/*/*.php"
@@ -96,6 +99,9 @@
         "psalm-taint": "Run Psalm taint analysis.",
         "coverage": "Run PHPUnit with Xdebug coverage output.",
         "pcov": "Run PHPUnit with PCOV coverage output.",
+        "apidoc": "Generate BEAR.ApiDoc documentation into docs/api.",
+        "apidoc:audit": "Print BEAR.ApiDoc documentation coverage audit.",
+        "apidoc:terms": "Print BEAR.ApiDoc term usage index.",
         "clean": "Clear analysis and generated test caches.",
         "build": "Clean, run static analysis, and run tests.",
         "serve": "Serve the API entrypoint.",
