@@ -4,14 +4,25 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 
 | プレフィックス | カテゴリ | 例 |
 |---------------|---------|-----|
-| `flow-` | ワークフロー | flow-purchase, flow-manage-order |
+| `feature-` | 機能領域 / coverage bucket | feature-purchase, feature-admin-order |
+| `flow-` | 業務導線 | flow-customer-purchase, flow-admin-product-publish |
 | `src-` | 情報源 | src-entity, src-router |
 | `actor-` | アクター | actor-admin, actor-customer |
 | `page` / `page-` | HTML画面状態 | page-admin, page-list, page-edit |
 | `route-` | 外部/EC-CUBEルート対応 | route-ec-cube |
 | （なし） | ドメイン | catalog, order, checkout |
 
-## Workflow（`flow-*`）
+## 機能領域（Feature area、現行 `flow-*` と `feature-*` の移行期間）
+
+既存 `alps.json` の旧 `flow-*` は、実態としては Feature matrix 用の機能領域タグとして使われてきた。これはカバー率を見るには有効だが、ハイパーメディアとして意味ある遷移列を表す「flow」ではない。
+
+ドメイン領域は、原則として prefix なしのドメインタグ（例: `catalog`, `order`, `checkout`）と `actor-*` で表す。`feature-*` は Feature matrix や coverage report が明示的な機能バケットを必要とする場合の補助軸であり、ドメイン語彙の置き換えではない。
+
+移行前監査では、旧 `flow-*` は 142 descriptor に 143 回付与されており、ほとんどが transition descriptor であった。これは機能領域の索引としては役立つが、状態をまたいだ業務導線そのものではない。
+
+現在の `alps.json` では、旧 `flow-*` を互換用に残しつつ、対応する `feature-*` を併記している。自然言語で定義された新しい業務導線も `flow-*` として追加済みである。移行計画は [`flow-tag-migration-plan.md`](flow-tag-migration-plan.md)、新しい flow 語彙は [`flow-ontology.md`](flow-ontology.md) を参照する。
+
+### 旧機能領域タグ（Legacy feature-area tags、互換用に残す旧 `flow-*`）
 
 | タグ | 説明 |
 |------|------|
@@ -21,6 +32,7 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 | flow-account | マイページ（履歴・情報変更・退会・パスワードリセット） |
 | flow-favorite | お気に入り（追加・削除・一覧） |
 | flow-inquiry | お問い合わせ（フォーム→送信→完了） |
+| flow-admin-auth | 管理画面認証（ログイン・2FA・ログアウト） |
 | flow-manage-product | 管理：商品（CRUD・CSV入出力・カテゴリ・タグ・規格） |
 | flow-manage-order | 管理：受注（CRUD・ステータス変更・CSV・PDF・メール送信） |
 | flow-manage-customer | 管理：会員（CRUD・CSV出力） |
@@ -31,7 +43,34 @@ EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。
 | flow-manage-mail | 管理：メール（テンプレート編集） |
 | flow-manage-plugin | 管理：プラグイン（インストール・有効化・無効化） |
 
-## Domain
+### 目標機能タグ（Target feature tags）
+
+| タグ | 説明 |
+|------|------|
+| feature-browse | 商品閲覧 |
+| feature-purchase | 購入 |
+| feature-register | 会員登録 |
+| feature-account | マイページ / アカウント |
+| feature-favorite | お気に入り |
+| feature-inquiry | お問い合わせ |
+| feature-admin-auth | 管理画面認証 |
+| feature-admin-catalog | 管理：商品 |
+| feature-admin-order | 管理：受注 |
+| feature-admin-customer | 管理：会員 |
+| feature-admin-shop | 管理：店舗設定 |
+| feature-admin-content | 管理：コンテンツ |
+| feature-admin-cms | 管理：CMS |
+| feature-admin-system | 管理：システム |
+| feature-admin-mail | 管理：メール |
+| feature-admin-plugin | 管理：プラグイン |
+
+## フロー（Flow、新しい `flow-*`）
+
+`flow-*` は、あるアクターが意味ある目的を達成するまでに辿るハイパーメディア遷移のまとまりを表す。単発操作や単なる機能領域には使わない。flow は複数 feature を跨いでよい。
+
+初期語彙は [`flow-ontology.md`](flow-ontology.md) が正。
+
+## ドメイン（Domain）
 
 ### ドメイン領域（プレフィックスなし）
 
