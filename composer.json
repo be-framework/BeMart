@@ -5,6 +5,10 @@
     "description": "BeMart — AI-driven EC-CUBE → BEAR.Sunday + Be Framework migration. BEAR.Sunday application layer.",
     "repositories": [
         {
+            "type": "vcs",
+            "url": "https://github.com/bearsunday/BEAR.DevTools.git"
+        },
+        {
             "type": "path",
             "url": "be",
             "options": {
@@ -29,6 +33,7 @@
         "tecnickcom/tcpdf": "^6.2"
     },
     "require-dev": {
+        "bear/devtools": "dev-codex/httpresource-hal-follow-dev as 1.x-dev",
         "bear/api-doc": "1.x-dev",
         "cweagans/composer-patches": "^1.7",
         "koriym/php-server": "^1.0",
