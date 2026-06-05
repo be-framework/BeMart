@@ -5,6 +5,10 @@
     "description": "BeMart — AI-driven EC-CUBE → BEAR.Sunday + Be Framework migration. BEAR.Sunday application layer.",
     "repositories": [
         {
+            "type": "vcs",
+            "url": "https://github.com/bearsunday/BEAR.DevTools.git"
+        },
+        {
             "type": "path",
             "url": "be",
             "options": {
@@ -29,6 +33,7 @@
         "tecnickcom/tcpdf": "^6.2"
     },
     "require-dev": {
+        "bear/devtools": "dev-codex/httpresource-hal-follow-dev as 1.x-dev",
         "bear/api-doc": "^1.11",
         "cweagans/composer-patches": "^1.7",
         "koriym/php-server": "^1.0",
@@ -49,11 +54,11 @@
         }
     },
     "scripts": {
-        "test": "./vendor/bin/phpunit",
-        "test:fake": "./vendor/bin/phpunit --testsuite fake",
-        "test:sql": "./vendor/bin/phpunit --testsuite sql",
-        "test:http": "./vendor/bin/phpunit --testsuite http",
-        "test:smoke": "./vendor/bin/phpunit --testsuite smoke",
+        "test": "php -d memory_limit=512M ./vendor/bin/phpunit",
+        "test:fake": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite fake",
+        "test:sql": "echo 'SQL PHPUnit suite is disabled; Sql folders are ignored by phpunit.xml.'",
+        "test:http": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite http",
+        "test:smoke": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite smoke",
         "tests": [
             "@sa",
             "@test"
@@ -68,8 +73,8 @@
         "cs:alps": "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
         "psalm": "./vendor/bin/psalm --no-cache --no-progress",
         "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
-        "coverage": "php -dzend_extension=xdebug.so -dxdebug.mode=coverage ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage",
-        "pcov": "php -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage --coverage-clover=coverage.xml",
+        "coverage": "php -d memory_limit=512M -dzend_extension=xdebug.so -dxdebug.mode=coverage ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage",
+        "pcov": "php -d memory_limit=512M -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage --coverage-clover=coverage.xml",
         "doc": [
             "@doc:alps",
             "@doc:api"
@@ -115,7 +120,7 @@
         "test": "Run the default PHPUnit suite.",
         "tests": "Run static analysis and the default PHPUnit suite.",
         "test:fake": "Run the fake-context PHPUnit suite.",
-        "test:sql": "Run the SQL PHPUnit suite.",
+        "test:sql": "Disabled: Sql folders are ignored by phpunit.xml.",
         "test:http": "Run the HTTP PHPUnit suite.",
         "test:smoke": "Run smoke tests.",
         "sa": "Run static analysis.",

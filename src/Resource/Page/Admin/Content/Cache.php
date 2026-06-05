@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -32,6 +33,7 @@ class Cache extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'doClearCache', href: 'page://self/admin/content/cache', method: 'put')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -48,6 +50,7 @@ class Cache extends ResourceObject
     }
 
     /** Clears the application cache (doClearCache). */
+    #[Link(rel: 'goMaintenance', href: 'page://self/admin/content/maintenance')]
     #[CsrfProtected]
     public function onPut(): static
     {

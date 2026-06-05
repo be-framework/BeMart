@@ -36,6 +36,7 @@ class Favorite extends ResourceObject
     /**
      * @psalm-taint-source input $productCode
      */
+    #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     #[Link(rel: 'goProduct', href: 'page://self/product')]
     #[CsrfProtected]
     public function onPost(string $productCode): static
@@ -86,6 +87,7 @@ class Favorite extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
     public function onDelete(string $productCode): static

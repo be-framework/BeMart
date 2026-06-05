@@ -38,6 +38,7 @@ class PaymentList extends ResourceObject
     }
 
     #[Link(rel: 'doCreatePayment', href: 'page://self/admin/payment/payment-list', method: 'post')]
+    #[Link(rel: 'goPayment', href: 'page://self/admin/payment/payment', method: 'get')]
     #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
     #[Link(rel: 'doDeletePayment', href: 'page://self/admin/payment/payment', method: 'delete')]
     public function onGet(): static

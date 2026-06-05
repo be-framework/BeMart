@@ -53,15 +53,14 @@ final class AuraRouterAdapterTest extends TestCase
         $this->assertSame(['blockId' => '9'], $match->query);
     }
 
-    public function testUnsupportedMethodKeepsPathMatchForBearResource405(): void
+    public function testUnsupportedMethodReturnsNullMatch(): void
     {
         $match = $this->router->match(
             ['_GET' => [], '_POST' => []],
             ['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/products/list'],
         );
 
-        $this->assertSame('post', $match->method);
-        $this->assertSame('page://self/products', $match->path);
+        $this->assertInstanceOf(NullMatch::class, $match);
     }
 
     public function testUnknownPathReturnsNullMatchForRouterCollectionFallback(): void

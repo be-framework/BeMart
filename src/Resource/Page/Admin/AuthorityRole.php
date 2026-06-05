@@ -104,6 +104,7 @@ class AuthorityRole extends ResourceObject
      */
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
+    #[Link(rel: 'goLoginHistoryList', href: 'page://self/admin/login-history')]
     #[CsrfProtected]
     public function onPost(
         string $loginId,

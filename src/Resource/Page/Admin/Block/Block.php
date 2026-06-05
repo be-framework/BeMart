@@ -116,6 +116,7 @@ class Block extends ResourceObject
      * @psalm-taint-source input $blockId
      */
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
+    #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     #[CsrfProtected]
     public function onDelete(string $blockId): static
     {

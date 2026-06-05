@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "f3c805a920e3690a9e2a713f9a1487d9",
+    "content-hash": "dea0eccededec992ec1052160526dcc1",
     "packages": [
         {
             "name": "aura/cli",
@@ -5162,6 +5162,129 @@
             "time": "2026-06-03T02:59:18+00:00"
         },
         {
+            "name": "bear/devtools",
+            "version": "dev-codex/httpresource-hal-follow-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bearsunday/BEAR.DevTools.git",
+                "reference": "851b642f9e011ce699fd8fe6ca209653b5488a1b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/851b642f9e011ce699fd8fe6ca209653b5488a1b",
+                "reference": "851b642f9e011ce699fd8fe6ca209653b5488a1b",
+                "shasum": ""
+            },
+            "require": {
+                "bear/app-meta": "^1.8",
+                "bear/resource": "^1.31",
+                "ext-curl": "*",
+                "koriym/php-server": "^1.0",
+                "php": "^8.2",
+                "ray/aop": "^2.14",
+                "ray/di": "^2.14"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "bear/package": "^1.10",
+                "madapaja/twig-module": "^2.5",
+                "phpunit/phpunit": "^9.6",
+                "ray/aura-sql-module": "^1.10",
+                "xhprof/xhprof": "^2.3"
+            },
+            "suggest": {
+                "ext-xhprof": "XHprof hierarchical profiler for performance analysis"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BEAR\\Dev\\": [
+                        "src/"
+                    ]
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "BEAR\\Dev\\": [
+                        "src-deprecated/",
+                        "tests/Fake"
+                    ],
+                    "MyVendor\\MyProject\\": [
+                        "tests/Fake/app/src"
+                    ]
+                }
+            },
+            "scripts": {
+                "post-install-cmd": [
+                    "@composer bin all install --ansi"
+                ],
+                "post-update-cmd": [
+                    "@composer bin all update --ansi"
+                ],
+                "test": [
+                    "./vendor/bin/phpunit"
+                ],
+                "tests": [
+                    "@cs",
+                    "@test",
+                    "@sa"
+                ],
+                "coverage": [
+                    "php -dzend_extension=xdebug.so ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage"
+                ],
+                "pcov": [
+                    "php -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage  --coverage-clover=coverage.xml"
+                ],
+                "cs": [
+                    "./vendor/bin/phpcs --standard=./phpcs.xml src tests"
+                ],
+                "cs-fix": [
+                    "./vendor/bin/phpcbf src tests"
+                ],
+                "clean": [
+                    "./vendor/bin/phpstan clear-result-cache",
+                    "./vendor/bin/psalm --clear-cache",
+                    "rm -rf tests/tmp/*.php"
+                ],
+                "sa": [
+                    "./vendor/bin/phpstan analyse -c phpstan.neon",
+                    "psalm --show-info=true"
+                ],
+                "metrics": [
+                    "./vendor/bin/phpmetrics --report-html=build/metrics --exclude=Exception --log-junit=build/junit.xml --junit=build/junit.xml src"
+                ],
+                "phpmd": [
+                    "./vendor/bin/phpmd src text ./phpmd.xml"
+                ],
+                "build": [
+                    "@cs",
+                    "@sa",
+                    "@pcov",
+                    "@metrics"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "support": {
+                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/codex/httpresource-hal-follow-dev",
+                "issues": "https://github.com/bearsunday/BEAR.DevTools/issues"
+            },
+            "time": "2026-06-04T18:20:02+00:00"
+        },
+        {
             "name": "composer/pcre",
             "version": "3.3.2",
             "source": {
@@ -8989,6 +9112,12 @@
             "alias_normalized": "0.1.0.0"
         },
         {
+            "package": "bear/devtools",
+            "version": "dev-codex/httpresource-hal-follow-dev",
+            "alias": "1.x-dev",
+            "alias_normalized": "1.9999999.9999999.9999999-dev"
+        },
+        {
             "package": "ray/fake-query",
             "version": "dev-codex/fake-query-release-hardening",
             "alias": "1.x-dev",
@@ -8998,6 +9127,7 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "be-framework/be": 20,
+        "bear/devtools": 20,
         "my-vendor/be-mart-be": 20,
         "ray/fake-query": 20
     },
