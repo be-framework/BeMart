@@ -9,18 +9,14 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
-use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
-use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowSessionContext;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
 use function assert;
 use function bin2hex;
-use function getenv;
-use function putenv;
 use function random_bytes;
 
 class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
@@ -37,9 +33,7 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
     private static string $customerId;
     private static string $productCode;
     private static string $productName;
-    /** @var array<string, mixed>|null */
-    private static array|null $previousSession = null;
-    private static string|false $previousCsrfEnv = false;
+    private static WorkflowSessionContext|null $context = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -47,13 +41,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
         self::$email = 'workflow-account-' . $suffix . '@example.com';
         self::$productCode = 'workflow-account-' . $suffix;
         self::$productName = 'Workflow Account Favorite Product ' . self::$productCode;
-        self::$previousSession = $_SESSION ?? null;
-        self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        $_SESSION = [
-            HtmlAdminSessionAdapter::ADMIN_ID_KEY => self::ADMIN_ID,
-            EccubeSharedCsrfTokenAdapter::SESSION_KEY => self::CSRF_TOKEN,
-        ];
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::CSRF_TOKEN);
+        self::$context = WorkflowSessionContext::capture();
+        self::$context->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
@@ -72,21 +61,12 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
-        if (self::$previousSession === null) {
-            unset($_SESSION);
-        } else {
-            $_SESSION = self::$previousSession;
-        }
-
-        if (self::$previousCsrfEnv === false) {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        } else {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::$previousCsrfEnv);
-        }
+        self::$context?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
+        self::$context = null;
 
         parent::tearDownAfterClass();
     }
@@ -126,7 +106,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
         $this->assertIsString($registered->body['customerId'] ?? null);
 
         self::$customerId = (string) $registered->body['customerId'];
-        $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = self::$customerId;
+        assert(self::$context instanceof WorkflowSessionContext);
+        self::$context->setCustomerId(self::$customerId);
 
         $created = $this->resource->post('page://self/admin/product', [
             'productCode' => self::$productCode,
@@ -160,7 +141,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::OK, $loggedIn->code);
         $this->assertSame(self::$email, $this->bodyValue($loggedIn, 'email'));
-        $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = (string) $this->bodyValue($loggedIn, 'customerId');
+        assert(self::$context instanceof WorkflowSessionContext);
+        self::$context->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
 
         return $loggedIn;
     }
