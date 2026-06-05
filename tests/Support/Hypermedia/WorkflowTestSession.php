@@ -23,7 +23,7 @@ final class WorkflowTestSession
         return new self(isset($_SESSION) && is_array($_SESSION) ? $_SESSION : null);
     }
 
-    public function assumeAdminLoggedIn(string $adminId, string $csrfToken): void
+    public function loginAsAdmin(string $adminId, string $csrfToken): void
     {
         $this->setAdminId($adminId);
         $this->setCsrfToken($csrfToken);

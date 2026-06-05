@@ -37,7 +37,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
     {
         self::$templateCode = 'workflow-' . bin2hex(random_bytes(4));
         self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
+        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
