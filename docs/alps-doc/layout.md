@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Layout"
+---
+
 # Layout
 
 Layout は EC-CUBE 管理画面 CMS のページレイアウトを表す。ALPS の `Layout` descriptor は、`dtb_layout` のレイアウト本体を BeMart の `LayoutEntity` として投影する。

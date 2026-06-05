@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Category"
+---
+
 # Category
 
 Category は EC-CUBE の商品カテゴリを表す。ALPS の `Category` descriptor は、`dtb_category` のカテゴリ本体を BeMart の `CategoryEntity` として投影し、商品割当との結合表とは境界を分ける。

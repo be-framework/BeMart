@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-25 — BDRはdomain noun + readonly propertyで表す"
+---
+
 # G-25 — BDRはdomain noun + readonly propertyで表す
 
 ## Context

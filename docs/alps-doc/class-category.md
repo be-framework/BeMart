@@ -1,3 +1,8 @@
+---
+layout: default
+title: "ClassCategory"
+---
+
 # ClassCategory
 
 ClassCategory は EC-CUBE の商品規格軸に属する具体値を表す。ALPS の `ClassCategory` descriptor は、`dtb_class_category` を BeMart の `ClassCategoryEntity` として投影する。

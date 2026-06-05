@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Query / Storage method naming"
+---
+
 # Query / Storage method naming
 
 BeMart の Ray.MediaQuery 境界では、SQL ID / fixture 名は検索性のために既存の snake_case を維持し、PHP メソッド名だけを呼び出し側の語彙として整える。

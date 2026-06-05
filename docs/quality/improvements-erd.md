@@ -1,3 +1,8 @@
+---
+layout: default
+title: "ER-D / Entity 調査結果とALPS改善案"
+---
+
 # ER-D / Entity 調査結果とALPS改善案
 
 ## テーブル/Entity概要

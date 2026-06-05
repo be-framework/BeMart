@@ -1,22 +1,30 @@
-# docs/ — ドキュメントマップ
+---
+layout: default
+title: "docs/ — ドキュメント索引"
+---
 
-`docs/` はこのリポジトリのドキュメント置き場であり、同時に GitHub Pages の
-publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` 配下に何があるかの索引。
+# docs/ — ドキュメント索引
 
-プロジェクト全体の入口は repo ルートの [`README.md`](../README.md)、
-規約は [`CLAUDE.md`](../CLAUDE.md) を参照。
+`docs/` はプロジェクト文書の置き場であり、同時に GitHub Pages の publish root
+（`docs/_config.yml`）でもある。
+
+全体の入口は repo ルートの [`README.md`](../README.md)。このファイルは
+`docs/` 配下の文書を「何を知りたいか」で引けるようにする索引である。
 
 ## まず読む順
 
 | 目的 | 読むもの |
 |---|---|
-| プロジェクトの意義を知る | [`../README.md`](../README.md) → [`migration-goal-review.md`](migration-goal-review.md) → [`FINAL-REPORT.md`](FINAL-REPORT.md) |
+| 最短で全体像を知る | [`../README.md`](../README.md) |
+| プロジェクトの意義を知る | [`migration-goal-review.md`](migration-goal-review.md) → [`FINAL-REPORT.md`](FINAL-REPORT.md) |
 | 最新の到達点を知る | [`migration-status.md`](migration-status.md) |
-| 残作業を始める | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) → `migration-status.md` §4 |
-| ALPS生成の背景を読む | [`index.md`](index.md) |
+| 完全代替への残差を知る | [`complete-replacement-residuals.md`](complete-replacement-residuals.md) |
+| 次の作業を始める | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) → [`migration-status.md`](migration-status.md) §4 |
+| flow / workflow の意味を知る | [`flow-ontology.md`](flow-ontology.md) → [`../tests/README.md`](../tests/README.md) |
+| ALPS 生成の背景を読む | [`archive/alps-profile-generation.md`](archive/alps-profile-generation.md) |
 | 境界ルールを再利用する | [`skills/index.md`](skills/index.md) → [`methodology/`](methodology/) |
 
-## トップレベル（canonical）
+## Canonical Documents
 
 | ファイル | 役割 |
 |---|---|
@@ -31,10 +39,12 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) | 引き継ぎ手順。再開時に読むファイル順・次にやること・リポジトリ構造。`migration-status.md` を正として読む。 |
 | [`tag.md`](tag.md) | タグ分類体系（`flow-*` / `src-*` 等、ワークフロー・ドメイン・アクター・情報源の命名規則）。 |
 
-### GitHub Pages 公開物（編集・移動しない）
+## Published / Generated Files
 
-`index.md`（公開ブログ記事）/ `_config.yml`（Jekyll 設定）/ `alps.json.html` /
-`openapi.html` / `alps.svg` は公開 URL を持つ生成物・設定。手動移動禁止。
+`index.html`（GitHub Pages 入口）/ `index.alps.json`（入口ページの profile）/
+`archive/alps-profile-generation.md`（旧公開ブログ記事）/ `_config.yml`（Jekyll 設定）/
+`alps.json.html` / `openapi.html` / `alps.svg` / `api/index.html` / `api/terms.html` /
+`api/openapi.json` / `api/llms.txt` は公開 URL を持つ生成物・設定。手動移動禁止。
 
 ## サブディレクトリ
 
@@ -45,6 +55,7 @@ publish root（`docs/_config.yml`）でもある。本ファイルは `docs/` �
 | [`phases/`](phases/) | フェーズ別の成果物。`alps-audit-phase3.md`（Phase 3 準備の ALPS 監査）、`admin-fanout-plan.md`（admin 移植のファンアウト計画）。 |
 | [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-25）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |
 | [`quality/`](quality/) | Phase 1 の ALPS 監査ノート（`verify-*.md` / `improvements-*.md`）。 |
+| [`assets/`](assets/) | README / GitHub Pages で使う BeMart branding 画像。 |
 | [`archive/`](archive/) | superseded された旧トラッカー・初期計画。歴史的記録として保持。現状の判断には使わない。 |
 
 ## archive/ の中身

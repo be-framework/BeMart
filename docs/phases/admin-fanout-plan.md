@@ -1,3 +1,9 @@
+---
+layout: default
+title: "Admin HTML Fan-out Manifest"
+---
+
+{% raw %}
 # Admin HTML Fan-out Manifest
 
 Phase 3 (HTML presentation) has finished the storefront (~40 pages) and the admin
@@ -393,3 +399,4 @@ shared `pager.twig`, handled in Wave 0).
 
 Total page templates: **77** (Customer's 3 included; 2 in flight). Recommended
 **7 parallel waves** + Wave 0 prereq + a small Customer remainder pass.
+{% endraw %}

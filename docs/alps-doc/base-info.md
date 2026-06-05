@@ -1,3 +1,8 @@
+---
+layout: default
+title: "BaseInfo"
+---
+
 # BaseInfo
 
 BaseInfo は EC-CUBE の店舗基本設定を表す。ALPS の `BaseInfo` descriptor は、`dtb_base_info` の id=1 行を BeMart の admin 設定画面で扱うシングルトンとして定義する。

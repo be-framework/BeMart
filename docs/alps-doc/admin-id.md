@@ -1,3 +1,8 @@
+---
+layout: default
+title: "adminId"
+---
+
 # adminId
 
 `adminId` は EC-CUBE の管理者メンバーを識別する不透明な文字列ハンドルである。ALPS では数値 ID ではなく、Fake と SQL の ID 形状差を隠す semantic identifier として扱う。

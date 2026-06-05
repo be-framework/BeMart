@@ -1,3 +1,8 @@
+---
+layout: default
+title: "methodology/ — 方法論索引"
+---
+
 # methodology/ — 方法論索引
 
 BeMart の移植中に再利用可能な原則として切り出した文書群です。現在の移植ステータスは [`../migration-status.md`](../migration-status.md) を正とし、このディレクトリは個別の判断基準を読むための入口です。
