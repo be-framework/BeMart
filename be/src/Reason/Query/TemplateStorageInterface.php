@@ -17,4 +17,10 @@ interface TemplateStorageInterface
     /** @return list<TemplateEntity> */
     #[DbQuery('ttemplate_list', factory: TemplateFactory::class)]
     public function list(): array;
+
+    #[DbQuery('ttemplate_put')]
+    public function put(TemplateEntity $template, string $templateCode): void;
+
+    #[DbQuery('ttemplate_delete')]
+    public function delete(string $templateId): void;
 }

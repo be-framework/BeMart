@@ -11,34 +11,45 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use BEAR\Resource\Uri as ResourceUri;
 use Koriym\PhpServer\PhpServer;
+use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Auth\HtmlSessionAdapter;
+use MyVendor\BeMart\Tests\Http\Exception\HalLinkNotFoundException;
 use MyVendor\BeMart\Tests\Support\UnsupportedResourceOperationException;
 use Override;
 
 use function array_key_exists;
+use function debug_backtrace;
 use function escapeshellarg;
 use function explode;
 use function file_exists;
 use function file_put_contents;
+use function getenv;
 use function http_build_query;
 use function implode;
 use function is_array;
+use function is_dir;
 use function is_string;
 use function json_decode;
 use function json_encode;
+use function mkdir;
 use function preg_match;
+use function preg_replace;
 use function preg_split;
 use function shell_exec;
 use function sprintf;
 use function str_contains;
+use function str_ends_with;
 use function str_starts_with;
 use function strlen;
 use function strtolower;
-use function strtoupper;
 use function substr;
 use function sys_get_temp_dir;
 use function tempnam;
 use function trim;
 
+use const DEBUG_BACKTRACE_IGNORE_ARGS;
+use const DIRECTORY_SEPARATOR;
 use const FILE_APPEND;
 use const JSON_THROW_ON_ERROR;
 use const PHP_EOL;
@@ -60,12 +71,11 @@ final class HttpResource implements ResourceInterface
     public function __construct(
         string $host,
         string $index,
-        private readonly string $logFile = 'php://stderr',
+        private readonly string $logPath = 'php://stderr',
     ) {
         $this->baseUri = sprintf('http://%s', $host);
         $this->cookieJar = (string) tempnam(sys_get_temp_dir(), 'bemart-http-cookie-');
         $this->startServer($host, $index);
-        $this->resetLog();
     }
 
     private function startServer(string $host, string $index): void
@@ -127,27 +137,22 @@ final class HttpResource implements ResourceInterface
             throw new UnsupportedResourceOperationException('href requires an array response body.');
         }
 
-        $links = $body['links'] ?? null;
-        if (is_array($links)) {
-            $href = $links[$rel] ?? null;
-            if (is_string($href)) {
-                return $this->get($href, $query);
-            }
+        $links = $body['_links'] ?? null;
+        if (! is_array($links) || ! array_key_exists($rel, $links)) {
+            throw new HalLinkNotFoundException(sprintf('HAL link rel `%s` is not available.', $rel));
         }
 
-        $submitTo = $body['submitTo'] ?? null;
-        if (! is_array($submitTo)) {
-            throw new UnsupportedResourceOperationException(sprintf('Link rel `%s` is not available.', $rel));
+        $link = $links[$rel];
+        if (! is_array($link)) {
+            throw new HalLinkNotFoundException(sprintf('HAL link rel `%s` does not contain an href.', $rel));
         }
 
-        $submitRel = $submitTo['rel'] ?? null;
-        $method = $submitTo['method'] ?? null;
-        $href = $submitTo['href'] ?? null;
-        if ($submitRel !== $rel || ! is_string($method) || ! is_string($href)) {
-            throw new UnsupportedResourceOperationException(sprintf('Unsafe rel `%s` has no submit target.', $rel));
+        $href = $link['href'] ?? null;
+        if (! is_string($href)) {
+            throw new HalLinkNotFoundException(sprintf('HAL link rel `%s` does not contain an href.', $rel));
         }
 
-        return $this->request(strtoupper($method), $href, $query);
+        return $this->get($href, $query);
     }
 
     /** @param array<string, mixed> $query */
@@ -248,6 +253,10 @@ final class HttpResource implements ResourceInterface
     {
         $jar = escapeshellarg($this->cookieJar);
         $curl = sprintf('curl -s -i -b %s -c %s', $jar, $jar);
+        foreach ($this->testHeaders() as $header => $value) {
+            $curl .= ' -H ' . escapeshellarg($header . ': ' . $value);
+        }
+
         if ($method !== 'GET') {
             $body = escapeshellarg(json_encode($query, JSON_THROW_ON_ERROR));
             $curl .= sprintf(" -H 'Content-Type: application/json' -X %s -d %s", $method, $body);
@@ -260,6 +269,38 @@ final class HttpResource implements ResourceInterface
         }
 
         return $raw;
+    }
+
+    /** @return array<string, string> */
+    private function testHeaders(): array
+    {
+        $headers = [];
+        /** @var mixed $adminId */
+        $adminId = $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] ?? null;
+        if (is_string($adminId) && $adminId !== '') {
+            $headers['X-BeMart-Test-Admin-Id'] = $adminId;
+        }
+
+        /** @var mixed $customerId */
+        $customerId = $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] ?? null;
+        if (is_string($customerId) && $customerId !== '') {
+            $headers['X-BeMart-Test-Customer-Id'] = $customerId;
+        }
+
+        /** @var mixed $csrfToken */
+        $csrfToken = $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] ?? null;
+        if (is_string($csrfToken) && $csrfToken !== '') {
+            $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
+
+            return $headers;
+        }
+
+        $csrfToken = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
+        if ($csrfToken !== false && $csrfToken !== '') {
+            $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
+        }
+
+        return $headers;
     }
 
     /** @return array{0: list<string>, 1: string} */
@@ -332,6 +373,8 @@ final class HttpResource implements ResourceInterface
      */
     private function log(string $method, string $url, array $query, array $headers, string $view): void
     {
+        $logFile = $this->logFile();
+        $this->resetLog($logFile);
         $log = sprintf(
             "%s %s\nquery=%s\n%s\n\n%s\n\n",
             $method,
@@ -340,15 +383,58 @@ final class HttpResource implements ResourceInterface
             implode(PHP_EOL, $headers),
             $view,
         );
-        file_put_contents($this->logFile, $log, FILE_APPEND);
+        file_put_contents($logFile, $log, FILE_APPEND);
     }
 
-    private function resetLog(): void
+    private function logFile(): string
     {
-        if ($this->logFile === 'php://stderr' || ! file_exists($this->logFile)) {
+        if ($this->logPath === 'php://stderr' || str_ends_with($this->logPath, '.log')) {
+            return $this->logPath;
+        }
+
+        if (! is_dir($this->logPath)) {
+            mkdir($this->logPath, 0777, true);
+        }
+
+        return $this->logPath . DIRECTORY_SEPARATOR . $this->currentTestLogName();
+    }
+
+    private function currentTestLogName(): string
+    {
+        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
+            $function = $frame['function'] ?? null;
+            if (! is_string($function) || ! str_starts_with($function, 'test')) {
+                continue;
+            }
+
+            return self::kebabCase($function) . '.log';
+        }
+
+        return 'http-resource.log';
+    }
+
+    private static function kebabCase(string $name): string
+    {
+        $kebab = preg_replace('/(?<!^)[A-Z]/', '-$0', $name);
+        if (! is_string($kebab)) {
+            return strtolower($name);
+        }
+
+        return strtolower($kebab);
+    }
+
+    private function resetLog(string $logFile): void
+    {
+        static $reset = [];
+
+        if ($logFile === 'php://stderr' || array_key_exists($logFile, $reset)) {
             return;
         }
 
-        file_put_contents($this->logFile, '');
+        if (file_exists($logFile)) {
+            file_put_contents($logFile, '');
+        }
+
+        $reset[$logFile] = true;
     }
 }

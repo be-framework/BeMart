@@ -10,17 +10,14 @@ use Aura\Router\RouterContainer;
 use BEAR\Sunday\Extension\Router\NullMatch;
 use BEAR\Sunday\Extension\Router\RouterInterface;
 use BEAR\Sunday\Extension\Router\RouterMatch;
-use LogicException;
 use Nyholm\Psr7\ServerRequest;
 use Override;
 
 use function array_key_exists;
-use function array_key_first;
 use function array_values;
 use function is_array;
 use function parse_url;
 use function rtrim;
-use function sprintf;
 use function str_ends_with;
 use function strtolower;
 use function strtoupper;
@@ -56,6 +53,10 @@ final class AuraRouter implements RouterInterface
         }
 
         $metadata = $this->routeMetadata($route, $method);
+        if ($metadata === null) {
+            return new NullMatch();
+        }
+
         $params = $this->resourceParams($route, $metadata) + $this->requestParams(strtolower($method), $globals);
         $this->normalizeWireAliases($params);
         $this->normalizeRouteAliases($metadata['queryParamMap'], $params);
@@ -83,28 +84,14 @@ final class AuraRouter implements RouterInterface
      *     paramMap: array<string, string>,
      *     defaults: array<string, mixed>,
      *     queryParamMap: array<string, string>
-     * }
+     * }|null
      */
-    private function routeMetadata(AuraRoute $route, string $method): array
+    private function routeMetadata(AuraRoute $route, string $method): array|null
     {
         /** @var mixed $metadata */
         $metadata = $route->extras['bemart']['methods'][$method] ?? null;
         if (! is_array($metadata)) {
-            /** @var mixed $methods */
-            $methods = $route->extras['bemart']['methods'] ?? [];
-            if (is_array($methods)) {
-                $firstMethod = array_key_first($methods);
-                $metadata = $firstMethod === null ? null : ($methods[$firstMethod] ?? null);
-            }
-
-            if (is_array($metadata)) {
-                $metadata['dispatchMethod'] = strtolower($method);
-                $metadata['queryParamMap'] = [];
-            }
-        }
-
-        if (! is_array($metadata)) {
-            throw new LogicException(sprintf('Aura route "%s" has no BeMart metadata for %s.', (string) $route->name, $method));
+            return null;
         }
 
         /** @var array{resource: string, dispatchMethod: string, paramMap: array<string, string>, defaults: array<string, mixed>, queryParamMap: array<string, string>} */

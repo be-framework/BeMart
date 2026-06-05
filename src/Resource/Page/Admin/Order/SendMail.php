@@ -60,6 +60,7 @@ class SendMail extends ResourceObject
      * @psalm-taint-source input $orderNo
      */
     #[Link(rel: 'doSendOrderMail', href: 'page://self/admin/order/send-mail', method: 'post')]
+    #[Link(rel: 'goOrderMailConfirm', href: 'page://self/admin/order/mail-confirm', method: 'get')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     public function onGet(string $orderNo = ''): static
     {
@@ -89,6 +90,8 @@ class SendMail extends ResourceObject
      * @psalm-taint-source input $orderNo
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
+    #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     #[CsrfProtected]
     public function onPost(
         string $orderNo,
@@ -118,6 +121,9 @@ class SendMail extends ResourceObject
         $this->body = [
             'orderNo' => $final->orderNo,
             'customerId' => $final->customerId,
+            'sendDate' => $final->sendDate,
+            'mailSubject' => $final->mailSubject,
+            'mailBody' => $final->mailBody,
             'message' => '注文確認メールを再送しました。',
         ];
 

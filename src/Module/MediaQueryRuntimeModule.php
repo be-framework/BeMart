@@ -26,6 +26,7 @@ use MyVendor\BeMart\Be\Reason\Query\LoginHistoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\NewsStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderMailHistoryCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderItemCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderItemQueryInterface;
@@ -44,6 +45,7 @@ use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TwoFactorAuthStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\AddressIdQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminIdQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\BlockIdQueryInterface;
@@ -117,6 +119,7 @@ final class MediaQueryRuntimeModule extends AbstractModule
             MailTemplateStorageInterface::class,
             NewsStorageInterface::class,
             OrderCommandInterface::class,
+            OrderMailHistoryCommandInterface::class,
             OrderHistoryQueryInterface::class,
             OrderItemCommandInterface::class,
             OrderItemQueryInterface::class,
@@ -135,6 +138,7 @@ final class MediaQueryRuntimeModule extends AbstractModule
             TaxRuleStorageInterface::class,
             TemplateStorageInterface::class,
             TradeLawStorageInterface::class,
+            TwoFactorAuthStorageInterface::class,
             AddressIdQueryInterface::class,
             AdminIdQueryInterface::class,
             BlockIdQueryInterface::class,

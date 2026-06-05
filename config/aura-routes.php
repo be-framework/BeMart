@@ -13,235 +13,10 @@ use Aura\Router\Route as AuraRoute;
  * Aura owns path matching, placeholder extraction, and URL generation.
  * BEAR\Resource owns method dispatch and 405 responses.
  * BeMart adds only route extras Aura does not know about: BEAR resource URI,
- * internal dispatch method, parameter-name aliases, and ALPS descriptor IDs.
+ * internal dispatch method, and parameter-name aliases.
  *
  * @return callable(Map): null
  */
-
-$alpsIds = [
-        'admin_change_password' => ['GET' => 'goChangePassword', 'POST' => 'doChangePassword'],
-        'admin_content_block' => 'goBlockList',
-        'admin_content_block_delete' => ['GET' => 'goBlockList', 'POST' => 'doDeleteBlock'],
-        'admin_content_block_edit' => ['GET' => 'goBlock', 'POST' => 'doUpdateBlock'],
-        'admin_content_block_new' => ['GET' => 'goBlock', 'POST' => 'doCreateBlock'],
-        'admin_content_cache' => ['GET' => 'goContentCache', 'POST' => 'doClearCache'],
-        'admin_content_css' => ['GET' => 'goContentCss', 'POST' => 'doUpdateContentCss'],
-        'admin_content_js' => ['GET' => 'goContentJs', 'POST' => 'doUpdateContentJs'],
-        'admin_content_layout' => 'goLayoutList',
-        'admin_content_layout_edit' => ['GET' => 'goLayout', 'POST' => 'doUpdateLayout'],
-        'admin_content_layout_new' => ['GET' => 'goLayout', 'POST' => 'doUpdateLayout'],
-        'admin_content_maintenance' => ['GET' => 'goMaintenance', 'POST' => 'doToggleMaintenance'],
-        'admin_content_news' => 'goNewsList',
-        'admin_content_news_delete' => ['GET' => 'goNewsList', 'POST' => 'doDeleteNews'],
-        'admin_content_news_edit' => ['GET' => 'goNews', 'POST' => 'doUpdateNews'],
-        'admin_content_news_new' => ['GET' => 'goNews', 'POST' => 'doCreateNews'],
-        'admin_content_page' => 'goPageList',
-        'admin_content_page_delete' => ['GET' => 'goPageList', 'POST' => 'doDeletePage'],
-        'admin_content_page_edit' => ['GET' => 'goPage', 'POST' => 'doUpdatePage'],
-        'admin_content_page_new' => ['GET' => 'goPage', 'POST' => 'doCreatePage'],
-        'admin_customer' => 'goCustomerList',
-        'admin_customer_delete' => ['GET' => 'goCustomerList', 'POST' => 'doDeleteCustomer'],
-        'admin_customer_delivery_new' => ['GET' => 'goCustomerAddress', 'POST' => 'doCreateCustomerAddress'],
-        'admin_customer_edit' => ['GET' => 'goCustomer', 'POST' => 'doUpdateCustomer'],
-        'admin_customer_export' => 'goExportCustomer',
-        'admin_customer_resend' => 'doResendActivationMail',
-        'admin_homepage' => 'goAdminTop',
-        'admin_homepage_customer' => ['GET' => 'goCustomerList', 'POST' => 'goCustomerList'],
-        'admin_homepage_nonstock' => ['GET' => 'goProductList', 'POST' => 'goProductList'],
-        'admin_homepage_sale' => ['GET' => 'goOrderList', 'POST' => 'goOrderList'],
-        'admin_login' => ['GET' => 'goAdminLogin', 'POST' => 'doAdminLogin'],
-        'admin_logout' => 'doAdminLogout',
-        'admin_order' => 'goOrderList',
-        'admin_order_bulk_delete' => ['GET' => 'goOrderList', 'POST' => 'doBulkDeleteOrder'],
-        'admin_order_csv_shipping' => ['GET' => 'goImportShippingCsv', 'POST' => 'doImportShippingCsv'],
-        'admin_order_edit' => ['GET' => 'goOrder', 'POST' => 'doUpdateOrder'],
-        'admin_order_export_order' => 'goExportOrder',
-        'admin_order_export_pdf' => 'goExportOrderPdf',
-        'admin_order_export_shipping' => 'goExportShipping',
-        'admin_order_mail' => ['GET' => 'goOrderMail', 'POST' => 'doSendOrderMail'],
-        'admin_order_shipping' => ['GET' => 'goOrderShippingAddress', 'POST' => 'doUpdateOrderShippingAddress'],
-        'admin_product' => 'goProductList',
-        'admin_product_bulk_product_status' => ['GET' => 'goProductList', 'POST' => 'doBulkUpdateProductStatus'],
-        'admin_product_category' => 'goCategoryList',
-        'admin_product_category_edit' => ['GET' => 'goCategory', 'POST' => 'doUpdateCategory'],
-        'admin_product_class_category' => ['GET' => 'goClassCategoryList', 'POST' => 'doCreateClassCategory'],
-        'admin_product_class_category_delete' => ['GET' => 'goClassCategoryList', 'POST' => 'doDeleteClassCategory'],
-        'admin_product_class_category_edit' => ['GET' => 'goClassCategory', 'POST' => 'doUpdateClassCategory'],
-        'admin_product_class_category_export' => 'goExportClassCategory',
-        'admin_product_class_category_sort_no_move' => ['GET' => 'goClassCategoryList', 'POST' => 'doSortNoMove'],
-        'admin_product_class_category_visibility' => ['GET' => 'goClassCategoryList', 'POST' => 'doToggleVisible'],
-        'admin_product_class_name' => 'goClassNameList',
-        'admin_product_class_name_delete' => ['GET' => 'goClassNameList', 'POST' => 'doDeleteClassName'],
-        'admin_product_class_name_export' => 'goExportClassName',
-        'admin_product_class_name_sort_no_move' => ['GET' => 'goClassNameList', 'POST' => 'doSortNoMove'],
-        'admin_product_csv_category' => ['GET' => 'goExportCategory', 'POST' => 'doImportCategoryCsv'],
-        'admin_product_csv_class_category' => ['GET' => 'goExportClassCategory', 'POST' => 'doImportClassCategoryCsv'],
-        'admin_product_csv_class_name' => ['GET' => 'goExportClassName', 'POST' => 'doImportClassNameCsv'],
-        'admin_product_csv_product' => ['GET' => 'goExportProduct', 'POST' => 'doImportProductCsv'],
-        'admin_product_export' => 'goExportProduct',
-        'admin_product_product_class' => 'goProduct',
-        'admin_product_product_copy' => ['GET' => 'goProduct', 'POST' => 'doCopyProduct'],
-        'admin_product_product_delete' => ['GET' => 'goProductList', 'POST' => 'doDeleteProduct'],
-        'admin_product_product_edit' => ['GET' => 'goProduct', 'POST' => 'doUpdateProduct'],
-        'admin_product_product_new' => ['GET' => 'goProduct', 'POST' => 'doCreateProduct'],
-        'admin_product_tag' => 'goTagList',
-        'admin_product_tag_delete' => ['GET' => 'goTagList', 'POST' => 'doDeleteTag'],
-        'admin_product_tag_sort_no_move' => ['GET' => 'goTagList', 'POST' => 'doSortNoMove'],
-        'admin_setting_shop' => ['GET' => 'goBaseInfo', 'POST' => 'doUpdateBaseInfo'],
-        'admin_setting_shop_calendar' => ['GET' => 'goCalendar', 'POST' => 'doUpdateCalendar'],
-        'admin_setting_shop_calendar_delete' => ['GET' => 'goCalendar', 'POST' => 'doDeleteCalendarHoliday'],
-        'admin_setting_shop_calendar_new' => ['GET' => 'goCalendar', 'POST' => 'doCreateCalendarHoliday'],
-        'admin_setting_shop_csv' => ['GET' => 'goCsv', 'POST' => 'doUpdateCsv'],
-        'admin_setting_shop_delivery' => ['GET' => 'goDeliveryList', 'POST' => 'goDeliveryList'],
-        'admin_setting_shop_delivery_delete' => ['GET' => 'goDeliveryList', 'POST' => 'doDeleteDelivery'],
-        'admin_setting_shop_delivery_edit' => ['GET' => 'goDelivery', 'POST' => 'doUpdateDelivery'],
-        'admin_setting_shop_delivery_new' => ['GET' => 'goDelivery', 'POST' => 'doCreateDelivery'],
-        'admin_setting_shop_delivery_sort_no_move' => ['GET' => 'goDeliveryList', 'POST' => 'doSortNoMove'],
-        'admin_setting_shop_delivery_visibility' => ['GET' => 'goDeliveryList', 'POST' => 'doToggleVisible'],
-        'admin_setting_shop_mail' => ['GET' => 'goMailTemplateList', 'POST' => 'doUpdateMailTemplate'],
-        'admin_setting_shop_mail_delete' => ['GET' => 'goMailTemplateList', 'POST' => 'doDeleteMailTemplate'],
-        'admin_setting_shop_order_status' => ['GET' => 'goOrderStatusList', 'POST' => 'doUpdateOrderStatusList'],
-        'admin_setting_shop_payment' => 'goPaymentList',
-        'admin_setting_shop_payment_delete' => ['GET' => 'goPaymentList', 'POST' => 'doDeletePayment'],
-        'admin_setting_shop_payment_edit' => ['GET' => 'goPayment', 'POST' => 'doUpdatePayment'],
-        'admin_setting_shop_payment_new' => ['GET' => 'goPayment', 'POST' => 'doCreatePayment'],
-        'admin_setting_shop_payment_sort_no_move' => ['GET' => 'goPaymentList', 'POST' => 'doSortNoMove'],
-        'admin_setting_shop_payment_visible' => ['GET' => 'goPaymentList', 'POST' => 'doToggleVisible'],
-        'admin_setting_shop_tax' => 'goTaxRuleList',
-        'admin_setting_shop_tax_delete' => ['GET' => 'goTaxRuleList', 'POST' => 'doDeleteTaxRule'],
-        'admin_setting_shop_tax_new' => 'doCreateTaxRule',
-        'admin_setting_shop_tradelaw' => ['GET' => 'goTradeLawList', 'POST' => 'doUpdateTradeLaw'],
-        'admin_setting_system_authority' => ['GET' => 'goAuthorityRole', 'POST' => 'doUpdateAuthorityRole'],
-        'admin_setting_system_masterdata' => ['GET' => 'goMasterData', 'POST' => 'doSelectMasterData'],
-        'admin_setting_system_masterdata_edit' => ['GET' => 'goMasterData', 'POST' => 'doUpdateMasterData'],
-        'admin_setting_system_member' => 'goMemberList',
-        'admin_setting_system_member_delete' => ['GET' => 'goMemberList', 'POST' => 'doDeleteMember'],
-        'admin_setting_system_member_down' => ['GET' => 'goMemberList', 'POST' => 'doSortNoMove'],
-        'admin_setting_system_member_edit' => ['GET' => 'goMember', 'POST' => 'doUpdateMember'],
-        'admin_setting_system_member_new' => ['GET' => 'goMember', 'POST' => 'doCreateMember'],
-        'admin_setting_system_member_up' => ['GET' => 'goMemberList', 'POST' => 'doSortNoMove'],
-        'admin_setting_system_security' => ['GET' => 'goSecurity', 'POST' => 'doUpdateSecurity'],
-        'admin_setting_system_system_phpinfo' => 'goSystemInfo',
-        'admin_shipping_notify_mail' => ['GET' => 'goOrder', 'POST' => 'doSendShippingNotifyMail'],
-        'admin_shipping_preview_notify_mail' => 'goOrderMailConfirm',
-        'admin_shipping_update_order_status' => ['GET' => 'goOrderList', 'POST' => 'doUpdateOrderStatus'],
-        'admin_shipping_update_tracking_number' => ['GET' => 'goOrder', 'POST' => 'doUpdateTrackingNumber'],
-        'admin_store_plugin' => 'goPluginList',
-        'admin_store_plugin_disable' => ['GET' => 'goPluginList', 'POST' => 'doDisablePlugin'],
-        'admin_store_plugin_enable' => ['GET' => 'goPluginList', 'POST' => 'doEnablePlugin'],
-        'admin_store_plugin_install' => ['GET' => 'goPluginList', 'POST' => 'doInstallPlugin'],
-        'admin_store_plugin_owners_search_page' => ['GET' => 'goPluginList', 'POST' => 'goPluginList'],
-        'admin_store_plugin_uninstall' => ['GET' => 'goPluginList', 'POST' => 'doUninstallPlugin'],
-        'admin_store_template' => ['GET' => 'goTemplateList', 'POST' => 'doSelectTemplate'],
-        'admin_store_template_delete' => ['GET' => 'goTemplateList', 'POST' => 'doDeleteTemplate'],
-        'admin_store_template_download' => ['GET' => 'goTemplateList', 'POST' => 'doDownloadTemplate'],
-        'admin_store_template_install' => ['GET' => 'goTemplateInstall', 'POST' => 'doInstallTemplate'],
-        'admin_two_factor_auth' => ['GET' => 'goTwoFactorAuth', 'POST' => 'doVerifyTwoFactorAuth'],
-        'admin_two_factor_auth_set' => ['GET' => 'goTwoFactorAuthSet', 'POST' => 'doSetTwoFactorAuth'],
-        'block_cart' => 'goCart',
-        'cart' => 'goCart',
-        'cart_handle_item' => ['GET' => 'goCart', 'POST' => 'doUpdateCartItemQuantity'],
-        'contact' => ['GET' => 'goContactForm', 'POST' => 'doSubmitContact'],
-        'contact_complete' => 'goContactComplete',
-        'contact_confirm' => 'doSubmitContact',
-        'entry' => ['GET' => 'goCustomerRegistration', 'POST' => 'doRegisterCustomer'],
-        'entry_activate' => 'doActivateCustomer',
-        'entry_complete' => 'goCustomerRegistrationComplete',
-        'entry_confirm' => 'goCustomerRegistrationConfirm',
-        'forgot' => ['GET' => 'goPasswordResetRequest', 'POST' => 'doRequestPasswordReset'],
-        'forgot_complete' => 'goPasswordResetRequestComplete',
-        'forgot_reset' => ['GET' => 'goPasswordReset', 'POST' => 'doResetPassword'],
-        'help_about' => 'goHelpAbout',
-        'help_agreement' => 'goHelpAgreement',
-        'help_guide' => 'goHelpGuide',
-        'help_privacy' => 'goHelpPrivacy',
-        'help_tradelaw' => 'goHelpTradeLaw',
-        'homepage' => 'goTop',
-        'logout' => 'doLogout',
-        'mypage' => 'goMypage',
-        'mypage_change' => ['GET' => 'goMypageChange', 'POST' => 'doUpdateCustomer'],
-        'mypage_change_complete' => 'goMypageChangeComplete',
-        'mypage_delivery' => 'goCustomerAddressList',
-        'mypage_delivery_delete' => ['GET' => 'goCustomerAddressList', 'POST' => 'doDeleteCustomerAddress'],
-        'mypage_delivery_edit' => ['GET' => 'goCustomerAddress', 'POST' => 'doUpdateCustomerAddress'],
-        'mypage_delivery_new' => ['GET' => 'goCustomerAddress', 'POST' => 'doCreateCustomerAddress'],
-        'mypage_favorite' => 'goFavoriteList',
-        'mypage_favorite_delete' => ['GET' => 'goFavoriteList', 'POST' => 'doRemoveFavorite'],
-        'mypage_history' => 'goMypageHistory',
-        'mypage_login' => ['GET' => 'goLogin', 'POST' => 'doLogin'],
-        'mypage_order' => 'doReorder',
-        'mypage_withdraw' => ['GET' => 'goMypageWithdraw', 'POST' => 'doWithdrawCustomer'],
-        'mypage_withdraw_confirm' => ['GET' => 'goMypageWithdrawConfirm', 'POST' => 'doWithdrawCustomer'],
-        'mypage_withdraw_complete' => 'goMypageWithdrawComplete',
-        'cart_buystep' => 'doSelectCartForCheckout',
-        'product_add_cart' => 'doAddCartItem',
-        'product_add_favorite' => ['GET' => 'goProduct', 'POST' => 'doAddFavorite'],
-        'product_delete_favorite' => 'doRemoveFavorite',
-        'product_detail' => 'goProduct',
-        'product_list' => 'goProductList',
-        'shopping' => 'goShopping',
-        'shopping_checkout' => 'doCheckout',
-        'shopping_customer' => 'doSubmitNonMember',
-        'shopping_complete' => 'goShoppingComplete',
-        'shopping_confirm' => 'doConfirmOrder',
-        'shopping_error' => 'goShoppingError',
-        'shopping_login' => 'goShoppingLogin',
-        'shopping_nonmember' => ['GET' => 'goShoppingNonMember', 'POST' => 'doSubmitNonMember'],
-        'shopping_redirect_to' => 'doShoppingRedirectTo',
-        'shopping_shipping' => ['GET' => 'goShoppingShipping', 'POST' => 'doSelectShippingAddress'],
-        'shopping_shipping_edit' => ['GET' => 'goShoppingShippingEdit', 'POST' => 'doUpdateShippingAddress'],
-        'shopping_shipping_multiple' => ['GET' => 'goShoppingShippingMultiple', 'POST' => 'doSelectShippingAddress'],
-        'shopping_shipping_multiple_edit' => ['GET' => 'goShoppingShippingMultiple', 'POST' => 'doUpdateShippingAddress'],
-];
-
-$fallbackAlps = static function (string $routeName, string $method, string|null $dispatchMethod): string {
-    $subject = (string) preg_replace_callback(
-        '/(?:^|_)([a-z])/',
-        static fn (array $m): string => ucfirst($m[1]),
-        $routeName,
-    );
-    if ($method === 'GET' || $dispatchMethod === 'get') {
-        return 'go' . $subject;
-    }
-
-    if ($dispatchMethod === 'delete' || str_ends_with($routeName, '_delete')) {
-        return 'doDelete' . $subject;
-    }
-
-    if ($dispatchMethod === 'put' || str_contains($routeName, 'update')) {
-        return 'doUpdate' . $subject;
-    }
-
-    return 'do' . $subject;
-};
-
-/**
- * @param list<string> $methods
- * @return array{ids: array<string, string>, explicit: bool}
- */
-$alpsFor = static function (string $routeName, array $methods, string|null $dispatchMethod) use ($alpsIds, $fallbackAlps): array {
-    if (array_key_exists($routeName, $alpsIds)) {
-        $value = $alpsIds[$routeName];
-        if (is_array($value)) {
-            return ['ids' => $value, 'explicit' => true];
-        }
-
-        $ids = [];
-        foreach ($methods as $method) {
-            $ids[strtoupper($method)] = $value;
-        }
-
-        return ['ids' => $ids, 'explicit' => true];
-    }
-
-    $ids = [];
-    foreach ($methods as $method) {
-        $method = strtoupper($method);
-        $ids[$method] = $fallbackAlps($routeName, $method, $dispatchMethod);
-    }
-
-    return ['ids' => $ids, 'explicit' => false];
-};
 
 /** @return array<string, array<string, mixed>> */
 $methodMetadataFor = static function (AuraRoute $route): array {
@@ -290,11 +65,10 @@ $route = static function (
     string|null $dispatchMethod = null,
     array $defaults = [],
     array $queryParamMap = [],
-) use ($auraRoute, $methodMetadataFor, $alpsFor, $fallbackAlps): void {
+) use ($auraRoute, $methodMetadataFor): void {
     $route = $auraRoute($map, $name, $path);
     $existingMethods = $methodMetadataFor($route);
     $newMethods = [];
-    $alps = $alpsFor($name, $methods, $dispatchMethod);
     foreach ($methods as $method) {
         $method = strtoupper($method);
         if (array_key_exists($method, $existingMethods) || array_key_exists($method, $newMethods)) {
@@ -307,8 +81,6 @@ $route = static function (
             'paramMap' => $paramMap,
             'defaults' => $defaults,
             'queryParamMap' => $queryParamMap,
-            'alpsId' => $alps['ids'][$method] ?? $fallbackAlps($name, $method, $dispatchMethod),
-            'alpsExplicit' => $alps['explicit'] && array_key_exists($method, $alps['ids']),
         ];
     }
 
@@ -666,6 +438,7 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
             $route($map, 'mypage_delivery_delete', ['GET'], '/mypage/delivery/delete', 'page://self/mypage/address-list');
             $route($map, 'mypage_delivery_delete', ['POST'], '/mypage/delivery/delete', 'page://self/mypage/address', [], 'delete', [], ['id' => 'addressId']);
             $route($map, 'mypage_favorite', ['GET'], '/mypage/favorite', 'page://self/mypage/favorite-list');
+            $route($map, 'mypage_favorite_action', ['POST', 'DELETE'], '/mypage/favorite', 'page://self/mypage/favorite');
             $route($map, 'mypage_favorite_delete', ['GET'], '/mypage/favorite/delete', 'page://self/mypage/favorite-list');
             $route($map, 'mypage_favorite_delete', ['POST'], '/mypage/favorite/delete', 'page://self/mypage/favorite', [], 'delete', [], ['id' => 'productCode']);
             $route($map,
@@ -732,7 +505,11 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
             );
 
             // ---- Admin: catalogue ----
-            $route($map, 'admin_product', ['GET', 'POST'], '/admin/product', 'page://self/admin/product-list', [], 'get');
+            $route($map, 'admin_product', ['GET'], '/admin/product', 'page://self/admin/product');
+            $route($map, 'admin_product', ['POST'], '/admin/product', 'page://self/admin/product');
+            $route($map, 'admin_product', ['PUT'], '/admin/product', 'page://self/admin/product');
+            $route($map, 'admin_product', ['DELETE'], '/admin/product', 'page://self/admin/product');
+            $route($map, 'admin_category_csv', ['GET', 'POST'], '/admin/category/csv', 'page://self/admin/category/csv');
             $route($map, 'admin_product_tag', ['GET', 'POST'], '/admin/product/tag', 'page://self/admin/tag/tag-list', [], 'get');
             $route($map,
                 'admin_product_class_name',
@@ -742,6 +519,8 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
                 [],
                 'get',
             );
+            $route($map, 'admin_product_csv_class_name_path', ['GET', 'POST'], '/admin/product/csv-class-name', 'page://self/admin/product/csv-class-name');
+            $route($map, 'admin_product_csv_class_category_path', ['GET', 'POST'], '/admin/product/csv-class-category', 'page://self/admin/product/csv-class-category');
             $route($map,
                 'admin_product_category',
                 ['GET', 'POST'],
@@ -752,7 +531,8 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
             );
 
             // ---- Admin: orders + customers ----
-            $route($map, 'admin_order', ['GET', 'POST'], '/admin/order', 'page://self/admin/order-list', [], 'get');
+            $route($map, 'admin_order', ['GET'], '/admin/order', 'page://self/admin/order');
+            $route($map, 'admin_order', ['PUT'], '/admin/order', 'page://self/admin/order');
             $route($map, 'admin_customer', ['GET', 'POST'], '/admin/customer', 'page://self/admin/customer-list', [], 'get');
             // `admin_customer_resend` POSTs the "resend the email-verification
             // mail to a 仮会員" action from a customer-list row. EC-CUBE keys

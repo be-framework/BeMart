@@ -138,6 +138,7 @@ class OrderStatus extends ResourceObject
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
+    #[Link(rel: 'goOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'get')]
     #[CsrfProtected]
     public function onPost(
         string $orderNo,

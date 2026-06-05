@@ -39,6 +39,7 @@ class Cart extends ResourceObject
      * @psalm-taint-source input $sessionPrefix
      */
     #[Link(rel: 'doAddCartItem', href: 'page://self/cart/item', method: 'post')]
+    #[Link(rel: 'goShoppingNonMember', href: 'page://self/shopping/non-member')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     public function onGet(string $sessionPrefix = self::DEFAULT_SESSION_PREFIX): static
     {

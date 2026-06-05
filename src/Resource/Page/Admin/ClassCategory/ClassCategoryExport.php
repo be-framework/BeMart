@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassCategory;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -33,6 +34,7 @@ class ClassCategoryExport extends ResourceObject
     /**
      * @psalm-taint-source input $classNameId
      */
+    #[Link(rel: 'doImportClassCategoryCsv', href: 'page://self/admin/product/csv-class-category', method: 'post')]
     public function onGet(string|null $classNameId = null): static
     {
         try {

@@ -11,8 +11,8 @@ use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
 use Override;
 
 use function array_key_exists;
+use function max;
 use function sprintf;
-use function uniqid;
 
 /**
  * EC-CUBE-compatible design-template management boundary.
@@ -68,6 +68,7 @@ final class EccubeTemplateCompatibility implements TemplateCompatibilityInterfac
     {
         $this->deleted[$templateId] = true;
         unset($this->installed[$templateId]);
+        $this->templates->delete($templateId);
     }
 
     #[Override]
@@ -83,9 +84,20 @@ final class EccubeTemplateCompatibility implements TemplateCompatibilityInterfac
     #[Override]
     public function install(string $code, string $name): string
     {
-        $templateId = uniqid('tpl_', false);
+        $templateId = (string) $this->nextTemplateId();
+        $this->templates->put(new TemplateEntity($templateId, $name, 10), $code);
         $this->installed[$templateId] = true;
 
         return $templateId;
+    }
+
+    private function nextTemplateId(): int
+    {
+        $next = 1;
+        foreach ($this->templates->list() as $template) {
+            $next = max($next, ((int) $template->templateId) + 1);
+        }
+
+        return $next;
     }
 }

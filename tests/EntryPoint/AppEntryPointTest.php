@@ -121,12 +121,12 @@ final class AppEntryPointTest extends TestCase
         $this->assertStringContainsString('Usage:', $result['stderr']);
     }
 
-    public function testKnownPathWithUnsupportedMethodIsReportedByBearResourceAs405(): void
+    public function testKnownPathWithUnsupportedMethodReturns404WithoutRouteFallback(): void
     {
         $result = $this->runBin('page.php', ['post', '/products/list'], ['APP_CONTEXT' => 'html-test']);
 
         $this->assertSame(1, $result['exit']);
-        $this->assertSame(405, $result['json']['code'] ?? null);
+        $this->assertSame(404, $result['json']['code'] ?? null);
     }
 
     private function skipWithoutDatabaseUrl(): void

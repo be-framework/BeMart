@@ -1,1 +1,1 @@
-SELECT id, payment_method, charge, rule_min, rule_max, visible FROM dtb_payment WHERE :paymentId REGEXP '^[0-9]+$' AND id = CAST(:paymentId AS UNSIGNED) LIMIT 1
+SELECT CAST(id AS CHAR), payment_method, CAST(charge AS SIGNED), CAST(rule_min AS SIGNED), CAST(rule_max AS SIGNED), visible FROM dtb_payment WHERE :paymentId REGEXP '^[0-9]+$' AND id = CAST(:paymentId AS UNSIGNED) LIMIT 1

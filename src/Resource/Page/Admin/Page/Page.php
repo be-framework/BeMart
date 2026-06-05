@@ -166,6 +166,7 @@ class Page extends ResourceObject
      * @psalm-taint-source input $pageId
      */
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
+    #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[CsrfProtected]
     public function onDelete(string $pageId): static
     {

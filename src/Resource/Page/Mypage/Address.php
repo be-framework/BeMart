@@ -242,6 +242,7 @@ class Address extends ResourceObject
     /**
      * @psalm-taint-source input $addressId
      */
+    #[Link(rel: 'goFavoriteList', href: 'page://self/mypage/favorite-list')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[CsrfProtected]
     public function onDelete(string $addressId): static
