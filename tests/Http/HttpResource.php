@@ -11,6 +11,9 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use BEAR\Resource\Uri as ResourceUri;
 use Koriym\PhpServer\PhpServer;
+use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Tests\Http\Exception\HalLinkNotFoundException;
 use MyVendor\BeMart\Tests\Support\UnsupportedResourceOperationException;
 use Override;
@@ -21,6 +24,7 @@ use function escapeshellarg;
 use function explode;
 use function file_exists;
 use function file_put_contents;
+use function getenv;
 use function http_build_query;
 use function implode;
 use function is_array;
@@ -249,6 +253,10 @@ final class HttpResource implements ResourceInterface
     {
         $jar = escapeshellarg($this->cookieJar);
         $curl = sprintf('curl -s -i -b %s -c %s', $jar, $jar);
+        foreach ($this->testHeaders() as $header => $value) {
+            $curl .= ' -H ' . escapeshellarg($header . ': ' . $value);
+        }
+
         if ($method !== 'GET') {
             $body = escapeshellarg(json_encode($query, JSON_THROW_ON_ERROR));
             $curl .= sprintf(" -H 'Content-Type: application/json' -X %s -d %s", $method, $body);
@@ -261,6 +269,38 @@ final class HttpResource implements ResourceInterface
         }
 
         return $raw;
+    }
+
+    /** @return array<string, string> */
+    private function testHeaders(): array
+    {
+        $headers = [];
+        /** @var mixed $adminId */
+        $adminId = $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] ?? null;
+        if (is_string($adminId) && $adminId !== '') {
+            $headers['X-BeMart-Test-Admin-Id'] = $adminId;
+        }
+
+        /** @var mixed $customerId */
+        $customerId = $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] ?? null;
+        if (is_string($customerId) && $customerId !== '') {
+            $headers['X-BeMart-Test-Customer-Id'] = $customerId;
+        }
+
+        /** @var mixed $csrfToken */
+        $csrfToken = $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] ?? null;
+        if (is_string($csrfToken) && $csrfToken !== '') {
+            $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
+
+            return $headers;
+        }
+
+        $csrfToken = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
+        if ($csrfToken !== false && $csrfToken !== '') {
+            $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
+        }
+
+        return $headers;
     }
 
     /** @return array{0: list<string>, 1: string} */
