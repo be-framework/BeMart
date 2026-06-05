@@ -11,11 +11,11 @@ SELECT pc.product_code,
         WHERE pi.product_id = p.id
         ORDER BY pi.sort_no ASC, pi.id ASC
         LIMIT 1) AS image_file_name,
-       (SELECT COALESCE(JSON_ARRAYAGG(c.category_name ORDER BY c.hierarchy ASC, c.sort_no DESC, c.id ASC), JSON_ARRAY())
+       (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(JSON_QUOTE(c.category_name) ORDER BY c.hierarchy ASC, c.sort_no DESC, c.id ASC SEPARATOR ','), ']'), JSON_ARRAY())
         FROM dtb_product_category pcat
         INNER JOIN dtb_category c ON c.id = pcat.category_id
         WHERE pcat.product_id = p.id) AS category_names_json,
-       (SELECT COALESCE(JSON_ARRAYAGG(t.name ORDER BY t.sort_no ASC, t.id ASC), JSON_ARRAY())
+       (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(JSON_QUOTE(t.name) ORDER BY t.sort_no ASC, t.id ASC SEPARATOR ','), ']'), JSON_ARRAY())
         FROM dtb_product_tag pt
         INNER JOIN dtb_tag t ON t.id = pt.tag_id
         WHERE pt.product_id = p.id) AS tag_names_json,

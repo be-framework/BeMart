@@ -31,13 +31,26 @@ final readonly class PaymentMethodAdminEntity implements \Ray\MediaQuery\ToScala
 {
     use MediaQueryJsonEntityTrait;
 
+    public string $paymentId;
+    public string $paymentMethodName;
+    public int $charge;
+    public int|null $ruleMin;
+    public int|null $ruleMax;
+    public bool $visible;
+
     public function __construct(
-        public string $paymentId,
-        public string $paymentMethodName,
-        public int $charge,
-        public int|null $ruleMin,
-        public int|null $ruleMax,
-        public bool $visible,
+        string $paymentId,
+        string $paymentMethodName,
+        int $charge,
+        int|null $ruleMin,
+        int|null $ruleMax,
+        bool|int|string $visible,
     ) {
+        $this->paymentId = $paymentId;
+        $this->paymentMethodName = $paymentMethodName;
+        $this->charge = $charge;
+        $this->ruleMin = $ruleMin;
+        $this->ruleMax = $ruleMax;
+        $this->visible = (bool) $visible;
     }
 }

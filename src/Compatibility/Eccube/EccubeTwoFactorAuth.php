@@ -59,6 +59,12 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
     }
 
     #[Override]
+    public function generateDeviceToken(string $secret): string
+    {
+        return $this->codeAt($secret, (int) (time() / self::PERIOD));
+    }
+
+    #[Override]
     public function enable(string $loginId, string $secret): void
     {
         $this->secrets[$loginId] = $secret;

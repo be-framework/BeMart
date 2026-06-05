@@ -126,6 +126,7 @@ class TradeLaw extends ResourceObject
      * @psalm-taint-source input $tradeLawBody
      */
     #[Link(rel: 'goTop', href: 'page://self/admin')]
+    #[Link(rel: 'goContentCss', href: 'page://self/admin/content/css')]
     #[CsrfProtected]
     public function onPost(string $tradeLawBody): static
     {

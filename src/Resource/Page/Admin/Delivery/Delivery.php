@@ -149,6 +149,7 @@ class Delivery extends ResourceObject
      * @psalm-taint-source input $deliveryId
      */
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
+    #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[CsrfProtected]
     public function onDelete(string $deliveryId): static
     {

@@ -56,6 +56,7 @@ class MailTemplate extends ResourceObject
      * Wave 9ι: goMailTemplateList — admin lists every mail template.
      */
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
+    #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -108,6 +109,8 @@ class MailTemplate extends ResourceObject
      * @psalm-taint-source input $mailSubject
      */
     #[Link(rel: 'goTop', href: 'page://self/admin')]
+    #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
+    #[Link(rel: 'doDeleteMailTemplate', href: 'page://self/admin/mail-template', method: 'delete')]
     #[CsrfProtected]
     public function onPost(
         int $mailTemplateId,
@@ -159,6 +162,7 @@ class MailTemplate extends ResourceObject
      *
      * @psalm-taint-source input $mailTemplateId
      */
+    #[Link(rel: 'goMailTemplateList', href: 'page://self/admin/mail-template', method: 'get')]
     #[CsrfProtected]
     public function onDelete(int $mailTemplateId): static
     {
@@ -176,6 +180,8 @@ class MailTemplate extends ResourceObject
 
             return $this;
         }
+
+        $this->mailTemplates->delete($mailTemplateId);
 
         $this->code = Code::OK;
         $this->body = [

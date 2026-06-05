@@ -5,22 +5,128 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use Aura\Sql\ExtendedPdoInterface;
+use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
 use PHPUnit\Framework\Attributes\Depends;
+use Ray\Di\InjectorInterface;
 
 use function assert;
+use function bin2hex;
+use function getenv;
+use function putenv;
+use function random_bytes;
 
 class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
 {
     public const FLOW_ID = 'flow-admin-order-fulfillment';
 
+    private const ADMIN_ID = 'ad000000000000000000000000000001';
+    private const CSRF_TOKEN = 'workflow-order-csrf-token';
+
+    private static InjectorInterface|null $injector = null;
+    private static ExtendedPdoInterface|null $db = null;
+    private static ResourceInterface|null $dbResource = null;
+    private static string $orderNo;
+    private static string $paymentId;
+    /** @var array<string, mixed>|null */
+    private static array|null $previousSession = null;
+    private static string|false $previousCsrfEnv = false;
+
+    public static function setUpBeforeClass(): void
+    {
+        $suffix = bin2hex(random_bytes(4));
+        self::$previousSession = $_SESSION ?? null;
+        self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
+        $_SESSION = [
+            HtmlAdminSessionAdapter::ADMIN_ID_KEY => self::ADMIN_ID,
+            EccubeSharedCsrfTokenAdapter::SESSION_KEY => self::CSRF_TOKEN,
+        ];
+        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::CSRF_TOKEN);
+
+        self::$injector = Injector::getInstance('html-prod-hal-api-app');
+        $db = self::$injector->getInstance(ExtendedPdoInterface::class);
+        assert($db instanceof ExtendedPdoInterface);
+        self::$db = $db;
+        self::$db->beginTransaction();
+
+        $resource = self::$injector->getInstance(ResourceInterface::class);
+        assert($resource instanceof ResourceInterface);
+        self::$dbResource = $resource;
+
+        $payment = $resource->post('page://self/admin/payment/payment-list', [
+            'paymentMethodName' => 'Workflow Order Payment ' . $suffix,
+            'charge' => 0,
+            'ruleMin' => 0,
+            'ruleMax' => 999999,
+            'visible' => true,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        assert($payment->code === Code::CREATED);
+        assert(isset($payment->body['paymentId']) && is_string($payment->body['paymentId']));
+        self::$paymentId = $payment->body['paymentId'];
+
+        $order = $resource->post('page://self/admin/order/create', [
+            'customerId' => 'workflow-customer-' . $suffix,
+            'paymentMethodId' => (int) self::$paymentId,
+            'orderItems' => [
+                [
+                    'productCode' => 'workflow-order-' . $suffix,
+                    'productName' => 'Workflow Order Item',
+                    'unitPrice' => 1200,
+                    'quantity' => 2,
+                ],
+            ],
+            'deliveryFeeTotal' => 500,
+            'charge' => 0,
+            'discount' => 0,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        assert($order->code === Code::CREATED);
+        assert(isset($order->body['orderNo']) && is_string($order->body['orderNo']));
+        self::$orderNo = $order->body['orderNo'];
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        if (self::$db instanceof ExtendedPdoInterface && self::$db->inTransaction()) {
+            self::$db->rollBack();
+        }
+
+        if (self::$previousSession === null) {
+            unset($_SESSION);
+        } else {
+            $_SESSION = self::$previousSession;
+        }
+
+        if (self::$previousCsrfEnv === false) {
+            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
+        } else {
+            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::$previousCsrfEnv);
+        }
+
+        self::$db = null;
+        self::$dbResource = null;
+        self::$injector = null;
+
+        parent::tearDownAfterClass();
+    }
+
     protected function newResource(): ResourceInterface
     {
-        $resource = Injector::getInstance('test-hal-api-app')->getInstance(ResourceInterface::class);
+        if (self::$dbResource instanceof ResourceInterface) {
+            return self::$dbResource;
+        }
+
+        assert(self::$injector instanceof InjectorInterface);
+        $resource = self::$injector->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
+        self::$dbResource = $resource;
 
         return $resource;
     }
@@ -28,90 +134,147 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
     #[Alps('goOrderList')]
     public function testOrderList(): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment open order list.');
+        $response = $this->resource->get('page://self/admin/order-list');
+
+        $this->assertSame(Code::OK, $response->code);
+
+        return $response;
     }
 
     #[Alps('goOrder')]
     #[Depends('testOrderList')]
     public function testOrder(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment open target order.');
+        return $this->follow($response, 'goOrder', ['orderNo' => self::$orderNo]);
     }
 
     #[Alps('doUpdateOrder')]
     #[Depends('testOrder')]
     public function testUpdatesOrder(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment update order.');
+        $updated = $this->resource->put('page://self/admin/order', [
+            'orderNo' => self::$orderNo,
+            'discount' => 100,
+            'charge' => 50,
+            'usePoint' => 0,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$orderNo, $this->bodyValue($updated, 'orderNo'));
+
+        return $updated;
     }
 
     #[Alps('doUpdateOrderStatus')]
     #[Depends('testUpdatesOrder')]
     public function testUpdatesOrderStatus(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment update order status.');
+        $updated = $this->resource->post('page://self/admin/order-status', [
+            'orderNo' => self::$orderNo,
+            'orderStatus' => 4,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$orderNo, $this->bodyValue($updated, 'orderNo'));
+        $this->assertSame(4, $this->bodyValue($updated, 'orderStatus'));
+
+        return $updated;
     }
 
     #[Alps('goOrderShippingAddress')]
     #[Depends('testUpdatesOrderStatus')]
     public function testOrderShippingAddress(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment open order shipping address.');
+        return $this->follow($response, 'goOrderShippingAddress', ['orderNo' => self::$orderNo]);
     }
 
     #[Alps('doUpdateOrderShippingAddress')]
     #[Depends('testOrderShippingAddress')]
     public function testUpdatesOrderShippingAddress(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment update order shipping address.');
+        $updated = $this->resource->put('page://self/admin/order/shipping-address', [
+            'orderNo' => self::$orderNo,
+            'name01' => '配送',
+            'name02' => '太郎',
+            'postalCode' => '1500001',
+            'pref' => 13,
+            'addr01' => '渋谷区',
+            'addr02' => 'ワークフロー1-1-1',
+            'phoneNumber' => '0312345678',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$orderNo, $this->bodyValue($updated, 'orderNo'));
+
+        return $updated;
     }
 
     #[Alps('doUpdateTrackingNumber')]
     #[Depends('testUpdatesOrderShippingAddress')]
     public function testUpdatesTrackingNumber(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment update tracking number.');
+        $updated = $this->resource->put('page://self/admin/order/tracking-number', [
+            'orderNo' => self::$orderNo,
+            'trackingNumber' => 'TRK' . self::$paymentId,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$orderNo, $this->bodyValue($updated, 'orderNo'));
+
+        return $updated;
     }
 
     #[Alps('goOrderMail')]
     #[Depends('testUpdatesTrackingNumber')]
     public function testOrderMail(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment open order mail form.');
+        return $this->follow($response, 'goOrderMail', ['orderNo' => self::$orderNo]);
     }
 
     #[Alps('goOrderMailConfirm')]
     #[Depends('testOrderMail')]
     public function testOrderMailConfirm(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment confirm order mail.');
+        return $this->follow($response, 'goOrderMailConfirm', ['orderNo' => self::$orderNo]);
     }
 
     #[Alps('doSendOrderMail')]
     #[Depends('testOrderMailConfirm')]
     public function testSendsOrderMail(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment send order mail.');
+        $sent = $this->resource->post('page://self/admin/order/send-mail', [
+            'orderNo' => self::$orderNo,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $sent->code);
+        $this->assertSame(self::$orderNo, $this->bodyValue($sent, 'orderNo'));
+
+        return $sent;
     }
 
     #[Alps('goExportOrderPdf')]
     #[Depends('testSendsOrderMail')]
     public function testExportsOrderPdf(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment export order PDF.');
+        return $this->follow($response, 'goExportOrderPdf', ['orderNo' => self::$orderNo]);
     }
 
     #[Alps('goExportOrder')]
     #[Depends('testExportsOrderPdf')]
     public function testExportsOrderCsv(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment export order CSV.');
+        return $this->follow($response, 'goExportOrder');
     }
 
     #[Alps('goExportShipping')]
     #[Depends('testExportsOrderCsv')]
     public function testExportsShippingCsv(ResourceObject $response): void
     {
-        self::markTestIncomplete('TODO: flow-admin-order-fulfillment export shipping CSV.');
+        $this->follow($response, 'goExportShipping');
     }
 }

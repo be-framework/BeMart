@@ -30,6 +30,12 @@ final class FakeTwoFactorAuth implements TwoFactorAuthInterface
     }
 
     #[Override]
+    public function generateDeviceToken(string $secret): string
+    {
+        return self::VALID_TOKEN;
+    }
+
+    #[Override]
     public function enable(string $loginId, string $secret): void
     {
         $this->secrets[$loginId] = $secret;

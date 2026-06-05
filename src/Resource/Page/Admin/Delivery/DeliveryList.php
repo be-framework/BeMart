@@ -37,6 +37,7 @@ class DeliveryList extends ResourceObject
     }
 
     #[Link(rel: 'doCreateDelivery', href: 'page://self/admin/delivery/delivery-list', method: 'post')]
+    #[Link(rel: 'goDelivery', href: 'page://self/admin/delivery/delivery', method: 'get')]
     #[Link(rel: 'doUpdateDelivery', href: 'page://self/admin/delivery/delivery', method: 'put')]
     #[Link(rel: 'doDeleteDelivery', href: 'page://self/admin/delivery/delivery', method: 'delete')]
     public function onGet(): static
