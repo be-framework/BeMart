@@ -11,10 +11,6 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
-use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
-use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
-use MyVendor\BeMart\Be\Reason\Query\AdminIdQueryInterface;
-use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
@@ -38,7 +34,6 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     private static InjectorInterface|null $injector = null;
     private static ExtendedPdoInterface|null $db = null;
     private static ResourceInterface|null $dbResource = null;
-    private static string $adminId;
     private static string $adminLoginId;
     private static string $memberLoginId;
     private static string $twoFactorAuthSecret;
@@ -61,24 +56,8 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         self::$db = $db;
         self::$db->beginTransaction();
 
-        $ids = self::$injector->getInstance(AdminIdQueryInterface::class);
-        assert($ids instanceof AdminIdQueryInterface);
-        self::$adminId = $ids->next()->value;
-
-        $hasher = self::$injector->getInstance(PasswordHasherInterface::class);
-        assert($hasher instanceof PasswordHasherInterface);
-        $command = self::$injector->getInstance(AdminCommandInterface::class);
-        assert($command instanceof AdminCommandInterface);
-        $command->create(new AdminEntity(
-            adminId: self::$adminId,
-            loginId: self::$adminLoginId,
-            passwordHash: $hasher->hash(self::ADMIN_PASSWORD),
-            name: 'Workflow System Admin',
-            authority: 0,
-        ));
-
         $_SESSION = [
-            HtmlAdminSessionAdapter::ADMIN_ID_KEY => self::$adminId,
+            HtmlAdminSessionAdapter::ADMIN_ID_KEY => 'ad000000000000000000000000000001',
             EccubeSharedCsrfTokenAdapter::SESSION_KEY => self::CSRF_TOKEN,
         ];
 
@@ -129,6 +108,16 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Alps('goAdminLogin')]
     public function testAdminLoginForm(): ResourceObject
     {
+        $created = $this->resource->post('page://self/admin/member', [
+            'loginId' => self::$adminLoginId,
+            'password' => self::ADMIN_PASSWORD,
+            'name' => 'Workflow System Admin',
+            'authority' => 0,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $created->code);
+        $this->assertSame(self::$adminLoginId, $this->bodyValue($created, 'loginId'));
+
         $response = $this->resource->get('page://self/admin/login');
 
         $this->assertSame(Code::OK, $response->code);
@@ -148,6 +137,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::OK, $loggedIn->code);
         $this->assertSame(self::$adminLoginId, $this->bodyValue($loggedIn, 'loginId'));
+        $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = (string) $this->bodyValue($loggedIn, 'adminId');
 
         return $loggedIn;
     }

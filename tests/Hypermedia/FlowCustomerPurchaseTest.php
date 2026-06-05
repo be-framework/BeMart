@@ -11,13 +11,10 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
-use MyVendor\BeMart\Be\Reason\Entity\PaymentMethodAdminEntity;
-use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
-use RuntimeException;
 
 use function assert;
 use function bin2hex;
@@ -31,13 +28,14 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
 
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-csrf-token';
-    private const PRODUCT_NAME = 'Workflow Purchase Product';
     private const SESSION_PREFIX = 'session-prefix-1_1';
 
     private static InjectorInterface|null $injector = null;
     private static ExtendedPdoInterface|null $db = null;
     private static ResourceInterface|null $dbResource = null;
     private static string $productCode;
+    private static string $productName;
+    private static string $paymentId;
     /** @var array<string, mixed>|null */
     private static array|null $previousSession = null;
     private static string|false $previousCsrfEnv = false;
@@ -45,6 +43,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     public static function setUpBeforeClass(): void
     {
         self::$productCode = 'workflow-purchase-' . bin2hex(random_bytes(4));
+        self::$productName = 'Workflow Purchase Product ' . self::$productCode;
         self::$previousSession = $_SESSION ?? null;
         self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
         $_SESSION = [
@@ -62,32 +61,6 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         $resource = self::$injector->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
         self::$dbResource = $resource;
-
-        $payments = self::$injector->getInstance(PaymentMethodAdminStorageInterface::class);
-        assert($payments instanceof PaymentMethodAdminStorageInterface);
-        $payments->put(new PaymentMethodAdminEntity(
-            paymentId: '1',
-            paymentMethodName: 'Workflow payment',
-            charge: 0,
-            ruleMin: null,
-            ruleMax: null,
-            visible: true,
-        ));
-
-        $created = $resource->post('page://self/admin/product', [
-            'productCode' => self::$productCode,
-            'productName' => self::PRODUCT_NAME,
-            'price02' => 1234,
-            'stock' => 9,
-            'productStatus' => 1,
-            'description' => 'DB-backed workflow purchase product.',
-            'searchWord' => 'workflow purchase product',
-            'note' => 'Created as flow-customer-purchase precondition.',
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        if ($created->code !== Code::CREATED) {
-            throw new RuntimeException('Failed to create flow-customer-purchase product precondition.');
-        }
     }
 
     public static function tearDownAfterClass(): void
@@ -132,6 +105,31 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     #[Alps('Top')]
     public function testIndex(): ResourceObject
     {
+        $payment = $this->resource->post('page://self/admin/payment/payment-list', [
+            'paymentMethodName' => 'Workflow Purchase Payment ' . bin2hex(random_bytes(4)),
+            'charge' => 0,
+            'ruleMin' => null,
+            'ruleMax' => null,
+            'visible' => true,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $payment->code);
+        $this->assertIsString($payment->body['paymentId'] ?? null);
+        self::$paymentId = $payment->body['paymentId'];
+
+        $created = $this->resource->post('page://self/admin/product', [
+            'productCode' => self::$productCode,
+            'productName' => self::$productName,
+            'price02' => 1234,
+            'stock' => 9,
+            'productStatus' => 1,
+            'description' => 'DB-backed workflow purchase product.',
+            'searchWord' => 'workflow purchase product',
+            'note' => 'Created as flow-customer-purchase precondition.',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $created->code);
+
         $response = $this->resource->get('page://self/');
 
         $this->assertSame(Code::OK, $response->code);
@@ -143,7 +141,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     #[Depends('testIndex')]
     public function testProductList(ResourceObject $response): ResourceObject
     {
-        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::PRODUCT_NAME]);
+        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$productName]);
 
         $this->assertSame(1, $this->bodyValue($list, 'totalItemCount'));
 
@@ -157,7 +155,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         $product = $this->follow($response, 'goProduct', ['productCode' => self::$productCode]);
 
         $this->assertSame(self::$productCode, $this->bodyValue($product, 'productCode'));
-        $this->assertSame(self::PRODUCT_NAME, $this->bodyValue($product, 'productName'));
+        $this->assertSame(self::$productName, $this->bodyValue($product, 'productName'));
 
         return $product;
     }
@@ -228,7 +226,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     {
         $confirmed = $this->resource->get('page://self/shopping/confirm', [
             'preOrderId' => $this->bodyValue($response, 'preOrderId'),
-            'paymentMethodId' => 1,
+            'paymentMethodId' => (int) self::$paymentId,
         ]);
 
         $this->assertSame(Code::OK, $confirmed->code);

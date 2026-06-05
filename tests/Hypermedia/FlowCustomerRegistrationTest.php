@@ -57,7 +57,6 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
         assert($db instanceof ExtendedPdoInterface);
         self::$db = $db;
-        self::$db->beginTransaction();
 
         $customerCommand = self::$injector->getInstance(CustomerCommandInterface::class);
         assert($customerCommand instanceof CustomerCommandInterface);
@@ -89,6 +88,8 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
             customerStatus: 1,
             secretKey: self::$activationSecretKey,
         ));
+
+        self::$db->beginTransaction();
     }
 
     public static function tearDownAfterClass(): void

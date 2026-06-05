@@ -52,14 +52,14 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
+        $layouts = self::$injector->getInstance(LayoutStorageInterface::class);
+        assert($layouts instanceof LayoutStorageInterface);
+        $layouts->put(new LayoutEntity('1', 'Workflow Seed Layout', 10));
+
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
         assert($db instanceof ExtendedPdoInterface);
         self::$db = $db;
         self::$db->beginTransaction();
-
-        $layouts = self::$injector->getInstance(LayoutStorageInterface::class);
-        assert($layouts instanceof LayoutStorageInterface);
-        $layouts->put(new LayoutEntity('1', 'Workflow Seed Layout', 10));
     }
 
     public static function tearDownAfterClass(): void
