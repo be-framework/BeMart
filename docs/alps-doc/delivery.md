@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Delivery"
+---
+
 # Delivery
 
 Delivery は EC-CUBE の配送方法マスタを表す。ALPS の `Delivery` descriptor は、`dtb_delivery` の配送方法本体を `DeliveryEntity` として投影し、送料・時間帯・発送日目安とは境界を分ける。

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-19: Admin AAA is a parallel firewall — separate `AdminSessionInterface` from `SessionInterface`"
+---
+
 # G-19: Admin AAA is a parallel firewall — separate `AdminSessionInterface` from `SessionInterface`
 
 ## Context

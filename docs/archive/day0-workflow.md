@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Day 0 Workflow"
+---
+
 # Day 0 Workflow
 
 ## 目的

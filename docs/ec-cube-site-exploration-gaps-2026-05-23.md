@@ -1,3 +1,8 @@
+---
+layout: default
+title: "EC-CUBE実サイト探索によるBeMart機能欠落レポート（2026-05-23）"
+---
+
 # EC-CUBE実サイト探索によるBeMart機能欠落レポート（2026-05-23）
 
 ## 目的

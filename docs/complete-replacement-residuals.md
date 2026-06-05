@@ -1,3 +1,8 @@
+---
+layout: default
+title: "完全置換残差（Complete Replacement Residuals）"
+---
+
 # 完全置換残差（Complete Replacement Residuals）
 
 Last updated: 2026-06-04

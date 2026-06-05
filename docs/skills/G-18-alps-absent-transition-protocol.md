@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-18: ALPS-absent transition discovery protocol"
+---
+
 # G-18: ALPS-absent transition discovery protocol
 
 ## Context

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Framework review — Be Framework + BEAR.Sunday at 139-transition scale"
+---
+
 # Framework review — Be Framework + BEAR.Sunday at 139-transition scale
 
 written after migrating all 139 ALPS transitions of EC-CUBE 4.3 to Be Framework + BEAR.Sunday in a single orchestrated session. this document is the orchestrator's candid take, written for future engineers (and framework authors) who will read it cold.

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "BeMart 全リンククリック監査レポート"
+---
+
 # BeMart 全リンククリック監査レポート
 
 - 実施日: 2026-05-23 (Asia/Tokyo)

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-17: `#[Be]` chain destination is class-level fixed — Input-per-intent, Being-per-shape"
+---
+
 # G-17: `#[Be]` chain destination is class-level fixed — Input-per-intent, Being-per-shape
 
 ## Context

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "ShippingAddress"
+---
+
 # ShippingAddress
 
 ShippingAddress は受注に紐づく配送先住所を表す。ALPS の `ShippingAddress` descriptor は、`dtb_shipping` の単一配送先行を BeMart の `ShippingAddressEntity` として投影する。

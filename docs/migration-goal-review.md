@@ -1,3 +1,8 @@
+---
+layout: default
+title: "EC-CUBE セマンティックオーバーホール：移行目標レビュー"
+---
+
 # EC-CUBE セマンティックオーバーホール：移行目標レビュー
 
 Last updated: 2026-06-04

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Product"
+---
+
 # Product
 
 Product は EC-CUBE の商品販売単位を表す。ALPS の `Product` descriptor は、画面やリソースで扱う商品を `dtb_product` 単独ではなく、既定の `dtb_product_class` 1行と合わせた投影として定義する。

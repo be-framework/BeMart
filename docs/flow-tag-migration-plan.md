@@ -1,3 +1,8 @@
+---
+layout: default
+title: "フロータグ移行計画（Flow Tag Migration Plan）"
+---
+
 # フロータグ移行計画（Flow Tag Migration Plan）
 
 Last updated: 2026-06-04

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Payment"
+---
+
 # Payment
 
 Payment は EC-CUBE の支払方法マスタを表す。ALPS の `Payment` descriptor は、`dtb_payment` の管理画面向けスライスを `PaymentMethodAdminEntity` として投影する。

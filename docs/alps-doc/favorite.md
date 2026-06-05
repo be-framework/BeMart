@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Favorite"
+---
+
 # Favorite
 
 Favorite は EC-CUBE のお気に入り一覧画面で 1 行あたり描画される情報構造である。ALPS の `Favorite` descriptor は、`dtb_customer_favorite_product` の leaf 列に商品表示用 JOIN フィールドを加えた画面投影として定義する。

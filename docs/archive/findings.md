@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Findings & Decisions — historical record"
+---
+
 # Findings & Decisions — historical record
 
 > **これは 2026-04-11 の計画セッションの調査記録であり、移植の現状ではない。**
@@ -99,18 +104,18 @@
 - Be Framework LLM reference: https://be-framework.github.io/llms-full.txt
 - Be Skills: https://github.com/be-framework/be-skills
 - BEAR.Skills: https://github.com/bearsunday/BEAR.Skills
-- Day 0 workflow: `~/git/ec-cube-alps/day0-workflow.md`
-- Project summary: `~/git/ec-cube-alps/README.md`
-- Coverage / next-ai notes: `~/git/ec-cube-alps/HANDOVER.md`
-- Domain tags: `~/git/ec-cube-alps/tag.md`
-- Migration plan draft: `~/git/ec-cube-alps/ec-cube-bear-be-migration-plan.md`
-- Autonomous execution runbook: `~/git/ec-cube-alps/autonomous-execution-runbook.md`
-- Claude Code native workflow: `~/git/ec-cube-alps/.claude/commands/run.md`
-- Migration workflow definition: `~/git/ec-cube-alps/.claude/workflows/migrate.json`
-- Workflow JSON Schema: `~/git/ec-cube-alps/.claude/workflows/workflow.schema.json`
-- Step prompts: `~/git/ec-cube-alps/.claude/prompts/`
-- Skills matrix: `~/git/ec-cube-alps/skills-matrix.md`
-- Be-first method: `~/git/ec-cube-alps/be-first-migration-method.md`
+- Day 0 workflow: `~/git/BeMart/day0-workflow.md`
+- Project summary: `~/git/BeMart/README.md`
+- Coverage / next-ai notes: `~/git/BeMart/HANDOVER.md`
+- Domain tags: `~/git/BeMart/tag.md`
+- Migration plan draft: `~/git/BeMart/ec-cube-bear-be-migration-plan.md`
+- Autonomous execution runbook: `~/git/BeMart/autonomous-execution-runbook.md`
+- Claude Code native workflow: `~/git/BeMart/.claude/commands/run.md`
+- Migration workflow definition: `~/git/BeMart/.claude/workflows/migrate.json`
+- Workflow JSON Schema: `~/git/BeMart/.claude/workflows/workflow.schema.json`
+- Step prompts: `~/git/BeMart/.claude/prompts/`
+- Skills matrix: `~/git/BeMart/skills-matrix.md`
+- Be-first method: `~/git/BeMart/be-first-migration-method.md`
 
 ## Visual/Browser Findings
 - BEAR.Sunday 公式資料では、`page://` が外部リクエスト向け、`app://` が内部 API 的 resource として説明されている

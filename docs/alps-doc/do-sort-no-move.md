@@ -1,3 +1,8 @@
+---
+layout: default
+title: "doSortNoMove"
+---
+
 # doSortNoMove
 
 `doSortNoMove` は管理画面の一覧で表示順を変更する汎用遷移である。ALPS では、EC-CUBE の複数の `*_sort_no_move` route を 1 つの抽象 transition として扱う。

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "MailTemplate"
+---
+
 # MailTemplate
 
 MailTemplate は EC-CUBE のメールテンプレート設定を表す。ALPS の `MailTemplate` descriptor は、本文ファイルではなく `dtb_mail_template` の登録情報を BeMart の `MailTemplateEntity` として投影する。
