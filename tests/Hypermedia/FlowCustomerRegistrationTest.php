@@ -15,7 +15,7 @@ use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowSessionContext;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
@@ -36,13 +36,13 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
     private static string $email;
     private static string $activationEmail;
     private static string $activationSecretKey;
-    private static WorkflowSessionContext|null $context = null;
+    private static WorkflowTestSession|null $session = null;
 
     public static function setUpBeforeClass(): void
     {
         self::$email = 'workflow-' . bin2hex(random_bytes(4)) . '@example.com';
-        self::$context = WorkflowSessionContext::capture();
-        self::$context->setCsrfToken(self::CSRF_TOKEN);
+        self::$session = WorkflowTestSession::fromCurrent();
+        self::$session->setCsrfToken(self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
@@ -89,12 +89,12 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
-        self::$context?->restore();
+        self::$session?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
-        self::$context = null;
+        self::$session = null;
 
         parent::tearDownAfterClass();
     }
@@ -199,8 +199,8 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
         $this->assertSame(Code::OK, $loggedIn->code);
         $this->assertSame(self::$email, $this->bodyValue($loggedIn, 'email'));
 
-        assert(self::$context instanceof WorkflowSessionContext);
-        self::$context->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
+        assert(self::$session instanceof WorkflowTestSession);
+        self::$session->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
 
         return $loggedIn;
     }

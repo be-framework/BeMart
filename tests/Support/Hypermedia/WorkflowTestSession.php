@@ -10,7 +10,7 @@ use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 
 use function is_array;
 
-final class WorkflowSessionContext
+final class WorkflowTestSession
 {
     /** @param array<string, mixed>|null $previousSession */
     private function __construct(
@@ -18,7 +18,7 @@ final class WorkflowSessionContext
     ) {
     }
 
-    public static function capture(): self
+    public static function fromCurrent(): self
     {
         return new self(isset($_SESSION) && is_array($_SESSION) ? $_SESSION : null);
     }
@@ -26,12 +26,6 @@ final class WorkflowSessionContext
     public function assumeAdminLoggedIn(string $adminId, string $csrfToken): void
     {
         $this->setAdminId($adminId);
-        $this->setCsrfToken($csrfToken);
-    }
-
-    public function assumeCustomerLoggedIn(string $customerId, string $csrfToken): void
-    {
-        $this->setCustomerId($customerId);
         $this->setCsrfToken($csrfToken);
     }
 

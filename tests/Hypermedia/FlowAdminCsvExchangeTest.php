@@ -11,7 +11,7 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowSessionContext;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
@@ -29,12 +29,12 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     private static InjectorInterface|null $injector = null;
     private static ExtendedPdoInterface|null $db = null;
     private static ResourceInterface|null $dbResource = null;
-    private static WorkflowSessionContext|null $context = null;
+    private static WorkflowTestSession|null $session = null;
 
     public static function setUpBeforeClass(): void
     {
-        self::$context = WorkflowSessionContext::capture();
-        self::$context->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
+        self::$session = WorkflowTestSession::fromCurrent();
+        self::$session->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
@@ -49,12 +49,12 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
-        self::$context?->restore();
+        self::$session?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
-        self::$context = null;
+        self::$session = null;
 
         parent::tearDownAfterClass();
     }
