@@ -12,7 +12,7 @@ final class FlowCustomerInquiryTest extends Workflow
     protected function newResource(): ResourceInterface
     {
         return new HttpResource(
-            '127.0.0.1:8081',
+            '127.0.0.1:8083',
             __DIR__ . '/json-index.php',
             __DIR__ . '/log',
         );

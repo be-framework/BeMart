@@ -45,6 +45,7 @@ use MyVendor\BeMart\Be\Reason\Query\TagStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TaxRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\TradeLawStorageInterface;
+use MyVendor\BeMart\Be\Reason\Query\TwoFactorAuthStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\AddressIdQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\AdminIdQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\BlockIdQueryInterface;
@@ -137,6 +138,7 @@ final class MediaQueryRuntimeModule extends AbstractModule
             TaxRuleStorageInterface::class,
             TemplateStorageInterface::class,
             TradeLawStorageInterface::class,
+            TwoFactorAuthStorageInterface::class,
             AddressIdQueryInterface::class,
             AdminIdQueryInterface::class,
             BlockIdQueryInterface::class,

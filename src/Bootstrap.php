@@ -137,7 +137,7 @@ final class Bootstrap
         }
 
         $isRedirect = isset($ro->headers['Location']);
-        $isDownload = $isHtml && ! $isRedirect && $this->isDownloadResponse($ro->headers);
+        $isDownload = ! $isRedirect && $this->isDownloadResponse($ro->headers, $isHtml);
         $view = $isHtml && ! $isRedirect && ! $isDownload ? $ro->toString() : null;
         ob_end_clean();
 
@@ -174,6 +174,18 @@ final class Bootstrap
             }
 
             echo $isDownload ? $this->downloadBody($ro->body) : (string) $view;
+
+            return $ro->code >= 400 ? 1 : 0;
+        }
+
+        if ($isDownload) {
+            foreach ($ro->headers as $name => $value) {
+                if (is_string($value)) {
+                    $this->emitHeader($name, $value, $statusCode);
+                }
+            }
+
+            echo $this->downloadBody($ro->body);
 
             return $ro->code >= 400 ? 1 : 0;
         }
@@ -348,14 +360,18 @@ final class Bootstrap
     }
 
     /** @param array<string, mixed> $headers */
-    private function isDownloadResponse(array $headers): bool
+    private function isDownloadResponse(array $headers, bool $isHtml): bool
     {
         $contentType = $headers['Content-Type'] ?? null;
         if (! is_string($contentType)) {
             return false;
         }
 
-        return ! str_contains($contentType, 'text/html');
+        if (str_contains($contentType, 'application/pdf') || str_contains($contentType, 'application/zip')) {
+            return true;
+        }
+
+        return $isHtml && ! str_contains($contentType, 'text/html');
     }
 
     /** @param mixed $body */

@@ -40,7 +40,6 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
 
     public static function setUpBeforeClass(): void
     {
-        $suffix = bin2hex(random_bytes(4));
         self::$previousSession = $_SESSION ?? null;
         self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
         $_SESSION = [
@@ -58,38 +57,6 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
         $resource = self::$injector->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
         self::$dbResource = $resource;
-
-        $payment = $resource->post('page://self/admin/payment/payment-list', [
-            'paymentMethodName' => 'Workflow Order Payment ' . $suffix,
-            'charge' => 0,
-            'ruleMin' => 0,
-            'ruleMax' => 999999,
-            'visible' => true,
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        assert($payment->code === Code::CREATED);
-        assert(isset($payment->body['paymentId']) && is_string($payment->body['paymentId']));
-        self::$paymentId = $payment->body['paymentId'];
-
-        $order = $resource->post('page://self/admin/order/create', [
-            'customerId' => 'workflow-customer-' . $suffix,
-            'paymentMethodId' => (int) self::$paymentId,
-            'orderItems' => [
-                [
-                    'productCode' => 'workflow-order-' . $suffix,
-                    'productName' => 'Workflow Order Item',
-                    'unitPrice' => 1200,
-                    'quantity' => 2,
-                ],
-            ],
-            'deliveryFeeTotal' => 500,
-            'charge' => 0,
-            'discount' => 0,
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        assert($order->code === Code::CREATED);
-        assert(isset($order->body['orderNo']) && is_string($order->body['orderNo']));
-        self::$orderNo = $order->body['orderNo'];
     }
 
     public static function tearDownAfterClass(): void
@@ -134,6 +101,38 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
     #[Alps('goOrderList')]
     public function testOrderList(): ResourceObject
     {
+        $payment = $this->resource->post('page://self/admin/payment/payment-list', [
+            'paymentMethodName' => 'Workflow Order Payment ' . bin2hex(random_bytes(4)),
+            'charge' => 0,
+            'ruleMin' => 0,
+            'ruleMax' => 999999,
+            'visible' => true,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $payment->code);
+        $this->assertIsString($payment->body['paymentId'] ?? null);
+        self::$paymentId = $payment->body['paymentId'];
+
+        $order = $this->resource->post('page://self/admin/order/create', [
+            'customerId' => 'workflow-customer-' . bin2hex(random_bytes(4)),
+            'paymentMethodId' => (int) self::$paymentId,
+            'orderItems' => [
+                [
+                    'productCode' => 'workflow-order-' . bin2hex(random_bytes(4)),
+                    'productName' => 'Workflow Order Item',
+                    'unitPrice' => 1200,
+                    'quantity' => 2,
+                ],
+            ],
+            'deliveryFeeTotal' => 500,
+            'charge' => 0,
+            'discount' => 0,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $order->code);
+        $this->assertIsString($order->body['orderNo'] ?? null);
+        self::$orderNo = $order->body['orderNo'];
+
         $response = $this->resource->get('page://self/admin/order-list');
 
         $this->assertSame(Code::OK, $response->code);
@@ -261,7 +260,9 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
     #[Depends('testSendsOrderMail')]
     public function testExportsOrderPdf(ResourceObject $response): ResourceObject
     {
-        return $this->follow($response, 'goExportOrderPdf', ['orderNo' => self::$orderNo]);
+        $this->follow($response, 'goExportOrderPdf', ['orderNo' => self::$orderNo]);
+
+        return $response;
     }
 
     #[Alps('goExportOrder')]
