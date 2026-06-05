@@ -9,21 +9,18 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
-use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
 use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowSessionContext;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
 use function assert;
 use function bin2hex;
-use function getenv;
-use function putenv;
 use function random_bytes;
 
 class FlowCustomerRegistrationTest extends AbstractWorkflowTest
@@ -39,19 +36,13 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
     private static string $email;
     private static string $activationEmail;
     private static string $activationSecretKey;
-    /** @var array<string, mixed>|null */
-    private static array|null $previousSession = null;
-    private static string|false $previousCsrfEnv = false;
+    private static WorkflowSessionContext|null $context = null;
 
     public static function setUpBeforeClass(): void
     {
         self::$email = 'workflow-' . bin2hex(random_bytes(4)) . '@example.com';
-        self::$previousSession = $_SESSION ?? null;
-        self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        $_SESSION = [
-            EccubeSharedCsrfTokenAdapter::SESSION_KEY => self::CSRF_TOKEN,
-        ];
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::CSRF_TOKEN);
+        self::$context = WorkflowSessionContext::capture();
+        self::$context->setCsrfToken(self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
@@ -98,21 +89,12 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
-        if (self::$previousSession === null) {
-            unset($_SESSION);
-        } else {
-            $_SESSION = self::$previousSession;
-        }
-
-        if (self::$previousCsrfEnv === false) {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        } else {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::$previousCsrfEnv);
-        }
+        self::$context?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
+        self::$context = null;
 
         parent::tearDownAfterClass();
     }
@@ -217,7 +199,8 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
         $this->assertSame(Code::OK, $loggedIn->code);
         $this->assertSame(self::$email, $this->bodyValue($loggedIn, 'email'));
 
-        $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = (string) $this->bodyValue($loggedIn, 'customerId');
+        assert(self::$context instanceof WorkflowSessionContext);
+        self::$context->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
 
         return $loggedIn;
     }

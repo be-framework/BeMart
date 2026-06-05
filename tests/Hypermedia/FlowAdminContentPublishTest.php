@@ -9,20 +9,17 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
-use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowSessionContext;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
 use function assert;
 use function bin2hex;
 use function count;
-use function getenv;
-use function putenv;
 use function random_bytes;
 
 class FlowAdminContentPublishTest extends AbstractWorkflowTest
@@ -36,20 +33,13 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     private static ExtendedPdoInterface|null $db = null;
     private static ResourceInterface|null $dbResource = null;
     private static string $suffix;
-    /** @var array<string, mixed>|null */
-    private static array|null $previousSession = null;
-    private static string|false $previousCsrfEnv = false;
+    private static WorkflowSessionContext|null $context = null;
 
     public static function setUpBeforeClass(): void
     {
         self::$suffix = bin2hex(random_bytes(4));
-        self::$previousSession = $_SESSION ?? null;
-        self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        $_SESSION = [
-            HtmlAdminSessionAdapter::ADMIN_ID_KEY => self::ADMIN_ID,
-            EccubeSharedCsrfTokenAdapter::SESSION_KEY => self::CSRF_TOKEN,
-        ];
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::CSRF_TOKEN);
+        self::$context = WorkflowSessionContext::capture();
+        self::$context->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $layouts = self::$injector->getInstance(LayoutStorageInterface::class);
@@ -68,21 +58,12 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
-        if (self::$previousSession === null) {
-            unset($_SESSION);
-        } else {
-            $_SESSION = self::$previousSession;
-        }
-
-        if (self::$previousCsrfEnv === false) {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        } else {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::$previousCsrfEnv);
-        }
+        self::$context?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
+        self::$context = null;
 
         parent::tearDownAfterClass();
     }
