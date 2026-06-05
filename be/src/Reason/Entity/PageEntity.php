@@ -20,23 +20,15 @@ final readonly class PageEntity implements \Ray\MediaQuery\ToScalarInterface
 {
     use MediaQueryJsonEntityTrait;
 
-    public string $pageId;
-    public string $pageName;
-    public string $pageUrl;
-    public string $pageFileName;
     public int $pageEditType;
 
     public function __construct(
-        string $pageId,
-        string $pageName,
-        string $pageUrl,
-        string $pageFileName,
+        public string $pageId,
+        public string $pageName,
+        public string $pageUrl,
+        public string $pageFileName,
         int|string $pageEditType,
     ) {
-        $this->pageId = $pageId;
-        $this->pageName = $pageName;
-        $this->pageUrl = $pageUrl;
-        $this->pageFileName = $pageFileName;
         $this->pageEditType = (int) $pageEditType;
     }
 }
