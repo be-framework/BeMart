@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassName;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -29,6 +30,7 @@ class ClassNameExport extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'doImportClassNameCsv', href: 'page://self/admin/product/csv-class-name', method: 'post')]
     public function onGet(): static
     {
         try {

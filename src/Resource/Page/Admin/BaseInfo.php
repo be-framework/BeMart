@@ -125,6 +125,7 @@ class BaseInfo extends ResourceObject
      * @psalm-taint-source input $shopMessage
      */
     #[Link(rel: 'goTop', href: 'page://self/admin')]
+    #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[CsrfProtected]
     public function onPost(
         string $shopName,

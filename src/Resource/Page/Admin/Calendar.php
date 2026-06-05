@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use MyVendor\BeMart\Annotation\CsrfProtected;
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
@@ -29,6 +30,9 @@ class Calendar extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'doCreateCalendarHoliday', href: 'page://self/admin/calendar', method: 'post')]
+    #[Link(rel: 'doUpdateCalendar', href: 'page://self/admin/calendar', method: 'post')]
+    #[Link(rel: 'doDeleteCalendarHoliday', href: 'page://self/admin/calendar', method: 'delete')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -72,6 +76,7 @@ class Calendar extends ResourceObject
      * @psalm-taint-source input $holiday
      * @psalm-taint-source input $calendarId
      */
+    #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
     public function onPost(
         string $operation = 'update',
@@ -104,6 +109,7 @@ class Calendar extends ResourceObject
      *
      * @psalm-taint-source input $calendarId
      */
+    #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
     public function onDelete(int|null $calendarId = null): static
     {

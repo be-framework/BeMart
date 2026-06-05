@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -42,6 +43,7 @@ class Js extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'doUpdateContentJs', href: 'page://self/admin/content/js', method: 'put')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

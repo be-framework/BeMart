@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -44,6 +45,7 @@ class CsvClassName extends AbstractCsvUpload
      *
      * @psalm-taint-source input $csv
      */
+    #[Link(rel: 'goExportClassCategory', href: 'page://self/admin/class-category/class-category-export')]
     #[CsrfProtected]
     public function onPost(string $csv = ''): static
     {

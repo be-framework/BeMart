@@ -96,6 +96,7 @@ class Withdraw extends ResourceObject
     /**
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Link(rel: 'goMypageWithdrawComplete', href: 'page://self/mypage/withdraw-complete')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
     public function onPost(

@@ -43,6 +43,7 @@ class TemplateAdd extends ResourceObject
     }
 
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
+    #[Link(rel: 'doInstallTemplate', href: 'page://self/admin/template/template-add', method: 'post')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -70,6 +71,7 @@ class TemplateAdd extends ResourceObject
      */
     #[CsrfProtected]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
+    #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
     public function onPost(string $templateCode, string $templateName): static
     {
         try {

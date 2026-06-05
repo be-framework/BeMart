@@ -36,6 +36,7 @@ class TaxRule extends ResourceObject
      * @psalm-taint-source input $taxRuleId
      */
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
+    #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
     public function onDelete(string $taxRuleId): static
     {

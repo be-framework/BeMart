@@ -16,11 +16,8 @@ tests/
 ├── EntryPoint/    bin/app.php CLI entry-point tests
 ├── Hypermedia/    in-process workflow tests
 │   ├── FlowCustomerInquiryTest.php  semantic inquiry workflow
-│   ├── WorkflowTest.php      storefront purchase-spine workflow
-│   └── RoutedResource.php    ResourceInterface over Aura.Router
 ├── Http/          real-HTTP workflow tests
 │   ├── FlowCustomerInquiryTest.php  extends Hypermedia\FlowCustomerInquiryTest
-│   ├── WorkflowTest.php      extends Hypermedia\WorkflowTest, swaps the transport
 │   ├── HttpResource.php      ResourceInterface over a koriym/php-server + curl
 │   ├── index.php             server entry — sets APP_CONTEXT=html, requires public/index.php
 │   └── log/                  per-run request/response log (git-ignored)
@@ -72,11 +69,6 @@ The PHP projection implements `newResource()` with an in-process
 and swaps only `newResource()` for `HttpResource`. Every workflow
 assertion in the base class therefore runs again, unchanged, over real
 HTTP.
-
-`tests/Http/WorkflowTest` is the older storefront HTML spine and still
-overrides `setUp()` directly because it uses a routed HTML adapter. New
-semantic workflows should prefer the `newResource()` swap pattern used by
-`FlowCustomerInquiryTest`.
 
 The two tiers are not redundant. The `hypermedia` tier runs the whole
 workflow in one process against one injector — its DI singletons live
@@ -132,12 +124,5 @@ targets stateless JSON APIs and omits cookie handling.
 
 These work today but are candidates for future consolidation:
 
-- **`RoutedResource` is a shim.** The hypermedia tier follows links
-  through Aura.Router, not BEAR's native `#[Link]` / `crawl`
-  hypermedia.
-- **`canonicalizeFormFields` maps field names.** The workflow test
-  translates HTML wire field names (`_token`, `product_id`) into resource
-  argument names (`csrfToken`, `productCode`). The form and the resource
-  should eventually agree on names so this mapping is unnecessary.
-- **Coverage is one workflow.** Only the storefront purchase spine is
-  covered so far; the structure is in place for more.
+- **Coverage is expanding flow by flow.** `flow-*` tests are the canonical
+  workflow coverage; older routed HTML shims are not part of this layer.

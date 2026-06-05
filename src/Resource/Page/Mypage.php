@@ -40,6 +40,8 @@ class Mypage extends ResourceObject
 
     #[Link(rel: 'goMypageHistory', href: 'page://self/mypage/history')]
     #[Link(rel: 'goMypageChange', href: 'page://self/mypage/change')]
+    #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
+    #[Link(rel: 'goFavoriteList', href: 'page://self/mypage/favorite-list')]
     #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'doAddFavorite', href: 'page://self/mypage/favorite', method: 'post')]

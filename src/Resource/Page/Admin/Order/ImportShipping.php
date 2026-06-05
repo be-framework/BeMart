@@ -71,6 +71,7 @@ class ImportShipping extends ResourceObject
      */
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]
+    #[Link(rel: 'goExportCustomer', href: 'page://self/admin/customer-csv')]
     #[CsrfProtected]
     public function onPost(string $csv): static
     {
