@@ -16,17 +16,13 @@ final readonly class LayoutEntity implements \Ray\MediaQuery\ToScalarInterface
 {
     use MediaQueryJsonEntityTrait;
 
-    public string $layoutId;
-    public string $layoutName;
     public int $deviceType;
 
     public function __construct(
-        string $layoutId,
-        string $layoutName,
+        public string $layoutId,
+        public string $layoutName,
         int|string $deviceType,
     ) {
-        $this->layoutId = $layoutId;
-        $this->layoutName = $layoutName;
         $this->deviceType = (int) $deviceType;
     }
 }
