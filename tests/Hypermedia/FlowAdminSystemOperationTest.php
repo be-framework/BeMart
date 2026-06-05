@@ -24,6 +24,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
 {
     public const FLOW_ID = 'flow-admin-system-operation';
 
+    private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-system-csrf-token';
     private const ADMIN_PASSWORD = 'local-dev-admin-password';
     private const MEMBER_PASSWORD = 'workflow-member-password-2026';
@@ -42,7 +43,7 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         self::$adminLoginId = 'workflow-admin-' . $suffix;
         self::$memberLoginId = 'workflow-member-' . $suffix;
         self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->assumeAdminLoggedIn('ad000000000000000000000000000001', self::CSRF_TOKEN);
+        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);

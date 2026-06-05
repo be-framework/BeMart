@@ -41,7 +41,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
         self::$deliveryName = 'Workflow Delivery ' . $suffix;
         self::$taxApplyDate = '2027-01-' . (string) (10 + (int) (hexdec($suffix[0]) % 9));
         self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
+        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);

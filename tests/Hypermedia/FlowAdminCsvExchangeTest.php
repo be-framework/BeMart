@@ -34,7 +34,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     public static function setUpBeforeClass(): void
     {
         self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
+        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);

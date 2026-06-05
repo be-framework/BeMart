@@ -39,7 +39,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
         self::$productName = 'Workflow Product Publish ' . self::$productCode;
         self::$updatedProductName = 'Workflow Product Published ' . self::$productCode;
         self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
+        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
