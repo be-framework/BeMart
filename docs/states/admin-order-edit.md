@@ -1,3 +1,8 @@
+---
+layout: default
+title: "AdminOrderEditPage — 管理受注編集画面"
+---
+
 # AdminOrderEditPage — 管理受注編集画面
 
 - ALPS ID: `AdminOrderEditPage`

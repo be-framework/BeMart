@@ -1,3 +1,8 @@
+---
+layout: default
+title: "ALPS Linked Documentation"
+---
+
 # ALPS Linked Documentation
 
 `alps-doc/` は、`alps.json` の descriptor から `link rel="describedby"` で参照する長文補足の置き場である。

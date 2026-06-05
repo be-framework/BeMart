@@ -1,3 +1,8 @@
+---
+layout: default
+title: "フローオントロジー（Flow Ontology）"
+---
+
 # フローオントロジー（Flow Ontology）
 
 Last updated: 2026-06-04

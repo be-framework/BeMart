@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-15: Multi-side-effect Final (Complex Convergence) judgment criteria"
+---
+
 # G-15: Multi-side-effect Final (Complex Convergence) judgment criteria
 
 ## Context

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "タグ分類体系"
+---
+
 # タグ分類体系
 
 EC-CUBE 4.3 ALPSプロファイルのタグ命名規則。

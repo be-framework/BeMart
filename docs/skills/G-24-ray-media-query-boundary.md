@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-24 — SQL境界はRay.MediaQuery interface + SQLファイルにする"
+---
+
 # G-24 — SQL境界はRay.MediaQuery interface + SQLファイルにする
 
 ## Context

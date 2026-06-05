@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-20: Cross-session rebind requires `toInstance` on both Iface and Impl bindings"
+---
+
 # G-20: Cross-session rebind requires `toInstance` on both Iface and Impl bindings
 
 ## Context

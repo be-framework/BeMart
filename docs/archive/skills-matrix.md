@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Skills Matrix"
+---
+
 # Skills Matrix
 
 ## 目的

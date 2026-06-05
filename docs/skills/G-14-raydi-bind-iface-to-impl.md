@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-14: Ray.Di `bind(Iface)->to(Impl)` does NOT consult `bind(Impl)->in(SINGLETON)`"
+---
+
 # G-14: Ray.Di `bind(Iface)->to(Impl)` does NOT consult `bind(Impl)->in(SINGLETON)`
 
 ## Context

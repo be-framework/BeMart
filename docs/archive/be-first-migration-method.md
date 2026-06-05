@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Be-First Migration Method"
+---
+
 # Be-First Migration Method
 
 ## 目的

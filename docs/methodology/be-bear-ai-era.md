@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Be Framework + BEAR.Sunday — AI コーディング時代の潜在能力"
+---
+
 # Be Framework + BEAR.Sunday — AI コーディング時代の潜在能力
 
 EC-CUBE 4.3 を Be Framework + BEAR.Sunday へ移植する BeMart プロジェクトの途中記録として書く論評。フレームワークそのものの実務レビュー（摩擦点・upstream 課題）は [`FRAMEWORK_REVIEW.md`](FRAMEWORK_REVIEW.md) が扱う。本稿はその先 — **「なぜこの 2 つのフレームワークが AI コーディング時代に効くのか」** を、この移植が実証しつつあることから論じる。

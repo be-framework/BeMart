@@ -1,3 +1,8 @@
+---
+layout: default
+title: "TaxRule"
+---
+
 # TaxRule
 
 TaxRule は EC-CUBE の税率ルールを表す。ALPS の `TaxRule` descriptor は、`dtb_tax_rule` の全体適用ルールを BeMart の `TaxRuleEntity` として投影する。

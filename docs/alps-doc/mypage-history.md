@@ -1,3 +1,8 @@
+---
+layout: default
+title: "MypageHistory"
+---
+
 # MypageHistory
 
 MypageHistory は customer の注文履歴詳細画面を表す。ALPS の `MypageHistory` descriptor は、EC-CUBE の `Mypage/history.twig` が描画する画面投影として定義する。

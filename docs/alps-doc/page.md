@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Page"
+---
+
 # Page
 
 Page は EC-CUBE の CMS ページ定義を表す。ALPS の `Page` descriptor は、`dtb_page` のページ本体を BeMart の `PageEntity` として投影し、レイアウト配置である `dtb_page_layout` とは境界を分ける。

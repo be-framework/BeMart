@@ -1,3 +1,8 @@
+---
+layout: default
+title: "CsvColumnConfig"
+---
+
 # CsvColumnConfig
 
 CsvColumnConfig は EC-CUBE の CSV 出力列設定を表す。ALPS の `CsvColumnConfig` descriptor は、`dtb_csv` の 1 行を BeMart の `CsvColumnConfigEntity` として投影する。
