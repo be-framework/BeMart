@@ -91,6 +91,7 @@ class SendMail extends ResourceObject
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
+    #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     #[CsrfProtected]
     public function onPost(
         string $orderNo,

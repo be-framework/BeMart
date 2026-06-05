@@ -16,7 +16,6 @@ use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
-use RuntimeException;
 
 use function assert;
 use function bin2hex;
@@ -31,14 +30,13 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-account-csrf-token';
     private const PASSWORD = 'workflow-account-password-2026';
-    private const PRODUCT_NAME = 'Workflow Account Favorite Product';
-
     private static InjectorInterface|null $injector = null;
     private static ExtendedPdoInterface|null $db = null;
     private static ResourceInterface|null $dbResource = null;
     private static string $email;
     private static string $customerId;
     private static string $productCode;
+    private static string $productName;
     /** @var array<string, mixed>|null */
     private static array|null $previousSession = null;
     private static string|false $previousCsrfEnv = false;
@@ -48,6 +46,7 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
         $suffix = bin2hex(random_bytes(4));
         self::$email = 'workflow-account-' . $suffix . '@example.com';
         self::$productCode = 'workflow-account-' . $suffix;
+        self::$productName = 'Workflow Account Favorite Product ' . self::$productCode;
         self::$previousSession = $_SESSION ?? null;
         self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
         $_SESSION = [
@@ -65,42 +64,6 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
         $resource = self::$injector->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
         self::$dbResource = $resource;
-
-        $registered = $resource->post('page://self/entry', [
-            'email' => self::$email,
-            'password' => self::PASSWORD,
-            'name01' => 'Account',
-            'name02' => 'Customer',
-            'kana01' => 'アカウント',
-            'kana02' => 'カスタマー',
-            'phoneNumber' => '0312345678',
-            'postalCode' => '1000001',
-            'pref' => 13,
-            'addr01' => '千代田区',
-            'addr02' => '千代田1-1',
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        if ($registered->code !== Code::CREATED || ! isset($registered->body['customerId'])) {
-            throw new RuntimeException('Failed to create flow-customer-account-maintenance customer precondition.');
-        }
-
-        self::$customerId = (string) $registered->body['customerId'];
-        $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = self::$customerId;
-
-        $created = $resource->post('page://self/admin/product', [
-            'productCode' => self::$productCode,
-            'productName' => self::PRODUCT_NAME,
-            'price02' => 2345,
-            'stock' => 7,
-            'productStatus' => 1,
-            'description' => 'DB-backed workflow account favorite product.',
-            'searchWord' => 'workflow account favorite product',
-            'note' => 'Created as flow-customer-account-maintenance precondition.',
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        if ($created->code !== Code::CREATED) {
-            throw new RuntimeException('Failed to create flow-customer-account-maintenance product precondition.');
-        }
     }
 
     public static function tearDownAfterClass(): void
@@ -145,6 +108,39 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
     #[Alps('goLogin')]
     public function testLoginForm(): ResourceObject
     {
+        $registered = $this->resource->post('page://self/entry', [
+            'email' => self::$email,
+            'password' => self::PASSWORD,
+            'name01' => 'Account',
+            'name02' => 'Customer',
+            'kana01' => 'アカウント',
+            'kana02' => 'カスタマー',
+            'phoneNumber' => '0312345678',
+            'postalCode' => '1000001',
+            'pref' => 13,
+            'addr01' => '千代田区',
+            'addr02' => '千代田1-1',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $registered->code);
+        $this->assertIsString($registered->body['customerId'] ?? null);
+
+        self::$customerId = (string) $registered->body['customerId'];
+        $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = self::$customerId;
+
+        $created = $this->resource->post('page://self/admin/product', [
+            'productCode' => self::$productCode,
+            'productName' => self::$productName,
+            'price02' => 2345,
+            'stock' => 7,
+            'productStatus' => 1,
+            'description' => 'DB-backed workflow account favorite product.',
+            'searchWord' => 'workflow account favorite product',
+            'note' => 'Created as flow-customer-account-maintenance precondition.',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $created->code);
+
         $response = $this->resource->get('page://self/login');
 
         $this->assertSame(Code::OK, $response->code);

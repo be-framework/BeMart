@@ -28,13 +28,12 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
 
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-csrf-token';
-    private const PRODUCT_NAME = 'Workflow Product Publish';
-    private const UPDATED_PRODUCT_NAME = 'Workflow Product Published';
-
     private static InjectorInterface|null $injector = null;
     private static ExtendedPdoInterface|null $db = null;
     private static ResourceInterface|null $dbResource = null;
     private static string $productCode;
+    private static string $productName;
+    private static string $updatedProductName;
     /** @var array<string, mixed>|null */
     private static array|null $previousSession = null;
     private static string|false $previousCsrfEnv = false;
@@ -42,6 +41,8 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     public static function setUpBeforeClass(): void
     {
         self::$productCode = 'workflow-product-' . bin2hex(random_bytes(4));
+        self::$productName = 'Workflow Product Publish ' . self::$productCode;
+        self::$updatedProductName = 'Workflow Product Published ' . self::$productCode;
         self::$previousSession = $_SESSION ?? null;
         self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
         $_SESSION = [
@@ -99,7 +100,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     #[Alps('goProductList')]
     public function testOpensAdminProductList(): ResourceObject
     {
-        $response = $this->resource->get('page://self/admin/product-list', ['nameKeyword' => self::PRODUCT_NAME]);
+        $response = $this->resource->get('page://self/admin/product-list', ['nameKeyword' => self::$productName]);
 
         $this->assertSame(Code::OK, $response->code);
 
@@ -112,7 +113,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     {
         $created = $this->resource->post('page://self/admin/product', [
             'productCode' => self::$productCode,
-            'productName' => self::PRODUCT_NAME,
+            'productName' => self::$productName,
             'price02' => 2468,
             'stock' => 8,
             'productStatus' => 1,
@@ -135,7 +136,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
         $read = $this->followLocation($response);
 
         $this->assertSame(self::$productCode, $this->bodyValue($read, 'productCode'));
-        $this->assertSame(self::PRODUCT_NAME, $this->bodyValue($read, 'productName'));
+        $this->assertSame(self::$productName, $this->bodyValue($read, 'productName'));
 
         return $read;
     }
@@ -146,7 +147,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     {
         $updated = $this->resource->put('page://self/admin/product', [
             'productCode' => self::$productCode,
-            'productName' => self::UPDATED_PRODUCT_NAME,
+            'productName' => self::$updatedProductName,
             'price02' => 3579,
             'stock' => 13,
             'productStatus' => 1,
@@ -158,7 +159,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::OK, $updated->code);
         $this->assertSame(self::$productCode, $this->bodyValue($updated, 'productCode'));
-        $this->assertSame(self::UPDATED_PRODUCT_NAME, $this->bodyValue($updated, 'productName'));
+        $this->assertSame(self::$updatedProductName, $this->bodyValue($updated, 'productName'));
 
         return $updated;
     }
@@ -167,7 +168,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     #[Depends('testUpdatesProduct')]
     public function testFindsProductInStorefrontList(ResourceObject $response): ResourceObject
     {
-        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::UPDATED_PRODUCT_NAME]);
+        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$updatedProductName]);
 
         $this->assertSame(1, $this->bodyValue($list, 'totalItemCount'));
 
@@ -181,7 +182,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
         $product = $this->follow($response, 'goProduct', ['productCode' => self::$productCode]);
 
         $this->assertSame(self::$productCode, $this->bodyValue($product, 'productCode'));
-        $this->assertSame(self::UPDATED_PRODUCT_NAME, $this->bodyValue($product, 'productName'));
+        $this->assertSame(self::$updatedProductName, $this->bodyValue($product, 'productName'));
         $this->assertSame(3579, $this->bodyValue($product, 'price02'));
     }
 }

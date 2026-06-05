@@ -438,6 +438,7 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
             $route($map, 'mypage_delivery_delete', ['GET'], '/mypage/delivery/delete', 'page://self/mypage/address-list');
             $route($map, 'mypage_delivery_delete', ['POST'], '/mypage/delivery/delete', 'page://self/mypage/address', [], 'delete', [], ['id' => 'addressId']);
             $route($map, 'mypage_favorite', ['GET'], '/mypage/favorite', 'page://self/mypage/favorite-list');
+            $route($map, 'mypage_favorite_action', ['POST', 'DELETE'], '/mypage/favorite', 'page://self/mypage/favorite');
             $route($map, 'mypage_favorite_delete', ['GET'], '/mypage/favorite/delete', 'page://self/mypage/favorite-list');
             $route($map, 'mypage_favorite_delete', ['POST'], '/mypage/favorite/delete', 'page://self/mypage/favorite', [], 'delete', [], ['id' => 'productCode']);
             $route($map,
@@ -508,6 +509,7 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
             $route($map, 'admin_product', ['POST'], '/admin/product', 'page://self/admin/product');
             $route($map, 'admin_product', ['PUT'], '/admin/product', 'page://self/admin/product');
             $route($map, 'admin_product', ['DELETE'], '/admin/product', 'page://self/admin/product');
+            $route($map, 'admin_category_csv', ['GET', 'POST'], '/admin/category/csv', 'page://self/admin/category/csv');
             $route($map, 'admin_product_tag', ['GET', 'POST'], '/admin/product/tag', 'page://self/admin/tag/tag-list', [], 'get');
             $route($map,
                 'admin_product_class_name',
@@ -517,6 +519,8 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
                 [],
                 'get',
             );
+            $route($map, 'admin_product_csv_class_name_path', ['GET', 'POST'], '/admin/product/csv-class-name', 'page://self/admin/product/csv-class-name');
+            $route($map, 'admin_product_csv_class_category_path', ['GET', 'POST'], '/admin/product/csv-class-category', 'page://self/admin/product/csv-class-category');
             $route($map,
                 'admin_product_category',
                 ['GET', 'POST'],

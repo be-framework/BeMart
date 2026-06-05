@@ -53,15 +53,6 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
         putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
-        $db = self::$injector->getInstance(ExtendedPdoInterface::class);
-        assert($db instanceof ExtendedPdoInterface);
-        self::$db = $db;
-        self::$db->beginTransaction();
-
-        $resource = self::$injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        self::$dbResource = $resource;
-
         $mailTemplates = self::$injector->getInstance(MailTemplateStorageInterface::class);
         assert($mailTemplates instanceof MailTemplateStorageInterface);
         if ($mailTemplates->list() === []) {
@@ -73,38 +64,14 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
             ));
         }
 
-        $suffix = bin2hex(random_bytes(4));
-        $payment = $resource->post('page://self/admin/payment/payment-list', [
-            'paymentMethodName' => 'Workflow Mail Payment ' . $suffix,
-            'charge' => 0,
-            'ruleMin' => 0,
-            'ruleMax' => 999999,
-            'visible' => true,
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        assert($payment->code === Code::CREATED);
-        assert(isset($payment->body['paymentId']) && is_string($payment->body['paymentId']));
-        self::$paymentId = $payment->body['paymentId'];
+        $db = self::$injector->getInstance(ExtendedPdoInterface::class);
+        assert($db instanceof ExtendedPdoInterface);
+        self::$db = $db;
+        self::$db->beginTransaction();
 
-        $order = $resource->post('page://self/admin/order/create', [
-            'customerId' => 'workflow-mail-customer-' . $suffix,
-            'paymentMethodId' => (int) self::$paymentId,
-            'orderItems' => [
-                [
-                    'productCode' => 'workflow-mail-' . $suffix,
-                    'productName' => 'Workflow Mail Item',
-                    'unitPrice' => 1200,
-                    'quantity' => 1,
-                ],
-            ],
-            'deliveryFeeTotal' => 0,
-            'charge' => 0,
-            'discount' => 0,
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        assert($order->code === Code::CREATED);
-        assert(isset($order->body['orderNo']) && is_string($order->body['orderNo']));
-        self::$orderNo = $order->body['orderNo'];
+        $resource = self::$injector->getInstance(ResourceInterface::class);
+        assert($resource instanceof ResourceInterface);
+        self::$dbResource = $resource;
     }
 
     public static function tearDownAfterClass(): void
@@ -183,6 +150,39 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
     #[Depends('testMailTemplateList')]
     public function testOrderMail(ResourceObject $response): ResourceObject
     {
+        $suffix = bin2hex(random_bytes(4));
+        $payment = $this->resource->post('page://self/admin/payment/payment-list', [
+            'paymentMethodName' => 'Workflow Mail Payment ' . $suffix,
+            'charge' => 0,
+            'ruleMin' => 0,
+            'ruleMax' => 999999,
+            'visible' => true,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $payment->code);
+        $this->assertIsString($payment->body['paymentId'] ?? null);
+        self::$paymentId = $payment->body['paymentId'];
+
+        $order = $this->resource->post('page://self/admin/order/create', [
+            'customerId' => 'workflow-mail-customer-' . $suffix,
+            'paymentMethodId' => (int) self::$paymentId,
+            'orderItems' => [
+                [
+                    'productCode' => 'workflow-mail-' . $suffix,
+                    'productName' => 'Workflow Mail Item',
+                    'unitPrice' => 1200,
+                    'quantity' => 1,
+                ],
+            ],
+            'deliveryFeeTotal' => 0,
+            'charge' => 0,
+            'discount' => 0,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $order->code);
+        $this->assertIsString($order->body['orderNo'] ?? null);
+        self::$orderNo = $order->body['orderNo'];
+
         return $this->follow($response, 'goOrderMail', ['orderNo' => self::$orderNo]);
     }
 
