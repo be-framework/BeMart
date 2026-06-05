@@ -9,17 +9,14 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
-use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowSessionContext;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
 use function assert;
 use function bin2hex;
-use function getenv;
-use function putenv;
 use function random_bytes;
 
 class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
@@ -35,9 +32,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     private static string $paymentName;
     private static string $deliveryName;
     private static string $taxApplyDate;
-    /** @var array<string, mixed>|null */
-    private static array|null $previousSession = null;
-    private static string|false $previousCsrfEnv = false;
+    private static WorkflowSessionContext|null $context = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -45,13 +40,8 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
         self::$paymentName = 'Workflow Payment ' . $suffix;
         self::$deliveryName = 'Workflow Delivery ' . $suffix;
         self::$taxApplyDate = '2027-01-' . (string) (10 + (int) (hexdec($suffix[0]) % 9));
-        self::$previousSession = $_SESSION ?? null;
-        self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        $_SESSION = [
-            HtmlAdminSessionAdapter::ADMIN_ID_KEY => self::ADMIN_ID,
-            EccubeSharedCsrfTokenAdapter::SESSION_KEY => self::CSRF_TOKEN,
-        ];
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::CSRF_TOKEN);
+        self::$context = WorkflowSessionContext::capture();
+        self::$context->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
@@ -66,21 +56,12 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
-        if (self::$previousSession === null) {
-            unset($_SESSION);
-        } else {
-            $_SESSION = self::$previousSession;
-        }
-
-        if (self::$previousCsrfEnv === false) {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        } else {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::$previousCsrfEnv);
-        }
+        self::$context?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
+        self::$context = null;
 
         parent::tearDownAfterClass();
     }
