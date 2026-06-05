@@ -83,12 +83,12 @@ final class RouterTest extends TestCase
         $this->assertSame('page://self/admin/index', $metadata['resource']);
     }
 
-    public function testResolvesAdminProductListPath(): void
+    public function testResolvesAdminProductResourcePath(): void
     {
         [$route, $metadata] = $this->match('GET', '/admin/product');
 
         $this->assertSame('admin_product', $route->name);
-        $this->assertSame('page://self/admin/product-list', $metadata['resource']);
+        $this->assertSame('page://self/admin/product', $metadata['resource']);
     }
 
     public function testHelpTradeLawPathMapsToKebabResourceUri(): void
@@ -208,7 +208,7 @@ final class RouterTest extends TestCase
             $methods = $route->extras['bemart']['methods'] ?? [];
             $this->assertIsArray($methods);
             foreach (array_keys($methods) as $method) {
-                $this->assertContains($method, ['GET', 'POST'], (string) $route->name);
+                $this->assertContains($method, ['GET', 'POST', 'PUT', 'DELETE'], (string) $route->name);
             }
         }
     }
