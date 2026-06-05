@@ -15,11 +15,14 @@ final readonly class BlockEntity implements \Ray\MediaQuery\ToScalarInterface
 {
     use MediaQueryJsonEntityTrait;
 
+    public bool $blockDeletable;
+
     public function __construct(
         public string $blockId,
         public string $blockName,
         public string $blockFileName,
-        public bool $blockDeletable,
+        bool|int|string $blockDeletable,
     ) {
+        $this->blockDeletable = (bool) $blockDeletable;
     }
 }

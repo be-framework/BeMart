@@ -54,6 +54,7 @@ class CsvConfig extends ResourceObject
      * Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
      * persists a submitted vector; this GET serves the editor body.
      */
+    #[Link(rel: 'doUpdateCsv', href: 'page://self/admin/csv-config', method: 'post')]
     public function onGet(int $id = 1): static
     {
         if ($this->adminSession->adminId === null) {
@@ -88,6 +89,7 @@ class CsvConfig extends ResourceObject
      * @psalm-taint-source input $columns
      */
     #[Link(rel: 'goTop', href: 'page://self/admin')]
+    #[Link(rel: 'goExportProduct', href: 'page://self/admin/product-csv', method: 'get')]
     #[CsrfProtected]
     public function onPost(
         int $csvType,

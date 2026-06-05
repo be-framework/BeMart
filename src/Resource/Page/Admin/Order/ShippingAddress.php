@@ -75,6 +75,7 @@ class ShippingAddress extends ResourceObject
      * @psalm-taint-source input $orderNo
      */
     #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
+    #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
     public function onGet(string $orderNo = ''): static
     {
@@ -109,6 +110,7 @@ class ShippingAddress extends ResourceObject
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
+    #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[CsrfProtected]
     public function onPost(
         string $orderNo,
@@ -160,6 +162,7 @@ class ShippingAddress extends ResourceObject
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
+    #[Link(rel: 'doUpdateTrackingNumber', href: 'page://self/admin/order/tracking-number', method: 'put')]
     #[CsrfProtected]
     public function onPut(
         string $orderNo,

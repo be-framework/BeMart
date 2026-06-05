@@ -15,13 +15,16 @@ final readonly class NewsEntity implements \Ray\MediaQuery\ToScalarInterface
 {
     use MediaQueryJsonEntityTrait;
 
+    public bool $linkMethod;
+
     public function __construct(
         public string $newsId,
         public string $newsTitle,
         public string|null $newsDescription,
         public string|null $newsUrl,
         public string $publishDate,
-        public bool $linkMethod,
+        bool|int|string $linkMethod,
     ) {
+        $this->linkMethod = (bool) $linkMethod;
     }
 }

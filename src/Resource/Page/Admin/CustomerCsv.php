@@ -37,6 +37,7 @@ class CustomerCsv extends ResourceObject
     }
 
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
+    #[Link(rel: 'goExportClassName', href: 'page://self/admin/class-name/class-name-export')]
     public function onGet(): static
     {
         try {

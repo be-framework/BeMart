@@ -11,7 +11,6 @@ use MyVendor\BeMart\Module\BeMartTwigExtension;
 use Nyholm\Psr7\ServerRequest;
 use PHPUnit\Framework\TestCase;
 
-use function array_key_first;
 use function array_keys;
 use function is_array;
 use function rtrim;
@@ -22,7 +21,7 @@ use function strtoupper;
  * Proves the Aura route map used by the front controller and Twig helpers:
  * route resolution, path-parameter extraction with EC-CUBE-name -> resource-param
  * renaming, and trailing-slash normalisation. Aura does not gate by HTTP
- * method; BEAR\Resource owns 405.
+ * method; BeMart metadata declares the HTTP methods each path can dispatch.
  */
 final class RouterTest extends TestCase
 {
@@ -83,12 +82,12 @@ final class RouterTest extends TestCase
         $this->assertSame('page://self/admin/index', $metadata['resource']);
     }
 
-    public function testResolvesAdminProductListPath(): void
+    public function testResolvesAdminProductResourcePath(): void
     {
         [$route, $metadata] = $this->match('GET', '/admin/product');
 
         $this->assertSame('admin_product', $route->name);
-        $this->assertSame('page://self/admin/product-list', $metadata['resource']);
+        $this->assertSame('page://self/admin/product', $metadata['resource']);
     }
 
     public function testHelpTradeLawPathMapsToKebabResourceUri(): void
@@ -107,16 +106,15 @@ final class RouterTest extends TestCase
         $this->assertFalse($matcher->match(new ServerRequest('GET', '/no/such/path')));
     }
 
-    public function testKnownPathWrongMethodStillMatchesForBearResource405(): void
+    public function testKnownPathWrongMethodHasNoDispatchMetadata(): void
     {
-        // `/products/list` exists. Aura should match the path and leave
-        // method support to BEAR\Resource, which will answer 405 if the
-        // ProductList resource has no onPost().
-        [$route, $metadata] = $this->match('POST', '/products/list');
+        $route = $this->routes->getMatcher()->match(new ServerRequest('POST', '/products/list'));
+        $this->assertInstanceOf(AuraRoute::class, $route);
 
         $this->assertSame('product_list', $route->name);
-        $this->assertSame('page://self/products', $metadata['resource']);
-        $this->assertSame('post', $metadata['dispatchMethod']);
+        $methods = $route->extras['bemart']['methods'] ?? [];
+        $this->assertIsArray($methods);
+        $this->assertArrayNotHasKey('POST', $methods);
     }
 
     public function testAddCartIsPostOnly(): void
@@ -125,11 +123,12 @@ final class RouterTest extends TestCase
         $this->assertSame('page://self/cart/item', $metadata['resource']);
         $this->assertSame(['productCode' => '7'], $params);
 
-        [$getRoute, $getMetadata, $getParams] = $this->match('GET', '/products/add_cart/7');
+        $getRoute = $this->routes->getMatcher()->match(new ServerRequest('GET', '/products/add_cart/7'));
+        $this->assertInstanceOf(AuraRoute::class, $getRoute);
         $this->assertSame('product_add_cart', $getRoute->name);
-        $this->assertSame('page://self/cart/item', $getMetadata['resource']);
-        $this->assertSame('get', $getMetadata['dispatchMethod']);
-        $this->assertSame(['productCode' => '7'], $getParams);
+        $getMethods = $getRoute->extras['bemart']['methods'] ?? [];
+        $this->assertIsArray($getMethods);
+        $this->assertArrayNotHasKey('GET', $getMethods);
     }
 
     public function testMethodMatchingIsCaseInsensitive(): void
@@ -151,9 +150,12 @@ final class RouterTest extends TestCase
         $this->assertSame('page://self/cart/item', $postMetadata['resource']);
         $this->assertSame('post', $postMetadata['dispatchMethod']);
 
-        [$put, $putMetadata] = $this->match('PUT', '/cart/item');
+        $put = $this->routes->getMatcher()->match(new ServerRequest('PUT', '/cart/item'));
+        $this->assertInstanceOf(AuraRoute::class, $put);
         $this->assertSame('cart_handle_item', $put->name);
-        $this->assertSame('put', $putMetadata['dispatchMethod']);
+        $putMethods = $put->extras['bemart']['methods'] ?? [];
+        $this->assertIsArray($putMethods);
+        $this->assertArrayNotHasKey('PUT', $putMethods);
     }
 
     public function testEntryFormPostsToRegisterResource(): void
@@ -208,7 +210,7 @@ final class RouterTest extends TestCase
             $methods = $route->extras['bemart']['methods'] ?? [];
             $this->assertIsArray($methods);
             foreach (array_keys($methods) as $method) {
-                $this->assertContains($method, ['GET', 'POST'], (string) $route->name);
+                $this->assertContains($method, ['GET', 'POST', 'PUT', 'DELETE'], (string) $route->name);
             }
         }
     }
@@ -261,19 +263,6 @@ final class RouterTest extends TestCase
     {
         /** @var mixed $metadata */
         $metadata = $route->extras['bemart']['methods'][$method] ?? null;
-        if (! is_array($metadata)) {
-            /** @var mixed $methods */
-            $methods = $route->extras['bemart']['methods'] ?? [];
-            if (is_array($methods)) {
-                $metadata = $methods[array_key_first($methods)] ?? null;
-            }
-
-            if (is_array($metadata)) {
-                $metadata['dispatchMethod'] = strtolower($method);
-                $metadata['queryParamMap'] = [];
-            }
-        }
-
         self::assertIsArray($metadata);
 
         /** @var array<string, mixed> */

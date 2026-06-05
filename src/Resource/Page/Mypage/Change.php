@@ -129,6 +129,7 @@ class Change extends ResourceObject
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
      */
+    #[Link(rel: 'goMypageChangeComplete', href: 'page://self/mypage/change-complete')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
     public function onPost(

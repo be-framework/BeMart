@@ -250,6 +250,7 @@
       {"id": "taxDisplayType", "title": "税表示区分","tag": "src-entity", "doc": {"value": "1=税抜（商品明細で使用）, 2=税込（送料・手数料・値引きで使用）。orderItemTypeと連動し、明細行の価格が税抜/税込どちらで格納されているかを示す"}},
       {"id": "saleTypeName", "title": "販売種別","tag": "src-entity", "doc": {"value": "販売種別の名称。カート分離の基準となる。異なる販売種別の商品は別カート(cartKey)に分離される"}},
       {"id": "saleTypeId", "title": "販売種別ID","tag": "src-entity", "doc": {"value": "dtb_product_class.sale_type_id — mtb_sale_type への FK（1=通常販売, 2=予約販売, 3=ダウンロード販売）。cartKey の組み立て(`{sessionPrefix}_{saleTypeId}`)に用いられ、異なる販売種別の商品を別カートに分離する基準。マスタ未登録時は 0 にフォールバック"}},
+      {"id": "sessionPrefix", "title": "セッション接頭辞","tag": "src-entity flow-customer-purchase", "doc": {"value": "購入フローのカートキーを構成するセッションスコープの接頭辞。saleTypeId と組み合わせて販売種別ごとのカートを分離する。"}},
       {"id": "deliveryFeeAmount", "title": "地域別送料","tag": "src-entity", "doc": {"value": "都道府県別の送料金額（DeliveryFee.fee）。配送方法（Delivery）と都道府県（Pref）の組み合わせで定義されるマスタ値。DeliveryFeePreprocessorでdeliveryFee（商品別送料）と合算されdeliveryFeeTotal（送料合計）に集計される"}},
       {"id": "deliveryDurationName", "title": "発送日目安名","tag": "src-entity", "doc": {"value": "発送日目安の表示名。例: 1〜2日後"}},
       {"id": "deliveryDurationDays", "title": "発送日目安日数","tag": "src-entity", "doc": {"value": "発送日目安の日数値。配送希望日の選択肢計算に使用。負の値はお取り寄せ品を意味し、配送希望日の選択不可となる"}},
@@ -491,6 +492,7 @@
           {"href": "#doUpdateCartItemQuantity"},
           {"href": "#doRemoveCartItem"},
           {"href": "#doSelectCartForCheckout"},
+          {"href": "#goShoppingNonMember"},
           {"href": "#goShopping"}
         ]
       },
@@ -680,8 +682,10 @@
           {"href": "#goOrderList"},
           {"href": "#doUpdateOrder"},
           {"href": "#doUpdateOrderStatus"},
+          {"href": "#goOrderShippingAddress"},
           {"href": "#doSendOrderMail"},
           {"href": "#doUpdateTrackingNumber"},
+          {"href": "#goExportOrderPdf"},
           {"href": "#doSendShippingNotifyMail"},
           {"href": "#doReorder"}
         ]
@@ -828,7 +832,8 @@
       {"id": "CustomerAddressList", "title": "配送先住所一覧","tag": "account src-template flow-customer-account-maintenance",
         "descriptor": [
           {"href": "#CustomerAddress"},
-          {"href": "#doCreateCustomerAddress"}
+          {"href": "#doCreateCustomerAddress"},
+          {"href": "#goFavoriteList"}
         ]
       },
 
@@ -895,6 +900,7 @@
           {"href": "#sex"},
           {"href": "#job"},
           {"href": "#goCustomerRegistration"},
+          {"href": "#goCustomerRegistrationConfirm"},
           {"href": "#doRegisterCustomer"}
         ]
       },
@@ -996,6 +1002,13 @@
           {"href": "#doUpdateCustomer"}
         ]
       },
+      {"id": "MypageChangeComplete", "title": "会員情報変更完了","tag": "account src-router src-template flow-customer-account-maintenance",
+        "doc": {"value": "会員情報変更の完了画面"},
+        "descriptor": [
+          {"href": "#goMypage"},
+          {"href": "#goCustomerAddressList"}
+        ]
+      },
       {"id": "MypageWithdraw", "title": "退会","tag": "account src-router src-template flow-customer-account-maintenance",
         "doc": {"value": "退会確認・退会処理画面"},
         "descriptor": [
@@ -1008,6 +1021,12 @@
         "descriptor": [
           {"href": "#doWithdrawCustomer"},
           {"href": "#goMypage"}
+        ]
+      },
+      {"id": "MypageWithdrawComplete", "title": "退会完了","tag": "account src-router src-template flow-customer-account-maintenance",
+        "doc": {"value": "退会完了画面"},
+        "descriptor": [
+          {"href": "#goTop"}
         ]
       },
 
@@ -1082,7 +1101,8 @@
           {"href": "#invoiceRegistrationNumber"},
           {"href": "#updateDate"},
           {"href": "#goBaseInfo"},
-          {"href": "#doUpdateBaseInfo"}
+          {"href": "#doUpdateBaseInfo"},
+          {"href": "#goPaymentList"}
         ]
       },
 
@@ -1111,6 +1131,7 @@
         "descriptor": [
           {"href": "#Payment"},
           {"href": "#goPaymentList"},
+          {"href": "#goPayment"},
           {"href": "#doCreatePayment"},
           {"href": "#doSortNoMove"},
           {"href": "#doToggleVisible"}
@@ -1159,6 +1180,7 @@
         "descriptor": [
           {"href": "#Delivery"},
           {"href": "#goDeliveryList"},
+          {"href": "#goDelivery"},
           {"href": "#doCreateDelivery"},
           {"href": "#doSortNoMove"},
           {"href": "#doToggleVisible"}
@@ -1206,7 +1228,8 @@
           {"href": "#updateDate"},
           {"href": "#goNews"},
           {"href": "#doUpdateNews"},
-          {"href": "#doDeleteNews"}
+          {"href": "#doDeleteNews"},
+          {"href": "#goPageList"}
         ]
       },
       {"id": "NewsList", "title": "ニュース一覧","tag": "content src-template flow-admin-content-publish",
@@ -1234,7 +1257,8 @@
           {"href": "#updateDate"},
           {"href": "#goPage"},
           {"href": "#doUpdatePage"},
-          {"href": "#doDeletePage"}
+          {"href": "#doDeletePage"},
+          {"href": "#goBlockList"}
         ]
       },
       {"id": "PageList", "title": "ページ一覧","tag": "content src-template flow-admin-content-publish",
@@ -1316,7 +1340,9 @@
           {"href": "#mailSubject"},
           {"href": "#createDate"},
           {"href": "#updateDate"},
-          {"href": "#doUpdateMailTemplate"}
+          {"href": "#doUpdateMailTemplate"},
+          {"href": "#doDeleteMailTemplate"},
+          {"href": "#goOrderMail"}
         ]
       },
       {"id": "MailTemplateList", "title": "メールテンプレート一覧","tag": "mail src-template flow-admin-mail-template-maintenance",
@@ -1350,7 +1376,8 @@
       {"id": "LoginHistoryList", "title": "ログイン履歴一覧","tag": "admin-system src-template flow-admin-system-operation",
         "descriptor": [
           {"href": "#LoginHistory"},
-          {"href": "#goLoginHistoryList"}
+          {"href": "#goLoginHistoryList"},
+          {"href": "#goSecurity"}
         ]
       },
 
@@ -1361,7 +1388,8 @@
           {"href": "#csvDispName"},
           {"href": "#csvEnabled"},
           {"href": "#sortNo"},
-          {"href": "#doUpdateCsv"}
+          {"href": "#doUpdateCsv"},
+          {"href": "#goExportProduct"}
         ]
       },
 
@@ -1417,7 +1445,11 @@
       {"id": "TemplateList", "title": "デザインテンプレート一覧","tag": "plugin src-template flow-admin-template-lifecycle",
         "descriptor": [
           {"href": "#Template"},
-          {"href": "#goTemplateList"}
+          {"href": "#goTemplateList"},
+          {"href": "#goTemplateInstall"},
+          {"href": "#doSelectTemplate"},
+          {"href": "#doDownloadTemplate"},
+          {"href": "#doDeleteTemplate"}
         ]
       },
 
@@ -1432,7 +1464,8 @@
           {"href": "#deviceType"},
           {"href": "#createDate"},
           {"href": "#updateDate"},
-          {"href": "#doUpdateLayout"}
+          {"href": "#doUpdateLayout"},
+          {"href": "#goTradeLawList"}
         ]
       },
       {"id": "LayoutList", "title": "レイアウト一覧","tag": "cms src-template flow-admin-content-publish",
@@ -1456,7 +1489,8 @@
           {"href": "#createDate"},
           {"href": "#updateDate"},
           {"href": "#doUpdateBlock"},
-          {"href": "#doDeleteBlock"}
+          {"href": "#doDeleteBlock"},
+          {"href": "#goLayoutList"}
         ]
       },
       {"id": "BlockList", "title": "ブロック一覧","tag": "cms src-template flow-admin-content-publish",
@@ -1481,7 +1515,8 @@
         "descriptor": [
           {"href": "#TradeLaw"},
           {"href": "#goTradeLawList"},
-          {"href": "#doUpdateTradeLaw"}
+          {"href": "#doUpdateTradeLaw"},
+          {"href": "#goContentCss"}
         ]
       },
 
@@ -1507,7 +1542,7 @@
       {"id": "doUpdateProduct", "title": "商品を更新する", "type": "idempotent", "rt": "#Product",
         "tag": "catalog flow-manage-product actor-admin src-router feature-admin-catalog flow-admin-product-publish",
         "doc": {"value": "商品マスタを更新する。基本情報・規格・在庫・画像・カテゴリ・タグを変更。"},
-        "descriptor": [{"href": "#productName"}]},
+        "descriptor": [{"href": "#productName"}, {"href": "#goProductList"}]},
       {"id": "doDeleteProduct", "title": "商品を削除する", "type": "idempotent", "rt": "#ProductList",
         "tag": "catalog flow-manage-product actor-admin src-router feature-admin-catalog",
         "doc": {"value": "商品をステータス変更による論理削除する（visible=false）。受注履歴側のスナップショットには影響しない。"},
@@ -1522,13 +1557,15 @@
         "descriptor": [{"href": "#productStatus"}]},
       {"id": "goExportProduct", "title": "商品CSVをエクスポートする", "type": "safe", "rt": "#ProductList",
         "tag": "catalog flow-manage-product actor-admin src-router feature-admin-catalog flow-admin-csv-exchange",
-        "doc": {"value": "商品マスタをCSV形式でダウンロードする。検索条件で絞り込み可能。"}},
+        "doc": {"value": "商品マスタをCSV形式でダウンロードする。検索条件で絞り込み可能。"},
+        "descriptor": [{"href": "#goExportCategory"}]},
       {"id": "doImportProductCsv", "title": "商品CSVをインポートする", "type": "unsafe", "rt": "#ProductList",
         "tag": "catalog flow-manage-product actor-admin src-router feature-admin-catalog flow-admin-csv-exchange",
         "doc": {"value": "商品マスタをCSVから一括登録／更新する。新規・更新の両方に対応、商品ID指定で既存商品を更新。"}},
       {"id": "doImportCategoryCsv", "title": "カテゴリCSVをインポートする", "type": "unsafe", "rt": "#CategoryList",
         "tag": "catalog flow-manage-product actor-admin src-router feature-admin-catalog flow-admin-csv-exchange",
-        "doc": {"value": "カテゴリマスタをCSVから一括登録／更新する。階層構造はparent_idで指定。"}},
+        "doc": {"value": "カテゴリマスタをCSVから一括登録／更新する。階層構造はparent_idで指定。"},
+        "descriptor": [{"href": "#goExportOrder"}]},
 
       {"id": "goCategoryList", "title": "カテゴリ一覧を見る", "type": "safe", "rt": "#CategoryList",
         "tag": "catalog flow-browse src-router feature-browse",
@@ -1551,7 +1588,8 @@
         "descriptor": [{"href": "#categoryName"}]},
       {"id": "goExportCategory", "title": "カテゴリCSVをエクスポートする", "type": "safe", "rt": "#CategoryList",
         "tag": "catalog flow-manage-product actor-admin src-router feature-admin-catalog flow-admin-csv-exchange",
-        "doc": {"value": "カテゴリマスタをCSV形式でダウンロードする。"}},
+        "doc": {"value": "カテゴリマスタをCSV形式でダウンロードする。"},
+        "descriptor": [{"href": "#doImportCategoryCsv"}]},
 
       {"id": "goCart", "title": "カートを見る", "type": "safe", "rt": "#Cart",
         "tag": "cart flow-purchase actor-customer src-router feature-purchase flow-customer-purchase",
@@ -1585,7 +1623,7 @@
       {"id": "doSubmitNonMember", "title": "非会員情報を送信する", "type": "unsafe", "rt": "#Shopping",
         "tag": "checkout flow-purchase actor-customer src-router src-controller feature-purchase flow-customer-purchase",
         "doc": {"value": "非会員購入の入力情報をセッションに保存し注文手続き画面へ進む。会員登録は行わない。"},
-        "descriptor": [{"href": "#name01"}, {"href": "#name02"}, {"href": "#email"}]},
+        "descriptor": [{"href": "#name01"}, {"href": "#name02"}, {"href": "#email"}, {"href": "#sessionPrefix"}]},
       {"id": "doShoppingRedirectTo", "title": "購入フロー内で遷移する", "type": "unsafe", "rt": "#Shopping",
         "tag": "checkout flow-purchase actor-customer src-router src-controller feature-purchase flow-customer-purchase",
         "doc": {"value": "注文手続きフォームの入力を保持しつつ、指定された購入フロー内画面へ遷移する。EC-CUBE の shopping_redirect_to に対応。"}},
@@ -1652,29 +1690,33 @@
       {"id": "doUpdateOrderStatus", "title": "受注ステータスを変更する", "type": "idempotent", "rt": "#Order",
         "tag": "order flow-manage-order actor-admin src-router feature-admin-order flow-admin-order-fulfillment",
         "doc": {"value": "Symfony Workflowステートマシンによるステータス遷移。許可された遷移のみ実行可能。cancel時: 在庫戻し・利用ポイント戻し。ship時: 加算ポイント付与。return時: 加算ポイント取消。back_to_in_progress時: キャンセル取消（在庫・ポイント再引当）。"},
-        "descriptor": [{"href": "#orderNo"}, {"href": "#orderStatus"}]},
+        "descriptor": [{"href": "#orderNo"}, {"href": "#orderStatus"}, {"href": "#goOrderShippingAddress"}]},
       {"id": "doBulkDeleteOrder", "title": "受注を一括削除する", "type": "unsafe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router feature-admin-order",
         "doc": {"value": "選択した受注を物理削除する。明細・配送・お支払い情報も連動削除。"}},
       {"id": "goExportOrder", "title": "受注CSVをエクスポートする", "type": "safe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router feature-admin-order flow-admin-order-fulfillment flow-admin-csv-exchange",
-        "doc": {"value": "受注データをCSV形式でダウンロードする。検索条件で絞り込み可能。"}},
+        "doc": {"value": "受注データをCSV形式でダウンロードする。検索条件で絞り込み可能。"},
+        "descriptor": [{"href": "#goExportShipping"}]},
       {"id": "goExportShipping", "title": "配送CSVをエクスポートする", "type": "safe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router feature-admin-order flow-admin-order-fulfillment flow-admin-csv-exchange",
-        "doc": {"value": "配送情報をCSV形式でダウンロードする。出荷管理用、伝票番号入力後のインポートと対をなす。"}},
+        "doc": {"value": "配送情報をCSV形式でダウンロードする。出荷管理用、伝票番号入力後のインポートと対をなす。"},
+        "descriptor": [{"href": "#doImportShippingCsv"}]},
       {"id": "doImportShippingCsv", "title": "配送CSVをインポートする", "type": "unsafe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router feature-admin-order flow-admin-order-fulfillment flow-admin-csv-exchange",
-        "doc": {"value": "配送CSVから伝票番号・出荷日を一括登録する。配送業者から受領した出荷情報の取り込み用。"}},
+        "doc": {"value": "配送CSVから伝票番号・出荷日を一括登録する。配送業者から受領した出荷情報の取り込み用。"},
+        "descriptor": [{"href": "#goExportCustomer"}]},
       {"id": "doUpdateTrackingNumber", "title": "伝票番号を更新する", "type": "idempotent", "rt": "#Order",
         "tag": "order flow-manage-order actor-admin src-router feature-admin-order flow-admin-order-fulfillment",
         "doc": {"value": "受注一覧画面（admin/Order/index.twig）から配送（Shipping）の伝票番号をインラインで更新する。EC-CUBE の admin_shipping_update_tracking_number ルートから導出。doImportShippingCsv の CSV 一括版に対する1配送行単位の手動更新。同一伝票番号の再送は同一状態となる冪等操作。"},
-        "descriptor": [{"href": "#trackingNumber"}]},
+        "descriptor": [{"href": "#trackingNumber"}, {"href": "#goOrderMail"}]},
       {"id": "doSendShippingNotifyMail", "title": "出荷通知メールを送信する", "type": "unsafe", "rt": "#Order",
         "tag": "order flow-manage-order actor-admin src-router feature-admin-order flow-admin-order-fulfillment",
         "doc": {"value": "受注一覧画面（admin/Order/index.twig）から配送（Shipping）単位の出荷通知メールを顧客へ送信する。EC-CUBE の admin_shipping_notify_mail ルートから導出。受注メール手動送信（doSendOrderMail）とは別物で、出荷済みの配送に対する顧客通知。送信のたびにメールが発生するため unsafe。"}},
       {"id": "goExportOrderPdf", "title": "帳票PDFをエクスポートする", "type": "safe", "rt": "#OrderList",
         "tag": "order flow-manage-order actor-admin src-router feature-admin-order flow-admin-order-fulfillment",
-        "doc": {"value": "選択受注の納品書・領収書PDFを出力する。テンプレートは設定で変更可能。"}},
+        "doc": {"value": "選択受注の納品書・領収書PDFを出力する。テンプレートは設定で変更可能。"},
+        "descriptor": [{"href": "#goExportOrder"}]},
       {"id": "doReorder", "title": "再注文する", "type": "unsafe", "rt": "#Cart",
         "tag": "order flow-purchase actor-customer src-router feature-purchase",
         "doc": {"value": "過去の受注内容をカートに再投入する。在庫切れ商品はスキップ、現在価格を適用。"},
@@ -1701,7 +1743,7 @@
       {"id": "doAdminLogin", "title": "管理者ログインする", "type": "unsafe", "rt": "#AdminTop",
         "tag": "account flow-admin-auth actor-admin src-router feature-admin-auth flow-admin-system-operation",
         "doc": {"value": "管理者がloginIdとpasswordで認証する。顧客側doLoginとは別firewallのAAA境界。"},
-        "descriptor": [{"href": "#loginId"}, {"href": "#password"}]},
+        "descriptor": [{"href": "#loginId"}, {"href": "#password"}, {"href": "#goAdminTop"}]},
       {"id": "doAdminLogout", "title": "管理者ログアウトする", "type": "idempotent", "rt": "#AdminLogin",
         "tag": "account actor-admin src-router flow-admin-system-operation",
         "doc": {"value": "管理者セッションを破棄。"}},
@@ -1712,7 +1754,7 @@
       {"id": "AdminTop", "title": "管理画面トップ",
         "tag": "admin-system flow-admin-auth actor-admin src-template page page-admin page-dashboard feature-admin-auth flow-admin-system-operation",
         "doc": {"value": "管理画面のダッシュボード。doAdminLogin 成功後の遷移先。受注・会員・商品・各種マスタ管理への入口を提供する。"},
-        "descriptor": [{"href": "#goOrderList"}, {"href": "#goCustomerList"}, {"href": "#goProductList"}, {"href": "#goMemberList"}, {"href": "#goBaseInfo"}, {"href": "#goPaymentList"}, {"href": "#goDeliveryList"}, {"href": "#goTaxRuleList"}, {"href": "#goNewsList"}, {"href": "#goPageList"}, {"href": "#goLayoutList"}, {"href": "#goBlockList"}, {"href": "#goTagList"}, {"href": "#goClassNameList"}, {"href": "#goClassCategoryList"}, {"href": "#goMailTemplateList"}, {"href": "#goLoginHistoryList"}, {"href": "#goPluginList"}, {"href": "#goTemplateList"}, {"href": "#goTradeLawList"}, {"href": "#doAdminLogout"}]},
+        "descriptor": [{"href": "#goOrderList"}, {"href": "#goCustomerList"}, {"href": "#goProductList"}, {"href": "#goMemberList"}, {"href": "#goBaseInfo"}, {"href": "#goPaymentList"}, {"href": "#goDeliveryList"}, {"href": "#goTaxRuleList"}, {"href": "#goNewsList"}, {"href": "#goPageList"}, {"href": "#goLayoutList"}, {"href": "#goBlockList"}, {"href": "#goTagList"}, {"href": "#goClassNameList"}, {"href": "#goClassCategoryList"}, {"href": "#goMailTemplateList"}, {"href": "#goLoginHistoryList"}, {"href": "#goPluginList"}, {"href": "#goTemplateList"}, {"href": "#goTradeLawList"}, {"href": "#goContentCache"}, {"href": "#doAdminLogout"}]},
       {"id": "doRequestPasswordReset", "title": "パスワードリセットを依頼する", "type": "unsafe", "rt": "#PasswordReset",
         "tag": "account flow-account actor-customer src-router feature-account",
         "doc": {"value": "メールアドレスを受け取り、パスワード再発行用URLを含むメールを送信する。リセットキーには有効期限あり。"},
@@ -1740,10 +1782,11 @@
       {"id": "doUpdateCustomer", "title": "会員情報を更新する", "type": "idempotent", "rt": "#MypageChange",
         "tag": "account flow-account actor-customer src-router feature-account flow-customer-account-maintenance",
         "doc": {"value": "会員自身がマイページから氏名・連絡先・メールアドレス・パスワード・基本住所を更新する。メール変更時は再認証は行わない。"},
-        "descriptor": [{"href": "#email"}]},
+        "descriptor": [{"href": "#email"}, {"href": "#goMypageChangeComplete"}]},
       {"id": "doWithdrawCustomer", "title": "退会する", "type": "idempotent", "rt": "#Top",
         "tag": "account flow-account actor-customer src-router src-controller feature-account flow-customer-account-maintenance",
-        "doc": {"value": "メールアドレスをダミー値に置換しカートとセッションをクリア。退会確認メール送信後にログアウト。"}},
+        "doc": {"value": "メールアドレスをダミー値に置換しカートとセッションをクリア。退会確認メール送信後にログアウト。"},
+        "descriptor": [{"href": "#goMypageWithdrawComplete"}]},
       {"id": "goCustomerList", "title": "会員一覧を見る", "type": "safe", "rt": "#CustomerList",
         "tag": "account flow-manage-customer actor-admin src-router feature-admin-customer",
         "doc": {"value": "会員一覧を表示する（管理画面）。フィルタ: 会員名・メール・電話番号・登録日範囲・購入金額。"}},
@@ -1765,7 +1808,8 @@
         "descriptor": [{"href": "#email"}]},
       {"id": "goExportCustomer", "title": "会員CSVをエクスポートする", "type": "safe", "rt": "#CustomerList",
         "tag": "account flow-manage-customer actor-admin src-router feature-admin-customer flow-admin-csv-exchange",
-        "doc": {"value": "会員データをCSV形式でダウンロードする。検索条件で絞り込み可能。"}},
+        "doc": {"value": "会員データをCSV形式でダウンロードする。検索条件で絞り込み可能。"},
+        "descriptor": [{"href": "#goExportClassName"}]},
 
       {"id": "goCustomerAddressList", "title": "配送先一覧を見る", "type": "safe", "rt": "#CustomerAddressList",
         "tag": "account flow-account actor-customer src-router feature-account flow-customer-account-maintenance",
@@ -1779,7 +1823,8 @@
         "doc": {"value": "登録済みの配送先（住所・氏名・連絡先）を更新する。"}},
       {"id": "doDeleteCustomerAddress", "title": "配送先を削除する", "type": "idempotent", "rt": "#CustomerAddressList",
         "tag": "account flow-account actor-customer src-router feature-account flow-customer-account-maintenance",
-        "doc": {"value": "登録済みの配送先を削除する。既存受注の配送先には影響しない。"}},
+        "doc": {"value": "登録済みの配送先を削除する。既存受注の配送先には影響しない。"},
+        "descriptor": [{"href": "#goFavoriteList"}]},
 
       {"id": "goFavoriteList", "title": "お気に入り一覧を見る", "type": "safe", "rt": "#CustomerFavoriteProductList",
         "tag": "favorite flow-favorite actor-customer src-router feature-favorite flow-customer-account-maintenance",
@@ -1787,11 +1832,11 @@
       {"id": "doAddFavorite", "title": "お気に入りに追加する", "type": "unsafe", "rt": "#CustomerFavoriteProduct",
         "tag": "favorite flow-favorite actor-customer src-router feature-favorite flow-customer-account-maintenance",
         "doc": {"value": "商品を会員のお気に入りに追加する。重複追加は無視。"},
-        "descriptor": [{"href": "#productName"}]},
+        "descriptor": [{"href": "#productName"}, {"href": "#doRemoveFavorite"}]},
       {"id": "doRemoveFavorite", "title": "お気に入りから削除する", "type": "idempotent", "rt": "#CustomerFavoriteProductList",
         "tag": "favorite flow-favorite actor-customer src-router feature-favorite flow-customer-account-maintenance",
         "doc": {"value": "お気に入りから商品を削除する。"},
-        "descriptor": [{"href": "#productName"}]},
+        "descriptor": [{"href": "#productName"}, {"href": "#goMypageWithdraw"}]},
 
       {"id": "goContactForm", "title": "お問い合わせフォームを見る", "type": "safe", "rt": "#ContactForm",
         "tag": "contact flow-inquiry actor-customer src-router feature-inquiry flow-customer-inquiry",
@@ -1822,7 +1867,8 @@
         "doc": {"value": "店舗の基本情報設定画面を表示する。会社名・住所・連絡先・営業時間・送料無料閾値・ポイント還元率等。"}},
       {"id": "doUpdateBaseInfo", "title": "基本情報を更新する", "type": "idempotent", "rt": "#BaseInfo",
         "tag": "shop flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
-        "doc": {"value": "店舗基本情報を更新する。`BaseInfo` テーブルは 1 レコードのみで全店舗共通設定として参照される。"}},
+        "doc": {"value": "店舗基本情報を更新する。`BaseInfo` テーブルは 1 レコードのみで全店舗共通設定として参照される。"},
+        "descriptor": [{"href": "#goPaymentList"}]},
       {"id": "doSortNoMove", "title": "並び順を変更する", "type": "idempotent", "rt": "#AdminTop",
         "tag": "admin-system flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
         "doc": {"value": "管理画面の一覧で表示順を並べ替える汎用遷移。sort_no を持つ複数マスタで共有する。"},
@@ -1846,7 +1892,7 @@
       {"id": "doDeletePayment", "title": "支払方法を削除する", "type": "idempotent", "rt": "#PaymentList",
         "tag": "shop flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
         "doc": {"value": "支払方法を論理削除する（visible=false）。配送方法との紐付けは保持。"},
-        "descriptor": [{"href": "#paymentMethodName"}]},
+        "descriptor": [{"href": "#paymentMethodName"}, {"href": "#goDeliveryList"}]},
       {"id": "goDeliveryList", "title": "配送方法一覧を見る", "type": "safe", "rt": "#DeliveryList",
         "tag": "shop flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
         "doc": {"value": "配送方法のマスタ一覧を表示する。各配送方法は販売種別・支払方法・都道府県別料金と紐づく。"}},
@@ -1861,7 +1907,7 @@
       {"id": "doDeleteDelivery", "title": "配送方法を削除する", "type": "idempotent", "rt": "#DeliveryList",
         "tag": "shop flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
         "doc": {"value": "配送方法を論理削除する（visible=false）。"},
-        "descriptor": [{"href": "#deliveryMethodName"}]},
+        "descriptor": [{"href": "#deliveryMethodName"}, {"href": "#goTaxRuleList"}]},
       {"id": "goTaxRuleList", "title": "税率ルール一覧を見る", "type": "safe", "rt": "#TaxRuleList",
         "tag": "shop flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
         "doc": {"value": "税率ルールの一覧を表示する。標準税率・軽減税率・商品別/カテゴリ別の例外ルールを含む。"}},
@@ -1871,7 +1917,8 @@
         "descriptor": [{"href": "#taxRuleRate"}, {"href": "#applyDate"}, {"href": "#roundingType"}]},
       {"id": "doDeleteTaxRule", "title": "税率ルールを削除する", "type": "idempotent", "rt": "#TaxRuleList",
         "tag": "shop flow-manage-shop actor-admin src-router feature-admin-shop flow-admin-shop-configuration",
-        "doc": {"value": "税率ルールを削除する。標準税率（id=1）は削除不可。"}},
+        "doc": {"value": "税率ルールを削除する。標準税率（id=1）は削除不可。"},
+        "descriptor": [{"href": "#goCalendar"}]},
 
       {"id": "goNewsList", "title": "ニュース一覧を見る", "type": "safe", "rt": "#NewsList",
         "tag": "content flow-manage-content src-router feature-admin-content flow-admin-content-publish",
@@ -1891,7 +1938,7 @@
       {"id": "doDeleteNews", "title": "ニュースを削除する", "type": "idempotent", "rt": "#NewsList",
         "tag": "content flow-manage-content actor-admin src-router feature-admin-content flow-admin-content-publish",
         "doc": {"value": "ニュースを論理削除する。"},
-        "descriptor": [{"href": "#newsTitle"}]},
+        "descriptor": [{"href": "#newsTitle"}, {"href": "#goPageList"}]},
 
       {"id": "goMemberList", "title": "管理者一覧を見る", "type": "safe", "rt": "#MemberList",
         "tag": "admin-system flow-manage-system actor-admin src-router feature-admin-system flow-admin-system-operation",
@@ -1918,19 +1965,20 @@
       {"id": "doUpdateAuthorityRole", "title": "権限ルールを更新する", "type": "idempotent", "rt": "#AuthorityRole",
         "tag": "admin-system flow-manage-system actor-admin src-router feature-admin-system flow-admin-system-operation",
         "doc": {"value": "管理画面の権限ルール（URL 単位の拒否設定）を更新する。`authority` レベルごとに `denyUrl` を構成。"},
-        "descriptor": [{"href": "#denyUrl"}, {"href": "#authority"}]},
+        "descriptor": [{"href": "#denyUrl"}, {"href": "#authority"}, {"href": "#goLoginHistoryList"}]},
 
       {"id": "goMailTemplateList", "title": "メールテンプレート一覧を見る", "type": "safe", "rt": "#MailTemplateList",
         "tag": "mail flow-manage-mail actor-admin src-router feature-admin-mail flow-admin-mail-template-maintenance",
-        "doc": {"value": "通知メールテンプレートの一覧を表示する。会員登録・注文確認・出荷通知・パスワード再発行等の各テンプレート。"}},
+        "doc": {"value": "通知メールテンプレートの一覧を表示する。会員登録・注文確認・出荷通知・パスワード再発行等の各テンプレート。"},
+        "descriptor": [{"href": "#goOrderMail"}]},
       {"id": "doUpdateMailTemplate", "title": "メールテンプレートを更新する", "type": "idempotent", "rt": "#MailTemplate",
         "tag": "mail flow-manage-mail actor-admin src-router feature-admin-mail flow-admin-mail-template-maintenance",
         "doc": {"value": "メールテンプレートの件名・本文・HTML 版を編集する。本文は Twig 変数を含む。"},
-        "descriptor": [{"href": "#mailSubject"}]},
+        "descriptor": [{"href": "#mailSubject"}, {"href": "#doDeleteMailTemplate"}, {"href": "#goOrderMail"}]},
       {"id": "doSendOrderMail", "title": "受注メールを送信する", "type": "unsafe", "rt": "#MailHistory",
         "tag": "mail flow-manage-order actor-admin src-router feature-admin-order flow-admin-order-fulfillment flow-admin-mail-template-maintenance",
         "doc": {"value": "管理画面から受注顧客に任意メールを手動送信する。送信履歴を `MailHistory` に記録。"},
-        "descriptor": [{"href": "#orderNo"}, {"href": "#mailSubject"}, {"href": "#mailBody"}]},
+        "descriptor": [{"href": "#orderNo"}, {"href": "#mailSubject"}, {"href": "#mailBody"}, {"href": "#goExportOrderPdf"}, {"href": "#goExportOrder"}]},
 
       {"id": "goPluginList", "title": "プラグイン一覧を見る", "type": "safe", "rt": "#PluginList",
         "tag": "plugin flow-manage-plugin actor-admin src-router feature-admin-plugin",
@@ -1958,7 +2006,7 @@
       {"id": "doUpdateLayout", "title": "レイアウトを更新する", "type": "idempotent", "rt": "#Layout",
         "tag": "cms flow-manage-cms actor-admin src-router feature-admin-cms flow-admin-content-publish",
         "doc": {"value": "レイアウトのブロック配置を編集する。各位置（pc/sp × header/contents_top/side_left etc.）に Block を配置。"},
-        "descriptor": [{"href": "#layoutName"}]},
+        "descriptor": [{"href": "#layoutName"}, {"href": "#goTradeLawList"}]},
       {"id": "goBlockList", "title": "ブロック一覧を見る", "type": "safe", "rt": "#BlockList",
         "tag": "cms flow-manage-cms actor-admin src-router feature-admin-cms flow-admin-content-publish",
         "doc": {"value": "再利用可能な UI ブロックの一覧を表示する。Twig テンプレート部品としてレイアウトに配置される。"}},
@@ -1973,13 +2021,14 @@
       {"id": "doDeleteBlock", "title": "ブロックを削除する", "type": "idempotent", "rt": "#BlockList",
         "tag": "cms flow-manage-cms actor-admin src-router feature-admin-cms flow-admin-content-publish",
         "doc": {"value": "ブロックを論理削除する。レイアウトでの参照は事前に解除が必要。"},
-        "descriptor": [{"href": "#blockName"}]},
+        "descriptor": [{"href": "#blockName"}, {"href": "#goLayoutList"}]},
       {"id": "goTradeLawList", "title": "特定商取引法一覧を見る", "type": "safe", "rt": "#TradeLawList",
         "tag": "cms flow-manage-cms actor-admin src-router feature-admin-cms flow-admin-content-publish",
         "doc": {"value": "特定商取引法の表示項目一覧（事業者名・住所・返品ポリシー等の各項目）を表示する。"}},
       {"id": "doUpdateTradeLaw", "title": "特定商取引法を更新する", "type": "idempotent", "rt": "#TradeLawList",
         "tag": "cms flow-manage-cms actor-admin src-router feature-admin-cms flow-admin-content-publish",
-        "doc": {"value": "特定商取引法の表記項目を一括更新する。各項目は name/description ペアで構成。"}},
+        "doc": {"value": "特定商取引法の表記項目を一括更新する。各項目は name/description ペアで構成。"},
+        "descriptor": [{"href": "#goContentCss"}]},
 
       {"id": "goPageList", "title": "ページ一覧を見る", "type": "safe", "rt": "#PageList",
         "tag": "content flow-manage-content actor-admin src-router feature-admin-content flow-admin-content-publish",
@@ -1999,7 +2048,7 @@
       {"id": "doDeletePage", "title": "ページを削除する", "type": "idempotent", "rt": "#PageList",
         "tag": "content flow-manage-content actor-admin src-router feature-admin-content flow-admin-content-publish",
         "doc": {"value": "ユーザー作成ページのみ削除可能。システムページは削除不可。"},
-        "descriptor": [{"href": "#pageName"}]},
+        "descriptor": [{"href": "#pageName"}, {"href": "#goBlockList"}]},
 
       {"id": "goTagList", "title": "タグ一覧を見る", "type": "safe", "rt": "#TagList",
         "tag": "catalog flow-manage-product actor-admin src-router feature-admin-catalog",
@@ -2051,31 +2100,35 @@
 
 
       {"id": "Calendar", "title": "営業日カレンダー", "tag": "src-template alps-route-gate flow-admin-shop-configuration",
-        "doc": {"value": "営業日カレンダーを表す画面状態。"}},
+        "doc": {"value": "営業日カレンダーを表す画面状態。"},
+        "descriptor": [{"href": "#goCalendar"}, {"href": "#doCreateCalendarHoliday"}, {"href": "#doUpdateCalendar"}, {"href": "#doDeleteCalendarHoliday"}]},
       {"id": "ChangePassword", "title": "パスワード変更", "tag": "src-template alps-route-gate flow-admin-system-operation",
         "doc": {"value": "パスワード変更を表す画面状態。"}},
       {"id": "ContentCache", "title": "キャッシュ管理", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "キャッシュ管理を表す画面状態。"}},
+        "doc": {"value": "キャッシュ管理を表す画面状態。"},
+        "descriptor": [{"href": "#doClearCache"}]},
       {"id": "ContentCss", "title": "CSS管理", "tag": "src-template alps-route-gate flow-admin-content-publish",
-        "doc": {"value": "CSS管理を表す画面状態。"}},
+        "doc": {"value": "CSS管理を表す画面状態。"},
+        "descriptor": [{"href": "#doUpdateContentCss"}, {"href": "#goContentJs"}]},
       {"id": "ContentJs", "title": "JavaScript管理", "tag": "src-template alps-route-gate flow-admin-content-publish",
-        "doc": {"value": "JavaScript管理を表す画面状態。"}},
+        "doc": {"value": "JavaScript管理を表す画面状態。"},
+        "descriptor": [{"href": "#doUpdateContentJs"}]},
       {"id": "CustomerRegistrationConfirm", "title": "会員登録確認", "tag": "src-template alps-route-gate flow-customer-registration",
         "doc": {"value": "会員登録確認を表す画面状態。"}},
       {"id": "Maintenance", "title": "メンテナンス管理", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "メンテナンス管理を表す画面状態。"}},
+        "doc": {"value": "メンテナンス管理を表す画面状態。"},
+        "descriptor": [{"href": "#doToggleMaintenance"}]},
       {"id": "MasterData", "title": "マスタデータ管理", "tag": "src-template alps-route-gate flow-admin-master-data-update",
         "doc": {"value": "マスタデータ管理を表す画面状態。"}},
-      {"id": "MypageChangeComplete", "title": "会員情報変更完了", "tag": "src-template alps-route-gate flow-customer-account-maintenance",
-        "doc": {"value": "会員情報変更完了を表す画面状態。"}},
-      {"id": "MypageWithdrawComplete", "title": "退会完了", "tag": "src-template alps-route-gate flow-customer-account-maintenance",
-        "doc": {"value": "退会完了を表す画面状態。"}},
       {"id": "OrderMail", "title": "受注メール作成", "tag": "src-template alps-route-gate flow-admin-order-fulfillment flow-admin-mail-template-maintenance",
-        "doc": {"value": "受注メール作成を表す画面状態。"}},
+        "doc": {"value": "受注メール作成を表す画面状態。"},
+        "descriptor": [{"href": "#goOrderMailConfirm"}, {"href": "#doSendOrderMail"}]},
       {"id": "OrderMailConfirm", "title": "受注メール確認", "tag": "src-template alps-route-gate flow-admin-order-fulfillment flow-admin-mail-template-maintenance",
-        "doc": {"value": "受注メール確認を表す画面状態。"}},
+        "doc": {"value": "受注メール確認を表す画面状態。"},
+        "descriptor": [{"href": "#doSendOrderMail"}]},
       {"id": "OrderShippingAddress", "title": "受注配送先", "tag": "src-template alps-route-gate flow-admin-order-fulfillment",
-        "doc": {"value": "受注配送先を表す画面状態。"}},
+        "doc": {"value": "受注配送先を表す画面状態。"},
+        "descriptor": [{"href": "#doUpdateOrderShippingAddress"}, {"href": "#doUpdateTrackingNumber"}]},
       {"id": "OrderStatusList", "title": "対応状況一覧", "tag": "src-template alps-route-gate flow-admin-order-fulfillment",
         "doc": {"value": "対応状況一覧を表す画面状態。"}},
       {"id": "PasswordResetRequest", "title": "パスワード再発行依頼", "tag": "src-template alps-route-gate",
@@ -2083,21 +2136,27 @@
       {"id": "PasswordResetRequestComplete", "title": "パスワード再発行依頼完了", "tag": "src-template alps-route-gate",
         "doc": {"value": "パスワード再発行依頼完了を表す画面状態。"}},
       {"id": "Security", "title": "セキュリティ設定", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "セキュリティ設定を表す画面状態。"}},
+        "doc": {"value": "セキュリティ設定を表す画面状態。"},
+        "descriptor": [{"href": "#doUpdateSecurity"}]},
       {"id": "SystemInfo", "title": "システム情報", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "システム情報を表す画面状態。"}},
+        "doc": {"value": "システム情報を表す画面状態。"},
+        "descriptor": [{"href": "#doAdminLogout"}]},
       {"id": "TemplateInstall", "title": "テンプレート追加", "tag": "src-template alps-route-gate flow-admin-template-lifecycle",
-        "doc": {"value": "テンプレート追加を表す画面状態。"}},
+        "doc": {"value": "テンプレート追加を表す画面状態。"},
+        "descriptor": [{"href": "#doInstallTemplate"}]},
       {"id": "TwoFactorAuth", "title": "二要素認証", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "二要素認証を表す画面状態。"}},
+        "doc": {"value": "二要素認証を表す画面状態。"},
+        "descriptor": [{"href": "#doVerifyTwoFactorAuth"}]},
       {"id": "TwoFactorAuthSet", "title": "二要素認証設定", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "二要素認証設定を表す画面状態。"}},
+        "doc": {"value": "二要素認証設定を表す画面状態。"},
+        "descriptor": [{"href": "#doSetTwoFactorAuth"}]},
       {"id": "doChangePassword", "title": "パスワードを変更する", "type": "unsafe", "rt": "#AdminTop",
         "tag": "src-router alps-route-gate flow-admin-system-operation",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "doClearCache", "title": "キャッシュを削除する", "type": "idempotent", "rt": "#ContentCache",
         "tag": "src-router alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goMaintenance"}]},
       {"id": "doCreateCalendarHoliday", "title": "休日を作成する", "type": "unsafe", "rt": "#Calendar",
         "tag": "src-router alps-route-gate flow-admin-shop-configuration",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
@@ -2106,40 +2165,49 @@
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "doDeleteMailTemplate", "title": "メールテンプレートを削除する", "type": "idempotent", "rt": "#MailTemplateList",
         "tag": "src-router alps-route-gate flow-admin-mail-template-maintenance",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goMailTemplateList"}]},
       {"id": "doDeleteTemplate", "title": "テンプレートを削除する", "type": "idempotent", "rt": "#TemplateList",
         "tag": "src-router alps-route-gate flow-admin-template-lifecycle",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goTemplateList"}]},
       {"id": "doDownloadTemplate", "title": "テンプレートをダウンロードする", "type": "unsafe", "rt": "#TemplateList",
         "tag": "src-router alps-route-gate flow-admin-template-lifecycle",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#doDeleteTemplate"}]},
       {"id": "doImportClassCategoryCsv", "title": "規格分類CSVをインポートする", "type": "unsafe", "rt": "#ClassCategoryList",
         "tag": "src-router alps-route-gate flow-admin-csv-exchange",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "doImportClassNameCsv", "title": "規格名CSVをインポートする", "type": "unsafe", "rt": "#ClassNameList",
         "tag": "src-router alps-route-gate flow-admin-csv-exchange",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goExportClassCategory"}]},
       {"id": "doInstallTemplate", "title": "テンプレートを追加する", "type": "unsafe", "rt": "#TemplateList",
         "tag": "src-router alps-route-gate flow-admin-template-lifecycle",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#doSelectTemplate"}]},
       {"id": "doSelectMasterData", "title": "マスタデータを選択する", "type": "idempotent", "rt": "#MasterData",
         "tag": "src-router alps-route-gate flow-admin-master-data-update",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "doSelectTemplate", "title": "テンプレートを選択する", "type": "idempotent", "rt": "#TemplateList",
         "tag": "src-router alps-route-gate flow-admin-template-lifecycle",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#doDownloadTemplate"}]},
       {"id": "doSetTwoFactorAuth", "title": "二要素認証を設定する", "type": "idempotent", "rt": "#TwoFactorAuthSet",
         "tag": "src-router alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goTwoFactorAuth"}]},
       {"id": "doToggleMaintenance", "title": "メンテナンス状態を切り替える", "type": "idempotent", "rt": "#Maintenance",
         "tag": "src-router alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goSystemInfo"}]},
       {"id": "doUpdateCalendar", "title": "営業日カレンダーを更新する", "type": "idempotent", "rt": "#Calendar",
         "tag": "src-router alps-route-gate flow-admin-shop-configuration",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "doUpdateContentCss", "title": "CSSを更新する", "type": "idempotent", "rt": "#ContentCss",
         "tag": "src-router alps-route-gate flow-admin-content-publish",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goContentJs"}]},
       {"id": "doUpdateContentJs", "title": "JavaScriptを更新する", "type": "idempotent", "rt": "#ContentJs",
         "tag": "src-router alps-route-gate flow-admin-content-publish",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
@@ -2148,16 +2216,19 @@
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "doUpdateOrderShippingAddress", "title": "受注配送先を更新する", "type": "idempotent", "rt": "#Order",
         "tag": "src-router alps-route-gate flow-admin-order-fulfillment",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#doUpdateTrackingNumber"}]},
       {"id": "doUpdateOrderStatusList", "title": "対応状況一覧を更新する", "type": "idempotent", "rt": "#OrderStatusList",
         "tag": "src-router alps-route-gate flow-admin-order-fulfillment",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "doUpdateSecurity", "title": "セキュリティ設定を更新する", "type": "idempotent", "rt": "#Security",
         "tag": "src-router alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goTwoFactorAuthSet"}]},
       {"id": "doVerifyTwoFactorAuth", "title": "二要素認証を確認する", "type": "unsafe", "rt": "#TwoFactorAuth",
         "tag": "src-router alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#goContentCache"}]},
       {"id": "goAdminLogin", "title": "管理画面ログインを見る", "type": "safe", "rt": "#AdminLogin",
         "tag": "src-router alps-route-gate flow-admin-system-operation",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
@@ -2208,10 +2279,12 @@
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
       {"id": "goExportClassCategory", "title": "規格分類CSVをエクスポートする", "type": "safe", "rt": "#ClassCategoryList",
         "tag": "src-router alps-route-gate flow-admin-csv-exchange",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#doImportClassCategoryCsv"}]},
       {"id": "goExportClassName", "title": "規格名CSVをエクスポートする", "type": "safe", "rt": "#ClassNameList",
         "tag": "src-router alps-route-gate flow-admin-csv-exchange",
-        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+        "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"},
+        "descriptor": [{"href": "#doImportClassNameCsv"}]},
       {"id": "goImportShippingCsv", "title": "配送CSVインポートを見る", "type": "safe", "rt": "#OrderList",
         "tag": "src-router alps-route-gate flow-admin-csv-exchange",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
@@ -2275,7 +2348,8 @@
 
       {"id": "doUpdateCsv", "title": "CSV出力設定を更新する", "type": "idempotent", "rt": "#Csv",
         "tag": "admin-system flow-manage-system actor-admin src-router feature-admin-system flow-admin-csv-exchange",
-        "doc": {"value": "CSV 出力フォーマット設定を更新する。受注・商品・顧客 CSV 各種について列の表示有無と順序を構成。"}}
+        "doc": {"value": "CSV 出力フォーマット設定を更新する。受注・商品・顧客 CSV 各種について列の表示有無と順序を構成。"},
+        "descriptor": [{"href": "#goExportProduct"}]}
     ],
     "ext": [{"id": "tags", "href": "tag.html", "value": "タグ分類体系の説明"}]
   }

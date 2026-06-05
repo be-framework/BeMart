@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
@@ -25,6 +26,7 @@ class System extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'doAdminLogout', href: 'page://self/admin/logout', method: 'post')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

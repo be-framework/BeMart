@@ -34,6 +34,10 @@ class TemplateList extends ResourceObject
     }
 
     #[Link(rel: 'goTemplateAdd', href: 'page://self/admin/template/template-add')]
+    #[Link(rel: 'goTemplateInstall', href: 'page://self/admin/template/template-add', method: 'get')]
+    #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
+    #[Link(rel: 'doDownloadTemplate', href: 'page://self/admin/template/template-list', method: 'post')]
+    #[Link(rel: 'doDeleteTemplate', href: 'page://self/admin/template/template-list', method: 'delete')]
     public function onGet(): static
     {
         try {
@@ -63,6 +67,7 @@ class TemplateList extends ResourceObject
      *
      * @psalm-taint-source input $templateId
      */
+    #[Link(rel: 'doDownloadTemplate', href: 'page://self/admin/template/template-list', method: 'post')]
     #[CsrfProtected]
     public function onPut(string $templateId): static
     {
@@ -73,6 +78,7 @@ class TemplateList extends ResourceObject
      *
      * @psalm-taint-source input $templateId
      */
+    #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list', method: 'get')]
     #[CsrfProtected]
     public function onDelete(string $templateId): static
     {
@@ -83,6 +89,7 @@ class TemplateList extends ResourceObject
      *
      * @psalm-taint-source input $templateId
      */
+    #[Link(rel: 'doDeleteTemplate', href: 'page://self/admin/template/template-list', method: 'delete')]
     #[CsrfProtected]
     public function onPost(string $templateId): static
     {

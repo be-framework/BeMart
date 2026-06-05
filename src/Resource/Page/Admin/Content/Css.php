@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -44,6 +45,7 @@ class Css extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'doUpdateContentCss', href: 'page://self/admin/content/css', method: 'put')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -68,6 +70,7 @@ class Css extends ResourceObject
      *
      * @psalm-taint-source input $css
      */
+    #[Link(rel: 'goContentJs', href: 'page://self/admin/content/js')]
     #[CsrfProtected]
     public function onPut(string $css = ''): static
     {

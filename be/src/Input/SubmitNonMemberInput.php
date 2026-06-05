@@ -55,6 +55,7 @@ final readonly class SubmitNonMemberInput
         public int $pref,
         public string $addr01,
         public string $addr02,
+        public string $sessionPrefix = 'session-prefix-1',
     ) {
     }
 }

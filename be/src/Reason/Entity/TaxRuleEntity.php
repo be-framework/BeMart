@@ -28,11 +28,16 @@ final readonly class TaxRuleEntity implements \Ray\MediaQuery\ToScalarInterface
 {
     use MediaQueryJsonEntityTrait;
 
+    public float $taxRate;
+    public int $roundingType;
+
     public function __construct(
         public string $taxRuleId,
-        public float $taxRate,
-        public int $roundingType,
+        float|int|string $taxRate,
+        int|string $roundingType,
         public string $applyDate,
     ) {
+        $this->taxRate = (float) $taxRate;
+        $this->roundingType = (int) $roundingType;
     }
 }

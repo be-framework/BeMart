@@ -164,6 +164,7 @@ class Payment extends ResourceObject
      * @psalm-taint-source input $paymentId
      */
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
+    #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[CsrfProtected]
     public function onDelete(string $paymentId): static
     {

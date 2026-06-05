@@ -54,6 +54,9 @@ class Index extends ResourceObject
      * pages, enforced here at the resource layer because there is no Be
      * Final to raise `UnauthorizedAdminAccessException`.
      */
+    #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
+    #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
+    #[Link(rel: 'doAdminLogout', href: 'page://self/admin/logout', method: 'post')]
     #[Link(rel: 'goAdminLogout', href: 'page://self/admin/login', method: 'post')]
     public function onGet(): static
     {

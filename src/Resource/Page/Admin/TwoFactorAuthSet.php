@@ -110,6 +110,7 @@ class TwoFactorAuthSet extends ResourceObject
      * @psalm-taint-source input $deviceToken
      */
     #[CsrfProtected]
+    #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPut(string $loginId, string $authKey, string $deviceToken): static
     {

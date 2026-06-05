@@ -1,7 +1,7 @@
 SELECT c.cart_key,
        c.sale_type_id,
        st.name AS sale_type_name,
-       (SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
+       (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(JSON_OBJECT(
            'productCode', pc.product_code,
            'quantity', ci.quantity,
            'price', ci.price,
@@ -13,7 +13,7 @@ SELECT c.cart_key,
            'className1', cn1.name,
            'classCategoryName2', cc2.name,
            'className2', cn2.name
-       ) ORDER BY ci.id ASC), JSON_ARRAY())
+       ) ORDER BY ci.id ASC SEPARATOR ','), ']'), JSON_ARRAY())
         FROM dtb_cart_item ci
         INNER JOIN dtb_product_class pc ON pc.id = ci.product_class_id
         INNER JOIN dtb_product p ON p.id = pc.product_id

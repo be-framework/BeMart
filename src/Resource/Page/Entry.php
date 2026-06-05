@@ -65,6 +65,7 @@ class Entry extends ResourceObject
      * token into the hidden `_token` input so a real browser form submit
      * can exercise the POST path instead of failing at the boundary.
      */
+    #[Link(rel: 'goCustomerRegistrationConfirm', href: 'page://self/entry/confirm')]
     #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
     public function onGet(): static
     {
