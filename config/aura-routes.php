@@ -732,7 +732,10 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
             );
 
             // ---- Admin: catalogue ----
-            $route($map, 'admin_product', ['GET', 'POST'], '/admin/product', 'page://self/admin/product-list', [], 'get');
+            $route($map, 'admin_product', ['GET'], '/admin/product', 'page://self/admin/product');
+            $route($map, 'admin_product', ['POST'], '/admin/product', 'page://self/admin/product');
+            $route($map, 'admin_product', ['PUT'], '/admin/product', 'page://self/admin/product');
+            $route($map, 'admin_product', ['DELETE'], '/admin/product', 'page://self/admin/product');
             $route($map, 'admin_product_tag', ['GET', 'POST'], '/admin/product/tag', 'page://self/admin/tag/tag-list', [], 'get');
             $route($map,
                 'admin_product_class_name',
@@ -752,7 +755,8 @@ return static function (Map $map) use ($route, $adminAliasRoutes): null {
             );
 
             // ---- Admin: orders + customers ----
-            $route($map, 'admin_order', ['GET', 'POST'], '/admin/order', 'page://self/admin/order-list', [], 'get');
+            $route($map, 'admin_order', ['GET'], '/admin/order', 'page://self/admin/order');
+            $route($map, 'admin_order', ['PUT'], '/admin/order', 'page://self/admin/order');
             $route($map, 'admin_customer', ['GET', 'POST'], '/admin/customer', 'page://self/admin/customer-list', [], 'get');
             // `admin_customer_resend` POSTs the "resend the email-verification
             // mail to a 仮会員" action from a customer-list row. EC-CUBE keys
