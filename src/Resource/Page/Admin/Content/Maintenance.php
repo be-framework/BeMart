@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -42,6 +43,7 @@ class Maintenance extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'doToggleMaintenance', href: 'page://self/admin/content/maintenance', method: 'put')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -63,6 +65,7 @@ class Maintenance extends ResourceObject
      *
      * @psalm-taint-source input $enabled
      */
+    #[Link(rel: 'goSystemInfo', href: 'page://self/admin/system')]
     #[CsrfProtected]
     public function onPut(bool $enabled): static
     {

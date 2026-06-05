@@ -25,10 +25,17 @@ final readonly class DeliveryEntity implements \Ray\MediaQuery\ToScalarInterface
 {
     use MediaQueryJsonEntityTrait;
 
+    public string $deliveryId;
+    public string $deliveryName;
+    public bool $visible;
+
     public function __construct(
-        public string $deliveryId,
-        public string $deliveryName,
-        public bool $visible,
+        string $deliveryId,
+        string $deliveryName,
+        bool|int|string $visible,
     ) {
+        $this->deliveryId = $deliveryId;
+        $this->deliveryName = $deliveryName;
+        $this->visible = (bool) $visible;
     }
 }

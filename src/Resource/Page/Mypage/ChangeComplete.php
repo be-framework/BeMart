@@ -36,6 +36,7 @@ use BEAR\Resource\ResourceObject;
 class ChangeComplete extends ResourceObject
 {
     #[Link(rel: 'goTop', href: 'page://self/')]
+    #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
     {

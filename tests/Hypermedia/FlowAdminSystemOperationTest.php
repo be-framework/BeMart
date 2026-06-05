@@ -4,23 +4,124 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
+use Aura\Sql\ExtendedPdoInterface;
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Be\Reason\Entity\AdminEntity;
+use MyVendor\BeMart\Be\Reason\Query\AdminCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\AdminIdQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
+use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
 use PHPUnit\Framework\Attributes\Depends;
+use Ray\Di\InjectorInterface;
 
 use function assert;
+use function bin2hex;
+use function getenv;
+use function putenv;
+use function random_bytes;
 
 class FlowAdminSystemOperationTest extends AbstractWorkflowTest
 {
     public const FLOW_ID = 'flow-admin-system-operation';
 
+    private const CSRF_TOKEN = 'workflow-system-csrf-token';
+    private const ADMIN_PASSWORD = 'local-dev-admin-password';
+    private const MEMBER_PASSWORD = 'workflow-member-password-2026';
+
+    private static InjectorInterface|null $injector = null;
+    private static ExtendedPdoInterface|null $db = null;
+    private static ResourceInterface|null $dbResource = null;
+    private static string $adminId;
+    private static string $adminLoginId;
+    private static string $memberLoginId;
+    private static string $twoFactorAuthSecret;
+    /** @var array<string, mixed>|null */
+    private static array|null $previousSession = null;
+    private static string|false $previousCsrfEnv = false;
+
+    public static function setUpBeforeClass(): void
+    {
+        $suffix = bin2hex(random_bytes(4));
+        self::$adminLoginId = 'workflow-admin-' . $suffix;
+        self::$memberLoginId = 'workflow-member-' . $suffix;
+        self::$previousSession = $_SESSION ?? null;
+        self::$previousCsrfEnv = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
+        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::CSRF_TOKEN);
+
+        self::$injector = Injector::getInstance('html-prod-hal-api-app');
+        $db = self::$injector->getInstance(ExtendedPdoInterface::class);
+        assert($db instanceof ExtendedPdoInterface);
+        self::$db = $db;
+        self::$db->beginTransaction();
+
+        $ids = self::$injector->getInstance(AdminIdQueryInterface::class);
+        assert($ids instanceof AdminIdQueryInterface);
+        self::$adminId = $ids->next()->value;
+
+        $hasher = self::$injector->getInstance(PasswordHasherInterface::class);
+        assert($hasher instanceof PasswordHasherInterface);
+        $command = self::$injector->getInstance(AdminCommandInterface::class);
+        assert($command instanceof AdminCommandInterface);
+        $command->create(new AdminEntity(
+            adminId: self::$adminId,
+            loginId: self::$adminLoginId,
+            passwordHash: $hasher->hash(self::ADMIN_PASSWORD),
+            name: 'Workflow System Admin',
+            authority: 0,
+        ));
+
+        $_SESSION = [
+            HtmlAdminSessionAdapter::ADMIN_ID_KEY => self::$adminId,
+            EccubeSharedCsrfTokenAdapter::SESSION_KEY => self::CSRF_TOKEN,
+        ];
+
+        $resource = self::$injector->getInstance(ResourceInterface::class);
+        assert($resource instanceof ResourceInterface);
+        self::$dbResource = $resource;
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        if (self::$db instanceof ExtendedPdoInterface && self::$db->inTransaction()) {
+            self::$db->rollBack();
+        }
+
+        if (self::$previousSession === null) {
+            unset($_SESSION);
+        } else {
+            $_SESSION = self::$previousSession;
+        }
+
+        if (self::$previousCsrfEnv === false) {
+            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
+        } else {
+            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . self::$previousCsrfEnv);
+        }
+
+        self::$db = null;
+        self::$dbResource = null;
+        self::$injector = null;
+
+        parent::tearDownAfterClass();
+    }
+
     protected function newResource(): ResourceInterface
     {
-        $resource = Injector::getInstance('test-hal-api-app')->getInstance(ResourceInterface::class);
+        if (self::$dbResource instanceof ResourceInterface) {
+            return self::$dbResource;
+        }
+
+        assert(self::$injector instanceof InjectorInterface);
+        $resource = self::$injector->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
+        self::$dbResource = $resource;
 
         return $resource;
     }
@@ -28,146 +129,247 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Alps('goAdminLogin')]
     public function testAdminLoginForm(): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open admin login form.');
+        $response = $this->resource->get('page://self/admin/login');
+
+        $this->assertSame(Code::OK, $response->code);
+
+        return $response;
     }
 
     #[Alps('doAdminLogin')]
     #[Depends('testAdminLoginForm')]
     public function testAdminLogsIn(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation login admin.');
+        $loggedIn = $this->resource->post('page://self/admin/login', [
+            'loginId' => self::$adminLoginId,
+            'password' => self::ADMIN_PASSWORD,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $loggedIn->code);
+        $this->assertSame(self::$adminLoginId, $this->bodyValue($loggedIn, 'loginId'));
+
+        return $loggedIn;
     }
 
     #[Alps('goAdminTop')]
     #[Depends('testAdminLogsIn')]
     public function testAdminTop(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open admin top.');
+        return $this->follow($response, 'goAdminTop');
     }
 
     #[Alps('goMemberList')]
     #[Depends('testAdminTop')]
     public function testMemberList(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open member list.');
+        return $this->follow($response, 'goMemberList');
     }
 
     #[Alps('doCreateMember')]
     #[Depends('testMemberList')]
     public function testCreatesMember(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation create member.');
+        $created = $this->resource->post('page://self/admin/member', [
+            'loginId' => self::$memberLoginId,
+            'password' => self::MEMBER_PASSWORD,
+            'name' => 'Workflow Member',
+            'authority' => 1,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $created->code);
+        $this->assertSame(self::$memberLoginId, $this->bodyValue($created, 'loginId'));
+
+        return $created;
     }
 
     #[Alps('goMember')]
     #[Depends('testCreatesMember')]
     public function testMember(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation read member.');
+        return $this->follow($response, 'goMember', ['loginId' => self::$memberLoginId]);
     }
 
     #[Alps('doUpdateMember')]
     #[Depends('testMember')]
     public function testUpdatesMember(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation update member.');
+        $updated = $this->resource->put('page://self/admin/member', [
+            'loginId' => self::$memberLoginId,
+            'name' => 'Workflow Member Updated',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$memberLoginId, $this->bodyValue($updated, 'loginId'));
+
+        return $updated;
     }
 
     #[Alps('doUpdateAuthorityRole')]
     #[Depends('testUpdatesMember')]
     public function testUpdatesAuthorityRole(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation update authority role.');
+        $updated = $this->resource->post('page://self/admin/authority-role', [
+            'loginId' => self::$memberLoginId,
+            'authority' => 0,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$memberLoginId, $this->bodyValue($updated, 'loginId'));
+
+        return $updated;
     }
 
     #[Alps('goLoginHistoryList')]
     #[Depends('testUpdatesAuthorityRole')]
     public function testLoginHistoryList(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open login history list.');
+        return $this->follow($response, 'goLoginHistoryList');
     }
 
     #[Alps('goSecurity')]
     #[Depends('testLoginHistoryList')]
     public function testSecurity(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open security settings.');
+        return $this->follow($response, 'goSecurity');
     }
 
     #[Alps('doUpdateSecurity')]
     #[Depends('testSecurity')]
     public function testUpdatesSecurity(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation update security settings.');
+        $updated = $this->resource->put('page://self/admin/security', [
+            'adminAllowHosts' => '',
+            'adminDenyHosts' => '',
+            'frontAllowHosts' => '',
+            'frontDenyHosts' => '',
+            'trustedHosts' => '^localhost$',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame('doUpdateSecurity', $this->bodyValue($updated, 'transitionId'));
+
+        return $updated;
     }
 
     #[Alps('goTwoFactorAuthSet')]
     #[Depends('testUpdatesSecurity')]
     public function testTwoFactorAuthSet(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open two factor auth setup.');
+        return $this->follow($response, 'goTwoFactorAuthSet');
     }
 
     #[Alps('doSetTwoFactorAuth')]
     #[Depends('testTwoFactorAuthSet')]
     public function testSetsTwoFactorAuth(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation set two factor auth.');
+        assert(self::$injector instanceof InjectorInterface);
+        $twoFactorAuth = self::$injector->getInstance(TwoFactorAuthInterface::class);
+        assert($twoFactorAuth instanceof TwoFactorAuthInterface);
+        self::$twoFactorAuthSecret = $twoFactorAuth->generateSecret();
+        $configured = $this->resource->put('page://self/admin/two-factor-auth-set', [
+            'loginId' => self::$adminLoginId,
+            'authKey' => self::$twoFactorAuthSecret,
+            'deviceToken' => $twoFactorAuth->generateDeviceToken(self::$twoFactorAuthSecret),
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $configured->code);
+        $this->assertSame('doSetTwoFactorAuth', $this->bodyValue($configured, 'transitionId'));
+        $this->assertSame(self::$adminLoginId, $this->bodyValue($configured, 'loginId'));
+
+        return $configured;
     }
 
     #[Alps('goTwoFactorAuth')]
     #[Depends('testSetsTwoFactorAuth')]
     public function testTwoFactorAuth(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open two factor auth verification.');
+        return $this->follow($response, 'goTwoFactorAuth');
     }
 
     #[Alps('doVerifyTwoFactorAuth')]
     #[Depends('testTwoFactorAuth')]
     public function testVerifiesTwoFactorAuth(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation verify two factor auth.');
+        assert(self::$injector instanceof InjectorInterface);
+        $twoFactorAuth = self::$injector->getInstance(TwoFactorAuthInterface::class);
+        assert($twoFactorAuth instanceof TwoFactorAuthInterface);
+        $verified = $this->resource->post('page://self/admin/two-factor-auth', [
+            'loginId' => self::$adminLoginId,
+            'deviceToken' => $twoFactorAuth->generateDeviceToken(self::$twoFactorAuthSecret),
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $verified->code);
+        $this->assertSame('doVerifyTwoFactorAuth', $this->bodyValue($verified, 'transitionId'));
+        $this->assertSame(self::$adminLoginId, $this->bodyValue($verified, 'loginId'));
+
+        return $verified;
     }
 
     #[Alps('goContentCache')]
-    #[Depends('testVerifiesTwoFactorAuth')]
+    #[Depends('testAdminTop')]
     public function testContentCache(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open content cache.');
+        return $this->follow($response, 'goContentCache');
     }
 
     #[Alps('doClearCache')]
     #[Depends('testContentCache')]
     public function testClearsCache(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation clear cache.');
+        $cleared = $this->resource->put('page://self/admin/content/cache', [
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $cleared->code);
+        $this->assertSame('doClearCache', $this->bodyValue($cleared, 'transitionId'));
+
+        return $cleared;
     }
 
     #[Alps('goMaintenance')]
     #[Depends('testClearsCache')]
     public function testMaintenance(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open maintenance settings.');
+        return $this->follow($response, 'goMaintenance');
     }
 
     #[Alps('doToggleMaintenance')]
     #[Depends('testMaintenance')]
     public function testTogglesMaintenance(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation toggle maintenance.');
+        $toggled = $this->resource->put('page://self/admin/content/maintenance', [
+            'enabled' => false,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $toggled->code);
+        $this->assertSame('doToggleMaintenance', $this->bodyValue($toggled, 'transitionId'));
+
+        return $toggled;
     }
 
     #[Alps('goSystemInfo')]
     #[Depends('testTogglesMaintenance')]
     public function testSystemInfo(ResourceObject $response): ResourceObject
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation open system info.');
+        return $this->follow($response, 'goSystemInfo');
     }
 
     #[Alps('doAdminLogout')]
     #[Depends('testSystemInfo')]
     public function testAdminLogsOut(ResourceObject $response): void
     {
-        self::markTestIncomplete('TODO: flow-admin-system-operation logout admin.');
+        $loggedOut = $this->resource->post('page://self/admin/logout', [
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $loggedOut->code);
     }
 }

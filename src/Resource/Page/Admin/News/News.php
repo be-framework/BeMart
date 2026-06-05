@@ -192,6 +192,7 @@ class News extends ResourceObject
      * @psalm-taint-source input $newsId
      */
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
+    #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     #[CsrfProtected]
     public function onDelete(string $newsId): static
     {

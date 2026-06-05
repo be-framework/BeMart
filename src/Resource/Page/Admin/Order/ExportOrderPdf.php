@@ -49,6 +49,7 @@ class ExportOrderPdf extends ResourceObject
      * @psalm-taint-source input $orderNo
      */
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
+    #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     public function onGet(array|string $orderNos = [], string $orderNo = ''): static
     {
         try {

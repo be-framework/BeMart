@@ -45,6 +45,7 @@ class TrackingNumber extends ResourceObject
      * @psalm-taint-source input $trackingNumber
      */
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     #[CsrfProtected]
     public function onPut(
         string $orderNo,

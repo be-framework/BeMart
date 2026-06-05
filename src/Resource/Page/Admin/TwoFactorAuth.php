@@ -54,6 +54,7 @@ class TwoFactorAuth extends ResourceObject
      * session state — the admin firewall guard is downstream of a
      * successful challenge.
      */
+    #[Link(rel: 'doVerifyTwoFactorAuth', href: 'page://self/admin/two-factor-auth', method: 'post')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
     {
@@ -85,6 +86,7 @@ class TwoFactorAuth extends ResourceObject
      * @psalm-taint-source input $deviceToken
      */
     #[CsrfProtected]
+    #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(string $loginId, string $deviceToken): static
     {

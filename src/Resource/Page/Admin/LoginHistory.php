@@ -41,6 +41,7 @@ class LoginHistory extends ResourceObject
     /**
      * @psalm-taint-source input $limit
      */
+    #[Link(rel: 'goSecurity', href: 'page://self/admin/security')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     public function onGet(int $limit = 50): static
     {

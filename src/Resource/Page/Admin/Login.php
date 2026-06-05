@@ -107,6 +107,7 @@ class Login extends ResourceObject
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $password
      */
+    #[Link(rel: 'goAdminTop', href: 'page://self/admin/index')]
     #[CsrfProtected]
     public function onPost(string $loginId, string $password): static
     {

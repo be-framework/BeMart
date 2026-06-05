@@ -67,6 +67,7 @@ class Layout extends ResourceObject
      * @psalm-taint-source input $layoutName
      */
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
+    #[Link(rel: 'goTradeLawList', href: 'page://self/admin/trade-law')]
     #[CsrfProtected]
     public function onPut(
         string $layoutId,

@@ -197,6 +197,7 @@ class Product extends ResourceObject
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
      */
+    #[Link(rel: 'goProductList', href: 'page://self/products')]
     #[CsrfProtected]
     public function onPut(
         string $productCode,

@@ -120,6 +120,7 @@ class NonMember extends ResourceObject
      * @psalm-taint-source input $pref
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
+     * @psalm-taint-source input $sessionPrefix
      */
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
@@ -134,6 +135,7 @@ class NonMember extends ResourceObject
         int $pref,
         string $addr01,
         string $addr02,
+        string $sessionPrefix = 'session-prefix-1',
     ): static {
         try {
             $final = ($this->becoming)(new SubmitNonMemberInput(
@@ -147,6 +149,7 @@ class NonMember extends ResourceObject
                 pref: $pref,
                 addr01: $addr01,
                 addr02: $addr02,
+                sessionPrefix: $sessionPrefix,
             ));
         } catch (SemanticVariableException $e) {
             // Be Framework Semantics rejected a guest field. Bridge the

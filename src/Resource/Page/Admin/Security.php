@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -39,6 +40,7 @@ class Security extends ResourceObject
     ) {
     }
 
+    #[Link(rel: 'doUpdateSecurity', href: 'page://self/admin/security', method: 'put')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -84,6 +86,7 @@ class Security extends ResourceObject
      * @psalm-taint-source input $frontDenyHosts
      * @psalm-taint-source input $trustedHosts
      */
+    #[Link(rel: 'goTwoFactorAuthSet', href: 'page://self/admin/two-factor-auth-set')]
     #[CsrfProtected]
     public function onPut(
         string $adminAllowHosts = '',

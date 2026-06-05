@@ -39,6 +39,7 @@ class Csv extends ResourceObject
     }
 
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
+    #[Link(rel: 'doImportCategoryCsv', href: 'page://self/admin/category/csv', method: 'post')]
     public function onGet(): static
     {
         try {
@@ -66,6 +67,7 @@ class Csv extends ResourceObject
      * @psalm-taint-source input $csv
      */
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
+    #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order')]
     #[CsrfProtected]
     public function onPost(string $csv): static
     {
