@@ -13,7 +13,7 @@ use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
 use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowSessionContext;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
@@ -33,13 +33,13 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     private static ExtendedPdoInterface|null $db = null;
     private static ResourceInterface|null $dbResource = null;
     private static string $suffix;
-    private static WorkflowSessionContext|null $context = null;
+    private static WorkflowTestSession|null $session = null;
 
     public static function setUpBeforeClass(): void
     {
         self::$suffix = bin2hex(random_bytes(4));
-        self::$context = WorkflowSessionContext::capture();
-        self::$context->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
+        self::$session = WorkflowTestSession::fromCurrent();
+        self::$session->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $layouts = self::$injector->getInstance(LayoutStorageInterface::class);
@@ -58,12 +58,12 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
-        self::$context?->restore();
+        self::$session?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
-        self::$context = null;
+        self::$session = null;
 
         parent::tearDownAfterClass();
     }

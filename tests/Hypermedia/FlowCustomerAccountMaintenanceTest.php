@@ -11,7 +11,7 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowSessionContext;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
@@ -33,7 +33,7 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
     private static string $customerId;
     private static string $productCode;
     private static string $productName;
-    private static WorkflowSessionContext|null $context = null;
+    private static WorkflowTestSession|null $session = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -41,8 +41,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
         self::$email = 'workflow-account-' . $suffix . '@example.com';
         self::$productCode = 'workflow-account-' . $suffix;
         self::$productName = 'Workflow Account Favorite Product ' . self::$productCode;
-        self::$context = WorkflowSessionContext::capture();
-        self::$context->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
+        self::$session = WorkflowTestSession::fromCurrent();
+        self::$session->assumeAdminLoggedIn(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
@@ -61,12 +61,12 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
-        self::$context?->restore();
+        self::$session?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
-        self::$context = null;
+        self::$session = null;
 
         parent::tearDownAfterClass();
     }
@@ -106,8 +106,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
         $this->assertIsString($registered->body['customerId'] ?? null);
 
         self::$customerId = (string) $registered->body['customerId'];
-        assert(self::$context instanceof WorkflowSessionContext);
-        self::$context->setCustomerId(self::$customerId);
+        assert(self::$session instanceof WorkflowTestSession);
+        self::$session->setCustomerId(self::$customerId);
 
         $created = $this->resource->post('page://self/admin/product', [
             'productCode' => self::$productCode,
@@ -141,8 +141,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::OK, $loggedIn->code);
         $this->assertSame(self::$email, $this->bodyValue($loggedIn, 'email'));
-        assert(self::$context instanceof WorkflowSessionContext);
-        self::$context->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
+        assert(self::$session instanceof WorkflowTestSession);
+        self::$session->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
 
         return $loggedIn;
     }
