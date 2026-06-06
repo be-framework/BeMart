@@ -65,8 +65,9 @@ final class AdminLayoutResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/layout/layout-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/layout/layout-list');
     }
 
     public function testUpdateMerges(): void
@@ -82,22 +83,24 @@ final class AdminLayoutResourceTest extends TestCase
 
     public function testUpdateUnknownReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/layout/layout', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\LayoutNotFoundException::class);
+
+        $this->resource->put('page://self/admin/layout/layout', [
             'layoutId' => 'nonexistent',
             'layoutName' => 'X',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testUpdateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->put('page://self/admin/layout/layout', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->put('page://self/admin/layout/layout', [
             'layoutId' => 'lo-pc-default',
             'layoutName' => 'X',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

@@ -45,27 +45,10 @@ class ClassCategory extends ResourceObject
         string $classCategoryId,
         string|null $classCategoryName = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateClassCategoryInput(
-                classCategoryId: $classCategoryId,
-                classCategoryName: $classCategoryName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ClassCategoryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された規格分類は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateClassCategoryInput(
+            classCategoryId: $classCategoryId,
+            classCategoryName: $classCategoryName,
+        ));
 
         assert($final instanceof ClassCategoryUpdated);
 
@@ -86,19 +69,7 @@ class ClassCategory extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $classCategoryId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteClassCategoryInput(classCategoryId: $classCategoryId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ClassCategoryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された規格分類は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteClassCategoryInput(classCategoryId: $classCategoryId));
 
         assert($final instanceof ClassCategoryDeleted);
 

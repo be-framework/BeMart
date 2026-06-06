@@ -40,19 +40,7 @@ class FavoriteList extends ResourceObject
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetFavoriteListInput());
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetFavoriteListInput());
 
         assert($final instanceof FavoriteListFetched);
 

@@ -40,14 +40,7 @@ class TemplateList extends ResourceObject
     #[Link(rel: 'doDeleteTemplate', href: 'page://self/admin/template/template-list', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminTemplateListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminTemplateListInput());
 
         assert($final instanceof AdminTemplateListFetched);
 
@@ -93,19 +86,7 @@ class TemplateList extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $templateId): static
     {
-        try {
-            $final = ($this->becoming)(new DownloadTemplateInput(templateId: $templateId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (TemplateNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたテンプレートは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DownloadTemplateInput(templateId: $templateId));
 
         assert($final instanceof TemplateDownloaded);
 
@@ -125,19 +106,7 @@ class TemplateList extends ResourceObject
      */
     private function run(string $transitionId, callable $run, string $message): static
     {
-        try {
-            $final = $run($this->becoming);
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (TemplateNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたテンプレートは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = $run($this->becoming);
 
         assert($final instanceof TemplateSelected || $final instanceof TemplateDeleted);
 

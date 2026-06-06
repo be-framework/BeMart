@@ -144,49 +144,23 @@ class Entry extends ResourceObject
         int|null $sex = null,
         int|null $job = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new RegisterCustomerInput(
-                email: $email,
-                password: $password,
-                name01: $name01,
-                name02: $name02,
-                kana01: $kana01,
-                kana02: $kana02,
-                companyName: $companyName,
-                phoneNumber: $phoneNumber,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-                birth: $birth,
-                sex: $sex,
-                job: $job,
-            ));
-        } catch (SemanticVariableException $e) {
-            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $message,
-                'email' => $email,
-                'csrfToken' => $this->csrfTokenForForm(),
-                'form' => $this->failedForm($email, $name01, $name02, $message),
-            ];
-
-            return $this;
-        } catch (EmailAlreadyRegisteredException) {
-            // BEAR\Resource\Code lacks CONFLICT; use the integer literal
-            // (same convention as Pilot 2's OutOfStockException).
-            $message = 'The email is already registered.';
-            $this->code = 409;
-            $this->body = [
-                'message' => $message,
-                'email' => $email,
-                'csrfToken' => $this->csrfTokenForForm(),
-                'form' => $this->failedForm($email, $name01, $name02, $message),
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new RegisterCustomerInput(
+            email: $email,
+            password: $password,
+            name01: $name01,
+            name02: $name02,
+            kana01: $kana01,
+            kana02: $kana02,
+            companyName: $companyName,
+            phoneNumber: $phoneNumber,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            birth: $birth,
+            sex: $sex,
+            job: $job,
+        ));
 
         assert($final instanceof CustomerRegistered);
 

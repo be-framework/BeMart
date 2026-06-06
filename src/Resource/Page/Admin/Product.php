@@ -67,24 +67,7 @@ class Product extends ResourceObject
     #[Link(rel: 'doCopyProduct', href: 'page://self/admin/product-copy', method: 'post')]
     public function onGet(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminProductInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された商品が見つかりません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminProductInput(productCode: $productCode));
 
         assert($final instanceof AdminProductFetched);
 
@@ -136,38 +119,16 @@ class Product extends ResourceObject
         string|null $searchWord = null,
         string|null $note = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminCreateProductInput(
-                productCode: $productCode,
-                productName: $productName,
-                price02: $price02,
-                stock: $stock,
-                productStatus: $productStatus,
-                description: $description,
-                searchWord: $searchWord,
-                note: $note,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'productCode' => $productCode,
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductCodeAlreadyInUseException) {
-            // BEAR\Resource\Code lacks CONFLICT; same integer-literal
-            // convention as Pilot 4 Entry / Wave 5O AdminCreateCustomer.
-            $this->code = 409;
-            $this->body = ['message' => 'この商品コードは既に使用されています。', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminCreateProductInput(
+            productCode: $productCode,
+            productName: $productName,
+            price02: $price02,
+            stock: $stock,
+            productStatus: $productStatus,
+            description: $description,
+            searchWord: $searchWord,
+            note: $note,
+        ));
 
         assert($final instanceof AdminProductCreated);
 
@@ -209,33 +170,16 @@ class Product extends ResourceObject
         string|null $searchWord = null,
         string|null $note = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminUpdateProductInput(
-                productCode: $productCode,
-                productName: $productName,
-                price02: $price02,
-                stock: $stock,
-                productStatus: $productStatus,
-                description: $description,
-                searchWord: $searchWord,
-                note: $note,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された商品が見つかりません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminUpdateProductInput(
+            productCode: $productCode,
+            productName: $productName,
+            price02: $price02,
+            stock: $stock,
+            productStatus: $productStatus,
+            description: $description,
+            searchWord: $searchWord,
+            note: $note,
+        ));
 
         assert($final instanceof AdminProductUpdated);
 
@@ -263,24 +207,7 @@ class Product extends ResourceObject
     public function onDelete(
         string $productCode,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminDeleteProductInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された商品が見つかりません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminDeleteProductInput(productCode: $productCode));
 
         assert($final instanceof AdminProductDeleted);
 

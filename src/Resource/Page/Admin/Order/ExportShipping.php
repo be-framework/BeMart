@@ -38,14 +38,7 @@ class ExportShipping extends ResourceObject
     #[Link(rel: 'doImportShippingCsv', href: 'page://self/admin/order/import-shipping', method: 'post')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new AdminExportShippingInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminExportShippingInput());
 
         assert($final instanceof AdminShippingCsvExported);
 

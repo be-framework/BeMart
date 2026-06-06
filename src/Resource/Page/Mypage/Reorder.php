@@ -46,32 +46,7 @@ class Reorder extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $orderNo): static
     {
-        try {
-            $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'orderNo' => $orderNo,
-            ];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        } catch (UnauthorizedOrderAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この注文へのアクセス権限がありません。', 'orderNo' => $orderNo];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Order not found.', 'orderNo' => $orderNo];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
 
         assert($final instanceof Reordered);
 

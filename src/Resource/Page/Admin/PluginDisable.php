@@ -38,29 +38,7 @@ class PluginDisable extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $pluginCode): static
     {
-        try {
-            $final = ($this->becoming)(new DisablePluginInput(pluginCode: $pluginCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (PluginNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'プラグインが見つかりませんでした。'];
-
-            return $this;
-        } catch (PluginNotInstalledException) {
-            $this->code = 409;
-            $this->body = ['message' => 'プラグインがインストールされていません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DisablePluginInput(pluginCode: $pluginCode));
 
         assert($final instanceof PluginDisabled);
 

@@ -196,3 +196,75 @@ See [`diff/entity-vs-eccube.md`](diff/entity-vs-eccube.md) for the
 Entity ↔ table mapping (8 grade-A 1:1, 8 grade-B JOINs, 5 grade-C
 schema deltas). Phase 2b will flip production bindings + add the
 remaining `Sql*` classes on the same framework.
+
+## SQL quality analysis (on-demand)
+
+[Koriym.SqlQuality](https://github.com/koriym/Koriym.SqlQuality) runs
+`EXPLAIN FORMAT=JSON` / `EXPLAIN ANALYZE` against a **live MySQL** and flags
+performance anti-patterns (FullTableScan, IneffectiveJoin,
+FunctionInvalidatesIndex, ImplicitTypeConversion, …). It is wired as a
+**standalone, on-demand** tool — deliberately **not** part of `composer sa`,
+`composer test`, `composer build`, or CI. Run it by hand when reviewing query
+shape; it requires a live DB and so is gated the same way the SQL test suites
+are.
+
+Scope: the **76 single-statement SELECT (read) queries** in `var/sql/`.
+Command files (INSERT/UPDATE/DELETE) and multi-statement scripts
+(`cart_save`, `order_item_register`, `plugin_set_enabled`,
+`tmail_template_update`) are excluded — they cannot be EXPLAIN-analyzed and
+would execute writes under `EXPLAIN ANALYZE`. The scope is fixed by the keys
+of [`var/sql-quality/sql_params.php`](../var/sql-quality/sql_params.php), which
+also supplies each query's bind values.
+
+### Prerequisites
+
+1. Bring up the DB and load schema + master + a representative dataset:
+
+   ```bash
+   malt start
+   sql/setup-db.sh "mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4"
+   mysql -h127.0.0.1 -P3306 -udbuser -psecret eccubedb_test < sql/seed/analysis-sample.sql
+   ```
+
+   `sql/seed/analysis-sample.sql` bulk-generates a representative catalog
+   (2,000 products / product_classes, 500 customers, 5 admins) so EXPLAIN sees
+   non-zero cardinality and produces realistic access paths. Order / cart /
+   config tables are left empty — their SELECTs still EXPLAIN validly (0 rows).
+
+2. **macOS / Homebrew note** — if `malt start` leaves MySQL `stopped` with a
+   `Library not loaded: …libprotobuf-lite.34.1.0.dylib` error, the Homebrew
+   `mysql@8.0` keg is linked against an older protobuf than the one currently
+   on `protobuf`. Either `brew reinstall mysql@8.0`, or launch `mysqld`
+   directly with the older keg on the loader path (reversible, no reinstall):
+
+   ```bash
+   DYLD_FALLBACK_LIBRARY_PATH=/opt/homebrew/Cellar/protobuf/34.1/lib \
+     /opt/homebrew/opt/mysql@8.0/bin/mysqld \
+     --defaults-file=malt/conf/my_3306.cnf.tmp \
+     --datadir=malt/var/mysql_0 --socket=malt/tmp/mysql_3306.sock --port=3306 &
+   disown
+   ```
+
+   (`mysqld_safe` / `nohup` won't work: they run under SIP-protected binaries
+   that strip `DYLD_*`. Launch `mysqld` directly.)
+
+### Run
+
+```bash
+composer sql:quality
+```
+
+Reports are written to `build/sql-quality/` (git-ignored):
+
+- `summary_report.md` — one row per query with Cost, Exec Time, Level
+  (μ ± σ classification), and detected Issues.
+- `<query>.md` — per-query EXPLAIN detail plus an AI optimization prompt.
+
+### Notes
+
+- Values in `sql_params.php` target the seed data so `EXPLAIN ANALYZE` returns
+  rows; placeholders only need a valid type, so queries against unseeded tables
+  still analyze (returning 0 rows).
+- The analyzer skips any query it cannot EXPLAIN and continues — e.g.
+  `order_history_by_order_no.sql` uses `JSON_ARRAYAGG(... ORDER BY ...)`, which
+  MySQL 8.0 does not support. Such skips are a useful portability signal.

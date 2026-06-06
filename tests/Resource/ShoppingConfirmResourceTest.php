@@ -86,22 +86,22 @@ final class ShoppingConfirmResourceTest extends TestCase
 
     public function testOnGetUnknownPreOrderReturns404(): void
     {
-        $ro = $this->resource->get('page://self/shopping/confirm', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\PreOrderNotFoundException::class);
+
+        $this->resource->get('page://self/shopping/confirm', [
             'preOrderId' => '0000000000000000000000000000000000000000',
             'paymentMethodId' => 1,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnGetMalformedPreOrderIdReturns400(): void
     {
-        $ro = $this->resource->get('page://self/shopping/confirm', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->get('page://self/shopping/confirm', [
             'preOrderId' => 'not-hex',
             'paymentMethodId' => 1,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnGetVerifyFailureRedirectsToShoppingError(): void

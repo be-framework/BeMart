@@ -33,14 +33,7 @@ class ClassNameExport extends ResourceObject
     #[Link(rel: 'doImportClassNameCsv', href: 'page://self/admin/product/csv-class-name', method: 'post')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new ExportClassNameInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ExportClassNameInput());
 
         assert($final instanceof ClassNameCsvExported);
 

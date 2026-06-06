@@ -47,32 +47,10 @@ class ProductCopy extends ResourceObject
         string $productCode,
         string $newProductCode,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminCopyProductInput(
-                productCode: $productCode,
-                newProductCode: $newProductCode,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'コピー元の商品が見つかりません。'];
-
-            return $this;
-        } catch (ProductCodeAlreadyInUseException) {
-            $this->code = 409;
-            $this->body = ['message' => 'この商品コードは既に使用されています。', 'newProductCode' => $newProductCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminCopyProductInput(
+            productCode: $productCode,
+            newProductCode: $newProductCode,
+        ));
 
         assert($final instanceof AdminProductCopied);
 

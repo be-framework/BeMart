@@ -95,22 +95,10 @@ class CsvConfig extends ResourceObject
         int $csvType,
         array $columns,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateCsvInput(
-                csvType: $csvType,
-                columns: $columns,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateCsvInput(
+            csvType: $csvType,
+            columns: $columns,
+        ));
 
         assert($final instanceof CsvConfigUpdated);
 

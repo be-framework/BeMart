@@ -43,6 +43,7 @@ use function dirname;
  * the admin session. AdminMasterRegistry routes the abstract transition
  * to the right storage keyed by `masterType`.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminMasterListTransitionsTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

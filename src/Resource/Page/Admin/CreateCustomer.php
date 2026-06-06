@@ -90,45 +90,23 @@ class CreateCustomer extends ResourceObject
         int|null $sex = null,
         int|null $job = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminCreateCustomerInput(
-                email: $email,
-                password: $password,
-                name01: $name01,
-                name02: $name02,
-                kana01: $kana01,
-                kana02: $kana02,
-                companyName: $companyName,
-                phoneNumber: $phoneNumber,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-                birth: $birth,
-                sex: $sex,
-                job: $job,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'email' => $email,
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (EmailAlreadyRegisteredException) {
-            // BEAR\Resource\Code lacks CONFLICT; use the integer literal
-            // (same convention as Pilot 4's Entry resource).
-            $this->code = 409;
-            $this->body = ['message' => 'The email is already registered.', 'email' => $email];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminCreateCustomerInput(
+            email: $email,
+            password: $password,
+            name01: $name01,
+            name02: $name02,
+            kana01: $kana01,
+            kana02: $kana02,
+            companyName: $companyName,
+            phoneNumber: $phoneNumber,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            birth: $birth,
+            sex: $sex,
+            job: $job,
+        ));
 
         assert($final instanceof AdminCustomerCreated);
 

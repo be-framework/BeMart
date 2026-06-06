@@ -27,6 +27,7 @@ use function dirname;
  * Tests the happy path + idempotent replay + format rejection + CSRF +
  * AUTHZ failure + 404.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderStatusResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

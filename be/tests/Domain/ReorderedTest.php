@@ -35,6 +35,7 @@ use function sprintf;
  * sample-001 / sample-002). Skip-path tests install additional seeded
  * orders in setUp by writing extra rows via `putItems()`.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class ReorderedTest extends TestCase
 {
     private BecomingInterface $becoming;

@@ -35,14 +35,7 @@ class BlockList extends ResourceObject
     #[Link(rel: 'doDeleteBlock', href: 'page://self/admin/block/block', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminBlockListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminBlockListInput());
 
         assert($final instanceof AdminBlockListFetched);
 
@@ -65,22 +58,10 @@ class BlockList extends ResourceObject
         string $blockName,
         string $blockFileName,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateBlockInput(
-                blockName: $blockName,
-                blockFileName: $blockFileName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateBlockInput(
+            blockName: $blockName,
+            blockFileName: $blockFileName,
+        ));
 
         assert($final instanceof BlockCreated);
 

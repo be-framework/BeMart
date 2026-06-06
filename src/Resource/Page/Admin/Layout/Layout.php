@@ -73,27 +73,10 @@ class Layout extends ResourceObject
         string $layoutId,
         string|null $layoutName = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateLayoutInput(
-                layoutId: $layoutId,
-                layoutName: $layoutName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (LayoutNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたレイアウトは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateLayoutInput(
+            layoutId: $layoutId,
+            layoutName: $layoutName,
+        ));
 
         assert($final instanceof LayoutUpdated);
 
