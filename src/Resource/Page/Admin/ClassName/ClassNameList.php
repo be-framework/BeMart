@@ -46,14 +46,7 @@ class ClassNameList extends ResourceObject
     #[Link(rel: 'doDeleteClassName', href: 'page://self/admin/class-name/class-name', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminClassNameListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminClassNameListInput());
 
         assert($final instanceof AdminClassNameListFetched);
 
@@ -77,19 +70,7 @@ class ClassNameList extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $classNameLabel): static
     {
-        try {
-            $final = ($this->becoming)(new CreateClassNameInput(classNameLabel: $classNameLabel));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateClassNameInput(classNameLabel: $classNameLabel));
 
         assert($final instanceof ClassNameCreated);
 

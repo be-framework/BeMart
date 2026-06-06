@@ -37,14 +37,7 @@ class ClassCategoryExport extends ResourceObject
     #[Link(rel: 'doImportClassCategoryCsv', href: 'page://self/admin/product/csv-class-category', method: 'post')]
     public function onGet(string|null $classNameId = null): static
     {
-        try {
-            $final = ($this->becoming)(new ExportClassCategoryInput(classNameId: $classNameId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ExportClassCategoryInput(classNameId: $classNameId));
 
         assert($final instanceof ClassCategoryCsvExported);
 

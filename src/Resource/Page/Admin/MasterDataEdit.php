@@ -42,19 +42,7 @@ class MasterDataEdit extends ResourceObject
     #[CsrfProtected]
     public function onPut(string $masterType, array $rows = []): static
     {
-        try {
-            $final = ($this->becoming)(new UpdateMasterDataInput(masterType: $masterType, rows: $rows));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? '指定されたマスタデータは見つかりませんでした。'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateMasterDataInput(masterType: $masterType, rows: $rows));
 
         assert($final instanceof MasterDataUpdated);
 

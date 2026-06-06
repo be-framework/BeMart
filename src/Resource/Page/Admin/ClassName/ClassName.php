@@ -43,27 +43,10 @@ class ClassName extends ResourceObject
         string $classNameId,
         string|null $classNameLabel = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateClassNameInput(
-                classNameId: $classNameId,
-                classNameLabel: $classNameLabel,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ClassNameNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された規格名は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateClassNameInput(
+            classNameId: $classNameId,
+            classNameLabel: $classNameLabel,
+        ));
 
         assert($final instanceof ClassNameUpdated);
 
@@ -83,19 +66,7 @@ class ClassName extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $classNameId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteClassNameInput(classNameId: $classNameId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ClassNameNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された規格名は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteClassNameInput(classNameId: $classNameId));
 
         assert($final instanceof ClassNameDeleted);
 

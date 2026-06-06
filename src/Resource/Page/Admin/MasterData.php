@@ -52,14 +52,7 @@ class MasterData extends ResourceObject
             return $this;
         }
 
-        try {
-            $rows = $this->masters->listRows($masterType);
-        } catch (MasterTypeFormatException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '指定されたマスタデータは見つかりませんでした。'];
-
-            return $this;
-        }
+        $rows = $this->masters->listRows($masterType);
 
         $masterTypes = $this->masters->listMasterTypes();
         $form = $this->formFactory->newInstance(AdminMasterDataForm::class);
@@ -87,19 +80,7 @@ class MasterData extends ResourceObject
     #[CsrfProtected]
     public function onPut(string $masterType = 'tag'): static
     {
-        try {
-            $final = ($this->becoming)(new SelectMasterDataInput(masterType: $masterType));
-        } catch (SemanticVariableException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '指定されたマスタデータは見つかりませんでした。'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SelectMasterDataInput(masterType: $masterType));
 
         assert($final instanceof MasterDataSelected);
 

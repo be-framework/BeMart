@@ -34,19 +34,7 @@ class Tag extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $tagId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteTagInput(tagId: $tagId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (TagNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたタグは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteTagInput(tagId: $tagId));
 
         assert($final instanceof TagDeleted);
 

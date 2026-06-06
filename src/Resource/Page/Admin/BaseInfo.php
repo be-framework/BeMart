@@ -60,14 +60,7 @@ class BaseInfo extends ResourceObject
     #[Link(rel: 'doUpdateBaseInfo', href: 'page://self/admin/base-info', method: 'post')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetBaseInfoInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetBaseInfoInput());
 
         assert($final instanceof BaseInfoFetched);
 
@@ -141,32 +134,20 @@ class BaseInfo extends ResourceObject
         string|null $shopEmail01 = null,
         string|null $shopMessage = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateBaseInfoInput(
-                shopName: $shopName,
-                shopKana: $shopKana,
-                shopNameEng: $shopNameEng,
-                companyName: $companyName,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-                phoneNumber: $phoneNumber,
-                businessHour: $businessHour,
-                shopEmail01: $shopEmail01,
-                shopMessage: $shopMessage,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateBaseInfoInput(
+            shopName: $shopName,
+            shopKana: $shopKana,
+            shopNameEng: $shopNameEng,
+            companyName: $companyName,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            phoneNumber: $phoneNumber,
+            businessHour: $businessHour,
+            shopEmail01: $shopEmail01,
+            shopMessage: $shopMessage,
+        ));
 
         assert($final instanceof BaseInfoUpdated);
 

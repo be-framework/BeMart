@@ -76,28 +76,11 @@ class Block extends ResourceObject
         string|null $blockName = null,
         string|null $blockFileName = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateBlockInput(
-                blockId: $blockId,
-                blockName: $blockName,
-                blockFileName: $blockFileName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (BlockNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたブロックは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateBlockInput(
+            blockId: $blockId,
+            blockName: $blockName,
+            blockFileName: $blockFileName,
+        ));
 
         assert($final instanceof BlockUpdated);
 
@@ -120,19 +103,7 @@ class Block extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $blockId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (BlockNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたブロックは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));
 
         assert($final instanceof BlockDeleted);
 

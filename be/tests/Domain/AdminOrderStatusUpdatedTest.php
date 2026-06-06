@@ -27,6 +27,7 @@ use function dirname;
  * with format validation via the OrderStatus Semantic + idempotency
  * branch tested explicitly.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderStatusUpdatedTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

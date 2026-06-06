@@ -59,52 +59,46 @@ final class LoginResourceTest extends TestCase
 
     public function testOnPostWrongPasswordReturns401(): void
     {
-        $ro = $this->resource->post('page://self/login', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\LoginFailedException::class);
+
+        $this->resource->post('page://self/login', [
             'email' => 'login-test@example.com',
             'password' => 'not-the-right-password',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('正しくありません', $ro->body['message']);
-        // The body MUST NOT echo the email back — that would broadcast
-        // existence information to attackers probing for valid emails.
-        $this->assertArrayNotHasKey('email', $ro->body);
     }
 
     public function testOnPostUnknownEmailReturns401(): void
     {
-        $ro = $this->resource->post('page://self/login', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\LoginFailedException::class);
+
+        $this->resource->post('page://self/login', [
             'email' => 'nobody@example.com',
             'password' => 'login-test-password-2026',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        // Same message as wrong-password case — no user enumeration.
-        $this->assertStringContainsString('正しくありません', $ro->body['message']);
     }
 
     public function testOnPostInvalidEmailReturns400(): void
     {
-        $ro = $this->resource->post('page://self/login', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/login', [
             'email' => 'not-an-email',
             'password' => 'login-test-password-2026',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostShortPasswordReturns400(): void
     {
-        $ro = $this->resource->post('page://self/login', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/login', [
             'email' => 'login-test@example.com',
             'password' => 'short',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

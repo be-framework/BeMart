@@ -48,19 +48,7 @@ class Mypage extends ResourceObject
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     public function onGet(int $orderLimit = 5): static
     {
-        try {
-            $final = ($this->becoming)(new GetMypageInput(orderLimit: $orderLimit));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetMypageInput(orderLimit: $orderLimit));
 
         assert($final instanceof MypageFetched);
 

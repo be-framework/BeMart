@@ -92,29 +92,12 @@ class Contact extends ResourceObject
         string $contactEmail,
         string $contactContents,
     ): static {
-        try {
-            $final = ($this->becoming)(new SubmitContactInput(
-                contactName01: $contactName01,
-                contactName02: $contactName02,
-                contactEmail: $contactEmail,
-                contactContents: $contactContents,
-            ));
-        } catch (SemanticVariableException $e) {
-            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $message,
-                'form' => $this->failedForm(
-                    $contactName01,
-                    $contactName02,
-                    $contactEmail,
-                    $contactContents,
-                    $message,
-                ),
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SubmitContactInput(
+            contactName01: $contactName01,
+            contactName02: $contactName02,
+            contactEmail: $contactEmail,
+            contactContents: $contactContents,
+        ));
 
         assert($final instanceof ContactSubmitted);
 
