@@ -33,7 +33,7 @@
         "tecnickcom/tcpdf": "^6.2"
     },
     "require-dev": {
-        "bear/api-doc": "1.x-dev as 1.11.2",
+        "bear/api-doc": "1.x",
         "bear/devtools": "dev-codex/httpresource-hal-follow-dev as 1.x-dev",
         "cweagans/composer-patches": "^1.7",
         "koriym/php-server": "^1.0",
