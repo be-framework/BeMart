@@ -22,27 +22,27 @@ INSERT INTO dtb_order (
     discriminator_type
 )
 SELECT CASE
-           WHEN JSON_VALUE(CAST(:order AS JSON), '$.customerId') REGEXP '^[0-9]+$'
-               THEN CAST(JSON_VALUE(CAST(:order AS JSON), '$.customerId') AS UNSIGNED)
+           WHEN JSON_VALUE(CAST(:order AS CHAR), '$.customerId') REGEXP '^[0-9]+$'
+               THEN CAST(JSON_VALUE(CAST(:order AS CHAR), '$.customerId') AS UNSIGNED)
            ELSE NULL
        END,
-       NULLIF(CAST(JSON_VALUE(CAST(:order AS JSON), '$.paymentMethodId') AS SIGNED), 0),
-       NULLIF(JSON_VALUE(CAST(:order AS JSON), '$.preOrderId'), ''),
-       JSON_VALUE(CAST(:order AS JSON), '$.orderNo'),
+       NULLIF(CAST(JSON_VALUE(CAST(:order AS CHAR), '$.paymentMethodId') AS SIGNED), 0),
+       NULLIF(JSON_VALUE(CAST(:order AS CHAR), '$.preOrderId'), ''),
+       JSON_VALUE(CAST(:order AS CHAR), '$.orderNo'),
        '-',
        '-',
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.subtotal') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.discount') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.deliveryFeeTotal') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.charge') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.tax') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.total') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.paymentTotal') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.addPoint') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.usePoint') AS SIGNED),
-       CAST(JSON_VALUE(CAST(:order AS JSON), '$.orderStatus') AS SIGNED),
-       NULLIF(REPLACE(JSON_VALUE(CAST(:order AS JSON), '$.orderDate'), 'T', ' '), ''),
-       NULLIF(REPLACE(JSON_VALUE(CAST(:order AS JSON), '$.paymentDate'), 'T', ' '), ''),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.subtotal') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.discount') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.deliveryFeeTotal') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.charge') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.tax') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.total') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.paymentTotal') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.addPoint') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.usePoint') AS SIGNED),
+       CAST(JSON_VALUE(CAST(:order AS CHAR), '$.orderStatus') AS SIGNED),
+       NULLIF(SUBSTRING(REPLACE(JSON_VALUE(CAST(:order AS CHAR), '$.orderDate'), 'T', ' '), 1, 19), ''),
+       NULLIF(SUBSTRING(REPLACE(JSON_VALUE(CAST(:order AS CHAR), '$.paymentDate'), 'T', ' '), 1, 19), ''),
        NOW(),
        NOW(),
        'order'
