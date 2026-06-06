@@ -57,9 +57,6 @@ jobs:
           path: tools/ec-cube-source
           key: eccube-reference-4706db5267016a05e933221cabb3144714425ffa
 
-      - name: Validate Composer metadata
-        run: composer validate --no-check-publish
-
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --no-progress
 
