@@ -50,14 +50,7 @@ class AddressList extends ResourceObject
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetCustomerAddressListInput());
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetCustomerAddressListInput());
 
         assert($final instanceof CustomerAddressListFetched);
 
@@ -97,30 +90,18 @@ class AddressList extends ResourceObject
         string|null $kana02 = null,
         string|null $companyName = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateCustomerAddressInput(
-                name01: $name01,
-                name02: $name02,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-                phoneNumber: $phoneNumber,
-                kana01: $kana01,
-                kana02: $kana02,
-                companyName: $companyName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateCustomerAddressInput(
+            name01: $name01,
+            name02: $name02,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            phoneNumber: $phoneNumber,
+            kana01: $kana01,
+            kana02: $kana02,
+            companyName: $companyName,
+        ));
 
         assert($final instanceof CustomerAddressCreated);
 

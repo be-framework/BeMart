@@ -58,32 +58,7 @@ class ResendActivationMail extends ResourceObject
     public function onPost(
         string $email,
     ): static {
-        try {
-            $final = ($this->becoming)(new ResendActivationMailInput(email: $email));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (CustomerNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された会員は見つかりませんでした。'];
-
-            return $this;
-        } catch (CustomerAlreadyActivatedException) {
-            // 409 Conflict — BEAR\Resource\Code has no CONFLICT constant;
-            // the literal matches the rest of the admin surface
-            // (CreateCustomer, Member, Product all use a bare 409).
-            $this->code = 409;
-            $this->body = ['message' => '指定された会員は既に本会員です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ResendActivationMailInput(email: $email));
 
         assert($final instanceof ActivationMailResent);
 

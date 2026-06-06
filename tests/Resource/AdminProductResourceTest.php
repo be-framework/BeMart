@@ -67,18 +67,18 @@ final class AdminProductResourceTest extends TestCase
 
     public function testOnGetUnknownProductReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/product', ['productCode' => 'does-not-exist']);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductNotFoundException::class);
 
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->resource->get('page://self/admin/product', ['productCode' => 'does-not-exist']);
     }
 
     public function testOnGetWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->get('page://self/admin/product', ['productCode' => 'admin-active-001']);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->resource->get('page://self/admin/product', ['productCode' => 'admin-active-001']);
     }
 
     // ----------- onPost (doCreateProduct) -----------
@@ -101,14 +101,14 @@ final class AdminProductResourceTest extends TestCase
 
     public function testOnPostDuplicateReturns409(): void
     {
-        $ro = $this->resource->post('page://self/admin/product', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductCodeAlreadyInUseException::class);
+
+        $this->resource->post('page://self/admin/product', [
             'productCode' => 'admin-active-001',
             'productName' => 'duplicate',
             'price02' => 1,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(409, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -127,15 +127,14 @@ final class AdminProductResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/product', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/product', [
             'productCode' => 'wave8-noadm-001',
             'productName' => 'No admin',
             'price02' => 100,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 
     // ----------- onPut (doUpdateProduct) -----------
@@ -156,26 +155,26 @@ final class AdminProductResourceTest extends TestCase
 
     public function testOnPutUnknownProductReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/product', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductNotFoundException::class);
+
+        $this->resource->put('page://self/admin/product', [
             'productCode' => 'does-not-exist',
             'productName' => 'whatever',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnPutWithoutAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->put('page://self/admin/product', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->put('page://self/admin/product', [
             'productCode' => 'admin-active-001',
             'productName' => 'no admin',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     // ----------- onDelete (doDeleteProduct) -----------
@@ -208,12 +207,12 @@ final class AdminProductResourceTest extends TestCase
 
     public function testOnDeleteUnknownReturns404(): void
     {
-        $ro = $this->resource->delete('page://self/admin/product', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductNotFoundException::class);
+
+        $this->resource->delete('page://self/admin/product', [
             'productCode' => 'does-not-exist',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnDeleteMissingCsrfReturns403(): void

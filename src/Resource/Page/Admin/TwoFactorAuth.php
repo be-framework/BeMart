@@ -90,17 +90,10 @@ class TwoFactorAuth extends ResourceObject
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(string $loginId, string $deviceToken): static
     {
-        try {
-            $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
-                loginId: $loginId,
-                deviceToken: $deviceToken,
-            ));
-        } catch (SemanticVariableException | TwoFactorAuthFailedException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '認証コードが正しくありません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
+            loginId: $loginId,
+            deviceToken: $deviceToken,
+        ));
 
         assert($final instanceof TwoFactorAuthVerified);
 

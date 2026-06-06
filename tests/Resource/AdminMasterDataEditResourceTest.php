@@ -66,12 +66,12 @@ final class AdminMasterDataEditResourceTest extends TestCase
 
     public function testSelectUnknownMasterReturns400(): void
     {
-        $ro = $this->resource->put('page://self/admin/master-data', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->put('page://self/admin/master-data', [
             'masterType' => 'no-such-master',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testUpdateWritesRows(): void
@@ -101,12 +101,12 @@ final class AdminMasterDataEditResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->put('page://self/admin/master-data-edit', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->put('page://self/admin/master-data-edit', [
             'masterType' => 'tag',
             'rows' => [],
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

@@ -54,33 +54,11 @@ class ToggleVisible extends ResourceObject
         string $rowId,
         bool $visible,
     ): static {
-        try {
-            $final = ($this->becoming)(new ToggleVisibleInput(
-                masterType: $masterType,
-                rowId: $rowId,
-                visible: $visible,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (MasterOperationNotSupportedException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => 'このマスタは表示・非表示の切り替えに対応していません。'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (MasterRowNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された行は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ToggleVisibleInput(
+            masterType: $masterType,
+            rowId: $rowId,
+            visible: $visible,
+        ));
 
         assert($final instanceof VisibleToggled);
 

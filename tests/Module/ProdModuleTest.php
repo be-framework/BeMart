@@ -12,6 +12,7 @@ use Be\Framework\BecomingInterface;
 use Koriym\SemanticLogger\SemanticLogger;
 use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Module\ProdModule;
@@ -85,25 +86,18 @@ final class ProdModuleTest extends TestCase
         );
 
         $resource = $injector->getInstance(ResourceInterface::class);
-        $ro = $resource->post('page://self/shopping/checkout', [
-            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-            'csrfToken' => 'prod-csrf-mirror',
-        ]);
 
-        // Phase 2c (production cutover): ProdModule now installs SqlModule,
-        // so the prod context runs the SQL-backed Reasons against the real
-        // DATABASE_URL DB instead of the in-memory Fakes. The Fakes used to
-        // pre-load the `aaaa…` PROCESSING pre-order for customer-001; the
-        // SQL backend has no such row unless the DB is seeded (an
-        // out-of-scope infrastructure prerequisite — load
-        // sql/schema/ec-cube-4.3-mysql-mysqldump.sql and seed dtb_*/mtb_*).
-        // So the checkout no longer 201s here; it resolves to a 404
-        // (pre-order not found). What this test still pins is the invariant
-        // it was written for: the request runs end-to-end through the
-        // Becoming framework under the prod context, and the prod logging
-        // override means var/log/bemart.json is NEVER written regardless of
-        // the response code (PII leak prevention).
-        $this->assertGreaterThanOrEqual(Code::OK, $ro->code);
+        try {
+            $resource->post('page://self/shopping/checkout', [
+                'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
+                'csrfToken' => 'prod-csrf-mirror',
+            ]);
+        } catch (PreOrderNotFoundException) {
+            // The SQL-backed prod DB used in CI may not carry the fake
+            // checkout fixture. The invariant under test is still that the
+            // prod Becoming path does not write the semantic log file.
+            $this->addToAssertionCount(1);
+        }
         $this->assertFileDoesNotExist(
             $this->logFile,
             'ProdModule must NOT write var/log/bemart.json (PII leak prevention)',
@@ -181,10 +175,6 @@ final class ProdModuleTest extends TestCase
             $version = (string) $pdo->query('SELECT VERSION()')->fetchColumn();
         } catch (\PDOException $e) {
             $this->markTestSkipped('DATABASE_URL unreachable — prod context requires SQL wiring: ' . $e->getMessage());
-        }
-
-        if (! \str_contains(\strtolower($version), 'mariadb')) {
-            $this->markTestSkipped('DATABASE_URL is not MariaDB — prod SQL wiring baseline targets MariaDB: ' . $version);
         }
     }
 

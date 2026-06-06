@@ -40,6 +40,7 @@ use function str_contains;
  *   - POST /admin/order/shipping-address    doSelectShippingAddress
  *   - PUT  /admin/order/shipping-address    doUpdateShippingAddress
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderExtrasResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

@@ -50,14 +50,7 @@ class ClassCategoryList extends ResourceObject
     #[Link(rel: 'doDeleteClassCategory', href: 'page://self/admin/class-category/class-category', method: 'delete')]
     public function onGet(string|null $classNameId = null): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminClassCategoryListInput(classNameId: $classNameId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminClassCategoryListInput(classNameId: $classNameId));
 
         assert($final instanceof AdminClassCategoryListFetched);
 
@@ -85,27 +78,10 @@ class ClassCategoryList extends ResourceObject
         string $classNameId,
         string $classCategoryName,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateClassCategoryInput(
-                classNameId: $classNameId,
-                classCategoryName: $classCategoryName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ClassNameNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された規格名は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateClassCategoryInput(
+            classNameId: $classNameId,
+            classCategoryName: $classCategoryName,
+        ));
 
         assert($final instanceof ClassCategoryCreated);
 

@@ -61,19 +61,7 @@ class Change extends ResourceObject
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetMypageChangeInput());
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetMypageChangeInput());
 
         assert($final instanceof MypageChangeFormFetched);
 
@@ -145,36 +133,19 @@ class Change extends ResourceObject
         string|null $addr01 = null,
         string|null $addr02 = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateCustomerInput(
-                email: $email,
-                name01: $name01,
-                name02: $name02,
-                kana01: $kana01,
-                kana02: $kana02,
-                companyName: $companyName,
-                phoneNumber: $phoneNumber,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        } catch (EmailAlreadyRegisteredException) {
-            $this->code = 409;
-            $this->body = ['message' => 'The new email is already registered.', 'email' => $email];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateCustomerInput(
+            email: $email,
+            name01: $name01,
+            name02: $name02,
+            kana01: $kana01,
+            kana02: $kana02,
+            companyName: $companyName,
+            phoneNumber: $phoneNumber,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+        ));
 
         assert($final instanceof CustomerUpdated);
 

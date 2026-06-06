@@ -111,25 +111,10 @@ class Login extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $loginId, string $password): static
     {
-        try {
-            $final = ($this->becoming)(new AdminLoginInput(
-                loginId: $loginId,
-                password: $password,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'loginId' => $loginId,
-            ];
-
-            return $this;
-        } catch (AdminLoginFailedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'ログインIDまたはパスワードが正しくありません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminLoginInput(
+            loginId: $loginId,
+            password: $password,
+        ));
 
         assert($final instanceof AdminAuthenticated);
 

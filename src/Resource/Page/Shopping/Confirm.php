@@ -56,22 +56,10 @@ class Confirm extends ResourceObject
         string $preOrderId = 'aceface0000000000000000000000000000a11ce',
         int $paymentMethodId = 2,
     ): static {
-        try {
-            $final = ($this->becoming)(new ConfirmOrderInput(
-                preOrderId: $preOrderId,
-                paymentMethodId: $paymentMethodId,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (PreOrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Pre-order not found.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ConfirmOrderInput(
+            preOrderId: $preOrderId,
+            paymentMethodId: $paymentMethodId,
+        ));
 
         if ($final instanceof OrderConfirmFailed) {
             // verify() rejected the pre-order — bounce to ShoppingError.

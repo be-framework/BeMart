@@ -43,14 +43,7 @@ class PaymentList extends ResourceObject
     #[Link(rel: 'doDeletePayment', href: 'page://self/admin/payment/payment', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminPaymentListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminPaymentListInput());
 
         assert($final instanceof AdminPaymentListFetched);
 
@@ -79,25 +72,13 @@ class PaymentList extends ResourceObject
         int|null $ruleMax = null,
         bool $visible = true,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreatePaymentMethodAdminInput(
-                paymentMethodName: $paymentMethodName,
-                charge: $charge,
-                ruleMin: $ruleMin,
-                ruleMax: $ruleMax,
-                visible: $visible,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreatePaymentMethodAdminInput(
+            paymentMethodName: $paymentMethodName,
+            charge: $charge,
+            ruleMin: $ruleMin,
+            ruleMax: $ruleMax,
+            visible: $visible,
+        ));
 
         assert($final instanceof PaymentMethodAdminCreated);
 

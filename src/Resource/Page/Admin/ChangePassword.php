@@ -106,43 +106,11 @@ class ChangePassword extends ResourceObject
         string $changePasswordFirst,
         string $changePasswordSecond,
     ): static {
-        try {
-            $final = ($this->becoming)(new ChangeAdminPasswordInput(
-                currentPassword: $currentPassword,
-                changePasswordFirst: $changePasswordFirst,
-                changePasswordSecond: $changePasswordSecond,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (InvalidCurrentPasswordException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '現在のパスワードが正しくありません。'];
-
-            return $this;
-        } catch (PasswordConfirmationMismatchException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '新しいパスワードと確認用パスワードが一致しません。'];
-
-            return $this;
-        } catch (PasswordPolicyViolationException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => 'パスワードは8文字以上32文字以下で入力してください。'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (AdminNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された管理者は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ChangeAdminPasswordInput(
+            currentPassword: $currentPassword,
+            changePasswordFirst: $changePasswordFirst,
+            changePasswordSecond: $changePasswordSecond,
+        ));
 
         assert($final instanceof AdminPasswordChanged);
 

@@ -116,32 +116,10 @@ class ShippingAddress extends ResourceObject
         string $orderNo,
         string $addressId,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminSelectShippingAddressInput(
-                orderNo: $orderNo,
-                addressId: $addressId,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
-
-            return $this;
-        } catch (AddressNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された住所は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminSelectShippingAddressInput(
+            orderNo: $orderNo,
+            addressId: $addressId,
+        ));
 
         assert($final instanceof AdminShippingAddressSelected);
 
@@ -174,33 +152,16 @@ class ShippingAddress extends ResourceObject
         string $addr02,
         string $phoneNumber,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminUpdateShippingAddressInput(
-                orderNo: $orderNo,
-                name01: $name01,
-                name02: $name02,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-                phoneNumber: $phoneNumber,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminUpdateShippingAddressInput(
+            orderNo: $orderNo,
+            name01: $name01,
+            name02: $name02,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            phoneNumber: $phoneNumber,
+        ));
 
         assert($final instanceof AdminShippingAddressUpdated);
 

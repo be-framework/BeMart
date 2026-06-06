@@ -52,14 +52,7 @@ class Delivery extends ResourceObject
     #[Link(rel: 'doUpdateDelivery', href: 'page://self/admin/delivery/delivery', method: 'put')]
     public function onGet(string $deliveryId = ''): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminDeliveryListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminDeliveryListInput());
 
         assert($final instanceof AdminDeliveryListFetched);
 
@@ -110,28 +103,11 @@ class Delivery extends ResourceObject
         string|null $deliveryName = null,
         bool|null $visible = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateDeliveryInput(
-                deliveryId: $deliveryId,
-                deliveryName: $deliveryName,
-                visible: $visible,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (DeliveryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された配送方法は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateDeliveryInput(
+            deliveryId: $deliveryId,
+            deliveryName: $deliveryName,
+            visible: $visible,
+        ));
 
         assert($final instanceof DeliveryUpdated);
 
@@ -153,19 +129,7 @@ class Delivery extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $deliveryId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteDeliveryInput(deliveryId: $deliveryId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (DeliveryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された配送方法は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteDeliveryInput(deliveryId: $deliveryId));
 
         assert($final instanceof DeliveryDeleted);
 

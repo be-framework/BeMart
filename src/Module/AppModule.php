@@ -64,6 +64,7 @@ final class AppModule extends AbstractAppModule
     protected function configure(): void
     {
         $this->install(new PackageModule());
+        $this->override(new AppErrorModule());
         $this->override(new AuraRouterModule($this->appMeta->appDir . '/config/aura-routes.php'));
         // PackageModule does not bind @AppName by itself; BEAR\Package\Module
         // factory normally overrides it. Install explicitly so tests can use

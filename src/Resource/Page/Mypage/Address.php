@@ -173,50 +173,19 @@ class Address extends ResourceObject
         string|null $addr02 = null,
         string|null $phoneNumber = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateCustomerAddressInput(
-                addressId: $addressId,
-                name01: $name01,
-                name02: $name02,
-                kana01: $kana01,
-                kana02: $kana02,
-                companyName: $companyName,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-                phoneNumber: $phoneNumber,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'addressId' => $addressId,
-            ];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        } catch (UnauthorizedAddressAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = [
-                'message' => 'この配送先へのアクセス権限がありません。',
-                'addressId' => $addressId,
-            ];
-
-            return $this;
-        } catch (AddressNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = [
-                'message' => 'Address not found.',
-                'addressId' => $addressId,
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateCustomerAddressInput(
+            addressId: $addressId,
+            name01: $name01,
+            name02: $name02,
+            kana01: $kana01,
+            kana02: $kana02,
+            companyName: $companyName,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            phoneNumber: $phoneNumber,
+        ));
 
         assert($final instanceof CustomerAddressUpdated);
 
@@ -247,38 +216,7 @@ class Address extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $addressId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteCustomerAddressInput(addressId: $addressId));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'addressId' => $addressId,
-            ];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        } catch (UnauthorizedAddressAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = [
-                'message' => 'この配送先へのアクセス権限がありません。',
-                'addressId' => $addressId,
-            ];
-
-            return $this;
-        } catch (AddressNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = [
-                'message' => 'Address not found.',
-                'addressId' => $addressId,
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteCustomerAddressInput(addressId: $addressId));
 
         assert($final instanceof CustomerAddressDeleted);
 

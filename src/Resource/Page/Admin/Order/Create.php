@@ -65,26 +65,14 @@ class Create extends ResourceObject
         int $charge = 0,
         int $discount = 0,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminCreateOrderInput(
-                customerId: $customerId,
-                paymentMethodId: $paymentMethodId,
-                orderItems: $orderItems,
-                deliveryFeeTotal: $deliveryFeeTotal,
-                charge: $charge,
-                discount: $discount,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminCreateOrderInput(
+            customerId: $customerId,
+            paymentMethodId: $paymentMethodId,
+            orderItems: $orderItems,
+            deliveryFeeTotal: $deliveryFeeTotal,
+            charge: $charge,
+            discount: $discount,
+        ));
 
         assert($final instanceof AdminOrderCreated);
 
