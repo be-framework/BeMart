@@ -83,7 +83,7 @@ class Js extends ResourceObject
         assert($final instanceof ContentJsUpdated);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_content_js';
+        $this->headers['Location'] = '/admin/content/js';
         $this->body = [
             'transitionId' => 'doUpdateContentJs',
             'length' => $final->length,

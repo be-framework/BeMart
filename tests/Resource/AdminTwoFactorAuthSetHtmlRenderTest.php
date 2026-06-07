@@ -93,7 +93,7 @@ final class AdminTwoFactorAuthSetHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="admin_two_factor_auth_device_token"', $html);
         $this->assertStringContainsString('id="admin_two_factor_auth_auth_key"', $html);
         $this->assertStringContainsString('type="hidden"', $html);
-        $this->assertStringContainsString('action="/admin_two_factor_auth_set"', $html);
+        $this->assertStringContainsString('action="/admin/two-factor-auth-set?_method=put"', $html);
     }
 
     #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
@@ -138,8 +138,8 @@ final class AdminTwoFactorAuthSetHtmlRenderTest extends TestCase
 
         foreach ([
             '<title>',
-            'name="_token"',
-            'csrf_token',
+            'name="csrfToken"',
+            'csrfcsrfToken',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -170,12 +170,12 @@ final class AdminTwoFactorAuthSetHtmlRenderTest extends TestCase
         // authKey — so the `otpauth://` URI diffs to zero.
         return $twig->render('two_factor_auth_set.twig', [
             'form' => new EcCubeStub([
-                '_token' => '_token',
-                'device_token' => 'device_token',
-                'auth_key' => 'auth_key',
+                'csrfToken' => 'csrfToken',
+                'deviceToken' => 'deviceToken',
+                'authKey' => 'authKey',
             ]),
             'error' => null,
-            'auth_key' => '',
+            'authKey' => '',
             'Member' => new EcCubeStub(['name' => '']),
             'BaseInfo' => new EcCubeStub(['shop_name' => 'BeMart']),
             'eccube_config' => ['locale' => 'ja'],
@@ -206,9 +206,9 @@ final class AdminTwoFactorAuthSetHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('trans', $trans));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
 
-        $formFields = ['device_token', 'auth_key'];
+        $formFields = ['deviceToken', 'authKey'];
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
             if ($form instanceof AdminTwoFactorAuthForm && is_string($field) && in_array($field, $formFields, true)) {
                 return new Markup($form->input($field), 'UTF-8');

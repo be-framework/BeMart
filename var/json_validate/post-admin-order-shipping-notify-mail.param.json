@@ -16,6 +16,18 @@
       "description": "顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。",
       "example": "past0000000000000000000000000001",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "CSRFトークン（出荷通知メール送信フォーム）",
+      "description": "管理画面の出荷通知メール送信フォーム送信元を検証するトークン。Resource引数ではなくCsrfProtected境界で消費される。",
+      "minLength": 0,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9._:-]*$",
+      "$comment": "csrfTokenはResource引数ではなくCsrfProtectedインターセプタで検証される。"
     }
   },
   "additionalProperties": false,

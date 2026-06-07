@@ -156,7 +156,7 @@ $(function() {
         }
 
         var $form = createForm($this.attr('href'), {
-            _token: $this.attr('token-for-anchor'),
+            csrfToken: $this.attr('token-for-anchor'),
             _method: data.method
         }).hide();
 

@@ -73,7 +73,7 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
         $this->assertSame('doUpdateMasterData', $this->bodyValue($updated, 'transitionId'));
         $this->assertSame(self::MASTER_TYPE, $this->bodyValue($updated, 'masterType'));
         $this->assertSame(1, $this->bodyValue($updated, 'count'));
-        $this->assertSame('/admin_setting_system_masterdata', $this->header($updated, 'Location'));
+        $this->assertSame('/admin/master-data', $this->header($updated, 'Location'));
 
         return $updated;
     }

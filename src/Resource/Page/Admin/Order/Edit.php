@@ -73,7 +73,7 @@ class Edit extends ResourceObject
         if ($orderNo === '') {
             $form->fillValues([
                 'name01' => '', 'name02' => '', 'email' => '',
-                'discount' => '0', 'charge' => '0', 'use_point' => '0', 'message' => '',
+                'discount' => '0', 'charge' => '0', 'usePoint' => '0', 'message' => '',
             ]);
 
             $this->code = Code::OK;
@@ -97,7 +97,7 @@ class Edit extends ResourceObject
             'email' => $final->customer['email'] ?? '',
             'discount' => (string) $final->discount,
             'charge' => (string) $final->charge,
-            'use_point' => (string) $final->usePoint,
+            'usePoint' => (string) $final->usePoint,
             'message' => '',
         ]);
 

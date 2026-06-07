@@ -10,6 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
@@ -61,10 +62,47 @@ class Confirm extends ResourceObject
         string $preOrderId = 'aceface0000000000000000000000000000a11ce',
         int $paymentMethodId = 2,
     ): static {
-        $final = ($this->becoming)(new ConfirmOrderInput(
-            preOrderId: $preOrderId,
-            paymentMethodId: $paymentMethodId,
-        ));
+        return $this->confirmOrder($preOrderId, $paymentMethodId);
+    }
+
+    /**
+     * HTML checkout form posts the selected payment field as `payment`.
+     * Keep GET query compatibility while accepting the real browser form.
+     *
+     * @psalm-taint-source input $preOrderId
+     * @psalm-taint-source input $payment
+     */
+    #[Alps('goShopping')]
+    #[JsonSchema(schema: 'get-shopping-confirm.json', params: 'post-shopping-confirm.param.json')]
+    #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
+    #[Link(rel: 'goShoppingError', href: 'page://self/shopping/error')]
+    #[CsrfProtected]
+    public function onPost(
+        string $preOrderId,
+        int $payment = 2,
+    ): static {
+        return $this->confirmOrder($preOrderId, $payment);
+    }
+
+    private function confirmOrder(string $preOrderId, int $paymentMethodId): static
+    {
+        try {
+            $final = ($this->becoming)(new ConfirmOrderInput(
+                preOrderId: $preOrderId,
+                paymentMethodId: $paymentMethodId,
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
+
+            return $this;
+        } catch (PreOrderNotFoundException) {
+            $this->code = Code::NOT_FOUND;
+            $this->body = ['message' => 'Pre-order not found.', 'preOrderId' => $preOrderId];
+
+            return $this;
+        }
+
 
         if ($final instanceof OrderConfirmFailed) {
             // verify() rejected the pre-order — bounce to ShoppingError.

@@ -96,7 +96,7 @@ final class ProductJaMessages
             'admin.product.product_csv_upload' => '商品CSV登録',
             'admin.product.product_csv_upload__message' => '商品CSVファイルをアップロードします。よろしいですか？',
             'admin.product.product_csv_upload__title' => '商品CSVをアップロードします',
-            'admin.product.product_id__short' => 'ID',
+            'admin.product.productCode__short' => 'ID',
             'admin.product.product_list' => '商品一覧',
             'admin.product.product_management' => '商品管理',
             'admin.product.stock' => '在庫数',

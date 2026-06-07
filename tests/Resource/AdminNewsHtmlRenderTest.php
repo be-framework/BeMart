@@ -70,7 +70,7 @@ final class AdminNewsHtmlRenderTest extends TestCase
      * acceptable. The form inputs are rendered by a real AdminNewsForm on
      * BOTH sides, so they diff to zero; the residual is the admin-frame
      * baseline (same families as {@see AdminNewsListHtmlRenderTest}) plus
-     * the form `_token` hidden input.
+     * the form `csrfToken` hidden input.
      *
      * @var list<string>
      */
@@ -204,7 +204,7 @@ final class AdminNewsHtmlRenderTest extends TestCase
         );
 
         // With the inputs rendered by a real AdminNewsForm on both sides,
-        // the residual is the admin-frame baseline + the form _token
+        // the residual is the admin-frame baseline + the form csrfToken
         // hidden input + the omitted `visible` select. If this balloons,
         // the port has drifted.
         $this->assertLessThanOrEqual(
@@ -233,11 +233,11 @@ final class AdminNewsHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // Form: EC-CUBE's hidden `_token` CSRF input. BeMart keeps the
+            // Form: EC-CUBE's hidden `csrfToken` CSRF input. BeMart keeps the
             // hidden input (structure) with an empty value — the html
             // context has no per-request CSRF widget.
-            'name="_token"',
-            'csrf_token',
+            'name="csrfToken"',
+            'csrfcsrfToken',
             // Form: EC-CUBE's `visible` display-status select in the
             // conversion area. The AdminNewsFetched projection does not
             // carry dtb_news.visible (out of the Wave 9 CMS slice), so the
@@ -290,7 +290,7 @@ final class AdminNewsHtmlRenderTest extends TestCase
             // The `form` variable's children are the field NAMES; the
             // stubbed form_widget (below) renders each through the form.
             'form' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'publish_date' => 'publish_date',
                 'title' => 'title',
                 'url' => 'url',
@@ -343,15 +343,15 @@ final class AdminNewsHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 
         // EC-CUBE's `form_widget(form.<field>)` renders through BeMart's
         // real AdminNewsForm so the inputs are byte-identical to BeMart's
         // port (which renders the same form). The first arg is the field
-        // name. Fields the AdminNewsForm does NOT declare — `_token` (CSRF
+        // name. Fields the AdminNewsForm does NOT declare — `csrfToken` (CSRF
         // is EC-CUBE-runtime) and `visible` (dtb_news.visible is out of
         // the Wave 9 CMS slice — see the port header) — render empty here,
         // mirroring BeMart's port which omits them; both are kept as

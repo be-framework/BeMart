@@ -3,7 +3,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_shop_calendar' %}
+{% set route = 'admin-calendar' %}
 {% set title = '定休日カレンダー設定' %}
 {% set sub_title = '店舗設定' %}
 
@@ -34,7 +34,7 @@
             });
 
             $('.calendar_list_item .cancel').click(function() {
-                location.href = '{{ url('admin_setting_shop_calendar') }}';
+                location.href = '/admin/calendar';
             });
         });
     </script>
@@ -70,8 +70,8 @@
                             </thead>
                             <tbody>
                                 <tr id="calendar_item_new">
-                                    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="{{ url('admin_setting_shop_calendar_new') }}">
-                                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                                    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/calendar?operation=create">
+                                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                                         <td class="align-middle ps-3"></td>
                                         <td class="align-middle" style="width:230px;">
                                             <div class="input-group">
@@ -94,8 +94,8 @@
 
                                 {% for Calendar in calendars %}
                                     <tr id="ex-calendar-{{ Calendar.id }}" class="calendar_list_item {{ Calendar.hasError ? 'has-error' }}">
-                                        <form name="edit-form" id="edit-form_{{ Calendar.id }}" method="post" action="{{ url('admin_setting_shop_calendar') }}">
-                                            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                                        <form name="edit-form" id="edit-form_{{ Calendar.id }}" method="post" action="/admin/calendar?operation=update">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                                             <input type="hidden" value="{{ Calendar.id }}" name="calendar_id">
                                             <input type="hidden" value="edit_inline" name="mode">
                                             <td class="align-middle ps-3"><span>{{ Calendar.id }}</span></td>
@@ -148,7 +148,7 @@
                                                                         </div>
                                                                         <div class="modal-footer">
                                                                             <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                                            <a class="btn btn-ec-delete" href="{{ url('admin_setting_shop_calendar_delete', { id : Calendar.id }) }}" data-confirm="false">削除</a>
+                                                                            <a class="btn btn-ec-delete" href="/admin/calendar?calendarId={{ Calendar.id }}&_method=delete" data-confirm="false">削除</a>
                                                                         </div>
                                                                     </div>
                                                                 </div>

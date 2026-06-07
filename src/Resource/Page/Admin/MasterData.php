@@ -91,8 +91,15 @@ class MasterData extends ResourceObject
 
         assert($final instanceof MasterDataSelected);
 
+        $masterTypes = $this->masters->listMasterTypes();
+        $form = $this->formFactory->newInstance(AdminMasterDataForm::class);
+        assert($form instanceof AdminMasterDataForm);
+        $form->fillValues($masterTypes, $final->masterType);
+
         $this->code = Code::OK;
         $this->body = [
+            'form' => $form,
+            'masterTypes' => $masterTypes,
             'transitionId' => 'doSelectMasterData',
             'selectedMaster' => $final->masterType,
             'rows' => $final->rows,

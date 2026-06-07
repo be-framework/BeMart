@@ -42,20 +42,20 @@ final class AdminCsvConfigForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('csv_type', 'select')
+        $this->setField('csvType', 'select')
             ->setAttribs(['id' => 'csv-type', 'class' => 'form-select'])
             ->setOptions(self::CSV_TYPES);
-        $this->setField('csv_not_output', 'select')
+        $this->setField('csvNotOutput', 'select')
             ->setAttribs(['id' => 'csv-not-output', 'class' => 'form-select', 'multiple' => 'multiple', 'size' => '30'])
             ->setOptions(self::NOT_OUTPUT_COLUMNS);
-        $this->setField('csv_output', 'select')
+        $this->setField('csvOutput', 'select')
             ->setAttribs(['id' => 'csv-output', 'class' => 'form-select', 'multiple' => 'multiple', 'size' => '30'])
             ->setOptions(self::OUTPUT_COLUMNS);
 
         $this->fill([
-            'csv_type' => '1',
-            'csv_output' => ['orderNo', 'orderDate', 'customerName', 'paymentTotal'],
-            'csv_not_output' => [],
+            'csvType' => '1',
+            'csvOutput' => ['orderNo', 'orderDate', 'customerName', 'paymentTotal'],
+            'csvNotOutput' => [],
         ]);
     }
 

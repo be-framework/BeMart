@@ -19,7 +19,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
      EC-CUBE-runtime only — enumerated as residual.
@@ -40,7 +40,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_content_block_new' %}
+{% set route = 'admin-block-block' %}
 {% set title = 'ブロック管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
@@ -81,8 +81,8 @@
 
 {% block main %}
     <form name="content_block_form" id="content_block_form" method="post"
-          action="{{ url('admin_content_block_new') }}">
-        <input type="hidden" id="block__token" name="_token" value="{{ csrfToken|default('') }}">
+          action="/admin/block/block">
+        <input type="hidden" id="block__token" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -151,7 +151,7 @@
                 <div class="row justify-content-between align-items-center">
                     <div class="col-6">
                         <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="{{ url('admin_content_block') }}">
+                            <a class="c-baseLink" href="/admin/block/block-list">
                                 <i class="fa fa-backward" aria-hidden="true"></i><span>ブロック管理</span>
                             </a>
                         </div>

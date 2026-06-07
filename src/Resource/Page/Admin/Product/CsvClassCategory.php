@@ -70,7 +70,7 @@ class CsvClassCategory extends AbstractCsvUpload
         assert($final instanceof ClassCategoryCsvImported);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/product/class_name';
+        $this->headers['Location'] = '/admin/class-category/class-category-list';
         $this->body = [
             'transitionId' => 'doImportClassCategoryCsv',
             'accepted' => $final->accepted,

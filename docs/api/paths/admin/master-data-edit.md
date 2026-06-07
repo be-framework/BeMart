@@ -4,7 +4,7 @@
 EC-CUBE マスタデータ編集 — Setting/System (doUpdateMasterData).
 
 Separate resource from {@see \MasterData} (which owns GET + the
-`doSelectMasterData` PUT on the same `/admin_setting_system_masterdata`
+`doSelectMasterData` PUT on the same `/admin/master-data`
 URL) so the edit verb does not collide. `onPut` drives the Be
 `doUpdateMasterData` transition; the destructive bulk write is isolated
 behind {@see \MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface}.

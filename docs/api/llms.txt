@@ -320,7 +320,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | id | href(doUpdateCsv) |
+| GET | csvType | href(doUpdateCsv) |
 | POST | csvType*, columns* | href(goTop), href(goExportProduct) |
 
 ### Page/Admin/Customer
@@ -1303,7 +1303,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-change-password | get-admin-change-password.json | form, transitionId, fields |
 | Post-admin-change-password | post-admin-change-password.json | message, transitionId, loginId, adminId |
 | Post-admin-create-customer | post-admin-create-customer.json | name01, customerId, customerStatus, email, initialPoint, name02 |
-| Get-admin-csv-config | get-admin-csv-config.json | form, notOutputColumns, outputColumns, id |
+| Get-admin-csv-config | get-admin-csv-config.json | form, notOutputColumns, outputColumns, csvType |
 | Post-admin-csv-config | post-admin-csv-config.json | message, csvType, columns, count |
 | Get-admin-customer | get-admin-customer.json | form, sex, kana02, phoneNumber, initialPoint, totalSpent, name02, kana01, name01, favorites, postalCode, addr01, birth, customerId, addr02, customerStatus, email, pref, favoriteCount, companyName, job, orders, orderCount |
 | Get-admin-customer-csv | get-admin-customer-csv.json | rowCount, csv |

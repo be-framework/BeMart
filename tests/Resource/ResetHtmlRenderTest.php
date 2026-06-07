@@ -49,11 +49,11 @@ use function trim;
  *   - the `resetKey` hidden input — EC-CUBE carries the reset key in the
  *     URL / session, BeMart carries it in a hidden form field (the
  *     ResetForm is keyed by `resetKey`, see Reset::onGet);
- *   - the empty `_token` CSRF hidden value.
+ *   - the empty `csrfToken` CSRF hidden value.
  *
- * MISSING-FIELD NOTE — EC-CUBE's `PasswordResetType` has a `login_email`
+ * MISSING-FIELD NOTE — EC-CUBE's `PasswordResetType` has a `email`
  * field; BeMart's `ResetPasswordInput` models `resetKey` + `password`,
- * not email. The `login_email` input is rendered for fidelity (ResetForm
+ * not email. The `email` input is rendered for fidelity (ResetForm
  * declares it as a renderer field) but the field is flagged as a
  * missing-body-field residual; not enriched in this template wave.
  */
@@ -82,9 +82,9 @@ final class ResetHtmlRenderTest extends TestCase
         '<meta name="author" content="">',
 
         // --- reset form: CSRF hidden input ------------------------------
-        // EC-CUBE's hidden _token carries a live form CSRF token; BeMart's
+        // EC-CUBE's hidden csrfToken carries a live form CSRF token; BeMart's
         // html context has no CSRF widget, so the value is empty.
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
 
         // --- reset form: resetKey hidden input (BeMart-only) ------------
         // EC-CUBE carries the reset key in the URL path / session; BeMart's
@@ -148,7 +148,7 @@ final class ResetHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/reset')->toString();
 
-        $this->assertStringContainsString('name="login_email"', $html);
+        $this->assertStringContainsString('name="email"', $html);
         $this->assertStringContainsString('name="password"', $html);
         $this->assertStringContainsString('type="password"', $html);
         $this->assertStringContainsString('name="password_confirm"', $html);
@@ -245,11 +245,11 @@ final class ResetHtmlRenderTest extends TestCase
 
         return $twig->render('Forgot/reset.twig', [
             'form' => new EcCubeStub([
-                'login_email' => 'login_email',
+                'email' => 'email',
                 'password' => new EcCubeStub([
                     'first' => 'password', 'second' => 'password_confirm',
                 ]),
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
             ]),
             'error' => null,
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
@@ -305,8 +305,8 @@ final class ResetHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
@@ -314,8 +314,8 @@ final class ResetHtmlRenderTest extends TestCase
         // BeMart's real ResetForm so the inputs are byte-identical.
         $resetForm = (new FormFactory())->newInstance(ResetForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($resetForm): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($resetForm instanceof ResetForm && is_string($field) && $field !== '') {

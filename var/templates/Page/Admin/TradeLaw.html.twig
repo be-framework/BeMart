@@ -3,13 +3,13 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_shop_tradelaw' %}
+{% set route = 'admin-trade-law' %}
 {% set title = '特定商取引法設定' %}
 {% set sub_title = '店舗設定' %}
 
 {% block main %}
-    <form method="post" action="{{ url('admin_setting_shop_tradelaw') }}">
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form method="post" action="/admin/trade-law">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

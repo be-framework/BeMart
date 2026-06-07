@@ -13,7 +13,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `{% for Layout in Layouts %}` -> the resource body's `layouts` list.
    - `Layout.DeviceType.id` -> the body carries `deviceType` (10 = PC,
@@ -33,7 +33,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_content_layout' %}
+{% set route = 'admin-layout-layout-list' %}
 {% set title = 'レイアウト管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
@@ -58,7 +58,7 @@
         <div class="c-contentsArea__primaryCol">
             <div class="c-primaryCol">
                 <div class="d-block mb-3">
-                    <a class="btn btn-ec-regular" href="{{ url('admin_content_layout_new') }}">新規作成</a>
+                    <a class="btn btn-ec-regular" href="/admin/layout/layout">新規作成</a>
                 </div>
                 {# layouts #}
                 {% for Layout in layouts %}
@@ -73,7 +73,7 @@
                                     {% endif %}
                                     <i class="fa fa-fw {{ icon }} fa-lg me-2"></i>
                                     <a class="card-title align-middle"
-                                       href="{{ url('admin_content_layout_edit', { id : Layout.layoutId } ) }}">{{ Layout.layoutName }}</a>
+                                       href="/admin/layout/layout?layoutId={{ Layout.layoutId }}">{{ Layout.layoutName }}</a>
                                 </div>
                                 <div class="col-4 text-end">
                                     <a href="#layout-{{ Layout.layoutId }}" data-bs-toggle="collapse" aria-expanded="false" aria-controls="layout-{{ Layout.layoutId }}">

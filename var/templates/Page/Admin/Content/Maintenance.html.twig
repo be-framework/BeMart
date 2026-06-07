@@ -17,7 +17,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
    - `{{ '...'|trans|nl2br }}` -> the ja literal with the `nl2br` Twig
      builtin kept (the maintenance message is multi-line).
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
@@ -26,13 +26,13 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_content_maintenance' %}
+{% set route = 'admin-content-maintenance' %}
 {% set title = 'メンテナンス管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
 {% block main %}
-    <form method="post" action="{{ url('admin_content_maintenance') }}">
-        <input type="hidden" id="maintenance__token" name="_token" value="{{ csrfToken|default('') }}">
+    <form method="post" action="/admin/content/maintenance?_method=put">
+        <input type="hidden" id="maintenance__token" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

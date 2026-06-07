@@ -41,8 +41,8 @@ use function trim;
  *
  * `Mypage/withdraw.twig` is a confirm screen — it carries NO editable
  * form FIELDS, only a submit button and a CSRF hidden token. EC-CUBE
- * emits the token via `{{ form_widget(form._token) }}`; BeMart authors
- * the hidden `_token` input plainly (no CSRF widget). Because there are
+ * emits the token via `{{ form_widget(form.csrfToken) }}`; BeMart authors
+ * the hidden `csrfToken` input plainly (no CSRF widget). Because there are
  * no `<input>` fields, no AbstractForm is needed — the form-page
  * recipe's `<Name>Form` exists for screens that render input fields.
  * The residual is the genuinely EC-CUBE-runtime-only `<head>` frame
@@ -77,10 +77,10 @@ final class WithdrawHtmlRenderTest extends TestCase
         '<meta name="author" content="">',
 
         // --- form: CSRF hidden input ------------------------------------
-        // EC-CUBE's `form_widget(form._token)` emits a hidden _token with
+        // EC-CUBE's `form_widget(form.csrfToken)` emits a hidden csrfToken with
         // a live CSRF value; BeMart's html context has no CSRF widget, so
         // the value is empty.
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -209,7 +209,7 @@ final class WithdrawHtmlRenderTest extends TestCase
         $this->registerEcCubeStubs($twig);
 
         return $twig->render('Mypage/withdraw.twig', [
-            'form' => new EcCubeStub(['_token' => '__token__']),
+            'form' => new EcCubeStub(['csrfToken' => '_csrfToken__']),
             'BaseInfo' => new EcCubeStub([
                 'shop_name' => 'EC-CUBE',
                 'option_favorite_product' => true,
@@ -270,17 +270,17 @@ final class WithdrawHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
-        // `form_widget(form._token)` is the only form helper withdraw.twig
+        // `form_widget(form.csrfToken)` is the only form helper withdraw.twig
         // uses — it emits the hidden CSRF token. BeMart authors the same
         // hidden input plainly; both sides emit it with an empty value.
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

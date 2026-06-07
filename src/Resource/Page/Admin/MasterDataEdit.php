@@ -22,7 +22,7 @@ use function assert;
  * EC-CUBE マスタデータ編集 — Setting/System (doUpdateMasterData).
  *
  * Separate resource from {@see MasterData} (which owns GET + the
- * `doSelectMasterData` PUT on the same `/admin_setting_system_masterdata`
+ * `doSelectMasterData` PUT on the same `/admin/master-data`
  * URL) so the edit verb does not collide. `onPut` drives the Be
  * `doUpdateMasterData` transition; the destructive bulk write is isolated
  * behind {@see \MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface}.
@@ -52,7 +52,7 @@ class MasterDataEdit extends ResourceObject
         assert($final instanceof MasterDataUpdated);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_setting_system_masterdata';
+        $this->headers['Location'] = '/admin/master-data';
         $this->body = [
             'transitionId' => 'doUpdateMasterData',
             'masterType' => $final->masterType,
