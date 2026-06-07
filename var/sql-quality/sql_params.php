@@ -41,9 +41,9 @@ return [
     // ── catalog (seeded) ─────────────────────────────────────────────────────
     'product_get.sql' => ['productCode' => 'CODE000001'],
     'product_class_get.sql' => ['productCode' => 'CODE000001'],
-    'product_list.sql' => ['limit' => 20, 'offset' => 0],
-    'product_search.sql' => ['nameKeyword' => '商品', 'limit' => 20],
-    'product_export.sql' => [],
+    'product_list.sql' => ['limit' => 50, 'offset' => 0],
+    'product_search.sql' => ['nameKeyword' => '商品', 'limit' => 50],
+    'product_export.sql' => ['limit' => 100, 'offset' => 0],
     'tag_get.sql' => ['tagId' => 1],
     'tag_list.sql' => [],
 

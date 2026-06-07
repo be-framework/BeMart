@@ -8,6 +8,7 @@ Phase 2 inputs that drive the EC-CUBE → BEAR.Sunday + Be Framework migration.
 sql/
 ├── schema/                              # source-of-truth EC-CUBE 4.3 schema
 │   └── ec-cube-4.3-mysql-mysqldump.sql  # 65 tables, structure only, utf8mb4_bin
+├── migrations/                          # BeMart schema deltas applied after the EC-CUBE dump
 ├── seed/                                # committed reference/master data
 │   └── mtb-master.sql                   # 22 mtb_* tables, 395 reference rows
 ├── diff/                                # planning docs
@@ -16,14 +17,13 @@ sql/
 └── README.md
 ```
 
-Future (Phase 2b+): `sql/migrations/` (schema deltas).
-
 ## Production database bring-up
 
-A live production database needs two committed artefacts: the **schema**
-(`schema/ec-cube-4.3-mysql-mysqldump.sql`) and the **mtb_\* master seed**
-(`seed/mtb-master.sql`). `setup-db.sh` stitches them together so a prod DB
-can be stood up reproducibly:
+A live production database needs three committed artefact sets: the **schema**
+(`schema/ec-cube-4.3-mysql-mysqldump.sql`), BeMart **migrations**
+(`migrations/*.sql`), and the **mtb_\* master seed** (`seed/mtb-master.sql`).
+`setup-db.sh` stitches them together so a prod DB can be stood up
+reproducibly:
 
 ```bash
 # from a DATABASE_URL (Symfony/Doctrine style)
@@ -49,8 +49,9 @@ The script:
    carries cross-table FKs but no such pragma, so a plain sequential load
    trips on the first table (`dtb_authority_role` → `dtb_member`). This
    mirrors the workaround in `be/tests/Sql/bootstrap.php` (Phase 2a Step 2).
-3. Loads `seed/mtb-master.sql`.
-4. Prints exact `COUNT(*)` per `mtb_*` table as a sanity check
+3. Applies BeMart schema deltas under `migrations/*.sql` in filename order.
+4. Loads `seed/mtb-master.sql`.
+5. Prints exact `COUNT(*)` per `mtb_*` table as a sanity check
    (e.g. `mtb_pref = 47`).
 
 After this, the database has the full schema + all reference data and is
