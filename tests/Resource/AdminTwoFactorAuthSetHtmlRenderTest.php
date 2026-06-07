@@ -96,6 +96,7 @@ final class AdminTwoFactorAuthSetHtmlRenderTest extends TestCase
         $this->assertStringContainsString('action="/admin_two_factor_auth_set"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testTwoFactorAuthSetHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/two-factor-auth-set')->toString();

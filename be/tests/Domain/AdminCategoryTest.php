@@ -340,6 +340,7 @@ final class AdminCategoryTest extends TestCase
         ($this->becoming)(new ExportCategoryInput());
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testCsvExportOnEmptyStoreReturnsHeaderOnly(): void
     {
         $this->markTestSkipped('Empty-store export is mutable fake state; covered by the SQL suite.');

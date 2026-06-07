@@ -127,6 +127,7 @@ final class ShoppingLoginHtmlRenderTest extends TestCase
         $this->assertStringContainsString('type="password"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShoppingLoginHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/login')->toString();

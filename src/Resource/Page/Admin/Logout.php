@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Final\AdminLoggedOut;
 use MyVendor\BeMart\Be\Input\AdminLogoutInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function getenv;
@@ -62,6 +64,8 @@ class Logout extends ResourceObject
      * input — same taint discipline as the customer logout.
      *
      */
+    #[Alps('doAdminLogout')]
+    #[JsonSchema(schema: 'post-admin-logout.json')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     #[CsrfProtected]
     public function onPost(): static

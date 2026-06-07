@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
 use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -60,6 +62,8 @@ class TwoFactorAuthSet extends ResourceObject
      * Anonymous-accessible (login-context): returns 200 regardless of
      * session state.
      */
+    #[Alps('doSetTwoFactorAuth')]
+    #[JsonSchema(schema: 'get-admin-two-factor-auth-set.json')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
     {
@@ -109,6 +113,8 @@ class TwoFactorAuthSet extends ResourceObject
      * @psalm-taint-source input $authKey
      * @psalm-taint-source input $deviceToken
      */
+    #[Alps('doSetTwoFactorAuth')]
+    #[JsonSchema(schema: 'put-admin-two-factor-auth-set.json', params: 'put-admin-two-factor-auth-set.param.json')]
     #[CsrfProtected]
     #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]

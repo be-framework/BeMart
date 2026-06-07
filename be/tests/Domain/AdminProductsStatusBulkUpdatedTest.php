@@ -77,6 +77,7 @@ final class AdminProductsStatusBulkUpdatedTest extends TestCase
         $this->assertSame(1, $final->changedCount);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testIdempotentReplayDoesNotCount(): void
     {
         $this->markTestSkipped('Idempotent replay needs mutable persistence; covered by the SQL suite.');

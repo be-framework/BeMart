@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Be\Final\LoggedOut;
 use MyVendor\BeMart\Be\Input\LogoutInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function getenv;
@@ -58,6 +60,8 @@ class Logout extends ResourceObject
      * Phase B Slice 9: the CSRF token is user-controlled input.
      *
      */
+    #[Alps('doLogout')]
+    #[JsonSchema(schema: 'post-logout.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
     public function onPost(): static

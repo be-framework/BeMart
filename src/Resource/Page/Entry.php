@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\EntryForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function assert;
@@ -65,6 +67,8 @@ class Entry extends ResourceObject
      * token into the hidden `_token` input so a real browser form submit
      * can exercise the POST path instead of failing at the boundary.
      */
+    #[Alps('goCustomerRegistration')]
+    #[JsonSchema(schema: 'get-entry.json')]
     #[Link(rel: 'goCustomerRegistrationConfirm', href: 'page://self/entry/confirm')]
     #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
     public function onGet(): static
@@ -125,6 +129,8 @@ class Entry extends ResourceObject
      * @psalm-taint-source input $sex
      * @psalm-taint-source input $job
      */
+    #[Alps('doRegisterCustomer')]
+    #[JsonSchema(schema: 'post-entry.json', params: 'post-entry.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
     public function onPost(

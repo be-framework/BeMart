@@ -28,6 +28,7 @@ use function dirname;
  * the box; the pagination test seeds two more so we can exercise
  * `limit` + `offset` end-to-end through the Becoming pipeline.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderListFetchedTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

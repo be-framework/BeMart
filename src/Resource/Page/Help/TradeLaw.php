@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Help;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goHelpTradeLaw — 特定商取引法に基づく表記 (Wave 3H pure renderer).
@@ -22,9 +24,12 @@ use BEAR\Resource\ResourceObject;
 class TradeLaw extends ResourceObject
 {
     /**
+     * ALPS `goHelpTradeLaw` に対応する GET 操作。
      * @todo Wave-future: surface tradeLawName / tradeLawDescription
      *     entries from the admin-editable TradeLaw store.
      */
+    #[Alps('goHelpTradeLaw')]
+    #[JsonSchema(schema: 'get-help-trade-law.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static
     {
