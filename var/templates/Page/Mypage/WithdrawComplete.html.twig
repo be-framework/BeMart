@@ -22,12 +22,12 @@
      `front.mypage.withdraw_complete_message__body` value is a multi-line
      YAML literal; EC-CUBE prints it through `nl2br`, so the port
      substitutes the literal text verbatim and applies the same `nl2br`.
-   - `url('homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
+   - `canonical-url 'homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
 #}
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_withdraw_complete' %}
+{% set route = 'mypage-withdraw-complete' %}
 {% set title = 'マイページ' %}
 
 {% block main %}
@@ -49,7 +49,7 @@
                 </div>
                 <div class="ec-off4Grid">
                     <div class="ec-off4Grid__cell">
-                        <a href="{{ url('homepage') }}" class="ec-blockBtn--cancel">トップページへ</a>
+                        <a href="/" class="ec-blockBtn--cancel">トップページへ</a>
                     </div>
                 </div>
             </div>

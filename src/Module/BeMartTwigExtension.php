@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
-use Aura\Router\Exception\RouteNotFound as AuraRouteNotFound;
-use Aura\Router\Generator as AuraGenerator;
-use Aura\Router\RouterContainer;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use NumberFormatter;
 use Override;
@@ -14,11 +11,8 @@ use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
 
-use function array_key_exists;
 use function bin2hex;
-use function http_build_query;
 use function is_string;
-use function preg_match_all;
 use function random_bytes;
 
 /**
@@ -48,28 +42,14 @@ use function random_bytes;
  *                        URLs (`/assets`, `/template/admin/assets`,
  *                        `/bundle`), so every package resolves to a real,
  *                        byte-identical EC-CUBE file.
- *  - `url` / `path`    — Symfony routing helpers kept for ported EC-CUBE
- *                        templates. They delegate path generation directly
- *                        to Aura.Router, so
- *                        template links and HTTP dispatch share the same
- *                        route definitions.
+ *  - CSRF helpers      — EC-CUBE-compatible CSRF token helpers. Links and
+ *                        forms use canonical BEAR Resource URLs directly.
  *
  * Every value produced here is deterministic, so the rendered HTML is
  * diffable against EC-CUBE's output (residual-diff verification).
  */
 final class BeMartTwigExtension extends AbstractExtension
 {
-    private readonly RouterContainer $routes;
-
-    private readonly AuraGenerator $generator;
-
-    /** Defaults to the shared EC-CUBE Aura route map. */
-    public function __construct(RouterContainer|null $routes = null)
-    {
-        $this->routes = $routes ?? self::routerContainer();
-        $this->generator = $this->routes->getGenerator();
-    }
-
     /** @return list<TwigFilter> */
     #[Override]
     public function getFilters(): array
@@ -85,8 +65,6 @@ final class BeMartTwigExtension extends AbstractExtension
     {
         return [
             new TwigFunction('asset', [$this, 'asset']),
-            new TwigFunction('url', [$this, 'url']),
-            new TwigFunction('path', [$this, 'path']),
             new TwigFunction('csrf_token', [$this, 'csrfToken']),
             new TwigFunction('csrf_token_for_anchor', [$this, 'csrfTokenForAnchor']),
         ];
@@ -157,80 +135,5 @@ final class BeMartTwigExtension extends AbstractExtension
     public function csrfTokenForAnchor(string $tokenId = ''): string
     {
         return $this->csrfToken($tokenId);
-    }
-
-    /** @param array<string, mixed> $params */
-    public function url(string $route, array $params = []): string
-    {
-        return $this->path($route, $params);
-    }
-
-    /**
-     * Resolve an EC-CUBE route name to a URL via Aura.Router.
-     *
-     * A mapped route generates its real EC-CUBE path with placeholders
-     * filled (`product_detail` + `{id: 5}` -> `/products/detail/5`); any
-     * leftover params become the query string. An unmapped name falls back
-     * to the legacy `/{name}` form so a template referencing an EC-CUBE
-     * route not yet in the map still renders a stable, diffable href.
-     *
-     * @param array<string, mixed> $params
-     */
-    public function path(string $route, array $params = []): string
-    {
-        try {
-            $path = $this->generator->generate($route, $params);
-            $query = $this->queryParams($route, $params);
-        } catch (AuraRouteNotFound) {
-            $path = '/' . $route;
-            $query = $params;
-        }
-
-        if ($query === []) {
-            return $path;
-        }
-
-        return $path . '?' . http_build_query($query);
-    }
-
-    /**
-     * @param array<string, mixed> $params
-     * @return array<string, mixed>
-     */
-    private function queryParams(string $route, array $params): array
-    {
-        $pathParamNames = $this->pathParamNames($route);
-        $query = [];
-        foreach ($params as $key => $value) {
-            if (! array_key_exists($key, $pathParamNames)) {
-                $query[$key] = $value;
-            }
-        }
-
-        return $query;
-    }
-
-    /** @return array<string, true> */
-    private function pathParamNames(string $route): array
-    {
-        $auraRoute = $this->routes->getMap()->getRoute($route);
-        preg_match_all(AuraGenerator::REGEX, (string) $auraRoute->path, $matches);
-
-        $names = [];
-        foreach ($matches[1] as $name) {
-            $names[$name] = true;
-        }
-
-        return $names;
-    }
-
-    private static function routerContainer(): RouterContainer
-    {
-        $container = new RouterContainer();
-        /** @var callable(\Aura\Router\Map): null $routes */
-        $routes = require __DIR__ . '/../../config/aura-routes.php';
-        $container->setMapBuilder($routes);
-
-        return $container;
     }
 }

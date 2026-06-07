@@ -298,7 +298,7 @@ final class AdminLoginHistoryHtmlRenderTest extends TestCase
 
         return $twig->render('Setting/System/login_history.twig', [
             'searchForm' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'multi' => 'multi',
                 'user_name' => 'user_name',
                 'client_ip' => 'client_ip',
@@ -359,8 +359,8 @@ final class AdminLoginHistoryHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
         $twig->addFunction(new TwigFunction('form_widget', static fn ($f = '', $o = []): string => ''));

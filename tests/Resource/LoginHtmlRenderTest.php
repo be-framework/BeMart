@@ -38,15 +38,15 @@ use function trim;
  *
  * The Login page is the FORM-PAGE pilot of the wave. EC-CUBE's
  * `Mypage/login.twig` renders its inputs through the Symfony FormView
- * (`form_widget(form.login_email)` etc.). BeMart's wave-1 port could
+ * (`form_widget(form.email)` etc.). BeMart's wave-1 port could
  * only author static `<input>`s — there was no form library, so the two
  * inputs were an unverified residual FAMILY (15-line residual).
  *
  * This rework adopts Ray.WebFormModule. BeMart's Login resource now
  * exposes a real {@see LoginForm} (an AbstractForm) as `body.form`, and
- * the port renders the inputs via `{{ form.input('login_email') }}`.
+ * the port renders the inputs via `{{ form.input('email') }}`.
  * Because the inputs are now produced by a real form object, this test
- * renders EC-CUBE's `form_widget(form.login_email / login_pass)` calls
+ * renders EC-CUBE's `form_widget(form.email / password)` calls
  * through the SAME `LoginForm` instance — so the two `<input>`s are
  * byte-identical on both sides and diff to ZERO. The form-widget
  * residual family is eliminated; the residual shrinks to the genuinely
@@ -110,11 +110,11 @@ final class LoginHtmlRenderTest extends TestCase
         '<meta name="author" content="">',
 
         // --- login form: CSRF hidden input ------------------------------
-        // EC-CUBE's hidden _csrf_token carries a live
-        // csrf_token('authenticate') value; BeMart's html context has no
+        // EC-CUBE's hidden csrfToken carries a live
+        // csrfcsrfToken('authenticate') value; BeMart's html context has no
         // CSRF widget (CsrfToken is isValid-only — Slice 8), so
         // the value is empty. Same hidden input, different (empty) value.
-        '<input type="hidden" name="_csrf_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -176,15 +176,15 @@ final class LoginHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/login')->toString();
 
-        // login_email — text input with EC-CUBE's id / ime-mode style /
+        // email — text input with EC-CUBE's id / ime-mode style /
         // placeholder / autofocus, all from LoginForm::init().
-        $this->assertStringContainsString('id="login_email"', $html);
-        $this->assertStringContainsString('name="login_email"', $html);
+        $this->assertStringContainsString('id="email"', $html);
+        $this->assertStringContainsString('name="email"', $html);
         $this->assertStringContainsString('ime-mode: disabled;', $html);
         $this->assertStringContainsString('placeholder="メールアドレス"', $html);
         $this->assertStringContainsString('value="login-test@example.com"', $html);
-        // login_pass — password input.
-        $this->assertStringContainsString('id="login_pass"', $html);
+        // password — password input.
+        $this->assertStringContainsString('id="password"', $html);
         $this->assertStringContainsString('type="password"', $html);
         $this->assertStringContainsString('placeholder="パスワード"', $html);
         $this->assertStringContainsString('value="login-test-password-2026"', $html);
@@ -245,7 +245,7 @@ final class LoginHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
-            'name="_csrf_token"',
+            'name="csrfToken"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -259,7 +259,7 @@ final class LoginHtmlRenderTest extends TestCase
      * Render EC-CUBE 4.3's real Mypage/login.twig + default_frame.twig
      * from the gitignored clone, with EC-CUBE's Twig API stubbed.
      *
-     * `form_widget(form.login_email / login_pass)` delegates to the real
+     * `form_widget(form.email / password)` delegates to the real
      * {@see LoginForm} so the two inputs are byte-identical to BeMart's
      * port (which renders the same form). See the class doc.
      */
@@ -281,8 +281,8 @@ final class LoginHtmlRenderTest extends TestCase
             // The `form` variable's children are the field NAMES; the
             // stubbed form_widget (below) renders each through LoginForm.
             'form' => new EcCubeStub([
-                'login_email' => 'login_email',
-                'login_pass' => 'login_pass',
+                'email' => 'email',
+                'password' => 'password',
                 'login_memory' => 'login_memory',
             ]),
             'error' => null,
@@ -341,15 +341,15 @@ final class LoginHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
-        // FORM-PAGE pilot: EC-CUBE's `form_widget(form.login_email)` calls
+        // FORM-PAGE pilot: EC-CUBE's `form_widget(form.email)` calls
         // are rendered through BeMart's real LoginForm so the two inputs
         // are byte-identical to BeMart's port. The first arg the stub
-        // receives is the field name (`login_email` / `login_pass`) — the
+        // receives is the field name (`email` / `password`) — the
         // `attr` options EC-CUBE passes are ignored here because LoginForm
         // (the agreed reference, ported from CustomerLoginType + the
         // template's attr options) already carries them. See class doc.
@@ -360,8 +360,8 @@ final class LoginHtmlRenderTest extends TestCase
         $loginForm = (new FormFactory())->newInstance(LoginForm::class);
         if ($loginForm instanceof LoginForm) {
             $loginForm->fillValues([
-                'login_email' => 'login-test@example.com',
-                'login_pass' => 'login-test-password-2026',
+                'email' => 'login-test@example.com',
+                'password' => 'login-test-password-2026',
             ]);
         }
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($loginForm): Markup {

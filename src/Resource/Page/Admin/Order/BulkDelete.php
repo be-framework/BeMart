@@ -64,7 +64,7 @@ class BulkDelete extends ResourceObject
         assert($final instanceof AdminOrdersBulkDeleted);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/order';
+        $this->headers['Location'] = '/admin/order-list';
         $this->body = [
             'orderNos' => $final->orderNos,
             'requestedCount' => $final->requestedCount,

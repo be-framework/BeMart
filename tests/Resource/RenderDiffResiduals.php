@@ -31,7 +31,7 @@ final class RenderDiffResiduals
             'data-method=', 'data-confirm', 'data-post-action', 'data-url=',
             'data-message=', 'data-bs-toggle', 'data-bs-target',
             'data-bs-dismiss', 'data-bs-placement', 'aria-labelledby=',
-            'aria-hidden=', 'role="dialog"', 'csrf_token', '_token',
+            'aria-hidden=', 'role="dialog"', 'csrfcsrfToken', 'csrfToken',
             "type: 'PUT'", "type: 'POST'", 'tracking_number',
 
             // List-row/action markup emitted by current fake seeds.

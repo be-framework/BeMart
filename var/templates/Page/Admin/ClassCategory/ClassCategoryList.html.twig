@@ -15,7 +15,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
    - `form_widget(form.name)` / `form.backend_name` ->
      `form.input('name')` / `form.input('backend_name')` — the real
      AdminClassCategoryForm inline-create inputs (Ray.WebFormModule).
@@ -46,7 +46,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_product_class_category' %}
+{% set route = 'admin-class-category-class-category-list' %}
 {% set title = '規格分類管理' %}
 {% set sub_title = '商品管理' %}
 
@@ -78,7 +78,7 @@
                     i++;
                 });
                 $.ajax({
-                    url: '{{ url('admin_product_class_category_sort_no_move') }}',
+                    url: '/admin/sort-no-move?masterType=classCategory&_method=put',
                     type: 'POST',
                     data: newSortNos
                 }).always(function() {
@@ -132,7 +132,7 @@
                 current.find('.mode-edit').removeClass('d-none');
             });
             sortable.on('click', 'button.action-edit-cancel', function(e) {
-                location.href = "{{ url('admin_product_class_category', {'class_name_id': classNameId}) }}";
+                location.href = "/admin/class-category/class-category-list?classNameId={{ classNameId }}";
             });
             sortable.find('.is-invalid').each(function(e) {
                 var current = $(this).parents('li');
@@ -180,11 +180,11 @@
                         <div class="row">
                             <div class="col-12 text-right">
                                 <div class="btn-group" role="group">
-                                    <a class="btn btn-ec-regular" href="{{ url('admin_product_class_category_export', {'class_name_id': classNameId}) }}">
+                                    <a class="btn btn-ec-regular" href="/admin/class-category/class-category-export?classNameId={{ classNameId }}">
                                         <i class="fa fa-cloud-download mr-1 text-secondary"></i>
                                         <span>CSVダウンロード</span>
                                     </a>
-                                    <a class="btn btn-ec-regular" href="{{ url('admin_setting_shop_csv') }}">
+                                    <a class="btn btn-ec-regular" href="/admin/csv-config">
                                         <i class="fa fa-cog mr-1 text-secondary"></i>
                                         <span>CSV出力項目設定</span>
                                     </a>
@@ -200,13 +200,13 @@
 
                             <ul class="list-group list-group-flush sortable-container">
                                 <li class="list-group-item">
-                                    <form role="form" class="row" name="form1" id="form1" method="post" action="{{ url('admin_product_class_category', {'class_name_id': classNameId}) }}">
+                                    <form role="form" class="row" name="form1" id="form1" method="post" action="/admin/class-category/class-category-list?classNameId={{ classNameId }}">
                                         <div class="col-auto align-self-center">
                                             <span>分類名</span>
                                             <span class="badge bg-primary ms-1">必須</span>
                                         </div>
                                         <div class="col-3 me-2">
-                                            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                                             {{ form.input('name')|raw }}
                                         </div>
                                         <div class="col-auto align-self-center"><span>管理名</span></div>
@@ -241,22 +241,22 @@
                                                 <a class="btn btn-ec-actionIcon me-2 action-edit" href="" data-bs-toggle="tooltip" data-bs-placement="top" title="編集">
                                                     <i class="fa fa-pencil fa-lg text-secondary"></i>
                                                 </a>
-                                                <a class="btn btn-ec-actionIcon me-2 action-visible" href="{{ url('admin_product_class_category_visibility', {'class_name_id': ClassCategory.classNameId, 'id': ClassCategory.classCategoryId}) }}"
+                                                <a class="btn btn-ec-actionIcon me-2 action-visible" href="/admin/toggle-visible?masterType=classCategory&class_name_id={{ ClassCategory.classNameId }}&rowId={{ ClassCategory.classCategoryId }}&_method=put"
                                                    data-bs-toggle="tooltip" data-bs-placement="top" title="非表示中 | 表示にする"
                                                    data-confirm="false">
                                                     <i class="fa fa-toggle-off fa-lg text-secondary" aria-hidden="true"></i>
                                                 </a>
                                                 <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
                                                     <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
-                                                       data-url="{{ url('admin_product_class_category_delete', {'class_name_id' : ClassCategory.classNameId, 'id': ClassCategory.classCategoryId}) }}"
+                                                       data-url="/admin/class-category/class-category?class_name_id={{ ClassCategory.classNameId }}&classCategoryId={{ ClassCategory.classCategoryId }}&_method=delete"
                                                        data-message="この操作はあとから取り消すことができません。「{{ ClassCategory.name }}」を削除してよろしいですか？">
                                                         <i class="fa fa-close fa-lg text-secondary"></i>
                                                     </a>
                                                 </div>
                                             </div>
                                         </div>
-                                        <form class="row d-none mode-edit" method="post" action="{{ url('admin_product_class_category_edit', {'class_name_id': ClassCategory.classNameId, 'id': ClassCategory.classCategoryId}) }}">
-                                            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                                        <form class="row d-none mode-edit" method="post" action="/admin/class-category/class-category-list?classNameId={{ ClassCategory.classNameId }}&classCategoryId={{ ClassCategory.classCategoryId }}">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                                             <div class="col-3 me-2">
                                                 <input type="text" class="form-control" name="name" value="{{ ClassCategory.name }}" data-origin-value="{{ ClassCategory.name }}">
                                             </div>
@@ -313,7 +313,7 @@
                 <div class="row justify-content-between align-items-center">
                     <div class="col-6">
                         <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="{{ url('admin_product_class_name') }}">
+                            <a class="c-baseLink" href="/admin/class-name/class-name-list">
                                 <i class="fa fa-backward" aria-hidden="true"></i><span>規格管理</span>
                             </a>
                         </div>

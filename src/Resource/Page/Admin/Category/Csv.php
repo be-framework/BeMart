@@ -77,7 +77,7 @@ class Csv extends ResourceObject
         assert($final instanceof CategoryCsvImported);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/product/category';
+        $this->headers['Location'] = '/admin/category/category-list';
         $this->body = [
             'transitionId' => 'doImportCategoryCsv',
             'accepted' => $final->accepted,

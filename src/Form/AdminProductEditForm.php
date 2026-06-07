@@ -38,26 +38,26 @@ final class AdminProductEditForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('name', 'text')
+        $this->setField('productName', 'text')
             ->setAttribs(['id' => 'product_name', 'class' => 'form-control', 'placeholder' => '商品名']);
-        $this->setField('product_code', 'text')
+        $this->setField('productCode', 'text')
             ->setAttribs(['id' => 'product_code', 'class' => 'form-control', 'placeholder' => '商品コード']);
         $this->setField('price02', 'text')
             ->setAttribs(['id' => 'product_price02', 'class' => 'form-control']);
         $this->setField('stock', 'text')
             ->setAttribs(['id' => 'product_stock', 'class' => 'form-control']);
-        $this->setField('status', 'select')
+        $this->setField('productStatus', 'select')
             ->setAttribs(['id' => 'product_status', 'class' => 'form-select'])
             ->setOptions(self::STATUS_OPTIONS);
-        $this->setField('description_detail', 'textarea')
+        $this->setField('description', 'textarea')
             ->setAttribs(['id' => 'product_description_detail', 'class' => 'form-control', 'rows' => '8']);
-        $this->setField('search_word', 'text')
+        $this->setField('searchWord', 'text')
             ->setAttribs(['id' => 'product_search_word', 'class' => 'form-control']);
         $this->setField('note', 'textarea')
             ->setAttribs(['id' => 'product_note', 'class' => 'form-control', 'rows' => '4']);
 
         // Non-authoritative structural check only — authority is the Be domain.
-        $this->filter->validate('name')->isNotBlank();
+        $this->filter->validate('productName')->isNotBlank();
     }
 
     /**

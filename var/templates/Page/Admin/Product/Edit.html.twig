@@ -19,7 +19,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
    - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
      AdminProductEditForm leaf fields (Ray.WebFormModule).
    - `price` filter -> JPY NumberFormatter.
@@ -27,13 +27,13 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_product_product_edit' %}
+{% set route = 'admin-product-edit' %}
 {% set title = productCode ? '商品編集' : '商品登録' %}
 {% set sub_title = '商品管理' %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ url('admin_product_product_edit') }}" id="product_form" name="form1" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form role="form" method="post" action="{{ productCode ? '/admin/product?_method=put' : '/admin/product' }}" id="product_form" name="form1" novalidate>
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
@@ -47,17 +47,17 @@
                             <div class="row mb-2">
                                 <div class="col-3"><span>商品名</span><span class="badge bg-primary ms-1">必須</span></div>
                                 <div class="col">
-                                    {{ form.input('name')|raw }}
-                                    {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                    {{ form.input('productName')|raw }}
+                                    {% if form.error('productName') %}<span class="invalid-feedback d-block">{{ form.error('productName') }}</span>{% endif %}
                                 </div>
                             </div>
                             <div class="row mb-2">
                                 <div class="col-3"><span>商品コード</span></div>
-                                <div class="col">{{ form.input('product_code')|raw }}</div>
+                                <div class="col">{{ form.input('productCode')|raw }}</div>
                             </div>
                             <div class="row mb-2">
                                 <div class="col-3"><span>公開ステータス</span></div>
-                                <div class="col">{{ form.input('status')|raw }}</div>
+                                <div class="col">{{ form.input('productStatus')|raw }}</div>
                             </div>
                         </div>
                     </div>
@@ -67,7 +67,7 @@
                             <span class="card-title">商品説明</span>
                         </div>
                         <div class="card-body">
-                            {{ form.input('description_detail')|raw }}
+                            {{ form.input('description')|raw }}
                         </div>
                     </div>
 
@@ -76,7 +76,7 @@
                             <span class="card-title">検索ワード</span>
                         </div>
                         <div class="card-body">
-                            {{ form.input('search_word')|raw }}
+                            {{ form.input('searchWord')|raw }}
                         </div>
                     </div>
 
@@ -116,7 +116,7 @@
                 <div class="row justify-content-between align-items-center">
                     <div class="col-6">
                         <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="{{ url('admin_product') }}">
+                            <a class="c-baseLink" href="/admin/product-list">
                                 <i class="fa fa-backward" aria-hidden="true"></i>
                                 <span>商品一覧へ戻る</span>
                             </a>

@@ -3,7 +3,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_system_log' %}
+{% set route = 'admin-setting-system-log' %}
 {% set title = 'ログ表示' %}
 {% set sub_title = 'システム設定' %}
 
@@ -18,7 +18,7 @@
                 </div>
                 <div class="card-body">
                     <form name="form1" id="form1" method="post">
-                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                         <div class="row mb-3">
                             <div class="mb-3 pe-3 col-2">
                                 {{ form.input('files')|raw }}

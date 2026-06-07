@@ -11,7 +11,7 @@ Phase 3 — HTML page. The product detail page carries the add-to-cart
 action, which EC-CUBE renders as a FORM (`AddCartType` — quantity +,
 for class products, the product-class selects). The resource builds
 an {@see \AddCartForm} (Ray.WebFormModule AbstractForm), seeds its
-hidden `product_id` with the product code, and exposes it as
+hidden `productCode` with the product code, and exposes it as
 `body['form']` so the HTML port can render the real quantity
 `<input>` via `{{ form.input('quantity') }}`. The form is a
 field-definition + renderer only — VALIDATION AUTHORITY STAYS WITH the

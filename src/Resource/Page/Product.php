@@ -31,7 +31,7 @@ use function assert;
  * action, which EC-CUBE renders as a FORM (`AddCartType` — quantity +,
  * for class products, the product-class selects). The resource builds
  * an {@see AddCartForm} (Ray.WebFormModule AbstractForm), seeds its
- * hidden `product_id` with the product code, and exposes it as
+ * hidden `productCode` with the product code, and exposes it as
  * `body['form']` so the HTML port can render the real quantity
  * `<input>` via `{{ form.input('quantity') }}`. The form is a
  * field-definition + renderer only — VALIDATION AUTHORITY STAYS WITH the
@@ -90,7 +90,7 @@ class Product extends ResourceObject
             'mainImage' => $final->imagePath ?? ProductImageCatalog::forProductCode($final->productCode),
             // Phase 3: the add-to-cart form. EC-CUBE renders the add-cart
             // quantity input through `AddCartType`; BeMart renders it
-            // through this AddCartForm. The hidden `product_id` is seeded
+            // through this AddCartForm. The hidden `productCode` is seeded
             // with the product code. JSON contexts ignore `form`.
             'form' => $this->addCartForm($final->productCode),
             // CSRF reference for the add-to-cart POST: the HTML port
@@ -105,7 +105,7 @@ class Product extends ResourceObject
     /**
      * Builds an AddCartForm for the given product.
      *
-     * The hidden `product_id` is seeded with the product code so the
+     * The hidden `productCode` is seeded with the product code so the
      * POST carries the product identity, and `quantity` keeps its
      * EC-CUBE default of 1. Validation authority stays with Be — the
      * form is a renderer here, never a validator.
@@ -116,7 +116,7 @@ class Product extends ResourceObject
         assert($form instanceof AddCartForm);
 
         $form->fillValues([
-            'product_id' => $productCode,
+            'productCode' => $productCode,
             'csrfToken' => $this->csrf->token,
             'quantity' => 1,
         ]);

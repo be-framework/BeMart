@@ -63,7 +63,7 @@ final class AdminCsvConfigResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertInstanceOf(AdminCsvConfigForm::class, $ro->body['form']);
-        $this->assertSame(1, $ro->body['id']);
+        $this->assertSame(1, $ro->body['csvType']);
         $this->assertArrayHasKey('orderNo', $ro->body['outputColumns']);
         $this->assertArrayHasKey('paymentMethod', $ro->body['notOutputColumns']);
     }

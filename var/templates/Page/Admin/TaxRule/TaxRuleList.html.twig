@@ -15,10 +15,10 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
-   - `form_widget(form.tax_rate)` / `form.apply_date` ->
-     `form.input('tax_rate')` / `form.input('apply_date')` — the real
+   - `form_widget(form.taxRate)` / `form.applyDate` ->
+     `form.input('taxRate')` / `form.input('applyDate')` — the real
      AdminTaxRuleForm inline-create inputs (Ray.WebFormModule).
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
@@ -48,7 +48,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_shop_tax' %}
+{% set route = 'admin-tax-rule-tax-rule-list' %}
 {% set title = '税率設定' %}
 {% set sub_title = '店舗設定' %}
 
@@ -79,7 +79,7 @@
             });
 
             $('.tax_rule_list_item .cancel').click(function() {
-                location.href = '{{ url('admin_setting_shop_tax') }}';
+                location.href = '/admin/tax-rule/tax-rule-list';
             });
         });
     </script>
@@ -119,19 +119,19 @@
                             <tbody>
 
                             <tr id="tax_rule_item_new">
-                                <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="{{ url('admin_setting_shop_tax_new') }}">
-                                    <input type="hidden" id="tax_rule__token" name="_token" value="{{ csrfToken|default('') }}">
+                                <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/tax-rule/tax-rule-list">
+                                    <input type="hidden" id="tax_rule__token" name="csrfToken" value="{{ csrfToken|default('') }}">
                                     <td class="align-middle ps-3"></td>
                                     <td class="align-middle" style="width:230px;">
                                         <div class="input-group">
-                                            {{ form.input('tax_rate')|raw }}
+                                            {{ form.input('taxRate')|raw }}
                                             <div class="input-group-text">%</div>
                                         </div>
                                     </td>
                                     <td class="align-middle">
                                     </td>
                                     <td class="align-middle">
-                                        {{ form.input('apply_date')|raw }}
+                                        {{ form.input('applyDate')|raw }}
                                     </td>
                                     <td class="align-middle"></td>
                                     <td class="align-middle pe-5">
@@ -144,7 +144,7 @@
 
                             {% for TaxRule in taxRules %}
                                 <tr id="ex-tax_rule-{{ TaxRule.taxRuleId }}" class="tax_rule_list_item">
-                                    <form name="edit-form" id="edit-form_{{ TaxRule.taxRuleId }}" method="post" action="{{ url('admin_setting_shop_tax') }}">
+                                    <form name="edit-form" id="edit-form_{{ TaxRule.taxRuleId }}" method="post" action="/admin/tax-rule/tax-rule-list">
                                         <input type="hidden" value="{{ TaxRule.taxRuleId }}" name="tax_rule_id">
                                         <input type="hidden" value="edit_inline" name="mode"/>
                                         <td class="align-middle ps-3"><span>{{ TaxRule.taxRuleId }}</span></td>
@@ -199,7 +199,7 @@
                                                                         <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">
                                                                             キャンセル
                                                                         </button>
-                                                                        <a class="btn btn-ec-delete" href="{{ url('admin_setting_shop_tax_delete', { id : TaxRule.taxRuleId }) }}"
+                                                                        <a class="btn btn-ec-delete" href="/admin/tax-rule/tax-rule?taxRuleId={{ TaxRule.taxRuleId }}&_method=delete"
                                                                            data-confirm="false">
                                                                             削除
                                                                         </a>

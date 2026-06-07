@@ -67,7 +67,7 @@ class Cache extends ResourceObject
         assert($final instanceof CacheCleared);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_content_cache';
+        $this->headers['Location'] = '/admin/content/cache';
         $this->body = [
             'transitionId' => 'doClearCache',
             'message' => 'キャッシュを削除しました。',

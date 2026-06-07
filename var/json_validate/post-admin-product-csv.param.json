@@ -15,6 +15,18 @@
       "$comment": "CSV列の業務妥当性はCSV互換サービスで検査する。ここではJSON境界上の文字列サイズを契約する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
       "title": "輸送ペイロード（入力）",
       "description": "CSVインポート/エクスポート本文。列構造の詳細はCSV互換サービス境界で検査する。"
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "CSRFトークン（CSV取込フォーム）",
+      "description": "管理画面CSV取込フォーム送信元を検証するトークン。multipart/form-dataのhidden inputから送信され、CSRFインターセプタが検証する。",
+      "minLength": 0,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:-]*$",
+      "$comment": "CSV本文そのものはimport_fileアップロードからBootstrap境界でcsvへ展開される。csrfTokenはResource引数ではなくCsrfProtected境界で消費される。"
     }
   },
   "additionalProperties": false,

@@ -125,7 +125,7 @@ class TemplateList extends ResourceObject
         assert($final instanceof TemplateSelected || $final instanceof TemplateDeleted);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_store_template';
+        $this->headers['Location'] = '/admin/template/template-list';
         $this->body = [
             'transitionId' => $transitionId,
             'templateId' => $final->templateId,

@@ -59,7 +59,7 @@ class CsvConfig extends ResourceObject
     #[Alps('doUpdateCsv')]
     #[JsonSchema(schema: 'get-admin-csv-config.json', params: 'get-admin-csv-config.param.json')]
     #[Link(rel: 'doUpdateCsv', href: 'page://self/admin/csv-config', method: 'post')]
-    public function onGet(int $id = 1): static
+    public function onGet(int $csvType = 1): static
     {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
@@ -74,7 +74,7 @@ class CsvConfig extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'form' => $form,
-            'id' => $id,
+            'csvType' => $csvType,
             'outputColumns' => AdminCsvConfigForm::outputColumns(),
             'notOutputColumns' => AdminCsvConfigForm::notOutputColumns(),
         ];

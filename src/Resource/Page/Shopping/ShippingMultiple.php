@@ -15,7 +15,7 @@ use BEAR\Resource\Annotation\JsonSchema;
  * EC-CUBE goShoppingShippingMultiple — 複数配送先設定画面 (Wave 3H pure renderer).
  *
  * Pure form-info endpoint: no Be Framework, no domain logic, no Reasons.
- * Maps to `page://self/shopping/shipping/multiple`.
+ * Maps to `page://self/shopping/shipping-multiple`.
  *
  * Production EC-CUBE distributes cart items across multiple shipping
  * addresses (per-item address selection). Wave 3H exposes the shape

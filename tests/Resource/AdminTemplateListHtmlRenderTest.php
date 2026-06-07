@@ -45,7 +45,7 @@ use function trim;
  * context's `AdminSession` is rebound to a seeded admin id.
  *
  * `template.twig` is nominally a Symfony form page (it wraps the table
- * in a `<form>` with `form_widget(form._token)` + `form_widget(form.
+ * in a `<form>` with `form_widget(form.csrfToken)` + `form_widget(form.
  * selected)`), but the TemplateList resource is a list-only endpoint
  * with no `body['form']`, so the page is ported as a DATA page — the two
  * `form_widget` calls are enumerated residuals (stubbed empty here,
@@ -196,7 +196,7 @@ final class AdminTemplateListHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // template.twig: `form_widget(form._token)` (CSRF hidden
+            // template.twig: `form_widget(form.csrfToken)` (CSRF hidden
             // input) + `form_widget(form.selected)` (hidden chosen-radio
             // field). The TemplateList resource carries no `body['form']`
             // — the page is a list-only endpoint. EC-CUBE-runtime form.
@@ -227,8 +227,8 @@ final class AdminTemplateListHtmlRenderTest extends TestCase
             // `action-delete"`. Same anchor, same family as the guard
             // residual above.
             'btn btn-ec-actionIcon action-delete',
-            // template.twig: `csrf_token_for_anchor()` on the delete <a>.
-            'csrf_token',
+            // template.twig: `csrfcsrfToken_for_anchor()` on the delete <a>.
+            'csrfcsrfToken',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -321,13 +321,13 @@ final class AdminTemplateListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
         $twig->addFunction(new TwigFunction('class_categories_as_json', static fn (): string => '{}'));
         // template.twig is nominally a form page; its two `form_widget`
-        // calls (`_token`, `selected`) are enumerated residuals — stubbed
+        // calls (`csrfToken`, `selected`) are enumerated residuals — stubbed
         // empty (EC-CUBE-runtime form, no `body['form']` on BeMart side).
         $twig->addFunction(new TwigFunction('form_widget', static fn (): string => ''));
     }

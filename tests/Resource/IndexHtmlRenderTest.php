@@ -89,7 +89,7 @@ final class IndexHtmlRenderTest extends TestCase
         '<div class="ec-role">',
         '<div class="ec-grid2">',
         '<div class="ec-grid2__cell">',
-        '<a class="ec-blockBtn--action" href="/products/list">商品一覧へ</a>',
+        '<a class="ec-blockBtn--action" href="/products">商品一覧へ</a>',
         '<a class="ec-blockBtn--cancel" href="/cart">カートを見る</a>',
     ];
 
@@ -142,7 +142,7 @@ final class IndexHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/')->toString();
 
-        $this->assertStringContainsString('href="/products/list"', $html);
+        $this->assertStringContainsString('href="/products"', $html);
         $this->assertStringContainsString('href="/cart"', $html);
     }
 
@@ -274,8 +274,8 @@ final class IndexHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
     }

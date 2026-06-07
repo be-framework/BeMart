@@ -853,8 +853,11 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - title: CSV種別
 - doc: dtb_csv.csv_type_id — mtb_csv_type への FK（1=注文CSV, 2=会員CSV, 3=商品CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）
 - usages:
+  - parameter: GET /admin/csv-config {csvType}
   - parameter: POST /admin/csv-config {csvType}
+  - schema property: get-admin-csv-config.param.json#/properties/csvType
   - schema property: post-admin-csv-config.param.json#/properties/csvType
+  - schema property: get-admin-csv-config.json#/properties/csvType
   - schema property: post-admin-csv-config.json#/properties/csvType
 
 ### `current`
@@ -1996,15 +1999,12 @@ This index reports lexical identifier matches only; it does not prove semantic e
 ### `id`
 
 - usages:
-  - parameter: GET /admin/csv-config {id}
   - parameter: GET /admin/customer {id}
   - parameter: GET /admin/customer-delivery-edit {id}
-  - schema property: get-admin-csv-config.param.json#/properties/id
   - schema property: get-admin-customer-delivery-edit.param.json#/properties/id
   - schema property: get-admin-customer.param.json#/properties/id
   - schema property: get-admin-authority-role.json#/properties/authorityOptions/items/properties/id
   - schema property: get-admin-calendar.json#/properties/calendars/items/properties/id
-  - schema property: get-admin-csv-config.json#/properties/id
   - schema property: get-admin-mail-template.json#/properties/Mail/properties/id
   - schema property: get-admin-mail-template.json#/properties/id
   - schema property: get-admin-master-data.json#/properties/rows/items/properties/id

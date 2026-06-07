@@ -55,7 +55,7 @@ final class AdminLoginResourceSqlTest extends AbstractResourceSqlTestCase
         // column is the bcrypt of self::ADMIN_PASSWORD (insertAdmin
         // default). authority_id=0 = system admin.
         $this->insertAdmin([
-            'login_id' => 'test-admin',
+            'loginId' => 'test-admin',
             'name' => 'テスト管理者',
             'authority_id' => 0,
             'work_id' => 1,

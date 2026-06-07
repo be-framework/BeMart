@@ -66,7 +66,7 @@ final class AppModule extends AbstractAppModule
     {
         $this->install(new PackageModule());
         $this->override(new AppErrorModule());
-        $this->override(new AuraRouterModule($this->appMeta->appDir . '/config/aura-routes.php'));
+        $this->override(new CanonicalResourceRouterModule());
         // PackageModule does not bind @AppName by itself; BEAR\Package\Module
         // factory normally overrides it. Install explicitly so tests can use
         // `new Injector(new *Module(...))` without the factory.

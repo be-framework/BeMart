@@ -1,0 +1,19 @@
+{
+  "name": "user-11-cart-after-add",
+  "requestedUrl": "submit /products/add_cart/api-persist-20260522-001",
+  "screenshot": "docs/web-e2e/screenshots/20260607-browser-check/user-11-cart-after-add.png",
+  "hasFatal": false,
+  "matched": [
+    {
+      "ok": true,
+      "text": "ショッピングカート"
+    },
+    {
+      "ok": false,
+      "text": "彩のジェラートセット"
+    }
+  ],
+  "textSample": "  \n0\nBeMart\nショッピングカート\n1\nカートの商品\n\t2\nお客様情報\n\t3\nご注文手続き\n\t4\nご注文内容確認\n\t5\n完了\n\n商品の合計金額は「￥3,600」です。\n\n\t\n\t\nサンプル商品 A\n￥1,200\n小計：￥3,600\n数量：3\n合計：￥3,600\nレジに進む\nお買い物を続ける\n当サイトについて\nプライバシーポリシー\n特定商取引法に基づく表記\nお問い合わせ\nBeMart\ncopyright (c) BeMart all rights reserved.\n カートを見る\n 新規会員登録\n お気に入り\n ログイン\n ホームに戻る\n\n商品カテゴリ\n\n新入荷\nジェラート\n彩のデザート\nCUBE\nアイスサンド\nフルーツ",
+  "title": "BeMart / ショッピングカート",
+  "url": "http://localhost:8080/cart"
+}

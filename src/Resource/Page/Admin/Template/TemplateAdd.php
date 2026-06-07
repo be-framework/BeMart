@@ -89,7 +89,7 @@ class TemplateAdd extends ResourceObject
         assert($final instanceof TemplateInstalled);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_store_template';
+        $this->headers['Location'] = '/admin/template/template-list';
         $this->body = [
             'transitionId' => 'doInstallTemplate',
             'templateId' => $final->templateId,

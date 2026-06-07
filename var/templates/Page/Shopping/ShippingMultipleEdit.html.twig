@@ -45,7 +45,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'other_page' %}
-{% set route = 'shopping_shipping_multiple_edit' %}
+{% set route = 'shopping-shipping-multiple-edit' %}
 {% set title = 'お届け先の追加' %}
 
 {% block javascript %}
@@ -59,9 +59,9 @@
         </div>
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
-                    <form method="post" action="{{ url('shopping_shipping_multiple_edit') }}" class="h-adr">
+                    <form method="post" action="/shopping/shipping-multiple-edit" class="h-adr">
                         <span class="p-country-name" style="display:none;">Japan</span>
-                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                         <div class="ec-borderedDefs">
                             <dl>
                                 <dt>
@@ -144,7 +144,7 @@
                             <div class="ec-off4Grid">
                                 <div class="ec-off4Grid__cell">
                                     <button type="submit" class="ec-blockBtn--action">登録する</button>
-                                    <a href="{{ url('shopping_shipping_multiple') }}" class="ec-blockBtn--cancel">戻る</a>
+                                    <a href="/shopping/shipping-multiple" class="ec-blockBtn--cancel">戻る</a>
                                 </div>
                             </div>
                         </div>

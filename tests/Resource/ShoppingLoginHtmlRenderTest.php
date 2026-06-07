@@ -43,7 +43,7 @@ use function trim;
  * route reuses `CustomerLoginType` — the same Symfony form type the
  * standalone `goLogin` page uses — so the Shopping Login resource
  * exposes the same {@see LoginForm} (an AbstractForm) as `body.form`.
- * This test renders EC-CUBE's `form_widget(form.login_email)` calls
+ * This test renders EC-CUBE's `form_widget(form.email)` calls
  * through the SAME `LoginForm` instance so the inputs diff to ZERO.
  * `is_granted('IS_AUTHENTICATED_REMEMBERED')` is stubbed FALSE — the
  * guest-purchase grid cell renders (the anonymous-checkout case, which
@@ -121,9 +121,9 @@ final class ShoppingLoginHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/shopping/login')->toString();
 
-        $this->assertStringContainsString('id="login_email"', $html);
-        $this->assertStringContainsString('name="login_email"', $html);
-        $this->assertStringContainsString('id="login_pass"', $html);
+        $this->assertStringContainsString('id="email"', $html);
+        $this->assertStringContainsString('name="email"', $html);
+        $this->assertStringContainsString('id="password"', $html);
         $this->assertStringContainsString('type="password"', $html);
     }
 
@@ -198,8 +198,8 @@ final class ShoppingLoginHtmlRenderTest extends TestCase
 
         return $twig->render('Shopping/login.twig', [
             'form' => new EcCubeStub([
-                'login_email' => 'login_email',
-                'login_pass' => 'login_pass',
+                'email' => 'email',
+                'password' => 'password',
                 'login_memory' => 'login_memory',
             ]),
             'error' => null,
@@ -252,12 +252,12 @@ final class ShoppingLoginHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
-        // FORM-PAGE recipe: `form_widget(form.login_email)` delegates to
+        // FORM-PAGE recipe: `form_widget(form.email)` delegates to
         // BeMart's real LoginForm so the login `<input>`s are
         // byte-identical to BeMart's port.
         $form = (new FormFactory())->newInstance(LoginForm::class);

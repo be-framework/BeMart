@@ -40,7 +40,7 @@
      control with no body value.
    - `is_granted('ROLE_USER')` — EC-CUBE auth-state runtime. The
      anonymous-only customer-edit JS / progress step / inline-edit panel
-     are OMITTED; the port renders the member-checkout path (the common
+     are OMITTED; the port renders the member-checkout URL (the common
      case — the page requires AUTHN, see Shopping.php). The `{% block
      javascript %}` redirect-to wiring is OMITTED as EC-CUBE-runtime.
    - `has_errors(...)` — request-validation runtime; resolves false on a
@@ -109,9 +109,10 @@
         <!-- アラートメッセージ -->
     </div>
 
-    <form id="shopping-form" method="post" action="{{ url('shopping_confirm') }}">
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form id="shopping-form" method="post" action="/shopping/confirm">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <input type="hidden" id="shopping_order_redirect_to" name="redirect_to" value="">
+        <input type="hidden" name="preOrderId" value="{{ preOrderId|default('') }}">
         <div class="ec-orderRole">
             <div class="ec-orderRole__detail">
                 <div class="ec-orderAccount">
@@ -161,7 +162,7 @@
                         </div>
                     {% endif %}
                     <div class="ec-orderDelivery__edit">
-                        <button type="button" class="ec-inlineBtn" data-trigger="click" data-path="{{ path('shopping_shipping_multiple') }}">お届け先を追加する</button>
+                        <button type="button" class="ec-inlineBtn" data-trigger="click" data-path="/shopping/shipping-multiple">お届け先を追加する</button>
                     </div>
                 </div>
                 <div class="ec-orderPayment">
@@ -208,7 +209,7 @@
                     <div class="ec-totalBox__paymentTotal">お支払い合計<span class="ec-totalBox__price">{{ (totalPrice|default(0) + deliveryFeeTotal|default(0))|price }}</span><span class="ec-totalBox__taxLabel">税込</span></div>
                     <div class="ec-totalBox__btn">
                         <button type="submit" class="ec-blockBtn--action">確認する</button>
-                        <a href="{{ url("cart") }}" class="ec-blockBtn--cancel">カートに戻る</a>
+                        <a href="/cart" class="ec-blockBtn--cancel">カートに戻る</a>
                     </div>
                 </div>
             </div>

@@ -59,18 +59,18 @@ final class AdminMemberResourceSqlTest extends AbstractResourceSqlTestCase
         // Three seed admins matching the Fake fixture's roster. The
         // returned ids are the numeric dtb_member.id PKs.
         $this->testAdminId = (string) $this->insertAdmin([
-            'login_id' => 'test-admin',
+            'loginId' => 'test-admin',
             'name' => 'テスト管理者',
             'authority_id' => 0, // system admin
         ]);
         $this->shopOwnerId = (string) $this->insertAdmin([
-            'login_id' => 'shop-owner',
+            'loginId' => 'shop-owner',
             'name' => '店舗オーナー',
             'authority_id' => 1, // shop owner
             'sort_no' => 2,
         ]);
         $this->insertAdmin([
-            'login_id' => 'deputy',
+            'loginId' => 'deputy',
             'name' => '副管理者',
             'authority_id' => 1,
         ]);

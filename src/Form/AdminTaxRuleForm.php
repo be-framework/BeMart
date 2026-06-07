@@ -20,8 +20,8 @@ use Ray\WebFormModule\AbstractForm;
  * Scope — the inline-create form only
  * -----------------------------------
  * EC-CUBE's `tax_rule.twig` renders TWO form families: the top-of-table
- * inline-CREATE form (`form.tax_rate` / `form.rounding_type` /
- * `form.apply_date`) and a per-row inline-EDIT form
+ * inline-CREATE form (`form.taxRate` / `form.rounding_type` /
+ * `form.applyDate`) and a per-row inline-EDIT form
  * (`forms[TaxRule.id].*`). BeMart's
  * {@see \MyVendor\BeMart\Resource\Page\Admin\TaxRule\TaxRuleList}
  * resource exposes `doCreateTaxRule` (POST) and `doDeleteTaxRule`
@@ -48,20 +48,20 @@ final class AdminTaxRuleForm extends AbstractForm
      * Declares the tax-rule inline-create inputs.
      *
      * EC-CUBE's `TaxRuleType` block prefix is `tax_rule`, so the
-     * FormView ids are `tax_rule_<field>`. `tax_rate` is an
-     * `IntegerType` (numeric input); `apply_date` is a `DateTimeType`
+     * FormView ids are `tax_rule_<field>`. `taxRate` is an
+     * `IntegerType` (numeric input); `applyDate` is a `DateTimeType`
      * with `widget: single_text` (a `datetime-local` input).
      */
     #[Override]
     public function init(): void
     {
-        $this->setField('tax_rate', 'number')
+        $this->setField('taxRate', 'number')
             ->setAttribs([
                 'id' => 'tax_rule_tax_rate',
                 'class' => 'form-control',
             ]);
 
-        $this->setField('apply_date', 'datetime-local')
+        $this->setField('applyDate', 'datetime-local')
             ->setAttribs([
                 'id' => 'tax_rule_apply_date',
                 'class' => 'form-control',
@@ -70,7 +70,7 @@ final class AdminTaxRuleForm extends AbstractForm
         // NON-AUTHORITATIVE structural check only — the authoritative
         // tax-rate / apply-date rules live in the Be domain
         // (CreateTaxRuleInput Semantic).
-        $this->filter->validate('tax_rate')->isNotBlank();
-        $this->filter->validate('apply_date')->isNotBlank();
+        $this->filter->validate('taxRate')->isNotBlank();
+        $this->filter->validate('applyDate')->isNotBlank();
     }
 }
