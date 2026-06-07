@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Delivery;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
 use MyVendor\BeMart\Be\Input\UpdateDeliveryInput;
 use MyVendor\BeMart\Form\AdminDeliveryForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -49,6 +51,8 @@ class Delivery extends ResourceObject
      *
      * @psalm-taint-source input $deliveryId
      */
+    #[Alps('doUpdateDelivery')]
+    #[JsonSchema(schema: 'get-admin-delivery-delivery.json', params: 'get-admin-delivery-delivery.param.json')]
     #[Link(rel: 'doUpdateDelivery', href: 'page://self/admin/delivery/delivery', method: 'put')]
     public function onGet(string $deliveryId = ''): static
     {
@@ -92,10 +96,13 @@ class Delivery extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateDelivery` に対応する PUT 操作。
      * @psalm-taint-source input $deliveryId
      * @psalm-taint-source input $deliveryName
      * @psalm-taint-source input $visible
      */
+    #[Alps('doUpdateDelivery')]
+    #[JsonSchema(schema: 'put-admin-delivery-delivery.json', params: 'put-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[CsrfProtected]
     public function onPut(
@@ -122,8 +129,11 @@ class Delivery extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateDelivery` に対応する DELETE 操作。
      * @psalm-taint-source input $deliveryId
      */
+    #[Alps('doUpdateDelivery')]
+    #[JsonSchema(schema: 'delete-admin-delivery-delivery.json', params: 'delete-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[CsrfProtected]

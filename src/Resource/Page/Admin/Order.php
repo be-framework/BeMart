@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderInput;
 use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -65,6 +67,8 @@ class Order extends ResourceObject
      *
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('goOrder')]
+    #[JsonSchema(schema: 'get-admin-order.json', params: 'get-admin-order.param.json')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'doUpdateOrder', href: 'page://self/admin/order', method: 'put')]
     #[Link(rel: 'doUpdateOrderStatus', href: 'page://self/admin/order-status', method: 'post')]
@@ -119,6 +123,8 @@ class Order extends ResourceObject
      * @psalm-taint-source input $charge
      * @psalm-taint-source input $usePoint
      */
+    #[Alps('doUpdateOrder')]
+    #[JsonSchema(schema: 'put-admin-order.json', params: 'put-admin-order.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[CsrfProtected]
     public function onPut(

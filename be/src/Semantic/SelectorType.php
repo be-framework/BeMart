@@ -5,17 +5,22 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Semantic;
 
 use Be\Framework\Attribute\Validate;
+use MyVendor\BeMart\Be\Exception\SelectorTypeFormatException;
 
 /**
- * Customer selector type used by admin customer edit/search flows.
+ * Admin customer selector type — discriminator for goAdminCustomer lookup.
  *
- * Optional free-form selector metadata. Registering this semantic removes
- * ontology fallback notices while keeping validation authority in Be.
+ * `customerId` selects the canonical customer identifier. `email` preserves the
+ * legacy admin lookup path used by existing forms and tests. No other selector
+ * namespace is part of this boundary contract.
  */
 final class SelectorType
 {
     #[Validate]
-    public function validate(string|null $selectorType): void
+    public function validate(string $selectorType): void
     {
+        if ($selectorType !== 'customerId' && $selectorType !== 'email') {
+            throw new SelectorTypeFormatException();
+        }
     }
 }

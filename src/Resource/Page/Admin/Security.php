@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Form\AdminSecurityForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -40,6 +42,9 @@ class Security extends ResourceObject
     ) {
     }
 
+    /** ALPS `doUpdateSecurity` に対応する GET 操作。 */
+    #[Alps('doUpdateSecurity')]
+    #[JsonSchema(schema: 'get-admin-security.json')]
     #[Link(rel: 'doUpdateSecurity', href: 'page://self/admin/security', method: 'put')]
     public function onGet(): static
     {
@@ -86,6 +91,8 @@ class Security extends ResourceObject
      * @psalm-taint-source input $frontDenyHosts
      * @psalm-taint-source input $trustedHosts
      */
+    #[Alps('doUpdateSecurity')]
+    #[JsonSchema(schema: 'put-admin-security.json', params: 'put-admin-security.param.json')]
     #[Link(rel: 'goTwoFactorAuthSet', href: 'page://self/admin/two-factor-auth-set')]
     #[CsrfProtected]
     public function onPut(

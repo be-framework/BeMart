@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderPdfForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -38,8 +40,11 @@ class OrderPdf extends ResourceObject
     }
 
     /**
+     * ALPS `goAdminOrderOrderPdf` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('goAdminOrderOrderPdf')]
+    #[JsonSchema(schema: 'get-admin-order-order-pdf.json', params: 'get-admin-order-order-pdf.param.json')]
     #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(string $orderNo = ''): static

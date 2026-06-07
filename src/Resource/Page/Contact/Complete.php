@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Contact;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goContactComplete — お問い合わせ(完了)
@@ -29,6 +31,9 @@ use BEAR\Resource\ResourceObject;
  */
 class Complete extends ResourceObject
 {
+    /** ALPS `goContactComplete` に対応する GET 操作。 */
+    #[Alps('goContactComplete')]
+    #[JsonSchema(schema: 'get-contact-complete.json', params: 'get-contact-complete.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(string $ticketId = ''): static
     {

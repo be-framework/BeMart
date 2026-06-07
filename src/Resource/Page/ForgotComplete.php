@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goForgotComplete — パスワード再発行(メール送信完了) (Phase 3
@@ -38,6 +40,8 @@ class ForgotComplete extends ResourceObject
      * EC-CUBE goForgotComplete — render the reset-mail-sent confirmation
      * page scaffolding.
      */
+    #[Alps('doRequestPasswordReset')]
+    #[JsonSchema(schema: 'get-forgot-complete.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static

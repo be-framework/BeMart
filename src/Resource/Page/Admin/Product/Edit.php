@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Input\GetAdminProductInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminProductEditForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -51,8 +53,11 @@ class Edit extends ResourceObject
     }
 
     /**
+     * ALPS `goProduct` に対応する GET 操作。
      * @psalm-taint-source input $productCode
      */
+    #[Alps('goProduct')]
+    #[JsonSchema(schema: 'get-admin-product-edit.json', params: 'get-admin-product-edit.param.json')]
     #[Link(rel: 'doCreateProduct', href: 'page://self/admin/product', method: 'post')]
     #[Link(rel: 'doUpdateProduct', href: 'page://self/admin/product', method: 'put')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]

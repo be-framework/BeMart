@@ -129,6 +129,7 @@ final class AdminChangePasswordHtmlRenderTest extends TestCase
         $this->assertStringContainsString('type="password"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testChangePasswordHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/change-password')->toString();

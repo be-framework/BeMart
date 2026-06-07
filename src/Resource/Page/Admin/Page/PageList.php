@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminPageListFetched;
 use MyVendor\BeMart\Be\Final\PageCreated;
 use MyVendor\BeMart\Be\Input\CreatePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageListInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -33,6 +35,9 @@ class PageList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goPageList` に対応する GET 操作。 */
+    #[Alps('goPageList')]
+    #[JsonSchema(schema: 'get-admin-page-page-list.json')]
     #[Link(rel: 'doCreatePage', href: 'page://self/admin/page/page-list', method: 'post')]
     #[Link(rel: 'goPage', href: 'page://self/admin/page/page', method: 'get')]
     #[Link(rel: 'doUpdatePage', href: 'page://self/admin/page/page', method: 'put')]
@@ -53,10 +58,13 @@ class PageList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreatePage` に対応する POST 操作。
      * @psalm-taint-source input $pageName
      * @psalm-taint-source input $pageUrl
      * @psalm-taint-source input $pageFileName
      */
+    #[Alps('doCreatePage')]
+    #[JsonSchema(schema: 'post-admin-page-page-list.json', params: 'post-admin-page-page-list.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     #[CsrfProtected]
     public function onPost(

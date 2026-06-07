@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\PasswordResetCompleted;
 use MyVendor\BeMart\Be\Input\ResetPasswordInput;
 use MyVendor\BeMart\Form\ResetForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -56,6 +58,8 @@ class Reset extends ResourceObject
      *
      * @psalm-taint-source input $resetKey
      */
+    #[Alps('doResetPassword')]
+    #[JsonSchema(schema: 'get-reset.json', params: 'get-reset.param.json')]
     #[Link(rel: 'doResetPassword', href: 'page://self/reset', method: 'post')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     public function onGet(string|null $resetKey = null): static
@@ -79,9 +83,12 @@ class Reset extends ResourceObject
     }
 
     /**
+     * ALPS `doResetPassword` に対応する POST 操作。
      * @psalm-taint-source input $resetKey
      * @psalm-taint-source input $password
      */
+    #[Alps('doResetPassword')]
+    #[JsonSchema(schema: 'post-reset.json', params: 'post-reset.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
     public function onPost(string $resetKey, string $password): static

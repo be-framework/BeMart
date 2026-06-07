@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Block;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminBlockListFetched;
 use MyVendor\BeMart\Be\Final\BlockCreated;
 use MyVendor\BeMart\Be\Input\CreateBlockInput;
 use MyVendor\BeMart\Be\Input\GetAdminBlockListInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -30,6 +32,9 @@ class BlockList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goBlockList` に対応する GET 操作。 */
+    #[Alps('goBlockList')]
+    #[JsonSchema(schema: 'get-admin-block-block-list.json')]
     #[Link(rel: 'doCreateBlock', href: 'page://self/admin/block/block-list', method: 'post')]
     #[Link(rel: 'doUpdateBlock', href: 'page://self/admin/block/block', method: 'put')]
     #[Link(rel: 'doDeleteBlock', href: 'page://self/admin/block/block', method: 'delete')]
@@ -49,9 +54,12 @@ class BlockList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateBlock` に対応する POST 操作。
      * @psalm-taint-source input $blockName
      * @psalm-taint-source input $blockFileName
      */
+    #[Alps('doCreateBlock')]
+    #[JsonSchema(schema: 'post-admin-block-block-list.json', params: 'post-admin-block-block-list.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[CsrfProtected]
     public function onPost(

@@ -149,6 +149,7 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="tax_rule_apply_date"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testTaxRuleListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/tax-rule/tax-rule-list')->toString();

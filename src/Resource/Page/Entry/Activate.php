@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Entry;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\SecretKeyNotFoundException;
 use MyVendor\BeMart\Be\Final\CustomerActivated;
 use MyVendor\BeMart\Be\Input\ActivateCustomerInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -58,6 +60,8 @@ class Activate extends ResourceObject
      * screen. Pure renderer: the body surfaces only the screen shape + the
      * outbound `goTop` transition (ALPS `#CustomerActivationComplete`).
      */
+    #[Alps('goTop')]
+    #[JsonSchema(schema: 'get-entry-activate.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static
     {
@@ -79,8 +83,11 @@ class Activate extends ResourceObject
     }
 
     /**
+     * ALPS `doActivateCustomer` に対応する POST 操作。
      * @psalm-taint-source input $secretKey
      */
+    #[Alps('doActivateCustomer')]
+    #[JsonSchema(schema: 'post-entry-activate.json', params: 'post-entry-activate.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
     public function onPost(string $secretKey): static
