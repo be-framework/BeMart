@@ -198,6 +198,7 @@ final class CartHtmlRenderTest extends TestCase
      * rendering of the same logical cart. Every difference must be in the
      * enumerated residual allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testCartHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         // Same logical cart on both sides: one normal-sale cart with one

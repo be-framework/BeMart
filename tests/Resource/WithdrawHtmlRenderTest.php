@@ -141,6 +141,7 @@ final class WithdrawHtmlRenderTest extends TestCase
      * The honesty test: diff BeMart's rendered withdrawal-confirm page
      * against EC-CUBE's own rendering.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testWithdrawHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/mypage/withdraw')->toString();

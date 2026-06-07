@@ -174,6 +174,7 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         }
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShoppingConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/confirm')->toString();

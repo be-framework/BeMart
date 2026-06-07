@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -21,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Query\AddressStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use MyVendor\BeMart\Form\AddressForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function assert;
@@ -80,6 +82,8 @@ class Address extends ResourceObject
      *
      * @psalm-taint-source input $addressId
      */
+    #[Alps('doUpdateCustomerAddress')]
+    #[JsonSchema(schema: 'get-mypage-address.json', params: 'get-mypage-address.param.json')]
     #[Link(rel: 'doCreateCustomerAddress', href: 'page://self/mypage/address-list', method: 'post')]
     #[Link(rel: 'doUpdateCustomerAddress', href: 'page://self/mypage/address', method: 'put')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
@@ -146,6 +150,7 @@ class Address extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateCustomerAddress` に対応する PUT 操作。
      * @psalm-taint-source input $addressId
      * @psalm-taint-source input $name01
      * @psalm-taint-source input $name02
@@ -158,6 +163,8 @@ class Address extends ResourceObject
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
      */
+    #[Alps('doUpdateCustomerAddress')]
+    #[JsonSchema(schema: 'put-mypage-address.json', params: 'put-mypage-address.param.json')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[CsrfProtected]
     public function onPut(
@@ -240,8 +247,11 @@ class Address extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateCustomerAddress` に対応する DELETE 操作。
      * @psalm-taint-source input $addressId
      */
+    #[Alps('doUpdateCustomerAddress')]
+    #[JsonSchema(schema: 'delete-mypage-address.json', params: 'delete-mypage-address.param.json')]
     #[Link(rel: 'goFavoriteList', href: 'page://self/mypage/favorite-list')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[CsrfProtected]

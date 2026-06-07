@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goShoppingComplete — ご注文完了 (Phase 3 — thin renderer).
@@ -52,8 +54,11 @@ class Complete extends ResourceObject
     }
 
     /**
+     * ALPS `goShoppingComplete` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('goShoppingComplete')]
+    #[JsonSchema(schema: 'get-shopping-complete.json', params: 'get-shopping-complete.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(string $orderNo = ''): static

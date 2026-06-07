@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Input\GetMypageChangeInput;
 use MyVendor\BeMart\Be\Input\UpdateCustomerInput;
 use MyVendor\BeMart\Form\ChangeForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function assert;
@@ -58,6 +60,8 @@ class Change extends ResourceObject
      * JSON contexts ignore `body['form']`; the flat profile keys stay on
      * `body` for the JSON-context tests.
      */
+    #[Alps('goMypageChange')]
+    #[JsonSchema(schema: 'get-mypage-change.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
     {
@@ -117,6 +121,7 @@ class Change extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateCustomer` に対応する POST 操作。
      * @psalm-taint-source input $email
      * @psalm-taint-source input $name01
      * @psalm-taint-source input $name02
@@ -129,6 +134,8 @@ class Change extends ResourceObject
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
      */
+    #[Alps('doUpdateCustomer')]
+    #[JsonSchema(schema: 'post-mypage-change.json', params: 'post-mypage-change.param.json')]
     #[Link(rel: 'goMypageChangeComplete', href: 'page://self/mypage/change-complete')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]

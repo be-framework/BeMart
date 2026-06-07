@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Final\PasswordResetRequested;
 use MyVendor\BeMart\Be\Input\RequestPasswordResetInput;
 use MyVendor\BeMart\Form\ForgotForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -53,6 +55,8 @@ class ForgotPassword extends ResourceObject
      * `csrfToken` stays `null` — the EventListener mirrors the Symfony
      * token into the session for the subsequent POST (same as Login).
      */
+    #[Alps('doRequestPasswordReset')]
+    #[JsonSchema(schema: 'get-forgot-password.json')]
     #[Link(rel: 'doRequestPasswordReset', href: 'page://self/forgot-password', method: 'post')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     public function onGet(): static
@@ -75,8 +79,11 @@ class ForgotPassword extends ResourceObject
     }
 
     /**
+     * ALPS `doRequestPasswordReset` に対応する POST 操作。
      * @psalm-taint-source input $email
      */
+    #[Alps('doRequestPasswordReset')]
+    #[JsonSchema(schema: 'post-forgot-password.json', params: 'post-forgot-password.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
     public function onPost(string $email): static

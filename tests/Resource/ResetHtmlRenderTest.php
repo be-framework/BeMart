@@ -161,6 +161,7 @@ final class ResetHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering. Every difference must be in the residual
      * allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testResetHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/reset')->toString();

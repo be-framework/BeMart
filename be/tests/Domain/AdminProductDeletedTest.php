@@ -61,6 +61,7 @@ final class AdminProductDeletedTest extends TestCase
         // FakeQuery fixtures are static; soft-delete persistence is covered by the SQL suite.
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testIdempotentReplayReturnsAlreadyDeletedTrue(): void
     {
         $this->markTestSkipped('Idempotent replay needs mutable persistence; covered by the SQL suite.');

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderEditForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -49,8 +51,11 @@ class Edit extends ResourceObject
     }
 
     /**
+     * ALPS `goOrder` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('goOrder')]
+    #[JsonSchema(schema: 'get-admin-order-edit.json', params: 'get-admin-order-edit.param.json')]
     #[Link(rel: 'doUpdateOrder', href: 'page://self/admin/order', method: 'put')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(string $orderNo = ''): static

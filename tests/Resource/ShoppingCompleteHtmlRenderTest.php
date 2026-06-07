@@ -118,6 +118,7 @@ final class ShoppingCompleteHtmlRenderTest extends TestCase
         }
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShoppingCompleteHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/complete')->toString();

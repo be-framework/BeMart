@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrdersBulkDeleted;
 use MyVendor\BeMart\Be\Input\AdminBulkDeleteOrderInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -43,10 +45,13 @@ class BulkDelete extends ResourceObject
     }
 
     /**
+     * ALPS `doBulkDeleteOrder` に対応する POST 操作。
      * @param list<string> $orderNos
      *
      * @psalm-taint-source input $orderNos
      */
+    #[Alps('doBulkDeleteOrder')]
+    #[JsonSchema(schema: 'post-admin-order-bulk-delete.json', params: 'post-admin-order-bulk-delete.param.json')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[CsrfProtected]
     public function onPost(
