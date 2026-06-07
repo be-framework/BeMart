@@ -10,8 +10,6 @@
         "boolean",
         "null"
       ],
-      "minLength": 0,
-      "maxLength": 255,
       "title": "ブロック削除可能フラグ",
       "description": "このブロックを管理画面から削除できるか。システム標準ブロックは削除不可 観察値 'false', 'true'。",
       "example": "false"
