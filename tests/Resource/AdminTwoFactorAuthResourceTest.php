@@ -52,13 +52,13 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
 
     public function testOnPostWrongTokenReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/two-factor-auth', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException::class);
+
+        $this->resource->post('page://self/admin/two-factor-auth', [
             'loginId' => 'test-admin',
             'deviceToken' => '000000',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

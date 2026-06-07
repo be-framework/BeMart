@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Help;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goHelpGuide — ご利用ガイド (Wave 3H pure renderer).
@@ -20,8 +22,11 @@ use BEAR\Resource\ResourceObject;
 class Guide extends ResourceObject
 {
     /**
+     * ALPS `goHelpGuide` に対応する GET 操作。
      * @todo Wave-future: surface guide content from admin-editable store.
      */
+    #[Alps('goHelpGuide')]
+    #[JsonSchema(schema: 'get-help-guide.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static
     {

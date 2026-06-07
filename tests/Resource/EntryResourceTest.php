@@ -84,43 +84,41 @@ final class EntryResourceTest extends TestCase
 
     public function testOnPostDuplicateEmailReturns409(): void
     {
-        $ro = $this->resource->post('page://self/entry', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException::class);
+
+        $this->resource->post('page://self/entry', [
             'email' => 'alice@example.com',
             'password' => 'try-to-overwrite-2026',
             'name01' => '別人',
             'name02' => 'A',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(409, $ro->code);
-        $this->assertSame('alice@example.com', $ro->body['email']);
     }
 
     public function testOnPostInvalidEmailReturns400(): void
     {
-        $ro = $this->resource->post('page://self/entry', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/entry', [
             'email' => 'not-an-email',
             'password' => 'whatever-2026',
             'name01' => '佐藤',
             'name02' => '五郎',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
-        $this->assertNotEmpty($ro->body['message']);
     }
 
     public function testOnPostEmptyPasswordReturns400(): void
     {
-        $ro = $this->resource->post('page://self/entry', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/entry', [
             'email' => 'pw-empty@example.com',
             'password' => '',
             'name01' => '佐藤',
             'name02' => '六郎',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

@@ -75,36 +75,34 @@ final class ReorderResourceTest extends TestCase
     {
         $this->rebindSession('customer-999');
 
-        $ro = $this->resource->post('page://self/mypage/reorder', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedOrderAccessException::class);
+
+        $this->resource->post('page://self/mypage/reorder', [
             'orderNo' => 'past0000000000000000000000000001',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertSame('past0000000000000000000000000001', $ro->body['orderNo']);
     }
 
     public function testOnPostUnknownOrderReturns404(): void
     {
-        $ro = $this->resource->post('page://self/mypage/reorder', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\OrderNotFoundException::class);
+
+        $this->resource->post('page://self/mypage/reorder', [
             'orderNo' => 'never00000000000000000000000000z',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertSame('never00000000000000000000000000z', $ro->body['orderNo']);
     }
 
     public function testOnPostAnonymousReturns401(): void
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->post('page://self/mypage/reorder', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
+
+        $this->resource->post('page://self/mypage/reorder', [
             'orderNo' => 'past0000000000000000000000000001',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

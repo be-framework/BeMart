@@ -1,9 +1,4 @@
----
-layout: default
-title: "/admin/order/create"
----
-
-<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/order/create
 EC-CUBE doCreateOrder — 受注を手動作成する (Wave 9η,
@@ -30,20 +25,49 @@ Failure mapping:
 
 
 ## POST
+ALPS `doCreateOrder` に対応する POST 操作。
+
+**ALPS**: `doCreateOrder`
+
 
 
 ### Request
 
 | Name | Type | Description | Default | Required | Constraints | Example |
 |------|------|-------------|---------|----------|-------------|---------|
-| customerId | string | 会員ID |  | Required |  |  |
-| paymentMethodId | int |  |  | Required |  |  |
-| orderItems | array |  |  | Required |  |  |
-| deliveryFeeTotal | int | 送料合計 | 0 | Optional |  |  |
-| charge | int | 手数料 | 0 | Optional |  |  |
-| discount | int | 値引き額 | 0 | Optional |  |  |
+| customerId | string | 会員ID（入力） - dtb_customer.id の不透明な文字列ハンドル。BeMart の Entity 層は数値ではなく文字列として保持する（マスアサインメント防止のため、Session/AuthZ 経由で読み出し、リクエスト本文からは受け取らない）。Favorite / Cart / Order の所有者キーとして横断使用 Fake観察文字長 12〜32; 観察値 'customer-001', '0123456789abcdef0123456789abcdef', 'customer-002', 'favorite-list-customer', 'favorite-html-customer', 'fedcba9876543210fedcba9876543210', 'aaaaaaaa00000000bbbbbbbb11111111', '10000000aaaa1111bbbb2222cccc3333'。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | customer-001 |
+| paymentMethodId | int | 支払方法ID - 受注に紐づく支払方法マスタID。Fake/EC-CUBE境界ではDB採番値として扱う。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"\u652f\u6255\u65b9\u6cd5ID\u306f\u696d\u52d9\u4e0aID\u3060\u304c\u3001HTTP\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u3002Resource/Semantic\u5c64\u306e\u691c\u8a3c\u3092\u901a\u3059\u305f\u3081transport schema\u3067\u306fstring|integer\u3092\u8a31\u5bb9\u3059\u308b\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | 2 |
+| orderItems | array | 受注明細一覧（入力） - /admin/order/create のレスポンスで扱う受注明細一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。 |  | Required | {"items":{"type":"object","title":"\u53d7\u6ce8\u660e\u7d30\uff08\u5165\u529b\uff09","description":"/admin/order/create \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308b\u53d7\u6ce8\u660e\u7d30\u3002\u89aa\u30b3\u30ec\u30af\u30b7\u30e7\u30f3 `orderItems` \u306e1\u884c\u3092\u8868\u3057\u3001\u56fa\u5b9a\u3067\u304d\u308b\u696d\u52d9\u5217\u306fschema property\u3067\u660e\u793a\u3059\u308b\u3002","properties":{"productCode":{"title":"\u5546\u54c1\u30b3\u30fc\u30c9\uff08\u5165\u529b\uff09","description":"SKU/\u54c1\u756a\u3002\u5728\u5eab\u7ba1\u7406\u3084\u53d7\u6ce8\u660e\u7d30\u3067\u306e\u8b58\u5225\u306b\u4f7f\u7528 \u5546\u54c1\u3092\u8b58\u5225\u3059\u308bSKU\u3002Fake corpus\u3067\u306fASCII\u82f1\u6570\u30fb\u30cf\u30a4\u30d5\u30f3\u4e2d\u5fc3\u3067\u3001\u53d7\u6ce8\u660e\u7d30/\u30ab\u30fc\u30c8\u660e\u7d30\u306e\u7d50\u5408\u30ad\u30fc\u306b\u306a\u308b\u3002 Fake\u89b3\u5bdf\u6587\u5b57\u9577 10\u301c26\u3002","type":["string","null"],"minLength":0,"maxLength":64,"example":"sample-001","$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."},"productName":{"type":["string","null"],"minLength":0,"maxLength":128,"title":"\u5546\u54c1\u540d\uff08\u5165\u529b\uff09","description":"\u5546\u54c1\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 6\u301c17\u3002","example":"\u30b5\u30f3\u30d7\u30eb\u5546\u54c1 A","$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."},"quantity":{"title":"\u6570\u91cf\uff08\u5165\u529b\uff09","description":"\u8cfc\u5165\u6570\u91cf\u3002\u30ab\u30fc\u30c8\u660e\u7d30\u3068\u53d7\u6ce8\u660e\u7d30\u3067\u5171\u901a\u4f7f\u7528 Fake\u89b3\u5bdf\u6570\u5024 1\u301c3; \u89b3\u5bdf\u5024 '1', '2', '3'\u3002","type":["integer","string","null"],"example":"1","$comment":"\u6570\u91cf\uff08\u5165\u529b\uff09\u306f\u672c\u6765\u6570\u5024/\u5217\u6319\u306e\u696d\u52d9\u5024\u3060\u304c\u3001HTTP\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u3002Resource/Semantic\u5c64\u306e400\u5fdc\u7b54\u3092\u596a\u308f\u306a\u3044\u305f\u3081transport schema\u3067\u306f\u6587\u5b57\u5217\u5165\u529b\u3092\u8a31\u5bb9\u3059\u308b\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."},"price":{"title":"\u8ca9\u58f2\u4fa1\u683c\uff08\u5165\u529b\uff09","description":"\u5b9f\u969b\u306e\u8ca9\u58f2\u4fa1\u683c\uff08\u7a0e\u629c\uff09\u3002\u7a0e\u8a08\u7b97\u30fb\u5c0f\u8a08\u8a08\u7b97\u306e\u30d9\u30fc\u30b9 Fake\u89b3\u5bdf\u6570\u5024 800\u301c13500; \u89b3\u5bdf\u5024 '1200', '8000', '1500', '800', '1000', '13500', '9800'\u3002","type":["integer","null"],"example":1200,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."},"unitPrice":{"title":"\u5358\u4fa1\uff08\u5165\u529b\uff09","description":"\u660e\u7d301\u4ef6\u3042\u305f\u308a\u306e\u5358\u4fa1\u3002\u53d7\u6ce8/\u30ab\u30fc\u30c8\u660e\u7d30\u30fb\u304a\u6c17\u306b\u5165\u308a\u30b9\u30ca\u30c3\u30d7\u30b7\u30e7\u30c3\u30c8\u3067\u306f\u8ffd\u52a0\u6642\u70b9\u306e price02 \u3092\u30b9\u30ca\u30c3\u30d7\u30b7\u30e7\u30c3\u30c8\u3057\u3066\u4fdd\u6301\u3059\u308b\uff08\u5f8c\u306e\u5024\u5f15\u304d\u3084\u30de\u30b9\u30bf\u6539\u5b9a\u306b\u5f71\u97ff\u3055\u308c\u306a\u3044\uff09\u3002BeMart \u5074\u3067\u306f `int` \u5186\u6574\u6570 Fake\u89b3\u5bdf\u6570\u5024 1200\u301c9800; \u89b3\u5bdf\u5024 '1200', '9800'\u3002","type":["integer","null"],"example":1200,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."},"tax":{"type":["integer","null"],"title":"\u7a0e\u984d\uff08\u5165\u529b\uff09","description":"\u53d7\u6ce8\u5168\u4f53\u306e\u7a0e\u984d\u5408\u8a08\uff08\u975e\u63a8\u5968\uff09\u3002\u660e\u7d30\u3054\u3068\u306e\u7a0e\u984d\u96c6\u8a08\u3068\u5dee\u7570\u304c\u751f\u3058\u308b\u5834\u5408\u304c\u3042\u308b\u305f\u3081\u3001\u6b63\u78ba\u306a\u7a0e\u984d\u306fOrderItem\u660e\u7d30\u3054\u3068\u306etax\u3092\u96c6\u8a08\u3059\u3079\u304d Fake\u89b3\u5bdf\u6570\u5024 1100\u301c1100; \u89b3\u5bdf\u5024 '1100'\u3002","example":1100,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."}},"additionalProperties":false,"$comment":"\u914d\u5217\u8981\u7d20\u306fFake/Resource\u3067\u89b3\u5bdf\u3055\u308c\u305f\u65e2\u77e5property\u306b\u56fa\u5b9a\u3059\u308b\u3002\u65b0\u3057\u3044\u5217\u304c\u5fc5\u8981\u306b\u306a\u3063\u305f\u5834\u5408\u306fSemantic-Ex\u89b3\u5bdf\u306b\u8ffd\u52a0\u3057\u3066schema\u3092\u66f4\u65b0\u3059\u308b\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."},"minItems":0,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
+| deliveryFeeTotal | int | 送料合計（入力） - 全配送先の送料合計（スナップショット）。deliveryFeeAmount（地域別送料）+ deliveryFee（商品別送料）×数量 の合計。DeliveryFeePreprocessorで計算。カートと受注の両方で使用 Fake観察数値 0〜800; 観察値 '600', '0', '500', '800', '700'。 | 0 | Optional | {"default":0,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | 600 |
+| charge | int | 手数料（入力） - 受注の決済手数料。paymentCharge（支払方法マスタの手数料）のスナップショット。PaymentChargePreprocessorにより受注作成時にコピーされる Fake観察数値 0〜300; 観察値 '0', '300', '200'。 | 0 | Optional | {"default":0,"$comment":"\u624b\u6570\u6599\uff08\u5165\u529b\uff09\u306f\u672c\u6765\u6570\u5024/\u5217\u6319\u306e\u696d\u52d9\u5024\u3060\u304c\u3001HTTP\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u3002Resource/Semantic\u5c64\u306e400\u5fdc\u7b54\u3092\u596a\u308f\u306a\u3044\u305f\u3081transport schema\u3067\u306f\u6587\u5b57\u5217\u5165\u529b\u3092\u8a31\u5bb9\u3059\u308b\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | 0 |
+| discount | int | 値引き額（入力） - 受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 '0'。 | 0 | Optional | {"default":0,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | 0 |
 
 
 ### Response
 
-_Not available_
+[Object: POST /admin/order/create response](../schemas/post-admin-order-create.json)
+
+| Name | Type | Description | Required | Constraints | Example |
+|------|------|-------------|----------|-------------|---------|
+| message | string|null | 注文メッセージ - /admin/order/create のレスポンスに含まれる処理結果メッセージ。注文時お問い合わせ欄ではなく、画面遷移や完了表示のための通知文。 | Optional | {"minLength":0,"maxLength":32} | 配送は平日希望です。 |
+| orderNo | string|null | 注文番号 - 顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。 | Required | {"minLength":0,"maxLength":64} | past0000000000000000000000000001 |
+| customerId | string|null | 会員ID - dtb_customer.id の不透明な文字列ハンドル。BeMart の Entity 層は数値ではなく文字列として保持する（マスアサインメント防止のため、Session/AuthZ 経由で読み出し、リクエスト本文からは受け取らない）。Favorite / Cart / Order の所有者キーとして横断使用 Fake観察文字長 12〜32; 観察値 'customer-001', '0123456789abcdef0123456789abcdef', 'customer-002', 'favorite-list-customer', 'favorite-html-customer', 'fedcba9876543210fedcba9876543210', 'aaaaaaaa00000000bbbbbbbb11111111', '10000000aaaa1111bbbb2222cccc3333'。 | Required | {"minLength":0,"maxLength":128,"pattern":"^[A-Za-z0-9._:@/-]*$","$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002"} | customer-001 |
+| paymentMethodId | int|null | 支払方法ID - 受注に紐づく支払方法マスタID。Fake/EC-CUBE境界ではDB採番値として扱う。 | Required | {"minimum":0,"maximum":2147483647} | 2 |
+| subtotal | int|null | 商品小計 - 商品合計金額（税込）。送料・手数料・値引き適用前の商品明細（orderItemType=1）のみの合計。PurchaseFlow.calculateSubTotal()で計算。送料無料条件の判定基準にも使用（お届け先ごとに判定） Fake観察数値 11000〜11000; 観察値 '11000'。 | Required | {"minimum":0,"maximum":999999999} | 11000 |
+| deliveryFeeTotal | int|null | 送料合計 - 全配送先の送料合計（スナップショット）。deliveryFeeAmount（地域別送料）+ deliveryFee（商品別送料）×数量 の合計。DeliveryFeePreprocessorで計算。カートと受注の両方で使用 Fake観察数値 0〜800; 観察値 '600', '0', '500', '800', '700'。 | Required | {"minimum":0,"maximum":999999999} | 600 |
+| charge | int|null | 手数料 - 受注の決済手数料。paymentCharge（支払方法マスタの手数料）のスナップショット。PaymentChargePreprocessorにより受注作成時にコピーされる Fake観察数値 0〜300; 観察値 '0', '300', '200'。 | Required | {"minimum":0,"maximum":999999999} | 0 |
+| discount | int|null | 値引き額 - 受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 '0'。 | Required | {"minimum":0,"maximum":999999999} | 0 |
+| tax | int|null | 税額 - 受注全体の税額合計（非推奨）。明細ごとの税額集計と差異が生じる場合があるため、正確な税額はOrderItem明細ごとのtaxを集計すべき Fake観察数値 1100〜1100; 観察値 '1100'。 | Required | {"minimum":0,"maximum":999999999} | 1100 |
+| total | int|null | 受注合計 - 受注合計金額。計算式: subtotal(商品税込合計) + deliveryFeeTotal(送料) + charge(手数料) - discount(値引き)。カートのtotalPriceとは別プロパティ Fake観察数値 12700〜12700; 観察値 '12700'。 | Required | {"minimum":0,"maximum":999999999} | 12700 |
+| paymentTotal | int|null | 支払合計 - 実際の支払金額。初期値はtotalと同値で、PointProcessorがポイント値引きのOrderItem（type=POINT_DISCOUNT、不課税）を追加後にPurchaseFlow.calculateTotal()で再計算される。計算式: total - (利用ポイント x pointConversionRate) Fake観察数値 12700〜12700; 観察値 '12700'。 | Required | {"minimum":0,"maximum":999999999} | 12700 |
+| addPoint | int|null | 付与ポイント - 注文により付与されるポイント数。商品単価(税抜) x pointRate x 数量で明細ごとに計算し合算。利用ポイント分を控除。発送済み(DELIVERED)遷移時に会員のpointに加算 Fake観察数値 0〜127; 観察値 '127', '0'。 | Required | {"minimum":0,"maximum":2147483647} | 127 |
+| itemCount | int|null | 明細件数 - /admin/order/create のレスポンスで返す明細件数。一覧・集計・処理結果の規模を表す非負整数。 | Required | {"minimum":0,"maximum":10000} | 1 |
+| orderStatus | int|null | 受注ステータス - 1=新規受付, 3=注文取消, 4=対応中, 5=発送済み, 6=入金済み, 7=決済処理中, 8=購入処理中, 9=返品。Symfony Workflowステートマシンで遷移を制御。許可される遷移: pay(1->6), packing(1,6->4), cancel(1,4,6->3), back_to_in_progress(3->4), ship(1,6,4->5), return(5->9), cancel_return(9->5)。7と8はPurchaseFlow内で直接セットされステートマシン遷移の対象外 Fake観察数値 1〜1; 観察値 '1'。 | Required | {"minimum":1,"maximum":9} | 1 |
+| orderDate | string|null | 注文日 - 注文確定日時 Fake観察文字長 19〜19; 観察値 '2026-04-01 10:00:00'。 | Required | {"pattern":"^\\d{4}-\\d{2}-\\d{2}([ T]\\d{2}:\\d{2}:\\d{2}([+-]\\d{2}:?\\d{2}|Z)?)?$"} | 2026-04-01 10:00:00 |
+
+#### Links
+
+| Relation | URL |
+|----------|-----|
+| goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |
+| goOrder | [<code>page://self/admin/order</code>](/admin/order.md) |

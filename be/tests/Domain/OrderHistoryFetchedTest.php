@@ -28,6 +28,7 @@ use function dirname;
  * so `limit` and `offset` can be exercised end-to-end against the
  * Becoming pipeline.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class OrderHistoryFetchedTest extends TestCase
 {
     private const TEST_CUSTOMER_ID = 'customer-001';

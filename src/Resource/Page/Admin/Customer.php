@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
 use MyVendor\BeMart\Be\Input\GetAdminCustomerInput;
 use MyVendor\BeMart\Form\AdminCustomerForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function filter_var;
@@ -70,6 +72,8 @@ class Customer extends ResourceObject
      * @psalm-taint-source input $customerId
      * @psalm-taint-source input $id
      */
+    #[Alps('goCustomer')]
+    #[JsonSchema(schema: 'get-admin-customer.json', params: 'get-admin-customer.param.json')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
     public function onGet(
         string|null $email = null,
@@ -94,29 +98,10 @@ class Customer extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetAdminCustomerInput(
-                selector: $selector,
-                selectorType: $selectorType,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (CustomerNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された会員は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminCustomerInput(
+            selector: $selector,
+            selectorType: $selectorType,
+        ));
 
         assert($final instanceof AdminCustomerFetched);
 

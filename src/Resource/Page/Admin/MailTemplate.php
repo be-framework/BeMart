@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminMailTemplateForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -55,6 +57,8 @@ class MailTemplate extends ResourceObject
     /**
      * Wave 9ι: goMailTemplateList — admin lists every mail template.
      */
+    #[Alps('goMailTemplateList')]
+    #[JsonSchema(schema: 'get-admin-mail-template.json')]
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     public function onGet(): static
@@ -66,14 +70,7 @@ class MailTemplate extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetMailTemplateListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetMailTemplateListInput());
 
         assert($final instanceof MailTemplateListFetched);
 
@@ -105,9 +102,12 @@ class MailTemplate extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateMailTemplate` に対応する POST 操作。
      * @psalm-taint-source input $mailTemplateId
      * @psalm-taint-source input $mailSubject
      */
+    #[Alps('doUpdateMailTemplate')]
+    #[JsonSchema(schema: 'post-admin-mail-template.json', params: 'post-admin-mail-template.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     #[Link(rel: 'doDeleteMailTemplate', href: 'page://self/admin/mail-template', method: 'delete')]
@@ -116,27 +116,10 @@ class MailTemplate extends ResourceObject
         int $mailTemplateId,
         string $mailSubject,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateMailTemplateInput(
-                mailTemplateId: $mailTemplateId,
-                mailSubject: $mailSubject,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (MailTemplateNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'メールテンプレートが見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateMailTemplateInput(
+            mailTemplateId: $mailTemplateId,
+            mailSubject: $mailSubject,
+        ));
 
         assert($final instanceof MailTemplateUpdated);
 
@@ -162,6 +145,8 @@ class MailTemplate extends ResourceObject
      *
      * @psalm-taint-source input $mailTemplateId
      */
+    #[Alps('doDeleteMailTemplate')]
+    #[JsonSchema(schema: 'delete-admin-mail-template.json', params: 'delete-admin-mail-template.param.json')]
     #[Link(rel: 'goMailTemplateList', href: 'page://self/admin/mail-template', method: 'get')]
     #[CsrfProtected]
     public function onDelete(int $mailTemplateId): static

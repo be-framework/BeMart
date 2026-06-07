@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE admin Product/new — 商品登録フォーム。
@@ -26,6 +28,9 @@ final class ProductNew extends ResourceObject
     ) {
     }
 
+    /** ALPS `doCreateProduct` に対応する GET 操作。 */
+    #[Alps('doCreateProduct')]
+    #[JsonSchema(schema: 'get-admin-product-new.json')]
     #[Link(rel: 'doCreateProduct', href: 'page://self/admin/product', method: 'post')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     public function onGet(): static

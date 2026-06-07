@@ -138,6 +138,7 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="phoneNumber"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShippingEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/shipping-edit')->toString();

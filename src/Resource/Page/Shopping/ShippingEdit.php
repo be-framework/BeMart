@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Form\ShoppingShippingEditForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goShoppingShippingEdit — お届け先変更フォーム (Wave 3H pure renderer).
@@ -37,10 +39,13 @@ class ShippingEdit extends ResourceObject
     }
 
     /**
+     * ALPS `goShoppingShippingEdit` に対応する GET 操作。
      * @todo Wave-future: prefill the form fields with the currently
      *     selected shipping address (member's chosen address book entry
      *     OR the non-member's submitted address).
      */
+    #[Alps('goShoppingShippingEdit')]
+    #[JsonSchema(schema: 'get-shopping-shipping-edit.json')]
     #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/shopping/shipping-edit', method: 'post')]
     #[Link(rel: 'goShoppingShipping', href: 'page://self/shopping/shipping')]
     public function onGet(): static
@@ -98,6 +103,8 @@ class ShippingEdit extends ResourceObject
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
      */
+    #[Alps('doUpdateShippingAddress')]
+    #[JsonSchema(schema: 'post-shopping-shipping-edit.json', params: 'post-shopping-shipping-edit.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
     public function onPost(

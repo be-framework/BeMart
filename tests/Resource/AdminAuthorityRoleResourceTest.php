@@ -87,40 +87,39 @@ final class AdminAuthorityRoleResourceTest extends TestCase
         // THE critical privilege-escalation guard test.
         $this->rebindAdminSession(self::SHOP_OWNER_ID);
 
-        $ro = $this->resource->post('page://self/admin/authority-role', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\InsufficientAuthorityException::class);
+
+        $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 0,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('権限', $ro->body['message']);
     }
 
     public function testShopOwnerCannotFlipPeer(): void
     {
         $this->rebindAdminSession(self::SHOP_OWNER_ID);
 
-        $ro = $this->resource->post('page://self/admin/authority-role', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\InsufficientAuthorityException::class);
+
+        $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'deputy',
             'authority' => 0,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testUnknownTargetReturns404(): void
     {
         $this->rebindAdminSession(self::SYSTEM_ADMIN_ID);
 
-        $ro = $this->resource->post('page://self/admin/authority-role', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\AdminNotFoundException::class);
+
+        $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'no-such-admin',
             'authority' => 1,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testMissingCsrfReturns403(): void
@@ -140,13 +139,13 @@ final class AdminAuthorityRoleResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/authority-role', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/authority-role', [
             'loginId' => 'shop-owner',
             'authority' => 0,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     /**

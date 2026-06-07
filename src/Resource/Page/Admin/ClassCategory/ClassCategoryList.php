@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassCategory;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Input\CreateClassCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminClassCategoryListInput;
 use MyVendor\BeMart\Form\AdminClassCategoryForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -43,21 +45,17 @@ class ClassCategoryList extends ResourceObject
     }
 
     /**
+     * ALPS `goClassCategoryList` に対応する GET 操作。
      * @psalm-taint-source input $classNameId
      */
+    #[Alps('goClassCategoryList')]
+    #[JsonSchema(schema: 'get-admin-class-category-class-category-list.json', params: 'get-admin-class-category-class-category-list.param.json')]
     #[Link(rel: 'doCreateClassCategory', href: 'page://self/admin/class-category/class-category-list', method: 'post')]
     #[Link(rel: 'doUpdateClassCategory', href: 'page://self/admin/class-category/class-category', method: 'put')]
     #[Link(rel: 'doDeleteClassCategory', href: 'page://self/admin/class-category/class-category', method: 'delete')]
     public function onGet(string|null $classNameId = null): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminClassCategoryListInput(classNameId: $classNameId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminClassCategoryListInput(classNameId: $classNameId));
 
         assert($final instanceof AdminClassCategoryListFetched);
 
@@ -76,36 +74,22 @@ class ClassCategoryList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateClassCategory` に対応する POST 操作。
      * @psalm-taint-source input $classNameId
      * @psalm-taint-source input $classCategoryName
      */
+    #[Alps('doCreateClassCategory')]
+    #[JsonSchema(schema: 'post-admin-class-category-class-category-list.json', params: 'post-admin-class-category-class-category-list.param.json')]
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
     #[CsrfProtected]
     public function onPost(
         string $classNameId,
         string $classCategoryName,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateClassCategoryInput(
-                classNameId: $classNameId,
-                classCategoryName: $classCategoryName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ClassNameNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された規格名は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateClassCategoryInput(
+            classNameId: $classNameId,
+            classCategoryName: $classCategoryName,
+        ));
 
         assert($final instanceof ClassCategoryCreated);
 

@@ -37,6 +37,7 @@ use function is_string;
  * `rebindSession` to drive the AUTHN / AUTHZ branches with two
  * fixture customers (alice + bob — same ids as the customer fixture).
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AddressBookResourceTest extends TestCase
 {
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';

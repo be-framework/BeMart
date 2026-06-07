@@ -52,6 +52,7 @@ use function trim;
  * pager wrapper (BeMart's dashboard is not a paged view). See the port
  * header in var/templates/Page/Mypage.html.twig.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class MypageHtmlRenderTest extends TestCase
 {
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';
@@ -192,6 +193,7 @@ final class MypageHtmlRenderTest extends TestCase
      * The honesty test: diff BeMart's rendered dashboard against
      * EC-CUBE's own rendering. Every difference must be in the allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testMypageHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/mypage')->toString();

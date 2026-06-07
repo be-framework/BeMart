@@ -40,10 +40,9 @@ final class ProductResourceTest extends TestCase
 
     public function testOnGetMissingProductReturns404(): void
     {
-        $ro = $this->resource->get('page://self/product', ['productCode' => 'missing-xyz']);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductNotFoundException::class);
 
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertSame('missing-xyz', $ro->body['productCode']);
+        $this->resource->get('page://self/product', ['productCode' => 'missing-xyz']);
     }
 
     public function testSemanticLogIsWrittenAfterRequest(): void

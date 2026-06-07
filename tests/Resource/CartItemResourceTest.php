@@ -46,14 +46,13 @@ final class CartItemResourceTest extends TestCase
 
     public function testOnPostMissingProductReturns404(): void
     {
-        $ro = $this->resource->post('page://self/cart/item', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductClassNotFoundException::class);
+
+        $this->resource->post('page://self/cart/item', [
             'productCode' => 'missing-xyz',
             'quantity' => 1,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertSame('missing-xyz', $ro->body['productCode']);
     }
 
     public function testOnPutUpdatesQuantityAndReturns200(): void
@@ -80,14 +79,13 @@ final class CartItemResourceTest extends TestCase
 
     public function testOnPutMissingItemReturns404(): void
     {
-        $ro = $this->resource->put('page://self/cart/item', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CartItemNotInCartException::class);
+
+        $this->resource->put('page://self/cart/item', [
             'productCode' => 'sample-002',
             'quantity' => 3,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertSame('sample-002', $ro->body['productCode']);
     }
 
     public function testOnPutMissingCsrfReturns403(): void
@@ -120,13 +118,12 @@ final class CartItemResourceTest extends TestCase
 
     public function testOnDeleteMissingItemReturns404(): void
     {
-        $ro = $this->resource->delete('page://self/cart/item', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CartItemNotInCartException::class);
+
+        $this->resource->delete('page://self/cart/item', [
             'productCode' => 'sample-002',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertSame('sample-002', $ro->body['productCode']);
     }
 
     public function testOnDeleteMissingCsrfReturns403(): void
@@ -140,25 +137,24 @@ final class CartItemResourceTest extends TestCase
 
     public function testOnPostOutOfStockReturns409(): void
     {
-        $ro = $this->resource->post('page://self/cart/item', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\OutOfStockException::class);
+
+        $this->resource->post('page://self/cart/item', [
             'productCode' => 'out-of-stock-test-001',
             'quantity' => 1,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(409, $ro->code);
     }
 
     public function testOnPostInvalidQuantityReturns400(): void
     {
-        $ro = $this->resource->post('page://self/cart/item', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/cart/item', [
             'productCode' => 'sample-001',
             'quantity' => 0,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
-        $this->assertNotEmpty($ro->body['message']);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
