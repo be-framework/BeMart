@@ -165,9 +165,9 @@ class Login extends ResourceObject
 
         // Repopulate the email (EC-CUBE getLastUsername UX). The password
         // is deliberately not repopulated.
-        $form->fillValues(['login_email' => $email]);
+        $form->fillValues(['email' => $email]);
         // Bridge the Be-domain verdict onto the form's error state.
-        $form->setDomainError('login_email', $message);
+        $form->setDomainError('email', $message);
 
         return $form;
     }
@@ -178,8 +178,8 @@ class Login extends ResourceObject
         assert($form instanceof LoginForm);
 
         $form->fillValues([
-            'login_email' => self::POC_LOGIN_EMAIL,
-            'login_pass' => self::POC_LOGIN_PASSWORD,
+            'email' => self::POC_LOGIN_EMAIL,
+            'password' => self::POC_LOGIN_PASSWORD,
         ]);
 
         return $form;

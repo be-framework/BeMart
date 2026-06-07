@@ -16,7 +16,9 @@ use Ray\InputQuery\Attribute\Input;
 
 use function array_map;
 use function array_sum;
+use function bin2hex;
 use function min;
+use function random_bytes;
 
 /**
  * Stage 2 Being — in-memory cart merge.
@@ -74,6 +76,7 @@ final readonly class CartMerged
                 deliveryFeeTotal: 0,
                 preOrderId: '',
             );
+        $preOrderId = $existingCart->preOrderId !== '' ? $existingCart->preOrderId : bin2hex(random_bytes(20));
 
         $mergedItems = [];
         $merged = false;
@@ -130,7 +133,7 @@ final readonly class CartMerged
             items: $mergedItems,
             totalPrice: $totalPrice,
             deliveryFeeTotal: $deliveryFeeTotal,
-            preOrderId: $existingCart->preOrderId,
+            preOrderId: $preOrderId,
         );
     }
 }

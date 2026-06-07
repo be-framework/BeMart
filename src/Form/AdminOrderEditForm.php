@@ -36,7 +36,7 @@ final class AdminOrderEditForm extends AbstractForm
             ->setAttribs(['id' => 'order_discount', 'class' => 'form-control']);
         $this->setField('charge', 'text')
             ->setAttribs(['id' => 'order_charge', 'class' => 'form-control']);
-        $this->setField('use_point', 'text')
+        $this->setField('usePoint', 'text')
             ->setAttribs(['id' => 'order_use_point', 'class' => 'form-control']);
         $this->setField('message', 'textarea')
             ->setAttribs(['id' => 'order_message', 'class' => 'form-control', 'rows' => '6']);

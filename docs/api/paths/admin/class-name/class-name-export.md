@@ -3,7 +3,7 @@
 # /admin/class-name/class-name-export
 EC-CUBE 規格名CSVダウンロード (goExportClassName).
 
-GET/POST /admin_product_class_name_export → CSV download
+GET/POST /admin/class-name/class-name-export → CSV download
 
 `onGet` drives the Be `goExportClassName` transition; the EC-CUBE-format
 encoding + download headers are isolated behind

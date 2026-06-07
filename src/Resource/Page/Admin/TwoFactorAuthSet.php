@@ -70,7 +70,7 @@ class TwoFactorAuthSet extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuthSet',
-            'fields' => ['device_token', 'auth_key'],
+            'fields' => ['deviceToken', 'authKey'],
             // MISSING-BODY-FIELD placeholders — see the class doc. The
             // QR-code JS reads these; authKey stays empty to match the
             // EC-CUBE render baseline (the real secret is supplied to onPut).
@@ -129,7 +129,7 @@ class TwoFactorAuthSet extends ResourceObject
         assert($final instanceof TwoFactorAuthConfigured);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin';
+        $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doSetTwoFactorAuth',
             'loginId' => $final->loginId,

@@ -40,7 +40,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'other_page' %}
-{% set route = 'shopping_shipping' %}
+{% set route = 'shopping-shipping' %}
 {% set title = 'お届け先の指定' %}
 
 {% block main %}
@@ -54,11 +54,11 @@
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
                 <div class="ec-addressRole">
-                    <div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="{{ url('shopping_shipping_edit') }}">新規お届け先を追加する</a></div>
+                    <div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping/shipping-edit">新規お届け先を追加する</a></div>
                 </div>
 
-                <form method="post" action="{{ url('shopping_shipping') }}">
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <form method="post" action="/shopping/shipping">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                     <div class="ec-addressList">
                         {% for address in addresses %}
                         <div class="ec-addressList__item">
@@ -78,7 +78,7 @@
                         <div class="ec-off4Grid">
                             <div class="ec-off4Grid__cell">
                                 <button type="submit" class="ec-blockBtn--action">選択したお届け先に送る</button>
-                                <a class="ec-blockBtn--cancel" href="{{ url('shopping') }}">戻る</a>
+                                <a class="ec-blockBtn--cancel" href="/shopping">戻る</a>
                             </div>
                         </div>
                     </div>

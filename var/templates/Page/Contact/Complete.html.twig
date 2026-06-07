@@ -16,12 +16,12 @@
      `front.contact.complete_message__body` value is a single-line YAML
      literal; EC-CUBE prints it raw (no `nl2br`), so the port substitutes
      the literal verbatim.
-   - `url('homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
+   - `canonical-url 'homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
 #}
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'other_page' %}
-{% set route = 'contact_complete' %}
+{% set route = 'contact-complete' %}
 {% set title = 'お問い合わせ(完了)' %}
 
 {% block main %}
@@ -40,7 +40,7 @@
             </div>
         </div>
         <div class="ec-off4Grid">
-            <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="{{ url('homepage') }}">トップページへ</a></div>
+            <div class="ec-off4Grid__cell"><a class="ec-blockBtn--cancel" href="/">トップページへ</a></div>
         </div>
     </div>
 {% endblock %}

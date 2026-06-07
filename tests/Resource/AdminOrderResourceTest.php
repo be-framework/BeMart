@@ -98,7 +98,7 @@ final class AdminOrderResourceTest extends TestCase
 
     public function testOnGetReturnsOrderDetail(): void
     {
-        $ro = $this->resource->get('page://self/admin/order', [
+        $ro = $this->resource->get('page://self/admin/order-list', [
             'orderNo' => self::ORDER_NO,
         ]);
 
@@ -113,7 +113,7 @@ final class AdminOrderResourceTest extends TestCase
 
     public function testOnGetUnknownOrderReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/order', [
+        $ro = $this->resource->get('page://self/admin/order-list', [
             'orderNo' => 'nonexistentordernononononononono',
         ]);
 
@@ -126,7 +126,7 @@ final class AdminOrderResourceTest extends TestCase
         $this->rebindAdminSession(null);
         $this->seedOrder();
 
-        $ro = $this->resource->get('page://self/admin/order', [
+        $ro = $this->resource->get('page://self/admin/order-list', [
             'orderNo' => self::ORDER_NO,
         ]);
 
@@ -136,7 +136,7 @@ final class AdminOrderResourceTest extends TestCase
 
     public function testOnPutHappyPathUpdatesEditableFields(): void
     {
-        $ro = $this->resource->put('page://self/admin/order', [
+        $ro = $this->resource->put('page://self/admin/order-list', [
             'orderNo' => self::ORDER_NO,
             'discount' => 1000,
             'charge' => 0,
@@ -158,7 +158,7 @@ final class AdminOrderResourceTest extends TestCase
 
     public function testOnPutPreservesNonEditableFields(): void
     {
-        $this->resource->put('page://self/admin/order', [
+        $this->resource->put('page://self/admin/order-list', [
             'orderNo' => self::ORDER_NO,
             'discount' => 500,
             'csrfToken' => FakeCsrfToken::TOKEN,
@@ -174,7 +174,7 @@ final class AdminOrderResourceTest extends TestCase
 
     public function testOnPutMissingCsrfReturns403(): void
     {
-        $ro = $this->resource->put('page://self/admin/order', [
+        $ro = $this->resource->put('page://self/admin/order-list', [
             'orderNo' => self::ORDER_NO,
             'discount' => 1000,
         ]);
@@ -185,7 +185,7 @@ final class AdminOrderResourceTest extends TestCase
 
     public function testOnPutUnknownOrderReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/order', [
+        $ro = $this->resource->put('page://self/admin/order-list', [
             'orderNo' => 'nonexistentordernononononononono',
             'discount' => 1000,
             'csrfToken' => FakeCsrfToken::TOKEN,
@@ -199,7 +199,7 @@ final class AdminOrderResourceTest extends TestCase
         $this->rebindAdminSession(null);
         $this->seedOrder();
 
-        $ro = $this->resource->put('page://self/admin/order', [
+        $ro = $this->resource->put('page://self/admin/order-list', [
             'orderNo' => self::ORDER_NO,
             'discount' => 1000,
             'csrfToken' => FakeCsrfToken::TOKEN,

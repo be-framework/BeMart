@@ -41,7 +41,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'cart_page' %}
-{% set route = 'shopping_nonmember' %}
+{% set route = 'shopping-non-member' %}
 {% set title = 'お客様情報の入力' %}
 
 {% block javascript %}
@@ -94,9 +94,9 @@
 
     <div class="ec-off1Grid">
         <div class="ec-off1Grid__cell">
-            <form method="post" action="{{ url('shopping_nonmember') }}" class="h-adr">
+            <form method="post" action="/shopping/non-member" class="h-adr">
             <span class="p-country-name" style="display:none;">Japan</span>
-            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
             <div class="ec-borderedDefs">
                 <dl>
                     <dt>
@@ -197,7 +197,7 @@
                 <div class="ec-off4Grid">
                     <div class="ec-off4Grid__cell">
                         <button type="submit" class="ec-blockBtn--action">次へ</button>
-                        <a class="ec-blockBtn--cancel" href="{{ url('cart') }}">戻る</a>
+                        <a class="ec-blockBtn--cancel" href="/cart">戻る</a>
                     </div>
                 </div>
             </div>

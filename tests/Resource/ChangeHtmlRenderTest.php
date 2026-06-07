@@ -82,7 +82,7 @@ final class ChangeHtmlRenderTest extends TestCase
         '<meta name="author" content="">',
 
         // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -273,7 +273,7 @@ final class ChangeHtmlRenderTest extends TestCase
                 ]),
                 'sex' => 'sex',
                 'job' => 'job',
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
             ]),
             'BaseInfo' => new EcCubeStub([
                 'shop_name' => 'EC-CUBE',
@@ -337,8 +337,8 @@ final class ChangeHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
@@ -347,8 +347,8 @@ final class ChangeHtmlRenderTest extends TestCase
         // byte-identical to BeMart's port.
         $form = $this->form;
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if (is_string($field) && $field !== '') {

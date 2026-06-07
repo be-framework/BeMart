@@ -55,7 +55,7 @@ final class AdminTwoFactorAuthHtmlRenderTest extends TestCase
     /**
      * The token input is rendered by a real AdminTwoFactorAuthForm on
      * BOTH sides (diffs to zero); the residual is the small login-frame
-     * baseline + the form `_token` hidden CSRF input.
+     * baseline + the form `csrfToken` hidden CSRF input.
      *
      * @var list<string>
      */
@@ -97,8 +97,8 @@ final class AdminTwoFactorAuthHtmlRenderTest extends TestCase
         $html = $this->resource->get('page://self/admin/two-factor-auth')->toString();
 
         $this->assertStringContainsString('id="admin_two_factor_auth_device_token"', $html);
-        $this->assertStringContainsString('name="device_token"', $html);
-        $this->assertStringContainsString('action="/admin_two_factor_auth"', $html);
+        $this->assertStringContainsString('name="deviceToken"', $html);
+        $this->assertStringContainsString('action="/admin/two-factor-auth"', $html);
     }
 
     #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
@@ -143,9 +143,9 @@ final class AdminTwoFactorAuthHtmlRenderTest extends TestCase
 
         foreach ([
             '<title>',
-            // Form: EC-CUBE's hidden `_token` CSRF input.
-            'name="_token"',
-            'csrf_token',
+            // Form: EC-CUBE's hidden `csrfToken` CSRF input.
+            'name="csrfToken"',
+            'csrfcsrfToken',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -173,8 +173,8 @@ final class AdminTwoFactorAuthHtmlRenderTest extends TestCase
 
         return $twig->render('two_factor_auth.twig', [
             'form' => new EcCubeStub([
-                '_token' => '_token',
-                'device_token' => 'device_token',
+                'csrfToken' => 'csrfToken',
+                'deviceToken' => 'deviceToken',
             ]),
             'error' => null,
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
@@ -201,9 +201,9 @@ final class AdminTwoFactorAuthHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('trans', $trans));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
 
-        $formFields = ['device_token', 'auth_key'];
+        $formFields = ['deviceToken', 'authKey'];
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
             if ($form instanceof AdminTwoFactorAuthForm && is_string($field) && in_array($field, $formFields, true)) {
                 return new Markup($form->input($field), 'UTF-8');

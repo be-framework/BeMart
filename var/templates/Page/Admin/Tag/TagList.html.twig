@@ -15,9 +15,9 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
-   - `form_widget(form.name)` -> `form.input('name')` — the real
+   - `form_widget(form.name)` -> `form.input('tagName')` — the real
      AdminTagForm inline-create input (Ray.WebFormModule).
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
@@ -41,7 +41,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_product_tag' %}
+{% set route = 'admin-tag-tag-list' %}
 {% set title = 'タグ管理' %}
 {% set sub_title = '商品管理' %}
 
@@ -72,7 +72,7 @@
                     i++;
                 });
                 $.ajax({
-                    url: '{{ url('admin_product_tag_sort_no_move') }}',
+                    url: '/admin/sort-no-move?masterType=tag&_method=put',
                     type: 'POST',
                     data: newSortNos
                 }).always(function() {
@@ -129,7 +129,7 @@
 
             // 編集キャンセル
             $('.sortable-item').on('click', 'button.action-edit-cancel', function(e) {
-                location.href = '{{ url('admin_product_tag') }}';
+                location.href = '/admin/tag/tag-list';
             });
             // 編集時, エラーがあれば入力欄を表示.
             $('.sortable-item').find('.is-invalid').each(function(e) {
@@ -160,10 +160,10 @@
                         <div class="card rounded border-0">
                             <ul class="list-group list-group-flush sortable-container">
                                 <li class="list-group-item">
-                                    <form role="form" class="row" method="post" action="{{ url('admin_product_tag') }}">
-                                        <input type="hidden" id="admin_tag__token" name="_token" value="{{ csrfToken|default('') }}">
+                                    <form role="form" class="row" method="post" action="/admin/tag/tag-list">
+                                        <input type="hidden" id="admin_tag__token" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_tag')) }}">
                                         <div class="col-auto align-items-center">
-                                            {{ form.input('name')|raw }}
+                                            {{ form.input('tagName')|raw }}
                                         </div>
 
                                         <div class="col-auto align-items-center">
@@ -201,15 +201,15 @@
                                                 <div class="d-inline-block me-2" data-bs-toggle="tooltip"
                                                      data-bs-placement="top" title="削除">
                                                     <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
-                                                       data-url="{{ url('admin_product_tag_delete', {'id' : Tag.tagId}) }}"
+                                                       data-url="/admin/tag/tag?tagId={{ Tag.tagId }}"
                                                        data-message="この操作はあとから取り消すことができません。「{{ Tag.tagName }}」を削除してよろしいですか？">
                                                         <i class="fa fa-close fa-lg text-secondary"></i>
                                                     </a>
                                                 </div>
                                             </div>
                                         </div>
-                                        <form class="row d-none mode-edit" method="post" action="{{ url('admin_product_tag') }}">
-                                            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                                        <form class="row d-none mode-edit" method="post" action="/admin/tag/tag-list">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_tag')) }}">
                                             <div class="col-auto align-items-center">
                                                 <input type="text" class="form-control" name="name" value="{{ Tag.tagName }}" data-origin-value="{{ Tag.tagName }}">
                                             </div>
@@ -245,6 +245,9 @@
                                                 キャンセル
                                             </button>
                                             <a class="btn btn-ec-delete" href="#"
+                                               data-post-action="delete"
+                                               token-for-anchor="{{ csrf_token_for_anchor('admin_tag_delete') }}"
+                                               data-method="delete"
                                                data-confirm="false">
                                                 削除
                                             </a>

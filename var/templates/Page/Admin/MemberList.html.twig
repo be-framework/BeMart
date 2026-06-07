@@ -14,7 +14,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `{% for Member in Members %}` -> the resource body's `members` list.
      EC-CUBE keys the per-row action `<a>`s by `Member.id` (dtb_member
@@ -44,7 +44,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_system_member' %}
+{% set route = 'admin-member-list' %}
 {% set title = 'メンバー管理' %}
 {% set sub_title = 'システム設定' %}
 
@@ -80,7 +80,7 @@
         <div class="c-contentsArea__primaryCol">
             <div class="c-primaryCol">
                 <div id="ex-member-new" class="d-block mb-3">
-                    <a class="btn btn-ec-regular" href="{{ url('admin_setting_system_member_new') }}">新規登録</a>
+                    <a class="btn btn-ec-regular" href="/admin/member">新規登録</a>
                 </div>
                 <div class="card rounded border-0 mb-4">
                     <div class="card-body p-0">
@@ -124,7 +124,7 @@
                                             <div class="text-end">
                                                 <div class="px-1 d-inline-block">
                                                     <a class="btn btn-ec-actionIcon action-edit"
-                                                       href="{{ url('admin_setting_system_member_edit', { 'id' : Member.loginId }) }}"
+                                                       href="/admin/member?loginId={{ Member.loginId }}"
                                                        data-bs-toggle="tooltip"
                                                        data-bs-placement="top"
                                                        title="編集">
@@ -133,7 +133,7 @@
                                                 </div>
                                                 <div class="px-1 d-inline-block">
                                                     <a class="btn btn-ec-actionIcon action-up {% if loop.first %} disabled {% endif %}"
-                                                       href="{{ url('admin_setting_system_member_up', {id: Member.loginId}) }}"
+                                                       href="/admin/member-list?loginId={{ Member.loginId }}"
                                                        data-bs-toggle="tooltip"
 
                                                        data-bs-placement="top"
@@ -143,7 +143,7 @@
                                                 </div>
                                                 <div class="px-1 d-inline-block">
                                                     <a class="btn btn-ec-actionIcon action-down {% if loop.last %} disabled {% endif %}"
-                                                       href="{{ url('admin_setting_system_member_down', {id: Member.loginId}) }}"
+                                                       href="/admin/member-list?loginId={{ Member.loginId }}"
                                                        data-bs-toggle="tooltip"
 
                                                        data-bs-placement="top"
@@ -181,7 +181,7 @@
                                                                     <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル
                                                                     </button>
                                                                     <a class="btn btn-ec-delete"
-                                                                       href="{{ url('admin_setting_system_member_delete', {id: Member.loginId}) }}"
+                                                                       href="/admin/member?loginId={{ Member.loginId }}&_method=delete"
                                                                        data-confirm="false">
                                                                         削除
                                                                     </a>

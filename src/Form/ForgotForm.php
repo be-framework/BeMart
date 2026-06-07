@@ -12,7 +12,7 @@ use Ray\WebFormModule\AbstractForm;
  * Ray.WebFormModule.
  *
  * PORT of EC-CUBE 4.3 `Form/Type/Front/ForgotType` + the
- * `Forgot/index.twig` `form_widget(form.login_email)` call. EC-CUBE
+ * `Forgot/index.twig` `form_widget(form.email)` call. EC-CUBE
  * renders the single email input through the Symfony FormView; BeMart
  * renders it through Ray.WebFormModule.
  *
@@ -23,7 +23,7 @@ use Ray\WebFormModule\AbstractForm;
  * password-reset request is anti-enumeration (uniform 200 / uniform
  * message). The `#[FormValidation]` aspect is NOT used.
  *
- * EC-CUBE's `ForgotType` uses the field name `login_email`; this form
+ * EC-CUBE's `ForgotType` uses the field name `email`; this form
  * declares the same name so the rendered `<input>` markup matches.
  *
  * @link https://schema.org/Action
@@ -44,12 +44,12 @@ final class ForgotForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        // メールアドレス — EC-CUBE's ForgotType field name is `login_email`.
-        $this->setField('login_email', 'text');
+        // メールアドレス — EC-CUBE's ForgotType field name is `email`.
+        $this->setField('email', 'text');
 
         // NON-AUTHORITATIVE structural check only — authority is the Be
         // domain (RequestPasswordResetInput Semantics).
-        $this->filter->validate('login_email')->isNotBlank();
+        $this->filter->validate('email')->isNotBlank();
     }
 
     /**

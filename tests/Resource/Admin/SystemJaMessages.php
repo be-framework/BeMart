@@ -50,7 +50,7 @@ final class SystemJaMessages
             'admin.setting.system.member.member_registration' => 'メンバー登録',
             'admin.setting.system.member.name' => '名前',
             'admin.setting.system.member.department' => '所属',
-            'admin.setting.system.member.login_id' => 'ログインID',
+            'admin.setting.system.member.loginId' => 'ログインID',
             'admin.setting.system.member.password' => 'パスワード',
             'admin.setting.system.member.password_confirm' => 'パスワード(確認)',
             'admin.setting.system.member.work' => '稼働',

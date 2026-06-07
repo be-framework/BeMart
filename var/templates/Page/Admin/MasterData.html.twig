@@ -3,7 +3,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_system_masterdata' %}
+{% set route = 'admin-master-data' %}
 {% set title = 'マスタデータ管理' %}
 {% set sub_title = 'システム設定' %}
 
@@ -11,8 +11,8 @@
     <div class="c-contentsArea__cols">
         <div class="c-contentsArea__primaryCol">
             <div class="c-primaryCol">
-                <form id="form1" name="form1" method="post" action="{{ url('admin_setting_system_masterdata') }}">
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <form id="form1" name="form1" method="post" action="/admin/master-data?_method=put">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_master_data')) }}">
                     <div class="card rounded border-0 mb-4">
                         <div class="card-header">
                             <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="各種マスターデータを管理します。">
@@ -22,8 +22,8 @@
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-3">
-                                    {{ form.input('masterdata')|raw }}
-                                    {% if form.error('masterdata') %}{{ form.error('masterdata') }}{% endif %}
+                                    {{ form.input('masterType')|raw }}
+                                    {% if form.error('masterType') %}{{ form.error('masterType') }}{% endif %}
                                 </div>
                                 <div class="col mb-2">
                                     <button class="btn btn-primary" type="submit">選択</button>
@@ -34,9 +34,9 @@
                 </form>
 
                 {% if rows is not empty %}
-                    <form id="form2" name="form2" method="post" action="{{ url('admin_setting_system_masterdata_edit') }}">
-                        {{ form.input('masterdata_name')|raw }}
-                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <form id="form2" name="form2" method="post" action="/admin/master-data-edit?_method=put">
+                        <input type="hidden" name="masterType" value="{{ selectedMaster }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_master_data')) }}">
                         <div class="card rounded border-0 mb-4">
                             <div class="card-header">
                                 <div class="read">
@@ -55,10 +55,10 @@
                                     {% for data in rows %}
                                         <tr id="ex-masterdata-{{ loop.index0 }}">
                                             <td class="align-middle text-center ps-3">
-                                                <input type="text" name="data[{{ loop.index0 }}][id]" class="form-control" value="{{ data.id }}">
+                                                <input type="text" name="rows[{{ loop.index0 }}][id]" class="form-control" value="{{ data.id }}">
                                             </td>
                                             <td class="align-middle text-center">
-                                                <input type="text" name="data[{{ loop.index0 }}][name]" class="form-control" value="{{ data.name }}">
+                                                <input type="text" name="rows[{{ loop.index0 }}][name]" class="form-control" value="{{ data.name }}">
                                             </td>
                                         </tr>
                                     {% endfor %}

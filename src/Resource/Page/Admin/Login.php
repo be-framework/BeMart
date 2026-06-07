@@ -135,7 +135,7 @@ class Login extends ResourceObject
         // URL segment (there is no `/admin/{adminId}` route). JSON
         // clients still read `adminId` off the body below.
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin';
+        $this->headers['Location'] = '/admin/index';
         $this->body = [
             'adminId' => $final->adminId,
             'loginId' => $final->loginId,
@@ -152,7 +152,7 @@ class Login extends ResourceObject
         assert($form instanceof AdminLoginForm);
 
         $form->fillValues([
-            'login_id' => self::POC_LOGIN_ID,
+            'loginId' => self::POC_LOGIN_ID,
             'password' => self::POC_LOGIN_PASSWORD,
         ]);
 

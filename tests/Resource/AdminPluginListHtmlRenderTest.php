@@ -261,11 +261,11 @@ final class AdminPluginListHtmlRenderTest extends TestCase
             'btn-primary btn-xs',
             'plugin_archive',
             'plugin_id',
-            'form_token',
-            // plugin_table.twig: `csrf_token_for_anchor()` on the
+            'formcsrfToken',
+            // plugin_table.twig: `csrfcsrfToken_for_anchor()` on the
             // enable/disable/delete <a>. BeMart's html context has no CSRF
             // widget. EC-CUBE-runtime only.
-            'csrf_token',
+            'csrfcsrfToken',
             // owners-store card: the entire plugin_table_official.twig
             // include — owners-store integration is out of scope, the
             // PluginListFetched projection carries no `officialPlugins`.
@@ -408,8 +408,8 @@ final class AdminPluginListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
         $twig->addFunction(new TwigFunction('class_categories_as_json', static fn (): string => '{}'));

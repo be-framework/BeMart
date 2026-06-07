@@ -64,9 +64,9 @@
         </div>
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
-                <form method="post" action="{{ url('contact') }}" class="h-adr" novalidate>
+                <form method="post" action="/contact" class="h-adr" novalidate>
                     <span class="p-country-name" style="display:none;">Japan</span>
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                     <p class="ec-para-normal">内容によっては回答をさしあげるのにお時間をいただくこともございます。<br />
 また、休業日は翌営業日以降の対応となりますのでご了承ください。<br />
 </p>

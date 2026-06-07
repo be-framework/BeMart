@@ -86,7 +86,7 @@ class Css extends ResourceObject
         assert($final instanceof ContentCssUpdated);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_content_css';
+        $this->headers['Location'] = '/admin/content/css';
         $this->body = [
             'transitionId' => 'doUpdateContentCss',
             'length' => $final->length,

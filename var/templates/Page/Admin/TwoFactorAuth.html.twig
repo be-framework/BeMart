@@ -17,7 +17,7 @@
   {@see \MyVendor\BeMart\Form\AdminTwoFactorAuthForm} as `body['form']`.
   The token input renders through that real form object:
 
-    {{ form.input('device_token')|raw }}
+    {{ form.input('deviceToken')|raw }}
 
   EC-CUBE renders the same input through the Symfony FormView
   (`form_widget(form.device_token)`); Ray.WebFormModule is BeMart's
@@ -25,7 +25,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `path('admin_two_factor_auth')` -> deterministic `/{route}`.
+   - canonical form action -> `/admin/two-factor-auth`.
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
      EC-CUBE-runtime only — enumerated as residual.
@@ -46,8 +46,8 @@
         <div class="row">
             <div class="col-12 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
                 <div class="text-center p-5 bg-white">
-                    <form name="form1" id="form1" method="post" action="{{ url('admin_two_factor_auth') }}">
-                        <input type="hidden" id="admin_two_factor_auth__token" name="_token" value="{{ csrfToken|default('') }}">
+                    <form name="form1" id="form1" method="post" action="/admin/two-factor-auth">
+                        <input type="hidden" id="admin_two_factor_auth__token" name="csrfToken" value="{{ csrfToken|default('') }}">
                         <p><img src="{{ asset('assets/img/logo2.png', 'admin') }}" alt="BeMart" width="106"></p>
                         <h5 class="mb-3">2段階認証</h5>
 
@@ -58,9 +58,9 @@
                         <div class="row">
                             <div class="col-12">
                                 <div class="mb-3 d-flex justify-content-center">
-                                    {{ form.input('device_token')|raw }}
+                                    {{ form.input('deviceToken')|raw }}
                                 </div>
-                                {% if form.error('device_token') %}<span class="invalid-feedback d-block">{{ form.error('device_token') }}</span>{% endif %}
+                                {% if form.error('deviceToken') %}<span class="invalid-feedback d-block">{{ form.error('deviceToken') }}</span>{% endif %}
                             </div>
                             <div class="col-12">
                                 <button type="submit" class="btn btn-primary w-100">認証</button>

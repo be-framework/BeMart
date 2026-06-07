@@ -51,12 +51,15 @@
     },
     "category_id": {
       "type": [
-        "integer",
+        "string",
         "null"
       ],
-      "title": "カテゴリID（入力）",
-      "description": "dtb_category.id の不透明な文字列ハンドル。BeMart の CategoryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_category.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlCategoryStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (CategoryUpdated / CategoryDeleted / CategoryCreated の親解決) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。parentId（自己参照 FK parent_category_id）も同じ文字列ハンドルで表現され、非数値 parentId は SQL では NULL（ルート）に倒れる。blockId / pageId / tagId と同じ Fake↔SQL 二重性",
-      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+      "pattern": "^[0-9]+$",
+      "minLength": 1,
+      "maxLength": 10,
+      "title": "カテゴリID（検索入力）",
+      "description": "/products のカテゴリ絞り込みでHTML query stringとして送られるカテゴリID。Resource境界では文字列で受け取り、カテゴリ名解決に使う。",
+      "$comment": "HTTP query parameterは文字列として届くためtransport schemaではstring|nullを許容する。数値性はpatternで表し、存在しないカテゴリはResource側で未絞り込みまたは0件として扱う。"
     },
     "pageno": {
       "type": [

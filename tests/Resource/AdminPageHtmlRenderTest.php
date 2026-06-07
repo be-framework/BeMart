@@ -176,9 +176,9 @@ final class AdminPageHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // Form: EC-CUBE's hidden `_token` CSRF input.
-            'name="_token"',
-            'csrf_token',
+            // Form: EC-CUBE's hidden `csrfToken` CSRF input.
+            'name="csrfToken"',
+            'csrfcsrfToken',
             // Page edit: EC-CUBE's URL / file-name rows show a static
             // path label (`app.request.schemeAndHttpHost`, `template_path`)
             // that is request-runtime; BeMart shows the bare pageUrl /
@@ -229,7 +229,7 @@ final class AdminPageHtmlRenderTest extends TestCase
 
         return $twig->render('Content/page_edit.twig', [
             'form' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'name' => 'name',
                 'url' => 'url',
                 'file_name' => 'file_name',
@@ -298,8 +298,8 @@ final class AdminPageHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 

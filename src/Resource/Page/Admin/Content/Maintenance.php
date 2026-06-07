@@ -81,7 +81,7 @@ class Maintenance extends ResourceObject
         assert($final instanceof MaintenanceToggled);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_content_maintenance';
+        $this->headers['Location'] = '/admin/content/maintenance';
         $this->body = [
             'transitionId' => 'doToggleMaintenance',
             'isMaintenance' => $final->enabled,

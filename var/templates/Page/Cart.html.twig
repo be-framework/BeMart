@@ -116,8 +116,8 @@
                             {% for item in cart.items %}
                                 <ul class="ec-cartRow">
                                     <li class="ec-cartRow__delColumn">
-                                        <form method="post" action="{{ url('cart_handle_item') }}" class="ec-cartRow__operationForm">
-                                            <input type="hidden" name="_csrf_token" value="{{ csrfToken|default(csrf_token('cart')) }}">
+                                        <form method="post" action="/cart/item" class="ec-cartRow__operationForm">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('cart')) }}">
                                             <input type="hidden" name="productCode" value="{{ item.productCode }}">
                                             <input type="hidden" name="operation" value="remove">
                                             <button type="submit" class="ec-icon" data-message="カートから商品を削除してもよろしいですか?">
@@ -127,13 +127,13 @@
                                     </li>
                                     <li class="ec-cartRow__contentColumn">
                                         <div class="ec-cartRow__img">
-                                            <a target="_blank" href="{{ url('product_detail', {id: item.productCode}) }}">
+                                            <a target="_blank" href="/product?productCode={{ item.productCode }}">
                                                 <img src="{{ asset(item.mainImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ item.productName }}"/>
                                             </a>
                                         </div>
                                         <div class="ec-cartRow__summary">
                                             <div class="ec-cartRow__name">
-                                                <a target="_blank" href="{{ url('product_detail', {id: item.productCode}) }}">{{ item.productName }}</a>
+                                                <a target="_blank" href="/product?productCode={{ item.productCode }}">{{ item.productName }}</a>
                                                 {% if item.classCategoryName1 %}
                                                     <br>{{ item.className1 }}：{{ item.classCategoryName1 }}
                                                 {% endif %}
@@ -150,8 +150,8 @@
                                         <div class="ec-cartRow__amountSP">数量：{{ item.quantity|number_format }}</div>
                                         <div class="ec-cartRow__amountUpDown">
                                             {% if item.quantity > 1 %}
-                                                <form method="post" action="{{ url('cart_handle_item') }}" class="ec-cartRow__amountDownForm">
-                                                    <input type="hidden" name="_csrf_token" value="{{ csrfToken|default(csrf_token('cart')) }}">
+                                                <form method="post" action="/cart/item" class="ec-cartRow__amountDownForm">
+                                                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('cart')) }}">
                                                     <input type="hidden" name="productCode" value="{{ item.productCode }}">
                                                     <input type="hidden" name="operation" value="down">
                                                     <input type="hidden" name="quantity" value="{{ item.quantity - 1 }}">
@@ -164,8 +164,8 @@
                                                     <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus.svg') }}" alt="reduce"></span>
                                                 </div>
                                             {% endif %}
-                                            <form method="post" action="{{ url('cart_handle_item') }}" class="ec-cartRow__amountUpForm">
-                                                <input type="hidden" name="_csrf_token" value="{{ csrfToken|default(csrf_token('cart')) }}">
+                                            <form method="post" action="/cart/item" class="ec-cartRow__amountUpForm">
+                                                <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('cart')) }}">
                                                 <input type="hidden" name="productCode" value="{{ item.productCode }}">
                                                 <input type="hidden" name="operation" value="up">
                                                 <input type="hidden" name="quantity" value="{{ item.quantity + 1 }}">
@@ -187,9 +187,9 @@
                     <div class="ec-cartRole__actions">
                         <div class="ec-cartRole__total">合計：<span class="ec-cartRole__totalAmount">{{ cart.totalPrice|price }}</span>
                         </div>
-                        <a class="ec-blockBtn--action" href="{{ path('shopping') }}">レジに進む</a>
+                        <a class="ec-blockBtn--action" href="/shopping">レジに進む</a>
                         {% if loop.last %}
-                            <a class="ec-blockBtn--cancel" href="{{ path('homepage') }}">お買い物を続ける</a>
+                            <a class="ec-blockBtn--cancel" href="/">お買い物を続ける</a>
                         {% endif %}
                     </div>
                 {% endfor %}
