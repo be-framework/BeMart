@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Input\ChangeAdminPasswordInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminChangePasswordForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -59,6 +61,8 @@ class ChangePassword extends ResourceObject
      * resource layer (there is no Be Final to raise
      * `UnauthorizedAdminAccessException`).
      */
+    #[Alps('doChangePassword')]
+    #[JsonSchema(schema: 'get-admin-change-password.json')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onGet(): static
     {
@@ -99,6 +103,8 @@ class ChangePassword extends ResourceObject
      * @psalm-taint-source input $changePasswordFirst
      * @psalm-taint-source input $changePasswordSecond
      */
+    #[Alps('doChangePassword')]
+    #[JsonSchema(schema: 'post-admin-change-password.json', params: 'post-admin-change-password.param.json')]
     #[CsrfProtected]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(
@@ -106,43 +112,11 @@ class ChangePassword extends ResourceObject
         string $changePasswordFirst,
         string $changePasswordSecond,
     ): static {
-        try {
-            $final = ($this->becoming)(new ChangeAdminPasswordInput(
-                currentPassword: $currentPassword,
-                changePasswordFirst: $changePasswordFirst,
-                changePasswordSecond: $changePasswordSecond,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (InvalidCurrentPasswordException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '現在のパスワードが正しくありません。'];
-
-            return $this;
-        } catch (PasswordConfirmationMismatchException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '新しいパスワードと確認用パスワードが一致しません。'];
-
-            return $this;
-        } catch (PasswordPolicyViolationException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => 'パスワードは8文字以上32文字以下で入力してください。'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (AdminNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された管理者は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ChangeAdminPasswordInput(
+            currentPassword: $currentPassword,
+            changePasswordFirst: $changePasswordFirst,
+            changePasswordSecond: $changePasswordSecond,
+        ));
 
         assert($final instanceof AdminPasswordChanged);
 

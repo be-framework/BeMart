@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\PluginUninstalled;
 use MyVendor\BeMart\Be\Input\UninstallPluginInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -53,23 +55,13 @@ class Plugin extends ResourceObject
      *
      * @psalm-taint-source input $pluginCode
      */
+    #[Alps('doUninstallPlugin')]
+    #[JsonSchema(schema: 'delete-admin-plugin.json', params: 'delete-admin-plugin.param.json')]
     #[Link(rel: 'goPluginList', href: 'page://self/admin/plugin-list', method: 'get')]
     #[CsrfProtected]
     public function onDelete(string $pluginCode): static
     {
-        try {
-            $final = ($this->becoming)(new UninstallPluginInput(pluginCode: $pluginCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UninstallPluginInput(pluginCode: $pluginCode));
 
         assert($final instanceof PluginUninstalled);
 

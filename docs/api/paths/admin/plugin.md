@@ -1,9 +1,4 @@
----
-layout: default
-title: "/admin/plugin"
----
-
-<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/plugin
 EC-CUBE doUninstallPlugin — プラグインをアンインストールする (Wave 8).
@@ -36,15 +31,28 @@ drops the row.
 ## DELETE
 Wave 8: pluginCode is admin-form input (selected from the grid).
 
+**ALPS**: `doUninstallPlugin`
+
 
 
 ### Request
 
 | Name | Type | Description | Default | Required | Constraints | Example |
 |------|------|-------------|---------|----------|-------------|---------|
-| pluginCode | string | プラグインコード |  | Required |  |  |
+| pluginCode | string | プラグインコード（入力） - プラグインの一意識別子。dtb_plugin.code に格納する自然キー — 列名は `code` であって `plugin_code` ではない（dtb_plugin は EC-CUBE 後発の dtb_*_code 命名規約より古い）。findByCode / install / uninstall / setEnabled の全ライフサイクルメソッドがこの列をプローブする。dtb_plugin は FK 制約を持たないが structure-only ダンプでは空のため、SQL ハイパーメディアテストは seedPlugins で2つのデモプラグイン（Sample/SamplePlugin, Sample/DisabledPlugin）をシードする Fake観察文字長 19〜21; 観察値 'Sample/SamplePlugin', 'Sample/DisabledPlugin'。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | Sample/SamplePlugin |
 
 
 ### Response
 
-_Not available_
+[Object: DELETE /admin/plugin response](../schemas/delete-admin-plugin.json)
+
+| Name | Type | Description | Required | Constraints | Example |
+|------|------|-------------|----------|-------------|---------|
+| pluginCode | string|null | プラグインコード - プラグインの一意識別子。dtb_plugin.code に格納する自然キー — 列名は `code` であって `plugin_code` ではない（dtb_plugin は EC-CUBE 後発の dtb_*_code 命名規約より古い）。findByCode / install / uninstall / setEnabled の全ライフサイクルメソッドがこの列をプローブする。dtb_plugin は FK 制約を持たないが structure-only ダンプでは空のため、SQL ハイパーメディアテストは seedPlugins で2つのデモプラグイン（Sample/SamplePlugin, Sample/DisabledPlugin）をシードする Fake観察文字長 19〜21; 観察値 'Sample/SamplePlugin', 'Sample/DisabledPlugin'。 | Required | {"minLength":0,"maxLength":128,"pattern":"^[A-Za-z0-9._:@/+-]*$"} | Sample/SamplePlugin |
+| wasInstalled | boolean|null | インストール済み結果 - /admin/plugin の処理状態を示すインストール済み結果。画面表示や冪等処理結果の分岐に使う真偽値。 | Required |  |  |
+
+#### Links
+
+| Relation | URL |
+|----------|-----|
+| goPluginList | [<code>page://self/admin/plugin-list</code>](/admin/plugin-list.md) |

@@ -1,0 +1,77 @@
+name: SQL Quality Report
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sql-quality:
+    name: Generate SQL Quality report
+    runs-on: ubuntu-latest
+
+    services:
+      mariadb:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mariadb-admin ping -h 127.0.0.1 -uroot -proot --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring, intl, pdo_mysql
+          coverage: none
+
+      - name: Install MySQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-mysql-client
+
+      - name: Install dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Prepare database user
+        run: |
+          MYSQL_PWD=root mysql -h127.0.0.1 -P3306 -uroot <<'SQL'
+          CREATE USER IF NOT EXISTS 'dbuser'@'%' IDENTIFIED BY 'secret';
+          GRANT ALL PRIVILEGES ON *.* TO 'dbuser'@'%' WITH GRANT OPTION;
+          FLUSH PRIVILEGES;
+          SQL
+
+      - name: Prepare SQL Quality database
+        run: |
+          sql/setup-db.sh "mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4"
+          MYSQL_PWD=secret mysql -h127.0.0.1 -P3306 -udbuser eccubedb_test < sql/seed/analysis-sample.sql
+          MYSQL_PWD=secret mysql -h127.0.0.1 -P3306 -udbuser eccubedb_test <<'SQL'
+          ANALYZE TABLE
+            dtb_product,
+            dtb_product_class,
+            dtb_product_image,
+            dtb_product_category,
+            dtb_product_tag,
+            dtb_customer,
+            dtb_category;
+          SQL
+
+      - name: Generate SQL Quality report
+        run: composer sql:quality
+
+      - name: Upload SQL Quality report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: sql-quality-report
+          path: build/sql-quality/

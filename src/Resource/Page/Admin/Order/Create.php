@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderCreated;
 use MyVendor\BeMart\Be\Input\AdminCreateOrderInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -45,6 +47,7 @@ class Create extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateOrder` に対応する POST 操作。
      * @param list<array{productCode: string, productName: string, unitPrice: int, quantity: int}> $orderItems
      *
      * @psalm-taint-source input $customerId
@@ -54,6 +57,8 @@ class Create extends ResourceObject
      * @psalm-taint-source input $charge
      * @psalm-taint-source input $discount
      */
+    #[Alps('doCreateOrder')]
+    #[JsonSchema(schema: 'post-admin-order-create.json', params: 'post-admin-order-create.param.json')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[CsrfProtected]
@@ -65,26 +70,14 @@ class Create extends ResourceObject
         int $charge = 0,
         int $discount = 0,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminCreateOrderInput(
-                customerId: $customerId,
-                paymentMethodId: $paymentMethodId,
-                orderItems: $orderItems,
-                deliveryFeeTotal: $deliveryFeeTotal,
-                charge: $charge,
-                discount: $discount,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminCreateOrderInput(
+            customerId: $customerId,
+            paymentMethodId: $paymentMethodId,
+            orderItems: $orderItems,
+            deliveryFeeTotal: $deliveryFeeTotal,
+            charge: $charge,
+            discount: $discount,
+        ));
 
         assert($final instanceof AdminOrderCreated);
 
