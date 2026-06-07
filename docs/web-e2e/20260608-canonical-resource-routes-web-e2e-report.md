@@ -10,7 +10,7 @@
   - customer email: `web-e2e-20260608-1780851113517@example.test`
   - productCode: `web-e2e-20260608-1780851276`
   - admin login used: `workflow-admin-08bcfc76`
-- 結果: pass 183 / fail 0 / 対象外 3
+- 結果: pass 181 / fail 2 / 対象外 3
 - `Web操作結果` 未実施: 0
 - 実操作対象のScreenshot空欄: 0
 
@@ -30,14 +30,19 @@ CSV/PDFのダウンロード境界は、ブラウザで導線画面を表示し�
 
 2026-06-08にfail 14件を先に修正・再確認した。
 
-- 注文履歴詳細/再注文: 実DB/prodでWeb入力により会員作成、ログイン、商品詳細からカート追加、購入確認、購入完了を実行。`GET /mypage/history?orderNo=...` は200、`POST /mypage/reorder` は303 `/cart`。
+- 注文履歴詳細/再注文: 再検証でfailに訂正。実DB/prodでWeb入力により会員作成、商品詳細からカート追加までは実行できたが、`/shopping` で顧客・配送・合計が空/0円となり、`/shopping/checkout` は `preOrderId` 400。注文履歴詳細/再注文の前提となる注文をWeb入力のみで作成できなかった。
 - CSV取込4件: ブラウザで取込フォームを表示し、同一実DBセッションのmultipart HTTPアップロードで各POSTが303の正規遷移先へ到達。
 - タグ3件: `127.0.0.1` canonical URLで一覧200、作成303、削除303を確認。
 - 出荷通知メール2件: GET 200、POST 303 `/admin/order?orderNo=...` を確認（FakeMailer境界）。
 - マスタデータ3件: GET 200、選択PUT 200、更新PUT 303を確認。
 
-現在のfailは0。
+現在のfailは2。
 
 ## Failures
 
-現在のfailは0。過去のfail 14件は上記 Fix14 re-verification に記録した。
+現在のfailは2。
+
+- User 注文履歴詳細: 実DB/prodでWeb入力のみの再検証を実施。会員登録、商品詳細からカート追加までは成功したが、`/shopping` で顧客・配送・合計が空/0円となり、`/shopping/checkout` は `preOrderId` 400。注文履歴詳細へ到達するための注文を作成できなかった。
+- User 再注文: 注文作成に失敗したため、再注文元となる注文履歴詳細を作れず、再注文操作へ到達できなかった。
+
+この2件は「証跡不足」ではなく、現時点の実DBブラウザ操作で再現した失敗として記録する。
