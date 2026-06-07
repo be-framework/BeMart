@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Input\CheckoutInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -55,6 +57,8 @@ class Checkout extends ResourceObject
      *
      * @psalm-taint-source input $preOrderId
      */
+    #[Alps('doCheckout')]
+    #[JsonSchema(schema: 'post-shopping-checkout.json', params: 'post-shopping-checkout.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfProtected]

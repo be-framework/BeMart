@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\News;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminNewsListFetched;
 use MyVendor\BeMart\Be\Final\NewsCreated;
 use MyVendor\BeMart\Be\Input\CreateNewsInput;
 use MyVendor\BeMart\Be\Input\GetAdminNewsListInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -30,6 +32,9 @@ class NewsList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goNewsList` に対応する GET 操作。 */
+    #[Alps('goNewsList')]
+    #[JsonSchema(schema: 'get-admin-news-news-list.json')]
     #[Link(rel: 'doCreateNews', href: 'page://self/admin/news/news-list', method: 'post')]
     #[Link(rel: 'goNews', href: 'page://self/admin/news/news', method: 'get')]
     #[Link(rel: 'doUpdateNews', href: 'page://self/admin/news/news', method: 'put')]
@@ -50,12 +55,15 @@ class NewsList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateNews` に対応する POST 操作。
      * @psalm-taint-source input $newsTitle
      * @psalm-taint-source input $publishDate
      * @psalm-taint-source input $newsDescription
      * @psalm-taint-source input $newsUrl
      * @psalm-taint-source input $linkMethod
      */
+    #[Alps('doCreateNews')]
+    #[JsonSchema(schema: 'post-admin-news-news-list.json', params: 'post-admin-news-news-list.param.json')]
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
     #[CsrfProtected]
     public function onPost(

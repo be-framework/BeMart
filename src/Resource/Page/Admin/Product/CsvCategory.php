@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\JsonSchema;
+use BEAR\Resource\Annotation\Link;
 use MyVendor\BeMart\Support\Resource\AbstractCsvUpload;
 use Override;
 
@@ -20,6 +23,18 @@ use Override;
  */
 class CsvCategory extends AbstractCsvUpload
 {
+    /** ALPS `goExportCategory` に対応する GET 操作。 */
+    #[Override]
+    #[Alps('goExportCategory')]
+    #[JsonSchema(schema: 'get-admin-product-csv-category.json')]
+    #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    public function onGet(): static
+    {
+        parent::onGet();
+
+        return $this;
+    }
+
     #[Override]
     protected function csvTitle(): string
     {

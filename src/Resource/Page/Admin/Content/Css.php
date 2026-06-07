@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Form\AdminCssForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -45,6 +47,9 @@ class Css extends ResourceObject
     ) {
     }
 
+    /** ALPS `goContentCss` に対応する GET 操作。 */
+    #[Alps('goContentCss')]
+    #[JsonSchema(schema: 'get-admin-content-css.json')]
     #[Link(rel: 'doUpdateContentCss', href: 'page://self/admin/content/css', method: 'put')]
     public function onGet(): static
     {
@@ -70,6 +75,8 @@ class Css extends ResourceObject
      *
      * @psalm-taint-source input $css
      */
+    #[Alps('doUpdateContentCss')]
+    #[JsonSchema(schema: 'put-admin-content-css.json', params: 'put-admin-content-css.param.json')]
     #[Link(rel: 'goContentJs', href: 'page://self/admin/content/js')]
     #[CsrfProtected]
     public function onPut(string $css = ''): static

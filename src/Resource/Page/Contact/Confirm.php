@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Contact;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Form\ContactConfirmForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goContactConfirm — お問い合わせ(確認)
@@ -49,10 +51,13 @@ class Confirm extends ResourceObject
     }
 
     /**
+     * ALPS `goContactForm` に対応する GET 操作。
      * @todo Enrichment backlog: thread the submitted inquiry payload into
      *     the confirm step so the value cells re-show the entered data.
      *     Requires a `mode=confirm` POST handler ahead of doSubmitContact.
      */
+    #[Alps('goContactForm')]
+    #[JsonSchema(schema: 'get-contact-confirm.json')]
     #[Link(rel: 'doSubmitContact', href: 'page://self/contact', method: 'post')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static

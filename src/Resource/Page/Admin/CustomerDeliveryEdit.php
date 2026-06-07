@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminCustomerDeliveryForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -41,6 +43,8 @@ class CustomerDeliveryEdit extends ResourceObject
      *
      * @psalm-taint-source input $customerId
      */
+    #[Alps('goAdminCustomerDeliveryEdit')]
+    #[JsonSchema(schema: 'get-admin-customer-delivery-edit.json', params: 'get-admin-customer-delivery-edit.param.json')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
     public function onGet(string $customerId = '', string $id = ''): static
     {

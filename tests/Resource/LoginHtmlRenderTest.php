@@ -195,6 +195,7 @@ final class LoginHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering. Every difference must be in the residual
      * allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testLoginHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/login')->toString();

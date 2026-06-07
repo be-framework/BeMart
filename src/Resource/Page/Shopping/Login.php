@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goShoppingLogin — 購入ログイン (Wave 3H pure renderer).
@@ -40,6 +42,9 @@ class Login extends ResourceObject
     ) {
     }
 
+    /** ALPS `goShoppingLogin` に対応する GET 操作。 */
+    #[Alps('goShoppingLogin')]
+    #[JsonSchema(schema: 'get-shopping-login.json')]
     #[Link(rel: 'doLogin', href: 'page://self/login', method: 'post')]
     #[Link(rel: 'goCustomerRegistration', href: 'page://self/entry')]
     #[Link(rel: 'goShoppingNonMember', href: 'page://self/shopping/non-member')]

@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE admin プラグイン拡張用スロット — top-level wave, Phase 3.
@@ -35,6 +37,8 @@ class EmptyPage extends ResourceObject
      * Admin-only: returns 403 for an anonymous request — the same
      * firewall contract as the other admin pages.
      */
+    #[Alps('goAdminEmptyPage')]
+    #[JsonSchema(schema: 'get-admin-empty-page.json')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

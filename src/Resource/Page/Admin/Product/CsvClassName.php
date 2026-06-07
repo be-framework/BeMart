@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\JsonSchema;
 use BEAR\Resource\Annotation\Link;
+use BEAR\Resource\Code;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use BEAR\Resource\Code;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassNameCsvImported;
@@ -41,11 +43,25 @@ class CsvClassName extends AbstractCsvUpload
         parent::__construct($adminSession, $formFactory);
     }
 
+    /** ALPS `goExportClassName` に対応する GET 操作。 */
+    #[Override]
+    #[Alps('goExportClassName')]
+    #[JsonSchema(schema: 'get-admin-product-csv-class-name.json')]
+    #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    public function onGet(): static
+    {
+        parent::onGet();
+
+        return $this;
+    }
+
     /**
      * Imports the 規格名 CSV (doImportClassNameCsv).
      *
      * @psalm-taint-source input $csv
      */
+    #[Alps('doImportClassNameCsv')]
+    #[JsonSchema(schema: 'post-admin-product-csv-class-name.json', params: 'post-admin-product-csv-class-name.param.json')]
     #[Link(rel: 'goExportClassCategory', href: 'page://self/admin/class-category/class-category-export')]
     #[CsrfProtected]
     public function onPost(string $csv = ''): static

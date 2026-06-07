@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Payment;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminPaymentListFetched;
 use MyVendor\BeMart\Be\Final\PaymentMethodAdminCreated;
 use MyVendor\BeMart\Be\Input\CreatePaymentMethodAdminInput;
 use MyVendor\BeMart\Be\Input\GetAdminPaymentListInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -37,6 +39,9 @@ class PaymentList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goPaymentList` に対応する GET 操作。 */
+    #[Alps('goPaymentList')]
+    #[JsonSchema(schema: 'get-admin-payment-payment-list.json')]
     #[Link(rel: 'doCreatePayment', href: 'page://self/admin/payment/payment-list', method: 'post')]
     #[Link(rel: 'goPayment', href: 'page://self/admin/payment/payment', method: 'get')]
     #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
@@ -57,12 +62,15 @@ class PaymentList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreatePayment` に対応する POST 操作。
      * @psalm-taint-source input $paymentMethodName
      * @psalm-taint-source input $charge
      * @psalm-taint-source input $ruleMin
      * @psalm-taint-source input $ruleMax
      * @psalm-taint-source input $visible
      */
+    #[Alps('doCreatePayment')]
+    #[JsonSchema(schema: 'post-admin-payment-payment-list.json', params: 'post-admin-payment-payment-list.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[CsrfProtected]
     public function onPost(

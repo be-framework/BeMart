@@ -129,6 +129,7 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="admin_class_name_backend_name"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testClassNameListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();

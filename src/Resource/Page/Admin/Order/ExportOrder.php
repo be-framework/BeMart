@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -11,6 +12,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderCsvExported;
 use MyVendor\BeMart\Be\Input\AdminExportOrderInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -34,6 +36,9 @@ class ExportOrder extends ResourceObject
     ) {
     }
 
+    /** ALPS `goExportOrder` に対応する GET 操作。 */
+    #[Alps('goExportOrder')]
+    #[JsonSchema(schema: 'get-admin-order-export-order.json')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]
     public function onGet(): static

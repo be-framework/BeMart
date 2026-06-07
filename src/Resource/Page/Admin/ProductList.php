@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Final\ProductListFetched;
 use MyVendor\BeMart\Be\Input\GetProductListInput;
 use MyVendor\BeMart\Form\AdminProductSearchForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -43,10 +45,13 @@ class ProductList extends ResourceObject
     }
 
     /**
+     * ALPS `goProductList` に対応する GET 操作。
      * @psalm-taint-source input $nameKeyword
      * @psalm-taint-source input $limit
      * @psalm-taint-source input $offset
      */
+    #[Alps('goProductList')]
+    #[JsonSchema(schema: 'get-admin-product-list.json', params: 'get-admin-product-list.param.json')]
     #[Link(rel: 'goProduct', href: 'page://self/admin/product', method: 'get')]
     #[Link(rel: 'doCreateProduct', href: 'page://self/admin/product', method: 'post')]
     #[Link(rel: 'doBulkUpdateProductStatus', href: 'page://self/admin/product-bulk-status', method: 'post')]
