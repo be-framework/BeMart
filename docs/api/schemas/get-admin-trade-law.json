@@ -80,8 +80,6 @@
               "boolean",
               "null"
             ],
-            "minLength": 0,
-            "maxLength": 255,
             "title": "表示順画面フラグ",
             "description": "注文確認画面にこの項目を表示するか"
           },
