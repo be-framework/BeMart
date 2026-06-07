@@ -23,30 +23,35 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 - `要調査`: Resourceはあるが画面導線が不明、または実装済み/意図的未実装の根拠が衝突している。
 - `✔` は各行で状態列のどれか1つだけに付ける。
 
+## Browser verification runs
+
+- `20260607-browser-check`: in-app browserで主要 user/admin GET とログイン/カート追加を実操作。結果JSONは `docs/web-e2e/results/`、証跡画像は `docs/web-e2e/screenshots/20260607-browser-check/` に保存。
+- 実測で見つかったfail: `User カート追加` はカート遷移後の商品名不一致、`Admin 商品一覧表示` / `Admin 受注一覧表示` は管理ナビURLが詳細Resourceへ向き400になる。
+
 ## 実装状態一覧
 
 | 区分 | 機能 | 画面/操作 | Resource/OpenAPI | 実装済み | 部分実装 | 意図的未実装 | 実装見落とし | 要調査 | 根拠 | Web操作結果 | Screenshot |
 |---|---|---|---|---|---|---|---|---|---|---|---|
-| User | トップページ表示 | / | GET /index | ✔ |  |  |  |  | Resource + HTML test + flow-customer-* | 未実施 |  |
-| User | 商品一覧表示 | /products/list | GET /products | ✔ |  |  |  |  | Resource + HTML test + flow-customer-purchase | 未実施 |  |
-| User | カテゴリ絞り込み | /products/list?category_id=... | GET /products | ✔ |  |  |  |  | Resource + 現ブラウザ到達確認 | 未実施 |  |
+| User | トップページ表示 | / | GET /index | ✔ |  |  |  |  | Resource + HTML test + flow-customer-* | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-02-top.png |
+| User | 商品一覧表示 | /products/list | GET /products | ✔ |  |  |  |  | Resource + HTML test + flow-customer-purchase | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-03-products-list.png |
+| User | カテゴリ絞り込み | /products/list?category_id=... | GET /products | ✔ |  |  |  |  | Resource + 現ブラウザ到達確認 | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-01-products-list-category.png |
 | User | 商品名検索 | /products/list?name=... | GET /products | ✔ |  |  |  |  | Resource + flow-customer-purchase | 未実施 |  |
-| User | 商品詳細表示 | /products/detail/{code} | GET /product | ✔ |  |  |  |  | Resource + HTML test + flow-customer-purchase | 未実施 |  |
-| User | カート追加 | 商品詳細→カート追加 | POST /cart/item | ✔ |  |  |  |  | Resource + flow-customer-purchase | 未実施 |  |
+| User | 商品詳細表示 | /products/detail/{code} | GET /product | ✔ |  |  |  |  | Resource + HTML test + flow-customer-purchase | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-04-product-detail.png |
+| User | カート追加 | 商品詳細→カート追加 | POST /cart/item | ✔ |  |  |  |  | Resource + flow-customer-purchase | ✘ fail（カート遷移は成功、選択商品とカート明細の商品名が不一致） | docs/web-e2e/screenshots/20260607-browser-check/user-11-cart-after-add.png |
 | User | カート数量変更 | カート→数量変更 | PUT /cart/item | ✔ |  |  |  |  | Resource test + OpenAPI schema | 未実施 |  |
 | User | カート商品削除 | カート→削除 | DELETE /cart/item | ✔ |  |  |  |  | Resource test + OpenAPI schema | 未実施 |  |
-| User | カート確認 | /cart | GET /cart | ✔ |  |  |  |  | Resource + HTML test + flow-customer-purchase | 未実施 |  |
+| User | カート確認 | /cart | GET /cart | ✔ |  |  |  |  | Resource + HTML test + flow-customer-purchase | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-05-cart.png |
 | User | 非会員購入情報入力 | /shopping/non-member | GET /shopping/non-member | ✔ |  |  |  |  | Resource + HTML test + flow-customer-purchase | 未実施 |  |
 | User | 非会員購入情報送信 | 非会員購入フォーム送信 | POST /shopping/non-member | ✔ |  |  |  |  | Resource + flow-customer-purchase | 未実施 |  |
 | User | 購入確認 | /shopping/confirm | GET /shopping/confirm | ✔ |  |  |  |  | Resource + HTML test + flow-customer-purchase | 未実施 |  |
 | User | 購入完了 | /shopping/checkout → /shopping/complete | POST /shopping/checkout; GET /shopping/complete | ✔ |  |  |  |  | Resource + flow-customer-purchase | 未実施 |  |
 | User | 購入エラー表示 | /shopping/error | GET /shopping/error | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
-| User | 会員登録入力 | /entry | GET /entry | ✔ |  |  |  |  | Resource + HTML test + flow-customer-registration | 未実施 |  |
+| User | 会員登録入力 | /entry | GET /entry | ✔ |  |  |  |  | Resource + HTML test + flow-customer-registration | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-06-entry.png |
 | User | 会員登録確認 | /entry/confirm | GET /entry/confirm | ✔ |  |  |  |  | Resource + HTML test + flow-customer-registration | 未実施 |  |
 | User | 会員登録完了 | /entry | POST /entry | ✔ |  |  |  |  | Resource + flow-customer-registration | 未実施 |  |
 | User | 会員登録完了画面 | /entry/complete | GET /entry/complete | ✔ |  |  |  |  | Resource + HTML test + flow-customer-registration | 未実施 |  |
 | User | 会員メール認証 | 認証リンク/トークン送信 | POST /entry/activate | ✔ |  |  |  |  | Resource + flow-customer-registration | 未実施 |  |
-| User | ログイン | /login | GET /login; POST /login | ✔ |  |  |  |  | Resource + HTML test + auth/session test | 未実施 |  |
+| User | ログイン | /login | GET /login; POST /login | ✔ |  |  |  |  | Resource + HTML test + auth/session test | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-12-login-submit.png |
 | User | ログアウト | ヘッダー/マイページ→ログアウト | POST /logout | ✔ |  |  |  |  | Resource + auth/session test | 未実施 |  |
 | User | パスワード再発行依頼 | /forgot-password | GET /forgot-password; POST /forgot-password | ✔ |  |  |  |  | Resource + HTML/Resource test | 未実施 |  |
 | User | パスワードリセット | /reset | GET /reset; POST /reset | ✔ |  |  |  |  | Resource + HTML/Resource test | 未実施 |  |
@@ -67,18 +72,18 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 | User | 退会入力/表示 | /mypage/withdraw | GET /mypage/withdraw | ✔ |  |  |  |  | Resource + HTML test + flow-customer-account-maintenance | 未実施 |  |
 | User | 退会実行 | 退会フォーム送信 | POST /mypage/withdraw | ✔ |  |  |  |  | Resource + flow-customer-account-maintenance | 未実施 |  |
 | User | 退会完了 | /mypage/withdraw-complete | GET /mypage/withdraw-complete | ✔ |  |  |  |  | Resource + HTML test + flow-customer-account-maintenance | 未実施 |  |
-| User | お問い合わせ入力 | /contact | GET /contact | ✔ |  |  |  |  | Resource + HTML test + flow-customer-inquiry | 未実施 |  |
+| User | お問い合わせ入力 | /contact | GET /contact | ✔ |  |  |  |  | Resource + HTML test + flow-customer-inquiry | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-08-contact.png |
 | User | お問い合わせ確認 | /contact/confirm | GET /contact/confirm; POST /contact | ✔ |  |  |  |  | Resource + HTML test + flow-customer-inquiry | 未実施 |  |
 | User | お問い合わせ完了 | /contact/complete | GET /contact/complete | ✔ |  |  |  |  | Resource + HTML test + flow-customer-inquiry | 未実施 |  |
-| User | 当サイトについて | /help/about | GET /help/about | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
+| User | 当サイトについて | /help/about | GET /help/about | ✔ |  |  |  |  | Resource + HTML test | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-09-help-about.png |
 | User | ご利用ガイド | /help/guide | GET /help/guide | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
 | User | 利用規約 | /help/agreement | GET /help/agreement | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
-| User | プライバシーポリシー | /help/privacy | GET /help/privacy | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
+| User | プライバシーポリシー | /help/privacy | GET /help/privacy | ✔ |  |  |  |  | Resource + HTML test | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/user-10-help-privacy.png |
 | User | 特定商取引法表示 | /help/trade-law | GET /help/trade-law | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
-| Admin | 管理ログイン | /admin/login | GET /admin/login; POST /admin/login | ✔ |  |  |  |  | Resource + HTML test + flow-admin-system-operation | 未実施 |  |
+| Admin | 管理ログイン | /admin/login | GET /admin/login; POST /admin/login | ✔ |  |  |  |  | Resource + HTML test + flow-admin-system-operation | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/admin-02-dashboard-after-login.png |
 | Admin | 管理ログアウト | 管理ヘッダー→ログアウト | POST /admin/logout | ✔ |  |  |  |  | Resource + flow-admin-system-operation | 未実施 |  |
-| Admin | 管理ダッシュボード表示 | /admin | GET /admin/index | ✔ |  |  |  |  | Resource + HTML test + flow-admin-system-operation | 未実施 |  |
-| Admin | 商品一覧表示 | 商品管理→商品一覧 | GET /admin/product-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-product-publish | 未実施 |  |
+| Admin | 管理ダッシュボード表示 | /admin | GET /admin/index | ✔ |  |  |  |  | Resource + HTML test + flow-admin-system-operation | ✔ pass（title確認） | docs/web-e2e/screenshots/20260607-browser-check/admin-02-dashboard-after-login.png |
+| Admin | 商品一覧表示 | 商品管理→商品一覧 | GET /admin/product-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-product-publish | ✘ fail（管理ナビ /admin/product は400。直URL /admin/product-list はpass） | docs/web-e2e/screenshots/20260607-browser-check/admin-03-product-list.png<br>docs/web-e2e/screenshots/20260607-browser-check/admin-10-product-list-direct-resource.png |
 | Admin | 商品検索 | 商品一覧検索フォーム | GET /admin/product-list | ✔ |  |  |  |  | Resource + flow-admin-product-publish | 未実施 |  |
 | Admin | 商品新規登録 | 商品管理→新規登録 | POST /admin/product | ✔ |  |  |  |  | Resource + flow-admin-product-publish | 未実施 |  |
 | Admin | 商品詳細表示 | 商品一覧→詳細 | GET /admin/product | ✔ |  |  |  |  | Resource + HTML test + flow-admin-product-publish | 未実施 |  |
@@ -110,7 +115,7 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 | Admin | 規格分類CSV出力 | 規格分類CSV | GET /admin/class-category/class-category-export | ✔ |  |  |  |  | Resource + flow-admin-csv-exchange | 未実施 |  |
 | Admin | 規格分類CSV取込 | 規格分類CSV取込 | POST /admin/product/csv-class-category |  | ✔ |  |  |  | Resource + flow-admin-csv-exchange; CSV upload/compat boundary | 未実施 |  |
 | Admin | 商品規格編集 | 商品詳細→規格編集 | GET /admin/product/product-class; PUT /admin/product/product-class | ✔ |  |  |  |  | Resource + HTML/Resource test | 未実施 |  |
-| Admin | 会員一覧表示 | 会員管理→一覧 | GET /admin/customer-list | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
+| Admin | 会員一覧表示 | 会員管理→一覧 | GET /admin/customer-list | ✔ |  |  |  |  | Resource + HTML test | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/admin-05-customer-list.png |
 | Admin | 会員検索 | 会員一覧検索フォーム | GET /admin/customer-list | ✔ |  |  |  |  | Resource test | 未実施 |  |
 | Admin | 会員詳細表示 | 会員一覧→詳細 | GET /admin/customer | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
 | Admin | 会員作成 | 会員管理→新規作成 | POST /admin/create-customer | ✔ |  |  |  |  | Resource test | 未実施 |  |
@@ -119,7 +124,7 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 | Admin | 会員配送先編集 | 会員詳細→配送先編集 | GET /admin/customer-delivery-edit; PUT /admin/customer-delivery-edit | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
 | Admin | 会員認証メール再送 | 会員詳細→認証メール再送 | POST /admin/customer/resend-activation-mail |  | ✔ |  |  |  | Resource test; FakeMailer boundary | 未実施 |  |
 | Admin | 会員CSV出力 | 会員管理→CSV出力 | GET /admin/customer-csv | ✔ |  |  |  |  | Resource + flow-admin-csv-exchange | 未実施 |  |
-| Admin | 受注一覧表示 | 受注管理→一覧 | GET /admin/order-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-order-fulfillment | 未実施 |  |
+| Admin | 受注一覧表示 | 受注管理→一覧 | GET /admin/order-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-order-fulfillment | ✘ fail（管理ナビ /admin/order は400。直URL /admin/order-list はpass） | docs/web-e2e/screenshots/20260607-browser-check/admin-04-order-list.png<br>docs/web-e2e/screenshots/20260607-browser-check/admin-11-order-list-direct-resource.png |
 | Admin | 受注検索 | 受注一覧検索フォーム | GET /admin/order-list | ✔ |  |  |  |  | Resource + flow-admin-order-fulfillment | 未実施 |  |
 | Admin | 受注詳細表示 | 受注一覧→詳細 | GET /admin/order | ✔ |  |  |  |  | Resource + HTML test + flow-admin-order-fulfillment | 未実施 |  |
 | Admin | 受注作成 | 受注管理→新規作成 | POST /admin/order/create | ✔ |  |  |  |  | Resource + flow-admin-order-fulfillment | 未実施 |  |
@@ -136,7 +141,7 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 | Admin | 出荷CSV出力 | 受注管理→出荷CSV | GET /admin/order/export-shipping | ✔ |  |  |  |  | Resource + flow-admin-csv-exchange | 未実施 |  |
 | Admin | 出荷CSV取込 | 受注管理→出荷CSV取込 | POST /admin/order/import-shipping |  | ✔ |  |  |  | Resource + flow-admin-csv-exchange; CSV upload/compat boundary | 未実施 |  |
 | Admin | 受注PDF出力 | 受注詳細→PDF | GET /admin/order/export-order-pdf |  | ✔ |  |  |  | Resource + flow-admin-order-fulfillment; PDF payload boundary | 未実施 |  |
-| Admin | 基本情報表示 | 店舗設定→基本情報 | GET /admin/base-info | ✔ |  |  |  |  | Resource + HTML test + flow-admin-shop-configuration | 未実施 |  |
+| Admin | 基本情報表示 | 店舗設定→基本情報 | GET /admin/base-info | ✔ |  |  |  |  | Resource + HTML test + flow-admin-shop-configuration | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/admin-12-base-info-nav-url.png |
 | Admin | 基本情報更新 | 基本情報→保存 | POST /admin/base-info | ✔ |  |  |  |  | Resource + flow-admin-shop-configuration | 未実施 |  |
 | Admin | 支払方法一覧表示 | 店舗設定→支払方法 | GET /admin/payment/payment-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-shop-configuration | 未実施 |  |
 | Admin | 支払方法作成 | 支払方法→追加 | POST /admin/payment/payment-list | ✔ |  |  |  |  | Resource + flow-admin-shop-configuration | 未実施 |  |
@@ -164,7 +169,7 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 | Admin | マスタデータ表示 | システム→マスタデータ | GET /admin/master-data | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
 | Admin | マスタデータ選択 | マスタデータ→種別選択 | PUT /admin/master-data | ✔ |  |  |  |  | Resource/HTTP test | 未実施 |  |
 | Admin | マスタデータ更新 | マスタデータ→保存 | PUT /admin/master-data-edit | ✔ |  |  |  |  | Resource/HTTP test | 未実施 |  |
-| Admin | メンバー一覧表示 | システム→メンバー | GET /admin/member-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-system-operation | 未実施 |  |
+| Admin | メンバー一覧表示 | システム→メンバー | GET /admin/member-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-system-operation | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/admin-07-system-member.png |
 | Admin | メンバー作成 | メンバー→追加 | POST /admin/member | ✔ |  |  |  |  | Resource + flow-admin-system-operation | 未実施 |  |
 | Admin | メンバー詳細表示 | メンバー一覧→詳細 | GET /admin/member | ✔ |  |  |  |  | Resource + HTML test + flow-admin-system-operation | 未実施 |  |
 | Admin | メンバー編集 | メンバー詳細→保存 | PUT /admin/member | ✔ |  |  |  |  | Resource + flow-admin-system-operation | 未実施 |  |
@@ -183,7 +188,7 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 | Admin | キャッシュ削除 | キャッシュ→削除 | PUT /admin/content/cache |  | ✔ |  |  |  | Resource + flow-admin-system-operation; FakeCacheClearer boundary | 未実施 |  |
 | Admin | メンテナンス表示 | コンテンツ→メンテナンス | GET /admin/content/maintenance | ✔ |  |  |  |  | Resource + flow-admin-system-operation | 未実施 |  |
 | Admin | メンテナンス切替 | メンテナンス→切替 | PUT /admin/content/maintenance |  | ✔ |  |  |  | Resource + flow-admin-system-operation; FakeMaintenanceMode boundary | 未実施 |  |
-| Admin | ニュース一覧表示 | コンテンツ→ニュース | GET /admin/news/news-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-content-publish | 未実施 |  |
+| Admin | ニュース一覧表示 | コンテンツ→ニュース | GET /admin/news/news-list | ✔ |  |  |  |  | Resource + HTML test + flow-admin-content-publish | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/admin-08-content-news.png |
 | Admin | ニュース作成 | ニュース→追加 | POST /admin/news/news-list | ✔ |  |  |  |  | Resource + flow-admin-content-publish | 未実施 |  |
 | Admin | ニュース編集 | ニュース→編集 | PUT /admin/news/news | ✔ |  |  |  |  | Resource + flow-admin-content-publish | 未実施 |  |
 | Admin | ニュース削除 | ニュース→削除 | DELETE /admin/news/news | ✔ |  |  |  |  | Resource + flow-admin-content-publish | 未実施 |  |
@@ -205,7 +210,7 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 | Admin | テンプレート追加 | テンプレート→追加 | POST /admin/template/template-add |  | ✔ |  |  |  | Resource + flow-admin-template-lifecycle; template compatibility boundary | 未実施 |  |
 | Admin | テンプレート有効化 | テンプレート→有効化 | PUT /admin/template/template-list |  | ✔ |  |  |  | Resource + flow-admin-template-lifecycle; template compatibility boundary | 未実施 |  |
 | Admin | テンプレート削除 | テンプレート→削除 | DELETE /admin/template/template-list |  | ✔ |  |  |  | Resource + flow-admin-template-lifecycle; template compatibility boundary | 未実施 |  |
-| Admin | プラグイン一覧表示 | オーナーズストア→プラグイン | GET /admin/plugin-list | ✔ |  |  |  |  | Resource + HTML test | 未実施 |  |
+| Admin | プラグイン一覧表示 | オーナーズストア→プラグイン | GET /admin/plugin-list | ✔ |  |  |  |  | Resource + HTML test | ✔ pass | docs/web-e2e/screenshots/20260607-browser-check/admin-13-plugin-nav-url.png |
 | Admin | プラグインインストール | プラグイン→インストール | POST /admin/plugin-list |  | ✔ |  |  |  | Resource test; plugin registry/install boundary | 未実施 |  |
 | Admin | プラグイン有効化 | プラグイン→有効化 | POST /admin/plugin-enable |  | ✔ |  |  |  | Resource test; plugin lifecycle boundary | 未実施 |  |
 | Admin | プラグイン無効化 | プラグイン→無効化 | POST /admin/plugin-disable |  | ✔ |  |  |  | Resource test; plugin lifecycle boundary | 未実施 |  |
