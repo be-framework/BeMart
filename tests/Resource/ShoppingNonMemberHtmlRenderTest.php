@@ -129,6 +129,7 @@ final class ShoppingNonMemberHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="postalCode"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShoppingNonMemberHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/non-member')->toString();

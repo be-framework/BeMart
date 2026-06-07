@@ -83,6 +83,7 @@ final class AdminPluginResourceTest extends TestCase
         $this->assertFalse($ro->body['wasInstalled']);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testOnDeleteReplayReturnsWasInstalledFalse(): void
     {
         $this->markTestSkipped('Stateful uninstall replay is covered by the SQL suite.');
@@ -110,18 +111,18 @@ final class AdminPluginResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);    }
+        $this->assertStringContainsString('CSRF', $ro->body['message']);
+    }
 
     public function testOnDeleteWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->delete('page://self/admin/plugin', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->delete('page://self/admin/plugin', [
             'pluginCode' => 'Sample/DisabledPlugin',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 }

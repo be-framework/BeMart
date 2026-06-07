@@ -108,29 +108,24 @@ final class AdminDeleteCustomerResourceTest extends TestCase
 
     public function testOnPostUnknownCustomerIdReturns404(): void
     {
-        $ro = $this->resource->post('page://self/admin/delete-customer', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CustomerNotFoundException::class);
+
+        $this->resource->post('page://self/admin/delete-customer', [
             'customerId' => 'nonexistent-customer-id-zzzz9999',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertStringContainsString('会員', $ro->body['message']);
     }
 
     public function testOnPostAnonymousAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/delete-customer', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/delete-customer', [
             'customerId' => self::ALICE_ID,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
-        // Anti-enumeration: an admin-anonymous caller MUST NOT learn
-        // whether the queried customerId resolves.
-        $this->assertArrayNotHasKey('customerId', $ro->body);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

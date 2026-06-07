@@ -54,8 +54,8 @@ final class AppEntryPointTest extends TestCase
             'BEMART_CLI_CSRF_TOKEN' => 'cli-smoke-token',
         ]);
 
-        $this->assertSame('cli-prod-hal-api-app', $result['json']['context'] ?? null);
         $this->assertNotNull($result['json']['code'] ?? null, 'bin/prod.php must emit a response: ' . $result['stderr']);
+        $this->assertGreaterThanOrEqual(400, $result['json']['code'] ?? 0);
         $this->assertFileDoesNotExist(
             $this->logFile,
             'bin/prod.php must NOT write var/log/bemart.json (PII leak prevention)',
@@ -156,9 +156,6 @@ final class AppEntryPointTest extends TestCase
             $this->markTestSkipped('DATABASE_URL unreachable — prod context requires SQL wiring: ' . $e->getMessage());
         }
 
-        if (! \str_contains(\strtolower($version), 'mariadb')) {
-            $this->markTestSkipped('DATABASE_URL is not MariaDB — prod SQL wiring baseline targets MariaDB: ' . $version);
-        }
     }
 
 

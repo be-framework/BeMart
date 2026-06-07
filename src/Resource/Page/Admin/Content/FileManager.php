@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminFileForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -40,6 +42,9 @@ class FileManager extends ResourceObject
         private readonly FormFactory $formFactory,
     ) {
     }
+    /** ALPS `goAdminContentFileManager` に対応する GET 操作。 */
+    #[Alps('goAdminContentFileManager')]
+    #[JsonSchema(schema: 'get-admin-content-file-manager.json')]
 
     public function onGet(): static
     {

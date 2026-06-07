@@ -70,8 +70,9 @@ final class AdminNewsResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/news/news-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/news/news-list');
     }
 
     public function testCreateHappyPathReturns201(): void
@@ -88,12 +89,13 @@ final class AdminNewsResourceTest extends TestCase
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/news/news-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/news/news-list', [
             'newsTitle' => 'X',
             'publishDate' => '2026-05-01T00:00:00+09:00',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testGetHappyPath(): void
@@ -106,8 +108,9 @@ final class AdminNewsResourceTest extends TestCase
 
     public function testGetUnknownIdReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/news/news', ['newsId' => 'nonexistent']);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\NewsNotFoundException::class);
+
+        $this->resource->get('page://self/admin/news/news', ['newsId' => 'nonexistent']);
     }
 
     public function testUpdateMerges(): void
@@ -134,10 +137,11 @@ final class AdminNewsResourceTest extends TestCase
 
     public function testDeleteUnknownReturns404(): void
     {
-        $ro = $this->resource->delete('page://self/admin/news/news', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\NewsNotFoundException::class);
+
+        $this->resource->delete('page://self/admin/news/news', [
             'newsId' => 'nonexistent',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 }

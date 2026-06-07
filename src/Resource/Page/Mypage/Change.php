@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Input\GetMypageChangeInput;
 use MyVendor\BeMart\Be\Input\UpdateCustomerInput;
 use MyVendor\BeMart\Form\ChangeForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function assert;
@@ -58,22 +60,12 @@ class Change extends ResourceObject
      * JSON contexts ignore `body['form']`; the flat profile keys stay on
      * `body` for the JSON-context tests.
      */
+    #[Alps('goMypageChange')]
+    #[JsonSchema(schema: 'get-mypage-change.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetMypageChangeInput());
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetMypageChangeInput());
 
         assert($final instanceof MypageChangeFormFetched);
 
@@ -117,6 +109,7 @@ class Change extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateCustomer` に対応する POST 操作。
      * @psalm-taint-source input $email
      * @psalm-taint-source input $name01
      * @psalm-taint-source input $name02
@@ -129,6 +122,8 @@ class Change extends ResourceObject
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
      */
+    #[Alps('doUpdateCustomer')]
+    #[JsonSchema(schema: 'post-mypage-change.json', params: 'post-mypage-change.param.json')]
     #[Link(rel: 'goMypageChangeComplete', href: 'page://self/mypage/change-complete')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
@@ -145,36 +140,19 @@ class Change extends ResourceObject
         string|null $addr01 = null,
         string|null $addr02 = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateCustomerInput(
-                email: $email,
-                name01: $name01,
-                name02: $name02,
-                kana01: $kana01,
-                kana02: $kana02,
-                companyName: $companyName,
-                phoneNumber: $phoneNumber,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        } catch (EmailAlreadyRegisteredException) {
-            $this->code = 409;
-            $this->body = ['message' => 'The new email is already registered.', 'email' => $email];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateCustomerInput(
+            email: $email,
+            name01: $name01,
+            name02: $name02,
+            kana01: $kana01,
+            kana02: $kana02,
+            companyName: $companyName,
+            phoneNumber: $phoneNumber,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+        ));
 
         assert($final instanceof CustomerUpdated);
 

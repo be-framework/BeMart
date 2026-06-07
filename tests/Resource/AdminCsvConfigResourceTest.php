@@ -141,15 +141,14 @@ final class AdminCsvConfigResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/csv-config', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/csv-config', [
             'csvType' => 3,
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
             ],
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 }

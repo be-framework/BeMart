@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderEditForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -49,8 +51,11 @@ class Edit extends ResourceObject
     }
 
     /**
+     * ALPS `goOrder` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('goOrder')]
+    #[JsonSchema(schema: 'get-admin-order-edit.json', params: 'get-admin-order-edit.param.json')]
     #[Link(rel: 'doUpdateOrder', href: 'page://self/admin/order', method: 'put')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(string $orderNo = ''): static
@@ -82,24 +87,7 @@ class Edit extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetAdminOrderInput(orderNo: $orderNo));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminOrderInput(orderNo: $orderNo));
 
         assert($final instanceof AdminOrderFetched);
 

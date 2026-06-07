@@ -57,11 +57,11 @@ final class AdminOrderPdfExportResourceTest extends TestCase
 
     public function testExportOrderPdfUnknownReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\OrderNotFoundException::class);
+
+        $this->resource->get('page://self/admin/order/export-order-pdf', [
             'orderNos' => ['never00000000000000000000000000z'],
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testExportOrderPdfEmptyOrderNosReturns400(): void
@@ -78,11 +78,11 @@ final class AdminOrderPdfExportResourceTest extends TestCase
     {
         $this->resource = $this->buildResource(null);
 
-        $ro = $this->resource->get('page://self/admin/order/export-order-pdf', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/order/export-order-pdf', [
             'orderNos' => [self::ORDER_NO],
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     private function buildResource(string|null $adminId): ResourceInterface

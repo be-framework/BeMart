@@ -134,6 +134,7 @@ final class AdminTagListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('セール', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testTagListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/tag/tag-list')->toString();

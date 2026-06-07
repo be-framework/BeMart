@@ -19,6 +19,7 @@ use Ray\Di\Injector;
 
 use function dirname;
 
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class MypageResourceTest extends TestCase
 {
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';

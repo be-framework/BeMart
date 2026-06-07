@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerDeleted;
 use MyVendor\BeMart\Be\Input\AdminDeleteCustomerInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -68,33 +70,16 @@ class DeleteCustomer extends ResourceObject
      *
      * @psalm-taint-source input $customerId
      */
+    #[Alps('doDeleteCustomer')]
+    #[JsonSchema(schema: 'post-admin-delete-customer.json', params: 'post-admin-delete-customer.param.json')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
     #[CsrfProtected]
     public function onPost(
         string $customerId,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminDeleteCustomerInput(
-                customerId: $customerId,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (CustomerNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された会員は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminDeleteCustomerInput(
+            customerId: $customerId,
+        ));
 
         assert($final instanceof AdminCustomerDeleted);
 

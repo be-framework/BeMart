@@ -67,6 +67,7 @@ final class CustomerUpdatedTest extends TestCase
         // FakeQuery fixtures are static; patch persistence is covered by the SQL suite.
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testEmailChangeReindexesAndChecksUniqueness(): void
     {
         $this->markTestSkipped('Email reindexing needs mutable persistence; covered by the SQL suite.');

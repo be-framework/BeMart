@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\News;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -22,6 +23,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminNewsForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -50,8 +52,11 @@ class News extends ResourceObject
     }
 
     /**
+     * ALPS `goNews` に対応する GET 操作。
      * @psalm-taint-source input $newsId
      */
+    #[Alps('goNews')]
+    #[JsonSchema(schema: 'get-admin-news-news.json', params: 'get-admin-news-news.param.json')]
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
     public function onGet(string|null $newsId = null): static
     {
@@ -78,19 +83,7 @@ class News extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetAdminNewsInput(newsId: $newsId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (NewsNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたニュースは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminNewsInput(newsId: $newsId));
 
         assert($final instanceof AdminNewsFetched);
 
@@ -130,6 +123,7 @@ class News extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateNews` に対応する PUT 操作。
      * @psalm-taint-source input $newsId
      * @psalm-taint-source input $newsTitle
      * @psalm-taint-source input $newsDescription
@@ -137,6 +131,8 @@ class News extends ResourceObject
      * @psalm-taint-source input $publishDate
      * @psalm-taint-source input $linkMethod
      */
+    #[Alps('doUpdateNews')]
+    #[JsonSchema(schema: 'put-admin-news-news.json', params: 'put-admin-news-news.param.json')]
     #[Link(rel: 'goNews', href: 'page://self/admin/news/news')]
     #[CsrfProtected]
     public function onPut(
@@ -147,31 +143,14 @@ class News extends ResourceObject
         string|null $publishDate = null,
         bool|null $linkMethod = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateNewsInput(
-                newsId: $newsId,
-                newsTitle: $newsTitle,
-                newsDescription: $newsDescription,
-                newsUrl: $newsUrl,
-                publishDate: $publishDate,
-                linkMethod: $linkMethod,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (NewsNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたニュースは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateNewsInput(
+            newsId: $newsId,
+            newsTitle: $newsTitle,
+            newsDescription: $newsDescription,
+            newsUrl: $newsUrl,
+            publishDate: $publishDate,
+            linkMethod: $linkMethod,
+        ));
 
         assert($final instanceof NewsUpdated);
 
@@ -189,26 +168,17 @@ class News extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateNews` に対応する DELETE 操作。
      * @psalm-taint-source input $newsId
      */
+    #[Alps('doUpdateNews')]
+    #[JsonSchema(schema: 'delete-admin-news-news.json', params: 'delete-admin-news-news.param.json')]
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     #[CsrfProtected]
     public function onDelete(string $newsId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteNewsInput(newsId: $newsId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (NewsNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたニュースは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteNewsInput(newsId: $newsId));
 
         assert($final instanceof NewsDeleted);
 

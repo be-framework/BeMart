@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Form\ShoppingShippingEditForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goShoppingShippingMultipleEdit — 複数配送の新規お届け先追加フォーム
@@ -49,10 +51,13 @@ class ShippingMultipleEdit extends ResourceObject
     }
 
     /**
+     * ALPS `goShoppingShippingMultipleEdit` に対応する GET 操作。
      * @todo Wave-future: on submit, append the entered address to the
      *     pre-order's shipping set so the multi-destination split screen
      *     can assign cart items to it.
      */
+    #[Alps('goShoppingShippingMultipleEdit')]
+    #[JsonSchema(schema: 'get-shopping-shipping-multiple-edit.json')]
     #[Link(rel: 'doAddMultipleShippingAddress', href: 'page://self/shopping/shipping-multiple-edit', method: 'post')]
     #[Link(rel: 'goShoppingShippingMultiple', href: 'page://self/shopping/shipping-multiple')]
     public function onGet(): static
@@ -110,6 +115,8 @@ class ShippingMultipleEdit extends ResourceObject
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
      */
+    #[Alps('doUpdateShippingAddress')]
+    #[JsonSchema(schema: 'post-shopping-shipping-multiple-edit.json', params: 'post-shopping-shipping-multiple-edit.param.json')]
     #[Link(rel: 'goShoppingShippingMultiple', href: 'page://self/shopping/shipping-multiple')]
     #[CsrfProtected]
     public function onPost(
