@@ -5,16 +5,29 @@
   "description": "PUT /admin/toggle-visible response の response body schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
   "type": "object",
   "properties": {
-    "message": {
-      "type": [
-        "string",
-        "null"
-      ],
-      "minLength": 0,
-      "maxLength": 32,
-      "title": "処理メッセージ",
-      "description": "/admin/toggle-visible のレスポンスに含まれる処理結果メッセージ。注文時お問い合わせ欄ではなく、画面遷移や完了表示のための通知文。",
-      "example": "配送は平日希望です。"
+    "masterType": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+      "title": "表示切替マスタ種別",
+      "description": "/admin/toggle-visible で表示状態を変更する管理マスタの種別。delivery や payment など、表示フラグを持つ管理一覧の対象を識別する。",
+      "example": "delivery"
+    },
+    "rowId": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:@/-]+$",
+      "title": "表示切替対象行ID",
+      "description": "/admin/toggle-visible で表示状態を変更する管理マスタ行のID。masterType と組み合わせて対象行を一意に指す。",
+      "example": "del-yamato"
+    },
+    "visible": {
+      "type": "boolean",
+      "title": "表示状態",
+      "description": "対象マスタ行を表示状態にするかどうかを表す真偽値。PUT はこの値へ冪等に設定する。",
+      "example": false
     }
   },
   "additionalProperties": false,
@@ -235,5 +248,10 @@
       }
     }
   },
-  "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape."
+  "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
+  "required": [
+    "masterType",
+    "rowId",
+    "visible"
+  ]
 }
