@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\GetAdminCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
 use MyVendor\BeMart\Form\AdminCategoryForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -50,8 +52,11 @@ class Edit extends ResourceObject
     }
 
     /**
+     * ALPS `goCategory` に対応する GET 操作。
      * @psalm-taint-source input $categoryId
      */
+    #[Alps('goCategory')]
+    #[JsonSchema(schema: 'get-admin-category-edit.json', params: 'get-admin-category-edit.param.json')]
     #[Link(rel: 'doCreateCategory', href: 'page://self/admin/category/category-list', method: 'post')]
     #[Link(rel: 'doUpdateCategory', href: 'page://self/admin/category/category', method: 'put')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]

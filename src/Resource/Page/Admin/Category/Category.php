@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Final\CategoryUpdated;
 use MyVendor\BeMart\Be\Input\DeleteCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryInput;
 use MyVendor\BeMart\Be\Input\UpdateCategoryInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -40,8 +42,11 @@ class Category extends ResourceObject
     }
 
     /**
+     * ALPS `goCategory` に対応する GET 操作。
      * @psalm-taint-source input $categoryId
      */
+    #[Alps('goCategory')]
+    #[JsonSchema(schema: 'get-admin-category-category.json', params: 'get-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     public function onGet(string $categoryId): static
     {
@@ -61,11 +66,14 @@ class Category extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateCategory` に対応する PUT 操作。
      * @psalm-taint-source input $categoryId
      * @psalm-taint-source input $categoryName
      * @psalm-taint-source input $sortNo
      * @psalm-taint-source input $parentId
      */
+    #[Alps('doUpdateCategory')]
+    #[JsonSchema(schema: 'put-admin-category-category.json', params: 'put-admin-category-category.param.json')]
     #[Link(rel: 'goCategory', href: 'page://self/admin/category/category')]
     #[CsrfProtected]
     public function onPut(
@@ -95,8 +103,11 @@ class Category extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateCategory` に対応する DELETE 操作。
      * @psalm-taint-source input $categoryId
      */
+    #[Alps('doUpdateCategory')]
+    #[JsonSchema(schema: 'delete-admin-category-category.json', params: 'delete-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[CsrfProtected]
     public function onDelete(string $categoryId): static

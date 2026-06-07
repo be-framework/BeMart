@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Input\AdminUpdateShippingAddressInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderShippingForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -74,6 +76,8 @@ class ShippingAddress extends ResourceObject
      *
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('doSelectShippingAddress')]
+    #[JsonSchema(schema: 'get-admin-order-shipping-address.json', params: 'get-admin-order-shipping-address.param.json')]
     #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
@@ -108,6 +112,8 @@ class ShippingAddress extends ResourceObject
      * @psalm-taint-source input $orderNo
      * @psalm-taint-source input $addressId
      */
+    #[Alps('doSelectShippingAddress')]
+    #[JsonSchema(schema: 'post-admin-order-shipping-address.json', params: 'post-admin-order-shipping-address.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doUpdateShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
     #[Link(rel: 'doUpdateOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'put')]
@@ -138,6 +144,8 @@ class ShippingAddress extends ResourceObject
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
      */
+    #[Alps('doUpdateShippingAddress')]
+    #[JsonSchema(schema: 'put-admin-order-shipping-address.json', params: 'put-admin-order-shipping-address.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'post')]
     #[Link(rel: 'doUpdateTrackingNumber', href: 'page://self/admin/order/tracking-number', method: 'put')]

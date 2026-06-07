@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Payment;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Input\GetAdminPaymentListInput;
 use MyVendor\BeMart\Be\Input\UpdatePaymentMethodAdminInput;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -49,6 +51,8 @@ class Payment extends ResourceObject
      *
      * @psalm-taint-source input $paymentId
      */
+    #[Alps('doUpdatePayment')]
+    #[JsonSchema(schema: 'get-admin-payment-payment.json', params: 'get-admin-payment-payment.param.json')]
     #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
     public function onGet(string $paymentId = ''): static
     {
@@ -95,6 +99,7 @@ class Payment extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdatePayment` に対応する PUT 操作。
      * @psalm-taint-source input $paymentId
      * @psalm-taint-source input $paymentMethodName
      * @psalm-taint-source input $charge
@@ -102,6 +107,8 @@ class Payment extends ResourceObject
      * @psalm-taint-source input $ruleMax
      * @psalm-taint-source input $visible
      */
+    #[Alps('doUpdatePayment')]
+    #[JsonSchema(schema: 'put-admin-payment-payment.json', params: 'put-admin-payment-payment.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[CsrfProtected]
     public function onPut(
@@ -137,8 +144,11 @@ class Payment extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdatePayment` に対応する DELETE 操作。
      * @psalm-taint-source input $paymentId
      */
+    #[Alps('doUpdatePayment')]
+    #[JsonSchema(schema: 'delete-admin-payment-payment.json', params: 'delete-admin-payment-payment.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[CsrfProtected]

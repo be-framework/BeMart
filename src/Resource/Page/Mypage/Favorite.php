@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Final\FavoriteAdded;
 use MyVendor\BeMart\Be\Final\FavoriteRemoved;
 use MyVendor\BeMart\Be\Input\AddFavoriteInput;
 use MyVendor\BeMart\Be\Input\RemoveFavoriteInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -34,8 +36,11 @@ class Favorite extends ResourceObject
     }
 
     /**
+     * ALPS `doAddFavorite` に対応する POST 操作。
      * @psalm-taint-source input $productCode
      */
+    #[Alps('doAddFavorite')]
+    #[JsonSchema(schema: 'post-mypage-favorite.json', params: 'post-mypage-favorite.param.json')]
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     #[Link(rel: 'goProduct', href: 'page://self/product')]
     #[CsrfProtected]
@@ -70,6 +75,8 @@ class Favorite extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Alps('doRemoveFavorite')]
+    #[JsonSchema(schema: 'delete-mypage-favorite.json', params: 'delete-mypage-favorite.param.json')]
     #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]

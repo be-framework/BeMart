@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ShippingNotifyMailSent;
 use MyVendor\BeMart\Be\Input\SendShippingNotifyMailInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -42,8 +44,11 @@ class ShippingNotifyMail extends ResourceObject
     }
 
     /**
+     * ALPS `doSendShippingNotifyMail` に対応する POST 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('doSendShippingNotifyMail')]
+    #[JsonSchema(schema: 'post-admin-order-shipping-notify-mail.json', params: 'post-admin-order-shipping-notify-mail.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[CsrfProtected]
     public function onPost(

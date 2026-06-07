@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Final\AdminProductCreated;
 use MyVendor\BeMart\Be\Final\AdminProductCsvExported;
 use MyVendor\BeMart\Be\Input\AdminCreateProductInput;
 use MyVendor\BeMart\Be\Input\AdminExportProductInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_flip;
 use function assert;
@@ -55,6 +57,9 @@ class ProductCsv extends ResourceObject
     ) {
     }
 
+    /** ALPS `goExportProduct` に対応する GET 操作。 */
+    #[Alps('goExportProduct')]
+    #[JsonSchema(schema: 'get-admin-product-csv.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[Link(rel: 'doImportProductCsv', href: 'page://self/admin/product-csv', method: 'post')]
     #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
@@ -76,8 +81,11 @@ class ProductCsv extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateProduct` に対応する POST 操作。
      * @psalm-taint-source input $csv
      */
+    #[Alps('doCreateProduct')]
+    #[JsonSchema(schema: 'post-admin-product-csv.json', params: 'post-admin-product-csv.param.json')]
     #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
     #[CsrfProtected]
     public function onPost(string $csv): static

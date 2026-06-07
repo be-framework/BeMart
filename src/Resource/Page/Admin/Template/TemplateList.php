@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Template;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,6 +20,7 @@ use MyVendor\BeMart\Be\Input\DeleteTemplateInput;
 use MyVendor\BeMart\Be\Input\DownloadTemplateInput;
 use MyVendor\BeMart\Be\Input\GetAdminTemplateListInput;
 use MyVendor\BeMart\Be\Input\SelectTemplateInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -33,6 +35,9 @@ class TemplateList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goTemplateList` に対応する GET 操作。 */
+    #[Alps('goTemplateList')]
+    #[JsonSchema(schema: 'get-admin-template-template-list.json')]
     #[Link(rel: 'goTemplateAdd', href: 'page://self/admin/template/template-add')]
     #[Link(rel: 'goTemplateInstall', href: 'page://self/admin/template/template-add', method: 'get')]
     #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
@@ -57,9 +62,12 @@ class TemplateList extends ResourceObject
     }
 
     /** Activates a template (doSelectTemplate). ALPS idempotent → PUT.
+     * ALPS `doSelectTemplate` に対応する PUT 操作。
      *
      * @psalm-taint-source input $templateId
      */
+    #[Alps('doSelectTemplate')]
+    #[JsonSchema(schema: 'put-admin-template-template-list.json', params: 'put-admin-template-template-list.param.json')]
     #[Link(rel: 'doDownloadTemplate', href: 'page://self/admin/template/template-list', method: 'post')]
     #[CsrfProtected]
     public function onPut(string $templateId): static
@@ -68,9 +76,12 @@ class TemplateList extends ResourceObject
     }
 
     /** Deletes a template (doDeleteTemplate). ALPS idempotent → DELETE.
+     * ALPS `doDeleteTemplate` に対応する DELETE 操作。
      *
      * @psalm-taint-source input $templateId
      */
+    #[Alps('doDeleteTemplate')]
+    #[JsonSchema(schema: 'delete-admin-template-template-list.json', params: 'delete-admin-template-template-list.param.json')]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list', method: 'get')]
     #[CsrfProtected]
     public function onDelete(string $templateId): static
@@ -79,9 +90,12 @@ class TemplateList extends ResourceObject
     }
 
     /** Downloads a template zip (doDownloadTemplate). ALPS unsafe → POST.
+     * ALPS `doDownloadTemplate` に対応する POST 操作。
      *
      * @psalm-taint-source input $templateId
      */
+    #[Alps('doDownloadTemplate')]
+    #[JsonSchema(schema: 'post-admin-template-template-list.json', params: 'post-admin-template-template-list.param.json')]
     #[Link(rel: 'doDeleteTemplate', href: 'page://self/admin/template/template-list', method: 'delete')]
     #[CsrfProtected]
     public function onPost(string $templateId): static

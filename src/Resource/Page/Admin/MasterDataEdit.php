@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,6 +14,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MasterDataUpdated;
 use MyVendor\BeMart\Be\Input\UpdateMasterDataInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -33,11 +35,14 @@ class MasterDataEdit extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateMasterData` に対応する PUT 操作。
      * @param list<array{id: string, name: string, sortNo?: int}> $rows
      *
      * @psalm-taint-source input $masterType
      * @psalm-taint-source input $rows
      */
+    #[Alps('doUpdateMasterData')]
+    #[JsonSchema(schema: 'put-admin-master-data-edit.json', params: 'put-admin-master-data-edit.param.json')]
     #[Link(rel: 'goMasterData', href: 'page://self/admin/master-data')]
     #[CsrfProtected]
     public function onPut(string $masterType, array $rows = []): static

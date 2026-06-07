@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminCustomerFetched;
 use MyVendor\BeMart\Be\Input\GetAdminCustomerInput;
 use MyVendor\BeMart\Form\AdminCustomerForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function filter_var;
@@ -70,6 +72,8 @@ class Customer extends ResourceObject
      * @psalm-taint-source input $customerId
      * @psalm-taint-source input $id
      */
+    #[Alps('goCustomer')]
+    #[JsonSchema(schema: 'get-admin-customer.json', params: 'get-admin-customer.param.json')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
     public function onGet(
         string|null $email = null,

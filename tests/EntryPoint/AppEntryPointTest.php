@@ -155,6 +155,7 @@ final class AppEntryPointTest extends TestCase
         } catch (\PDOException $e) {
             $this->markTestSkipped('DATABASE_URL unreachable — prod context requires SQL wiring: ' . $e->getMessage());
         }
+
     }
 
 

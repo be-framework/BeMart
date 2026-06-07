@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerDeleted;
 use MyVendor\BeMart\Be\Input\AdminDeleteCustomerInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -68,6 +70,8 @@ class DeleteCustomer extends ResourceObject
      *
      * @psalm-taint-source input $customerId
      */
+    #[Alps('doDeleteCustomer')]
+    #[JsonSchema(schema: 'post-admin-delete-customer.json', params: 'post-admin-delete-customer.param.json')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
     #[CsrfProtected]
     public function onPost(

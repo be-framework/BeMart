@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
 use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -54,6 +56,8 @@ class TwoFactorAuth extends ResourceObject
      * session state — the admin firewall guard is downstream of a
      * successful challenge.
      */
+    #[Alps('doVerifyTwoFactorAuth')]
+    #[JsonSchema(schema: 'get-admin-two-factor-auth.json')]
     #[Link(rel: 'doVerifyTwoFactorAuth', href: 'page://self/admin/two-factor-auth', method: 'post')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
@@ -85,6 +89,8 @@ class TwoFactorAuth extends ResourceObject
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $deviceToken
      */
+    #[Alps('doVerifyTwoFactorAuth')]
+    #[JsonSchema(schema: 'post-admin-two-factor-auth.json', params: 'post-admin-two-factor-auth.param.json')]
     #[CsrfProtected]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]

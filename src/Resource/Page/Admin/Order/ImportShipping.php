@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminShippingCsvImported;
 use MyVendor\BeMart\Be\Input\AdminImportShippingCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -49,6 +51,8 @@ class ImportShipping extends ResourceObject
      * admin-session check (Pattern B — no Be transition is invoked on
      * the GET path); a non-admin firewall is refused with 403.
      */
+    #[Alps('doImportShippingCsv')]
+    #[JsonSchema(schema: 'get-admin-order-import-shipping.json')]
     #[Link(rel: 'doImportShippingCsv', href: 'page://self/admin/order/import-shipping', method: 'post')]
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]
     public function onGet(): static
@@ -67,8 +71,11 @@ class ImportShipping extends ResourceObject
     }
 
     /**
+     * ALPS `doImportShippingCsv` に対応する POST 操作。
      * @psalm-taint-source input $csv
      */
+    #[Alps('doImportShippingCsv')]
+    #[JsonSchema(schema: 'post-admin-order-import-shipping.json', params: 'post-admin-order-import-shipping.param.json')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]
     #[Link(rel: 'goExportCustomer', href: 'page://self/admin/customer-csv')]

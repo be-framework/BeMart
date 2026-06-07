@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Tag;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\CreateTagInput;
 use MyVendor\BeMart\Be\Input\GetAdminTagListInput;
 use MyVendor\BeMart\Form\AdminTagForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -33,6 +35,9 @@ class TagList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goTagList` に対応する GET 操作。 */
+    #[Alps('goTagList')]
+    #[JsonSchema(schema: 'get-admin-tag-tag-list.json')]
     #[Link(rel: 'doCreateTag', href: 'page://self/admin/tag/tag-list', method: 'post')]
     #[Link(rel: 'doDeleteTag', href: 'page://self/admin/tag/tag', method: 'delete')]
     public function onGet(): static
@@ -56,8 +61,11 @@ class TagList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateTag` に対応する POST 操作。
      * @psalm-taint-source input $tagName
      */
+    #[Alps('doCreateTag')]
+    #[JsonSchema(schema: 'post-admin-tag-tag-list.json', params: 'post-admin-tag-tag-list.param.json')]
     #[Link(rel: 'goTagList', href: 'page://self/admin/tag/tag-list')]
     #[CsrfProtected]
     public function onPost(string $tagName): static

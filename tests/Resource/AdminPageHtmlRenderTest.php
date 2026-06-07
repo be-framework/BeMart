@@ -124,6 +124,7 @@ final class AdminPageHtmlRenderTest extends TestCase
         $this->assertStringContainsString('class="c-conversionArea"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testPageEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/page/page', [

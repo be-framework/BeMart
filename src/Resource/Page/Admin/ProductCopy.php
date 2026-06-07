@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminProductCopied;
 use MyVendor\BeMart\Be\Input\AdminCopyProductInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -37,9 +39,12 @@ class ProductCopy extends ResourceObject
     }
 
     /**
+     * ALPS `doCopyProduct` に対応する POST 操作。
      * @psalm-taint-source input $productCode
      * @psalm-taint-source input $newProductCode
      */
+    #[Alps('doCopyProduct')]
+    #[JsonSchema(schema: 'post-admin-product-copy.json', params: 'post-admin-product-copy.param.json')]
     #[Link(rel: 'goProduct', href: 'page://self/admin/product', method: 'get')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[CsrfProtected]

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Input\ChangeAdminPasswordInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminChangePasswordForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -59,6 +61,8 @@ class ChangePassword extends ResourceObject
      * resource layer (there is no Be Final to raise
      * `UnauthorizedAdminAccessException`).
      */
+    #[Alps('doChangePassword')]
+    #[JsonSchema(schema: 'get-admin-change-password.json')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onGet(): static
     {
@@ -99,6 +103,8 @@ class ChangePassword extends ResourceObject
      * @psalm-taint-source input $changePasswordFirst
      * @psalm-taint-source input $changePasswordSecond
      */
+    #[Alps('doChangePassword')]
+    #[JsonSchema(schema: 'post-admin-change-password.json', params: 'post-admin-change-password.param.json')]
     #[CsrfProtected]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(

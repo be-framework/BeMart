@@ -193,6 +193,7 @@ final class MypageHtmlRenderTest extends TestCase
      * The honesty test: diff BeMart's rendered dashboard against
      * EC-CUBE's own rendering. Every difference must be in the allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testMypageHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/mypage')->toString();

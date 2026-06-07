@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AuthorityRoleUpdated;
 use MyVendor\BeMart\Be\Input\UpdateAuthorityRoleInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -70,6 +72,8 @@ class AuthorityRole extends ResourceObject
      * exposes the stable form body shape the HTML needs and flags the
      * rule rows as static placeholders.
      */
+    #[Alps('doUpdateAuthorityRole')]
+    #[JsonSchema(schema: 'get-admin-authority-role.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     public function onGet(): static
     {
@@ -102,6 +106,8 @@ class AuthorityRole extends ResourceObject
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $authority
      */
+    #[Alps('doUpdateAuthorityRole')]
+    #[JsonSchema(schema: 'post-admin-authority-role.json', params: 'post-admin-authority-role.param.json')]
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     #[Link(rel: 'goLoginHistoryList', href: 'page://self/admin/login-history')]

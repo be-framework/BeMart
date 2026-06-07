@@ -5,18 +5,26 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Semantic;
 
 use Be\Framework\Attribute\Validate;
+use MyVendor\BeMart\Be\Exception\SelectorFormatException;
+
+use function mb_strlen;
 
 /**
- * Customer selector value used by admin customer edit/search flows.
+ * Admin customer selector — the opaque lookup value used by goAdminCustomer.
  *
- * EC-CUBE form ports pass this optional selector through Be semantic
- * validation; the value itself is intentionally transport-shaped here,
- * while selector-specific interpretation stays in the application flow.
+ * The accompanying `selectorType` tells whether this value is interpreted as
+ * `customerId` or `email`. This Semantic therefore enforces only the transport
+ * boundary common to both meanings: a non-empty, bounded scalar selector. The
+ * Resource layer keeps email syntax validation close to the HTTP parameter
+ * fallback, and CustomerQuery remains responsible for existence.
  */
 final class Selector
 {
     #[Validate]
-    public function validate(string|null $selector): void
+    public function validate(string $selector): void
     {
+        if ($selector === '' || mb_strlen($selector) > 255) {
+            throw new SelectorFormatException();
+        }
     }
 }
