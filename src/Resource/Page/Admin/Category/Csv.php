@@ -47,14 +47,7 @@ class Csv extends ResourceObject
     #[Link(rel: 'doImportCategoryCsv', href: 'page://self/admin/category/csv', method: 'post')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new ExportCategoryInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ExportCategoryInput());
 
         assert($final instanceof CategoryCsvExported);
 
@@ -79,14 +72,7 @@ class Csv extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $csv): static
     {
-        try {
-            $final = ($this->becoming)(new ImportCategoryCsvInput(csv: $csv));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ImportCategoryCsvInput(csv: $csv));
 
         assert($final instanceof CategoryCsvImported);
 

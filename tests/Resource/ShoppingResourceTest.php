@@ -103,10 +103,9 @@ final class ShoppingResourceTest extends TestCase
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->get('page://self/shopping');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
 
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('ログイン', $ro->body['message']);
+        $this->resource->get('page://self/shopping');
     }
 
     public function testOnGetUnknownCustomerSessionReturns401(): void
@@ -114,8 +113,8 @@ final class ShoppingResourceTest extends TestCase
         // Session points to a non-existent customerId — same 401 as anonymous.
         $this->rebindSession('ghost-customer-no-such-row');
 
-        $ro = $this->resource->get('page://self/shopping');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
 
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+        $this->resource->get('page://self/shopping');
     }
 }

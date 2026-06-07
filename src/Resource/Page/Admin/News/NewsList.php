@@ -41,14 +41,7 @@ class NewsList extends ResourceObject
     #[Link(rel: 'doDeleteNews', href: 'page://self/admin/news/news', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminNewsListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminNewsListInput());
 
         assert($final instanceof AdminNewsListFetched);
 
@@ -80,25 +73,13 @@ class NewsList extends ResourceObject
         string|null $newsUrl = null,
         bool $linkMethod = false,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateNewsInput(
-                newsTitle: $newsTitle,
-                publishDate: $publishDate,
-                newsDescription: $newsDescription,
-                newsUrl: $newsUrl,
-                linkMethod: $linkMethod,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateNewsInput(
+            newsTitle: $newsTitle,
+            publishDate: $publishDate,
+            newsDescription: $newsDescription,
+            newsUrl: $newsUrl,
+            linkMethod: $linkMethod,
+        ));
 
         assert($final instanceof NewsCreated);
 

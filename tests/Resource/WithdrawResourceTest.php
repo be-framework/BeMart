@@ -100,12 +100,11 @@ final class WithdrawResourceTest extends TestCase
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->post('page://self/mypage/withdraw', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
+
+        $this->resource->post('page://self/mypage/withdraw', [
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('ログイン', $ro->body['message']);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

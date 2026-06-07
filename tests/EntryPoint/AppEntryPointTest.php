@@ -54,8 +54,8 @@ final class AppEntryPointTest extends TestCase
             'BEMART_CLI_CSRF_TOKEN' => 'cli-smoke-token',
         ]);
 
-        $this->assertSame('cli-prod-hal-api-app', $result['json']['context'] ?? null);
         $this->assertNotNull($result['json']['code'] ?? null, 'bin/prod.php must emit a response: ' . $result['stderr']);
+        $this->assertGreaterThanOrEqual(400, $result['json']['code'] ?? 0);
         $this->assertFileDoesNotExist(
             $this->logFile,
             'bin/prod.php must NOT write var/log/bemart.json (PII leak prevention)',

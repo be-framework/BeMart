@@ -81,14 +81,7 @@ class Css extends ResourceObject
     #[CsrfProtected]
     public function onPut(string $css = ''): static
     {
-        try {
-            $final = ($this->becoming)(new UpdateContentCssInput(css: $css));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateContentCssInput(css: $css));
 
         assert($final instanceof ContentCssUpdated);
 

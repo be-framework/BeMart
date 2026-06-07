@@ -111,18 +111,18 @@ final class AdminPluginResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);    }
+        $this->assertStringContainsString('CSRF', $ro->body['message']);
+    }
 
     public function testOnDeleteWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->delete('page://self/admin/plugin', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->delete('page://self/admin/plugin', [
             'pluginCode' => 'Sample/DisabledPlugin',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 }

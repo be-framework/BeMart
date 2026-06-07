@@ -54,24 +54,7 @@ class ShippingNotifyMail extends ResourceObject
     public function onPost(
         string $orderNo,
     ): static {
-        try {
-            $final = ($this->becoming)(new SendShippingNotifyMailInput(orderNo: $orderNo));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SendShippingNotifyMailInput(orderNo: $orderNo));
 
         assert($final instanceof ShippingNotifyMailSent);
 

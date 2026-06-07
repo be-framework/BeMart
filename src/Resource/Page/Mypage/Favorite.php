@@ -46,24 +46,7 @@ class Favorite extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new AddFavoriteInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AddFavoriteInput(productCode: $productCode));
 
         assert($final instanceof FavoriteAdded);
 
@@ -99,19 +82,7 @@ class Favorite extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));
 
         assert($final instanceof FavoriteRemoved);
 

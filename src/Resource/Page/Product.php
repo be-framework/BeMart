@@ -69,14 +69,7 @@ class Product extends ResourceObject
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     public function onGet(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new GetProductInput($productCode));
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetProductInput($productCode));
 
         assert($final instanceof ProductFetched);
 

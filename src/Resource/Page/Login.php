@@ -120,41 +120,10 @@ class Login extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $email, string $password): static
     {
-        try {
-            $final = ($this->becoming)(new LoginInput(
-                email: $email,
-                password: $password,
-            ));
-        } catch (SemanticVariableException $e) {
-            // Be Framework Semantics rejected the input shape (malformed
-            // email / out-of-range password). Bridge the domain verdict
-            // onto the form: repopulate the email, attach the ja message
-            // as an inline field error. EC-CUBE shows this in
-            // `ec-errorMessage`.
-            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $message,
-                'email' => $email,
-                'form' => $this->failedForm($email, $message),
-            ];
-
-            return $this;
-        } catch (LoginFailedException) {
-            // Wrong credentials. The top-level body deliberately does NOT
-            // echo the email — that would leak user-enumeration signal.
-            // The repopulated email lives INSIDE `body['form']` only, so
-            // the HTML page re-shows it (EC-CUBE's getLastUsername UX)
-            // while the JSON body stays enumeration-safe.
-            $message = 'メールアドレスまたはパスワードが正しくありません。';
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = [
-                'message' => $message,
-                'form' => $this->failedForm($email, $message),
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new LoginInput(
+            email: $email,
+            password: $password,
+        ));
 
         assert($final instanceof CustomerAuthenticated);
 

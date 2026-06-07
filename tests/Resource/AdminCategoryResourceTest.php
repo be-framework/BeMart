@@ -101,26 +101,25 @@ final class AdminCategoryResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/category/category-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/category/category-list', [
             'categoryName' => 'Food',
             'sortNo' => 10,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], '管理者'));
     }
 
     public function testCreateRejectsUnknownParent(): void
     {
-        $ro = $this->resource->post('page://self/admin/category/category-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CategoryNotFoundException::class);
+
+        $this->resource->post('page://self/admin/category/category-list', [
             'categoryName' => 'Cookies',
             'sortNo' => 20,
             'parentId' => 'nonexistent-zzz',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testListReturnsCount(): void
@@ -137,8 +136,9 @@ final class AdminCategoryResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/category/category-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/category/category-list');
     }
 
     public function testGetReturnsDetail(): void
@@ -154,10 +154,11 @@ final class AdminCategoryResourceTest extends TestCase
 
     public function testGetUnknownIdReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/category/category', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CategoryNotFoundException::class);
+
+        $this->resource->get('page://self/admin/category/category', [
             'categoryId' => 'nonexistent-zzz',
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testPutMergesPartialFields(): void
@@ -202,11 +203,12 @@ final class AdminCategoryResourceTest extends TestCase
 
     public function testDeleteUnknownIdReturns404(): void
     {
-        $ro = $this->resource->delete('page://self/admin/category/category', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CategoryNotFoundException::class);
+
+        $this->resource->delete('page://self/admin/category/category', [
             'categoryId' => 'nonexistent-zzz',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testExportCsvDumpsRows(): void
@@ -237,10 +239,11 @@ final class AdminCategoryResourceTest extends TestCase
     public function testImportCsvRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/category/csv', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/category/csv', [
             'csv' => "foo\nbar",
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

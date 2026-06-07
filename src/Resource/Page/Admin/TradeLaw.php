@@ -64,14 +64,7 @@ class TradeLaw extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetTradeLawInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetTradeLawInput());
 
         assert($final instanceof TradeLawFetched);
 
@@ -137,19 +130,7 @@ class TradeLaw extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $tradeLawBody): static
     {
-        try {
-            $final = ($this->becoming)(new UpdateTradeLawInput(tradeLawBody: $tradeLawBody));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateTradeLawInput(tradeLawBody: $tradeLawBody));
 
         assert($final instanceof TradeLawUpdated);
 

@@ -93,22 +93,10 @@ class Reset extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $resetKey, string $password): static
     {
-        try {
-            $final = ($this->becoming)(new ResetPasswordInput(
-                resetKey: $resetKey,
-                password: $password,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (ResetKeyInvalidException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => 'パスワードリセットリンクが無効か、既に使用済みです。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ResetPasswordInput(
+            resetKey: $resetKey,
+            password: $password,
+        ));
 
         assert($final instanceof PasswordResetCompleted);
 

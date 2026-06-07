@@ -80,13 +80,13 @@ final class AdminMemberSortNoMoveResourceTest extends TestCase
 
     public function testMemberSortNoMoveUnknownRowReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/sort-no-move', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\MasterRowNotFoundException::class);
+
+        $this->resource->put('page://self/admin/sort-no-move', [
             'masterType' => 'member',
             'rowId' => 'ad000000000000000000000000999999',
             'sortNo' => 8,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 }

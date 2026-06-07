@@ -71,24 +71,22 @@ final class CheckoutResourceTest extends TestCase
 
     public function testOnPostUnknownPreOrderReturns404(): void
     {
-        $ro = $this->resource->post('page://self/shopping/checkout', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\PreOrderNotFoundException::class);
+
+        $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'eeee00000000000000000000000000000000eeee',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertSame('eeee00000000000000000000000000000000eeee', $ro->body['preOrderId']);
     }
 
     public function testOnPostInsufficientStockReturns422(): void
     {
-        $ro = $this->resource->post('page://self/shopping/checkout', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\InsufficientStockException::class);
+
+        $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'bbbb00000000000000000000000000000000bbbb',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(422, $ro->code);
-        $this->assertStringContainsString('Insufficient', $ro->body['message']);
     }
 
     public function testOnPostPaymentDeclinedReturns422(): void
@@ -97,13 +95,12 @@ final class CheckoutResourceTest extends TestCase
         // rather than tripping AUTHZ first.
         $this->rebindSession('customer-002');
 
-        $ro = $this->resource->post('page://self/shopping/checkout', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\PaymentDeclinedException::class);
+
+        $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'cccc00000000000000000000000000000000cccc',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(422, $ro->code);
-        $this->assertStringContainsString('declined', $ro->body['message']);
     }
 
     public function testOnPostForeignCustomerReturns403(): void
@@ -113,13 +110,12 @@ final class CheckoutResourceTest extends TestCase
         // exception to HTTP 403.
         $this->rebindSession('customer-999');
 
-        $ro = $this->resource->post('page://self/shopping/checkout', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException::class);
+
+        $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertSame('aaaa00000000000000000000000000000000aaaa', $ro->body['preOrderId']);
     }
 
     public function testOnPostAnonymousReturns403(): void
@@ -128,23 +124,22 @@ final class CheckoutResourceTest extends TestCase
         // requires the matching logged-in customer.
         $this->rebindSession(null);
 
-        $ro = $this->resource->post('page://self/shopping/checkout', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException::class);
+
+        $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testOnPostMalformedPreOrderIdReturns400(): void
     {
-        $ro = $this->resource->post('page://self/shopping/checkout', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'not-a-hex-id',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
-        $this->assertNotEmpty($ro->body['message']);
     }
 
     public function testClientSuppliedPaymentMethodIdIsIgnored(): void
