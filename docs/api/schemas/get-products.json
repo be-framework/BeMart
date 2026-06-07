@@ -333,8 +333,6 @@
               "boolean",
               "null"
             ],
-            "minLength": 0,
-            "maxLength": 255,
             "title": "在庫検索フラグ",
             "description": "/products の処理文脈から派生した在庫検索フラグ。ALPS基礎語だけでは単位や用途が不足するため、このResource上の意味を明示する。"
           },

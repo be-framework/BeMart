@@ -60,7 +60,7 @@ still need to defend (e.g. bound parameters for SQL).
 | tagNames | array|null | タグ名一覧 - Fake観察数値 0〜2。 | Optional | {"items":{"type":"string","title":"\u30bf\u30b0\u540d","minLength":0,"maxLength":128,"description":"/product \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308b\u5546\u54c1\u884c\u3002\u89aa\u30b3\u30ec\u30af\u30b7\u30e7\u30f3 `tagNames` \u306e1\u884c\u3092\u8868\u3057\u3001\u56fa\u5b9a\u3067\u304d\u308b\u696d\u52d9\u5217\u306fschema property\u3067\u660e\u793a\u3059\u308b\u3002"},"minItems":0} |  |
 | categoryNames | array|null | カテゴリ名一覧 - Fake観察数値 0〜4。 | Optional | {"items":{"type":"string","title":"\u30ab\u30c6\u30b4\u30ea\u540d","minLength":0,"maxLength":128,"description":"/product \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308b\u5546\u54c1\u884c\u3002\u89aa\u30b3\u30ec\u30af\u30b7\u30e7\u30f3 `categoryNames` \u306e1\u884c\u3092\u8868\u3057\u3001\u56fa\u5b9a\u3067\u304d\u308b\u696d\u52d9\u5217\u306fschema property\u3067\u660e\u793a\u3059\u308b\u3002"},"minItems":0} |  |
 | productCode | string | 商品コード - SKU/品番。在庫管理や受注明細での識別に使用 商品を識別するSKU。Fake corpusではASCII英数・ハイフン中心で、受注明細/カート明細の結合キーになる。 Fake観察文字長 10〜26。 | Required | {"minLength":0,"maxLength":64} | sample-001 |
-| stockFind | boolean|null | 在庫検索フラグ - /product の処理文脈から派生した在庫検索フラグ。ALPS基礎語だけでは単位や用途が不足するため、このResource上の意味を明示する。 | Required | {"minLength":0,"maxLength":255} |  |
+| stockFind | boolean|null | 在庫検索フラグ - /product の処理文脈から派生した在庫検索フラグ。ALPS基礎語だけでは単位や用途が不足するため、このResource上の意味を明示する。 | Required |  |  |
 | csrfToken | string|null | 処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。 | Optional | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 
 #### Links
