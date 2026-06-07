@@ -143,6 +143,7 @@ final class AdminClassCategoryListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="admin_class_category_backend_name"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testClassCategoryListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/class-category/class-category-list')->toString();

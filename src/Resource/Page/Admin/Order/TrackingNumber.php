@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\TrackingNumberUpdated;
 use MyVendor\BeMart\Be\Input\UpdateTrackingNumberInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -41,9 +43,12 @@ class TrackingNumber extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateTrackingNumber` に対応する PUT 操作。
      * @psalm-taint-source input $orderNo
      * @psalm-taint-source input $trackingNumber
      */
+    #[Alps('doUpdateTrackingNumber')]
+    #[JsonSchema(schema: 'put-admin-order-tracking-number.json', params: 'put-admin-order-tracking-number.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     #[CsrfProtected]

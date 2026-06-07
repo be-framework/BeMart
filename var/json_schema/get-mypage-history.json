@@ -1,0 +1,660 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "get-mypage-history.json",
+  "title": "GET /mypage/history response",
+  "description": "GET /mypage/history response の response body schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
+  "type": "object",
+  "properties": {
+    "addPoint": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "title": "付与ポイント",
+      "description": "注文により付与されるポイント数。商品単価(税抜) x pointRate x 数量で明細ごとに計算し合算。利用ポイント分を控除。発送済み(DELIVERED)遷移時に会員のpointに加算 Fake観察数値 0〜127; 観察値 '127', '0'。",
+      "example": 127,
+      "minimum": 0,
+      "maximum": 2147483647
+    },
+    "paymentDate": {
+      "title": "入金日",
+      "description": "入金確認日時。入金済みステータスへの変更時に記録 Fake観察文字長 19〜19; 観察値 '2026-04-01 10:00:00'。",
+      "type": "string",
+      "example": "2026-04-01 10:00:00",
+      "$comment": "未入金・未発送・未公開など未確定日時はEC-CUBE境界で空文字として現れるため、日付/日時文字列に加えて空文字を許容する。",
+      "pattern": "^$|\\d{4}-\\d{2}-\\d{2}([ T]\\d{2}:\\d{2}:\\d{2}([+-]\\d{2}:?\\d{2}|Z)?)?$"
+    },
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "会員メッセージ",
+      "description": "/mypage/history のレスポンスに含まれる処理結果メッセージ。注文時お問い合わせ欄ではなく、画面遷移や完了表示のための通知文。",
+      "example": "配送は平日希望です。"
+    },
+    "orderNo": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 64,
+      "title": "注文番号",
+      "description": "顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。",
+      "example": "past0000000000000000000000000001"
+    },
+    "deliveryFeeTotal": {
+      "title": "送料合計",
+      "description": "全配送先の送料合計（スナップショット）。deliveryFeeAmount（地域別送料）+ deliveryFee（商品別送料）×数量 の合計。DeliveryFeePreprocessorで計算。カートと受注の両方で使用 Fake観察数値 0〜800; 観察値 '600', '0', '500', '800', '700'。",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "example": 600
+    },
+    "orderStatus": {
+      "title": "受注ステータス",
+      "description": "1=新規受付, 3=注文取消, 4=対応中, 5=発送済み, 6=入金済み, 7=決済処理中, 8=購入処理中, 9=返品。Symfony Workflowステートマシンで遷移を制御。許可される遷移: pay(1->6), packing(1,6->4), cancel(1,4,6->3), back_to_in_progress(3->4), ship(1,6,4->5), return(5->9), cancel_return(9->5)。7と8はPurchaseFlow内で直接セットされステートマシン遷移の対象外 Fake観察数値 1〜1; 観察値 '1'。",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9,
+      "example": 1
+    },
+    "usePoint": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 2147483647,
+      "title": "使用ポイント",
+      "description": "注文で使用するポイント数。実際の値引き額は usePoint x pointConversionRate（切り捨て）で計算され、不課税のポイント値引き明細として受注に追加 Fake観察数値 0〜0; 観察値 '0'。",
+      "example": 0
+    },
+    "orderDate": {
+      "title": "注文日",
+      "description": "注文確定日時 Fake観察文字長 19〜19; 観察値 '2026-04-01 10:00:00'。",
+      "type": "string",
+      "example": "2026-04-01 10:00:00",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}([ T]\\d{2}:\\d{2}:\\d{2}([+-]\\d{2}:?\\d{2}|Z)?)?$"
+    },
+    "mailHistories": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "メール履歴一覧",
+      "description": "Fake観察数値 1〜1。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "title": "メール履歴",
+        "description": "/mypage/history のレスポンスに含まれるメール履歴。親コレクション `mailHistories` の1行を表し、固定できる業務列はschema propertyで明示する。",
+        "properties": {
+          "sendDate": {
+            "title": "送信日時",
+            "description": "メールの送信日時 Fake観察文字長 19〜19; 観察値 '2026-04-01 10:05:00'。",
+            "type": "string",
+            "example": "2026-04-01 10:05:00",
+            "$comment": "未入金・未発送・未公開など未確定日時はEC-CUBE境界で空文字として現れるため、日付/日時文字列に加えて空文字を許容する。",
+            "pattern": "^$|\\d{4}-\\d{2}-\\d{2}([ T]\\d{2}:\\d{2}:\\d{2}([+-]\\d{2}:?\\d{2}|Z)?)?$"
+          },
+          "mailSubject": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 32,
+            "title": "メール件名",
+            "description": "メールの件名。テンプレート変数を含む場合あり Fake観察文字長 13〜13; 観察値 'ご注文ありがとうございます'。",
+            "example": "ご注文ありがとうございます"
+          },
+          "mailBody": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 128,
+            "title": "メール本文",
+            "description": "送信済みメールのプレーンテキスト本文 Fake観察文字長 43〜43; 観察値 'この度はご注文いただきありがとうございます。\\n商品の発送まで今しばらくお待ちください。'。",
+            "example": "この度はご注文いただきありがとうございます。\n商品の発送まで今しばらくお待ちください。"
+          }
+        },
+        "additionalProperties": false,
+        "$comment": "配列要素はFake/Resourceで観察された既知propertyに固定する。新しい列が必要になった場合はSemantic-Ex観察に追加してschemaを更新する。"
+      },
+      "minItems": 0
+    },
+    "charge": {
+      "title": "手数料",
+      "description": "受注の決済手数料。paymentCharge（支払方法マスタの手数料）のスナップショット。PaymentChargePreprocessorにより受注作成時にコピーされる Fake観察数値 0〜300; 観察値 '0', '300', '200'。",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "example": 0
+    },
+    "paymentTotal": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "title": "支払合計",
+      "description": "実際の支払金額。初期値はtotalと同値で、PointProcessorがポイント値引きのOrderItem（type=POINT_DISCOUNT、不課税）を追加後にPurchaseFlow.calculateTotal()で再計算される。計算式: total - (利用ポイント x pointConversionRate) Fake観察数値 12700〜12700; 観察値 '12700'。",
+      "example": 12700,
+      "minimum": 0,
+      "maximum": 999999999
+    },
+    "tax": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "title": "税額",
+      "description": "受注全体の税額合計（非推奨）。明細ごとの税額集計と差異が生じる場合があるため、正確な税額はOrderItem明細ごとのtaxを集計すべき Fake観察数値 1100〜1100; 観察値 '1100'。",
+      "example": 1100,
+      "minimum": 0,
+      "maximum": 999999999
+    },
+    "paymentMethod": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "支払方法",
+      "description": "注文時点の支払方法名称（スナップショット） Fake観察文字長 4〜4; 観察値 '銀行振込'。",
+      "example": "銀行振込"
+    },
+    "subtotal": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "title": "商品小計",
+      "description": "商品合計金額（税込）。送料・手数料・値引き適用前の商品明細（orderItemType=1）のみの合計。PurchaseFlow.calculateSubTotal()で計算。送料無料条件の判定基準にも使用（お届け先ごとに判定） Fake観察数値 11000〜11000; 観察値 '11000'。",
+      "example": 11000,
+      "minimum": 0,
+      "maximum": 999999999
+    },
+    "discount": {
+      "title": "値引き額",
+      "description": "受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 '0'。",
+      "type": [
+        "integer",
+        "null"
+      ],
+      "minimum": 0,
+      "maximum": 999999999,
+      "example": 0
+    },
+    "shippings": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "配送一覧",
+      "description": "Fake観察数値 1〜1。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "title": "配送",
+        "description": "/mypage/history のレスポンスに含まれる配送。親コレクション `shippings` の1行を表し、固定できる業務列はschema propertyで明示する。",
+        "properties": {
+          "items": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "title": "明細一覧",
+            "description": "/mypage/history の親オブジェクト `shippingsItem` に含まれる明細配列。商品・カート・受注明細の文脈で解釈する。",
+            "items": {
+              "type": [
+                "object",
+                "null"
+              ],
+              "title": "明細",
+              "description": "/mypage/history のレスポンスに含まれる明細。親コレクション `items` の1行を表し、固定できる業務列はschema propertyで明示する。",
+              "properties": {
+                "productName": {
+                  "type": [
+                    "string",
+                    "null"
+                  ],
+                  "minLength": 0,
+                  "maxLength": 128,
+                  "title": "商品名",
+                  "description": "商品の表示名 Fake観察文字長 6〜17。",
+                  "example": "サンプル商品 A"
+                },
+                "productCode": {
+                  "title": "商品コード",
+                  "description": "SKU/品番。在庫管理や受注明細での識別に使用 商品を識別するSKU。Fake corpusではASCII英数・ハイフン中心で、受注明細/カート明細の結合キーになる。 Fake観察文字長 10〜26。",
+                  "type": "string",
+                  "minLength": 0,
+                  "maxLength": 64,
+                  "example": "sample-001"
+                },
+                "quantity": {
+                  "title": "数量",
+                  "description": "購入数量。カート明細と受注明細で共通使用 Fake観察数値 1〜3; 観察値 '1', '2', '3'。",
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 999,
+                  "example": 1
+                },
+                "unitPrice": {
+                  "title": "単価（表示/計算用）",
+                  "description": "明細1件あたりの単価。受注/カート明細・お気に入りスナップショットでは追加時点の price02 をスナップショットして保持する（後の値引きやマスタ改定に影響されない）。BeMart 側では `int` 円整数 Fake観察数値 1200〜9800; 観察値 '1200', '9800'。",
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 999999999,
+                  "example": 1200
+                }
+              },
+              "additionalProperties": false,
+              "$comment": "配列要素はFake/Resourceで観察された既知propertyに固定する。新しい列が必要になった場合はSemantic-Ex観察に追加してschemaを更新する。"
+            },
+            "minItems": 0
+          },
+          "kana02": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 32,
+            "pattern": "^[ァ-ヶー　 ]*$",
+            "title": "メイ",
+            "description": "名のカタカナ読み。全角カタカナのみ許可（ひらがな入力時は自動変換）。日本の氏名入力に特有の読み仮名 Fake観察文字長 3〜3; 観察値 'アリス', 'ハナコ', 'タロウ'; null 18/31。",
+            "example": "アリス"
+          },
+          "phoneNumber": {
+            "title": "電話番号",
+            "description": "日本の電話番号形式（ハイフン区切り） 日本の電話番号。Fake corpusはハイフンなし中心だが、入力ではハイフン付きも許容する。 Fake観察文字長 10〜10; 観察値 '0312345678', '0901234567', '0612345678'; null 18/33。",
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^0\\d{1,4}-?\\d{1,4}-?\\d{3,4}$",
+            "minLength": 10,
+            "maxLength": 13,
+            "example": "0312345678"
+          },
+          "deliveryName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "配送方法名",
+            "description": "管理画面で登録・更新する配送方法の表示名。実運用では店舗独自の長い名称を許容する。",
+            "example": "ヤマト宅急便"
+          },
+          "deliveryTime": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 32,
+            "title": "配送時間帯",
+            "description": "顧客が選択した配送希望時間帯（例: 午前中、14-16時） Fake観察文字長 3〜3; 観察値 '午前中'。",
+            "example": "午前中"
+          },
+          "name02": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 80,
+            "title": "名",
+            "description": "顧客・受注・配送先・お問い合わせで共通使用される名 Fake観察文字長 1〜3; 観察値 'アリス', '太郎', '次郎', '花子', '三郎', '済'。",
+            "example": "アリス"
+          },
+          "deliveryDate": {
+            "title": "配送希望日",
+            "description": "顧客が指定した配送希望日 Fake観察文字長 10〜10; 観察値 '2026-04-03'。",
+            "type": "string",
+            "example": "2026-04-03",
+            "$comment": "未入金・未発送・未公開など未確定日時はEC-CUBE境界で空文字として現れるため、日付/日時文字列に加えて空文字を許容する。",
+            "pattern": "^$|\\d{4}-\\d{2}-\\d{2}([ T]\\d{2}:\\d{2}:\\d{2}([+-]\\d{2}:?\\d{2}|Z)?)?$"
+          },
+          "kana01": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 32,
+            "pattern": "^[ァ-ヶー　 ]*$",
+            "title": "セイ",
+            "description": "姓のカタカナ読み。全角カタカナのみ許可（ひらがな入力時は自動変換）。日本の氏名入力に特有の読み仮名 Fake観察文字長 3〜3; 観察値 'ヤマダ', 'サトウ'; null 18/31。",
+            "example": "ヤマダ"
+          },
+          "name01": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 80,
+            "title": "姓",
+            "description": "顧客・受注・配送先・お問い合わせで共通使用される姓 Fake観察文字長 2〜2; 観察値 '鈴木', '山田', '佐藤', '高橋', '退会'。",
+            "example": "鈴木"
+          },
+          "addr02": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 32,
+            "title": "番地・建物名",
+            "description": "番地・ビル名・部屋番号等の詳細住所 Fake観察文字長 5〜8; 観察値 '神宮前1-1-1', '丸の内2-2-2', '梅田1-1-1', '1-2-3'; null 18/33。",
+            "example": "神宮前1-1-1"
+          },
+          "postalCode": {
+            "title": "郵便番号",
+            "description": "日本の郵便番号。ハイフンなし7桁またはハイフン付き8桁 日本の郵便番号。入力フォームではハイフン有無をどちらも受け入れる。 Fake観察文字長 7〜8; 観察値 '1500001', '1000005', '5300001', '530-0001'; null 18/33。",
+            "type": [
+              "string",
+              "null"
+            ],
+            "pattern": "^\\d{3}-?\\d{4}$",
+            "example": "1500001"
+          },
+          "addr01": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 32,
+            "title": "市区町村",
+            "description": "都道府県より下位の市区町村名 Fake観察文字長 3〜7; 観察値 '渋谷区', '千代田区', '大阪市北区', '大阪市北区梅田'; null 18/33。",
+            "example": "渋谷区"
+          },
+          "prefName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 32,
+            "title": "都道府県名",
+            "description": "都道府県の表示名（mtb_pref.name）。pref（mtb_pref への整数 FK）を住所行に描画するための表示用投影フィールドであり、storage の真の leaf 列ではない。Phase 3 enrichment で追加。SqlAddressStorage が dtb_customer_address.pref_id → mtb_pref を JOIN して充填する（構造のみダンプでは mtb_pref は空のため、未シード時は空文字に degrade）。配送先住所一覧画面（CustomerAddress）が pref の整数 id ではなく都道府県名を表示するために使用 Fake観察文字長 3〜3; 観察値 '東京都', '大阪府'。",
+            "example": "東京都"
+          }
+        },
+        "additionalProperties": false,
+        "$comment": "配列要素はFake/Resourceで観察された既知propertyに固定する。新しい列が必要になった場合はSemantic-Ex観察に追加してschemaを更新する。"
+      },
+      "minItems": 0
+    },
+    "total": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "title": "受注合計",
+      "description": "受注合計金額。計算式: subtotal(商品税込合計) + deliveryFeeTotal(送料) + charge(手数料) - discount(値引き)。カートのtotalPriceとは別プロパティ Fake観察数値 12700〜12700; 観察値 '12700'。",
+      "example": 12700,
+      "minimum": 0,
+      "maximum": 999999999
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "productCode": {
+      "title": "商品コード",
+      "description": "SKU/品番。在庫管理や受注明細での識別に使用 SKUとして在庫・カート・受注明細を接続する。Fake観察ではASCII英数とハイフン中心。",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+      "example": "sample-001"
+    },
+    "email": {
+      "title": "メールアドレス",
+      "description": "会員のログインIDを兼ねる。有効会員間で一意 ログインID/通知先として使うためRFC準拠のemail形式。",
+      "type": "string",
+      "format": "email",
+      "minLength": 3,
+      "maxLength": 254,
+      "example": "alice@example.com"
+    },
+    "postalCode": {
+      "title": "郵便番号",
+      "description": "日本の郵便番号。ハイフンなし7桁またはハイフン付き8桁 日本国内住所向け。ハイフンなし7桁またはハイフン付き8桁。",
+      "type": "string",
+      "pattern": "^\\d{3}-?\\d{4}$",
+      "example": "1500001"
+    },
+    "phoneNumber": {
+      "title": "電話番号",
+      "description": "日本の電話番号形式（ハイフン区切り） 日本国内電話番号。Fakeはハイフンなし中心、入力ではハイフン付きも許容。",
+      "type": "string",
+      "pattern": "^0\\d{1,4}-?\\d{1,4}-?\\d{3,4}$",
+      "minLength": 10,
+      "maxLength": 13,
+      "example": "0312345678"
+    },
+    "price": {
+      "title": "金額",
+      "description": "EC-CUBEの商品価格・送料・手数料・売上金額。日本円の整数金額として扱う。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 999999999,
+      "example": 1200
+    },
+    "quantity": {
+      "title": "数量",
+      "description": "購入数量。カート明細と受注明細で共通使用 購入/調整数量。入力は1以上、調整後や集計では0以上を許容する場合がある。",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 999,
+      "example": 2
+    },
+    "nonNegativeInteger": {
+      "title": "非負整数",
+      "description": "件数、在庫、ページ番号、集計値など0以上の整数。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "example": 1
+    },
+    "opaqueId": {
+      "title": "不透明ID",
+      "description": "BeMart/Fake/アプリ層で外部に公開する文字列ID。DB採番値としての数値演算には使わない。",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:@/-]+$",
+      "example": "customer-001"
+    },
+    "dbId": {
+      "title": "DB採番ID",
+      "description": "EC-CUBEマスタや内部行を指す非負整数ID。表示やフォーム境界では文字列化される場合があるが、意味は採番ID。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "example": 1
+    },
+    "mixedBoundaryId": {
+      "title": "互換境界ID",
+      "description": "同一ResourceでFake文字列IDとEC-CUBE整数IDの両方が観察される互換境界専用ID。恒久的なドメイン型ではない。",
+      "type": [
+        "string",
+        "integer"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "example": "pay-cod",
+      "$comment": "mixedBoundaryIdは移行互換のための例外。可能ならopaqueIdまたはdbIdへ分解する。"
+    },
+    "pref": {
+      "title": "都道府県ID",
+      "description": "日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用 確定住所は1〜47。入力フォームの未選択初期値として0を許容する。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 47,
+      "example": 13
+    },
+    "productStatus": {
+      "title": "商品ステータス",
+      "description": "1=公開（フロント表示）, 2=非公開（フロント非表示）, 3=廃止（論理削除、管理画面でもデフォルト非表示）",
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3
+      ],
+      "example": 1
+    },
+    "customerStatus": {
+      "title": "会員ステータス",
+      "description": "1=仮会員（メール未認証）, 2=本会員（認証済み）, 3=退会。退会時はメールアドレスが無効化される",
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3
+      ],
+      "example": 2
+    },
+    "orderStatus": {
+      "title": "注文ステータス",
+      "description": "1=新規受付, 3=注文取消, 4=対応中, 5=発送済み, 6=入金済み, 7=決済処理中, 8=購入処理中, 9=返品。Symfony Workflowステートマシンで遷移を制御。許可される遷移: pay(1->6), packing(1,6->4), cancel(1,4,6->3), back_to_in_progress(3->4), ship(1,6,4->5), return(5->9), cancel_return(9->5)。7と8はPurchaseFlow内で直接セットされステートマシン遷移の対象外 EC-CUBE受注状態。Fake/管理画面で扱う状態ID。",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9,
+      "example": 1
+    },
+    "cartKey": {
+      "title": "カートキー",
+      "description": "カート分離キー。形式: {セッションプレフィックス}_{販売種別ID}。EC-CUBEは販売種別ごとにカートを分離するため、異なる販売種別の商品は別カートになる",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^.+_[0-9]+$",
+      "example": "session-prefix-1_1"
+    },
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "fake-csrf-token-bemart-2026"
+    },
+    "uriReference": {
+      "title": "URI参照",
+      "description": "画面遷移・リダイレクト・リンク先を表す相対または絶対URI。",
+      "type": "string",
+      "format": "uri-reference",
+      "minLength": 1,
+      "maxLength": 2048,
+      "example": "/products"
+    },
+    "transitionId": {
+      "title": "ALPS遷移ID",
+      "description": "alps.json に定義された safe/unsafe descriptor のID。",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 96,
+      "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
+      "example": "doAddCartItem"
+    },
+    "date": {
+      "title": "日付",
+      "description": "業務上の日付。",
+      "type": "string",
+      "format": "date",
+      "example": "2026-01-01"
+    },
+    "dateTime": {
+      "title": "日時",
+      "description": "業務イベント発生日時。",
+      "type": "string",
+      "format": "date-time",
+      "example": "2026-01-01T00:00:00+09:00"
+    },
+    "link": {
+      "title": "ハイパーメディアリンク",
+      "description": "ALPS遷移に対応するリンク。hrefはURI参照。",
+      "type": "object",
+      "required": [
+        "href"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "href": {
+          "title": "URI参照",
+          "description": "画面遷移・リダイレクト・リンク先を表す相対または絶対URI。",
+          "type": "string",
+          "format": "uri-reference",
+          "minLength": 1,
+          "maxLength": 2048,
+          "example": "/products"
+        },
+        "rel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "get",
+            "post",
+            "put",
+            "patch",
+            "delete",
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        }
+      }
+    }
+  },
+  "$comment": "Generated by bin/semantic-ex-json-schema.py from ALPS meaning, be/var/fake observation, and Resource schema shape.",
+  "required": [
+    "addPoint",
+    "paymentDate",
+    "orderNo",
+    "deliveryFeeTotal",
+    "orderStatus",
+    "usePoint",
+    "orderDate",
+    "mailHistories",
+    "charge",
+    "paymentTotal",
+    "tax",
+    "paymentMethod",
+    "subtotal",
+    "discount",
+    "shippings",
+    "total"
+  ]
+}

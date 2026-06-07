@@ -1,9 +1,4 @@
----
-layout: default
-title: "/admin/content/cache"
----
-
-<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/content/cache
 EC-CUBE キャッシュ管理 — admin CMS page.
@@ -18,6 +13,10 @@ marks the transition `idempotent` → PUT. `onGet` renders the screen.
 
 
 ## GET
+ALPS `doClearCache` に対応する GET 操作。
+
+**ALPS**: `doClearCache`
+
 
 
 ### Request
@@ -26,9 +25,20 @@ _No parameters required_
 
 ### Response
 
-_Not available_
+[Object: GET /admin/content/cache response](../schemas/get-admin-content-cache.json)
+
+| Name | Type | Description | Required | Constraints | Example |
+|------|------|-------------|----------|-------------|---------|
+
+#### Links
+
+| Relation | URL |
+|----------|-----|
+| doClearCache | [<code>page://self/admin/content/cache</code>](/admin/content/cache.md) |
 ## PUT
-Clears the application cache (doClearCache).
+ALPS `doClearCache` に対応する PUT 操作。
+
+**ALPS**: `doClearCache`
 
 
 
@@ -38,4 +48,15 @@ _No parameters required_
 
 ### Response
 
-_Not available_
+[Object: PUT /admin/content/cache response](../schemas/put-admin-content-cache.json)
+
+| Name | Type | Description | Required | Constraints | Example |
+|------|------|-------------|----------|-------------|---------|
+| message | string|null | 処理メッセージ - /admin/content/cache のレスポンスに含まれる処理結果メッセージ。注文時お問い合わせ欄ではなく、画面遷移や完了表示のための通知文。 | Optional | {"minLength":0,"maxLength":32} | 配送は平日希望です。 |
+| transitionId | string | ALPS遷移ID - このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。 | Required | {"minLength":2,"maxLength":96,"pattern":"^(go|do)[A-Z][A-Za-z0-9]*$"} | doAddCartItem |
+
+#### Links
+
+| Relation | URL |
+|----------|-----|
+| goMaintenance | [<code>page://self/admin/content/maintenance</code>](/admin/content/maintenance.md) |

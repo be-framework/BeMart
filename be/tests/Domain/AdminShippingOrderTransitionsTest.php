@@ -29,6 +29,7 @@ use function dirname;
  * Phase 3 ALPS-audit remediation — the admin Order transitions
  * doUpdateTrackingNumber / doSendShippingNotifyMail (domain layer).
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminShippingOrderTransitionsTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

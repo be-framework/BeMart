@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Resource\Annotation\Link;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Input\SubmitContactInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\ContactForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function assert;
@@ -51,6 +53,8 @@ class Contact extends ResourceObject
      * renders it into the form's hidden `_token` input so the
      * subsequent POST passes CSRF validation.
      */
+    #[Alps('goContactForm')]
+    #[JsonSchema(schema: 'get-contact.json')]
     #[Link(rel: 'doSubmitContact', href: 'page://self/contact', method: 'post')]
     public function onGet(): static
     {
@@ -79,11 +83,14 @@ class Contact extends ResourceObject
     }
 
     /**
+     * ALPS `doSubmitContact` に対応する POST 操作。
      * @psalm-taint-source input $contactName01
      * @psalm-taint-source input $contactName02
      * @psalm-taint-source input $contactEmail
      * @psalm-taint-source input $contactContents
      */
+    #[Alps('doSubmitContact')]
+    #[JsonSchema(schema: 'post-contact.json', params: 'post-contact.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
     public function onPost(

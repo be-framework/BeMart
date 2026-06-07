@@ -112,6 +112,7 @@ final class EntryCompleteHtmlRenderTest extends TestCase
         }
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testEntryCompleteHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/entry/complete')->toString();

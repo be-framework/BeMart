@@ -45,6 +45,7 @@ final class PasswordResetCompletedTest extends TestCase
         // FakeQuery fixtures are static; password hash persistence is covered by the SQL suite.
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testTokenConsumedAfterReset(): void
     {
         $this->markTestSkipped('Token consumption needs mutable persistence; covered by the SQL suite.');

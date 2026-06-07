@@ -124,6 +124,7 @@ final class HelpTradeLawHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering of the same (empty) data. Every difference
      * must be in the residual allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testHelpTradeLawHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/help/trade-law')->toString();
