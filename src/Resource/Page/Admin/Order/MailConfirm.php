@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE 受注メール確認 — Order Tier-2 (`admin/Order/mail_confirm.twig`).
@@ -35,8 +37,11 @@ class MailConfirm extends ResourceObject
     }
 
     /**
+     * ALPS `goAdminOrderMailConfirm` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('goAdminOrderMailConfirm')]
+    #[JsonSchema(schema: 'get-admin-order-mail-confirm.json', params: 'get-admin-order-mail-confirm.param.json')]
     #[Link(rel: 'doSendOrderMail', href: 'page://self/admin/order/send-mail', method: 'post')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     public function onGet(string $orderNo = ''): static

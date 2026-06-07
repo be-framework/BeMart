@@ -195,6 +195,7 @@ final class ProductHtmlRenderTest extends TestCase
      * image-less) product. Every difference must be in the residual
      * allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testProductDetailHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource

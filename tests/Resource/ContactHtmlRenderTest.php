@@ -186,6 +186,7 @@ final class ContactHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering. Every difference must be in the residual
      * allowlist or the explained missing-body-field family.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testContactHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/contact')->toString();

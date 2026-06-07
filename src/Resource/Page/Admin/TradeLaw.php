@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Input\UpdateTradeLawInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminTradeLawForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function count;
@@ -50,6 +52,8 @@ class TradeLaw extends ResourceObject
     /**
      * Wave 9ι: goTradeLawList — admin views the current TradeLaw body.
      */
+    #[Alps('goTradeLawList')]
+    #[JsonSchema(schema: 'get-admin-trade-law.json')]
     #[Link(rel: 'doUpdateTradeLaw', href: 'page://self/admin/trade-law', method: 'post')]
     public function onGet(): static
     {
@@ -123,8 +127,11 @@ class TradeLaw extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateTradeLaw` に対応する POST 操作。
      * @psalm-taint-source input $tradeLawBody
      */
+    #[Alps('doUpdateTradeLaw')]
+    #[JsonSchema(schema: 'post-admin-trade-law.json', params: 'post-admin-trade-law.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goContentCss', href: 'page://self/admin/content/css')]
     #[CsrfProtected]

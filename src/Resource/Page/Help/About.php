@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Help;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goHelpAbout — 当サイトについて (Wave 3H pure renderer).
@@ -22,8 +24,11 @@ use BEAR\Resource\ResourceObject;
 class About extends ResourceObject
 {
     /**
+     * ALPS `goodTraded` に対応する GET 操作。
      * @todo Wave-future: surface shopMessage + goodTraded from BaseInfo.
      */
+    #[Alps('goodTraded')]
+    #[JsonSchema(schema: 'get-help-about.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static
     {

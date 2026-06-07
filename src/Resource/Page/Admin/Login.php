@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\AdminLoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminLoginForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function getenv;
@@ -80,6 +82,8 @@ class Login extends ResourceObject
      * issues, which the HTML port renders into the form's hidden
      * `_csrf_token` input so the subsequent POST passes CSRF validation.
      */
+    #[Alps('doAdminLogin')]
+    #[JsonSchema(schema: 'get-admin-login.json')]
     #[Link(rel: 'doAdminLogin', href: 'page://self/admin/login', method: 'post')]
     public function onGet(): static
     {
@@ -107,6 +111,8 @@ class Login extends ResourceObject
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $password
      */
+    #[Alps('doAdminLogin')]
+    #[JsonSchema(schema: 'post-admin-login.json', params: 'post-admin-login.param.json')]
     #[Link(rel: 'goAdminTop', href: 'page://self/admin/index')]
     #[CsrfProtected]
     public function onPost(string $loginId, string $password): static

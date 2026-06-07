@@ -25,6 +25,7 @@ use function dirname;
  * Failure ladder: 400 / 403 (CSRF) / 403 (AUTHZ) / 404 (unknown) /
  * 409 (uninstalled). Plus happy-path + idempotent-replay coverage.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminPluginEnableResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

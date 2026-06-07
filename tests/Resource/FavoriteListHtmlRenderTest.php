@@ -144,6 +144,7 @@ final class FavoriteListHtmlRenderTest extends TestCase
      * The honesty test: diff BeMart's rendered favorites list against
      * EC-CUBE's own rendering of the same logical list.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testFavoriteHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/mypage/favorite-list')->toString();

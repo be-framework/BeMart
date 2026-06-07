@@ -133,6 +133,7 @@ final class AddressListHtmlRenderTest extends TestCase
      * The honesty test: diff BeMart's rendered address book against
      * EC-CUBE's own rendering of the same logical list.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testAddressListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/mypage/address-list')->toString();

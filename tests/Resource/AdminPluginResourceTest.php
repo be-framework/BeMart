@@ -83,6 +83,7 @@ final class AdminPluginResourceTest extends TestCase
         $this->assertFalse($ro->body['wasInstalled']);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testOnDeleteReplayReturnsWasInstalledFalse(): void
     {
         $this->markTestSkipped('Stateful uninstall replay is covered by the SQL suite.');

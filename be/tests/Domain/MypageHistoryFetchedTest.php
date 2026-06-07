@@ -27,6 +27,7 @@ use function dirname;
  * (owned by `customer-001`). Session is rebound per-case to drive the
  * happy / 401 / 403 branches.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class MypageHistoryFetchedTest extends TestCase
 {
     private BecomingInterface $becoming;

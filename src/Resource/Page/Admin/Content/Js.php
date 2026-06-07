@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Form\AdminJsForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -43,6 +45,9 @@ class Js extends ResourceObject
     ) {
     }
 
+    /** ALPS `goContentJs` に対応する GET 操作。 */
+    #[Alps('goContentJs')]
+    #[JsonSchema(schema: 'get-admin-content-js.json')]
     #[Link(rel: 'doUpdateContentJs', href: 'page://self/admin/content/js', method: 'put')]
     public function onGet(): static
     {
@@ -68,6 +73,8 @@ class Js extends ResourceObject
      *
      * @psalm-taint-source input $js
      */
+    #[Alps('doUpdateContentJs')]
+    #[JsonSchema(schema: 'put-admin-content-js.json', params: 'put-admin-content-js.param.json')]
     #[CsrfProtected]
     public function onPut(string $js = ''): static
     {

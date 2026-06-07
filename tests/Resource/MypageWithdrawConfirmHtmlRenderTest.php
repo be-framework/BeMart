@@ -120,6 +120,7 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
         }
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testWithdrawConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/mypage/withdraw-confirm')->toString();

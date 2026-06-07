@@ -1,0 +1,4360 @@
+{
+  "schemaFiles": {
+    "json_schema": 234,
+    "json_validate": 154
+  },
+  "totals": {
+    "files": 388,
+    "requiredSchemas": 330
+  },
+  "broadEscapeTypes": [],
+  "additionalPropertiesTrue": [],
+  "scalarWithoutConstraints": [],
+  "propertiesWithoutAlps": {
+    "method": 405,
+    "rel": 389,
+    "transitionId": 62,
+    "name": 31,
+    "count": 28,
+    "title": 24,
+    "csrfToken": 23,
+    "page": 14,
+    "id": 12,
+    "visible": 11,
+    "csv": 10,
+    "enabled": 10,
+    "limit": 10,
+    "value": 9,
+    "offset": 9,
+    "nameKeyword": 8,
+    "parentId": 7,
+    "changed": 7,
+    "masterType": 7,
+    "items": 6,
+    "columns": 6,
+    "body": 6,
+    "content": 6,
+    "mainImage": 5,
+    "itemCount": 5,
+    "ruleMin": 5,
+    "ruleMax": 5,
+    "shippingAddressId": 5,
+    "calendarId": 4,
+    "label": 4,
+    "rowCount": 4,
+    "filters": 4,
+    "orders": 4,
+    "orderNos": 4,
+    "csvTitle": 4,
+    "skeletonRoute": 4,
+    "tagNames": 4,
+    "categoryNames": 4,
+    "accepted": 4,
+    "alreadyDeleted": 3,
+    "holiday": 3,
+    "classNames": 3,
+    "initialPoint": 3,
+    "favoriteCount": 3,
+    "rows": 3,
+    "addresses": 3,
+    "productCodes": 3,
+    "rowId": 3,
+    "categories": 2,
+    "isMaintenance": 2,
+    "emailKeyword": 2,
+    "favorites": 2,
+    "orderCount": 2,
+    "color": 2,
+    "selectedMaster": 2,
+    "nameKey": 2,
+    "pages": 2,
+    "installed": 2,
+    "products": 2,
+    "carts": 2,
+    "cartCount": 2,
+    "stockFind": 2,
+    "disp_number": 2,
+    "pageno": 2,
+    "orderby": 2,
+    "imported": 2,
+    "lineCount": 2,
+    "wasLoggedIn": 2,
+    "requestedCount": 2,
+    "changedCount": 2,
+    "newProductCode": 2,
+    "requestedQuantity": 2,
+    "adjustedQuantity": 2,
+    "length": 2,
+    "operation": 2,
+    "deviceToken": 2,
+    "wasInstalled": 1,
+    "alreadyAbsent": 1,
+    "blocks": 1,
+    "calendars": 1,
+    "hasError": 1,
+    "classCategories": 1,
+    "tplIsTopDir": 1,
+    "tplNowDir": 1,
+    "tplParentDir": 1,
+    "customers": 1,
+    "totalSpent": 1,
+    "deliveries": 1,
+    "countNonStockProducts": 1,
+    "salesToday": 1,
+    "version": 1,
+    "salesThisMonth": 1,
+    "countCustomers": 1,
+    "countProducts": 1,
+    "salesYesterday": 1,
+    "layouts": 1,
+    "log": 1,
+    "entries": 1,
+    "success": 1,
+    "timestamp": 1,
+    "mailTemplates": 1,
+    "isDeletable": 1,
+    "file_name": 1,
+    "table": 1,
+    "members": 1,
+    "news": 1,
+    "pdf": 1,
+    "size": 1,
+    "displayOrderCountKey": 1,
+    "customerNameKey": 1,
+    "colorKey": 1,
+    "payments": 1,
+    "plugins": 1,
+    "imagePath": 1,
+    "classes": 1,
+    "className": 1,
+    "isSecureRequest": 1,
+    "phpinfoEnabled": 1,
+    "tags": 1,
+    "taxRules": 1,
+    "templates": 1,
+    "goTemplateAdd": 1,
+    "descriptionKey": 1,
+    "className2": 1,
+    "classCategoryName2": 1,
+    "classCategoryName1": 1,
+    "className1": 1,
+    "mailHistories": 1,
+    "shippings": 1,
+    "recentOrders": 1,
+    "recentOrderCount": 1,
+    "pager": 1,
+    "previous": 1,
+    "next": 1,
+    "pageCount": 1,
+    "current": 1,
+    "totalItemCount": 1,
+    "mainListImage": 1,
+    "doAddMultipleShippingAddress": 1,
+    "cartItems": 1,
+    "canCheckout": 1,
+    "paymentMethods": 1,
+    "defaultShippingAddress": 1,
+    "previousAuthority": 1,
+    "deleted": 1,
+    "originalEmail": 1,
+    "skipped": 1,
+    "previousStatus": 1,
+    "alreadyInstalled": 1,
+    "newProductName": 1,
+    "alreadyExisted": 1,
+    "skippedCount": 1,
+    "skippedProductCodes": 1,
+    "addedCount": 1,
+    "cartKeys": 1,
+    "cleared": 1,
+    "dummyEmail": 1,
+    "allocationCount": 1,
+    "historyLimit": 1,
+    "orderLimit": 1,
+    "currentPassword": 1,
+    "changePasswordFirst": 1,
+    "changePasswordSecond": 1,
+    "orderItems": 1,
+    "allocations": 1,
+    "css": 1,
+    "js": 1,
+    "adminAllowHosts": 1,
+    "adminDenyHosts": 1,
+    "frontAllowHosts": 1,
+    "frontDenyHosts": 1
+  },
+  "classifiedPropertiesWithoutAlps": {
+    "hypermedia": 858,
+    "presentation": 98,
+    "collection-or-row": 81,
+    "identifier": 67,
+    "counter": 64,
+    "runtime-flag": 57,
+    "pagination": 57,
+    "transport-payload": 25,
+    "domain-derived": 23,
+    "form-context": 15,
+    "operation-result": 2
+  },
+  "unclassifiedPropertiesWithoutAlps": {},
+  "alpsGapLedger": {
+    "method": {
+      "classification": "hypermedia",
+      "count": 405,
+      "examples": [
+        "var/json_schema/delete-admin-block-block.json:.$defs.method",
+        "var/json_schema/delete-admin-calendar.json:.$defs.method",
+        "var/json_schema/delete-admin-category-category.json:.$defs.method",
+        "var/json_schema/delete-admin-class-category-class-category.json:.$defs.method",
+        "var/json_schema/delete-admin-class-name-class-name.json:.$defs.method",
+        "var/json_schema/delete-admin-delivery-delivery.json:.$defs.method"
+      ],
+      "aliasCandidate": "httpMethod",
+      "schemaDecision": "ALPS遷移/link relationとして扱う。",
+      "schemaConstraint": "type=string; enum=[get,post,put,patch,delete,GET,POST,PUT,...]",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "ALPS遷移relationやURI mapであり、業務フィールドではない。",
+      "shouldReturnToAlps": false
+    },
+    "rel": {
+      "classification": "hypermedia",
+      "count": 389,
+      "examples": [
+        "var/json_schema/delete-admin-block-block.json:.$defs.rel",
+        "var/json_schema/delete-admin-calendar.json:.$defs.rel",
+        "var/json_schema/delete-admin-category-category.json:.$defs.rel",
+        "var/json_schema/delete-admin-class-category-class-category.json:.$defs.rel",
+        "var/json_schema/delete-admin-class-name-class-name.json:.$defs.rel",
+        "var/json_schema/delete-admin-delivery-delivery.json:.$defs.rel"
+      ],
+      "aliasCandidate": "transitionId",
+      "schemaDecision": "ALPS遷移/link relationとして扱う。",
+      "schemaConstraint": "type=string; minLength=1; maxLength=96",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "ALPS遷移relationやURI mapであり、業務フィールドではない。",
+      "shouldReturnToAlps": false
+    },
+    "transitionId": {
+      "classification": "hypermedia",
+      "count": 62,
+      "examples": [
+        "var/json_schema/delete-admin-calendar.json:transitionId",
+        "var/json_schema/delete-admin-mail-template.json:transitionId",
+        "var/json_schema/delete-admin-template-template-list.json:transitionId",
+        "var/json_schema/get-admin-change-password.json:transitionId",
+        "var/json_schema/get-admin-login.json:transitionId",
+        "var/json_schema/get-admin-two-factor-auth-set.json:transitionId"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS遷移/link relationとして扱う。",
+      "schemaConstraint": "type=string; pattern=^(go|do)[A-Z][A-Za-z0-9]*$; minLength=2; maxLength=96",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "ALPS遷移relationやURI mapであり、業務フィールドではない。",
+      "shouldReturnToAlps": false
+    },
+    "name": {
+      "classification": "presentation",
+      "count": 31,
+      "examples": [
+        "var/json_schema/get-admin-class-category-class-category-list.json:classCategories.items.name",
+        "var/json_schema/get-admin-class-name-class-name-list.json:classNames.items.name",
+        "var/json_schema/get-admin-customer.json:favorites.items.name",
+        "var/json_schema/get-admin-index.json:recommendedPlugins.items.name",
+        "var/json_schema/get-admin-index.json:orderStatuses.items.name",
+        "var/json_schema/get-admin-master-data.json:rows.items.name"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=32",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "count": {
+      "classification": "counter",
+      "count": 28,
+      "examples": [
+        "var/json_schema/get-admin-block-block-list.json:count",
+        "var/json_schema/get-admin-category-category-list.json:count",
+        "var/json_schema/get-admin-category-edit.json:count",
+        "var/json_schema/get-admin-class-category-class-category-list.json:count",
+        "var/json_schema/get-admin-class-name-class-name-list.json:count",
+        "var/json_schema/get-admin-customer-list.json:count"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "title": {
+      "classification": "presentation",
+      "count": 24,
+      "examples": [
+        "var/json_schema/get-admin-calendar.json:calendars.items.title",
+        "var/json_schema/get-admin-system.json:info.items.title",
+        "var/json_schema/get-contact-complete.json:staticContent.title",
+        "var/json_schema/get-contact-confirm.json:staticContent.title",
+        "var/json_schema/get-entry-activate.json:staticContent.title",
+        "var/json_schema/get-entry-complete.json:staticContent.title"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "csrfToken": {
+      "classification": "identifier",
+      "count": 23,
+      "examples": [
+        "var/json_schema/get-admin-login.json:csrfToken",
+        "var/json_schema/get-admin-member.json:csrfToken",
+        "var/json_schema/get-admin-news-news.json:csrfToken",
+        "var/json_schema/get-admin-order.json:csrfToken",
+        "var/json_schema/get-admin-page-page.json:csrfToken",
+        "var/json_schema/get-admin-product-new.json:csrfToken"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/null; pattern=^[A-Za-z0-9_.:-]+$; minLength=8; maxLength=160",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "page": {
+      "classification": "pagination",
+      "count": 14,
+      "examples": [
+        "var/json_schema/get-contact-complete.json:staticContent.page",
+        "var/json_schema/get-contact-confirm.json:staticContent.page",
+        "var/json_schema/get-entry-activate.json:staticContent.page",
+        "var/json_schema/get-entry-complete.json:staticContent.page",
+        "var/json_schema/get-entry-confirm.json:staticContent.page",
+        "var/json_schema/get-help-about.json:staticContent.page"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "id": {
+      "classification": "identifier",
+      "count": 12,
+      "examples": [
+        "var/json_schema/get-admin-authority-role.json:authorityOptions.items.id",
+        "var/json_schema/get-admin-calendar.json:calendars.items.id",
+        "var/json_schema/get-admin-csv-config.json:id",
+        "var/json_schema/get-admin-mail-template.json:id",
+        "var/json_schema/get-admin-mail-template.json:Mail.id",
+        "var/json_schema/get-admin-master-data.json:rows.items.id"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/integer/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "visible": {
+      "classification": "runtime-flag",
+      "count": 11,
+      "examples": [
+        "var/json_schema/get-admin-delivery-delivery-list.json:deliveries.items.visible",
+        "var/json_schema/get-admin-payment-payment-list.json:payments.items.visible",
+        "var/json_schema/post-admin-delivery-delivery-list.json:visible",
+        "var/json_schema/post-admin-payment-payment-list.json:visible",
+        "var/json_schema/put-admin-delivery-delivery.json:visible",
+        "var/json_schema/put-admin-payment-payment.json:visible"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "csv": {
+      "classification": "transport-payload",
+      "count": 10,
+      "examples": [
+        "var/json_schema/get-admin-category-csv.json:csv",
+        "var/json_schema/get-admin-customer-csv.json:csv",
+        "var/json_schema/get-admin-order-export-order.json:csv",
+        "var/json_schema/get-admin-order-export-shipping.json:csv",
+        "var/json_schema/get-admin-product-csv.json:csv",
+        "var/json_validate/post-admin-category-csv.param.json:csv"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "CSV/PDF/ログ等の輸送payloadとしてサイズ・文字列性を契約する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=5000000",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "CSV/PDF/log等の輸送境界。",
+      "shouldReturnToAlps": false
+    },
+    "enabled": {
+      "classification": "runtime-flag",
+      "count": 10,
+      "examples": [
+        "var/json_schema/get-admin-index.json:recommendedPlugins.items.enabled",
+        "var/json_schema/get-admin-plugin-list.json:plugins.items.enabled",
+        "var/json_schema/post-admin-csv-config.json:columns.items.enabled",
+        "var/json_schema/post-admin-plugin-disable.json:enabled",
+        "var/json_schema/post-admin-plugin-enable.json:enabled",
+        "var/json_schema/post-admin-plugin-list.json:enabled"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "limit": {
+      "classification": "pagination",
+      "count": 10,
+      "examples": [
+        "var/json_schema/get-admin-member-list.json:filters.limit",
+        "var/json_schema/get-admin-order-list.json:limit",
+        "var/json_schema/get-admin-product-list.json:filters.limit",
+        "var/json_schema/get-mypage-order-history.json:limit",
+        "var/json_validate/get-admin-customer-list.param.json:limit",
+        "var/json_validate/get-admin-login-history.param.json:limit"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "offset": {
+      "classification": "pagination",
+      "count": 9,
+      "examples": [
+        "var/json_schema/get-admin-member-list.json:filters.offset",
+        "var/json_schema/get-admin-order-list.json:offset",
+        "var/json_schema/get-admin-product-list.json:filters.offset",
+        "var/json_schema/get-mypage-order-history.json:offset",
+        "var/json_validate/get-admin-member-list.param.json:offset",
+        "var/json_validate/get-admin-order-list.param.json:offset"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "value": {
+      "classification": "transport-payload",
+      "count": 9,
+      "examples": [
+        "var/json_schema/get-admin-class-category-class-category-export.json:value",
+        "var/json_schema/get-admin-class-name-class-name-export.json:value",
+        "var/json_schema/get-admin-master-data.json:masterTypes.items.value",
+        "var/json_schema/get-admin-system.json:info.items.value",
+        "var/json_schema/post-admin-csv-config.json:columns.items.value",
+        "var/json_schema/post-admin-template-template-list.json:value"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "CSV/PDF/ログ等の輸送payloadとしてサイズ・文字列性を契約する。",
+      "schemaConstraint": "type=string; minLength=0; maxLength=5000000",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "CSV/PDF/log等の輸送境界。",
+      "shouldReturnToAlps": false
+    },
+    "nameKeyword": {
+      "classification": "pagination",
+      "count": 8,
+      "examples": [
+        "var/json_schema/get-admin-customer-list.json:filters.nameKeyword",
+        "var/json_schema/get-admin-member-list.json:filters.nameKeyword",
+        "var/json_schema/get-admin-product-list.json:filters.nameKeyword",
+        "var/json_schema/get-products.json:filters.nameKeyword",
+        "var/json_validate/get-admin-customer-list.param.json:nameKeyword",
+        "var/json_validate/get-admin-member-list.param.json:nameKeyword"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "changed": {
+      "classification": "runtime-flag",
+      "count": 7,
+      "examples": [
+        "var/json_schema/post-admin-authority-role.json:changed",
+        "var/json_schema/post-admin-base-info.json:changed",
+        "var/json_schema/post-admin-mail-template.json:changed",
+        "var/json_schema/post-admin-order-status.json:changed",
+        "var/json_schema/post-admin-plugin-disable.json:changed",
+        "var/json_schema/post-admin-plugin-enable.json:changed"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "masterType": {
+      "classification": "domain-derived",
+      "count": 7,
+      "examples": [
+        "var/json_schema/put-admin-master-data-edit.json:masterType",
+        "var/json_schema/put-admin-sort-no-move.json:masterType",
+        "var/json_validate/get-admin-master-data.param.json:masterType",
+        "var/json_validate/put-admin-master-data-edit.param.json:masterType",
+        "var/json_validate/put-admin-master-data.param.json:masterType",
+        "var/json_validate/put-admin-sort-no-move.param.json:masterType"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=string; minLength=1; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "parentId": {
+      "classification": "identifier",
+      "count": 7,
+      "examples": [
+        "var/json_schema/get-admin-category-category-list.json:categories.items.parentId",
+        "var/json_schema/get-admin-category-category.json:parentId",
+        "var/json_schema/get-admin-category-edit.json:categories.items.parentId",
+        "var/json_schema/post-admin-category-category-list.json:parentId",
+        "var/json_schema/put-admin-category-category.json:parentId",
+        "var/json_validate/post-admin-category-category-list.param.json:parentId"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/null; pattern=^[A-Za-z0-9._:@/-]*$; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "body": {
+      "classification": "presentation",
+      "count": 6,
+      "examples": [
+        "var/json_schema/get-help-about.json:staticContent.sections.items.body",
+        "var/json_schema/get-help-agreement.json:staticContent.sections.items.body",
+        "var/json_schema/get-help-guide.json:staticContent.sections.items.body",
+        "var/json_schema/get-help-privacy.json:staticContent.sections.items.body",
+        "var/json_schema/get-help-trade-law.json:staticContent.sections.items.body",
+        "var/json_schema/get-shopping-error.json:staticContent.sections.items.body"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "columns": {
+      "classification": "collection-or-row",
+      "count": 6,
+      "examples": [
+        "var/json_schema/get-admin-product-csv-category.json:columns",
+        "var/json_schema/get-admin-product-csv-class-category.json:columns",
+        "var/json_schema/get-admin-product-csv-class-name.json:columns",
+        "var/json_schema/get-admin-product-csv-product.json:columns",
+        "var/json_schema/post-admin-csv-config.json:columns",
+        "var/json_validate/post-admin-csv-config.param.json:columns"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "content": {
+      "classification": "presentation",
+      "count": 6,
+      "examples": [
+        "var/json_schema/get-help-about.json:staticContent.sections.items.content",
+        "var/json_schema/get-help-agreement.json:staticContent.sections.items.content",
+        "var/json_schema/get-help-guide.json:staticContent.sections.items.content",
+        "var/json_schema/get-help-privacy.json:staticContent.sections.items.content",
+        "var/json_schema/get-help-trade-law.json:staticContent.sections.items.content",
+        "var/json_schema/get-shopping-error.json:staticContent.sections.items.content"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "items": {
+      "classification": "collection-or-row",
+      "count": 6,
+      "examples": [
+        "var/json_schema/get-admin-order-edit.json:items",
+        "var/json_schema/get-admin-order.json:items",
+        "var/json_schema/get-cart.json:carts.items.items",
+        "var/json_schema/get-mypage-history.json:shippings.items.items",
+        "var/json_schema/get-shopping-confirm.json:items",
+        "var/json_schema/get-shopping.json:carts.items.items"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "itemCount": {
+      "classification": "counter",
+      "count": 5,
+      "examples": [
+        "var/json_schema/get-admin-customer.json:orders.items.itemCount",
+        "var/json_schema/get-admin-index.json:orders.items.itemCount",
+        "var/json_schema/get-admin-order.json:itemCount",
+        "var/json_schema/get-mypage.json:recentOrders.items.itemCount",
+        "var/json_schema/post-admin-order-create.json:itemCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=10000",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "mainImage": {
+      "classification": "presentation",
+      "count": 5,
+      "examples": [
+        "var/json_schema/get-admin-customer.json:favorites.items.mainImage",
+        "var/json_schema/get-admin-product.json:mainImage",
+        "var/json_schema/get-cart.json:carts.items.items.items.mainImage",
+        "var/json_schema/get-mypage-favorite-list.json:favorites.items.mainImage",
+        "var/json_schema/get-product.json:mainImage"
+      ],
+      "aliasCandidate": "imagePath",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; format=uri-reference; minLength=1; maxLength=2048",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "ruleMax": {
+      "classification": "form-context",
+      "count": 5,
+      "examples": [
+        "var/json_schema/get-admin-payment-payment-list.json:payments.items.ruleMax",
+        "var/json_schema/post-admin-payment-payment-list.json:ruleMax",
+        "var/json_schema/put-admin-payment-payment.json:ruleMax",
+        "var/json_validate/post-admin-payment-payment-list.param.json:ruleMax",
+        "var/json_validate/put-admin-payment-payment.param.json:ruleMax"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "フォーム入力/表示文脈の補助値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "フォーム再表示・フレームワーク文脈。",
+      "shouldReturnToAlps": false
+    },
+    "ruleMin": {
+      "classification": "form-context",
+      "count": 5,
+      "examples": [
+        "var/json_schema/get-admin-payment-payment-list.json:payments.items.ruleMin",
+        "var/json_schema/post-admin-payment-payment-list.json:ruleMin",
+        "var/json_schema/put-admin-payment-payment.json:ruleMin",
+        "var/json_validate/post-admin-payment-payment-list.param.json:ruleMin",
+        "var/json_validate/put-admin-payment-payment.param.json:ruleMin"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "フォーム入力/表示文脈の補助値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "フォーム再表示・フレームワーク文脈。",
+      "shouldReturnToAlps": false
+    },
+    "shippingAddressId": {
+      "classification": "identifier",
+      "count": 5,
+      "examples": [
+        "var/json_schema/get-shopping-shipping-multiple.json:addresses.items.shippingAddressId",
+        "var/json_schema/get-shopping-shipping.json:addresses.items.shippingAddressId",
+        "var/json_schema/post-shopping-shipping.json:shippingAddressId",
+        "var/json_validate/post-shopping-shipping-multiple.param.json:allocations.items.shippingAddressId",
+        "var/json_validate/post-shopping-shipping.param.json:shippingAddressId"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "accepted": {
+      "classification": "runtime-flag",
+      "count": 4,
+      "examples": [
+        "var/json_schema/post-admin-category-csv.json:accepted",
+        "var/json_schema/post-admin-order-import-shipping.json:accepted",
+        "var/json_schema/post-admin-product-csv-class-category.json:accepted",
+        "var/json_schema/post-admin-product-csv-class-name.json:accepted"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=integer/boolean/null; minimum=0",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "calendarId": {
+      "classification": "identifier",
+      "count": 4,
+      "examples": [
+        "var/json_schema/delete-admin-calendar.json:calendarId",
+        "var/json_schema/post-admin-calendar.json:calendarId",
+        "var/json_validate/delete-admin-calendar.param.json:calendarId",
+        "var/json_validate/post-admin-calendar.param.json:calendarId"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/integer/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "categoryNames": {
+      "classification": "collection-or-row",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-product-list.json:products.items.categoryNames",
+        "var/json_schema/get-admin-product.json:categoryNames",
+        "var/json_schema/get-product.json:categoryNames",
+        "var/json_schema/get-products.json:products.items.categoryNames"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "csvTitle": {
+      "classification": "presentation",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-product-csv-category.json:csvTitle",
+        "var/json_schema/get-admin-product-csv-class-category.json:csvTitle",
+        "var/json_schema/get-admin-product-csv-class-name.json:csvTitle",
+        "var/json_schema/get-admin-product-csv-product.json:csvTitle"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "filters": {
+      "classification": "collection-or-row",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-customer-list.json:filters",
+        "var/json_schema/get-admin-member-list.json:filters",
+        "var/json_schema/get-admin-product-list.json:filters",
+        "var/json_schema/get-products.json:filters"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=object/null; properties=2",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "label": {
+      "classification": "presentation",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-authority-role.json:authorityOptions.items.label",
+        "var/json_schema/get-admin-master-data.json:masterTypes.items.label",
+        "var/json_schema/post-admin-csv-config.json:columns.items.label",
+        "var/json_validate/post-admin-csv-config.param.json:columns.items.label"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "orderNos": {
+      "classification": "collection-or-row",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-order-export-order-pdf.json:orderNos",
+        "var/json_schema/post-admin-order-bulk-delete.json:orderNos",
+        "var/json_validate/get-admin-order-export-order-pdf.param.json:orderNos",
+        "var/json_validate/post-admin-order-bulk-delete.param.json:orderNos"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "orders": {
+      "classification": "collection-or-row",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-customer.json:orders",
+        "var/json_schema/get-admin-index.json:orders",
+        "var/json_schema/get-admin-order-list.json:orders",
+        "var/json_schema/get-mypage-order-history.json:orders"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "rowCount": {
+      "classification": "counter",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-category-csv.json:rowCount",
+        "var/json_schema/get-admin-customer-csv.json:rowCount",
+        "var/json_schema/get-admin-order-export-order.json:rowCount",
+        "var/json_schema/get-admin-order-export-shipping.json:rowCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "skeletonRoute": {
+      "classification": "presentation",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-product-csv-category.json:skeletonRoute",
+        "var/json_schema/get-admin-product-csv-class-category.json:skeletonRoute",
+        "var/json_schema/get-admin-product-csv-class-name.json:skeletonRoute",
+        "var/json_schema/get-admin-product-csv-product.json:skeletonRoute"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "tagNames": {
+      "classification": "collection-or-row",
+      "count": 4,
+      "examples": [
+        "var/json_schema/get-admin-product-list.json:products.items.tagNames",
+        "var/json_schema/get-admin-product.json:tagNames",
+        "var/json_schema/get-product.json:tagNames",
+        "var/json_schema/get-products.json:products.items.tagNames"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "addresses": {
+      "classification": "collection-or-row",
+      "count": 3,
+      "examples": [
+        "var/json_schema/get-mypage-address-list.json:addresses",
+        "var/json_schema/get-shopping-shipping-multiple.json:addresses",
+        "var/json_schema/get-shopping-shipping.json:addresses"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "alreadyDeleted": {
+      "classification": "runtime-flag",
+      "count": 3,
+      "examples": [
+        "var/json_schema/delete-admin-member.json:alreadyDeleted",
+        "var/json_schema/delete-admin-product.json:alreadyDeleted",
+        "var/json_schema/post-admin-delete-customer.json:alreadyDeleted"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "classNames": {
+      "classification": "collection-or-row",
+      "count": 3,
+      "examples": [
+        "var/json_schema/get-admin-class-name-class-name-list.json:classNames",
+        "var/json_schema/get-admin-product.json:classNames",
+        "var/json_schema/get-product.json:classNames"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "favoriteCount": {
+      "classification": "counter",
+      "count": 3,
+      "examples": [
+        "var/json_schema/get-admin-customer.json:favoriteCount",
+        "var/json_schema/get-mypage-favorite-list.json:favoriteCount",
+        "var/json_schema/get-mypage.json:favoriteCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "holiday": {
+      "classification": "domain-derived",
+      "count": 3,
+      "examples": [
+        "var/json_schema/get-admin-calendar.json:calendars.items.holiday",
+        "var/json_schema/post-admin-calendar.json:holiday",
+        "var/json_validate/post-admin-calendar.param.json:holiday"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=string/integer/null; minLength=0; maxLength=64; maximum=2147483647",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "initialPoint": {
+      "classification": "domain-derived",
+      "count": 3,
+      "examples": [
+        "var/json_schema/get-admin-customer.json:initialPoint",
+        "var/json_schema/post-admin-create-customer.json:initialPoint",
+        "var/json_schema/post-entry.json:initialPoint"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "productCodes": {
+      "classification": "identifier",
+      "count": 3,
+      "examples": [
+        "var/json_schema/post-admin-product-bulk-status.json:productCodes",
+        "var/json_schema/post-admin-product-csv.json:productCodes",
+        "var/json_validate/post-admin-product-bulk-status.param.json:productCodes"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=array; minItems=0; items=defined",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "rowId": {
+      "classification": "identifier",
+      "count": 3,
+      "examples": [
+        "var/json_schema/put-admin-sort-no-move.json:rowId",
+        "var/json_validate/put-admin-sort-no-move.param.json:rowId",
+        "var/json_validate/put-admin-toggle-visible.param.json:rowId"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/integer/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "rows": {
+      "classification": "collection-or-row",
+      "count": 3,
+      "examples": [
+        "var/json_schema/get-admin-master-data.json:rows",
+        "var/json_schema/put-admin-master-data.json:rows",
+        "var/json_validate/put-admin-master-data-edit.param.json:rows"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "adjustedQuantity": {
+      "classification": "domain-derived",
+      "count": 2,
+      "examples": [
+        "var/json_schema/post-cart-item.json:adjustedQuantity",
+        "var/json_schema/put-cart-item.json:adjustedQuantity"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=integer; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "cartCount": {
+      "classification": "counter",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-cart.json:cartCount",
+        "var/json_schema/get-shopping.json:cartCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "carts": {
+      "classification": "collection-or-row",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-cart.json:carts",
+        "var/json_schema/get-shopping.json:carts"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "categories": {
+      "classification": "collection-or-row",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-category-category-list.json:categories",
+        "var/json_schema/get-admin-category-edit.json:categories"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "changedCount": {
+      "classification": "counter",
+      "count": 2,
+      "examples": [
+        "var/json_schema/post-admin-order-bulk-delete.json:changedCount",
+        "var/json_schema/post-admin-product-bulk-status.json:changedCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "color": {
+      "classification": "presentation",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-index.json:orderStatuses.items.color",
+        "var/json_validate/put-admin-order-status.param.json:orderStatuses.items.color"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "deviceToken": {
+      "classification": "identifier",
+      "count": 2,
+      "examples": [
+        "var/json_validate/post-admin-two-factor-auth.param.json:deviceToken",
+        "var/json_validate/put-admin-two-factor-auth-set.param.json:deviceToken"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "disp_number": {
+      "classification": "pagination",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-products.json:filters.disp_number",
+        "var/json_validate/get-products.param.json:disp_number"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=string/integer/null; minLength=0; maxLength=64; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "emailKeyword": {
+      "classification": "pagination",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-customer-list.json:filters.emailKeyword",
+        "var/json_validate/get-admin-customer-list.param.json:emailKeyword"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "favorites": {
+      "classification": "collection-or-row",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-customer.json:favorites",
+        "var/json_schema/get-mypage-favorite-list.json:favorites"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "imported": {
+      "classification": "runtime-flag",
+      "count": 2,
+      "examples": [
+        "var/json_schema/post-admin-category-csv.json:imported",
+        "var/json_schema/post-admin-order-import-shipping.json:imported"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=integer/boolean/null; minimum=0",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "installed": {
+      "classification": "runtime-flag",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-plugin-list.json:plugins.items.installed",
+        "var/json_schema/post-admin-plugin-list.json:installed"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "isMaintenance": {
+      "classification": "runtime-flag",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-content-maintenance.json:isMaintenance",
+        "var/json_schema/put-admin-content-maintenance.json:isMaintenance"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "length": {
+      "classification": "counter",
+      "count": 2,
+      "examples": [
+        "var/json_schema/put-admin-content-css.json:length",
+        "var/json_schema/put-admin-content-js.json:length"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "lineCount": {
+      "classification": "counter",
+      "count": 2,
+      "examples": [
+        "var/json_schema/post-admin-category-csv.json:lineCount",
+        "var/json_schema/post-admin-order-import-shipping.json:lineCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "nameKey": {
+      "classification": "identifier",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-order-status.json:orderStatuses.items.nameKey",
+        "var/json_schema/get-admin-trade-law.json:tradeLawRows.items.nameKey"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "newProductCode": {
+      "classification": "identifier",
+      "count": 2,
+      "examples": [
+        "var/json_schema/post-admin-product-copy.json:newProductCode",
+        "var/json_validate/post-admin-product-copy.param.json:newProductCode"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=64",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "operation": {
+      "classification": "operation-result",
+      "count": 2,
+      "examples": [
+        "var/json_validate/post-admin-calendar.param.json:operation",
+        "var/json_validate/post-cart-item.param.json:operation"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "unsafe操作の処理結果として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=64",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "unsafe操作の戻り値。",
+      "shouldReturnToAlps": false
+    },
+    "orderCount": {
+      "classification": "counter",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-customer.json:orderCount",
+        "var/json_schema/get-mypage-order-history.json:orderCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "orderby": {
+      "classification": "pagination",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-products.json:filters.orderby",
+        "var/json_validate/get-products.param.json:orderby"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "pageno": {
+      "classification": "pagination",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-products.json:filters.pageno",
+        "var/json_validate/get-products.param.json:pageno"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=string/integer/null; minLength=0; maxLength=64; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "pages": {
+      "classification": "collection-or-row",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-page-page-list.json:pages",
+        "var/json_schema/get-products.json:pager.pages"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "products": {
+      "classification": "collection-or-row",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-product-list.json:products",
+        "var/json_schema/get-products.json:products"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "requestedCount": {
+      "classification": "counter",
+      "count": 2,
+      "examples": [
+        "var/json_schema/post-admin-order-bulk-delete.json:requestedCount",
+        "var/json_schema/post-admin-product-bulk-status.json:requestedCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "requestedQuantity": {
+      "classification": "domain-derived",
+      "count": 2,
+      "examples": [
+        "var/json_schema/post-cart-item.json:requestedQuantity",
+        "var/json_schema/put-cart-item.json:requestedQuantity"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=integer; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "selectedMaster": {
+      "classification": "domain-derived",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-admin-master-data.json:selectedMaster",
+        "var/json_schema/put-admin-master-data.json:selectedMaster"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "stockFind": {
+      "classification": "domain-derived",
+      "count": 2,
+      "examples": [
+        "var/json_schema/get-product.json:stockFind",
+        "var/json_schema/get-products.json:products.items.stockFind"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=boolean/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "wasLoggedIn": {
+      "classification": "runtime-flag",
+      "count": 2,
+      "examples": [
+        "var/json_schema/post-admin-logout.json:wasLoggedIn",
+        "var/json_schema/post-logout.json:wasLoggedIn"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "addedCount": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-mypage-reorder.json:addedCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "adminAllowHosts": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_validate/put-admin-security.param.json:adminAllowHosts"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "adminDenyHosts": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_validate/put-admin-security.param.json:adminDenyHosts"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "allocationCount": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-shopping-shipping-multiple.json:allocationCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "allocations": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_validate/post-shopping-shipping-multiple.param.json:allocations"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "alreadyAbsent": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/delete-mypage-favorite.json:alreadyAbsent"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "alreadyExisted": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-mypage-favorite.json:alreadyExisted"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "alreadyInstalled": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-admin-plugin-list.json:alreadyInstalled"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "blocks": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-block-block-list.json:blocks"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "calendars": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-calendar.json:calendars"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "canCheckout": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-shopping.json:canCheckout"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "cartItems": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-shopping-shipping-multiple.json:cartItems"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "cartKeys": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-mypage-reorder.json:cartKeys"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "changePasswordFirst": {
+      "classification": "form-context",
+      "count": 1,
+      "examples": [
+        "var/json_validate/post-admin-change-password.param.json:changePasswordFirst"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "フォーム入力/表示文脈の補助値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "フォーム再表示・フレームワーク文脈。",
+      "shouldReturnToAlps": false
+    },
+    "changePasswordSecond": {
+      "classification": "form-context",
+      "count": 1,
+      "examples": [
+        "var/json_validate/post-admin-change-password.param.json:changePasswordSecond"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "フォーム入力/表示文脈の補助値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "フォーム再表示・フレームワーク文脈。",
+      "shouldReturnToAlps": false
+    },
+    "classCategories": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-class-category-class-category-list.json:classCategories"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "classCategoryName1": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-cart.json:carts.items.items.items.classCategoryName1"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "classCategoryName2": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-cart.json:carts.items.items.items.classCategoryName2"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "className": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-product-product-class.json:classes.items.className"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "className1": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-cart.json:carts.items.items.items.className1"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "className2": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-cart.json:carts.items.items.items.className2"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "classes": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-product-product-class.json:classes"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "cleared": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-mypage-withdraw.json:cleared"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "colorKey": {
+      "classification": "identifier",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-order-status.json:orderStatuses.items.colorKey"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "countCustomers": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-index.json:countCustomers"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "countNonStockProducts": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-index.json:countNonStockProducts"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "countProducts": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-index.json:countProducts"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "css": {
+      "classification": "transport-payload",
+      "count": 1,
+      "examples": [
+        "var/json_validate/put-admin-content-css.param.json:css"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "CSV/PDF/ログ等の輸送payloadとしてサイズ・文字列性を契約する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=1000000",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "CSV/PDF/log等の輸送境界。",
+      "shouldReturnToAlps": false
+    },
+    "current": {
+      "classification": "pagination",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-products.json:pager.current"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "currentPassword": {
+      "classification": "form-context",
+      "count": 1,
+      "examples": [
+        "var/json_validate/post-admin-change-password.param.json:currentPassword"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "フォーム入力/表示文脈の補助値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "フォーム再表示・フレームワーク文脈。",
+      "shouldReturnToAlps": false
+    },
+    "customerNameKey": {
+      "classification": "identifier",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-order-status.json:orderStatuses.items.customerNameKey"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "customers": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-customer-list.json:customers"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "defaultShippingAddress": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-shopping.json:defaultShippingAddress"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=object/null; properties=5",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "deleted": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-admin-category-csv.json:deleted"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=integer/boolean/null; minimum=0",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "deliveries": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-delivery-delivery-list.json:deliveries"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "descriptionKey": {
+      "classification": "identifier",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-trade-law.json:tradeLawRows.items.descriptionKey"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "displayOrderCountKey": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-order-status.json:orderStatuses.items.displayOrderCountKey"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=128",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "doAddMultipleShippingAddress": {
+      "classification": "hypermedia",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-shopping-shipping-multiple-edit.json:links.doAddMultipleShippingAddress"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS遷移/link relationとして扱う。",
+      "schemaConstraint": "$ref=#/$defs/uriReference",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "ALPS遷移relationやURI mapであり、業務フィールドではない。",
+      "shouldReturnToAlps": false
+    },
+    "dummyEmail": {
+      "classification": "form-context",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-mypage-withdraw.json:dummyEmail"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "フォーム入力/表示文脈の補助値として扱う。",
+      "schemaConstraint": "type=string; format=email; minLength=3; maxLength=254",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "フォーム再表示・フレームワーク文脈。",
+      "shouldReturnToAlps": false
+    },
+    "entries": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-login-history.json:entries"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "file_name": {
+      "classification": "transport-payload",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-mail-template.json:Mail.file_name"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "CSV/PDF/ログ等の輸送payloadとしてサイズ・文字列性を契約する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "CSV/PDF/log等の輸送境界。",
+      "shouldReturnToAlps": false
+    },
+    "frontAllowHosts": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_validate/put-admin-security.param.json:frontAllowHosts"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "frontDenyHosts": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_validate/put-admin-security.param.json:frontDenyHosts"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "goTemplateAdd": {
+      "classification": "hypermedia",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-template-template-list.json:links.goTemplateAdd"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS遷移/link relationとして扱う。",
+      "schemaConstraint": "$ref=#/$defs/uriReference",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "ALPS遷移relationやURI mapであり、業務フィールドではない。",
+      "shouldReturnToAlps": false
+    },
+    "hasError": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-calendar.json:calendars.items.hasError"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "historyLimit": {
+      "classification": "pagination",
+      "count": 1,
+      "examples": [
+        "var/json_validate/get-mypage-order-history.param.json:historyLimit"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=integer/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "imagePath": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-product-list.json:products.items.imagePath"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; format=uri-reference; minLength=1; maxLength=2048",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "isDeletable": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-mail-template.json:Mail.isDeletable"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "isSecureRequest": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-security.json:isSecureRequest"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "js": {
+      "classification": "transport-payload",
+      "count": 1,
+      "examples": [
+        "var/json_validate/put-admin-content-js.param.json:js"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "CSV/PDF/ログ等の輸送payloadとしてサイズ・文字列性を契約する。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=1000000",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "CSV/PDF/log等の輸送境界。",
+      "shouldReturnToAlps": false
+    },
+    "layouts": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-layout-layout-list.json:layouts"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "log": {
+      "classification": "transport-payload",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-log.json:log"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "CSV/PDF/ログ等の輸送payloadとしてサイズ・文字列性を契約する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "CSV/PDF/log等の輸送境界。",
+      "shouldReturnToAlps": false
+    },
+    "mailHistories": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-mypage-history.json:mailHistories"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "mailTemplates": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-mail-template.json:mailTemplates"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "mainListImage": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-products.json:products.items.mainListImage"
+      ],
+      "aliasCandidate": "imagePath",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; format=uri-reference; minLength=1; maxLength=2048",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "members": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-member-list.json:members"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "newProductName": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-admin-product-copy.json:newProductName"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string; minLength=1; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "news": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-news-news-list.json:news"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "next": {
+      "classification": "pagination",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-products.json:pager.next"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "orderItems": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_validate/post-admin-order-create.param.json:orderItems"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "orderLimit": {
+      "classification": "pagination",
+      "count": 1,
+      "examples": [
+        "var/json_validate/get-mypage.param.json:orderLimit"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=integer/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "originalEmail": {
+      "classification": "form-context",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-admin-delete-customer.json:originalEmail"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "フォーム入力/表示文脈の補助値として扱う。",
+      "schemaConstraint": "type=string; format=email; minLength=3; maxLength=254",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "フォーム再表示・フレームワーク文脈。",
+      "shouldReturnToAlps": false
+    },
+    "pageCount": {
+      "classification": "pagination",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-products.json:pager.pageCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "pager": {
+      "classification": "pagination",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-products.json:pager"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=object/null; properties=5",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "paymentMethods": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-shopping.json:paymentMethods"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "payments": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-payment-payment-list.json:payments"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "pdf": {
+      "classification": "transport-payload",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-order-export-order-pdf.json:pdf"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "CSV/PDF/ログ等の輸送payloadとしてサイズ・文字列性を契約する。",
+      "schemaConstraint": "type=string; minLength=0; maxLength=5000000",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "CSV/PDF/log等の輸送境界。",
+      "shouldReturnToAlps": false
+    },
+    "phpinfoEnabled": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-system.json:phpinfoEnabled"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "plugins": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-plugin-list.json:plugins"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "previous": {
+      "classification": "pagination",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-products.json:pager.previous"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "previousAuthority": {
+      "classification": "domain-derived",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-admin-authority-role.json:previousAuthority"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "previousStatus": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-admin-order-status.json:previousStatus"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=integer; minimum=1; maximum=9",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "recentOrderCount": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-mypage.json:recentOrderCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "recentOrders": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-mypage.json:recentOrders"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "salesThisMonth": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-index.json:salesThisMonth"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=999999999",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "salesToday": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-index.json:salesToday"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=999999999",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "salesYesterday": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-index.json:salesYesterday"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=999999999",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "shippings": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-mypage-history.json:shippings"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "size": {
+      "classification": "transport-payload",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-order-export-order-pdf.json:size"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "CSV/PDF/ログ等の輸送payloadとしてサイズ・文字列性を契約する。",
+      "schemaConstraint": "type=integer/null; minimum=0",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "CSV/PDF/log等の輸送境界。",
+      "shouldReturnToAlps": false
+    },
+    "skipped": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-admin-order-import-shipping.json:skipped"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=integer/boolean/null; minimum=0",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "skippedCount": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-mypage-reorder.json:skippedCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "skippedProductCodes": {
+      "classification": "identifier",
+      "count": 1,
+      "examples": [
+        "var/json_schema/post-mypage-reorder.json:skippedProductCodes"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "不透明ID/採番ID/互換IDのいずれかとしてschemaで明示する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "Resource境界でID型を分解し、ALPS候補は別途検討する。",
+      "shouldReturnToAlps": false
+    },
+    "success": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-login-history.json:entries.items.success"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "table": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-master-data.json:masterTypes.items.table"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "tags": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-tag-tag-list.json:tags"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "taxRules": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-tax-rule-tax-rule-list.json:taxRules"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "templates": {
+      "classification": "collection-or-row",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-template-template-list.json:templates"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "配列/行データとして親Resource文脈でshapeを定義する。",
+      "schemaConstraint": "type=array/null; minItems=0; items=defined",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "親Resource文脈でshapeを固定し、ALPSへ戻す候補は台帳で追跡する。",
+      "shouldReturnToAlps": false
+    },
+    "timestamp": {
+      "classification": "domain-derived",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-login-history.json:entries.items.timestamp"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "ALPS基礎語からResource文脈で派生した業務値として扱う。",
+      "schemaConstraint": "type=string; pattern=^\\d{4}-\\d{2}-\\d{2}([ T]\\d{2}:\\d{2}:\\d{2}([+-]\\d{2}:?\\d{2}|Z)?)?$",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "ALPS基礎語から派生したResource固有値。",
+      "shouldReturnToAlps": false
+    },
+    "totalItemCount": {
+      "classification": "pagination",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-products.json:totalItemCount"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "一覧検索のページング/検索条件として扱う。",
+      "schemaConstraint": "type=integer/null; minimum=0; maximum=2147483647",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "一覧制御の横断項目として複数Resourceで共有される。",
+      "shouldReturnToAlps": false
+    },
+    "totalSpent": {
+      "classification": "counter",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-customer.json:totalSpent"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "非負整数の件数・集計値として扱う。",
+      "schemaConstraint": "type=integer; minimum=0; maximum=999999999",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "集計値・処理件数であり永続属性とは限らない。",
+      "shouldReturnToAlps": false
+    },
+    "tplIsTopDir": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-content-file-manager.json:tplIsTopDir"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    },
+    "tplNowDir": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-content-file-manager.json:tplNowDir"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "tplParentDir": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-content-file-manager.json:tplParentDir"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=255",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "version": {
+      "classification": "presentation",
+      "count": 1,
+      "examples": [
+        "var/json_schema/get-admin-index.json:recommendedPlugins.items.version"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "画面表示/テンプレート用のpresentation値として扱う。",
+      "schemaConstraint": "type=string/null; minLength=0; maxLength=32",
+      "shapeFixedCandidate": true,
+      "exceptionReason": "表示・テンプレート補助値。",
+      "shouldReturnToAlps": false
+    },
+    "wasInstalled": {
+      "classification": "runtime-flag",
+      "count": 1,
+      "examples": [
+        "var/json_schema/delete-admin-plugin.json:wasInstalled"
+      ],
+      "aliasCandidate": "",
+      "schemaDecision": "Resource処理状態を表すboolean flagとして扱う。",
+      "schemaConstraint": "type=boolean/null",
+      "shapeFixedCandidate": false,
+      "exceptionReason": "処理結果/画面状態の一時フラグ。",
+      "shouldReturnToAlps": false
+    }
+  },
+  "suspiciousDescriptions": [],
+  "genericFallbackDescriptions": [],
+  "genericFallbackDescriptionsByClass": {},
+  "mechanicalTitles": [],
+  "mechanicalTitlesByClass": {},
+  "wideTransportUnions": [],
+  "mixedBoundaryIds": [
+    "var/json_schema/delete-admin-calendar.json:calendarId",
+    "var/json_schema/delete-admin-payment-payment.json:paymentId",
+    "var/json_schema/get-admin-authority-role.json:authorityOptions.items.id",
+    "var/json_schema/get-admin-calendar.json:calendars.items.id",
+    "var/json_schema/get-admin-calendar.json:calendars.items.holiday",
+    "var/json_schema/get-admin-csv-config.json:id",
+    "var/json_schema/get-admin-mail-template.json:id",
+    "var/json_schema/get-admin-mail-template.json:Mail.id",
+    "var/json_schema/get-admin-master-data.json:rows.items.id",
+    "var/json_schema/get-admin-order-status.json:orderStatuses.items.id",
+    "var/json_schema/get-admin-payment-payment-list.json:payments.items.paymentId",
+    "var/json_schema/get-admin-payment-payment.json:paymentId",
+    "var/json_schema/get-admin-trade-law.json:tradeLawRows.items.id",
+    "var/json_schema/get-products.json:filters.disp_number",
+    "var/json_schema/get-products.json:filters.pageno",
+    "var/json_schema/get-products.json:products.items.id",
+    "var/json_schema/post-admin-calendar.json:calendarId",
+    "var/json_schema/post-admin-calendar.json:holiday",
+    "var/json_schema/post-admin-payment-payment-list.json:paymentId",
+    "var/json_schema/put-admin-payment-payment.json:paymentId",
+    "var/json_schema/put-admin-sort-no-move.json:rowId",
+    "var/json_validate/delete-admin-calendar.param.json:calendarId",
+    "var/json_validate/delete-admin-mail-template.param.json:mailTemplateId",
+    "var/json_validate/delete-admin-payment-payment.param.json:paymentId",
+    "var/json_validate/get-admin-csv-config.param.json:id",
+    "var/json_validate/get-admin-customer-delivery-edit.param.json:id",
+    "var/json_validate/get-admin-customer.param.json:id",
+    "var/json_validate/get-admin-payment-payment.param.json:paymentId",
+    "var/json_validate/get-products.param.json:pageno",
+    "var/json_validate/get-products.param.json:disp_number",
+    "var/json_validate/get-shopping-confirm.param.json:paymentMethodId",
+    "var/json_validate/post-admin-calendar.param.json:holiday",
+    "var/json_validate/post-admin-calendar.param.json:calendarId",
+    "var/json_validate/post-admin-mail-template.param.json:mailTemplateId",
+    "var/json_validate/post-admin-order-create.param.json:paymentMethodId",
+    "var/json_validate/post-admin-order-create.param.json:orderItems.items.quantity",
+    "var/json_validate/post-admin-order-create.param.json:charge",
+    "var/json_validate/post-admin-payment-payment-list.param.json:charge",
+    "var/json_validate/post-admin-product-bulk-status.param.json:productStatus",
+    "var/json_validate/post-admin-product.param.json:price02",
+    "var/json_validate/post-admin-product.param.json:productStatus",
+    "var/json_validate/post-cart-item.param.json:quantity",
+    "var/json_validate/post-shopping-shipping-multiple.param.json:allocations.items.shippingAddressId",
+    "var/json_validate/post-shopping-shipping-multiple.param.json:allocations.items.quantity",
+    "var/json_validate/post-shopping-shipping.param.json:shippingAddressId",
+    "var/json_validate/put-admin-order.param.json:charge",
+    "var/json_validate/put-admin-payment-payment.param.json:paymentId",
+    "var/json_validate/put-admin-payment-payment.param.json:charge",
+    "var/json_validate/put-admin-product.param.json:price02",
+    "var/json_validate/put-admin-product.param.json:productStatus",
+    "var/json_validate/put-admin-sort-no-move.param.json:rowId",
+    "var/json_validate/put-admin-toggle-visible.param.json:rowId",
+    "var/json_validate/put-cart-item.param.json:quantity"
+  ],
+  "approvedMixedBoundaryIds": [
+    {
+      "path": "var/json_schema/delete-admin-calendar.json:calendarId",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/delete-admin-payment-payment.json:paymentId",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-authority-role.json:authorityOptions.items.id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-calendar.json:calendars.items.id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-calendar.json:calendars.items.holiday",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-csv-config.json:id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-mail-template.json:id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-mail-template.json:Mail.id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-master-data.json:rows.items.id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-status.json:orderStatuses.items.id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-payment-payment-list.json:payments.items.paymentId",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-payment-payment.json:paymentId",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-trade-law.json:tradeLawRows.items.id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-products.json:filters.disp_number",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-products.json:filters.pageno",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/get-products.json:products.items.id",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/post-admin-calendar.json:calendarId",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/post-admin-calendar.json:holiday",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/post-admin-payment-payment-list.json:paymentId",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/put-admin-payment-payment.json:paymentId",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_schema/put-admin-sort-no-move.json:rowId",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "classification": "ec-cube-boundary"
+    },
+    {
+      "path": "var/json_validate/delete-admin-calendar.param.json:calendarId",
+      "reason": "カレンダーID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/delete-admin-mail-template.param.json:mailTemplateId",
+      "reason": "メールテンプレートID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/delete-admin-payment-payment.param.json:paymentId",
+      "reason": "支払方法ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/get-admin-csv-config.param.json:id",
+      "reason": "ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/get-admin-customer-delivery-edit.param.json:id",
+      "reason": "ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/get-admin-customer.param.json:id",
+      "reason": "ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/get-admin-payment-payment.param.json:paymentId",
+      "reason": "支払方法ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/get-products.param.json:pageno",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/get-products.param.json:disp_number",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/get-shopping-confirm.param.json:paymentMethodId",
+      "reason": "支払方法IDは業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-calendar.param.json:holiday",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-calendar.param.json:calendarId",
+      "reason": "カレンダーID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-mail-template.param.json:mailTemplateId",
+      "reason": "メールテンプレートID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-order-create.param.json:paymentMethodId",
+      "reason": "支払方法IDは業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-order-create.param.json:orderItems.items.quantity",
+      "reason": "数量（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-order-create.param.json:charge",
+      "reason": "手数料（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-payment-payment-list.param.json:charge",
+      "reason": "手数料（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-product-bulk-status.param.json:productStatus",
+      "reason": "商品ステータス（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-product.param.json:price02",
+      "reason": "販売価格（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-admin-product.param.json:productStatus",
+      "reason": "商品ステータス（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-cart-item.param.json:quantity",
+      "reason": "数量（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-shopping-shipping-multiple.param.json:allocations.items.shippingAddressId",
+      "reason": "配送先ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-shopping-shipping-multiple.param.json:allocations.items.quantity",
+      "reason": "数量（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/post-shopping-shipping.param.json:shippingAddressId",
+      "reason": "配送先ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/put-admin-order.param.json:charge",
+      "reason": "手数料（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/put-admin-payment-payment.param.json:paymentId",
+      "reason": "支払方法ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/put-admin-payment-payment.param.json:charge",
+      "reason": "手数料（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/put-admin-product.param.json:price02",
+      "reason": "販売価格（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/put-admin-product.param.json:productStatus",
+      "reason": "商品ステータス（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/put-admin-sort-no-move.param.json:rowId",
+      "reason": "行ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/put-admin-toggle-visible.param.json:rowId",
+      "reason": "行ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    },
+    {
+      "path": "var/json_validate/put-cart-item.param.json:quantity",
+      "reason": "数量（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "classification": "request-transport"
+    }
+  ],
+  "unapprovedMixedBoundaryIds": [],
+  "mixedBoundaryLedger": [
+    {
+      "path": "var/json_schema/delete-admin-calendar.json:calendarId",
+      "name": "calendarId",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/delete-admin-payment-payment.json:paymentId",
+      "name": "paymentId",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-authority-role.json:authorityOptions.items.id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-calendar.json:calendars.items.id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-calendar.json:calendars.items.holiday",
+      "name": "holiday",
+      "classification": "ec-cube-boundary",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-csv-config.json:id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-mail-template.json:id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-mail-template.json:Mail.id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-master-data.json:rows.items.id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-status.json:orderStatuses.items.id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-payment-payment-list.json:payments.items.paymentId",
+      "name": "paymentId",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-payment-payment.json:paymentId",
+      "name": "paymentId",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-trade-law.json:tradeLawRows.items.id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-products.json:filters.disp_number",
+      "name": "disp_number",
+      "classification": "ec-cube-boundary",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-products.json:filters.pageno",
+      "name": "pageno",
+      "classification": "ec-cube-boundary",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/get-products.json:products.items.id",
+      "name": "id",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/post-admin-calendar.json:calendarId",
+      "name": "calendarId",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/post-admin-calendar.json:holiday",
+      "name": "holiday",
+      "classification": "ec-cube-boundary",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/post-admin-payment-payment-list.json:paymentId",
+      "name": "paymentId",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/put-admin-payment-payment.json:paymentId",
+      "name": "paymentId",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_schema/put-admin-sort-no-move.json:rowId",
+      "name": "rowId",
+      "classification": "ec-cube-boundary",
+      "reason": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。",
+      "schemaDecision": "EC-CUBE採番IDとFake文字列IDが同じResource境界に現れるため、この境界だけ互換IDとして扱う。"
+    },
+    {
+      "path": "var/json_validate/delete-admin-calendar.param.json:calendarId",
+      "name": "calendarId",
+      "classification": "request-transport",
+      "reason": "カレンダーID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/delete-admin-mail-template.param.json:mailTemplateId",
+      "name": "mailTemplateId",
+      "classification": "request-transport",
+      "reason": "メールテンプレートID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/delete-admin-payment-payment.param.json:paymentId",
+      "name": "paymentId",
+      "classification": "request-transport",
+      "reason": "支払方法ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/get-admin-csv-config.param.json:id",
+      "name": "id",
+      "classification": "request-transport",
+      "reason": "ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/get-admin-customer-delivery-edit.param.json:id",
+      "name": "id",
+      "classification": "request-transport",
+      "reason": "ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/get-admin-customer.param.json:id",
+      "name": "id",
+      "classification": "request-transport",
+      "reason": "ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/get-admin-payment-payment.param.json:paymentId",
+      "name": "paymentId",
+      "classification": "request-transport",
+      "reason": "支払方法ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/get-products.param.json:pageno",
+      "name": "pageno",
+      "classification": "request-transport",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/get-products.param.json:disp_number",
+      "name": "disp_number",
+      "classification": "request-transport",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/get-shopping-confirm.param.json:paymentMethodId",
+      "name": "paymentMethodId",
+      "classification": "request-transport",
+      "reason": "支払方法IDは業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-calendar.param.json:holiday",
+      "name": "holiday",
+      "classification": "request-transport",
+      "reason": "EC-CUBE互換のフォーム/一覧境界で数値と文字列の両方が観察される。業務解釈はResource/Semantic層で行う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-calendar.param.json:calendarId",
+      "name": "calendarId",
+      "classification": "request-transport",
+      "reason": "カレンダーID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-mail-template.param.json:mailTemplateId",
+      "name": "mailTemplateId",
+      "classification": "request-transport",
+      "reason": "メールテンプレートID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-order-create.param.json:paymentMethodId",
+      "name": "paymentMethodId",
+      "classification": "request-transport",
+      "reason": "支払方法IDは業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-order-create.param.json:orderItems.items.quantity",
+      "name": "quantity",
+      "classification": "request-transport",
+      "reason": "数量（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-order-create.param.json:charge",
+      "name": "charge",
+      "classification": "request-transport",
+      "reason": "手数料（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-payment-payment-list.param.json:charge",
+      "name": "charge",
+      "classification": "request-transport",
+      "reason": "手数料（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-product-bulk-status.param.json:productStatus",
+      "name": "productStatus",
+      "classification": "request-transport",
+      "reason": "商品ステータス（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-product.param.json:price02",
+      "name": "price02",
+      "classification": "request-transport",
+      "reason": "販売価格（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-product.param.json:productStatus",
+      "name": "productStatus",
+      "classification": "request-transport",
+      "reason": "商品ステータス（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-cart-item.param.json:quantity",
+      "name": "quantity",
+      "classification": "request-transport",
+      "reason": "数量（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-shopping-shipping-multiple.param.json:allocations.items.shippingAddressId",
+      "name": "shippingAddressId",
+      "classification": "request-transport",
+      "reason": "配送先ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-shopping-shipping-multiple.param.json:allocations.items.quantity",
+      "name": "quantity",
+      "classification": "request-transport",
+      "reason": "数量（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/post-shopping-shipping.param.json:shippingAddressId",
+      "name": "shippingAddressId",
+      "classification": "request-transport",
+      "reason": "配送先ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-order.param.json:charge",
+      "name": "charge",
+      "classification": "request-transport",
+      "reason": "手数料（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-payment-payment.param.json:paymentId",
+      "name": "paymentId",
+      "classification": "request-transport",
+      "reason": "支払方法ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-payment-payment.param.json:charge",
+      "name": "charge",
+      "classification": "request-transport",
+      "reason": "手数料（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-product.param.json:price02",
+      "name": "price02",
+      "classification": "request-transport",
+      "reason": "販売価格（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-product.param.json:productStatus",
+      "name": "productStatus",
+      "classification": "request-transport",
+      "reason": "商品ステータス（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-sort-no-move.param.json:rowId",
+      "name": "rowId",
+      "classification": "request-transport",
+      "reason": "行ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-toggle-visible.param.json:rowId",
+      "name": "rowId",
+      "classification": "request-transport",
+      "reason": "行ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    },
+    {
+      "path": "var/json_validate/put-cart-item.param.json:quantity",
+      "name": "quantity",
+      "classification": "request-transport",
+      "reason": "数量（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "HTTP formでは文字列として届くため、Resource/Semantic層の400応答を奪わないtransport契約としてmixedを許可する。"
+    }
+  ],
+  "stringTokenMixedIds": [],
+  "dbIdMixedWithoutTransportReason": [],
+  "openCollectionItemObjects": [],
+  "opaqueFormObjects": [
+    {
+      "path": "var/json_schema/get-admin-base-info.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-block-block.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-calendar.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-calendar.json:calendars.items.form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-category-edit.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-change-password.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-class-category-class-category-list.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-class-name-class-name-list.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-content-css.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-content-file-manager.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-content-js.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-csv-config.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-customer-delivery-edit.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-customer-list.json:searchForm",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-customer.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-delivery-delivery.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-layout-layout.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-log.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-login.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-mail-template.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-master-data.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-member.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-news-news.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-edit.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-list.json:searchForm",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-order-pdf.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-send-mail.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-shipping-address.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-status.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-page-page.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-payment-payment.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-category.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-class-category.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-class-name.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-product.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-edit.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-list.json:searchForm",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-product-class.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-security.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-tag-tag-list.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-tax-rule-tax-rule-list.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-template-template-add.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-trade-law.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-two-factor-auth-edit.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-two-factor-auth-set.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-admin-two-factor-auth.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-contact-confirm.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-contact.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-entry-confirm.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-entry.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-forgot-password.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-login.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-mypage-address.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-mypage-change.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-product.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-reset.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-shopping-login.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-shopping-non-member.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-shopping-shipping-edit.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-shopping-shipping-multiple-edit.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    },
+    {
+      "path": "var/json_schema/get-shopping.json:form",
+      "comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "classification": "framework-form-boundary"
+    }
+  ],
+  "formBoundaryLedger": [
+    {
+      "path": "var/json_schema/get-admin-base-info.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-block-block.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-calendar.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-calendar.json:calendars.items.form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-category-edit.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-change-password.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-class-category-class-category-list.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-class-name-class-name-list.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-content-css.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-content-file-manager.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-content-js.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-csv-config.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-customer-delivery-edit.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-customer-list.json:searchForm",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-customer.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-delivery-delivery.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-layout-layout.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-log.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-login.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-mail-template.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-master-data.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-member.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-news-news.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-edit.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-list.json:searchForm",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-order-pdf.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-send-mail.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-shipping-address.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-status.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-page-page.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-payment-payment.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-category.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-class-category.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-class-name.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-product.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-edit.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-list.json:searchForm",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-product-class.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-security.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-tag-tag-list.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-tax-rule-tax-rule-list.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-template-template-add.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-trade-law.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-two-factor-auth-edit.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-two-factor-auth-set.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-two-factor-auth.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-contact-confirm.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-contact.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-entry-confirm.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-entry.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-forgot-password.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-login.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-mypage-address.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-mypage-change.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-product.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-reset.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-shopping-login.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-shopping-non-member.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-shopping-shipping-edit.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-shopping-shipping-multiple-edit.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    },
+    {
+      "path": "var/json_schema/get-shopping.json:form",
+      "classification": "framework-form-boundary",
+      "properties": 0,
+      "reason": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。",
+      "schemaDecision": "Aura/WebForm内部構造はアプリケーション契約外。Resource上はフォーム文脈の存在だけを契約する。"
+    }
+  ],
+  "shapeableOpaqueFormObjects": [],
+  "opaqueFormObjectsWithoutReason": [],
+  "dynamicRowsAccepted": [
+    {
+      "path": "var/json_schema/get-admin-authority-role.json:authorityOptions.items",
+      "title": "権限選択肢",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 2,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-authority-role.json:rules.items",
+      "title": "権限ルール",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 2,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-index.json:recommendedPlugins.items",
+      "title": "推奨プラグイン",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 4,
+      "classification": "external-catalog-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-index.json:orderStatuses.items",
+      "title": "注文ステータス",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 3,
+      "classification": "status-summary-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-master-data.json:masterTypes.items",
+      "title": "マスタ種別",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 3,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-master-data.json:rows.items",
+      "title": "行",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 2,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-status.json:orderStatuses.items",
+      "title": "注文ステータス",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 5,
+      "classification": "status-summary-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-category.json:columns.items",
+      "title": "CSV列",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 2,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-class-category.json:columns.items",
+      "title": "CSV列",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 2,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-class-name.json:columns.items",
+      "title": "CSV列",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 2,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-product.json:columns.items",
+      "title": "CSV列",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 2,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/get-admin-trade-law.json:tradeLawRows.items",
+      "title": "特定商取引法表示行",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 7,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/post-admin-csv-config.json:columns.items",
+      "title": "CSV列",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 4,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_schema/put-admin-master-data.json:rows.items",
+      "title": "行",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "properties": 4,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+    },
+    {
+      "path": "var/json_validate/post-admin-csv-config.param.json:columns.items",
+      "title": "CSV列（入力）",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "properties": 4,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    {
+      "path": "var/json_validate/put-admin-master-data-edit.param.json:rows.items",
+      "title": "行（入力）",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "properties": 4,
+      "classification": "dynamic-master-or-csv-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    {
+      "path": "var/json_validate/put-admin-order-status.param.json:orderStatuses.items",
+      "title": "注文ステータス（入力）",
+      "comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "properties": 3,
+      "classification": "status-summary-row",
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    }
+  ],
+  "dynamicRowLedger": [
+    {
+      "path": "var/json_schema/get-admin-authority-role.json:authorityOptions.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "権限選択肢",
+      "properties": 2,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-authority-role.json:rules.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "権限ルール",
+      "properties": 2,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-index.json:recommendedPlugins.items",
+      "classification": "external-catalog-row",
+      "title": "推奨プラグイン",
+      "properties": 4,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-index.json:orderStatuses.items",
+      "classification": "status-summary-row",
+      "title": "注文ステータス",
+      "properties": 3,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-master-data.json:masterTypes.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "マスタ種別",
+      "properties": 3,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-master-data.json:rows.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "行",
+      "properties": 2,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-order-status.json:orderStatuses.items",
+      "classification": "status-summary-row",
+      "title": "注文ステータス",
+      "properties": 5,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-category.json:columns.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "CSV列",
+      "properties": 2,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-class-category.json:columns.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "CSV列",
+      "properties": 2,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-class-name.json:columns.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "CSV列",
+      "properties": 2,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-product-csv-product.json:columns.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "CSV列",
+      "properties": 2,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/get-admin-trade-law.json:tradeLawRows.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "特定商取引法表示行",
+      "properties": 7,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/post-admin-csv-config.json:columns.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "CSV列",
+      "properties": 4,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_schema/put-admin-master-data.json:rows.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "行",
+      "properties": 4,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_validate/post-admin-csv-config.param.json:columns.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "CSV列（入力）",
+      "properties": 4,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-master-data-edit.param.json:rows.items",
+      "classification": "dynamic-master-or-csv-row",
+      "title": "行（入力）",
+      "properties": 4,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    },
+    {
+      "path": "var/json_validate/put-admin-order-status.param.json:orderStatuses.items",
+      "classification": "status-summary-row",
+      "title": "注文ステータス（入力）",
+      "properties": 3,
+      "reason": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+      "schemaDecision": "安定列はpropertiesへ昇格し、対象マスタ/CSV/外部カタログで増える列だけ互換境界として許容する。"
+    }
+  ],
+  "dynamicRowsWithoutReason": [],
+  "dynamicRowsWithNoProperties": []
+}

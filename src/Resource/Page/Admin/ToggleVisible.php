@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\MasterRowNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\VisibleToggled;
 use MyVendor\BeMart\Be\Input\ToggleVisibleInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -44,10 +46,13 @@ class ToggleVisible extends ResourceObject
     }
 
     /**
+     * ALPS `doToggleVisible` に対応する PUT 操作。
      * @psalm-taint-source input $masterType
      * @psalm-taint-source input $rowId
      * @psalm-taint-source input $visible
      */
+    #[Alps('doToggleVisible')]
+    #[JsonSchema(schema: 'put-admin-toggle-visible.json', params: 'put-admin-toggle-visible.param.json')]
     #[CsrfProtected]
     public function onPut(
         string $masterType,

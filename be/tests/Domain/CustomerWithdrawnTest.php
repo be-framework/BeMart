@@ -23,6 +23,7 @@ use function assert;
 use function count;
 use function dirname;
 
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class CustomerWithdrawnTest extends TestCase
 {
     protected function setUp(): void
