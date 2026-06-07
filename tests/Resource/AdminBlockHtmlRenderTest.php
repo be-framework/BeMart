@@ -118,6 +118,7 @@ final class AdminBlockHtmlRenderTest extends TestCase
         $this->assertStringContainsString('class="c-conversionArea"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testBlockEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/block/block')->toString();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -26,6 +27,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminMemberForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -78,6 +80,8 @@ class Member extends ResourceObject
      *
      * @psalm-taint-source input $loginId
      */
+    #[Alps('goMember')]
+    #[JsonSchema(schema: 'get-admin-member.json', params: 'get-admin-member.param.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     public function onGet(string|null $loginId = null): static
     {
@@ -162,6 +166,8 @@ class Member extends ResourceObject
      * @psalm-taint-source input $name
      * @psalm-taint-source input $authority
      */
+    #[Alps('doCreateMember')]
+    #[JsonSchema(schema: 'post-admin-member.json', params: 'post-admin-member.param.json')]
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
     #[CsrfProtected]
     public function onPost(
@@ -226,6 +232,8 @@ class Member extends ResourceObject
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $name
      */
+    #[Alps('doUpdateMember')]
+    #[JsonSchema(schema: 'put-admin-member.json', params: 'put-admin-member.param.json')]
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
     #[CsrfProtected]
     public function onPut(
@@ -278,6 +286,8 @@ class Member extends ResourceObject
      *
      * @psalm-taint-source input $loginId
      */
+    #[Alps('doDeleteMember')]
+    #[JsonSchema(schema: 'delete-admin-member.json', params: 'delete-admin-member.param.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     #[CsrfProtected]
     public function onDelete(string $loginId): static

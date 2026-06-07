@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -11,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Support\ProductImageCatalog;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function array_map;
@@ -55,6 +57,8 @@ class Products extends ResourceObject
      * @psalm-taint-source input $name
      * @psalm-taint-source input $nameKeyword
      */
+    #[Alps('goProductList')]
+    #[JsonSchema(schema: 'get-products.json', params: 'get-products.param.json')]
     #[Link(rel: 'goProduct', href: 'page://self/product')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'goTop', href: 'page://self/')]

@@ -99,6 +99,7 @@ final class CartItemAddedTest extends TestCase
         }
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testSameSkuAddedTwiceMergesQuantity(): void
     {
         $this->markTestSkipped('Repeated cart mutation needs mutable persistence; covered by the SQL suite.');

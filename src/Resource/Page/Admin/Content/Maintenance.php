@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Final\MaintenanceToggled;
 use MyVendor\BeMart\Be\Input\ToggleMaintenanceInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -43,6 +45,9 @@ class Maintenance extends ResourceObject
     ) {
     }
 
+    /** ALPS `goMaintenance` に対応する GET 操作。 */
+    #[Alps('goMaintenance')]
+    #[JsonSchema(schema: 'get-admin-content-maintenance.json')]
     #[Link(rel: 'doToggleMaintenance', href: 'page://self/admin/content/maintenance', method: 'put')]
     public function onGet(): static
     {
@@ -65,6 +70,8 @@ class Maintenance extends ResourceObject
      *
      * @psalm-taint-source input $enabled
      */
+    #[Alps('doToggleMaintenance')]
+    #[JsonSchema(schema: 'put-admin-content-maintenance.json', params: 'put-admin-content-maintenance.param.json')]
     #[Link(rel: 'goSystemInfo', href: 'page://self/admin/system')]
     #[CsrfProtected]
     public function onPut(bool $enabled): static

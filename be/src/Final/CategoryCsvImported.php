@@ -74,7 +74,7 @@ final readonly class CategoryCsvImported
                 continue;
             }
 
-            $fields = str_getcsv($line);
+            $fields = str_getcsv($line, ',', '"', '\\');
             $id = trim((string) ($fields[0] ?? ''));
             $name = trim((string) ($fields[1] ?? ''));
             $parentId = trim((string) ($fields[2] ?? ''));

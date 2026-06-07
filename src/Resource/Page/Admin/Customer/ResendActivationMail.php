@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Customer;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ActivationMailResent;
 use MyVendor\BeMart\Be\Input\ResendActivationMailInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -51,8 +53,11 @@ class ResendActivationMail extends ResourceObject
     }
 
     /**
+     * ALPS `doResendActivationMail` に対応する POST 操作。
      * @psalm-taint-source input $email
      */
+    #[Alps('doResendActivationMail')]
+    #[JsonSchema(schema: 'post-admin-customer-resend-activation-mail.json', params: 'post-admin-customer-resend-activation-mail.param.json')]
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
     #[CsrfProtected]
     public function onPost(

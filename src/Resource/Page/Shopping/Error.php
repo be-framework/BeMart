@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goShoppingError — 購入エラー表示 (Wave 3H pure renderer).
@@ -26,10 +28,13 @@ use BEAR\Resource\ResourceObject;
 class Error extends ResourceObject
 {
     /**
+     * ALPS `goShoppingError` に対応する GET 操作。
      * @todo Wave-future: surface the underlying error reason (stock /
      *     payment / session) once the flashbag-equivalent transport
      *     is decided.
      */
+    #[Alps('goShoppingError')]
+    #[JsonSchema(schema: 'get-shopping-error.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(): static
     {

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -22,6 +23,7 @@ use MyVendor\BeMart\Be\Input\AdminDeleteProductInput;
 use MyVendor\BeMart\Be\Input\AdminUpdateProductInput;
 use MyVendor\BeMart\Be\Input\GetAdminProductInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -61,6 +63,8 @@ class Product extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Alps('goProduct')]
+    #[JsonSchema(schema: 'get-admin-product.json', params: 'get-admin-product.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[Link(rel: 'doUpdateProduct', href: 'page://self/admin/product', method: 'put')]
     #[Link(rel: 'doDeleteProduct', href: 'page://self/admin/product', method: 'delete')]
@@ -125,6 +129,8 @@ class Product extends ResourceObject
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
      */
+    #[Alps('doCreateProduct')]
+    #[JsonSchema(schema: 'post-admin-product.json', params: 'post-admin-product.param.json')]
     #[CsrfProtected]
     public function onPost(
         string $productCode,
@@ -197,6 +203,8 @@ class Product extends ResourceObject
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
      */
+    #[Alps('doUpdateProduct')]
+    #[JsonSchema(schema: 'put-admin-product.json', params: 'put-admin-product.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/products')]
     #[CsrfProtected]
     public function onPut(
@@ -259,6 +267,8 @@ class Product extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Alps('doDeleteProduct')]
+    #[JsonSchema(schema: 'delete-admin-product.json', params: 'delete-admin-product.param.json')]
     #[CsrfProtected]
     public function onDelete(
         string $productCode,

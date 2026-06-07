@@ -26,6 +26,7 @@ use function dirname;
  * editor (works with empty Fake storage); a known orderNo pre-fills;
  * an unknown orderNo is 404. The AUTHZ guard rejects anonymous admins.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderEditResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

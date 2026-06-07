@@ -26,6 +26,7 @@ use function str_contains;
  * Phase 3 ALPS-audit remediation — JSON resource coverage for the admin
  * Order transitions doUpdateTrackingNumber / doSendShippingNotifyMail.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminShippingOrderTransitionsResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

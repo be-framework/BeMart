@@ -108,6 +108,7 @@ final class AdminLoginHtmlRenderTest extends TestCase
         $this->assertStringContainsString('action="/admin/login"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testLoginHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/login')->toString();

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\CustomerAddressCreated;
 use MyVendor\BeMart\Be\Final\CustomerAddressListFetched;
 use MyVendor\BeMart\Be\Input\CreateCustomerAddressInput;
 use MyVendor\BeMart\Be\Input\GetCustomerAddressListInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -44,6 +46,9 @@ class AddressList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goCustomerAddressList` に対応する GET 操作。 */
+    #[Alps('goCustomerAddressList')]
+    #[JsonSchema(schema: 'get-mypage-address-list.json')]
     #[Link(rel: 'doCreateCustomerAddress', href: 'page://self/mypage/address-list', method: 'post')]
     #[Link(rel: 'doUpdateCustomerAddress', href: 'page://self/mypage/address', method: 'put')]
     #[Link(rel: 'doDeleteCustomerAddress', href: 'page://self/mypage/address', method: 'delete')]
@@ -72,6 +77,7 @@ class AddressList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateCustomerAddress` に対応する POST 操作。
      * @psalm-taint-source input $name01
      * @psalm-taint-source input $name02
      * @psalm-taint-source input $kana01
@@ -83,6 +89,8 @@ class AddressList extends ResourceObject
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
      */
+    #[Alps('doCreateCustomerAddress')]
+    #[JsonSchema(schema: 'post-mypage-address-list.json', params: 'post-mypage-address-list.param.json')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[CsrfProtected]
     public function onPost(

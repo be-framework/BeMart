@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\GetBaseInfoInput;
 use MyVendor\BeMart\Be\Input\UpdateBaseInfoInput;
 use MyVendor\BeMart\Form\AdminShopMasterForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -57,6 +59,8 @@ class BaseInfo extends ResourceObject
      * the `form` key carries an {@see AdminShopMasterForm} pre-filled
      * with the dtb_base_info row for the HTML editor.
      */
+    #[Alps('goBaseInfo')]
+    #[JsonSchema(schema: 'get-admin-base-info.json')]
     #[Link(rel: 'doUpdateBaseInfo', href: 'page://self/admin/base-info', method: 'post')]
     public function onGet(): static
     {
@@ -124,6 +128,8 @@ class BaseInfo extends ResourceObject
      * @psalm-taint-source input $shopEmail01
      * @psalm-taint-source input $shopMessage
      */
+    #[Alps('doUpdateBaseInfo')]
+    #[JsonSchema(schema: 'post-admin-base-info.json', params: 'post-admin-base-info.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[CsrfProtected]

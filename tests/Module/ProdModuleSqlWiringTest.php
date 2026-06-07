@@ -146,9 +146,6 @@ final class ProdModuleSqlWiringTest extends TestCase
             $this->markTestSkipped('DATABASE_URL unreachable — prod context requires SQL wiring: ' . $e->getMessage());
         }
 
-        if (! \str_contains(\strtolower($version), 'mariadb')) {
-            $this->markTestSkipped('DATABASE_URL is not MariaDB — prod SQL wiring baseline targets MariaDB: ' . $version);
-        }
     }
 
 }

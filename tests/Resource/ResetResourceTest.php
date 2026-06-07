@@ -65,6 +65,7 @@ final class ResetResourceTest extends TestCase
         $this->assertStringContainsString('無効', $ro->body['message']);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testReusedKeyReturns400(): void
     {
         $this->markTestSkipped('Single-use token mutation is covered by the SQL suite.');

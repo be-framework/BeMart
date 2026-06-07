@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerCreated;
 use MyVendor\BeMart\Be\Input\AdminCreateCustomerInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -71,6 +73,8 @@ class CreateCustomer extends ResourceObject
      * @psalm-taint-source input $sex
      * @psalm-taint-source input $job
      */
+    #[Alps('doCreateCustomer')]
+    #[JsonSchema(schema: 'post-admin-create-customer.json', params: 'post-admin-create-customer.param.json')]
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
     #[CsrfProtected]
     public function onPost(

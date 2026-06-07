@@ -84,6 +84,7 @@ final class AdminPluginListResourceTest extends TestCase
         $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testOnPostHappyPathInstallsPlugin(): void
     {
         $this->markTestSkipped('Stateful plugin install post-condition is covered by the SQL suite.');

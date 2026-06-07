@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
 use MyVendor\BeMart\Form\ShoppingOrderForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -57,8 +59,11 @@ class Shopping extends ResourceObject
     }
 
     /**
+     * ALPS `goShopping` に対応する GET 操作。
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('goShopping')]
+    #[JsonSchema(schema: 'get-shopping.json', params: 'get-shopping.param.json')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(string $sessionPrefix = 'session-prefix-1'): static
