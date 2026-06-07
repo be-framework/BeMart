@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\PluginInstalled;
 use MyVendor\BeMart\Be\Final\PluginListFetched;
 use MyVendor\BeMart\Be\Input\GetPluginListInput;
 use MyVendor\BeMart\Be\Input\InstallPluginInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -48,19 +50,15 @@ class PluginList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goPluginList` に対応する GET 操作。 */
+    #[Alps('goPluginList')]
+    #[JsonSchema(schema: 'get-admin-plugin-list.json')]
     #[Link(rel: 'doEnablePlugin', href: 'page://self/admin/plugin-enable', method: 'post')]
     #[Link(rel: 'doDisablePlugin', href: 'page://self/admin/plugin-disable', method: 'post')]
     #[Link(rel: 'doUninstallPlugin', href: 'page://self/admin/plugin', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetPluginListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetPluginListInput());
 
         assert($final instanceof PluginListFetched);
 
@@ -80,6 +78,8 @@ class PluginList extends ResourceObject
      * @psalm-taint-source input $pluginName
      * @psalm-taint-source input $pluginVersion
      */
+    #[Alps('doInstallPlugin')]
+    #[JsonSchema(schema: 'post-admin-plugin-list.json', params: 'post-admin-plugin-list.param.json')]
     #[Link(rel: 'goPluginList', href: 'page://self/admin/plugin-list', method: 'get')]
     #[CsrfProtected]
     public function onPost(
@@ -87,25 +87,11 @@ class PluginList extends ResourceObject
         string $pluginName,
         string $pluginVersion,
     ): static {
-        try {
-            $final = ($this->becoming)(new InstallPluginInput(
-                pluginCode: $pluginCode,
-                pluginName: $pluginName,
-                pluginVersion: $pluginVersion,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new InstallPluginInput(
+            pluginCode: $pluginCode,
+            pluginName: $pluginName,
+            pluginVersion: $pluginVersion,
+        ));
 
         assert($final instanceof PluginInstalled);
 

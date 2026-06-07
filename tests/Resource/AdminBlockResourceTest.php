@@ -66,8 +66,9 @@ final class AdminBlockResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/block/block-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/block/block-list');
     }
 
     public function testCreateHappyPath(): void
@@ -85,12 +86,13 @@ final class AdminBlockResourceTest extends TestCase
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/block/block-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/block/block-list', [
             'blockName' => 'バナー',
             'blockFileName' => 'banner',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testUpdateMerges(): void
@@ -117,10 +119,11 @@ final class AdminBlockResourceTest extends TestCase
 
     public function testDeleteSystemBlockIsRefused(): void
     {
-        $ro = $this->resource->delete('page://self/admin/block/block', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\BlockNotFoundException::class);
+
+        $this->resource->delete('page://self/admin/block/block', [
             'blockId' => 'bk-header',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 }

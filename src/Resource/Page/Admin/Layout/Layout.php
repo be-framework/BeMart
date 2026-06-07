@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Layout;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Final\LayoutUpdated;
 use MyVendor\BeMart\Be\Input\UpdateLayoutInput;
 use MyVendor\BeMart\Form\AdminLayoutForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -50,6 +52,8 @@ class Layout extends ResourceObject
      *
      * The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
      */
+    #[Alps('doUpdateLayout')]
+    #[JsonSchema(schema: 'get-admin-layout-layout.json')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     public function onGet(): static
     {
@@ -63,9 +67,12 @@ class Layout extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateLayout` に対応する PUT 操作。
      * @psalm-taint-source input $layoutId
      * @psalm-taint-source input $layoutName
      */
+    #[Alps('doUpdateLayout')]
+    #[JsonSchema(schema: 'put-admin-layout-layout.json', params: 'put-admin-layout-layout.param.json')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     #[Link(rel: 'goTradeLawList', href: 'page://self/admin/trade-law')]
     #[CsrfProtected]
@@ -73,27 +80,10 @@ class Layout extends ResourceObject
         string $layoutId,
         string|null $layoutName = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateLayoutInput(
-                layoutId: $layoutId,
-                layoutName: $layoutName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (LayoutNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたレイアウトは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateLayoutInput(
+            layoutId: $layoutId,
+            layoutName: $layoutName,
+        ));
 
         assert($final instanceof LayoutUpdated);
 

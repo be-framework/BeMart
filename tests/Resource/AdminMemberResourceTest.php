@@ -69,18 +69,18 @@ final class AdminMemberResourceTest extends TestCase
 
     public function testOnGetUnknownLoginIdReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/member', ['loginId' => 'no-such-admin']);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\AdminNotFoundException::class);
 
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->resource->get('page://self/admin/member', ['loginId' => 'no-such-admin']);
     }
 
     public function testOnGetAnonymousAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->get('page://self/admin/member', ['loginId' => 'shop-owner']);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->resource->get('page://self/admin/member', ['loginId' => 'shop-owner']);
     }
 
     public function testOnPostCreatesNewAdmin(): void
@@ -104,15 +104,15 @@ final class AdminMemberResourceTest extends TestCase
 
     public function testOnPostDuplicateLoginIdReturns409(): void
     {
-        $ro = $this->resource->post('page://self/admin/member', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException::class);
+
+        $this->resource->post('page://self/admin/member', [
             'loginId' => 'test-admin',  // already exists
             'password' => 'duplicate-attempt-2026',
             'name' => '別人',
             'authority' => 1,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(409, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -143,13 +143,13 @@ final class AdminMemberResourceTest extends TestCase
 
     public function testOnPutUnknownLoginIdReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/member', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\AdminNotFoundException::class);
+
+        $this->resource->put('page://self/admin/member', [
             'loginId' => 'no-such-admin',
             'name' => 'irrelevant',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnDeleteSoftDeletesAdmin(): void
@@ -168,13 +168,12 @@ final class AdminMemberResourceTest extends TestCase
     public function testOnDeleteSelfReturns403(): void
     {
         // test-admin tries to delete themselves.
-        $ro = $this->resource->delete('page://self/admin/member', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\InsufficientAuthorityException::class);
+
+        $this->resource->delete('page://self/admin/member', [
             'loginId' => 'test-admin',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('権限', $ro->body['message']);
     }
 
     public function testOnDeleteAlreadyDeletedReturns200WithFlag(): void

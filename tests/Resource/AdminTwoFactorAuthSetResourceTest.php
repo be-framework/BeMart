@@ -56,14 +56,14 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
 
     public function testOnPutWrongCodeReturns400(): void
     {
-        $ro = $this->resource->put('page://self/admin/two-factor-auth-set', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException::class);
+
+        $this->resource->put('page://self/admin/two-factor-auth-set', [
             'loginId' => 'fresh-admin-x',
             'authKey' => FakeTwoFactorAuth::FIXED_SECRET,
             'deviceToken' => '000000',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPutMissingCsrfReturns403(): void

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AddCartForm;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -59,20 +61,15 @@ class Product extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Alps('goProduct')]
+    #[JsonSchema(schema: 'get-product.json', params: 'get-product.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/products')]
     #[Link(rel: 'doAddCartItem', href: 'page://self/cart/item', method: 'post')]
     #[Link(rel: 'doAddFavorite', href: 'page://self/mypage/favorite', method: 'post')]
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     public function onGet(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new GetProductInput($productCode));
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetProductInput($productCode));
 
         assert($final instanceof ProductFetched);
 

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -12,6 +13,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\MypageFetched;
 use MyVendor\BeMart\Be\Input\GetMypageInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -38,6 +40,9 @@ class Mypage extends ResourceObject
     ) {
     }
 
+    /** ALPS `goMypage` に対応する GET 操作。 */
+    #[Alps('goMypage')]
+    #[JsonSchema(schema: 'get-mypage.json', params: 'get-mypage.param.json')]
     #[Link(rel: 'goMypageHistory', href: 'page://self/mypage/history')]
     #[Link(rel: 'goMypageChange', href: 'page://self/mypage/change')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
@@ -48,19 +53,7 @@ class Mypage extends ResourceObject
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     public function onGet(int $orderLimit = 5): static
     {
-        try {
-            $final = ($this->becoming)(new GetMypageInput(orderLimit: $orderLimit));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetMypageInput(orderLimit: $orderLimit));
 
         assert($final instanceof MypageFetched);
 

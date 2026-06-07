@@ -76,28 +76,28 @@ final class ContactResourceTest extends TestCase
 
     public function testOnPostInvalidEmailReturns400(): void
     {
-        $ro = $this->resource->post('page://self/contact', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/contact', [
             'contactName01' => '山田',
             'contactName02' => '太郎',
             'contactEmail' => 'not-an-email',
             'contactContents' => 'body text',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostEmptyContentsReturns400(): void
     {
-        $ro = $this->resource->post('page://self/contact', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/contact', [
             'contactName01' => '山田',
             'contactName02' => '太郎',
             'contactEmail' => 'yamada@example.com',
             'contactContents' => '',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

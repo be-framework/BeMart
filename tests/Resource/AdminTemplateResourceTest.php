@@ -62,7 +62,8 @@ final class AdminTemplateResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/template/template-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/template/template-list');
     }
 }

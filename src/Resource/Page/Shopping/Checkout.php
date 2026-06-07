@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedPreOrderAccessException;
 use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Input\CheckoutInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -55,45 +57,16 @@ class Checkout extends ResourceObject
      *
      * @psalm-taint-source input $preOrderId
      */
+    #[Alps('doCheckout')]
+    #[JsonSchema(schema: 'post-shopping-checkout.json', params: 'post-shopping-checkout.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfProtected]
     public function onPost(string $preOrderId): static
     {
-        try {
-            $final = ($this->becoming)(new CheckoutInput(
-                preOrderId: $preOrderId,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'preOrderId' => $preOrderId,
-            ];
-
-            return $this;
-        } catch (PreOrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Pre-order not found.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        } catch (UnauthorizedPreOrderAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'You are not authorized to access this pre-order.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        } catch (InsufficientStockException) {
-            // BEAR\Resource\Code lacks UNPROCESSABLE_ENTITY; use the literal.
-            $this->code = 422;
-            $this->body = ['message' => 'Insufficient stock to fulfill the order.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        } catch (PaymentDeclinedException) {
-            $this->code = 422;
-            $this->body = ['message' => 'Payment was declined.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CheckoutInput(
+            preOrderId: $preOrderId,
+        ));
 
         assert($final instanceof CheckoutCompleted);
 

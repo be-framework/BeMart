@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Module;
 use BEAR\Package\AbstractAppModule;
 use BEAR\Package\Module\AppMetaModule;
 use BEAR\Package\PackageModule;
+use BEAR\Resource\Module\JsonSchemaModule;
 use Be\Framework\Module\BeModule;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistry;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
@@ -64,11 +65,19 @@ final class AppModule extends AbstractAppModule
     protected function configure(): void
     {
         $this->install(new PackageModule());
+        $this->override(new AppErrorModule());
         $this->override(new AuraRouterModule($this->appMeta->appDir . '/config/aura-routes.php'));
         // PackageModule does not bind @AppName by itself; BEAR\Package\Module
         // factory normally overrides it. Install explicitly so tests can use
         // `new Injector(new *Module(...))` without the factory.
         $this->override(new AppMetaModule($this->appMeta));
+
+        $this->install(
+            new JsonSchemaModule(
+                $this->appMeta->appDir . '/var/json_schema',
+                $this->appMeta->appDir . '/var/json_validate',
+            ),
+        );
 
         $this->bind(RequestQueryContext::class)->in(Scope::SINGLETON);
         $this->bind(InvokerInterface::class)->to(RequestQueryCapturingInvoker::class);

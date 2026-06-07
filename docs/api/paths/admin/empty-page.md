@@ -1,10 +1,4 @@
----
-layout: default
-title: "/admin/empty-page"
----
-
-{% raw %}
-<a href="../index.html" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
+<a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/empty-page
 EC-CUBE admin プラグイン拡張用スロット — top-level wave, Phase 3.
@@ -29,6 +23,8 @@ Renders the empty admin extension-slot page.
 Admin-only: returns 403 for an anonymous request — the same
 firewall contract as the other admin pages.
 
+**ALPS**: `goAdminEmptyPage`
+
 
 
 ### Request
@@ -37,5 +33,7 @@ _No parameters required_
 
 ### Response
 
-_Not available_
-{% endraw %}
+[Object: GET /admin/empty-page response](../schemas/get-admin-empty-page.json)
+
+| Name | Type | Description | Required | Constraints | Example |
+|------|------|-------------|----------|-------------|---------|

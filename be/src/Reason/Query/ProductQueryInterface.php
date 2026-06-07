@@ -57,14 +57,13 @@ interface ProductQueryInterface
     public function search(?string $nameKeyword, int $limit = 50): array;
 
     /**
-     * Wave 8 (goExportProduct admin) — full unpaged dump for the CSV
-     * exporter. Walks every product regardless of status. The list
-     * is intentionally unbounded here because the export endpoint is
-     * admin-only and the Phase 1 fixture is small; Phase 2 will swap
-     * this to a streaming cursor.
+     * Wave 8 (goExportProduct admin) — paged dump for the CSV exporter.
+     * Walks every product regardless of status. The Final loops through
+     * pages so the public CSV still contains the full corpus, while each
+     * storage query remains bounded.
      *
      * @return list<ProductEntity>
      */
     #[DbQuery('product_export', factory: ProductFactory::class)]
-    public function listForExport(): array;
+    public function listForExport(int $limit = 100, int $offset = 0): array;
 }

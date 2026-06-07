@@ -70,8 +70,9 @@ final class AdminTagResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/tag/tag-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/tag/tag-list');
     }
 
     public function testCreateHappyPath(): void
@@ -87,11 +88,12 @@ final class AdminTagResourceTest extends TestCase
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/tag/tag-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/tag/tag-list', [
             'tagName' => '限定',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testDeleteHappyPath(): void
@@ -106,10 +108,11 @@ final class AdminTagResourceTest extends TestCase
 
     public function testDeleteUnknownReturns404(): void
     {
-        $ro = $this->resource->delete('page://self/admin/tag/tag', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\TagNotFoundException::class);
+
+        $this->resource->delete('page://self/admin/tag/tag', [
             'tagId' => 'nonexistent',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 }

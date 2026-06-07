@@ -21,6 +21,7 @@ use function dirname;
  * installed by Ray.FakeQuery fixture JSON. Pilot 12 itself is not yet
  * implemented; this test only locks the contract Pilot 12 will consume.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class OrderItemQueryTest extends TestCase
 {
     private OrderQueryInterface $orderQuery;

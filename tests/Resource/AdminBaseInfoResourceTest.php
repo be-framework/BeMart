@@ -104,23 +104,23 @@ final class AdminBaseInfoResourceTest extends TestCase
 
     public function testOnPostEmptyShopNameReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/base-info', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/admin/base-info', [
             'shopName' => '   ',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostBadPhoneNumberReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/base-info', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/admin/base-info', [
             'shopName' => '新ショップ',
             'phoneNumber' => 'not-digits',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -137,12 +137,11 @@ final class AdminBaseInfoResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/base-info', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/base-info', [
             'shopName' => '新ショップ',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 }

@@ -72,9 +72,8 @@ final class AdminCustomerCsvResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->get('page://self/admin/customer-csv');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
+        $this->resource->get('page://self/admin/customer-csv');
     }
 }

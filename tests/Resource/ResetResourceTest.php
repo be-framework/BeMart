@@ -53,18 +53,16 @@ final class ResetResourceTest extends TestCase
 
     public function testUnknownKeyReturns400(): void
     {
-        $ro = $this->resource->post('page://self/reset', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ResetKeyInvalidException::class);
+
+        $this->resource->post('page://self/reset', [
             'resetKey' => 'unknown-reset-key-not-in-storage-zzzz',
             'password' => self::NEW_PASSWORD,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        // 400 (not 404) — does not distinguish format-invalid from
-        // value-invalid at the HTTP level.
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
-        $this->assertStringContainsString('無効', $ro->body['message']);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testReusedKeyReturns400(): void
     {
         $this->markTestSkipped('Single-use token mutation is covered by the SQL suite.');
@@ -72,36 +70,35 @@ final class ResetResourceTest extends TestCase
 
     public function testExpiredKeyReturns400(): void
     {
-        $ro = $this->resource->post('page://self/reset', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ResetKeyInvalidException::class);
+
+        $this->resource->post('page://self/reset', [
             'resetKey' => self::EXPIRED_RESET_KEY,
             'password' => self::NEW_PASSWORD,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
-        $this->assertStringContainsString('無効', $ro->body['message']);
     }
 
     public function testInvalidPasswordFormatReturns400(): void
     {
-        $ro = $this->resource->post('page://self/reset', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/reset', [
             'resetKey' => self::VALID_RESET_KEY,
             'password' => 'short',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testInvalidKeyFormatReturns400(): void
     {
-        $ro = $this->resource->post('page://self/reset', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/reset', [
             'resetKey' => 'short',
             'password' => self::NEW_PASSWORD,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testMissingCsrfReturns403(): void

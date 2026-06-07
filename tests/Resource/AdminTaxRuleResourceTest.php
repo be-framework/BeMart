@@ -84,12 +84,13 @@ final class AdminTaxRuleResourceTest extends TestCase
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/tax-rule/tax-rule-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/tax-rule/tax-rule-list', [
             'taxRate' => 10.0,
             'applyDate' => '2024-04-01T00:00:00+09:00',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testCreateRejectsMissingCsrf(): void
@@ -116,8 +117,9 @@ final class AdminTaxRuleResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/tax-rule/tax-rule-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/tax-rule/tax-rule-list');
     }
 
     public function testDeleteHappyPath(): void
@@ -135,11 +137,12 @@ final class AdminTaxRuleResourceTest extends TestCase
 
     public function testDeleteUnknownIdReturns404(): void
     {
-        $ro = $this->resource->delete('page://self/admin/tax-rule/tax-rule', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\TaxRuleNotFoundException::class);
+
+        $this->resource->delete('page://self/admin/tax-rule/tax-rule', [
             'taxRuleId' => 'nonexistent-zzz',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testDeleteRejectsMissingCsrf(): void
