@@ -87,7 +87,7 @@ class ImportShipping extends ResourceObject
         assert($final instanceof AdminShippingCsvImported);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/order';
+        $this->headers['Location'] = '/admin/order-list';
         $this->body = [
             'transitionId' => 'doImportShippingCsv',
             'accepted' => $final->accepted,

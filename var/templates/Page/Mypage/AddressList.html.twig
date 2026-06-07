@@ -40,7 +40,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_delivery' %}
+{% set route = 'mypage-address-list' %}
 {% set title = 'マイページ' %}
 
 {% block main %}
@@ -63,14 +63,14 @@
                 <div class="ec-off1Grid__cell">
                     <div class="ec-addressRole">
                         <div class="ec-addressRole__actions">
-                            <a class="ec-inlineBtn" href="{{ url('mypage_delivery_new') }}">新規お届け先を追加する</a>
+                            <a class="ec-inlineBtn" href="/mypage/address">新規お届け先を追加する</a>
                         </div>
                     </div>
                     {% if count > 0 %}
                         <div class="ec-addressList">
                             {% for CustomerAddress in addresses %}
                                 <div class="ec-addressList__item">
-                                    <a class="ec-addressList__remove" href="{{ url('mypage_delivery_delete', { id : CustomerAddress.addressId }) }}" token-for-anchor="{{ csrf_token_for_anchor() }}" data-method="delete">
+                                    <a class="ec-addressList__remove" href="/mypage/address?addressId={{ CustomerAddress.addressId }}&_method=delete" token-for-anchor="{{ csrf_token_for_anchor() }}" data-method="delete">
                                         <div class="ec-icon">
                                             <img src="{{ asset('assets/icon/cross.svg') }}" alt="remove">
                                         </div>
@@ -81,7 +81,7 @@
                                         <div>{{ CustomerAddress.phoneNumber }}</div>
                                     </div>
                                     <div class="ec-addressList__action">
-                                        <a class="ec-inlineBtn" href="{{ url('mypage_delivery_edit', { id : CustomerAddress.addressId }) }}">変更</a>
+                                        <a class="ec-inlineBtn" href="/mypage/address?addressId={{ CustomerAddress.addressId }}">変更</a>
                                     </div>
                                 </div>
                             {% endfor %}

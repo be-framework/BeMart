@@ -127,18 +127,17 @@
         "orderNo"
       ]
     },
-    "id": {
-      "type": [
-        "string",
-        "integer",
-        "null"
+    "csvType": {
+      "type": "integer",
+      "title": "CSV種別",
+      "description": "CSV出力項目設定で現在選択しているCSV種別。1=受注CSV, 2=会員CSV, 3=商品CSV, 4=配送CSV。画面の選択状態とPOST対象の列設定コンテキストを示す。",
+      "enum": [
+        1,
+        2,
+        3,
+        4
       ],
-      "title": "ID",
-      "description": "Fake観察文字長 13〜32; 観察値 'ad000000000000000000000000000001', 'ad000000000000000000000000000003', 'fedcba9876543210fedcba9876543210', '10000000aaaa1111bbbb2222cccc3333', 'ad000000000000000000000000000002', '0123456789abcdef0123456789abcdef', 'aaaaaaaa00000000bbbbbbbb11111111', '20000000dddd2222eeee3333ffff4444'。",
-      "example": "ad000000000000000000000000000001",
-      "minLength": 0,
-      "maxLength": 128,
-      "$comment": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。"
+      "example": 1
     }
   },
   "additionalProperties": false,
@@ -363,6 +362,6 @@
   "required": [
     "notOutputColumns",
     "outputColumns",
-    "id"
+    "csvType"
   ]
 }

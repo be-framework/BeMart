@@ -40,7 +40,7 @@ use function trim;
  *
  * Same standard as the storefront form-page pilot {@see LoginHtmlRenderTest}
  * and the admin form pilot {@see AdminNewsHtmlRenderTest}: EC-CUBE renders
- * the login inputs through the Symfony FormView (`form_widget(form.login_id)`);
+ * the login inputs through the Symfony FormView (`form_widget(form.loginId)`);
  * BeMart renders them through a real Ray.WebFormModule
  * {@see AdminLoginForm} exposed as `body.form`. This test renders
  * EC-CUBE's `form_widget(form.<field>)` calls through the SAME
@@ -98,13 +98,13 @@ final class AdminLoginHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/admin/login')->toString();
 
-        $this->assertStringContainsString('id="login_id"', $html);
-        $this->assertStringContainsString('name="login_id"', $html);
+        $this->assertStringContainsString('id="loginId"', $html);
+        $this->assertStringContainsString('name="loginId"', $html);
         $this->assertStringContainsString('value="test-admin"', $html);
         $this->assertStringContainsString('id="admin_login_password"', $html);
         $this->assertStringContainsString('type="password"', $html);
         $this->assertStringContainsString('value="admin-test-password-2026"', $html);
-        // Slice 9: path('admin_login') now resolves through Aura route map.
+        // Slice 9: path('admin_login') now resolves through canonical Resource path.
         $this->assertStringContainsString('action="/admin/login"', $html);
     }
 
@@ -151,11 +151,11 @@ final class AdminLoginHtmlRenderTest extends TestCase
         foreach ([
             '<title>',
             // The hidden CSRF input: EC-CUBE renders a live per-request
-            // `csrf_token('authenticate')` value, BeMart renders the
+            // `csrfcsrfToken('authenticate')` value, BeMart renders the
             // CsrfToken reference. The token VALUE can never
             // match across the two runtimes — the line is residual by
-            // its `_csrf_token` field name regardless of the value.
-            'name="_csrf_token"',
+            // its `csrfToken` field name regardless of the value.
+            'name="csrfToken"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -184,7 +184,7 @@ final class AdminLoginHtmlRenderTest extends TestCase
         $form = (new FormFactory())->newInstance(AdminLoginForm::class);
         if ($form instanceof AdminLoginForm) {
             $form->fillValues([
-                'login_id' => 'test-admin',
+                'loginId' => 'test-admin',
                 'password' => 'admin-test-password-2026',
             ]);
         }
@@ -192,7 +192,7 @@ final class AdminLoginHtmlRenderTest extends TestCase
 
         return $twig->render('login.twig', [
             'form' => new EcCubeStub([
-                'login_id' => 'login_id',
+                'loginId' => 'loginId',
                 'password' => 'password',
             ]),
             'error' => null,
@@ -221,13 +221,13 @@ final class AdminLoginHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('trans', $trans));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
 
         // EC-CUBE's `form_widget(form.<field>)` renders through the real
         // AdminLoginForm so the inputs are byte-identical to BeMart's
         // port. The first arg is the field name. Returns Twig\Markup so
         // the markup is not double-escaped.
-        $formFields = ['login_id', 'password'];
+        $formFields = ['loginId', 'password'];
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
             if ($form instanceof AdminLoginForm && is_string($field) && in_array($field, $formFields, true)) {
                 return new Markup($form->input($field), 'UTF-8');

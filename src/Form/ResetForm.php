@@ -26,13 +26,13 @@ use Ray\WebFormModule\AbstractForm;
  * Fields: EC-CUBE's `PasswordResetType` nests the new password under a
  * `RepeatedPasswordType` (`form.password.first` / `.second`); BeMart
  * declares the two leaf inputs flat (`password`, `password_confirm`) the
- * same way {@see EntryForm} does. The `login_email` field is the
+ * same way {@see EntryForm} does. The `email` field is the
  * confirmation email EC-CUBE's reset screen asks the user to re-enter;
  * BeMart's `ResetPasswordInput` does not model it (the reset is keyed by
  * `resetKey`), so it is declared here purely as a renderer field. The
  * `resetKey` itself is a hidden field carried by the Reset page body.
  *
- * MISSING-FIELD NOTE — `login_email` has no BeMart body field behind it
+ * MISSING-FIELD NOTE — `email` has no BeMart body field behind it
  * (ResetPasswordInput models `resetKey` + `password`, not email). Per
  * the Phase-3 recipe a template wave does not enrich the Input/ALPS; the
  * field is rendered for fidelity and flagged as a missing-body-field
@@ -57,7 +57,7 @@ final class ResetForm extends AbstractForm
     public function init(): void
     {
         // メールアドレス — EC-CUBE's PasswordResetType field name.
-        $this->setField('login_email', 'text');
+        $this->setField('email', 'text');
 
         // パスワード + 確認 — EC-CUBE's RepeatedPasswordType leaf inputs.
         $this->setField('password', 'password')
@@ -68,7 +68,7 @@ final class ResetForm extends AbstractForm
         // NON-AUTHORITATIVE structural checks only — authority is the Be
         // domain (ResetPasswordInput Semantics + PasswordResetCompleted
         // Final).
-        $this->filter->validate('login_email')->isNotBlank();
+        $this->filter->validate('email')->isNotBlank();
         $this->filter->validate('password')->isNotBlank();
     }
 

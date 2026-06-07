@@ -45,7 +45,7 @@ final class AdminTagForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('name', 'text')
+        $this->setField('tagName', 'text')
             ->setAttribs([
                 'id' => 'admin_tag_name',
                 'class' => 'form-control',
@@ -53,6 +53,6 @@ final class AdminTagForm extends AbstractForm
 
         // NON-AUTHORITATIVE structural check only — the authoritative
         // tag-name rule lives in the Be domain (CreateTagInput Semantic).
-        $this->filter->validate('name')->isNotBlank();
+        $this->filter->validate('tagName')->isNotBlank();
     }
 }

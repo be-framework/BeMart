@@ -17,7 +17,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `{% for Plugin in Plugins %}` -> the resource body's `plugins`
      list. EC-CUBE keys the per-row action `<a>`s / `<form>` by the
@@ -51,7 +51,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_store_plugin' %}
+{% set route = 'admin-store-plugin' %}
 {% set title = 'インストールプラグイン一覧' %}
 {% set sub_title = 'オーナーズストア' %}
 
@@ -79,7 +79,7 @@
             <div class="c-primaryCol">
                 <div class="card rounded border-0 mb-4">
                     <div class="card-header">
-                        <a href="{{ url('admin_store_plugin_install') }}"
+                        <a href="/admin/plugin-list"
                            class="btn btn-ec-regular me-2 float-end">アップロードして新規追加</a>
                         <h5 class="box-title mb-3">ユーザー独自プラグイン</h5>
                     </div>
@@ -124,14 +124,14 @@
                                                                 <a href="#" class="btn btn-ec-actionIcon"
                                                                    data-bs-toggle="modal"
                                                                    data-bs-target="#localPluginDeleteModal"
-                                                                   data-delete-url="{{ url('admin_store_plugin_uninstall', { code: Plugin.pluginCode }) }}">
+                                                                   data-delete-url="/admin/plugin?pluginCode={{ Plugin.pluginCode }}&_method=delete">
                                                                     <i class="fa fa-close fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="削除"></i>
                                                                 </a>
                                                             </div>
                                                             {% endif %}
                                                             {% if Plugin.enabled %}
                                                             <div class="col-6 px-0">
-                                                                <a href="{{ url('admin_store_plugin_disable', { code: Plugin.pluginCode }) }}"
+                                                                <a href="/admin/plugin-disable?pluginCode={{ Plugin.pluginCode }}"
                                                                    class="btn btn-ec-actionIcon"
                                                                    data-method="post" data-confirm="false">
                                                                     <i class="fa fa-pause fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="無効にする"></i>
@@ -139,7 +139,7 @@
                                                             </div>
                                                             {% else %}
                                                             <div class="col-6 px-0">
-                                                                <a href="{{ url('admin_store_plugin_enable', { code: Plugin.pluginCode }) }}"
+                                                                <a href="/admin/plugin-enable?pluginCode={{ Plugin.pluginCode }}"
                                                                    class="btn btn-ec-actionIcon"
                                                                    data-method="post" data-confirm="false">
                                                                     <i class="fa fa-play fa-lg text-secondary" data-bs-toggle="tooltip" data-bs-placement="top" title="有効にする"></i>

@@ -23,7 +23,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `currency_symbol()`  -> the JPY symbol literal `￥`. EC-CUBE's
      `EccubeExtension::getCurrencySymbol()` resolves the configured
@@ -43,7 +43,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_homepage' %}
+{% set route = 'admin-index' %}
 {% set title = 'ホーム' %}
 {% set sub_title = '' %}
 
@@ -87,7 +87,7 @@
             var priceBorderColor = 'rgba(255, 255, 255, 0)';
 
             $.ajax({
-                url: '{{ url('admin_homepage_sale') }}',
+                url: '/admin/order-list',
                 type: 'GET',
                 dataType: 'json'
             }).done(function(datas) {
@@ -145,14 +145,14 @@
                     <div class="col-4 mb-4">
                         <div id="order-status" class="card rounded border-0 h-100">
                             <div class="card-header">
-                                <a href="{{ url('admin_order') }}">
+                                <a href="/admin/order-list">
                                     <span class="card-title">注文状況</span>
                                 </a>
                             </div>
                             <div class="card-body p-0">
                                 {% for OrderStatus in orderStatuses %}
                                     <div class="d-block border border-top-0 border-start-0 border-end-0">
-                                        <a href="{{ url('admin_order', { 'order_status_id': OrderStatus.id }) }}" class="p-3 d-block">
+                                        <a href="/admin/order?order_status_id={{ OrderStatus.id }}" class="p-3 d-block">
                                             <div class="row align-items-center">
                                                 <div class="col align-middle">
                                                     <span class="align-middle">{{ OrderStatus.name }}</span>
@@ -248,7 +248,7 @@
                             </div>
                             <div class="card-body p-0">
                                 <div class="d-block border border-top-0 border-start-0 border-end-0">
-                                    <a href="{{ url('admin_homepage_nonstock') }}" class="p-3 d-block">
+                                    <a href="/admin/product-list" class="p-3 d-block">
                                         <div class="row align-items-center">
                                             <div class="col-2 align-middle text-center">
                                                 <i class="fa fa-inbox fa-2x text-secondary" aria-hidden="true"></i>
@@ -263,7 +263,7 @@
                                     </a>
                                 </div>
                                 <div class="d-block border border-top-0 border-start-0 border-end-0">
-                                    <a href="{{ url('admin_product') }}" class="p-3 d-block">
+                                    <a href="/admin/product-list" class="p-3 d-block">
                                         <div class="row align-items-center">
                                             <div class="col-2 align-middle text-center">
                                                 <i class="fa fa-cubes fa-2x text-secondary" aria-hidden="true"></i>
@@ -278,7 +278,7 @@
                                     </a>
                                 </div>
                                 <div class="d-block border border-top-0 border-start-0 border-end-0">
-                                    <a href="{{ url('admin_homepage_customer') }}" class="p-3 d-block">
+                                    <a href="/admin/customer-list" class="p-3 d-block">
                                         <div class="row align-items-center">
                                             <div class="col-2 align-middle text-center">
                                                 <i class="fa fa-users fa-2x text-secondary" aria-hidden="true"></i>
@@ -320,7 +320,7 @@
                                 {% endfor %}
                             </div>
                             <div class="card-footer">
-                                > <a href="{{ url('admin_store_plugin_owners_search_page') }}">オーナーズストア</a>
+                                > <a href="/admin/plugin-list">オーナーズストア</a>
                             </div>
                         </div><!-- /#ec-cube-plugin -->
                     </div>

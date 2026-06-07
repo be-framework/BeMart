@@ -57,17 +57,17 @@ final class AdminAuthorityRoleResourceSqlTest extends AbstractResourceSqlTestCas
         $this->seedAdminMasters();
 
         $this->systemAdminId = (string) $this->insertAdmin([
-            'login_id' => 'test-admin',
+            'loginId' => 'test-admin',
             'name' => 'テスト管理者',
             'authority_id' => 0, // system admin — highest privilege
         ]);
         $this->shopOwnerId = (string) $this->insertAdmin([
-            'login_id' => 'shop-owner',
+            'loginId' => 'shop-owner',
             'name' => '店舗オーナー',
             'authority_id' => 1, // shop owner
         ]);
         $this->insertAdmin([
-            'login_id' => 'deputy',
+            'loginId' => 'deputy',
             'name' => '副管理者',
             'authority_id' => 1,
         ]);

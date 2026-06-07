@@ -1,7 +1,7 @@
 {# EC-CUBE admin category list — product category management screen. #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_product_category' %}
+{% set route = 'admin-category-category-list' %}
 {% set title = 'カテゴリ管理' %}
 {% set sub_title = '商品管理' %}
 
@@ -12,7 +12,7 @@
                 <div class="card rounded border-0 mb-4">
                     <div class="card-header"><span class="card-title">カテゴリ登録</span></div>
                     <div class="card-body">
-                        <form method="post" action="{{ url('admin_product_category') }}" class="row g-3 align-items-end">
+                        <form method="post" action="/admin/category/category-list" class="row g-3 align-items-end">
                             <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category') }}">
                             <div class="col-6">
                                 <label class="form-label" for="categoryName">カテゴリ名</label>
@@ -50,7 +50,7 @@
                                     <td>{{ Category.parentId|default('') }}</td>
                                     <td>{{ Category.sortNo }}</td>
                                     <td class="text-end pe-3">
-                                        <a class="btn btn-ec-regular" href="{{ url('admin_product_category_edit', { id: Category.categoryId }) }}">編集</a>
+                                        <a class="btn btn-ec-regular" href="/admin/category/category?categoryId={{ Category.categoryId }}">編集</a>
                                     </td>
                                 </tr>
                             {% else %}

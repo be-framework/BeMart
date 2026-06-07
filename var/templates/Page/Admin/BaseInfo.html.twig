@@ -3,13 +3,13 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_shop' %}
+{% set route = 'admin-base-info' %}
 {% set title = '店舗基本情報' %}
 {% set sub_title = '店舗設定' %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ url('admin_setting_shop') }}" id="shop_master_form" name="form1" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form role="form" method="post" action="/admin/base-info" id="shop_master_form" name="form1" novalidate>
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

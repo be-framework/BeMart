@@ -21,8 +21,6 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function sprintf;
-use function urlencode;
 
 /**
  * EC-CUBE goTagList + doCreateTag — collection endpoint (Wave 9).
@@ -75,7 +73,7 @@ class TagList extends ResourceObject
         assert($final instanceof TagCreated);
 
         $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/admin/tag/tag?tagId=%s', urlencode($final->tagId));
+        $this->headers['Location'] = '/admin/tag/tag-list';
         $this->body = [
             'tagId' => $final->tagId,
             'tagName' => $final->tagName,

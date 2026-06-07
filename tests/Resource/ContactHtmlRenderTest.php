@@ -218,7 +218,7 @@ final class ContactHtmlRenderTest extends TestCase
         // explained: 13 shared <head>/<title>/CSRF frame lines + 10
         // distinct EC-CUBE-only kana/address/phone missing-body-field
         // lines (some collapse-equal across the three rows) + the 2
-        // hidden-CSRF-input lines (EC-CUBE's empty `_token` vs BeMart's
+        // hidden-CSRF-input lines (EC-CUBE's empty `csrfToken` vs BeMart's
         // CsrfToken reference — the values never match). The
         // form-widget residual family is eliminated; what remains is the
         // frame + the genuinely-missing fields, which are flagged for a
@@ -245,10 +245,10 @@ final class ContactHtmlRenderTest extends TestCase
             '<title>',
             'meta name="author"',
             // The hidden CSRF input: EC-CUBE renders a live per-request
-            // form `_token`, BeMart renders the CsrfToken
+            // form `csrfToken`, BeMart renders the CsrfToken
             // reference. The token VALUE can never match across the two
-            // runtimes — residual by its `_token` field name.
-            'name="_token"',
+            // runtimes — residual by its `csrfToken` field name.
+            'name="csrfToken"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -297,7 +297,7 @@ final class ContactHtmlRenderTest extends TestCase
                 'postal_code' => null,
                 'address' => new EcCubeStub([]),
                 'phone_number' => null,
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
             ]),
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
             'eccube_config' => ['locale' => 'ja'],
@@ -351,8 +351,8 @@ final class ContactHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
@@ -364,8 +364,8 @@ final class ContactHtmlRenderTest extends TestCase
         $contactForm = (new FormFactory())->newInstance(ContactForm::class);
         $modelled = ['contactName01', 'contactName02', 'contactEmail', 'contactContents'];
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($contactForm, $modelled): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($contactForm instanceof ContactForm && is_string($field) && in_array($field, $modelled, true)) {

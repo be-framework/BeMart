@@ -20,7 +20,7 @@ final class AdminMasterDataForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('masterdata', 'select')
+        $this->setField('masterType', 'select')
             ->setAttribs([
                 'id' => 'admin_system_masterdata_masterdata',
                 'class' => 'form-select',
@@ -34,12 +34,7 @@ final class AdminMasterDataForm extends AbstractForm
                 'news' => 'dtb_news',
             ]);
 
-        $this->setField('masterdata_name', 'hidden')
-            ->setAttribs([
-                'id' => 'admin_system_masterdata_edit_masterdata_name',
-            ]);
-
-        $this->filter->validate('masterdata')->isNotBlank();
+        $this->filter->validate('masterType')->isNotBlank();
     }
 
     /**
@@ -48,8 +43,7 @@ final class AdminMasterDataForm extends AbstractForm
     public function fillValues(array $masterTypes, string $selectedMaster): void
     {
         $this->fill([
-            'masterdata' => $selectedMaster,
-            'masterdata_name' => $selectedMaster,
+            'masterType' => $selectedMaster,
         ]);
     }
 }

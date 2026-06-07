@@ -16,7 +16,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` / `path(...)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` / `canonical-path ...)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `form_widget(searchForm.multi)` -> `searchForm.input('multi')` — the
      real AdminCustomerSearchForm keyword box (Ray.WebFormModule).
@@ -47,7 +47,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_customer' %}
+{% set route = 'admin-customer-list' %}
 {% set title = '会員一覧' %}
 {% set sub_title = '会員管理' %}
 
@@ -196,8 +196,8 @@
                             <div class="col-5 text-end">
                                 <div class="d-inline-block">
                                     <div class="btn-group" role="group">
-                                        <a class="btn btn-ec-regular" href="{{ url('admin_customer_export') }}"><i class="fa fa-cloud-download me-1 text-secondary"></i><span>CSVダウンロード</span></a>
-                                        <a class="btn btn-ec-regular" href="{{ url('admin_setting_shop_csv') }}"><i class="fa fa-cog me-1 text-secondary"></i><span>CSV出力項目設定</span></a>
+                                        <a class="btn btn-ec-regular" href="/admin/customer-csv"><i class="fa fa-cloud-download me-1 text-secondary"></i><span>CSVダウンロード</span></a>
+                                        <a class="btn btn-ec-regular" href="/admin/csv-config"><i class="fa fa-cog me-1 text-secondary"></i><span>CSV出力項目設定</span></a>
                                     </div>
                                 </div>
                             </div>
@@ -219,7 +219,7 @@
                                     {% for Customer in customers %}
                                         <tr id="ex-customer-{{ Customer.customerId }}">
                                             <td class="align-middle ps-3">{{ Customer.customerId }}</td>
-                                            <td class="align-middle"><a href="{{ url('admin_customer_edit', { 'id': Customer.customerId}) }}">{{ Customer.name01 }}&nbsp;{{ Customer.name02 }}</a></td>
+                                            <td class="align-middle"><a href="/admin/customer?customerId={{ Customer.customerId }}">{{ Customer.name01 }}&nbsp;{{ Customer.name02 }}</a></td>
                                             <td class="align-middle">{{ Customer.phoneNumber|default('') }}</td>
                                             <td class="align-middle">{{ Customer.email }}</td>
                                             <td class="align-middle"></td>
@@ -248,7 +248,7 @@
                                                                     <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">
                                                                         キャンセル
                                                                     </button>
-                                                                    <a href="{{ url('admin_customer_delete', {'id' : Customer.customerId}) }}" class="btn btn-ec-delete" data-confirm="false">
+                                                                    <a href="/admin/delete-customer?customerId={{ Customer.customerId }}" class="btn btn-ec-delete" data-confirm="false">
                                                                         削除
                                                                     </a>
                                                                 </div>

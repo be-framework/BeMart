@@ -1265,15 +1265,13 @@ can stay free of session lookups; we just map the exception.</div><div class="me
   <td rowspan="3" class="path-cell" id="path-admin/csv-config">/admin/csv-config</td>
   <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE CSV出力項目設定 — Setting/Shop Tier-2.</div><div class="method-desc">Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
 persists a submitted vector; this GET serves the editor body.</div><div class="method-alps"><a href="../alps.json.html#doUpdateCsv" class="alps-link">doUpdateCsv</a></div></td>
-  <td><span class="param">id</span></td>
+  <td><a href="../alps.json.html#csvType" class="param alps-param" title="CSV種別">csvType</a></td>
   <td><span class="badge type-int">int</span></td>
-  <td class="param-desc">ID（入力） - Fake観察文字長 13〜32; 観察値 &#039;ad000000000000000000000000000001&#039;, &#039;ad000000000000000000000000000003&#039;, &#039;fedcba9876543210fedcba9876543210&#039;, &#039;10000000aaaa1111bbbb2222cccc3333&#039;, &#039;ad000000000000000000000000000002&#039;, &#039;0123456789abcdef0123456789abcdef&#039;, &#039;aaaaaaaa00000000bbbbbbbb11111111&#039;, &#039;20000000dddd2222eeee3333ffff4444&#039;。</td>
+  <td class="param-desc">CSV種別（入力） - CSV出力項目設定で編集対象にするCSV種別。1=受注CSV, 2=会員CSV, 3=商品CSV, 4=配送CSV。HTTP queryでは文字列として届く場合があるためtransport schemaではstring|integer|nullを許容し、意味検証はResource/Semantic層へ委ねる。</td>
   <td><div class="extra-info">
       <span class="badge constraint">default: 1</span>
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 128</span>
-      <span class="badge constraint">$comment: ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
-      <span class="badge example">example: ad000000000000000000000000000001</span>
+      <span class="badge constraint">enum: [1,2,3,4,&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,null]</span>
+      <span class="badge constraint">$comment: GET query transport boundary: browser selection values arrive as strings; Resource signature casts/validates csvType semantics.</span>
     </div></td>
   <td rowspan="1"><a href="#GET/admin/csv-configresponse" class="schema-link">GET /admin/csv-config response</a></td>
 </tr>
@@ -8776,14 +8774,12 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
-  <td><span class="prop-name">id</span></td>
-  <td><span class="badge type-stringintnull">string|int|null</span></td>
-  <td class="param-desc">ID - Fake観察文字長 13〜32; 観察値 &#039;ad000000000000000000000000000001&#039;, &#039;ad000000000000000000000000000003&#039;, &#039;fedcba9876543210fedcba9876543210&#039;, &#039;10000000aaaa1111bbbb2222cccc3333&#039;, &#039;ad000000000000000000000000000002&#039;, &#039;0123456789abcdef0123456789abcdef&#039;, &#039;aaaaaaaa00000000bbbbbbbb11111111&#039;, &#039;20000000dddd2222eeee3333ffff4444&#039;。</td>
+  <td><span class="prop-name">csvType</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">CSV種別 - CSV出力項目設定で現在選択しているCSV種別。1=受注CSV, 2=会員CSV, 3=商品CSV, 4=配送CSV。画面の選択状態とPOST対象の列設定コンテキストを示す。</td>
   <td><div class="extra-info">
-      <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 128</span>
-      <span class="badge constraint">$comment: Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。</span>
-      <span class="badge example">example: ad000000000000000000000000000001</span>
+      <span class="badge constraint">enum: [1,2,3,4]</span>
+      <span class="badge example">example: 1</span>
     </div></td>
 </tr>
 <tr class="link-row">

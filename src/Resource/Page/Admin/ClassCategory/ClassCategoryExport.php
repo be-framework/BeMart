@@ -19,7 +19,7 @@ use function assert;
 /**
  * EC-CUBE 規格分類CSVダウンロード (goExportClassCategory).
  *
- *   GET/POST /admin_product_class_category_export → CSV download
+ *   GET/POST /admin/class-category/class-category-export → CSV download
  *
  * `onGet` drives the Be `goExportClassCategory` transition (optionally
  * scoped to one 規格名); the EC-CUBE-format encoding + download headers

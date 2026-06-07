@@ -32,7 +32,7 @@
 #}
 {% extends 'base.html.twig' %}
 
-{% set route = 'help_about' %}
+{% set route = 'help-about' %}
 {% set title = '当サイトについて' %}
 
 {% block main %}
@@ -45,7 +45,7 @@
         <div class="ec-off1Grid__cell">
             <div class="ec-borderedDefs">
                 {% for section in staticContent.sections %}
-                    <dl id="help_about_box__{{ section.id }}">
+                    <dl id="/help/about_box__{{ section.id }}">
                         <dt>
                             <label class="ec-label">{{ section.label }}</label>
                         </dt>

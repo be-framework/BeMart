@@ -1,0 +1,63 @@
+{#
+  BeMart admin shipping-notification mail confirmation.
+
+  This page is the canonical BEAR Resource-path screen for
+  `/admin/order/shipping-notify-mail`.  It intentionally keeps the
+  contract narrow: the GET displays the order keyed by orderNo, and the
+  POST sends the shipping notification through the BeMart mail boundary.
+#}
+{% extends 'admin-base.html.twig' %}
+
+{% set route = 'admin-order-shipping-notify-mail' %}
+{% set title = '出荷通知メール' %}
+{% set sub_title = '受注管理' %}
+
+{% block main %}
+    <form role="form" method="post" action="/admin/order/shipping-notify-mail" id="shipping_notify_mail_form" name="form1" novalidate>
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_shipping_notify_mail')) }}">
+        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
+        <div class="c-contentsArea__cols">
+            <div class="c-contentsArea__primaryCol">
+                <div class="c-primaryCol">
+                    <div class="card rounded border-0 mb-4">
+                        <div class="card-header">
+                            <span class="card-title">出荷通知メール送信</span>
+                        </div>
+                        <div class="card-body">
+                            <p class="mb-4">{{ message|default('出荷通知メールを送信します。よろしいですか？') }}</p>
+                            <div class="row mb-2">
+                                <div class="col-3 fw-bold">注文番号</div>
+                                <div class="col">{{ orderNo|default('') }}</div>
+                            </div>
+                            <div class="row mb-0">
+                                <div class="col-3 fw-bold">会員ID</div>
+                                <div class="col">{{ customerId|default('') ?: 'ゲスト購入' }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="c-conversionArea">
+            <div class="c-conversionArea__container">
+                <div class="row justify-content-between align-items-center">
+                    <div class="col-6">
+                        <div class="c-conversionArea__leftBlockItem">
+                            <a class="c-baseLink" href="/admin/order?orderNo={{ orderNo|default('')|url_encode }}">
+                                <i class="fa fa-backward" aria-hidden="true"></i>
+                                <span>受注詳細へ戻る</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
+                            <div class="col-auto">
+                                <button type="submit" class="btn btn-ec-conversion px-5">出荷通知メールを送信</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+{% endblock %}

@@ -44,7 +44,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_favorite' %}
+{% set route = 'mypage-favorite-list' %}
 {% set title = 'マイページ' %}
 
 {% block main %}
@@ -67,14 +67,14 @@
                             {% for FavoriteProduct in favorites %}
                                 <li class="ec-favoriteRole__item">
                                     <a class="ec-closeBtn--circle"
-                                       href="{{ url('mypage_favorite_delete', { id : FavoriteProduct.productCode }) }}"
+                                       href="/mypage/favorite?productCode={{ FavoriteProduct.productCode }}&_method=delete"
                                        token-for-anchor="{{ csrf_token_for_anchor() }}"
                                        data-method="delete">
                                         <div class="ec-icon">
                                             <img src="{{ asset('assets/icon/cross-white.svg') }}" alt="close">
                                         </div>
                                     </a>
-                                    <a class="ec-favoriteRole__itemThumb" href="{{ url('product_detail', {'id': FavoriteProduct.productCode}) }}">
+                                    <a class="ec-favoriteRole__itemThumb" href="/product?productCode={{ FavoriteProduct.productCode }}">
                                         <p class="ec-favoriteRole__item-image">
                                             <img src="{{ asset(FavoriteProduct.fileName|default('assets/img/common/no_image_product.png'), 'save_image') }}">
                                         </p>

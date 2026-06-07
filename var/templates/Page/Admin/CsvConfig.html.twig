@@ -3,7 +3,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_shop_csv' %}
+{% set route = 'admin-csv-config' %}
 {% set title = 'CSV出力項目設定' %}
 {% set sub_title = '店舗設定' %}
 
@@ -45,23 +45,39 @@
             });
 
             $('#csv-type').on('change', function() {
-                var id = $(this).val();
-                var href = '{{ url('admin_setting_shop_csv') }}' + '/' + id;
-                location.href = href;
+                var csvType = $(this).val();
+                location.href = '/admin/csv-config?csvType=' + encodeURIComponent(csvType);
                 return false;
             });
 
             $('#csv-form').submit(function() {
                 $('#csv-not-output').children().prop('selected', true);
                 $('#csv-output').children().prop('selected', true);
+                $('#csv-columns').remove();
+
+                var columns = $('<div id="csv-columns" />').hide();
+                var sortNo = 0;
+                $('#csv-output option').each(function() {
+                    appendColumn(columns, sortNo++, $(this).val(), true);
+                });
+                $('#csv-not-output option').each(function() {
+                    appendColumn(columns, sortNo++, $(this).val(), false);
+                });
+                columns.appendTo('#csv-form');
             });
+
+            function appendColumn(container, index, columnName, enabled) {
+                $('<input>').attr({type: 'hidden', name: 'columns[' + index + '][columnName]'}).val(columnName).appendTo(container);
+                $('<input>').attr({type: 'hidden', name: 'columns[' + index + '][enabled]'}).val(enabled ? '1' : '0').appendTo(container);
+                $('<input>').attr({type: 'hidden', name: 'columns[' + index + '][sortNo]'}).val(index + 1).appendTo(container);
+            }
         });
     </script>
 {% endblock %}
 
 {% block main %}
-    <form id="csv-form" method="post" action="{{ url('admin_setting_shop_csv', {'id': id}) }}">
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form id="csv-form" method="post" action="/admin/csv-config">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -80,7 +96,7 @@
                                     </div>
                                 </div>
                                 <div class="col-6">
-                                    {{ form.input('csv_type')|raw }}
+                                    {{ form.input('csvType')|raw }}
                                 </div>
                                 <div class="col"></div>
                             </div>
@@ -88,7 +104,7 @@
                                 <div class="col-4">
                                     <div class="mb-3">
                                         <label for="csv-not-output">出力しない項目</label>
-                                        {{ form.input('csv_not_output')|raw }}
+                                        {{ form.input('csvNotOutput')|raw }}
                                     </div>
                                 </div>
                                 <div class="col-2 align-self-center">
@@ -119,7 +135,7 @@
                                 <div class="col-4">
                                     <div class="mb-3">
                                         <label for="csv-output">出力する項目</label>
-                                        {{ form.input('csv_output')|raw }}
+                                        {{ form.input('csvOutput')|raw }}
                                     </div>
                                 </div>
                                 <div class="col-2 align-self-center">

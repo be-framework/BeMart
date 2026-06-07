@@ -16,14 +16,14 @@
   {@see \MyVendor\BeMart\Form\AdminLoginForm} as `body['form']`. The
   inputs render through that real form object:
 
-    {{ form.input('login_id')|raw }}    <- real <input> w/ id/attrs/value
+    {{ form.input('loginId')|raw }}    <- real <input> w/ id/attrs/value
     {{ form.input('password')|raw }}    <- real password <input>
 
   EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.login_id)`); Ray.WebFormModule is BeMart's
+  (`form_widget(form.loginId)`); Ray.WebFormModule is BeMart's
   BEAR-idiomatic equivalent. `AdminLoginForm::init()` ports the field
   names / ids / attributes from EC-CUBE's `LoginType` (block prefix
-  `admin_login`) + the template's per-widget `attr` overrides.
+  `/admin/login`) + the template's per-widget `attr` overrides.
 
   VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
   form is a field-definition + renderer. On a domain rejection the admin
@@ -31,7 +31,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `path('admin_login')` -> deterministic `/{route}` (BeMartTwigExtension).
+   - canonical form action -> `/admin/login`.
    - `csrf_token('authenticate')` -> EC-CUBE per-request CSRF widget.
      BeMart's CSRF is the CsrfToken (Slice 8); the hidden
      `_csrf_token` input is kept (structure) with the body's `csrfToken`
@@ -53,11 +53,11 @@
         <div class="row">
             <div class="col-12 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
                 <div class="text-center p-5 bg-white">
-                    <form name="form1" id="form1" method="post" action="{{ url('admin_login') }}">
-                        <input type="hidden" name="_csrf_token" value="{{ csrfToken|default('') }}">
+                    <form name="form1" id="form1" method="post" action="/admin/login">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                         <p><img src="{{ asset('assets/img/logo2.png', 'admin') }}" alt="BeMart" width="106"></p>
                         <div class="mb-3">
-                            {{ form.input('login_id')|raw }}
+                            {{ form.input('loginId')|raw }}
                         </div>
                         <div class="mb-3">
                             {{ form.input('password')|raw }}

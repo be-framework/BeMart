@@ -1,12 +1,12 @@
 {# EC-CUBE admin category edit — product category detail screen. #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_product_category_edit' %}
+{% set route = 'admin-category-category' %}
 {% set title = 'カテゴリ編集' %}
 {% set sub_title = '商品管理' %}
 
 {% block main %}
-    <form method="post" action="{{ url('admin_product_category_edit', { id: categoryId }) }}">
+    <form method="post" action="/admin/category/category?categoryId={{ categoryId }}">
         <input type="hidden" name="_method" value="put">
         <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_category') }}">
         <input type="hidden" name="categoryId" value="{{ categoryId }}">
@@ -36,7 +36,7 @@
         <div class="c-conversionArea">
             <div class="c-conversionArea__container">
                 <div class="row justify-content-between align-items-center">
-                    <div class="col-6"><a class="c-baseLink" href="{{ url('admin_product_category') }}"><i class="fa fa-backward"></i><span>カテゴリ管理</span></a></div>
+                    <div class="col-6"><a class="c-baseLink" href="/admin/category/category-list"><i class="fa fa-backward"></i><span>カテゴリ管理</span></a></div>
                     <div class="col-6 text-end"><button class="btn btn-ec-conversion px-5" type="submit">保存</button></div>
                 </div>
             </div>

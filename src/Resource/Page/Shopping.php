@@ -11,8 +11,10 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
+use MyVendor\BeMart\Auth\HtmlCartSession;
 use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\ShoppingOrderForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -55,6 +57,7 @@ class Shopping extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -68,9 +71,25 @@ class Shopping extends ResourceObject
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(string $sessionPrefix = 'session-prefix-1'): static
     {
-        $final = ($this->becoming)(new GetShoppingInput(sessionPrefix: $sessionPrefix));
+        try {
+            $final = ($this->becoming)(new GetShoppingInput(
+                sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+            ));
+        } catch (SemanticVariableException $e) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
+
+            return $this;
+        } catch (UnauthenticatedException) {
+            $this->code = Code::UNAUTHORIZED;
+            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
+
+            return $this;
+        }
 
         assert($final instanceof ShoppingFetched);
+
+        $firstCart = $final->carts[0] ?? null;
 
         $this->code = Code::OK;
         $this->body = [
@@ -79,12 +98,14 @@ class Shopping extends ResourceObject
             'name01' => $final->name01,
             'name02' => $final->name02,
             'defaultShippingAddress' => $final->defaultShippingAddress,
+            'preOrderId' => is_array($firstCart) ? ($firstCart['preOrderId'] ?? null) : null,
             'carts' => $final->carts,
             'cartCount' => $final->cartCount,
             'totalPrice' => $final->totalPrice,
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
             'paymentMethods' => $final->paymentMethods,
             'canCheckout' => $final->canCheckout,
+            'csrfToken' => $this->csrf->token,
             // Phase 3: an empty ShoppingOrderForm for the HTML port to
             // render the message textarea + delivery / payment controls.
             // JSON contexts ignore it.

@@ -84,13 +84,15 @@
         },
         "category_id": {
           "type": [
-            "integer",
+            "string",
             "null"
           ],
-          "minimum": 0,
-          "maximum": 2147483647,
-          "title": "カテゴリID",
-          "description": "dtb_category.id の不透明な文字列ハンドル。BeMart の CategoryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_category.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlCategoryStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (CategoryUpdated / CategoryDeleted / CategoryCreated の親解決) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。parentId（自己参照 FK parent_category_id）も同じ文字列ハンドルで表現され、非数値 parentId は SQL では NULL（ルート）に倒れる。blockId / pageId / tagId と同じ Fake↔SQL 二重性"
+          "pattern": "^[0-9]+$",
+          "minLength": 1,
+          "maxLength": 10,
+          "title": "選択中カテゴリID",
+          "description": "/products の検索フォームに再表示する選択中カテゴリID。HTTP query由来の文字列値で、カテゴリ絞り込み条件を保持する。",
+          "$comment": "Responseのfiltersは入力再表示用のtransport値なので、DB IDとしてのintegerではなくHTML queryと同じstring|nullで表す。"
         }
       },
       "additionalProperties": false,
@@ -114,23 +116,23 @@
       "properties": {
         "previous": {
           "type": [
-            "string",
+            "integer",
             "null"
           ],
-          "minLength": 0,
-          "maxLength": 255,
-          "title": "前ページリンク",
-          "description": "/products の一覧表示を制御するページング/検索条件。件数、開始位置、並び順、前後リンクをクライアントが再現するための値。"
+          "minimum": 1,
+          "maximum": 10000,
+          "title": "前ページ番号",
+          "description": "/products のページャで、現在ページの直前に遷移するページ番号。先頭ページでは null。"
         },
         "next": {
           "type": [
-            "string",
+            "integer",
             "null"
           ],
-          "minLength": 0,
-          "maxLength": 255,
-          "title": "次ページリンク",
-          "description": "/products の一覧表示を制御するページング/検索条件。件数、開始位置、並び順、前後リンクをクライアントが再現するための値。"
+          "minimum": 1,
+          "maximum": 10000,
+          "title": "次ページ番号",
+          "description": "/products のページャで、現在ページの直後に遷移するページ番号。最終ページでは null。"
         },
         "pages": {
           "type": [

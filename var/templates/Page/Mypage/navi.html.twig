@@ -28,19 +28,19 @@
 <div class="ec-navlistRole">
     <ul class="ec-navlistRole__navlist">
         <li class="ec-navlistRole__item {% if mypageno|default('') == 'index' %}active{% endif %}">
-            <a href="{{ url('mypage') }}">ご注文履歴</a>
+            <a href="/mypage">ご注文履歴</a>
         </li>
         <li class="ec-navlistRole__item {% if mypageno|default('') == 'favorite' %}active{% endif %}">
-            <a href="{{ url('mypage_favorite') }}">お気に入り一覧</a>
+            <a href="/mypage/favorite-list">お気に入り一覧</a>
         </li>
         <li class="ec-navlistRole__item {% if mypageno|default('') == 'change' %}active{% endif %}">
-            <a href="{{ url('mypage_change') }}">会員情報編集</a>
+            <a href="/mypage/change">会員情報編集</a>
         </li>
         <li class="ec-navlistRole__item {% if mypageno|default('') == 'delivery' %}active{% endif %}">
-            <a href="{{ url('mypage_delivery') }}">お届け先一覧</a>
+            <a href="/mypage/address-list">お届け先一覧</a>
         </li>
         <li class="ec-navlistRole__item {% if mypageno|default('') == 'withdraw' %}active{% endif %}">
-            <a href="{{ url('mypage_withdraw') }}">退会手続き</a>
+            <a href="/mypage/withdraw">退会手続き</a>
         </li>
     </ul>
 </div>

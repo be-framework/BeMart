@@ -14,20 +14,20 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
    - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
      AdminOrderPdfForm leaf fields (Ray.WebFormModule).
    - `csrf_token()` hidden input -> `csrfToken|default('')`.
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_order_pdf' %}
+{% set route = 'admin-order-pdf' %}
 {% set title = '帳票出力' %}
 {% set sub_title = '受注管理' %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ url('admin_order_export_pdf') }}" id="order_pdf_form" name="form1" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form role="form" method="post" action="/admin/order/export-order-pdf" id="order_pdf_form" name="form1" novalidate>
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
@@ -74,7 +74,7 @@
                 <div class="row justify-content-between align-items-center">
                     <div class="col-6">
                         <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="{{ url('admin_order') }}">
+                            <a class="c-baseLink" href="/admin/order-list">
                                 <i class="fa fa-backward" aria-hidden="true"></i>
                                 <span>受注一覧へ戻る</span>
                             </a>

@@ -45,7 +45,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_change' %}
+{% set route = 'mypage-change' %}
 {% set title = 'マイページ' %}
 
 {% block javascript %}
@@ -64,9 +64,9 @@
             <div class="ec-editRole">
                 <div class="ec-off1Grid">
                     <div class="ec-off1Grid__cell">
-                        <form method="post" action="{{ url('mypage_change') }}" novalidate class="h-adr">
+                        <form method="post" action="/mypage/change" novalidate class="h-adr">
                             <span class="p-country-name" style="display:none;">Japan</span>
-                            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                             <div class="ec-borderedDefs">
                                 <dl>
                                     <dt>
