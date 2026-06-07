@@ -91,18 +91,17 @@ final class AdminOrderListResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->get('page://self/admin/order-list');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
+        $this->resource->get('page://self/admin/order-list');
     }
 
     public function testOnGetWithInvalidLimitReturns400(): void
     {
-        $ro = $this->resource->get('page://self/admin/order-list', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->get('page://self/admin/order-list', [
             'limit' => 0,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 }

@@ -80,11 +80,12 @@ final class AdminPaymentResourceTest extends TestCase
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/payment/payment-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/payment/payment-list', [
             'paymentMethodName' => 'クレジットカード',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testCreateRejectsMissingCsrf(): void
@@ -110,8 +111,9 @@ final class AdminPaymentResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/payment/payment-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/payment/payment-list');
     }
 
     public function testPutEditsMaster(): void
@@ -132,12 +134,13 @@ final class AdminPaymentResourceTest extends TestCase
 
     public function testPutUnknownIdReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/payment/payment', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\PaymentMethodAdminNotFoundException::class);
+
+        $this->resource->put('page://self/admin/payment/payment', [
             'paymentId' => 'nonexistent-zzz',
             'paymentMethodName' => 'X',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testDeleteHappyPath(): void
@@ -197,8 +200,8 @@ final class AdminPaymentResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->get('page://self/admin/payment/payment');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->resource->get('page://self/admin/payment/payment');
     }
 }

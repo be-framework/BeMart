@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -12,6 +13,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\LoginHistoryListFetched;
 use MyVendor\BeMart\Be\Input\GetLoginHistoryListInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -39,25 +41,16 @@ class LoginHistory extends ResourceObject
     }
 
     /**
+     * ALPS `goLoginHistoryList` に対応する GET 操作。
      * @psalm-taint-source input $limit
      */
+    #[Alps('goLoginHistoryList')]
+    #[JsonSchema(schema: 'get-admin-login-history.json', params: 'get-admin-login-history.param.json')]
     #[Link(rel: 'goSecurity', href: 'page://self/admin/security')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     public function onGet(int $limit = 50): static
     {
-        try {
-            $final = ($this->becoming)(new GetLoginHistoryListInput(limit: $limit));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetLoginHistoryListInput(limit: $limit));
 
         assert($final instanceof LoginHistoryListFetched);
 

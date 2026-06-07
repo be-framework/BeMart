@@ -45,17 +45,13 @@ final class AdminLoginResourceTest extends TestCase
 
     public function testOnPostWrongPasswordReturns401(): void
     {
-        $ro = $this->resource->post('page://self/admin/login', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\AdminLoginFailedException::class);
+
+        $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'not-the-right-password',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('正しくありません', $ro->body['message']);
-        // The body MUST NOT echo the loginId back — same anti-enumeration
-        // discipline as the customer login.
-        $this->assertArrayNotHasKey('loginId', $ro->body);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -71,12 +67,12 @@ final class AdminLoginResourceTest extends TestCase
 
     public function testOnPostShortPasswordReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/login', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'short',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 }

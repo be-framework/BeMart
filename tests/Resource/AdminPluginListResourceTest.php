@@ -78,12 +78,12 @@ final class AdminPluginListResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->get('page://self/admin/plugin-list');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
+        $this->resource->get('page://self/admin/plugin-list');
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testOnPostHappyPathInstallsPlugin(): void
     {
         $this->markTestSkipped('Stateful plugin install post-condition is covered by the SQL suite.');
@@ -139,28 +139,27 @@ final class AdminPluginListResourceTest extends TestCase
 
     public function testOnPostBadPluginCodeReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/plugin-list', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/admin/plugin-list', [
             'pluginCode' => 'has spaces',
             'pluginName' => '新規プラグイン',
             'pluginVersion' => '1.0.0',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/plugin-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/plugin-list', [
             'pluginCode' => 'NewVendor/Plugin',
             'pluginName' => '新規プラグイン',
             'pluginVersion' => '1.0.0',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 }

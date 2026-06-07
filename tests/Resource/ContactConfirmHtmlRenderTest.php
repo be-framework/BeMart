@@ -175,6 +175,7 @@ final class ContactConfirmHtmlRenderTest extends TestCase
         $this->assertStringContainsString('<input type="hidden" name="contactContents"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testContactConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/contact/confirm')->toString();

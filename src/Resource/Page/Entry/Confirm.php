@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Entry;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Form\EntryConfirmForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goCustomerRegistrationConfirm — 新規会員登録(確認)
@@ -53,11 +55,14 @@ class Confirm extends ResourceObject
     }
 
     /**
+     * ALPS `goCustomerRegistrationConfirm` に対応する GET 操作。
      * @todo Enrichment backlog: thread the submitted registration payload
      *     into the confirm step so the value cells re-show the entered
      *     data. Requires a `mode=confirm` POST handler ahead of
      *     doRegisterCustomer.
      */
+    #[Alps('goCustomerRegistrationConfirm')]
+    #[JsonSchema(schema: 'get-entry-confirm.json')]
     #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static

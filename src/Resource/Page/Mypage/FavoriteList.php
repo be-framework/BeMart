@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -12,6 +13,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\FavoriteListFetched;
 use MyVendor\BeMart\Be\Input\GetFavoriteListInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -35,24 +37,15 @@ class FavoriteList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goFavoriteList` に対応する GET 操作。 */
+    #[Alps('goFavoriteList')]
+    #[JsonSchema(schema: 'get-mypage-favorite-list.json')]
     #[Link(rel: 'doAddFavorite', href: 'page://self/mypage/favorite', method: 'post')]
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetFavoriteListInput());
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetFavoriteListInput());
 
         assert($final instanceof FavoriteListFetched);
 

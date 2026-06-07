@@ -1,0 +1,42 @@
+diff --git a/src/Helper/Input.php b/src/Helper/Input.php
+index 478c47d..057a61a 100644
+--- a/src/Helper/Input.php
++++ b/src/Helper/Input.php
+@@ -28,7 +28,7 @@ class Input extends HelperLocator
+      *
+      * @return mixed
+      *
+      */
+-    public function __invoke(array $spec = null)
++    public function __invoke(?array $spec = null)
+     {
+         if ($spec === null) {
+             return $this;
+diff --git a/src/Helper/Input/AbstractInput.php b/src/Helper/Input/AbstractInput.php
+index 9fe8af1..967ce99 100644
+--- a/src/Helper/Input/AbstractInput.php
++++ b/src/Helper/Input/AbstractInput.php
+@@ -74,7 +74,7 @@ abstract class AbstractInput extends AbstractHelper
+      *
+      * @return string
+      *
+      */
+-    public function __invoke(array $spec = null)
++    public function __invoke(?array $spec = null)
+     {
+         if ($spec !== null) {
+             $this->prep($spec);
+diff --git a/src/Helper/Input/Select.php b/src/Helper/Input/Select.php
+index bbf2ad1..9c5d925 100644
+--- a/src/Helper/Input/Select.php
++++ b/src/Helper/Input/Select.php
+@@ -72,7 +72,7 @@ class Select extends AbstractInput
+      *
+      * @return string|self
+      *
+      */
+-    public function __invoke(array $spec = null)
++    public function __invoke(?array $spec = null)
+     {
+         if ($spec !== null) {
+             $this->prep($spec);

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Customer;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ActivationMailResent;
 use MyVendor\BeMart\Be\Input\ResendActivationMailInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -51,39 +53,17 @@ class ResendActivationMail extends ResourceObject
     }
 
     /**
+     * ALPS `doResendActivationMail` に対応する POST 操作。
      * @psalm-taint-source input $email
      */
+    #[Alps('doResendActivationMail')]
+    #[JsonSchema(schema: 'post-admin-customer-resend-activation-mail.json', params: 'post-admin-customer-resend-activation-mail.param.json')]
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
     #[CsrfProtected]
     public function onPost(
         string $email,
     ): static {
-        try {
-            $final = ($this->becoming)(new ResendActivationMailInput(email: $email));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (CustomerNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された会員は見つかりませんでした。'];
-
-            return $this;
-        } catch (CustomerAlreadyActivatedException) {
-            // 409 Conflict — BEAR\Resource\Code has no CONFLICT constant;
-            // the literal matches the rest of the admin surface
-            // (CreateCustomer, Member, Product all use a bare 409).
-            $this->code = 409;
-            $this->body = ['message' => '指定された会員は既に本会員です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ResendActivationMailInput(email: $email));
 
         assert($final instanceof ActivationMailResent);
 

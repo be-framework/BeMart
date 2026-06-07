@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\MasterRowNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\SortNoMoved;
 use MyVendor\BeMart\Be\Input\SortNoMoveInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -43,43 +45,24 @@ class SortNoMove extends ResourceObject
     }
 
     /**
+     * ALPS `doSortNoMove` に対応する PUT 操作。
      * @psalm-taint-source input $masterType
      * @psalm-taint-source input $rowId
      * @psalm-taint-source input $sortNo
      */
+    #[Alps('doSortNoMove')]
+    #[JsonSchema(schema: 'put-admin-sort-no-move.json', params: 'put-admin-sort-no-move.param.json')]
     #[CsrfProtected]
     public function onPut(
         string $masterType,
         string $rowId,
         int $sortNo,
     ): static {
-        try {
-            $final = ($this->becoming)(new SortNoMoveInput(
-                masterType: $masterType,
-                rowId: $rowId,
-                sortNo: $sortNo,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (MasterOperationNotSupportedException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => 'このマスタは並び順の変更に対応していません。'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (MasterRowNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された行は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SortNoMoveInput(
+            masterType: $masterType,
+            rowId: $rowId,
+            sortNo: $sortNo,
+        ));
 
         assert($final instanceof SortNoMoved);
 

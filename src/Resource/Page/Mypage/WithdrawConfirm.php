@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goMypageWithdrawConfirm — 退会手続き(実行確認)
@@ -48,6 +50,9 @@ use BEAR\Resource\ResourceObject;
  */
 class WithdrawConfirm extends ResourceObject
 {
+    /** ALPS `goMypageWithdrawConfirm` に対応する GET 操作。 */
+    #[Alps('goMypageWithdrawConfirm')]
+    #[JsonSchema(schema: 'get-mypage-withdraw-confirm.json')]
     #[Link(rel: 'doWithdrawCustomer', href: 'page://self/mypage/withdraw', method: 'post')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static

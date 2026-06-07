@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -12,6 +13,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\OrderHistoryFetched;
 use MyVendor\BeMart\Be\Input\GetOrderHistoryInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -38,26 +40,17 @@ class OrderHistory extends ResourceObject
     ) {
     }
 
+    /** ALPS `goOrderHistory` に対応する GET 操作。 */
+    #[Alps('goOrderHistory')]
+    #[JsonSchema(schema: 'get-mypage-order-history.json', params: 'get-mypage-order-history.param.json')]
     #[Link(rel: 'goMypageHistory', href: 'page://self/mypage/history', method: 'get')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(int $historyLimit = 50, int $offset = 0): static
     {
-        try {
-            $final = ($this->becoming)(new GetOrderHistoryInput(
-                historyLimit: $historyLimit,
-                offset: $offset,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetOrderHistoryInput(
+            historyLimit: $historyLimit,
+            offset: $offset,
+        ));
 
         assert($final instanceof OrderHistoryFetched);
 

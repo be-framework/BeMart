@@ -65,38 +65,37 @@ final class AdminProductCopyResourceTest extends TestCase
 
     public function testOnPostUnknownSourceReturns404(): void
     {
-        $ro = $this->resource->post('page://self/admin/product-copy', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductNotFoundException::class);
+
+        $this->resource->post('page://self/admin/product-copy', [
             'productCode' => 'does-not-exist',
             'newProductCode' => 'new-001',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnPostCollidingTargetReturns409(): void
     {
-        $ro = $this->resource->post('page://self/admin/product-copy', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductCodeAlreadyInUseException::class);
+
+        $this->resource->post('page://self/admin/product-copy', [
             'productCode' => 'admin-active-001',
             'newProductCode' => 'sample-001',  // already exists
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(409, $ro->code);
     }
 
     public function testOnPostWithoutAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/product-copy', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/product-copy', [
             'productCode' => 'admin-active-001',
             'newProductCode' => 'foo',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
