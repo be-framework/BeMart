@@ -1,5 +1,6 @@
 /vendor/
 /.phpunit.cache/
+/build/
 /var/log/*.json
 /var/tmp/
 /tests/Http/log/*.log
@@ -14,5 +15,5 @@
 /malt/var/
 /malt/conf/*.tmp
 
-# EC-CUBE source clone for schema extraction (Phase 2a)
+# EC-CUBE source clone for schema extraction and HTML parity tests
 /tools/ec-cube-source/

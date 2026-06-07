@@ -70,14 +70,7 @@ class MailTemplate extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetMailTemplateListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetMailTemplateListInput());
 
         assert($final instanceof MailTemplateListFetched);
 
@@ -123,27 +116,10 @@ class MailTemplate extends ResourceObject
         int $mailTemplateId,
         string $mailSubject,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateMailTemplateInput(
-                mailTemplateId: $mailTemplateId,
-                mailSubject: $mailSubject,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (MailTemplateNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'メールテンプレートが見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateMailTemplateInput(
+            mailTemplateId: $mailTemplateId,
+            mailSubject: $mailSubject,
+        ));
 
         assert($final instanceof MailTemplateUpdated);
 

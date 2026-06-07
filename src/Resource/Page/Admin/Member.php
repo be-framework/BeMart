@@ -110,26 +110,7 @@ class Member extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetMemberInput(loginId: $loginId));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (AdminNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された管理者は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetMemberInput(loginId: $loginId));
 
         assert($final instanceof MemberFetched);
 
@@ -176,34 +157,12 @@ class Member extends ResourceObject
         string $name,
         int $authority,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateMemberInput(
-                loginId: $loginId,
-                password: $password,
-                name: $name,
-                authority: $authority,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'loginId' => $loginId,
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (LoginIdAlreadyTakenException) {
-            // BEAR\Resource\Code lacks CONFLICT; use the integer
-            // literal (same convention as Pilot 4 Entry resource).
-            $this->code = 409;
-            $this->body = ['message' => 'このログインIDは既に使用されています。', 'loginId' => $loginId];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateMemberInput(
+            loginId: $loginId,
+            password: $password,
+            name: $name,
+            authority: $authority,
+        ));
 
         assert($final instanceof MemberCreated);
 
@@ -240,29 +199,10 @@ class Member extends ResourceObject
         string $loginId,
         string|null $name = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateMemberInput(
-                loginId: $loginId,
-                name: $name,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (AdminNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された管理者は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateMemberInput(
+            loginId: $loginId,
+            name: $name,
+        ));
 
         assert($final instanceof MemberUpdated);
 
@@ -292,31 +232,7 @@ class Member extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $loginId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteMemberInput(loginId: $loginId));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (AdminNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された管理者は見つかりませんでした。'];
-
-            return $this;
-        } catch (InsufficientAuthorityException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作を行う権限がありません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteMemberInput(loginId: $loginId));
 
         assert($final instanceof MemberDeleted);
 

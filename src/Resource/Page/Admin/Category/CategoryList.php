@@ -59,14 +59,7 @@ class CategoryList extends ResourceObject
     #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv', method: 'get')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminCategoryListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminCategoryListInput());
 
         assert($final instanceof AdminCategoryListFetched);
 
@@ -94,28 +87,11 @@ class CategoryList extends ResourceObject
         int $sortNo,
         string|null $parentId = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateCategoryInput(
-                categoryName: $categoryName,
-                sortNo: $sortNo,
-                parentId: $parentId,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (CategoryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された親カテゴリは存在しません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateCategoryInput(
+            categoryName: $categoryName,
+            sortNo: $sortNo,
+            parentId: $parentId,
+        ));
 
         assert($final instanceof CategoryCreated);
 

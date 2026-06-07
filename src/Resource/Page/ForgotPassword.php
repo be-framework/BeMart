@@ -88,14 +88,7 @@ class ForgotPassword extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $email): static
     {
-        try {
-            $final = ($this->becoming)(new RequestPasswordResetInput(email: $email));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new RequestPasswordResetInput(email: $email));
 
         assert($final instanceof PasswordResetRequested);
 

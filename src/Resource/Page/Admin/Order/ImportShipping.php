@@ -82,14 +82,7 @@ class ImportShipping extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $csv): static
     {
-        try {
-            $final = ($this->becoming)(new AdminImportShippingCsvInput(csv: $csv));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminImportShippingCsvInput(csv: $csv));
 
         assert($final instanceof AdminShippingCsvImported);
 

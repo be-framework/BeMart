@@ -92,19 +92,7 @@ class Activate extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $secretKey): static
     {
-        try {
-            $final = ($this->becoming)(new ActivateCustomerInput(secretKey: $secretKey));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (SecretKeyNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '本登録リンクが無効か、既に使用済みです。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ActivateCustomerInput(secretKey: $secretKey));
 
         assert($final instanceof CustomerActivated);
 

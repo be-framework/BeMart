@@ -51,14 +51,7 @@ class TaxRuleList extends ResourceObject
     #[Link(rel: 'doDeleteTaxRule', href: 'page://self/admin/tax-rule/tax-rule', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminTaxRuleListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminTaxRuleListInput());
 
         assert($final instanceof AdminTaxRuleListFetched);
 
@@ -94,23 +87,11 @@ class TaxRuleList extends ResourceObject
         string $applyDate,
         int $roundingType = 1,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateTaxRuleInput(
-                taxRate: $taxRate,
-                applyDate: $applyDate,
-                roundingType: $roundingType,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateTaxRuleInput(
+            taxRate: $taxRate,
+            applyDate: $applyDate,
+            roundingType: $roundingType,
+        ));
 
         assert($final instanceof TaxRuleCreated);
 

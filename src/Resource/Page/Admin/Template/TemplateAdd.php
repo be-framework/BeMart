@@ -81,17 +81,10 @@ class TemplateAdd extends ResourceObject
     #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
     public function onPost(string $templateCode, string $templateName): static
     {
-        try {
-            $final = ($this->becoming)(new InstallTemplateInput(
-                templateCode: $templateCode,
-                templateName: $templateName,
-            ));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new InstallTemplateInput(
+            templateCode: $templateCode,
+            templateName: $templateName,
+        ));
 
         assert($final instanceof TemplateInstalled);
 

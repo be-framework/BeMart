@@ -56,6 +56,9 @@ final readonly class AdminProductCsvExported
     /** dtb_csv csv_type_id for the product export. */
     private const CSV_TYPE = 3;
 
+    /** Number of products fetched per SQL query during export. */
+    private const EXPORT_BATCH_SIZE = 100;
+
     /** @var list<string> */
     private const DEFAULT_COLUMNS = [
         'productCode',
@@ -84,8 +87,6 @@ final readonly class AdminProductCsvExported
             self::DEFAULT_COLUMNS,
             $csvColumnConfig->listByType(self::CSV_TYPE),
         );
-        $rows = $productQuery->listForExport();
-
         $handle = fopen('php://memory', 'w+');
         if ($handle === false) {
             // php://memory is process-local and not subject to disk
@@ -99,8 +100,17 @@ final readonly class AdminProductCsvExported
 
         fputcsv($handle, $layout->columns, ',', '"', '\\');
 
-        foreach ($rows as $row) {
-            fputcsv($handle, $layout->project($this->encodeRow($row)), ',', '"', '\\');
+        $count = 0;
+        for ($offset = 0; ; $offset += self::EXPORT_BATCH_SIZE) {
+            $rows = $productQuery->listForExport(self::EXPORT_BATCH_SIZE, $offset);
+            foreach ($rows as $row) {
+                fputcsv($handle, $layout->project($this->encodeRow($row)), ',', '"', '\\');
+            }
+
+            $count += count($rows);
+            if (count($rows) < self::EXPORT_BATCH_SIZE) {
+                break;
+            }
         }
 
         rewind($handle);
@@ -108,7 +118,7 @@ final readonly class AdminProductCsvExported
         fclose($handle);
 
         $this->csv = $csv === false ? '' : $csv;
-        $this->count = count($rows);
+        $this->count = $count;
     }
 
     /**

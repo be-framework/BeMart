@@ -97,35 +97,32 @@ final class MypageHistoryResourceTest extends TestCase
 
     public function testOnGetUnknownOrderReturns404(): void
     {
-        $ro = $this->resource->get('page://self/mypage/history', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\OrderNotFoundException::class);
+
+        $this->resource->get('page://self/mypage/history', [
             'orderNo' => 'never00000000000000000000000000z',
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertSame('never00000000000000000000000000z', $ro->body['orderNo']);
     }
 
     public function testOnGetWrongOwnerReturns403(): void
     {
         $this->rebindSession('customer-999');
 
-        $ro = $this->resource->get('page://self/mypage/history', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedOrderAccessException::class);
+
+        $this->resource->get('page://self/mypage/history', [
             'orderNo' => 'past0000000000000000000000000001',
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertSame('past0000000000000000000000000001', $ro->body['orderNo']);
     }
 
     public function testOnGetAnonymousReturns401(): void
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->get('page://self/mypage/history', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
+
+        $this->resource->get('page://self/mypage/history', [
             'orderNo' => 'past0000000000000000000000000001',
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('ログイン', $ro->body['message']);
     }
 }

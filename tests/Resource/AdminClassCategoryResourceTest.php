@@ -92,12 +92,13 @@ final class AdminClassCategoryResourceTest extends TestCase
 
     public function testCreateRejectsUnknownClassName(): void
     {
-        $ro = $this->resource->post('page://self/admin/class-category/class-category-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ClassNameNotFoundException::class);
+
+        $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => 'nonexistent-zzz',
             'classCategoryName' => 'Red',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testCreateRejectsAnonymousAdmin(): void
@@ -105,12 +106,13 @@ final class AdminClassCategoryResourceTest extends TestCase
         $classNameId = $this->seedClassName('Color');
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/class-category/class-category-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/class-category/class-category-list', [
             'classNameId' => $classNameId,
             'classCategoryName' => 'Red',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testListScopedToOneAxis(): void
@@ -133,8 +135,9 @@ final class AdminClassCategoryResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/class-category/class-category-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/class-category/class-category-list');
     }
 
     public function testPutRenamesValue(): void
@@ -154,12 +157,13 @@ final class AdminClassCategoryResourceTest extends TestCase
 
     public function testPutUnknownIdReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/class-category/class-category', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ClassCategoryNotFoundException::class);
+
+        $this->resource->put('page://self/admin/class-category/class-category', [
             'classCategoryId' => 'nonexistent-zzz',
             'classCategoryName' => 'X',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testDeleteHappyPath(): void
@@ -178,10 +182,11 @@ final class AdminClassCategoryResourceTest extends TestCase
 
     public function testDeleteUnknownIdReturns404(): void
     {
-        $ro = $this->resource->delete('page://self/admin/class-category/class-category', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ClassCategoryNotFoundException::class);
+
+        $this->resource->delete('page://self/admin/class-category/class-category', [
             'classCategoryId' => 'nonexistent-zzz',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 }

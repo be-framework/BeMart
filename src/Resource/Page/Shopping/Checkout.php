@@ -64,40 +64,9 @@ class Checkout extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $preOrderId): static
     {
-        try {
-            $final = ($this->becoming)(new CheckoutInput(
-                preOrderId: $preOrderId,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'preOrderId' => $preOrderId,
-            ];
-
-            return $this;
-        } catch (PreOrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Pre-order not found.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        } catch (UnauthorizedPreOrderAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'You are not authorized to access this pre-order.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        } catch (InsufficientStockException) {
-            // BEAR\Resource\Code lacks UNPROCESSABLE_ENTITY; use the literal.
-            $this->code = 422;
-            $this->body = ['message' => 'Insufficient stock to fulfill the order.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        } catch (PaymentDeclinedException) {
-            $this->code = 422;
-            $this->body = ['message' => 'Payment was declined.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CheckoutInput(
+            preOrderId: $preOrderId,
+        ));
 
         assert($final instanceof CheckoutCompleted);
 

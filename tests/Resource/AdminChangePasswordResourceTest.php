@@ -79,26 +79,26 @@ final class AdminChangePasswordResourceTest extends TestCase
 
     public function testOnPostWrongCurrentPasswordReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/change-password', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\InvalidCurrentPasswordException::class);
+
+        $this->resource->post('page://self/admin/change-password', [
             'currentPassword' => 'wrong-password',
             'changePasswordFirst' => 'new-strong-password-2026',
             'changePasswordSecond' => 'new-strong-password-2026',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostConfirmationMismatchReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/change-password', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\PasswordConfirmationMismatchException::class);
+
+        $this->resource->post('page://self/admin/change-password', [
             'currentPassword' => self::CURRENT_PASSWORD,
             'changePasswordFirst' => 'new-strong-password-2026',
             'changePasswordSecond' => 'mismatch-confirmation-2026',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -117,13 +117,13 @@ final class AdminChangePasswordResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/change-password', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/change-password', [
             'currentPassword' => self::CURRENT_PASSWORD,
             'changePasswordFirst' => 'new-strong-password-2026',
             'changePasswordSecond' => 'new-strong-password-2026',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

@@ -45,14 +45,7 @@ class CustomerCsv extends ResourceObject
     #[Link(rel: 'goExportClassName', href: 'page://self/admin/class-name/class-name-export')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new AdminExportCustomerInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminExportCustomerInput());
 
         assert($final instanceof AdminCustomerCsvExported);
 

@@ -81,19 +81,7 @@ class Page extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetAdminPageInput(pageId: $pageId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (PageNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminPageInput(pageId: $pageId));
 
         assert($final instanceof AdminPageFetched);
 
@@ -132,29 +120,12 @@ class Page extends ResourceObject
         string|null $pageUrl = null,
         string|null $pageFileName = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdatePageInput(
-                pageId: $pageId,
-                pageName: $pageName,
-                pageUrl: $pageUrl,
-                pageFileName: $pageFileName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (PageNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdatePageInput(
+            pageId: $pageId,
+            pageName: $pageName,
+            pageUrl: $pageUrl,
+            pageFileName: $pageFileName,
+        ));
 
         assert($final instanceof PageUpdated);
 
@@ -181,19 +152,7 @@ class Page extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $pageId): static
     {
-        try {
-            $final = ($this->becoming)(new DeletePageInput(pageId: $pageId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (PageNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeletePageInput(pageId: $pageId));
 
         assert($final instanceof PageDeleted);
 

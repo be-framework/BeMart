@@ -120,18 +120,11 @@ class TwoFactorAuthSet extends ResourceObject
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPut(string $loginId, string $authKey, string $deviceToken): static
     {
-        try {
-            $final = ($this->becoming)(new SetTwoFactorAuthInput(
-                loginId: $loginId,
-                authKey: $authKey,
-                deviceToken: $deviceToken,
-            ));
-        } catch (SemanticVariableException | TwoFactorAuthFailedException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '認証コードが正しくありません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SetTwoFactorAuthInput(
+            loginId: $loginId,
+            authKey: $authKey,
+            deviceToken: $deviceToken,
+        ));
 
         assert($final instanceof TwoFactorAuthConfigured);
 

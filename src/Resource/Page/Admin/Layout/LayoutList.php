@@ -35,14 +35,7 @@ class LayoutList extends ResourceObject
     #[Link(rel: 'doUpdateLayout', href: 'page://self/admin/layout/layout', method: 'put')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminLayoutListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminLayoutListInput());
 
         assert($final instanceof AdminLayoutListFetched);
 

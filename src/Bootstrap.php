@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart;
 
 use BEAR\Resource\Code;
-use BEAR\Resource\Exception\BadRequestException;
 use BEAR\Resource\Method;
 use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Application\AppInterface;
@@ -116,24 +115,11 @@ final class Bootstrap
         try {
             $ro = $app->resource->{$route->method}->uri($route->path)($route->query);
             assert($ro instanceof ResourceObject);
-        } catch (BadRequestException $e) {
-            ob_end_clean();
-
-            return $this->fail(
-                $isCli,
-                $this->exceptionStatusCode($e),
-                $e->getMessage() !== '' ? $e->getMessage() : 'Bad Request',
-                $context,
-            );
         } catch (Throwable $e) {
             ob_end_clean();
-            if ($isCli) {
-                fwrite(STDERR, $e->getMessage() . PHP_EOL);
+            $app->throwableHandler->handle($e, $route)->transfer();
 
-                return 1;
-            }
-
-            throw $e;
+            return 1;
         }
 
         $isRedirect = isset($ro->headers['Location']);
@@ -389,13 +375,6 @@ final class Bootstrap
         }
 
         return json_encode($body, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
-    }
-
-    private function exceptionStatusCode(BadRequestException $e): int
-    {
-        $code = $e->getCode();
-
-        return $code >= 400 && $code < 600 ? $code : Code::BAD_REQUEST;
     }
 
     private function fail(bool $isCli, int $status, string $message, string $context): int

@@ -58,33 +58,11 @@ class SortNoMove extends ResourceObject
         string $rowId,
         int $sortNo,
     ): static {
-        try {
-            $final = ($this->becoming)(new SortNoMoveInput(
-                masterType: $masterType,
-                rowId: $rowId,
-                sortNo: $sortNo,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (MasterOperationNotSupportedException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => 'このマスタは並び順の変更に対応していません。'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (MasterRowNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された行は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SortNoMoveInput(
+            masterType: $masterType,
+            rowId: $rowId,
+            sortNo: $sortNo,
+        ));
 
         assert($final instanceof SortNoMoved);
 
