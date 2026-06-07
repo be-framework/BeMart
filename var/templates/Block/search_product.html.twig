@@ -5,13 +5,13 @@
 
   In EC-CUBE's default layout, the top page reaches Product/list through
   the header search block: submitting the search form with no keyword
-  performs an all-products search and navigates to `product_list`.
+  performs an all-products search and navigates to `/products`.
   BeMart does not yet carry EC-CUBE's Symfony FormView or category tree in
   the shared frame, so this block keeps the same route-level affordance
   with static markup only.
 #}
 <div class="ec-headerSearch">
-    <form method="get" action="{{ url('product_list') }}">
+    <form method="get" action="/products">
         <div class="ec-headerSearch__category">
             <div class="ec-select ec-select_search">
                 <select name="category_id" id="category_id">

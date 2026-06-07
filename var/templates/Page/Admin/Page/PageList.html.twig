@@ -13,7 +13,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `{% for Page in Pages %}` -> the resource body's `pages` list.
    - `router.routecollection.get(Page.url).path` -> Symfony router lookup
@@ -32,7 +32,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_content_page' %}
+{% set route = 'admin-page-page-list' %}
 {% set title = 'ページ管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
@@ -51,7 +51,7 @@
             <div class="c-primaryCol">
                 <div class="row justify-content-between mb-2">
                     <div class="col-9">
-                        <a class="btn btn-ec-regular" href="{{ url('admin_content_page_new') }}">
+                        <a class="btn btn-ec-regular" href="/admin/page/page">
                             新規作成
                         </a>
                     </div>
@@ -82,7 +82,7 @@
                             {% for Page in pages %}
                                 <tr id="ex-page-{{ Page.pageId }}">
                                     <td class="align-middle ps-3">
-                                        <a href="{{ url('admin_content_page_edit', {id : Page.pageId } ) }}">{{ Page.pageName }}</a>
+                                        <a href="/admin/page/page?pageId={{ Page.pageId }}">{{ Page.pageName }}</a>
                                     </td>
                                     <td class="align-middle ps-3 text-break">
                                         {{ Page.pageUrl }}
@@ -119,7 +119,7 @@
                                                             </div>
                                                             <div class="modal-footer">
                                                                 <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                                <a class="btn btn-ec-delete" href="{{ url('admin_content_page_delete', {'id' : Page.pageId}) }}"
+                                                                <a class="btn btn-ec-delete" href="/admin/page/page?pageId={{ Page.pageId }}&_method=delete"
                                                                          data-confirm="false">削除</a>
                                                             </div>
                                                         </div>

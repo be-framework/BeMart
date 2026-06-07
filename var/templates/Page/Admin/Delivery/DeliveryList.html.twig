@@ -15,7 +15,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `{% for Delivery in Deliveries %}` -> the resource body's
      `deliveries` list. EC-CUBE keys the row + actions by `Delivery.id`;
@@ -37,7 +37,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_shop_delivery' %}
+{% set route = 'admin-delivery-delivery-list' %}
 {% set title = '配送方法一覧' %}
 {% set sub_title = '店舗設定' %}
 
@@ -60,7 +60,7 @@
                     i++;
                 });
                 $.ajax({
-                    url: '{{ url('admin_setting_shop_delivery_sort_no_move') }}',
+                    url: '/admin/sort-no-move?masterType=delivery&_method=put',
                     type: 'POST',
                     data: newSortNos
                 }).always(function() {
@@ -126,7 +126,7 @@
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
                     <div class="d-block mb-3">
-                        <a class="btn btn-ec-regular" href="{{ url('admin_setting_shop_delivery_new') }}">新規作成</a>
+                        <a class="btn btn-ec-regular" href="/admin/delivery/delivery">新規作成</a>
                     </div>
                     <div class="card rounded border-0 mb-4">
                         <div class="card-body p-0">
@@ -146,7 +146,7 @@
                                                     <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
                                                     <div class="col-auto d-flex align-items-center">{{ Delivery.deliveryId }}</div>
                                                     <div class="col d-flex align-items-center">
-                                                        <a href="{{ url('admin_setting_shop_delivery_edit', {id: Delivery.deliveryId} ) }}">
+                                                        <a href="/admin/delivery/delivery?deliveryId={{ Delivery.deliveryId }}">
                                                             {{ Delivery.deliveryName }}
                                                         </a>
                                                     </div>
@@ -157,7 +157,7 @@
                                                         <a href="#" class="btn btn-ec-actionIcon me-2 action-down {% if loop.last %}disabled{% endif %}" data-bs-toggle="tooltip" data-bs-placement="top" title="下へ">
                                                             <i class="fa fa-arrow-down fa-lg text-secondary"></i>
                                                         </a>
-                                                        <a class="btn btn-ec-actionIcon me-2 action-visible" href="{{ url('admin_setting_shop_delivery_visibility', {'id': Delivery.deliveryId }) }}"
+                                                        <a class="btn btn-ec-actionIcon me-2 action-visible" href="/admin/toggle-visible?masterType=delivery&rowId={{ Delivery.deliveryId }}&_method=put"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" title="{{ Delivery.visible ? '非表示にする' : '表示する' }}"
                                                            data-confirm="false" >
                                                             <i class="fa fa-toggle-{{ Delivery.visible ? 'on' : 'off' }} fa-lg text-secondary" aria-hidden="true"></i>
@@ -165,7 +165,7 @@
                                                         <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top"
                                                              title="削除">
                                                             <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
-                                                               data-url="{{ url('admin_setting_shop_delivery_delete', {id: Delivery.deliveryId} ) }}"
+                                                               data-url="/admin/delivery/delivery?deliveryId={{ Delivery.deliveryId }}&_method=delete"
                                                                data-message="この操作はあとから取り消すことができません。「{{ Delivery.deliveryName }}」を削除してよろしいですか？">
                                                                 <i class="fa fa-close fa-lg"></i>
                                                             </a>

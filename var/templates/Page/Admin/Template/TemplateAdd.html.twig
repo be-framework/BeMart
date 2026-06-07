@@ -9,7 +9,7 @@
 
   Store section, Tier-2 FORM page. EC-CUBE renders a template-code,
   template-name and zip-archive file-upload form (`Form/Type/Admin/TemplateType`,
-  `admin_template` block prefix). The Be `doTemplateInstall` write
+  admin template block prefix). The Be `doTemplateInstall` write
   transition is a Phase-A stub, so this port renders the upload shell —
   the three inputs plus the 雛形 (template-zip) download link. The
   markup skeleton + `c-*` / Bootstrap classes are kept verbatim from
@@ -19,7 +19,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `form_widget(form.code|name|file)` -> `form.input('field')` — the
      real AdminTemplateAddForm fields (Ray.WebFormModule).
@@ -28,13 +28,13 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_store_template_install' %}
+{% set route = 'admin-template-template-add' %}
 {% set title = 'テンプレート登録' %}
 {% set sub_title = 'オーナーズストア' %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ url('admin_store_template_install') }}" id="template_add_form" enctype="multipart/form-data" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form role="form" method="post" action="/admin/template/template-add" id="template_add_form" enctype="multipart/form-data" novalidate>
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -69,7 +69,7 @@
                             <div class="row mb-2">
                                 <div class="col-3"></div>
                                 <div class="col">
-                                    <a href="{{ url('admin_store_template_download') }}">雛形ファイルダウンロード</a>
+                                    <a href="/admin/template/template-list">雛形ファイルダウンロード</a>
                                 </div>
                             </div>
                         </div>
@@ -84,7 +84,7 @@
                 <div class="row justify-content-between align-items-center">
                     <div class="col-6">
                         <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="{{ url('admin_store_template') }}">
+                            <a class="c-baseLink" href="/admin/template/template-list">
                                 <i class="fa fa-backward" aria-hidden="true"></i>
                                 <span>テンプレート一覧へ戻る</span>
                             </a>

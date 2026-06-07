@@ -26,7 +26,7 @@ use Ray\WebFormModule\AbstractForm;
  * filter axes are out of the Wave 8 slice — see ProductListFetched's
  * docblock ("Phase 2 will add category, tag, stock state, sale type").
  *
- * This form therefore declares ONLY `id` (EC-CUBE's
+ * This form therefore declares ONLY `nameKeyword` (EC-CUBE's
  * `admin_search_product_id` keyword text box). The detail-search panel's
  * other `form_widget` calls in the ported template render empty — and
  * EC-CUBE's real template, fed this same form, renders them empty too, so
@@ -42,7 +42,7 @@ final class AdminProductSearchForm extends AbstractForm
     /**
      * Declares the search box.
      *
-     * `id` is EC-CUBE's free-text keyword input (block prefix
+     * `nameKeyword` is EC-CUBE's free-text keyword input (block prefix
      * `admin_search_product`, so the FormView id is
      * `admin_search_product_id`). It matches on the product name / id /
      * code. The `sortkey` / `sorttype` hidden inputs EC-CUBE emits below
@@ -52,7 +52,7 @@ final class AdminProductSearchForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('id', 'text')
+        $this->setField('nameKeyword', 'text')
             ->setAttribs([
                 'id' => 'admin_search_product_id',
                 'class' => 'form-control',
@@ -69,6 +69,6 @@ final class AdminProductSearchForm extends AbstractForm
      */
     public function fillFilters(array $filters): void
     {
-        $this->fill(['id' => (string) ($filters['nameKeyword'] ?? '')]);
+        $this->fill(['nameKeyword' => (string) ($filters['nameKeyword'] ?? '')]);
     }
 }

@@ -19,7 +19,7 @@
 
   This is a SIMPLIFIED port (厳密移植 Grade-C, parity with the Cart port):
   the catalog row carries only the bare name + a single `price02`, with
-  the `product_detail` link and the placeholder thumbnail. EC-CUBE's row
+  the `/product` link and the placeholder thumbnail. EC-CUBE's row
   additionally renders a per-item add-cart `<form>` (ProductClass selects
   + quantity), an `.ec-modal` add-cart dialog, the `disp_number` /
   `orderby` sort controls and an `.ec-pagerRole` pager — all of which
@@ -37,7 +37,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'product_page' %}
-{% set route = 'product_list' %}
+{% set route = 'products' %}
 {% set title = '商品一覧' %}
 
 {% block javascript %}
@@ -100,7 +100,7 @@
 
                     // カートブロックを更新する
                     $.ajax({
-                        url: '{{ url('block_cart') }}',
+                        url: '/cart',
                         type: 'GET',
                         dataType: 'html'
                     }).done(function(html) {
@@ -136,12 +136,12 @@
         </form>
         <div class="ec-searchnavRole__topicpath">
             <ol class="ec-topicpath">
-                <li class="ec-topicpath__item"><a href="{{ url('product_list') }}">全て</a>
+                <li class="ec-topicpath__item"><a href="/products">全て</a>
                 </li>
                 {% if filters.categoryName|default(null) %}
                     <li class="ec-topicpath__divider">|</li>
                     <li class="ec-topicpath__item--active">
-                        <a href="{{ url('product_list') }}?category_id={{ filters.category_id }}">{{ filters.categoryName }}</a>
+                        <a href="/products?category_id={{ filters.category_id }}">{{ filters.categoryName }}</a>
                     </li>
                 {% endif %}
                 {% if filters.name|default('') %}
@@ -181,7 +181,7 @@
             <ul class="ec-shelfGrid">
                 {% for product in products %}
                     <li class="ec-shelfGrid__item">
-                        <a href="{{ url('product_detail', {'id': product.id}) }}">
+                        <a href="/product?productCode={{ product.id }}">
                             <p class="ec-shelfGrid__item-image">
                                 <img src="{{ asset(product.mainListImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ product.name }}" {% if loop.index > 5 %} loading="lazy"{% endif %}>
                             </p>
@@ -208,7 +208,7 @@
                     <div class="ec-modal-box">
                         <div class="ec-role">
                             <span class="ec-inlineBtn--cancel">お買い物を続ける</span>
-                            <a href="{{ url('cart') }}" class="ec-inlineBtn--action">カートへ進む</a>
+                            <a href="/cart" class="ec-inlineBtn--action">カートへ進む</a>
                         </div>
                     </div>
                 </div>

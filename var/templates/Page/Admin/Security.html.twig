@@ -3,7 +3,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_system_security' %}
+{% set route = 'admin-security' %}
 {% set title = 'セキュリティ管理' %}
 {% set sub_title = 'システム設定' %}
 
@@ -20,8 +20,8 @@
 {% endblock %}
 
 {% block main %}
-    <form method="post" action="{{ url('admin_setting_system_security') }}">
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form method="post" action="/admin/security?_method=put">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -46,8 +46,8 @@
                                         <span class="badge bg-primary ms-1">必須</span>
                                     </div>
                                     <div class="col">
-                                        {{ form.input('admin_route_dir')|raw }}
-                                        {% if form.error('admin_route_dir') %}{{ form.error('admin_route_dir') }}{% endif %}
+                                        {{ form.input('adminRouteDir')|raw }}
+                                        {% if form.error('adminRouteDir') %}{{ form.error('adminRouteDir') }}{% endif %}
                                     </div>
                                 </div>
                             </div>
@@ -74,7 +74,7 @@
                                         </div>
                                     </div>
                                     <div class="col">
-                                        {{ form.input('admin_allow_hosts')|raw }}
+                                        {{ form.input('adminAllowHosts')|raw }}
                                         <p>改行区切りでIPアドレスまたはCIDRを入力してください。</p>
                                     </div>
                                 </div>
@@ -85,7 +85,7 @@
                                         </div>
                                     </div>
                                     <div class="col">
-                                        {{ form.input('admin_deny_hosts')|raw }}
+                                        {{ form.input('adminDenyHosts')|raw }}
                                         <p>改行区切りでIPアドレスまたはCIDRを入力してください。</p>
                                     </div>
                                 </div>
@@ -113,7 +113,7 @@
                                         </div>
                                     </div>
                                     <div class="col">
-                                        {{ form.input('front_allow_hosts')|raw }}
+                                        {{ form.input('frontAllowHosts')|raw }}
                                         <p>改行区切りでIPアドレスまたはCIDRを入力してください。</p>
                                     </div>
                                 </div>
@@ -124,7 +124,7 @@
                                         </div>
                                     </div>
                                     <div class="col">
-                                        {{ form.input('front_deny_hosts')|raw }}
+                                        {{ form.input('frontDenyHosts')|raw }}
                                         <p>改行区切りでIPアドレスまたはCIDRを入力してください。</p>
                                     </div>
                                 </div>
@@ -152,7 +152,7 @@
                                         </div>
                                     </div>
                                     <div class="col">
-                                        {{ form.input('force_ssl')|raw }}
+                                        {{ form.input('forceSsl')|raw }}
                                         {% if not isSecureRequest %}
                                             <p class="text-danger">HTTPS接続ではないため、実際の強制SSL切替は未実行です。</p>
                                         {% endif %}
@@ -166,8 +166,8 @@
                                         <span class="badge bg-primary ms-1">必須</span>
                                     </div>
                                     <div class="col">
-                                        {{ form.input('trusted_hosts')|raw }}
-                                        {% if form.error('trusted_hosts') %}{{ form.error('trusted_hosts') }}{% endif %}
+                                        {{ form.input('trustedHosts')|raw }}
+                                        {% if form.error('trustedHosts') %}{{ form.error('trustedHosts') }}{% endif %}
                                         <p>正規表現でホスト名を入力してください。</p>
                                     </div>
                                 </div>

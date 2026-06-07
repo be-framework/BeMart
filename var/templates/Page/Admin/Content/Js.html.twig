@@ -21,7 +21,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
      EC-CUBE-runtime only — enumerated as residual.
@@ -32,7 +32,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_content_js' %}
+{% set route = 'admin-content-js' %}
 {% set title = 'JavaScript管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
@@ -46,8 +46,8 @@
 {% endblock %}
 
 {% block main %}
-    <form id="content_js_form" method="post" action="{{ url('admin_content_js') }}">
-        <input type="hidden" id="form__token" name="_token" value="{{ csrfToken|default('') }}">
+    <form id="content_js_form" method="post" action="/admin/content/js?_method=put">
+        <input type="hidden" id="form__token" name="csrfToken" value="{{ csrfToken|default('') }}">
 
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
@@ -91,7 +91,7 @@
                 <div class="row justify-content-between align-items-center">
                     <div class="col-6">
                         <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="{{ url('admin_content_page') }}">
+                            <a class="c-baseLink" href="/admin/page/page-list">
                                 <i class="fa fa-backward" aria-hidden="true"></i>
                                 <span>JavaScript管理</span>
                             </a>

@@ -1,0 +1,309 @@
+[
+  {
+    "name": "admin-03-product-list",
+    "requestedUrl": "http://localhost:8080/admin/product",
+    "screenshot": "docs/web-e2e/screenshots/20260607-browser-check/admin-03-product-list.png",
+    "forms": [],
+    "h": [],
+    "hasFatal": false,
+    "matched": [
+      {
+        "ok": false,
+        "text": "商品一覧"
+      }
+    ],
+    "textSample": "{\"code\":400,\"message\":\"productCode\"}",
+    "title": "",
+    "url": "http://localhost:8080/admin/product"
+  },
+  {
+    "name": "admin-04-order-list",
+    "requestedUrl": "http://localhost:8080/admin/order",
+    "screenshot": "docs/web-e2e/screenshots/20260607-browser-check/admin-04-order-list.png",
+    "forms": [],
+    "h": [],
+    "hasFatal": false,
+    "matched": [
+      {
+        "ok": false,
+        "text": "受注一覧"
+      },
+      {
+        "ok": false,
+        "text": "受注管理"
+      }
+    ],
+    "textSample": "{\"code\":400,\"message\":\"orderNo\"}",
+    "title": "",
+    "url": "http://localhost:8080/admin/order"
+  },
+  {
+    "name": "admin-05-customer-list",
+    "requestedUrl": "http://localhost:8080/admin/customer",
+    "screenshot": "docs/web-e2e/screenshots/20260607-browser-check/admin-05-customer-list.png",
+    "forms": [
+      {
+        "action": "",
+        "fields": [
+          {
+            "id": "admin_search_customer_multi",
+            "name": "multi",
+            "tag": "input",
+            "text": "",
+            "type": "text"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "検索",
+            "type": "submit"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          }
+        ],
+        "method": "post"
+      }
+    ],
+    "h": [
+      "",
+      "会員一覧会員管理",
+      "会員一覧会員管理",
+      "会員一覧",
+      "CSVダウンロード CSV出力項目設定 会員ID お名前 電話番号 メールアドレス 0123456789abcdef0123456789abcdef 山田 アリス alice@example.com 削除します この操作はあとから取り消すことができません。「alice@example.com」を削除してよろしいですか？ キャンセル 削除 fedcba9876543210fedcba9876543210 鈴木 太郎 bob@example.com 削除します この操作はあとから取り消すことができません。「bob@example.com」を削除してよろしいですか？ キャンセル 削除 aaaaaaaa00000000bbbbbbbb11111111 佐藤 花子 carol@example.com 削除します この操作はあとから取り消すことができません。「carol@example.com」を削除してよろしいですか？ キャンセル 削除 10000000aaaa1111bbbb2222cccc3333 鈴木 次郎 login-test@example.com 削除します この操作はあとから取り消すことができません。「login-test@example.com」を削除してよろしいですか？ キャンセル 削除 20000000dddd2222eeee3333ffff4444 高橋 三郎 provisional@example.com 削除します この操作はあとから取り消すことができません。「provisional@example.com」を削除してよろしいですか？ キャンセル 削除"
+    ],
+    "hasFatal": false,
+    "matched": [
+      {
+        "ok": true,
+        "text": "会員一覧"
+      },
+      {
+        "ok": true,
+        "text": "会員管理"
+      }
+    ],
+    "textSample": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n会員一覧会員管理\n会員ID・メールアドレス・お名前\n詳細検索\n検索\n 検索結果：5件が該当しました\nCSVダウンロード\nCSV出力項目設定\n会員ID\tお名前\t電話番号\tメールアドレス\t \t \n0123456789abcdef0123456789abcdef\t山田 アリス\t\talice@example.com\t\t\n\nfedcba9876543210fedcba9876543210\t鈴木 太郎\t\tbob@example.com\t\t\n\naaaaaaaa00000000bbb",
+    "title": "会員一覧 会員管理 - BeMart",
+    "url": "http://localhost:8080/admin/customer"
+  },
+  {
+    "name": "admin-06-base-info",
+    "requestedUrl": "http://localhost:8080/admin/setting/shop/shop",
+    "screenshot": "docs/web-e2e/screenshots/20260607-browser-check/admin-06-base-info.png",
+    "forms": [],
+    "h": [],
+    "hasFatal": false,
+    "matched": [
+      {
+        "ok": false,
+        "text": "基本設定"
+      },
+      {
+        "ok": false,
+        "text": "店舗設定"
+      }
+    ],
+    "textSample": "{\"code\":404,\"message\":\"page:\\/\\/self\\/admin\\/setting\\/shop\\/shop\"}",
+    "title": "",
+    "url": "http://localhost:8080/admin/setting/shop/shop"
+  },
+  {
+    "name": "admin-07-system-member",
+    "requestedUrl": "http://localhost:8080/admin/setting/system/member",
+    "screenshot": "docs/web-e2e/screenshots/20260607-browser-check/admin-07-system-member.png",
+    "forms": [
+      {
+        "action": "",
+        "fields": [
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "",
+            "type": "button"
+          },
+          {
+            "id": "",
+            "name": "",
+            "tag": "button",
+            "text": "キャンセル",
+            "type": "button"
+          }
+        ],
+        "method": "post"
+      }
+    ],
+    "h": [
+      "",
+      "メンバー管理システム設定",
+      "メンバー管理システム設定",
+      "メンバー管理",
+      "新規登録 名前 所属 権限 稼働 2段階認証 テスト管理者 メンバーを削除します。 メンバーを削除してよろしいですか？ キャンセル 削除 店舗オーナー メンバーを削除します。 メンバーを削除してよろしいですか？ キャンセル 削除 副管理者 メンバーを削除します。 メンバーを削除してよろしいですか？ キャンセル 削除 削除済み管理者 メンバーを削除します。 メンバーを削除してよろしいですか？ キャンセル 削除"
+    ],
+    "hasFatal": false,
+    "matched": [
+      {
+        "ok": true,
+        "text": "メンバー管理"
+      }
+    ],
+    "textSample": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nメンバー管理システム設定\n新規登録\n名前\t所属\t権限\t稼働\t2段階認証\t\nテスト管理者\t\t\t\t\t\n   \n\n店舗オーナー\t\t\t\t\t\n   \n\n副管理者\t\t\t\t\t\n   \n\n削除済み管理者\t\t\t\t\t\n   ",
+    "title": "メンバー管理 システム設定 - BeMart",
+    "url": "http://localhost:8080/admin/setting/system/member"
+  },
+  {
+    "name": "admin-08-content-news",
+    "requestedUrl": "http://localhost:8080/admin/content/news",
+    "screenshot": "docs/web-e2e/screenshots/20260607-browser-check/admin-08-content-news.png",
+    "forms": [],
+    "h": [
+      "",
+      "新着情報管理コンテンツ管理",
+      "新着情報管理コンテンツ管理",
+      "新着情報管理",
+      "新規作成 公開日時 タイトル 2026-01-01T00:00:00+09:00 ようこそ 削除します この操作はあとから取り消すことができません。「ようこそ」を削除してよろしいですか？ キャンセル 削除"
+    ],
+    "hasFatal": false,
+    "matched": [
+      {
+        "ok": true,
+        "text": "新着情報"
+      },
+      {
+        "ok": false,
+        "text": "ニュース"
+      }
+    ],
+    "textSample": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n新着情報管理コンテンツ管理\n新規作成\n公開日時\nタイトル\n2026-01-01T00:00:00+09:00\nようこそ",
+    "title": "新着情報管理 コンテンツ管理 - BeMart",
+    "url": "http://localhost:8080/admin/content/news"
+  },
+  {
+    "name": "admin-09-plugin-list",
+    "requestedUrl": "http://localhost:8080/admin/store/plugin",
+    "screenshot": "docs/web-e2e/screenshots/20260607-browser-check/admin-09-plugin-list.png",
+    "forms": [],
+    "h": [],
+    "hasFatal": false,
+    "matched": [
+      {
+        "ok": false,
+        "text": "プラグイン"
+      }
+    ],
+    "textSample": "{\"code\":404,\"message\":\"page:\\/\\/self\\/admin\\/store\\/plugin\"}",
+    "title": "",
+    "url": "http://localhost:8080/admin/store/plugin"
+  }
+]

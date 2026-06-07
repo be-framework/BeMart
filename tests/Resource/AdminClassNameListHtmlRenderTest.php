@@ -183,8 +183,8 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // ClassName list: EC-CUBE's hidden `_token` CSRF input.
-            'name="_token"',
+            // ClassName list: EC-CUBE's hidden `csrfToken` CSRF input.
+            'name="csrfToken"',
             // ClassName list: EC-CUBE's CSV-setting link passes the
             // `CsvType::CSV_TYPE_CLASS_NAME` constant as the `id` query
             // param; BeMart's port links to the bare route. Same anchor.
@@ -245,14 +245,14 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
                 'ClassCategories' => [],
             ]);
             $forms[$cn['classNameId']] = new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'name' => 'name',
                 'backend_name' => 'backend_name',
             ]);
         }
 
         return $twig->render('Product/class_name.twig', [
-            'form' => new EcCubeStub(['_token' => '_token', 'name' => 'name', 'backend_name' => 'backend_name']),
+            'form' => new EcCubeStub(['csrfToken' => 'csrfToken', 'name' => 'name', 'backend_name' => 'backend_name']),
             'forms' => $forms,
             'ClassNames' => $classNames,
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
@@ -300,8 +300,8 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 

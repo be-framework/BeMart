@@ -190,9 +190,9 @@ final class AdminTagListHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // Tag list: EC-CUBE's hidden `_token` CSRF input. BeMart keeps
+            // Tag list: EC-CUBE's hidden `csrfToken` CSRF input. BeMart keeps
             // the hidden input (structure) with an empty value.
-            'name="_token"',
+            'name="csrfToken"',
             // Tag list: `Tag.sortNo` — dtb_tag has the column but
             // TagEntity does not project it; the `data-sort-no` attr
             // renders empty on BeMart's side. EC-CUBE renders a value.
@@ -244,13 +244,13 @@ final class AdminTagListHtmlRenderTest extends TestCase
             // `doUpdateTag`; the row-form widgets render empty here so
             // they fall into the `mode-edit` residual family.
             $forms[$tag['tagId']] = new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'name' => 'name',
             ]);
         }
 
         return $twig->render('Product/tag.twig', [
-            'form' => new EcCubeStub(['_token' => '_token', 'name' => 'name']),
+            'form' => new EcCubeStub(['csrfToken' => 'csrfToken', 'name' => 'name']),
             'forms' => $forms,
             'Tags' => $tags,
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
@@ -298,8 +298,8 @@ final class AdminTagListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 

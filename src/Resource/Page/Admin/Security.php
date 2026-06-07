@@ -59,12 +59,12 @@ class Security extends ResourceObject
         $form = $this->formFactory->newInstance(AdminSecurityForm::class);
         assert($form instanceof AdminSecurityForm);
         $form->fillValues([
-            'admin_route_dir' => 'admin',
-            'admin_allow_hosts' => $settings['admin_allow_hosts'] ?? '',
-            'admin_deny_hosts' => $settings['admin_deny_hosts'] ?? '',
-            'front_allow_hosts' => $settings['front_allow_hosts'] ?? '',
-            'front_deny_hosts' => $settings['front_deny_hosts'] ?? '',
-            'trusted_hosts' => $settings['trusted_hosts'] ?? '^localhost$',
+            'adminRouteDir' => 'admin',
+            'adminAllowHosts' => $settings['admin_allow_hosts'] ?? '',
+            'adminDenyHosts' => $settings['admin_deny_hosts'] ?? '',
+            'frontAllowHosts' => $settings['front_allow_hosts'] ?? '',
+            'frontDenyHosts' => $settings['front_deny_hosts'] ?? '',
+            'trustedHosts' => $settings['trusted_hosts'] ?? '^localhost$',
         ]);
 
         $this->code = Code::OK;
@@ -113,7 +113,7 @@ class Security extends ResourceObject
         assert($final instanceof SecuritySettingsUpdated);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_setting_system_security';
+        $this->headers['Location'] = '/admin/security';
         $this->body = [
             'transitionId' => 'doUpdateSecurity',
             'trustedHosts' => $final->trustedHosts,

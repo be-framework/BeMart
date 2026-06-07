@@ -69,7 +69,7 @@ final class ShoppingNonMemberHtmlRenderTest extends TestCase
         '<title>EC-CUBE / お客様情報の入力</title>',
         '<meta name="author" content="">',
         // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -217,7 +217,7 @@ final class ShoppingNonMemberHtmlRenderTest extends TestCase
                 ]),
                 'phone_number' => 'phoneNumber',
                 'email' => new EcCubeStub(['first' => 'email', 'second' => 'email_confirm']),
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
             ]),
             'eccube_config' => ['locale' => 'ja'],
             'Page' => new EcCubeStub([
@@ -264,8 +264,8 @@ final class ShoppingNonMemberHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
@@ -273,8 +273,8 @@ final class ShoppingNonMemberHtmlRenderTest extends TestCase
         // BeMart's real NonMemberForm so the inputs diff to ZERO.
         $form = (new FormFactory())->newInstance(NonMemberForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($form instanceof NonMemberForm && is_string($field) && $field !== '') {

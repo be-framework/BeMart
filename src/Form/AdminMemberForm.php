@@ -31,8 +31,8 @@ use Ray\WebFormModule\AbstractForm;
  * slice) carries only `loginId` / `name` / `authority` / `work`; it does
  * NOT carry `department` or the 2FA columns, and `authority` / `work`
  * are bare ints with no joined mtb_authority / mtb_work option set.
- * {@see fillValues()} therefore repopulates only `name` and `login_id`;
- * the `department` / `Authority` / `Work` / `two_factor_auth_enabled`
+ * {@see fillValues()} therefore repopulates only `name` and `loginId`;
+ * the `department` / `Authority` / `Work` / `twoFactorAuthEnabled`
  * controls render with empty values. FLAGGED missing-body-fields.
  */
 final class AdminMemberForm extends AbstractForm
@@ -49,10 +49,10 @@ final class AdminMemberForm extends AbstractForm
      * Declares the member form fields.
      *
      * Ported from EC-CUBE's `MemberType::buildForm()` + `member_edit.twig`:
-     * `name` (text), `department` (text), `login_id` (text),
+     * `name` (text), `department` (text), `loginId` (text),
      * `plain_password` (repeated → first/second password inputs),
      * `Authority` (entity select), `Work` (radio), and
-     * `two_factor_auth_enabled` (checkbox). EC-CUBE's block prefix is
+     * `twoFactorAuthEnabled` (checkbox). EC-CUBE's block prefix is
      * `admin_member`, so the rendered ids are `admin_member_<field>`.
      */
     #[Override]
@@ -70,27 +70,27 @@ final class AdminMemberForm extends AbstractForm
                 'class' => 'form-control',
             ]);
 
-        $this->setField('login_id', 'text')
+        $this->setField('loginId', 'text')
             ->setAttribs([
-                'id' => 'admin_member_login_id',
+                'id' => 'admin_member_loginId',
                 'class' => 'form-control',
             ]);
 
-        $this->setField('plain_password_first', 'password')
+        $this->setField('password', 'password')
             ->setAttribs([
-                'id' => 'admin_member_plain_password_first',
+                'id' => 'admin_member_password',
                 'class' => 'form-control',
             ]);
 
-        $this->setField('plain_password_second', 'password')
+        $this->setField('passwordConfirm', 'password')
             ->setAttribs([
-                'id' => 'admin_member_plain_password_second',
+                'id' => 'admin_member_passwordConfirm',
                 'class' => 'form-control',
             ]);
 
-        $this->setField('two_factor_auth_enabled', 'checkbox')
+        $this->setField('twoFactorAuthEnabled', 'checkbox')
             ->setAttribs([
-                'id' => 'admin_member_two_factor_auth_enabled',
+                'id' => 'admin_member_twoFactorAuthEnabled',
             ])
             ->setOptions(['1' => '2段階認証']);
 
@@ -99,7 +99,7 @@ final class AdminMemberForm extends AbstractForm
         // (CreateMemberInput / UpdateMemberInput Semantics). The Member
         // resource does not consult this filter.
         $this->filter->validate('name')->isNotBlank();
-        $this->filter->validate('login_id')->isNotBlank();
+        $this->filter->validate('loginId')->isNotBlank();
     }
 
     /**
@@ -107,7 +107,7 @@ final class AdminMemberForm extends AbstractForm
      *
      * Maps the resource body keys (`name`, `loginId`) onto the EC-CUBE
      * form field names. The `department` / `Authority` / `Work` /
-     * `two_factor_auth_enabled` controls have no body source (the
+     * `twoFactorAuthEnabled` controls have no body source (the
      * MemberFetched projection does not carry them — FLAGGED), so they
      * render empty. The password inputs are always blank on edit.
      *
@@ -117,7 +117,7 @@ final class AdminMemberForm extends AbstractForm
     {
         $this->fill([
             'name' => (string) ($body['name'] ?? ''),
-            'login_id' => (string) ($body['loginId'] ?? ''),
+            'loginId' => (string) ($body['loginId'] ?? ''),
         ]);
     }
 

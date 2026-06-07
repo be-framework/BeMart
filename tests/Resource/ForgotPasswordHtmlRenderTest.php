@@ -43,8 +43,8 @@ use function trim;
  * follows the Ray.WebFormModule form-page recipe (see
  * var/templates/README.md): the ForgotPassword resource exposes a real
  * {@see ForgotForm} (an AbstractForm) as `body.form`, the port renders
- * `{{ form.input('login_email') }}`, and this test renders EC-CUBE's
- * `form_widget(form.login_email)` through the SAME `ForgotForm` instance
+ * `{{ form.input('email') }}`, and this test renders EC-CUBE's
+ * `form_widget(form.email)` through the SAME `ForgotForm` instance
  * so the input diffs to ZERO. The residual is the genuinely
  * EC-CUBE-runtime-only `<head>` frame material + the empty CSRF hidden
  * value.
@@ -74,9 +74,9 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
         '<meta name="author" content="">',
 
         // --- forgot form: CSRF hidden input -----------------------------
-        // EC-CUBE's hidden _token carries a live form CSRF token; BeMart's
+        // EC-CUBE's hidden csrfToken carries a live form CSRF token; BeMart's
         // html context has no CSRF widget, so the value is empty.
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -136,7 +136,7 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/forgot-password')->toString();
 
-        $this->assertStringContainsString('name="login_email"', $html);
+        $this->assertStringContainsString('name="email"', $html);
         $this->assertStringContainsString('type="text"', $html);
     }
 
@@ -206,7 +206,7 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
      * Render EC-CUBE 4.3's real Forgot/index.twig + default_frame.twig
      * from the gitignored clone, with EC-CUBE's Twig API stubbed.
      *
-     * `form_widget(form.login_email)` delegates to the real
+     * `form_widget(form.email)` delegates to the real
      * {@see ForgotForm} so the input is byte-identical to BeMart's port.
      */
     private function renderEcCubeForgot(): string
@@ -225,8 +225,8 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
 
         return $twig->render('Forgot/index.twig', [
             'form' => new EcCubeStub([
-                'login_email' => 'login_email',
-                '_token' => '__token__',
+                'email' => 'email',
+                'csrfToken' => '_csrfToken__',
             ]),
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
             'eccube_config' => ['locale' => 'ja'],
@@ -277,17 +277,17 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
-        // FORM-PAGE recipe: `form_widget(form.login_email)` delegates to
+        // FORM-PAGE recipe: `form_widget(form.email)` delegates to
         // BeMart's real ForgotForm so the input is byte-identical.
         $forgotForm = (new FormFactory())->newInstance(ForgotForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($forgotForm): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($forgotForm instanceof ForgotForm && is_string($field) && $field !== '') {

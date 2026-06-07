@@ -75,9 +75,9 @@ class Edit extends ResourceObject
 
         if ($productCode === '') {
             $form->fillValues([
-                'name' => '', 'product_code' => '', 'price02' => '',
-                'stock' => '', 'status' => '1', 'description_detail' => '',
-                'search_word' => '', 'note' => '',
+                'productName' => '', 'productCode' => '', 'price02' => '',
+                'stock' => '', 'productStatus' => '1', 'description' => '',
+                'searchWord' => '', 'note' => '',
             ]);
 
             $this->code = Code::OK;
@@ -95,13 +95,13 @@ class Edit extends ResourceObject
         assert($final instanceof AdminProductFetched);
 
         $form->fillValues([
-            'name' => $final->productName,
-            'product_code' => $final->productCode,
+            'productName' => $final->productName,
+            'productCode' => $final->productCode,
             'price02' => (string) $final->price02,
             'stock' => $final->stock === null ? '' : (string) $final->stock,
-            'status' => (string) $final->productStatus,
-            'description_detail' => $final->description ?? '',
-            'search_word' => $final->searchWord ?? '',
+            'productStatus' => (string) $final->productStatus,
+            'description' => $final->description ?? '',
+            'searchWord' => $final->searchWord ?? '',
             'note' => $final->note ?? '',
         ]);
 

@@ -3,7 +3,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_system_system' %}
+{% set route = 'admin-setting-system-system' %}
 {% set title = 'システム情報' %}
 {% set sub_title = 'システム設定' %}
 
@@ -62,7 +62,7 @@
                         </div>
                     </div>
                     <div id="php_info_box__frame">
-                        <iframe name="php_info" src="{{ url('admin_setting_system_system_phpinfo') }}" height="500" frameborder="0" style="width: 100%;"></iframe>
+                        <iframe name="php_info" src="/admin/system" height="500" frameborder="0" style="width: 100%;"></iframe>
                     </div>
                 </div>
             </div>

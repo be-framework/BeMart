@@ -26,7 +26,7 @@ use Ray\WebFormModule\AbstractForm;
  *
  * Field names / ids are ported from EC-CUBE's `LoginType` (block prefix
  * `admin_login`, so the FormView ids are `admin_login_<field>`). The
- * `login.twig` template overrides `login_id`'s id to a bare `login_id`
+ * `login.twig` template overrides `loginId`'s id to a bare `loginId`
  * and its placeholder; those overrides are folded into the field attrs
  * here so the rendered `<input>` markup matches EC-CUBE's.
  */
@@ -45,10 +45,10 @@ final class AdminLoginForm extends AbstractForm
      * Declares the admin login form fields.
      *
      * Ported verbatim from EC-CUBE's `LoginType::buildForm()` +
-     * `login.twig`: `login_id` (text, maxlength 50 — `eccube_id_max_len`)
+     * `login.twig`: `loginId` (text, maxlength 50 — `eccube_id_max_len`)
      * and `password` (password, maxlength 50 — `eccube_password_max_len`).
-     * `login.twig` passes `{'id': 'login_id', 'attr': {'placeholder':
-     * 'admin.login.login_id', 'autofocus': true}}` to the `login_id`
+     * `login.twig` passes `{'id': 'loginId', 'attr': {'placeholder':
+     * 'admin.login.loginId', 'autofocus': true}}` to the `loginId`
      * widget and `{'attr': {'placeholder': 'admin.login.password'}}` to
      * the `password` widget — those template-side overrides are folded
      * in here.
@@ -56,9 +56,9 @@ final class AdminLoginForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('login_id', 'text')
+        $this->setField('loginId', 'text')
             ->setAttribs([
-                'id' => 'login_id',
+                'id' => 'loginId',
                 'class' => 'form-control',
                 'maxlength' => '50',
                 'placeholder' => 'ログインID',
@@ -77,7 +77,7 @@ final class AdminLoginForm extends AbstractForm
         // loginId / password rules live in the Be domain (AdminLoginInput
         // Semantics + AdminAuthenticated Final). The Login resource does
         // not consult this filter.
-        $this->filter->validate('login_id')->isNotBlank();
+        $this->filter->validate('loginId')->isNotBlank();
         $this->filter->validate('password')->isNotBlank();
     }
 

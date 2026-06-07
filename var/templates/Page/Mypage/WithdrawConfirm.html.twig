@@ -41,7 +41,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_withdraw_confirm' %}
+{% set route = 'mypage-withdraw-confirm' %}
 {% set title = 'マイページ' %}
 
 {% block main %}
@@ -64,11 +64,11 @@
                         </p>
                     </div>
                 </div>
-                <form method="post" action="{{ url('mypage_withdraw') }}">
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <form method="post" action="/mypage/withdraw">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                     <div class="ec-off4Grid">
                         <div class="ec-off4Grid__cell">
-                            <a class="ec-withdrawConfirmRole__cancel ec-blockBtn--cancel" href="{{ url('mypage') }}">
+                            <a class="ec-withdrawConfirmRole__cancel ec-blockBtn--cancel" href="/mypage">
                                 いいえ、退会しません
                             </a>
                             <button type="submit" class="ec-blockBtn" name="mode"

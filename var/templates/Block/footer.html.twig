@@ -14,8 +14,8 @@
    - `{{ 'front.block.footer.*'|trans }}` -> the Japanese literal the key
      resolves to in messages.ja.yaml (about_us / privacy_policy /
      act_on_specified_commercial_transactions / inquiry).
-   - `url('help_about'|'help_privacy'|'help_tradelaw'|'contact'|'homepage')`
-     -> BeMartTwigExtension `url()`.
+   - `canonical-url '/help/about'|'/help/privacy'|'/help/trade-law'|'contact'|'homepage')`
+     -> BeMartTwigExtension `canonical-url )`.
    - `BaseInfo.shop_name` -> the frame's `shop_name` variable, defaulting
      to `BeMart` (the storefront frame carries no BaseInfo entity).
 
@@ -26,21 +26,21 @@
     <div class="ec-footerRole__inner">
         <ul class="ec-footerNavi">
             <li class="ec-footerNavi__link">
-                <a href="{{ url('help_about') }}">当サイトについて</a>
+                <a href="/help/about">当サイトについて</a>
             </li>
             <li class="ec-footerNavi__link">
-                <a href="{{ url('help_privacy') }}">プライバシーポリシー</a>
+                <a href="/help/privacy">プライバシーポリシー</a>
             </li>
             <li class="ec-footerNavi__link">
-                <a href="{{ url('help_tradelaw') }}">特定商取引法に基づく表記</a>
+                <a href="/help/trade-law">特定商取引法に基づく表記</a>
             </li>
             <li class="ec-footerNavi__link">
-                <a href="{{ url('contact') }}">お問い合わせ</a>
+                <a href="/contact">お問い合わせ</a>
             </li>
         </ul>
         <div class="ec-footerTitle">
             <div class="ec-footerTitle__logo">
-                <a href="{{ url('homepage') }}">{{ shop_name|default('BeMart') }}</a>
+                <a href="/">{{ shop_name|default('BeMart') }}</a>
             </div>
             <div class="ec-footerTitle__copyright">copyright (c) {{ shop_name|default('BeMart') }} all rights reserved.</div>
         </div>

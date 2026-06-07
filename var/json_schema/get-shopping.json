@@ -185,6 +185,19 @@
             "minimum": 0,
             "maximum": 999999999,
             "example": 600
+          },
+          "preOrderId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "仮注文ID",
+            "description": "購入フローの一時セッショントークン。カートと注文確認/注文確定を接続する40文字の小文字16進ID。HTML確認フォームではhidden inputとして送信される。",
+            "minLength": 0,
+            "maxLength": 128,
+            "pattern": "^[0-9a-f]*$",
+            "example": "deadbeefcafe1234567890abcdef01234567890a",
+            "$comment": "実DBではカート作成時に生成され、/shopping → /shopping/confirm → /shopping/checkout の境界契約として使う。"
           }
         },
         "additionalProperties": false,
@@ -312,6 +325,29 @@
       "required": [
         "addr01"
       ]
+    },
+    "preOrderId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "仮注文ID",
+      "description": "購入フローの一時セッショントークン。カートと注文確認/注文確定を接続する40文字の小文字16進ID。HTML確認フォームではhidden inputとして送信される。",
+      "minLength": 0,
+      "maxLength": 128,
+      "pattern": "^[0-9a-f]*$",
+      "example": "deadbeefcafe1234567890abcdef01234567890a",
+      "$comment": "実DBではカート作成時に生成され、/shopping → /shopping/confirm → /shopping/checkout の境界契約として使う。"
+    },
+    "csrfToken": {
+      "title": "購入確認CSRFトークン",
+      "description": "/shopping で表示する購入確認フォームの送信元検証トークン。/shopping/confirm へ進むPOSTで hidden input として送信され、CsrfProtected によりセッション上の信頼済みトークンと照合される。実HTTPでは64桁hex、test/fake文脈では deterministic token を使う。",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+      "$comment": "実HTTPではEccubeSharedCsrfTokenAdapter/BeMartTwigExtensionがPHPセッションに保存した64桁hexを返す。test/fake contextではFakeCsrfToken::TOKENを返すため、schemaはCSRF値の文字種・最小長のみ契約し、真正性はCsrfProtectedで検証する。"
     }
   },
   "additionalProperties": false,
@@ -544,6 +580,7 @@
     "carts",
     "email",
     "paymentMethods",
-    "defaultShippingAddress"
+    "defaultShippingAddress",
+    "csrfToken"
   ]
 }

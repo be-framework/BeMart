@@ -23,7 +23,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route)`         -> deterministic `/{route}` (BeMartTwigExtension).
+   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
      EC-CUBE-runtime only — enumerated as residual.
@@ -42,7 +42,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_content_file' %}
+{% set route = 'admin-content-file' %}
 {% set title = 'ファイル管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
@@ -62,7 +62,7 @@
         <input type="hidden" name="tree_select_file" value="{{ tplNowDir|default('') }}"/>
         <input type="hidden" name="tree_status" value=""/>
         <input type="hidden" name="select_file" value=""/>
-        <input type="hidden" id="file__token" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" id="file__token" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-outsideBlock">
             <div class="c-outsideBlock__contents">
                 <nav aria-label="breadcrumb" role="navigation">

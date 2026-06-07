@@ -135,7 +135,7 @@ final class ShoppingShippingResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
-        $this->assertSame('/shopping/shipping/multiple', $ro->headers['Location']);
+        $this->assertSame('/shopping/shipping-multiple', $ro->headers['Location']);
         $this->assertSame('doUpdateShippingAddress', $ro->body['transitionId']);
         $this->assertSame('佐藤', $ro->body['name01']);
         $this->assertSame('新宿区', $ro->body['addr01']);

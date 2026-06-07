@@ -97,7 +97,7 @@ class Activate extends ResourceObject
         assert($final instanceof CustomerActivated);
 
         $this->code = Code::SEE_OTHER;
-        $this->headers['Location'] = sprintf('/customer/%s', $final->customerId);
+        $this->headers['Location'] = sprintf('/login?customerId=%s', $final->customerId);
         $this->body = [
             'customerId' => $final->customerId,
             'email' => $final->email,
