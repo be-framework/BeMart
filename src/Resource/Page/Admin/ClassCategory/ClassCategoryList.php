@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassCategory;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Input\CreateClassCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminClassCategoryListInput;
 use MyVendor\BeMart\Form\AdminClassCategoryForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -43,8 +45,11 @@ class ClassCategoryList extends ResourceObject
     }
 
     /**
+     * ALPS `goClassCategoryList` に対応する GET 操作。
      * @psalm-taint-source input $classNameId
      */
+    #[Alps('goClassCategoryList')]
+    #[JsonSchema(schema: 'get-admin-class-category-class-category-list.json', params: 'get-admin-class-category-class-category-list.param.json')]
     #[Link(rel: 'doCreateClassCategory', href: 'page://self/admin/class-category/class-category-list', method: 'post')]
     #[Link(rel: 'doUpdateClassCategory', href: 'page://self/admin/class-category/class-category', method: 'put')]
     #[Link(rel: 'doDeleteClassCategory', href: 'page://self/admin/class-category/class-category', method: 'delete')]
@@ -76,9 +81,12 @@ class ClassCategoryList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateClassCategory` に対応する POST 操作。
      * @psalm-taint-source input $classNameId
      * @psalm-taint-source input $classCategoryName
      */
+    #[Alps('doCreateClassCategory')]
+    #[JsonSchema(schema: 'post-admin-class-category-class-category-list.json', params: 'post-admin-class-category-class-category-list.param.json')]
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
     #[CsrfProtected]
     public function onPost(

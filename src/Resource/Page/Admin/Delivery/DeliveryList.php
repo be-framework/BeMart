@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Delivery;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\AdminDeliveryListFetched;
 use MyVendor\BeMart\Be\Final\DeliveryCreated;
 use MyVendor\BeMart\Be\Input\CreateDeliveryInput;
 use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -36,6 +38,9 @@ class DeliveryList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goDeliveryList` に対応する GET 操作。 */
+    #[Alps('goDeliveryList')]
+    #[JsonSchema(schema: 'get-admin-delivery-delivery-list.json')]
     #[Link(rel: 'doCreateDelivery', href: 'page://self/admin/delivery/delivery-list', method: 'post')]
     #[Link(rel: 'goDelivery', href: 'page://self/admin/delivery/delivery', method: 'get')]
     #[Link(rel: 'doUpdateDelivery', href: 'page://self/admin/delivery/delivery', method: 'put')]
@@ -63,9 +68,12 @@ class DeliveryList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateDelivery` に対応する POST 操作。
      * @psalm-taint-source input $deliveryName
      * @psalm-taint-source input $visible
      */
+    #[Alps('doCreateDelivery')]
+    #[JsonSchema(schema: 'post-admin-delivery-delivery-list.json', params: 'post-admin-delivery-delivery-list.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[CsrfProtected]
     public function onPost(

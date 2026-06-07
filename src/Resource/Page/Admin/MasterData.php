@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminMasterDataForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -40,8 +42,11 @@ class MasterData extends ResourceObject
     }
 
     /**
+     * ALPS `goMasterData` に対応する GET 操作。
      * @psalm-taint-source input $masterType
      */
+    #[Alps('goMasterData')]
+    #[JsonSchema(schema: 'get-admin-master-data.json', params: 'get-admin-master-data.param.json')]
     #[Link(rel: 'doSelectMasterData', href: 'page://self/admin/master-data', method: 'put')]
     public function onGet(string $masterType = 'tag'): static
     {
@@ -83,6 +88,8 @@ class MasterData extends ResourceObject
      *
      * @psalm-taint-source input $masterType
      */
+    #[Alps('doSelectMasterData')]
+    #[JsonSchema(schema: 'put-admin-master-data.json', params: 'put-admin-master-data.param.json')]
     #[Link(rel: 'doUpdateMasterData', href: 'page://self/admin/master-data-edit', method: 'put')]
     #[CsrfProtected]
     public function onPut(string $masterType = 'tag'): static

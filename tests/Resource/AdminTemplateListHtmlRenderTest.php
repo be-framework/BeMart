@@ -143,6 +143,7 @@ final class AdminTemplateListHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering. Every difference must be in the residual
      * allowlist or a residual family.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testTemplateListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/template/template-list')->toString();

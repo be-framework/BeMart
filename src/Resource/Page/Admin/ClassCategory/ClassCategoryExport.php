@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassCategory;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -11,6 +12,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassCategoryCsvExported;
 use MyVendor\BeMart\Be\Input\ExportClassCategoryInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -32,8 +34,11 @@ class ClassCategoryExport extends ResourceObject
     }
 
     /**
+     * ALPS `goExportClassCategory` に対応する GET 操作。
      * @psalm-taint-source input $classNameId
      */
+    #[Alps('goExportClassCategory')]
+    #[JsonSchema(schema: 'get-admin-class-category-class-category-export.json', params: 'get-admin-class-category-class-category-export.param.json')]
     #[Link(rel: 'doImportClassCategoryCsv', href: 'page://self/admin/product/csv-class-category', method: 'post')]
     public function onGet(string|null $classNameId = null): static
     {

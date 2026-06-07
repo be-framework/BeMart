@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use MyVendor\BeMart\Be\Exception\TaxRuleNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\TaxRuleDeleted;
 use MyVendor\BeMart\Be\Input\DeleteTaxRuleInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -33,8 +35,11 @@ class TaxRule extends ResourceObject
     }
 
     /**
+     * ALPS `doDeleteTaxRule` に対応する DELETE 操作。
      * @psalm-taint-source input $taxRuleId
      */
+    #[Alps('doDeleteTaxRule')]
+    #[JsonSchema(schema: 'delete-admin-tax-rule-tax-rule.json', params: 'delete-admin-tax-rule-tax-rule.param.json')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]

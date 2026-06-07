@@ -111,6 +111,7 @@ final class ContactCompleteHtmlRenderTest extends TestCase
         }
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testContactCompleteHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/contact/complete')->toString();

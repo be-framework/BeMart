@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goMypageChangeComplete — 会員情報編集(完了)
@@ -35,6 +37,9 @@ use BEAR\Resource\ResourceObject;
  */
 class ChangeComplete extends ResourceObject
 {
+    /** ALPS `goMypageChangeComplete` に対応する GET 操作。 */
+    #[Alps('goMypageChangeComplete')]
+    #[JsonSchema(schema: 'get-mypage-change-complete.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]

@@ -152,6 +152,7 @@ final class EntryConfirmHtmlRenderTest extends TestCase
         $this->assertStringContainsString('<input type="hidden" name="user_policy_check"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testEntryConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/entry/confirm')->toString();

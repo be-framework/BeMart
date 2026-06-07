@@ -195,6 +195,7 @@ final class ShoppingHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="payment"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShoppingHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping')->toString();

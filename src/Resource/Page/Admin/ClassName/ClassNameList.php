@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassName;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\CreateClassNameInput;
 use MyVendor\BeMart\Be\Input\GetAdminClassNameListInput;
 use MyVendor\BeMart\Form\AdminClassNameForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -41,6 +43,9 @@ class ClassNameList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goClassNameList` に対応する GET 操作。 */
+    #[Alps('goClassNameList')]
+    #[JsonSchema(schema: 'get-admin-class-name-class-name-list.json')]
     #[Link(rel: 'doCreateClassName', href: 'page://self/admin/class-name/class-name-list', method: 'post')]
     #[Link(rel: 'doUpdateClassName', href: 'page://self/admin/class-name/class-name', method: 'put')]
     #[Link(rel: 'doDeleteClassName', href: 'page://self/admin/class-name/class-name', method: 'delete')]
@@ -71,8 +76,11 @@ class ClassNameList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateClassName` に対応する POST 操作。
      * @psalm-taint-source input $classNameLabel
      */
+    #[Alps('doCreateClassName')]
+    #[JsonSchema(schema: 'post-admin-class-name-class-name-list.json', params: 'post-admin-class-name-class-name-list.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
     #[CsrfProtected]
     public function onPost(string $classNameLabel): static

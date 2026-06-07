@@ -29,6 +29,7 @@ use function dirname;
  * finalized orders for her at setUp time so the pagination paths can
  * be exercised.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class OrderHistoryResourceTest extends TestCase
 {
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';

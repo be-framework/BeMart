@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedOrderAccessException;
 use MyVendor\BeMart\Be\Final\MypageHistoryFetched;
 use MyVendor\BeMart\Be\Input\GetMypageHistoryInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -39,8 +41,11 @@ class History extends ResourceObject
     }
 
     /**
+     * ALPS `goMypageHistory` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('goMypageHistory')]
+    #[JsonSchema(schema: 'get-mypage-history.json', params: 'get-mypage-history.param.json')]
     #[Link(rel: 'doReorder', href: 'page://self/mypage/reorder', method: 'post')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(string $orderNo): static

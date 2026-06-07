@@ -155,6 +155,7 @@ final class MypageHistoryHtmlRenderTest extends TestCase
      * own rendering of the same logical order. Every difference must be
      * in the residual allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testHistoryHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/mypage/history', [
