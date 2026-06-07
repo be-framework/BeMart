@@ -13,11 +13,11 @@
   now rendered through a real form object — `LoginForm` (an
   AbstractForm), exposed by the Login resource as `body.form`:
 
-    {{ form.input('login_email') }}   <- real <input> w/ id/attrs/value
-    {{ form.error('login_email') }}   <- inline Be-domain error, if any
+    {{ form.input('email') }}   <- real <input> w/ id/attrs/value
+    {{ form.error('email') }}   <- inline Be-domain error, if any
 
   EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.login_email)`); Ray.WebFormModule (Aura.Input +
+  (`form_widget(form.email)`); Ray.WebFormModule (Aura.Input +
   Aura.Html) is BeMart's BEAR-idiomatic equivalent. The field names /
   ids / attributes in LoginForm::init() are ported from EC-CUBE's
   `CustomerLoginType` + the template's `form_widget` `attr` options, so
@@ -43,7 +43,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_login' %}
+{% set route = 'login' %}
 {% set title = 'ログイン' %}
 
 {% block main %}
@@ -53,15 +53,15 @@
         </div>
         <div class="ec-off2Grid">
             <div class="ec-off2Grid__cell">
-                <form name="login_mypage" id="login_mypage" method="post" action="{{ url('mypage_login') }}">
+                <form name="login_mypage" id="login_mypage" method="post" action="/login">
                     <div class="ec-login">
                         <div class="ec-login__icon">
                             <div class="ec-icon"><img src="{{ asset('assets/icon/user.svg') }}" alt=""></div>
                         </div>
                         <div class="ec-login__input">
                             <div class="ec-input">
-                                {{ form.input('login_email')|raw }}
-                                {{ form.input('login_pass')|raw }}
+                                {{ form.input('email')|raw }}
+                                {{ form.input('password')|raw }}
                             </div>
                             {% if message is defined and message %}
                                 <p class="ec-errorMessage">{{ message }}</p>
@@ -76,15 +76,15 @@
                             </div>
                             <div class="ec-grid2__cell">
                                 <div class="ec-login__link"><a class="ec-link"
-                                                               href="{{ url('forgot') }}">ログイン情報をお忘れですか？</a>
+                                                               href="/forgot-password">ログイン情報をお忘れですか？</a>
                                 </div>
                                 <div class="ec-login__link"><a class="ec-link"
-                                                               href="{{ url('entry') }}">新規会員登録</a>
+                                                               href="/entry">新規会員登録</a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <input type="hidden" name="_csrf_token" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                 </form>
             </div>
         </div>

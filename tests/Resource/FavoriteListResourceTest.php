@@ -19,7 +19,7 @@ use function dirname;
 /**
  * Resource-level coverage for goFavoriteList (the read pair for
  * Pilot 13 doAddFavorite + doRemoveFavorite). FavoriteStorage is
- * singleton-bound by AppModule, so a POST to /mypage/favorite within
+ * singleton-bound by AppModule, so a POST to /mypage/favorite-list within
  * the same injector is visible to a subsequent GET to
  * /mypage/favorite-list.
  */

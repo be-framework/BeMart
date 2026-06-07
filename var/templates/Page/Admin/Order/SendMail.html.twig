@@ -16,20 +16,20 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`.
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
    - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
      AdminOrderMailForm leaf fields (Ray.WebFormModule).
    - `csrf_token()` hidden input -> `csrfToken|default('')`.
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_order_mail' %}
+{% set route = 'admin-order-send-mail' %}
 {% set title = '受注メール送信' %}
 {% set sub_title = '受注管理' %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ url('admin_order_mail', { id: orderNo }) }}" id="mail_form" name="form1" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+    <form role="form" method="post" action="/admin/order/send-mail?orderNo={{ orderNo }}" id="mail_form" name="form1" novalidate>
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
@@ -68,7 +68,7 @@
                 <div class="row justify-content-between align-items-center">
                     <div class="col-6">
                         <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="{{ url('admin_order_edit', { id: orderNo }) }}">
+                            <a class="c-baseLink" href="/admin/order/edit?orderNo={{ orderNo }}">
                                 <i class="fa fa-backward" aria-hidden="true"></i>
                                 <span>受注編集へ戻る</span>
                             </a>

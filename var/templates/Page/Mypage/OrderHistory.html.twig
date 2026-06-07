@@ -1,0 +1,56 @@
+{#
+  BeMart mypage full order history — canonical `/mypage/order-history`.
+
+  The dashboard `/mypage` shows a recent-order summary, while this page
+  renders the paged/unbounded `OrderHistory` Resource body:
+  customerId, orderCount, limit, offset, orders[].
+#}
+{% extends 'base.html.twig' %}
+
+{% set body_class = 'mypage' %}
+{% set route = 'mypage-order-history' %}
+{% set title = 'マイページ' %}
+
+{% block main %}
+    <div class="ec-layoutRole__main">
+        <div class="ec-mypageRole">
+            <div class="ec-pageHeader">
+                <h1>マイページ/ご注文履歴</h1>
+            </div>
+            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'index', name01: name01|default(''), name02: name02|default('') } %}
+        </div>
+        <div class="ec-mypageRole">
+            {% if orderCount > 0 %}
+                <p class="ec-para-normal">{{ orderCount }}件の履歴があります</p>
+                {% for Order in orders %}
+                    <div class="ec-historyRole">
+                        <div class="ec-historyRole__contents">
+                            <div class="ec-historyRole__header">
+                                <div class="ec-historyListHeader">
+                                    <p class="ec-historyListHeader__date">{{ Order.orderDate }}</p>
+                                    <dl class="ec-definitions">
+                                        <dt>ご注文番号</dt>
+                                        <dd>{{ Order.orderNo }}</dd>
+                                    </dl>
+                                    <dl class="ec-definitions">
+                                        <dt>ご注文状況</dt>
+                                        <dd>{{ Order.orderStatus }}</dd>
+                                    </dl>
+                                    <dl class="ec-definitions">
+                                        <dt>お支払い合計</dt>
+                                        <dd>{{ Order.paymentTotal|price }}</dd>
+                                    </dl>
+                                    <p class="ec-historyListHeader__action">
+                                        <a class="ec-inlineBtn" href="/mypage/history?orderNo={{ Order.orderNo|url_encode }}">詳細を見る</a>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p class="ec-para-normal">ご注文履歴はありません。</p>
+            {% endif %}
+        </div>
+    </div>
+{% endblock %}

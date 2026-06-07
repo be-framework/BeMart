@@ -71,7 +71,7 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
         '<title>EC-CUBE / マイページ</title>',
         '<meta name="author" content="">',
         // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -188,7 +188,7 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
         $this->registerEcCubeStubs($twig);
 
         return $twig->render('Mypage/withdraw_confirm.twig', [
-            'form' => new EcCubeStub(['_token' => '__token__']),
+            'form' => new EcCubeStub(['csrfToken' => '_csrfToken__']),
             'BaseInfo' => new EcCubeStub([
                 'shop_name' => 'EC-CUBE',
                 'option_favorite_product' => true,
@@ -244,15 +244,15 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-        // The single `form_widget(form._token)` — the Symfony CSRF widget;
-        // the port authors the same hidden `_token` input plainly.
+        // The single `form_widget(form.csrfToken)` — the Symfony CSRF widget;
+        // the port authors the same hidden `csrfToken` input plainly.
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

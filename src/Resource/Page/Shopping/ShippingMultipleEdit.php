@@ -132,7 +132,7 @@ class ShippingMultipleEdit extends ResourceObject
         string $phoneNumber = '',
     ): static {
         $this->code = Code::SEE_OTHER;
-        $this->headers['Location'] = '/shopping/shipping/multiple';
+        $this->headers['Location'] = '/shopping/shipping-multiple';
         $this->body = [
             'transitionId' => 'doUpdateShippingAddress',
             'name01' => $name01,

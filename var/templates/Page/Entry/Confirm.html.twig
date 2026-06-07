@@ -45,7 +45,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'registration_page' %}
-{% set route = 'entry_confirm' %}
+{% set route = 'entry-confirm' %}
 {% set title = '新規会員登録(確認)' %}
 
 {% block main %}
@@ -55,8 +55,8 @@
         </div>
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
-                <form method="post" action="{{ url('entry') }}">
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <form method="post" action="/entry">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                     <p>{{ "下記の内容で登録してもよろしいでしょうか？\nよろしければ、一番下の「会員登録をする」ボタンをクリックしてください。\n"|nl2br }}</p>
                     <div class="ec-borderedDefs">
                         <dl>

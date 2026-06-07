@@ -65,7 +65,7 @@ class TwoFactorAuth extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuth',
-            'fields' => ['device_token'],
+            'fields' => ['deviceToken'],
             // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
             'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
         ];
@@ -104,7 +104,7 @@ class TwoFactorAuth extends ResourceObject
         assert($final instanceof TwoFactorAuthVerified);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin';
+        $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doVerifyTwoFactorAuth',
             'loginId' => $final->loginId,

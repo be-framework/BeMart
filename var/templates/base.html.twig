@@ -46,7 +46,7 @@
     {% block stylesheet %}{% endblock %}
     <link rel="stylesheet" href="{{ asset('assets/css/customize.css') }}">
 </head>
-<body id="page_{{ route|default('homepage') }}" class="{{ body_class|default('other_page') }}">
+<body id="page_{{ route|default('index') }}" class="{{ body_class|default('other_page') }}">
 
 <div class="ec-layoutRole">
     {# Layout: HEADER — default EC-CUBE wires header / logo / category_nav_pc

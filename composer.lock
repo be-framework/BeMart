@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b593ebf7848fd0436f33f0c84eba3f99",
+    "content-hash": "38e3ec4b6ff762cb081b3f57e60eb20c",
     "packages": [
         {
             "name": "aura/cli",
@@ -319,59 +319,6 @@
                 "source": "https://github.com/auraphp/installer-default/tree/1.0.0"
             },
             "time": "2012-11-26T21:35:57+00:00"
-        },
-        {
-            "name": "aura/router",
-            "version": "3.4.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/auraphp/Aura.Router.git",
-                "reference": "f1c01072362f48dd0cb165630f1a706f4ab1dabc"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/auraphp/Aura.Router/zipball/f1c01072362f48dd0cb165630f1a706f4ab1dabc",
-                "reference": "f1c01072362f48dd0cb165630f1a706f4ab1dabc",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.5.0",
-                "psr/http-message": "^1.0 || ^2.0",
-                "psr/log": "^1.0 || ^2.0 || ^3.0"
-            },
-            "require-dev": {
-                "guzzlehttp/psr7": "^1.0 || ^2.0",
-                "yoast/phpunit-polyfills": "~1.0"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Aura\\Router\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Aura.Router Contributors",
-                    "homepage": "https://github.com/auraphp/Aura.Router/contributors"
-                }
-            ],
-            "description": "Powerful, flexible web routing for PSR-7 requests.",
-            "homepage": "https://github.com/auraphp/Aura.Router",
-            "keywords": [
-                "psr-7",
-                "route",
-                "router",
-                "routing"
-            ],
-            "support": {
-                "issues": "https://github.com/auraphp/Aura.Router/issues",
-                "source": "https://github.com/auraphp/Aura.Router/tree/3.4.2"
-            },
-            "time": "2025-04-24T07:17:58+00:00"
         },
         {
             "name": "aura/session",

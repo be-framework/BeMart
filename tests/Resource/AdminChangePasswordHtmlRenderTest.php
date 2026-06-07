@@ -63,7 +63,7 @@ final class AdminChangePasswordHtmlRenderTest extends TestCase
     /**
      * The form inputs are rendered by a real AdminChangePasswordForm on
      * BOTH sides, so they diff to zero; the residual is the admin-frame
-     * baseline + the form `_token` hidden CSRF input.
+     * baseline + the form `csrfToken` hidden CSRF input.
      *
      * @var list<string>
      */
@@ -179,10 +179,10 @@ final class AdminChangePasswordHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // Form: EC-CUBE's hidden `_token` CSRF input. BeMart keeps the
+            // Form: EC-CUBE's hidden `csrfToken` CSRF input. BeMart keeps the
             // hidden input (structure) with an empty value.
-            'name="_token"',
-            'csrf_token',
+            'name="csrfToken"',
+            'csrfcsrfToken',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -214,7 +214,7 @@ final class AdminChangePasswordHtmlRenderTest extends TestCase
         // names; the stubbed `form_widget` delegates by that name.
         return $twig->render('change_password.twig', [
             'form' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'current_password' => 'current_password',
                 'change_password' => new EcCubeStub([
                     'first' => 'change_password_first',
@@ -266,7 +266,7 @@ final class AdminChangePasswordHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 
@@ -275,7 +275,7 @@ final class AdminChangePasswordHtmlRenderTest extends TestCase
         // (a string for current_password / a RepeatedType child for
         // change_password.first|second — both resolve to the flat field
         // name via the EcCubeStub above). Fields not declared by the form
-        // (`_token`) render empty, mirroring the BeMart port.
+        // (`csrfToken`) render empty, mirroring the BeMart port.
         $formFields = ['current_password', 'change_password_first', 'change_password_second'];
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
             $name = is_object($field) ? (string) $field : $field;

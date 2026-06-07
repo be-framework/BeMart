@@ -160,6 +160,7 @@ class ProductCsv extends ResourceObject
         fclose($handle);
 
         $this->code = Code::OK;
+        $this->headers['Location'] = '/admin/product-list';
         $this->body = [
             'transitionId' => 'doImportProductCsv',
             'count' => $count,

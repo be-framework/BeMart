@@ -20,6 +20,7 @@ use function header;
 use function headers_sent;
 use function http_response_code;
 use function is_array;
+use function is_readable;
 use function is_string;
 use function json_decode;
 use function json_encode;
@@ -324,9 +325,33 @@ final class Bootstrap
                     $body[$key] = $value;
                 }
             }
+
+            $uploadedCsv = $this->uploadedCsvBody();
+            if ($uploadedCsv !== null && (($body['csv'] ?? '') === '')) {
+                $body['csv'] = $uploadedCsv;
+            }
         }
 
         return $this->requestFromTarget($method, $target, $body);
+    }
+
+    private function uploadedCsvBody(): string|null
+    {
+        /** @var mixed $file */
+        $file = $_FILES['import_file'] ?? null;
+        if (! is_array($file)) {
+            return null;
+        }
+
+        /** @var mixed $tmpName */
+        $tmpName = $file['tmp_name'] ?? null;
+        if (! is_string($tmpName) || $tmpName === '' || ! is_readable($tmpName)) {
+            return null;
+        }
+
+        $csv = file_get_contents($tmpName);
+
+        return is_string($csv) ? $csv : null;
     }
 
     /** @param array<string, mixed> $body */

@@ -17,9 +17,9 @@ use Ray\WebFormModule\AbstractForm;
  * Aura.Filter + Aura.Html).
  *
  * One form serves both login-context 2FA pages:
- *  - `two_factor_auth.twig`     — the challenge: renders `device_token`.
+ *  - `two_factor_auth.twig`     — the challenge: renders `deviceToken`.
  *  - `two_factor_auth_set.twig` — device registration: renders
- *    `device_token` + the hidden `auth_key`.
+ *    `deviceToken` + the hidden `authKey`.
  *
  * EC-CUBE's block prefix is `admin_two_factor_auth`, so the FormView
  * ids are `admin_two_factor_auth_device_token` /
@@ -40,7 +40,7 @@ final class AdminTwoFactorAuthForm extends AbstractForm
      * Declares the 2FA form fields.
      *
      * Ported from EC-CUBE's `TwoFactorAuthType::buildForm()`:
-     * `device_token` (text, maxlength 6) and `auth_key` (hidden). The
+     * `deviceToken` (text, maxlength 6) and `authKey` (hidden). The
      * `two_factor_auth.twig` template adds `class="w-100"` and a
      * placeholder to the `device_token` widget; `two_factor_auth_set`
      * uses the bare widget — the `w-100` class is kept (it is harmless
@@ -49,7 +49,7 @@ final class AdminTwoFactorAuthForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('device_token', 'text')
+        $this->setField('deviceToken', 'text')
             ->setAttribs([
                 'id' => 'admin_two_factor_auth_device_token',
                 'class' => 'w-100',
@@ -59,7 +59,7 @@ final class AdminTwoFactorAuthForm extends AbstractForm
                 'autofocus' => 'autofocus',
             ]);
 
-        $this->setField('auth_key', 'hidden')
+        $this->setField('authKey', 'hidden')
             ->setAttribs([
                 'id' => 'admin_two_factor_auth_auth_key',
             ]);
@@ -67,6 +67,6 @@ final class AdminTwoFactorAuthForm extends AbstractForm
         // NON-AUTHORITATIVE structural check only. The authoritative
         // 6-digit numeric token rule is EC-CUBE-domain; no Be transition
         // exists for this wave.
-        $this->filter->validate('device_token')->isNotBlank();
+        $this->filter->validate('deviceToken')->isNotBlank();
     }
 }

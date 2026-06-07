@@ -15,7 +15,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `{% for Template in Templates %}` -> the resource body's
      `templates` list. EC-CUBE keys the per-row action `<a>`s by the
@@ -49,7 +49,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_store_template' %}
+{% set route = 'admin-template-template-list' %}
 {% set title = 'テンプレート一覧' %}
 {% set sub_title = 'オーナーズストア' %}
 
@@ -64,12 +64,12 @@
 {% endblock javascript %}
 
 {% block main %}
-    <form name="form1" id="form1" method="post" action="{{ url('admin_store_template') }}">
+    <form name="form1" id="form1" method="post" action="/admin/template/template-list?_method=put">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
                     <div class="d-block mb-3">
-                        <a class="btn btn-ec-regular" href="{{ url('admin_store_template_install') }}">新規作成</a>
+                        <a class="btn btn-ec-regular" href="/admin/template/template-add">新規作成</a>
                     </div>
                     <div class="card rounded border-0 mb-4">
                         <div class="card-header"><span class="card-title">テンプレート一覧</span></div>
@@ -99,7 +99,7 @@
                                         <td class="align-middle text-center icon_edit">
                                             <div class="row justify-content-end">
                                                 <div class="col-auto text-center">
-                                                    <a href="{{ url('admin_store_template_download', { 'id' : Template.templateId }) }}"
+                                                    <a href="/admin/template/template-list?templateId={{ Template.templateId }}"
                                                        class="btn btn-ec-actionIcon action-download" data-bs-toggle="tooltip" data-bs-placement="top"
                                                        title="ダウンロード">
                                                         <i class="fa fa-cloud-download fa-lg text-secondary" aria-hidden="true"></i>
@@ -124,7 +124,7 @@
                                                                 <div class="modal-footer">
                                                                     <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
                                                                     <a class="btn btn-ec-delete" data-confirm="false"
-                                                                       href="{{ url('admin_store_template_delete', { 'id': Template.templateId}) }}">
+                                                                       href="/admin/template/template-list?templateId={{ Template.templateId }}&_method=delete">
                                                                         削除
                                                                     </a>
                                                                 </div>

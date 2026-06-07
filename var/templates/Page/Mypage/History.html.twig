@@ -48,7 +48,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_history' %}
+{% set route = 'mypage-history' %}
 {% set title = 'マイページ' %}
 
 {% block main %}
@@ -185,7 +185,12 @@
         </div>
         <div class="ec-role ec-orderRole">
             <div class="ec-orderRole__detail">
-                <a href="{{ url('mypage') }}" class="ec-inlineBtn ec-font-bold">戻る</a>
+                <form method="post" action="/mypage/reorder" class="d-inline">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('mypage_reorder')) }}">
+                    <input type="hidden" name="orderNo" value="{{ orderNo }}">
+                    <button type="submit" class="ec-inlineBtn ec-font-bold">再注文する</button>
+                </form>
+                <a href="/mypage" class="ec-inlineBtn ec-font-bold">戻る</a>
             </div>
         </div>
     </div>

@@ -11,7 +11,7 @@
   markup skeleton and `ec-*` class names verbatim.
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `url('homepage')`     -> BeMartTwigExtension `url()` -> `/`.
+   - `canonical-url 'homepage')`     -> BeMartTwigExtension `canonical-url )` -> `/`.
    - `BaseInfo.shop_name`  -> the frame's `shop_name` variable, which
      defaults to `BeMart` (the storefront frame carries no BaseInfo
      entity; every page leaves `shop_name` unset, so the default applies).
@@ -25,7 +25,7 @@
         <div class="ec-headerTitle">
             <div class="ec-headerTitle__title">
                 <h1>
-                    <a href="{{ url('homepage') }}">
+                    <a href="/">
                         {{ shop_name|default('BeMart') }}
                     </a>
                 </h1>
