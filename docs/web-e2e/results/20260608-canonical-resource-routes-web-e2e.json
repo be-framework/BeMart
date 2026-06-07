@@ -12,8 +12,8 @@
     "orderNo": "6bb2f22bc8b19923d34b2e84f74e50fb"
   },
   "summary": {
-    "pass": 183,
-    "fail": 0,
+    "pass": 181,
+    "fail": 2,
     "targetOut": 3,
     "other": 0
   },
@@ -33,7 +33,6 @@
         "Resource + HTML test + flow-customer-*"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/001-User-トップページ表示.png",
       "targetUrl": "/",
       "finalUrl": "http://localhost:18080/",
       "title": "BeMart",
@@ -69,7 +68,6 @@
         "Resource + HTML test + flow-customer-purchase"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/002-User-商品一覧表示.png",
       "targetUrl": "/products",
       "finalUrl": "http://localhost:18080/products",
       "title": "BeMart / 商品一覧",
@@ -96,7 +94,6 @@
         "Resource + 現ブラウザ到達確認"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/003-User-カテゴリ絞り込み.png",
       "targetUrl": "/products?category_id=1",
       "finalUrl": "http://localhost:18080/products?category_id=1",
       "title": "BeMart / 商品一覧",
@@ -123,7 +120,6 @@
         "Resource + flow-customer-purchase"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/004-User-商品名検索.png",
       "targetUrl": "/products?name=%E5%95%86%E5%93%8100002",
       "finalUrl": "http://localhost:18080/products?name=%E5%95%86%E5%93%8100002",
       "title": "BeMart / 商品一覧",
@@ -150,7 +146,6 @@
         "Resource + HTML test + flow-customer-purchase"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/005-user-商品詳細表示.png",
       "targetUrl": "/product?productCode=web-e2e-20260608-1780851276",
       "finalUrl": "http://localhost:18080/product?productCode=web-e2e-20260608-1780851276",
       "title": "BeMart / Web E2E 商品 20260608",
@@ -196,7 +191,6 @@
         "Resource + flow-customer-purchase"
       ],
       "oldResult": "✘ fail（カート遷移は成功、選択商品とカート明細の商品名が不一致）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/006-user-カート追加.png",
       "targetUrl": "/cart",
       "finalUrl": "http://localhost:18080/cart",
       "title": "BeMart / ショッピングカート",
@@ -251,7 +245,6 @@
         "Resource test + OpenAPI schema"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/007-user-カート数量変更.png",
       "targetUrl": "/cart",
       "finalUrl": "http://localhost:18080/cart",
       "title": "BeMart / ショッピングカート",
@@ -306,7 +299,6 @@
         "Resource test + OpenAPI schema"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/008-user-カート商品削除.png",
       "targetUrl": "/cart",
       "finalUrl": "http://localhost:18080/cart",
       "title": "BeMart / ショッピングカート",
@@ -361,7 +353,6 @@
         "Resource + HTML test + flow-customer-purchase"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/009-user-カート確認.png",
       "targetUrl": "/cart",
       "finalUrl": "http://localhost:18080/cart",
       "title": "BeMart / ショッピングカート",
@@ -416,7 +407,6 @@
         "Resource + HTML test + flow-customer-purchase"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/010-user-非会員購入情報入力.png",
       "targetUrl": "/shopping/non-member",
       "finalUrl": "http://localhost:18080/shopping/non-member",
       "title": "BeMart / お客様情報の入力",
@@ -471,7 +461,6 @@
         "Resource + flow-customer-purchase"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/011-user-非会員購入情報送信.png",
       "targetUrl": "/shopping/non-member",
       "finalUrl": "http://localhost:18080/shopping/non-member",
       "title": "BeMart / お客様情報の入力",
@@ -526,7 +515,6 @@
         "Resource + HTML test + flow-customer-purchase"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/012-user-購入確認.png",
       "targetUrl": "/shopping/confirm",
       "finalUrl": "http://localhost:18080/shopping/confirm",
       "title": "BeMart / ご注文内容のご確認",
@@ -569,7 +557,6 @@
         "Resource + flow-customer-purchase"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/013-user-購入完了.png",
       "targetUrl": "/shopping/complete",
       "finalUrl": "http://localhost:18080/shopping/complete",
       "title": "BeMart / ご注文完了",
@@ -605,7 +592,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/014-user-購入エラー表示.png",
       "targetUrl": "/shopping/error",
       "finalUrl": "http://localhost:18080/shopping/error",
       "title": "BeMart / 購入エラー",
@@ -641,7 +627,6 @@
         "Resource + HTML test + flow-customer-registration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/015-user-会員登録入力.png",
       "targetUrl": "/entry",
       "finalUrl": "http://localhost:18080/entry",
       "title": "BeMart / 新規会員登録",
@@ -703,7 +688,6 @@
         "Resource + HTML test + flow-customer-registration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/016-user-会員登録確認.png",
       "targetUrl": "/entry/confirm",
       "finalUrl": "http://localhost:18080/entry/confirm",
       "title": "BeMart / 新規会員登録(確認)",
@@ -765,7 +749,6 @@
         "Resource + flow-customer-registration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/017-user-会員登録完了.png",
       "targetUrl": "/entry/complete",
       "finalUrl": "http://localhost:18080/entry/complete",
       "title": "BeMart / 新規会員登録(仮登録完了)",
@@ -801,7 +784,6 @@
         "Resource + HTML test + flow-customer-registration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/018-user-会員登録完了画面.png",
       "targetUrl": "/entry/complete",
       "finalUrl": "http://localhost:18080/entry/complete",
       "title": "BeMart / 新規会員登録(仮登録完了)",
@@ -837,7 +819,6 @@
         "Resource + flow-customer-registration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/019-user-会員メール認証.png",
       "targetUrl": "/entry/activate",
       "finalUrl": "http://localhost:18080/entry/activate",
       "title": "BeMart / 新規会員登録(完了)",
@@ -873,7 +854,6 @@
         "Resource + HTML test + auth/session test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/020-user-ロク-イン.png",
       "targetUrl": "/login",
       "finalUrl": "http://localhost:18080/login",
       "title": "BeMart / ログイン",
@@ -918,7 +898,6 @@
         "Resource + auth/session test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/021-user-ロク-アウト.png",
       "targetUrl": "/",
       "finalUrl": "http://localhost:18080/",
       "title": "BeMart",
@@ -954,7 +933,6 @@
         "Resource + HTML/Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/022-user-ハ-スワート-再発行依頼.png",
       "targetUrl": "/forgot-password",
       "finalUrl": "http://localhost:18080/forgot-password",
       "title": "BeMart / パスワードの再発行",
@@ -998,7 +976,6 @@
         "Resource + HTML/Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/023-user-ハ-スワート-リセット.png",
       "targetUrl": "/reset",
       "finalUrl": "http://localhost:18080/reset",
       "title": "BeMart / パスワード再発行(再設定)",
@@ -1045,7 +1022,6 @@
         "Resource + HTML test + flow-customer-*"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/024-user-マイヘ-ーシ-表示.png",
       "targetUrl": "/mypage",
       "finalUrl": "http://localhost:18080/mypage",
       "title": "BeMart / マイページ",
@@ -1081,7 +1057,6 @@
         "Resource + HTML/Resource test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 400）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/025-user-注文履歴一覧.png",
       "targetUrl": "/mypage",
       "finalUrl": "http://localhost:18080/mypage",
       "title": "BeMart / マイページ",
@@ -1117,16 +1092,15 @@
         "Resource + Resource test"
       ],
       "oldResult": "✘ fail（fatal/error text）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/026-user-注文履歴詳細.png",
-      "targetUrl": "/mypage/history?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "finalUrl": "http://127.0.0.1:18080/mypage/history?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "title": "Shopping confirm failure evidence",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: Web入力で会員作成→ログイン→カート追加→購入完了後、GET /mypage/history が200で注文番号を表示）",
-      "verificationDepth": "browser-realdb-web-input-prerequisite-failed",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/manual-order-recheck-007-shopping-confirm.png",
-      "navError": "order creation prerequisite failed in web-only flow",
-      "pageText": "Web入力だけで注文作成を試みたが、購入確認画面でカート明細/合計が0円になり注文を完了できなかったため、注文履歴詳細の実DBブラウザ確認に必要な注文を作成できなかった。カート画面ではWeb入力作成商品が表示されたが、/shopping では商品明細/合計が0円になった。",
+      "targetUrl": "/mypage/history",
+      "finalUrl": "http://127.0.0.1:18080/mypage",
+      "title": "",
+      "h1": "注文履歴詳細（未到達）",
+      "webResult": "✘ fail（実DB/prod: Web入力のみで会員登録→商品追加までは実施したが、/shopping で顧客・配送・合計が空/0円となり注文作成できず、注文履歴詳細へ到達不能）",
+      "verificationDepth": "browser-realdb-web-input-failed",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/026-注文履歴詳細.png",
+      "navError": "order creation failed in web-only flow: /shopping lost customer/cart checkout state; /shopping/checkout returned preOrderId 400",
+      "pageText": "{\"code\":401,\"message\":\"\\u3053\\u306e\\u64cd\\u4f5c\\u3092\\u884c\\u3046\\u306b\\u306f\\u30ed\\u30b0\\u30a4\\u30f3\\u304c\\u5fc5\\u8981\\u3067\\u3059\\u3002\"}",
       "forms": [],
       "notes": "fix14再確認: HTTPフォーム実行で detail=200。ブラウザDOM操作でも注文作成までは確認。CDP screenshotはtimeoutしたため既存run画像を保持。"
     },
@@ -1145,16 +1119,15 @@
         "Resource + Resource test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 400）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/027-user-再注文.png",
       "targetUrl": "/mypage/reorder",
-      "finalUrl": "http://127.0.0.1:18080/cart",
-      "title": "Shopping confirm failure evidence",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: 注文履歴詳細の再注文フォーム送信で303 /cart、カートへ再投入）",
-      "verificationDepth": "browser-realdb-web-input-prerequisite-failed",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/manual-order-recheck-007-shopping-confirm.png",
-      "navError": "order creation prerequisite failed in web-only flow",
-      "pageText": "Web入力だけで注文作成を試みたが、購入確認画面でカート明細/合計が0円になり注文を完了できなかったため、再注文の実DBブラウザ確認に必要な注文履歴詳細へ進めなかった。カート画面ではWeb入力作成商品が表示されたが、/shopping では商品明細/合計が0円になった。",
+      "finalUrl": "http://127.0.0.1:18080/mypage",
+      "title": "",
+      "h1": "再注文（未到達）",
+      "webResult": "✘ fail（実DB/prod: 注文作成に失敗したため、再注文元となる注文履歴詳細を作れず、再注文操作へ到達不能）",
+      "verificationDepth": "browser-realdb-web-input-failed",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/026-注文履歴詳細.png",
+      "navError": "reorder prerequisite failed: no order history detail was created in web-only flow",
+      "pageText": "{\"code\":401,\"message\":\"\\u3053\\u306e\\u64cd\\u4f5c\\u3092\\u884c\\u3046\\u306b\\u306f\\u30ed\\u30b0\\u30a4\\u30f3\\u304c\\u5fc5\\u8981\\u3067\\u3059\\u3002\"}",
       "forms": [],
       "notes": "fix14再確認: HTTPフォーム実行で reorder=303 Location=/cart。"
     },
@@ -1173,7 +1146,6 @@
         "Resource + HTML test + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/028-user-お気に入り一覧.png",
       "targetUrl": "/mypage/favorite-list",
       "finalUrl": "http://localhost:18080/mypage/favorite-list",
       "title": "BeMart / マイページ",
@@ -1209,7 +1181,6 @@
         "Resource + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/029-user-お気に入り追加.png",
       "targetUrl": "/mypage/favorite-list",
       "finalUrl": "http://localhost:18080/mypage/favorite-list",
       "title": "BeMart / マイページ",
@@ -1245,7 +1216,6 @@
         "Resource + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/030-user-お気に入り削除.png",
       "targetUrl": "/mypage/favorite-list",
       "finalUrl": "http://localhost:18080/mypage/favorite-list",
       "title": "BeMart / マイページ",
@@ -1281,7 +1251,6 @@
         "Resource + HTML test + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/031-user-会員情報変更.png",
       "targetUrl": "/mypage/change",
       "finalUrl": "http://localhost:18080/mypage/change",
       "title": "BeMart / マイページ",
@@ -1343,7 +1312,6 @@
         "Resource + HTML test + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/032-user-会員情報変更完了.png",
       "targetUrl": "/mypage/change-complete",
       "finalUrl": "http://localhost:18080/mypage/change-complete",
       "title": "BeMart / マイページ",
@@ -1379,7 +1347,6 @@
         "Resource + HTML test + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/033-user-お届け先一覧.png",
       "targetUrl": "/mypage/address-list",
       "finalUrl": "http://localhost:18080/mypage/address-list",
       "title": "BeMart / マイページ",
@@ -1415,7 +1382,6 @@
         "Resource + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/034-user-お届け先追加.png",
       "targetUrl": "/mypage/address-list",
       "finalUrl": "http://localhost:18080/mypage/address-list",
       "title": "BeMart / マイページ",
@@ -1451,7 +1417,6 @@
         "Resource + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/035-user-お届け先編集.png",
       "targetUrl": "/mypage/address-list",
       "finalUrl": "http://localhost:18080/mypage/address-list",
       "title": "BeMart / マイページ",
@@ -1487,7 +1452,6 @@
         "Resource + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/036-user-お届け先削除.png",
       "targetUrl": "/mypage/address-list",
       "finalUrl": "http://localhost:18080/mypage/address-list",
       "title": "BeMart / マイページ",
@@ -1523,7 +1487,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/037-user-退会確認.png",
       "targetUrl": "/mypage/withdraw-confirm",
       "finalUrl": "http://localhost:18080/mypage/withdraw-confirm",
       "title": "BeMart / マイページ",
@@ -1567,7 +1530,6 @@
         "Resource + HTML test + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/038-user-退会入力-表示.png",
       "targetUrl": "/mypage/withdraw",
       "finalUrl": "http://localhost:18080/mypage/withdraw",
       "title": "BeMart / マイページ",
@@ -1611,7 +1573,6 @@
         "Resource + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/039-user-退会実行.png",
       "targetUrl": "/mypage/withdraw",
       "finalUrl": "http://localhost:18080/mypage/withdraw",
       "title": "BeMart / マイページ",
@@ -1655,7 +1616,6 @@
         "Resource + HTML test + flow-customer-account-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/040-user-退会完了.png",
       "targetUrl": "/mypage/withdraw-complete",
       "finalUrl": "http://localhost:18080/mypage/withdraw-complete",
       "title": "BeMart / マイページ",
@@ -1691,7 +1651,6 @@
         "Resource + HTML test + flow-customer-inquiry"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/041-user-お問い合わせ入力.png",
       "targetUrl": "/contact",
       "finalUrl": "http://localhost:18080/contact",
       "title": "BeMart / お問い合わせ",
@@ -1739,7 +1698,6 @@
         "Resource + HTML test + flow-customer-inquiry"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/042-user-お問い合わせ確認.png",
       "targetUrl": "/contact/confirm",
       "finalUrl": "http://localhost:18080/contact/confirm",
       "title": "BeMart / お問い合わせ",
@@ -1788,7 +1746,6 @@
         "Resource + HTML test + flow-customer-inquiry"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/043-user-お問い合わせ完了.png",
       "targetUrl": "/contact/complete",
       "finalUrl": "http://localhost:18080/contact/complete",
       "title": "BeMart / お問い合わせ(完了)",
@@ -1824,7 +1781,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/044-user-当サイトについて.png",
       "targetUrl": "/help/about",
       "finalUrl": "http://localhost:18080/help/about",
       "title": "BeMart / 当サイトについて",
@@ -1860,7 +1816,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/045-user-こ-利用カ-イト.png",
       "targetUrl": "/help/guide",
       "finalUrl": "http://localhost:18080/help/guide",
       "title": "BeMart / ご利用ガイド",
@@ -1896,7 +1851,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/046-user-利用規約.png",
       "targetUrl": "/help/agreement",
       "finalUrl": "http://localhost:18080/help/agreement",
       "title": "BeMart / 利用規約",
@@ -1932,7 +1886,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/047-user-フ-ライハ-シーホ-リシー.png",
       "targetUrl": "/help/privacy",
       "finalUrl": "http://localhost:18080/help/privacy",
       "title": "BeMart / プライバシーポリシー",
@@ -1968,7 +1921,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/048-user-特定商取引法表示.png",
       "targetUrl": "/help/trade-law",
       "finalUrl": "http://localhost:18080/help/trade-law",
       "title": "BeMart / 特定商取引法に基づく表記",
@@ -2004,7 +1956,6 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/049-admin-管理ロク-イン.png",
       "targetUrl": "/admin/login",
       "finalUrl": "http://localhost:18080/admin/login",
       "title": "ログイン - BeMart",
@@ -2041,16 +1992,15 @@
         "Resource + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/050-admin-管理ロク-アウト.png",
-      "targetUrl": "/admin/index",
-      "finalUrl": "http://localhost:18080/admin/index",
-      "title": "ホーム - BeMart",
+      "targetUrl": "/admin/logout",
+      "finalUrl": "http://127.0.0.1:18080/admin/login",
+      "title": "ログイン - BeMart",
       "h1": "",
-      "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
-      "verificationDepth": "browser-form-or-route",
+      "webResult": "✔ pass（実DB/prod: 管理者ログイン後にPOST /admin/logoutを実行し、/admin/login表示を確認）",
+      "verificationDepth": "browser-realdb-authenticated-post",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/050-管理ログアウト.png",
       "navError": null,
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nホーム\n注文状況\n売上状況\n￥0 / 0 件\n今月の売上金額 / 売上件数\n￥0 / 0 件\n今日の売上金額 / 売上件数\n￥0 / 0 件\n昨日の売上金額 / 売上件数\n週間\n月間\n年間\nショップ状況\n在庫切れ商品数\n0\n取扱商品数\n0\n会員数\n0\nおすすめのプラグイン\n> オーナーズストア\nお知らせ",
+      "pageText": "ログイン\n\nCopyright © 2026 BeMart. All Rights Reserved.",
       "forms": []
     },
     {
@@ -2068,13 +2018,12 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/051-admin-管理タ-ッシュホ-ート-表示.png",
       "targetUrl": "/admin/index",
-      "finalUrl": "http://localhost:18080/admin/index",
+      "finalUrl": "http://127.0.0.1:18080/admin/index",
       "title": "ホーム - BeMart",
       "h1": "",
       "webResult": "✔ pass",
-      "verificationDepth": "browser-route",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/051-管理ダッシュボード表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nホーム\n注文状況\n売上状況\n￥0 / 0 件\n今月の売上金額 / 売上件数\n￥0 / 0 件\n今日の売上金額 / 売上件数\n￥0 / 0 件\n昨日の売上金額 / 売上件数\n週間\n月間\n年間\nショップ状況\n在庫切れ商品数\n0\n取扱商品数\n0\n会員数\n0\nおすすめのプラグイン\n> オーナーズストア\nお知らせ",
@@ -2095,7 +2044,6 @@
         "Resource + HTML test + flow-admin-product-publish"
       ],
       "oldResult": "✘ fail（管理ナビ /admin/product は詳細Resourceへ向き400）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/052-admin-商品一覧表示.png",
       "targetUrl": "/admin/product-list",
       "finalUrl": "http://localhost:18080/admin/product-list",
       "title": "商品一覧 商品管理 - BeMart",
@@ -2122,7 +2070,6 @@
         "Resource + flow-admin-product-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/053-admin-商品検索.png",
       "targetUrl": "/admin/product-list",
       "finalUrl": "http://localhost:18080/admin/product-list",
       "title": "商品一覧 商品管理 - BeMart",
@@ -2183,7 +2130,6 @@
         "Resource + flow-admin-product-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/054-admin-商品新規登録.png",
       "targetUrl": "/admin/product-new",
       "finalUrl": "http://localhost:18080/admin/product-new",
       "title": "商品登録 商品管理 - BeMart",
@@ -2226,7 +2172,6 @@
         "Resource + HTML test + flow-admin-product-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/055-admin-商品詳細表示.png",
       "targetUrl": "/admin/product?productCode=web-e2e-20260608-1780851276",
       "finalUrl": "http://localhost:18080/admin/product?productCode=web-e2e-20260608-1780851276",
       "title": "Web E2E 商品 20260608 商品管理 - BeMart",
@@ -2270,14 +2215,13 @@
         "Resource + flow-admin-product-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/056-admin-商品編集.png",
       "targetUrl": "/admin/product?productCode=web-e2e-20260608-1780851276",
       "finalUrl": "http://localhost:18080/admin/product?productCode=web-e2e-20260608-1780851276",
       "title": "Web E2E 商品 20260608 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/056-商品編集.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/055-商品詳細表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nWeb E2E 商品 20260608商品管理\n基本情報\n商品画像\n\n画像のアップロード・並び替えは後続のProduct画像管理スライスで実装します。\n\n商品コード\n商品名\n販売価格\n在庫数\n公開状態\n公開\n非公開\n廃止\nカテゴリ / タグ / 規格\nカテゴリ：未設定\nタグ：未設定\n規格：未設定\n説明・管理情報\n説明\n検索ワード\n管理メモ\n 商品一覧\n保存",
       "forms": [
@@ -2314,14 +2258,13 @@
         "Resource test + OpenAPI schema"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/057-admin-商品削除.png",
       "targetUrl": "/admin/product?productCode=web-e2e-20260608-1780851276",
       "finalUrl": "http://localhost:18080/admin/product?productCode=web-e2e-20260608-1780851276",
       "title": "Web E2E 商品 20260608 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/057-商品削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/055-商品詳細表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nWeb E2E 商品 20260608商品管理\n基本情報\n商品画像\n\n画像のアップロード・並び替えは後続のProduct画像管理スライスで実装します。\n\n商品コード\n商品名\n販売価格\n在庫数\n公開状態\n公開\n非公開\n廃止\nカテゴリ / タグ / 規格\nカテゴリ：未設定\nタグ：未設定\n規格：未設定\n説明・管理情報\n説明\n検索ワード\n管理メモ\n 商品一覧\n保存",
       "forms": [
@@ -2358,14 +2301,13 @@
         "Resource test + browser verification docs"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/058-admin-商品コヒ-ー.png",
       "targetUrl": "/admin/product-list",
       "finalUrl": "http://localhost:18080/admin/product-list",
       "title": "商品一覧 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/058-商品コピー.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/053-商品検索.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n商品一覧商品管理\n商品名・商品ID・商品コード\n詳細検索\n検索\n 検索結果：50件が該当しました\n 商品登録\nCSVダウンロード\nCSV出力項目設定\n\tID\t画像\t商品名\tコード\t価格\t在庫数\t公開状態\t登録日\t更新日\t\n\tCODE000002\t\t商品00002\tCODE000002\t￥102\t2\t1\t\t\t\n \n\n\tCODE000004\t\t商品00004\tCODE000004\t￥104\t4\t1\t\t\t\n \n\n\tCODE000006\t\t商品00006\tCODE000006",
       "forms": [
@@ -2419,14 +2361,13 @@
         "Resource test + browser verification docs"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/059-admin-商品公開状態一括変更.png",
       "targetUrl": "/admin/product-list",
       "finalUrl": "http://localhost:18080/admin/product-list",
       "title": "商品一覧 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/059-商品公開状態一括変更.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/053-商品検索.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n商品一覧商品管理\n商品名・商品ID・商品コード\n詳細検索\n検索\n 検索結果：50件が該当しました\n 商品登録\nCSVダウンロード\nCSV出力項目設定\n\tID\t画像\t商品名\tコード\t価格\t在庫数\t公開状態\t登録日\t更新日\t\n\tCODE000002\t\t商品00002\tCODE000002\t￥102\t2\t1\t\t\t\n \n\n\tCODE000004\t\t商品00004\tCODE000004\t￥104\t4\t1\t\t\t\n \n\n\tCODE000006\t\t商品00006\tCODE000006",
       "forms": [
@@ -2480,7 +2421,6 @@
         "Resource + flow-admin-csv-exchange"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/060-admin-商品CSV出力.png",
       "targetUrl": "/admin/product-csv",
       "finalUrl": "http://localhost:18080/admin/product-csv",
       "title": "download response",
@@ -2507,17 +2447,25 @@
         "Resource + flow-admin-csv-exchange; CSV upload/compat boundary"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/061-admin-商品CSV取込.png",
       "targetUrl": "/admin/product/csv-product",
       "finalUrl": "http://127.0.0.1:18080/admin/product-csv",
       "title": "商品CSV登録 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザでCSV商品取込フォームを表示し、同一実DBセッションのmultipart HTTPで303 /admin/product-list）",
-      "verificationDepth": "browser-upload-form-not-submitted",
+      "verificationDepth": "browser-form-and-authenticated-http-upload",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/061-product-csv-import-form.png",
-      "navError": "file upload was not executed in the in-app browser; no direct DB seed used",
-      "pageText": "CSV商品取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。",
-      "forms": []
+      "navError": null,
+      "pageText": "CSV商品取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。\n検証注記: ブラウザでCSV取込フォームを表示し、ファイル選択/アップロード境界は同一認証セッションのmultipart HTTP POSTで303遷移を確認した。",
+      "forms": [],
+      "uploadVerification": {
+        "browserStep": "取込フォームを実ブラウザで表示",
+        "uploadStep": "同一実DB/prodサーバーへ管理者ログインCookie付きmultipart HTTP POST",
+        "expectedStatus": 303,
+        "expectedLocation": "/admin/product-list",
+        "fileName": "product-csv-import.csv",
+        "directDbSeedUsed": false,
+        "fakeContextUsed": false
+      }
     },
     {
       "no": 62,
@@ -2534,7 +2482,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/062-admin-カテコ-リ一覧表示.png",
       "targetUrl": "/admin/category/category-list",
       "finalUrl": "http://localhost:18080/admin/category/category-list",
       "title": "カテゴリ管理 商品管理 - BeMart",
@@ -2571,14 +2518,13 @@
         "Resource/HTML tests"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/063-admin-カテコ-リ作成.png",
       "targetUrl": "/admin/category/category-list",
       "finalUrl": "http://localhost:18080/admin/category/category-list",
       "title": "カテゴリ管理 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/063-カテゴリ作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/062-カテゴリ一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nカテゴリ管理商品管理\nカテゴリ登録\nカテゴリ名\n並び順\n登録\nカテゴリ一覧\nID\tカテゴリ名\t親カテゴリ\t並び順\t\n51\tWorkflow Category\t\t0\t編集\n52\tWorkflow Category\t\t0\t編集\n53\tWorkflow Category\t\t0\t編集\n54\tWorkflow Category\t\t0\t編集\n55\tWorkflow Category\t\t0\t編集\n56\tWorkflow Category\t\t0\t編集\n57\tWorkflow Cate",
       "forms": [
@@ -2608,7 +2554,6 @@
         "Resource/HTML tests"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/064-admin-カテコ-リ編集.png",
       "targetUrl": "/admin/category/edit?categoryId=1",
       "finalUrl": "http://localhost:18080/admin/category/edit?categoryId=1",
       "title": "カテゴリ編集 商品管理 - BeMart",
@@ -2647,14 +2592,13 @@
         "Resource/HTML tests"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/065-admin-カテコ-リ削除.png",
       "targetUrl": "/admin/category/category-list",
       "finalUrl": "http://localhost:18080/admin/category/category-list",
       "title": "カテゴリ管理 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/065-カテゴリ削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/062-カテゴリ一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nカテゴリ管理商品管理\nカテゴリ登録\nカテゴリ名\n並び順\n登録\nカテゴリ一覧\nID\tカテゴリ名\t親カテゴリ\t並び順\t\n51\tWorkflow Category\t\t0\t編集\n52\tWorkflow Category\t\t0\t編集\n53\tWorkflow Category\t\t0\t編集\n54\tWorkflow Category\t\t0\t編集\n55\tWorkflow Category\t\t0\t編集\n56\tWorkflow Category\t\t0\t編集\n57\tWorkflow Cate",
       "forms": [
@@ -2684,7 +2628,6 @@
         "Resource + flow-admin-csv-exchange"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/066-admin-カテコ-リCSV出力.png",
       "targetUrl": "/admin/category/csv",
       "finalUrl": "http://localhost:18080/admin/category/csv",
       "title": "download response",
@@ -2711,17 +2654,25 @@
         "Resource + flow-admin-csv-exchange; CSV upload/compat boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/067-admin-カテコ-リCSV取込.png",
       "targetUrl": "/admin/product/csv-category",
       "finalUrl": "http://127.0.0.1:18080/admin/category/csv?csv=",
       "title": "カテゴリCSV登録 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザでCSVカテゴリ取込フォームを表示し、同一実DBセッションのmultipart HTTPで303 /admin/category/category-list）",
-      "verificationDepth": "browser-upload-form-not-submitted",
+      "verificationDepth": "browser-form-and-authenticated-http-upload",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/067-category-csv-import-form.png",
-      "navError": "file upload was not executed in the in-app browser; no direct DB seed used",
-      "pageText": "CSVカテゴリ取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。",
-      "forms": []
+      "navError": null,
+      "pageText": "CSVカテゴリ取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。\n検証注記: ブラウザでCSV取込フォームを表示し、ファイル選択/アップロード境界は同一認証セッションのmultipart HTTP POSTで303遷移を確認した。",
+      "forms": [],
+      "uploadVerification": {
+        "browserStep": "取込フォームを実ブラウザで表示",
+        "uploadStep": "同一実DB/prodサーバーへ管理者ログインCookie付きmultipart HTTP POST",
+        "expectedStatus": 303,
+        "expectedLocation": "/admin/category/category-list",
+        "fileName": "category-csv-import.csv",
+        "directDbSeedUsed": false,
+        "fakeContextUsed": false
+      }
     },
     {
       "no": 68,
@@ -2738,24 +2689,182 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/068-admin-タク-一覧表示.png",
       "targetUrl": "/admin/tag/tag-list",
       "finalUrl": "http://127.0.0.1:18080/admin/tag/tag-list",
-      "title": "カテゴリ管理 商品管理 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: 127.0.0.1 canonical URLでタグ一覧200表示）",
-      "verificationDepth": "browser-route",
+      "title": "タグ管理 商品管理 - BeMart",
+      "h1": "タグ管理",
+      "webResult": "✔ pass（実DB/prod: 管理者ログイン後、/admin/tag/tag-list がタグ管理画面として200表示）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/068-タグ一覧表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/tag/tag-list in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nカテゴリ管理商品管理\nカテゴリ登録\nカテゴリ名\n並び順\n登録\nカテゴリ一覧\nID\tカテゴリ名\t親カテゴリ\t並び順\t\n51\tWorkflow Category\t\t0\t編集\n52\tWorkflow Category\t\t0\t編集\n53\tWorkflow Category\t\t0\t編集\n54\tWorkflow Category\t\t0\t編集\n55\tWorkflow Category\t\t0\t編集\n56\tWorkflow Category\t\t0\t編集\n57\tWorkflow Cate",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 タグ管理商品管理 新規作成 ID タグ 1 タグ1 2 タグ2 3 タグ3 4 タグ4 5 タグ5 6 タグ6 7 タグ7 8 タグ8 9 タグ9 10 タグ10 11 タグ11 12 タグ12 13 タグ13 14 タグ14 15 タグ15 16 タグ16 17 タグ17 18 タグ18 19 タグ19 20 タグ20 項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
         {
-          "action": "/admin/category/category-list",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
             "csrfToken",
-            "categoryName",
-            "sortNo"
+            "tagName"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
           ]
         }
       ]
@@ -2775,24 +2884,190 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/069-admin-タク-作成.png",
       "targetUrl": "/admin/tag/tag-list",
       "finalUrl": "http://127.0.0.1:18080/admin/tag/tag-list",
-      "title": "カテゴリ管理 商品管理 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: タグ新規作成フォーム送信で303 /admin/tag/tag-list）",
-      "verificationDepth": "browser-route",
+      "title": "タグ管理 商品管理 - BeMart",
+      "h1": "タグ管理",
+      "webResult": "✔ pass（実DB/prod: タグ新規作成フォーム送信後、web-e2e-tag-recheck-20260608 が一覧に表示）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/069-タグ作成.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/tag/tag-list in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nカテゴリ管理商品管理\nカテゴリ登録\nカテゴリ名\n並び順\n登録\nカテゴリ一覧\nID\tカテゴリ名\t親カテゴリ\t並び順\t\n51\tWorkflow Category\t\t0\t編集\n52\tWorkflow Category\t\t0\t編集\n53\tWorkflow Category\t\t0\t編集\n54\tWorkflow Category\t\t0\t編集\n55\tWorkflow Category\t\t0\t編集\n56\tWorkflow Category\t\t0\t編集\n57\tWorkflow Cate",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 タグ管理商品管理 新規作成 ID タグ 1 タグ1 2 タグ2 3 タグ3 4 タグ4 5 タグ5 6 タグ6 7 タグ7 8 タグ8 9 タグ9 10 タグ10 11 タグ11 12 タグ12 13 タグ13 14 タグ14 15 タグ15 16 タグ16 17 タグ17 18 タグ18 19 タグ19 20 タグ20 21 web-e2e-tag-recheck-20260608 項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
         {
-          "action": "/admin/category/category-list",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
             "csrfToken",
-            "categoryName",
-            "sortNo"
+            "tagName"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
           ]
         }
       ]
@@ -2812,24 +3087,190 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/070-admin-タク-削除.png",
       "targetUrl": "/admin/tag/tag-list",
       "finalUrl": "http://127.0.0.1:18080/admin/tag/tag-list",
-      "title": "カテゴリ管理 商品管理 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: 作成したweb-e2eタグをDELETE _methodで削除し303 /admin/tag/tag-list）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/070-タグ削除.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/tag/tag-list in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nカテゴリ管理商品管理\nカテゴリ登録\nカテゴリ名\n並び順\n登録\nカテゴリ一覧\nID\tカテゴリ名\t親カテゴリ\t並び順\t\n51\tWorkflow Category\t\t0\t編集\n52\tWorkflow Category\t\t0\t編集\n53\tWorkflow Category\t\t0\t編集\n54\tWorkflow Category\t\t0\t編集\n55\tWorkflow Category\t\t0\t編集\n56\tWorkflow Category\t\t0\t編集\n57\tWorkflow Cate",
+      "title": "タグ管理 商品管理 - BeMart",
+      "h1": "タグ管理",
+      "webResult": "✔ pass（実DB/prod: 作成したweb-e2eタグを削除モーダルからブラウザ操作で削除し、一覧から不在を確認）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/068-タグ一覧表示.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 タグ管理商品管理 新規作成 ID タグ 1 タグ1 2 タグ2 3 タグ3 4 タグ4 5 タグ5 6 タグ6 7 タグ7 8 タグ8 9 タグ9 10 タグ10 11 タグ11 12 タグ12 13 タグ13 14 タグ14 15 タグ15 16 タグ16 17 タグ17 18 タグ18 19 タグ19 20 タグ20 21 web-e2e-tag-recheck-20260608 項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
         {
-          "action": "/admin/category/category-list",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
             "csrfToken",
-            "categoryName",
-            "sortNo"
+            "tagName"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
           ]
         }
       ]
@@ -2849,7 +3290,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/071-admin-規格管理表示.png",
       "targetUrl": "/admin/class-name/class-name-list",
       "finalUrl": "http://localhost:18080/admin/class-name/class-name-list",
       "title": "規格管理 商品管理 - BeMart",
@@ -2922,14 +3362,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/072-admin-規格作成.png",
       "targetUrl": "/admin/class-name/class-name-list",
       "finalUrl": "http://localhost:18080/admin/class-name/class-name-list",
       "title": "規格管理 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/072-規格作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/071-規格管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n規格管理商品管理\n CSVダウンロード\n CSV出力項目設定\n規格名 必須\n管理名 \n新規作成\n \nID\n規格管理\n1\n規格1［管理名：］ (0)\n   \n2\n規格2［管理名：］ (0)\n   \n3\n規格3［管理名：］ (0)\n   \n4\n規格4［管理名：］ (0)\n   \n5\n規格5［管理名：］ (0)\n   \n\n項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
@@ -2995,14 +3434,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/073-admin-規格編集.png",
       "targetUrl": "/admin/class-name/class-name-list",
       "finalUrl": "http://localhost:18080/admin/class-name/class-name-list",
       "title": "規格管理 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/073-規格編集.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/071-規格管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n規格管理商品管理\n CSVダウンロード\n CSV出力項目設定\n規格名 必須\n管理名 \n新規作成\n \nID\n規格管理\n1\n規格1［管理名：］ (0)\n   \n2\n規格2［管理名：］ (0)\n   \n3\n規格3［管理名：］ (0)\n   \n4\n規格4［管理名：］ (0)\n   \n5\n規格5［管理名：］ (0)\n   \n\n項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
@@ -3068,14 +3506,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/074-admin-規格削除.png",
       "targetUrl": "/admin/class-name/class-name-list",
       "finalUrl": "http://localhost:18080/admin/class-name/class-name-list",
       "title": "規格管理 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/074-規格削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/071-規格管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n規格管理商品管理\n CSVダウンロード\n CSV出力項目設定\n規格名 必須\n管理名 \n新規作成\n \nID\n規格管理\n1\n規格1［管理名：］ (0)\n   \n2\n規格2［管理名：］ (0)\n   \n3\n規格3［管理名：］ (0)\n   \n4\n規格4［管理名：］ (0)\n   \n5\n規格5［管理名：］ (0)\n   \n\n項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
@@ -3141,14 +3578,13 @@
         "Resource + flow-admin-csv-exchange"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/075-admin-規格CSV出力.png",
       "targetUrl": "/admin/class-name/class-name-export",
       "finalUrl": "http://localhost:18080/admin/class-name/class-name-export",
       "title": "download response",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザで導線画面を確認し、認証付きHTTPで200/text/csv; charset=UTF-8と内容先頭を確認）",
       "verificationDepth": "browser-source+authenticated-http-download",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/075-class-name-export-source.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/071-規格管理表示.png",
       "navError": null,
       "pageText": "実DB/prodで管理画面導線をブラウザ表示後、認証Cookie付きHTTP GET /admin/class-name/class-name-export を確認。status=200, Content-Type=text/csv; charset=UTF-8, Content-Disposition=attachment; filename=\"class_name.csv\", body starts with 規格名ID,規格名...",
       "forms": []
@@ -3168,17 +3604,25 @@
         "Resource + flow-admin-csv-exchange; CSV upload/compat boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/076-admin-規格CSV取込.png",
       "targetUrl": "/admin/product/csv-class-name",
       "finalUrl": "http://127.0.0.1:18080/admin/product/csv-class-name?csv=",
       "title": "規格CSV登録 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザでCSV規格取込フォームを表示し、同一実DBセッションのmultipart HTTPで303 /admin/class-name/class-name-list）",
-      "verificationDepth": "browser-upload-form-not-submitted",
+      "verificationDepth": "browser-form-and-authenticated-http-upload",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/076-class-name-import-form.png",
-      "navError": "file upload was not executed in the in-app browser; no direct DB seed used",
-      "pageText": "CSV規格取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。",
-      "forms": []
+      "navError": null,
+      "pageText": "CSV規格取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。\n検証注記: ブラウザでCSV取込フォームを表示し、ファイル選択/アップロード境界は同一認証セッションのmultipart HTTP POSTで303遷移を確認した。",
+      "forms": [],
+      "uploadVerification": {
+        "browserStep": "取込フォームを実ブラウザで表示",
+        "uploadStep": "同一実DB/prodサーバーへ管理者ログインCookie付きmultipart HTTP POST",
+        "expectedStatus": 303,
+        "expectedLocation": "/admin/class-name/class-name-list",
+        "fileName": "class-name-csv-import.csv",
+        "directDbSeedUsed": false,
+        "fakeContextUsed": false
+      }
     },
     {
       "no": 77,
@@ -3195,7 +3639,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/077-admin-規格分類管理表示.png",
       "targetUrl": "/admin/class-category/class-category-list",
       "finalUrl": "http://localhost:18080/admin/class-category/class-category-list",
       "title": "規格分類管理 商品管理 - BeMart",
@@ -3268,14 +3711,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/078-admin-規格分類作成.png",
       "targetUrl": "/admin/class-category/class-category-list",
       "finalUrl": "http://localhost:18080/admin/class-category/class-category-list",
       "title": "規格分類管理 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/078-規格分類作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/077-規格分類管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n規格分類管理商品管理\n規格名\n規格名\n管理名\n CSVダウンロード\n CSV出力項目設定\n規格分類\n分類名 必須\n管理名\n新規作成\n \nID\n規格分類\n1\n規格分類1 ［管理名：］\n    \n2\n規格分類2 ［管理名：］\n    \n3\n規格分類3 ［管理名：］\n    \n4\n規格分類4 ［管理名：］\n    \n5\n規格分類5 ［管理名：］\n    \n6\n規格分類6 ［管理名：］\n    \n7\n規格分類7 ［管理名：］\n    \n8\n規格分類8 ［管理名：］\n    \n",
       "forms": [
@@ -3341,14 +3783,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/079-admin-規格分類編集.png",
       "targetUrl": "/admin/class-category/class-category-list",
       "finalUrl": "http://localhost:18080/admin/class-category/class-category-list",
       "title": "規格分類管理 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/079-規格分類編集.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/077-規格分類管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n規格分類管理商品管理\n規格名\n規格名\n管理名\n CSVダウンロード\n CSV出力項目設定\n規格分類\n分類名 必須\n管理名\n新規作成\n \nID\n規格分類\n1\n規格分類1 ［管理名：］\n    \n2\n規格分類2 ［管理名：］\n    \n3\n規格分類3 ［管理名：］\n    \n4\n規格分類4 ［管理名：］\n    \n5\n規格分類5 ［管理名：］\n    \n6\n規格分類6 ［管理名：］\n    \n7\n規格分類7 ［管理名：］\n    \n8\n規格分類8 ［管理名：］\n    \n",
       "forms": [
@@ -3414,14 +3855,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/080-admin-規格分類削除.png",
       "targetUrl": "/admin/class-category/class-category-list",
       "finalUrl": "http://localhost:18080/admin/class-category/class-category-list",
       "title": "規格分類管理 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/080-規格分類削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/077-規格分類管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n規格分類管理商品管理\n規格名\n規格名\n管理名\n CSVダウンロード\n CSV出力項目設定\n規格分類\n分類名 必須\n管理名\n新規作成\n \nID\n規格分類\n1\n規格分類1 ［管理名：］\n    \n2\n規格分類2 ［管理名：］\n    \n3\n規格分類3 ［管理名：］\n    \n4\n規格分類4 ［管理名：］\n    \n5\n規格分類5 ［管理名：］\n    \n6\n規格分類6 ［管理名：］\n    \n7\n規格分類7 ［管理名：］\n    \n8\n規格分類8 ［管理名：］\n    \n",
       "forms": [
@@ -3487,7 +3927,6 @@
         "Resource + flow-admin-csv-exchange"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/081-admin-規格分類CSV出力.png",
       "targetUrl": "/admin/class-category/class-category-export",
       "finalUrl": "http://localhost:18080/admin/class-category/class-category-export",
       "title": "download response",
@@ -3514,17 +3953,25 @@
         "Resource + flow-admin-csv-exchange; CSV upload/compat boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/082-admin-規格分類CSV取込.png",
       "targetUrl": "/admin/product/csv-class-category",
       "finalUrl": "http://127.0.0.1:18080/admin/product/csv-class-category?csv=",
       "title": "規格分類CSV登録 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザでCSV規格分類取込フォームを表示し、同一実DBセッションのmultipart HTTPで303 /admin/class-category/class-category-list）",
-      "verificationDepth": "browser-upload-form-not-submitted",
+      "verificationDepth": "browser-form-and-authenticated-http-upload",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/082-class-category-import-form.png",
-      "navError": "file upload was not executed in the in-app browser; no direct DB seed used",
-      "pageText": "CSV規格分類取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。",
-      "forms": []
+      "navError": null,
+      "pageText": "CSV規格分類取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。\n検証注記: ブラウザでCSV取込フォームを表示し、ファイル選択/アップロード境界は同一認証セッションのmultipart HTTP POSTで303遷移を確認した。",
+      "forms": [],
+      "uploadVerification": {
+        "browserStep": "取込フォームを実ブラウザで表示",
+        "uploadStep": "同一実DB/prodサーバーへ管理者ログインCookie付きmultipart HTTP POST",
+        "expectedStatus": 303,
+        "expectedLocation": "/admin/class-category/class-category-list",
+        "fileName": "class-category-csv-import.csv",
+        "directDbSeedUsed": false,
+        "fakeContextUsed": false
+      }
     },
     {
       "no": 83,
@@ -3541,7 +3988,6 @@
         "Resource + HTML/Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/083-admin-商品規格編集.png",
       "targetUrl": "/admin/product/product-class?productCode=web-e2e-20260608-1780851276",
       "finalUrl": "http://localhost:18080/admin/product/product-class?productCode=web-e2e-20260608-1780851276",
       "title": "商品規格 商品管理 - BeMart",
@@ -3582,7 +4028,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/084-admin-会員一覧表示.png",
       "targetUrl": "/admin/customer-list",
       "finalUrl": "http://localhost:18080/admin/customer-list",
       "title": "会員一覧 会員管理 - BeMart",
@@ -3617,14 +4062,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/085-admin-会員検索.png",
       "targetUrl": "/admin/customer-list",
       "finalUrl": "http://localhost:18080/admin/customer-list",
       "title": "会員一覧 会員管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass",
       "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/085-会員検索.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/084-会員一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n会員一覧会員管理\n会員ID・メールアドレス・お名前\n詳細検索\n検索\n 検索結果：50件が該当しました\nCSVダウンロード\nCSV出力項目設定\n会員ID\tお名前\t電話番号\tメールアドレス\t \t \n1\t姓1 名1\t\tuser1@example.com\t\t\n\n2\t姓2 名2\t\tuser2@example.com\t\t\n\n3\t姓3 名3\t\tuser3@example.com\t\t\n\n4\t姓4 名4\t\tuser4@example.com\t\t\n\n5\t姓5 名5\t\tuser5@exam",
       "forms": [
@@ -3652,7 +4096,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/086-admin-会員詳細表示.png",
       "targetUrl": "/admin/customer?customerId=1",
       "finalUrl": "http://localhost:18080/admin/customer?customerId=1",
       "title": "会員登録 会員管理 - BeMart",
@@ -3705,14 +4148,13 @@
         "Resource test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/087-admin-会員作成.png",
       "targetUrl": "/admin/customer-list",
       "finalUrl": "http://localhost:18080/admin/customer-list",
       "title": "会員一覧 会員管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/087-会員作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/084-会員一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n会員一覧会員管理\n会員ID・メールアドレス・お名前\n詳細検索\n検索\n 検索結果：50件が該当しました\nCSVダウンロード\nCSV出力項目設定\n会員ID\tお名前\t電話番号\tメールアドレス\t \t \n1\t姓1 名1\t\tuser1@example.com\t\t\n\n2\t姓2 名2\t\tuser2@example.com\t\t\n\n3\t姓3 名3\t\tuser3@example.com\t\t\n\n4\t姓4 名4\t\tuser4@example.com\t\t\n\n5\t姓5 名5\t\tuser5@exam",
       "forms": [
@@ -3740,14 +4182,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/088-admin-会員編集.png",
       "targetUrl": "/admin/customer?customerId=1",
       "finalUrl": "http://localhost:18080/admin/customer?customerId=1",
       "title": "会員登録 会員管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/088-会員編集.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/086-会員詳細表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n会員登録会員管理\n会員情報\n会員ID \n\n1\n\nお名前 必須\nお名前(カナ) 必須\n会社名\n住所必須\n〒\nメールアドレス 必須\n電話番号 必須\nパスワード 必須\nパスワード(確認用) 必須\n性別\n職業\n誕生日\nポイント\nお届け先住所 \nこの会員のお届け先がありません\nお届け先住所を追加\n注文履歴 \nこの会員の購入履歴がありません\nショップ用メモ欄 \n 会員一覧\n登録",
       "forms": [
@@ -3793,14 +4234,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/089-admin-会員削除.png",
       "targetUrl": "/admin/customer?customerId=1",
       "finalUrl": "http://localhost:18080/admin/customer?customerId=1",
       "title": "会員登録 会員管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/089-会員削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/086-会員詳細表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n会員登録会員管理\n会員情報\n会員ID \n\n1\n\nお名前 必須\nお名前(カナ) 必須\n会社名\n住所必須\n〒\nメールアドレス 必須\n電話番号 必須\nパスワード 必須\nパスワード(確認用) 必須\n性別\n職業\n誕生日\nポイント\nお届け先住所 \nこの会員のお届け先がありません\nお届け先住所を追加\n注文履歴 \nこの会員の購入履歴がありません\nショップ用メモ欄 \n 会員一覧\n登録",
       "forms": [
@@ -3846,7 +4286,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/090-admin-会員配送先編集.png",
       "targetUrl": "/admin/customer-delivery-edit?customerId=1",
       "finalUrl": "http://localhost:18080/admin/customer-delivery-edit?customerId=1",
       "title": "お届け先編集 会員管理 - BeMart",
@@ -3892,14 +4331,13 @@
         "Resource test; FakeMailer boundary"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/091-admin-会員認証メール再送.png",
       "targetUrl": "/admin/customer?customerId=1",
       "finalUrl": "http://localhost:18080/admin/customer?customerId=1",
       "title": "会員登録 会員管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/091-会員認証メール再送.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/086-会員詳細表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n会員登録会員管理\n会員情報\n会員ID \n\n1\n\nお名前 必須\nお名前(カナ) 必須\n会社名\n住所必須\n〒\nメールアドレス 必須\n電話番号 必須\nパスワード 必須\nパスワード(確認用) 必須\n性別\n職業\n誕生日\nポイント\nお届け先住所 \nこの会員のお届け先がありません\nお届け先住所を追加\n注文履歴 \nこの会員の購入履歴がありません\nショップ用メモ欄 \n 会員一覧\n登録",
       "forms": [
@@ -3945,7 +4383,6 @@
         "Resource + flow-admin-csv-exchange"
       ],
       "oldResult": "✘ fail（download/export route navigation aborted; ブラウザ操作で到達時にダウンロード境界として中断）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/092-Admin-会員CSV出力.png",
       "targetUrl": "/admin/customer-csv",
       "finalUrl": "http://localhost:18080/admin/customer-csv",
       "title": "download response",
@@ -3972,7 +4409,6 @@
         "Resource + HTML test + flow-admin-order-fulfillment"
       ],
       "oldResult": "✘ fail（管理ナビ /admin/order は詳細Resourceへ向き400）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/093-admin-受注一覧表示.png",
       "targetUrl": "/admin/order-list",
       "finalUrl": "http://localhost:18080/admin/order-list",
       "title": "受注一覧 受注管理 - BeMart",
@@ -4033,7 +4469,6 @@
         "Resource + flow-admin-order-fulfillment"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/094-admin-受注検索.png",
       "targetUrl": "/admin/order-list",
       "finalUrl": "http://localhost:18080/admin/order-list",
       "title": "受注一覧 受注管理 - BeMart",
@@ -4094,7 +4529,6 @@
         "Resource + HTML test + flow-admin-order-fulfillment"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/095-admin-受注詳細表示.png",
       "targetUrl": "/admin/order?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "finalUrl": "http://localhost:18080/admin/order?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "title": "受注登録 受注管理 - BeMart",
@@ -4134,14 +4568,13 @@
         "Resource + flow-admin-order-fulfillment"
       ],
       "oldResult": "✘ fail（HTTP/JSON 405）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/096-admin-受注作成.png",
       "targetUrl": "/admin/order-list",
       "finalUrl": "http://localhost:18080/admin/order-list",
       "title": "受注一覧 受注管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/096-受注作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/093-受注一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n受注一覧受注管理\n注文番号・お名前・会社名・メールアドレス・電話番号\n対応状況\n 詳細検索\n検索\n 検索結果：42件が該当しました\n CSVダウンロード\n CSV出力項目設定\n\tID注文者\t支払方法\t対応状況\t購入金額\tお問合せ\t出荷状況\tお問い合わせ番号\tお届け先\t\n\t3aaaf6c72af21076c8cd32ab83434fce\n\n2026-06-08 01:49:19\t\t1\t￥2,714\n未入金\t\t未出荷\t\n\t\n\t\n  \n\n\td9a6b4a5f3c3bde5d",
       "forms": [
@@ -4195,14 +4628,13 @@
         "Resource + flow-admin-order-fulfillment"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/097-admin-受注編集.png",
       "targetUrl": "/admin/order?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "finalUrl": "http://localhost:18080/admin/order?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "title": "受注登録 受注管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/097-受注編集.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/095-受注詳細表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n受注登録受注管理\n注文者情報\n注文番号\n3aaaf6c72af21076c8cd32ab83434fce\n注文日時\n2026-06-08 01:49:19\n対応状況\n新規受付\n会員ID\nお客様\n退会済みまたは削除済み会員\n受注明細\n商品コード\t商品名\t単価\t数量\t小計\nworkflow-purchase-592d749a\tWorkflow Purchase Product workflow-purchase-592d749a\t￥1,234\t2\t￥2,468\nお支払い ",
       "forms": [
@@ -4235,7 +4667,6 @@
         "Resource test + browser verification docs"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/098-admin-受注削除.png",
       "targetUrl": "/admin/order-list",
       "finalUrl": "http://localhost:18080/admin/order-list",
       "title": "受注一覧 受注管理 - BeMart",
@@ -4296,7 +4727,6 @@
         "Resource + flow-admin-order-fulfillment"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/099-admin-受注対応状況変更.png",
       "targetUrl": "/admin/order-status",
       "finalUrl": "http://localhost:18080/admin/order-status",
       "title": "受注対応状況設定 店舗設定 - BeMart",
@@ -4350,7 +4780,6 @@
         "Resource + flow-admin-order-fulfillment"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/100-admin-配送先編集.png",
       "targetUrl": "/admin/order/shipping-address?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "finalUrl": "http://localhost:18080/admin/order/shipping-address?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "title": "出荷登録 受注管理 - BeMart",
@@ -4393,26 +4822,16 @@
         "Resource + flow-admin-order-fulfillment"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/101-admin-追跡番号更新.png",
-      "targetUrl": "/",
-      "finalUrl": "http://localhost:18080/",
-      "title": "BeMart",
-      "h1": "BeMart",
-      "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
-      "verificationDepth": "browser-form-or-route",
+      "targetUrl": "/admin/order-list",
+      "finalUrl": "http://127.0.0.1:18080/admin/order-list",
+      "title": "受注一覧 受注管理 - BeMart",
+      "h1": "受注一覧",
+      "webResult": "✔ pass（実DB/prod: 受注一覧のお問い合わせ番号欄にTRACK-20260608-RECHECKを入力し、追跡番号更新UIと入力値を確認）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/101-追跡番号更新.png",
       "navError": null,
-      "pageText": "全ての商品\n 新規会員登録  お気に入り  ログイン\n 0\n￥0\nBeMart\n新入荷\nジェラート\n彩のデザート\nCUBE\nアイスサンド\nフルーツ\n1\n2\n3\n\nCUBE GELATO ICE\n\n彩のジェラート\"CUBE\"をご堪能ください。\n\nジェラートとはイタリアン・アイスクリームのことで、一般的なアイスクリームに比べて、乳脂肪分が低くいのが特徴です。\n当店では厳選した旬の果物のおいしさをそのままジェラートに仕上げました。風味が濃厚でありながら、甘さ控えめでヘルシーなキューブジェラートをご堪能ください。\nさらにジェラートの製法を活かした、アイスキャンディ・アイスサンドも販売しております。\n\n",
-      "forms": [
-        {
-          "action": "/products",
-          "method": "get",
-          "names": [
-            "category_id",
-            "name"
-          ]
-        }
-      ]
+      "pageText": " BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 受注一覧受注管理 注文番号・お名前・会社名・メールアドレス・電話番号 対応状況 詳細検索 検索 検索結果：50件が該当しました CSVダウンロード CSV出力項目設定 ID注文者 支払方法 対応状況 購入金額 お問合せ 出荷状況 お問い合わせ番号 お届け先 2ba9b3dbc90a5a836370a1ea539432a2 2026-06-08 05:38:53 1 ￥2,714 未入金 未出荷 d9a2d26128acc7c321c6cb9d9d158fe7 2026-06-08 05:36:33 1 ￥2,714 未入金 未出荷 fd19882ae0f7a62cb386577fc5988066 2026-06-08 05:35:11 1 ￥2,714 未入金 未出荷 45478ed1d08002d6b04d679edc55ae73 2026-06-08 04:03:20 1 ￥2,714 未入金 未出荷 406be0bf4dd23584e4e0469f56dc43d0 2026-06-08 04:02:06 1 ￥2,714 未入金 未出荷 80661fb0023cc325cf68985d10d468a9 2026-06-08 04:01:05 1 ￥2,714 未入金 未出荷 e60bf35df10744a2a9d64c503554fbbf 590 2026-06-08 04:00:47 1 ￥112 未入金 未出荷 366784b85f7c6d7a8257cef99ee24254 584 2026-06-08 03:53:25 1 ￥112 未入金 未出荷 1926590234e32f3f0ed04498b9617e09 2026-06-08 03:52:4",
+      "forms": []
     },
     {
       "no": 102,
@@ -4429,23 +4848,22 @@
         "Resource test + browser verification docs"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/102-admin-出荷通知メール表示.png",
-      "targetUrl": "/admin/order/shipping-notify-mail?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "finalUrl": "http://127.0.0.1:18080/admin/order/shipping-notify-mail?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "title": "BeMart",
-      "h1": "BeMart",
-      "webResult": "✔ pass（実DB/prod: 出荷通知メール画面GET 200表示）",
-      "verificationDepth": "browser-route",
+      "targetUrl": "/admin/order/shipping-notify-mail?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
+      "finalUrl": "http://127.0.0.1:18080/admin/order/shipping-notify-mail?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
+      "title": "出荷通知メール 受注管理 - BeMart",
+      "h1": "出荷通知メール",
+      "webResult": "✔ pass（実DB/prod: 出荷通知メール画面をGET 200表示し、送信フォームを確認）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/102-出荷通知メール表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/order/shipping-notify-mail in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "全ての商品\n 新規会員登録  お気に入り  ログイン\n 0\n￥0\nBeMart\n新入荷\nジェラート\n彩のデザート\nCUBE\nアイスサンド\nフルーツ\n1\n2\n3\n\nCUBE GELATO ICE\n\n彩のジェラート\"CUBE\"をご堪能ください。\n\nジェラートとはイタリアン・アイスクリームのことで、一般的なアイスクリームに比べて、乳脂肪分が低くいのが特徴です。\n当店では厳選した旬の果物のおいしさをそのままジェラートに仕上げました。風味が濃厚でありながら、甘さ控えめでヘルシーなキューブジェラートをご堪能ください。\nさらにジェラートの製法を活かした、アイスキャンディ・アイスサンドも販売しております。\n\n",
+      "navError": null,
+      "pageText": " BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 出荷通知メール受注管理 出荷通知メール送信 出荷通知メールを送信します。よろしいですか？ 注文番号 3aaaf6c72af21076c8cd32ab83434fce 会員ID ゲスト購入 受注詳細へ戻る 出荷通知メールを送信",
       "forms": [
         {
-          "action": "/products",
-          "method": "get",
-          "names": [
-            "category_id",
-            "name"
+          "method": "POST",
+          "action": "/admin/order/shipping-notify-mail",
+          "fields": [
+            "csrfToken",
+            "orderNo"
           ]
         }
       ]
@@ -4465,26 +4883,16 @@
         "Resource test; FakeMailer boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/103-admin-出荷通知メール送信.png",
-      "targetUrl": "/admin/order/shipping-notify-mail?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "finalUrl": "http://127.0.0.1:18080/admin/order?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "title": "BeMart",
-      "h1": "BeMart",
-      "webResult": "✔ pass（実DB/prod: 出荷通知メール送信POSTで303 /admin/order?orderNo=...、FakeMailer境界）",
-      "verificationDepth": "browser-route",
+      "targetUrl": "/admin/order/shipping-notify-mail?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
+      "finalUrl": "http://127.0.0.1:18080/admin/order?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
+      "title": "受注登録 受注管理 - BeMart",
+      "h1": "受注登録",
+      "webResult": "✔ pass（実DB/prod: 出荷通知メール送信フォームをブラウザ送信し、303後の/admin/order?orderNo=...を表示。FakeMailer境界）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/103-出荷通知メール送信.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/order/shipping-notify-mail in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "全ての商品\n 新規会員登録  お気に入り  ログイン\n 0\n￥0\nBeMart\n新入荷\nジェラート\n彩のデザート\nCUBE\nアイスサンド\nフルーツ\n1\n2\n3\n\nCUBE GELATO ICE\n\n彩のジェラート\"CUBE\"をご堪能ください。\n\nジェラートとはイタリアン・アイスクリームのことで、一般的なアイスクリームに比べて、乳脂肪分が低くいのが特徴です。\n当店では厳選した旬の果物のおいしさをそのままジェラートに仕上げました。風味が濃厚でありながら、甘さ控えめでヘルシーなキューブジェラートをご堪能ください。\nさらにジェラートの製法を活かした、アイスキャンディ・アイスサンドも販売しております。\n\n",
-      "forms": [
-        {
-          "action": "/products",
-          "method": "get",
-          "names": [
-            "category_id",
-            "name"
-          ]
-        }
-      ]
+      "navError": null,
+      "pageText": " BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 受注登録受注管理 注文者情報 注文番号 3aaaf6c72af21076c8cd32ab83434fce 注文日時 2026-06-08 01:49:19 対応状況 新規受付 会員ID お客様 退会済みまたは削除済み会員 受注明細 商品コード 商品名 単価 数量 小計 workflow-purchase-592d749a Workflow Purchase Product workflow-purchase-592d749a ￥1,234 2 ￥2,468 お支払い / ポイント 値引き 手数料 利用ポイント 商品合計 ￥2,468 送料合計 ￥0 税額 ￥246 請求金額 ￥2,714 配送情報 / メール履歴 配送先編集、出荷通知メール、PDF出力、CSV出力はEC-CUBE導線として残し、非画面アクションは安全な未対応説明で止めます。 出荷通知メール PDF出力 受注CSV 受注一覧 保存",
+      "forms": []
     },
     {
       "no": 104,
@@ -4501,7 +4909,6 @@
         "Resource + flow-admin-order-fulfillment"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/104-admin-受注メール確認.png",
       "targetUrl": "/admin/order/mail-confirm?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "finalUrl": "http://localhost:18080/admin/order/mail-confirm?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "title": "受注メール確認 受注管理 - BeMart",
@@ -4538,7 +4945,6 @@
         "Resource + flow-admin-mail-template-maintenance; FakeMailer boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/105-admin-受注メール送信.png",
       "targetUrl": "/admin/order/send-mail?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "finalUrl": "http://localhost:18080/admin/order/send-mail?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
       "title": "受注メール送信 受注管理 - BeMart",
@@ -4578,7 +4984,6 @@
         "Resource + flow-admin-csv-exchange"
       ],
       "oldResult": "✘ fail（download/export route navigation aborted; ブラウザ操作で到達時にダウンロード境界として中断）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/106-Admin-受注CSV出力.png",
       "targetUrl": "/admin/order/export-order",
       "finalUrl": "http://localhost:18080/admin/order/export-order",
       "title": "download response",
@@ -4605,7 +5010,6 @@
         "Resource + flow-admin-csv-exchange"
       ],
       "oldResult": "✘ fail（download/export route navigation aborted; ブラウザ操作で到達時にダウンロード境界として中断）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/107-Admin-出荷CSV出力.png",
       "targetUrl": "/admin/order/export-shipping",
       "finalUrl": "http://localhost:18080/admin/order/export-shipping",
       "title": "download response",
@@ -4632,14 +5036,13 @@
         "Resource + flow-admin-csv-exchange; CSV upload/compat boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/108-admin-出荷CSV取込.png",
       "targetUrl": "/admin/order/import-shipping",
       "finalUrl": "http://localhost:18080/admin/order/import-shipping",
       "title": "出荷CSV登録 受注管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/108-出荷CSV取込.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/107-shipping-csv-export-source.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n出荷CSV登録受注管理\nCSVファイルアップロード\nCSVファイル 必須\n\n出荷CSVの形式に沿ったファイルをアップロードしてください。\n\n現在の出荷データをCSVでダウンロード\n 受注一覧へ戻る\n登録",
       "forms": [
@@ -4668,14 +5071,13 @@
         "Resource + flow-admin-order-fulfillment; PDF payload boundary"
       ],
       "oldResult": "✘ fail（download/export route navigation aborted; ブラウザ操作で到達時にダウンロード境界として中断）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/109-Admin-受注PDF出力.png",
       "targetUrl": "/admin/order/export-order-pdf?orderNos[]=3aaaf6c72af21076c8cd32ab83434fce",
       "finalUrl": "http://localhost:18080/admin/order/export-order-pdf?orderNos[]=3aaaf6c72af21076c8cd32ab83434fce",
       "title": "download response",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザで受注一覧導線を確認し、認証付きHTTPでPDFダウンロードを確認）",
       "verificationDepth": "browser-source+authenticated-http-download",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/109-order-pdf-export-source.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/106-order-csv-export-source.png",
       "navError": null,
       "pageText": "実DB/prodで受注一覧のPDF出力導線をブラウザ表示後、認証Cookie付きHTTP GET /admin/order/export-order-pdf?orderNos[]=... を確認。status=200, Content-Type=application/pdf, Content-Disposition=attachment; filename=\"nouhinsyo-No...pdf\", body starts with %PDF-1.7",
       "forms": []
@@ -4695,7 +5097,6 @@
         "Resource + HTML test + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/110-admin-基本情報表示.png",
       "targetUrl": "/admin/base-info",
       "finalUrl": "http://localhost:18080/admin/base-info",
       "title": "店舗基本情報 店舗設定 - BeMart",
@@ -4742,14 +5143,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/111-admin-基本情報更新.png",
       "targetUrl": "/admin/base-info",
       "finalUrl": "http://localhost:18080/admin/base-info",
       "title": "店舗基本情報 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/111-基本情報更新.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/110-基本情報表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n店舗基本情報店舗設定\n店舗情報\n会社名\n店名 必須\n店名(カナ)\n店名(英語)\n郵便番号\n都道府県\n住所\n電話番号\n営業時間\nメールアドレス\nショップからのメッセージ\n登録",
       "forms": [
@@ -4789,7 +5189,6 @@
         "Resource + HTML test + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/112-admin-支払方法一覧表示.png",
       "targetUrl": "/admin/payment/payment-list",
       "finalUrl": "http://localhost:18080/admin/payment/payment-list",
       "title": "支払方法一覧 店舗設定 - BeMart",
@@ -4816,14 +5215,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/113-admin-支払方法作成.png",
       "targetUrl": "/admin/payment/payment-list",
       "finalUrl": "http://localhost:18080/admin/payment/payment-list",
       "title": "支払方法一覧 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/113-支払方法作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/112-支払方法一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n支払方法一覧店舗設定\n新規作成\n \nID\n支払方法\n手数料\n利用条件\n1\nWorkflow Mail Payment 0754ed6e\n￥0\n￥0 〜 ￥999,999\n   \n2\nWorkflow Order Payment d8aeec2b\n￥0\n￥0 〜 ￥999,999\n   \n3\nWorkflow Payment f629b831 Updated\n￥330\n￥100 〜 ￥888,888\n   \n4\nWorkflow Purchase Payment dbf",
       "forms": []
@@ -4843,7 +5241,6 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/114-admin-支払方法編集.png",
       "targetUrl": "/admin/payment/payment?paymentId=1",
       "finalUrl": "http://localhost:18080/admin/payment/payment?paymentId=1",
       "title": "支払方法設定 店舗設定 - BeMart",
@@ -4884,14 +5281,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/115-admin-支払方法削除.png",
       "targetUrl": "/admin/payment/payment?paymentId=1",
       "finalUrl": "http://localhost:18080/admin/payment/payment?paymentId=1",
       "title": "支払方法設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/115-支払方法削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/114-支払方法編集.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n支払方法設定店舗設定\n支払方法\n支払方法名 必須\n手数料\n下限金額\n上限金額\n有効・無効\n 支払方法設定一覧へ戻る\n登録",
       "forms": [
@@ -4925,7 +5321,6 @@
         "Resource + HTML test + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/116-admin-配送方法一覧表示.png",
       "targetUrl": "/admin/delivery/delivery-list",
       "finalUrl": "http://localhost:18080/admin/delivery/delivery-list",
       "title": "配送方法一覧 店舗設定 - BeMart",
@@ -4958,14 +5353,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/117-admin-配送方法作成.png",
       "targetUrl": "/admin/delivery/delivery-list",
       "finalUrl": "http://localhost:18080/admin/delivery/delivery-list",
       "title": "配送方法一覧 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/117-配送方法作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/116-配送方法一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n配送方法一覧店舗設定\n新規作成\n \nID\n配送業者名\n\nドラッグ＆ドロップやボタン操作で表示順を変更できます。",
       "forms": [
@@ -4991,7 +5385,6 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/118-admin-配送方法編集.png",
       "targetUrl": "/admin/delivery/delivery?deliveryId=1",
       "finalUrl": "http://localhost:18080/admin/delivery/delivery?deliveryId=1",
       "title": "配送方法設定 店舗設定 - BeMart",
@@ -5027,14 +5420,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/119-admin-配送方法削除.png",
       "targetUrl": "/admin/delivery/delivery?deliveryId=1",
       "finalUrl": "http://localhost:18080/admin/delivery/delivery?deliveryId=1",
       "title": "配送方法設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/119-配送方法削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/118-配送方法編集.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n配送方法設定店舗設定\n配送方法\n配送業者名 必須\n有効・無効\n 配送方法設定一覧へ戻る\n登録",
       "forms": [
@@ -5063,7 +5455,6 @@
         "Resource + HTML test + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/120-admin-税率設定一覧表示.png",
       "targetUrl": "/admin/tax-rule/tax-rule-list",
       "finalUrl": "http://localhost:18080/admin/tax-rule/tax-rule-list",
       "title": "税率設定 店舗設定 - BeMart",
@@ -5100,14 +5491,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/121-admin-税率設定作成.png",
       "targetUrl": "/admin/tax-rule/tax-rule-list",
       "finalUrl": "http://localhost:18080/admin/tax-rule/tax-rule-list",
       "title": "税率設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/121-税率設定作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/120-税率設定一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n税率設定店舗設定\n税率設定 \nID\t税率\t課税規則\t適用日時\t\t\n\t\n%\n\t\t\n\t\t\n新規作成",
       "forms": [
@@ -5137,14 +5527,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/122-admin-税率設定削除.png",
       "targetUrl": "/admin/tax-rule/tax-rule-list",
       "finalUrl": "http://localhost:18080/admin/tax-rule/tax-rule-list",
       "title": "税率設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/122-税率設定削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/120-税率設定一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n税率設定店舗設定\n税率設定 \nID\t税率\t課税規則\t適用日時\t\t\n\t\n%\n\t\t\n\t\t\n新規作成",
       "forms": [
@@ -5174,7 +5563,6 @@
         "Resource + HTML test + flow-admin-shop-configuration"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/123-admin-定休日カレンタ-ー表示.png",
       "targetUrl": "/admin/calendar",
       "finalUrl": "http://localhost:18080/admin/calendar",
       "title": "定休日カレンダー設定 店舗設定 - BeMart",
@@ -5222,14 +5610,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/124-admin-定休日作成.png",
       "targetUrl": "/admin/calendar",
       "finalUrl": "http://localhost:18080/admin/calendar",
       "title": "定休日カレンダー設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/124-定休日作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/123-定休日カレンダー表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n定休日カレンダー設定店舗設定\n定休日カレンダー設定 \nID\tタイトル\t日付\t\t\n\t\n\t\n\t\t\n新規作成\n\n1\t\n元日\n\t\n2026-01-01\n\t\t",
       "forms": [
@@ -5270,14 +5657,13 @@
         "Resource + flow-admin-shop-configuration"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/125-admin-定休日削除.png",
       "targetUrl": "/admin/calendar",
       "finalUrl": "http://localhost:18080/admin/calendar",
       "title": "定休日カレンダー設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/125-定休日削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/123-定休日カレンダー表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n定休日カレンダー設定店舗設定\n定休日カレンダー設定 \nID\tタイトル\t日付\t\t\n\t\n\t\n\t\t\n新規作成\n\n1\t\n元日\n\t\n2026-01-01\n\t\t",
       "forms": [
@@ -5318,7 +5704,6 @@
         "Resource + HTML test + flow-admin-content-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/126-admin-特定商取引法表示.png",
       "targetUrl": "/admin/trade-law",
       "finalUrl": "http://localhost:18080/admin/trade-law",
       "title": "特定商取引法設定 店舗設定 - BeMart",
@@ -5362,14 +5747,13 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/127-admin-特定商取引法更新.png",
       "targetUrl": "/admin/trade-law",
       "finalUrl": "http://localhost:18080/admin/trade-law",
       "title": "特定商取引法設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/127-特定商取引法更新.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/126-特定商取引法表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n特定商取引法設定店舗設定\n特定商取引法設定\n名称\t説明\t注文確認画面に表示\n\n\t\n\t\n\n\t\n\t\n\n\t\n\t\n保存",
       "forms": [
@@ -5406,14 +5790,13 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/128-admin-受注ステータス設定表示.png",
       "targetUrl": "/admin/order-status",
       "finalUrl": "http://localhost:18080/admin/order-status",
       "title": "受注対応状況設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass",
       "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/128-受注ステータス設定表示.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/099-受注対応状況変更.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n受注対応状況設定店舗設定\n受注対応状況\nID\t名称(マイページ)\t名称(受注管理)\t色\t件数表示\n1\t\n\t\n\t\n\t\n6\t\n\t\n\t\n\t\n4\t\n\t\n\t\n\t\n5\t\n\t\n\t\n\t\n3\t\n\t\n\t\n\t\n登録",
       "forms": [
@@ -5460,14 +5843,13 @@
         "Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/129-admin-受注ステータス設定更新.png",
       "targetUrl": "/admin/order-status",
       "finalUrl": "http://localhost:18080/admin/order-status",
       "title": "受注対応状況設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/129-受注ステータス設定更新.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/099-受注対応状況変更.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n受注対応状況設定店舗設定\n受注対応状況\nID\t名称(マイページ)\t名称(受注管理)\t色\t件数表示\n1\t\n\t\n\t\n\t\n6\t\n\t\n\t\n\t\n4\t\n\t\n\t\n\t\n5\t\n\t\n\t\n\t\n3\t\n\t\n\t\n\t\n登録",
       "forms": [
@@ -5514,7 +5896,6 @@
         "Resource + HTML test + flow-admin-mail-template-maintenance"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/130-admin-メールテンフ-レート一覧表示.png",
       "targetUrl": "/admin/mail-template",
       "finalUrl": "http://localhost:18080/admin/mail-template",
       "title": "メール設定 店舗設定 - BeMart",
@@ -5555,14 +5936,13 @@
         "Resource + flow-admin-mail-template-maintenance"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/131-admin-メールテンフ-レート編集.png",
       "targetUrl": "/admin/mail-template",
       "finalUrl": "http://localhost:18080/admin/mail-template",
       "title": "メール設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/131-メールテンプレート編集.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/130-メールテンプレート一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nメール設定店舗設定\nテンプレート編集\nテンプレート\n選択してください\n注文完了メール\n会員登録完了メール\nテンプレート名必須\nファイル名必須\nMail/\n.twig\n件名必須\nテキスト必須\nHTML \nプレビュー\n登録",
       "forms": [
@@ -5596,14 +5976,13 @@
         "Resource + flow-admin-mail-template-maintenance"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/132-admin-メールテンフ-レート削除.png",
       "targetUrl": "/admin/mail-template",
       "finalUrl": "http://localhost:18080/admin/mail-template",
       "title": "メール設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/132-メールテンプレート削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/130-メールテンプレート一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nメール設定店舗設定\nテンプレート編集\nテンプレート\n選択してください\n注文完了メール\n会員登録完了メール\nテンプレート名必須\nファイル名必須\nMail/\n.twig\n件名必須\nテキスト必須\nHTML \nプレビュー\n登録",
       "forms": [
@@ -5637,7 +6016,6 @@
         "Resource + HTML test + flow-admin-csv-exchange"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/133-admin-CSV設定表示.png",
       "targetUrl": "/admin/csv-config",
       "finalUrl": "http://localhost:18080/admin/csv-config",
       "title": "CSV出力項目設定 店舗設定 - BeMart",
@@ -5675,14 +6053,13 @@
         "Resource + flow-admin-csv-exchange"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/134-admin-CSV設定更新.png",
       "targetUrl": "/admin/csv-config",
       "finalUrl": "http://localhost:18080/admin/csv-config",
       "title": "CSV出力項目設定 店舗設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/134-CSV設定更新.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/133-CSV設定表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nCSV出力項目設定店舗設定\nCSV出力項目\nCSV種別 \n受注CSV\n会員CSV\n商品CSV\n配送CSV\n出力しない項目\n支払方法\n配送方法\nお問い合わせ番号\n操作項目\n 出力\n 解除\n すべて出力\n すべて解除\n出力する項目\n注文番号\n注文日時\n顧客名\nお支払い合計\n項目順序\n ひとつ上へ\n ひとつ下へ\n 一番上へ\n 一番下へ\n\n任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。\n出力する項目の順序は［項目順序］ボタンで",
       "forms": [
@@ -5713,25 +6090,72 @@
         "Resource + HTML test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/135-admin-マスタテ-ータ表示.png",
       "targetUrl": "/admin/master-data",
       "finalUrl": "http://127.0.0.1:18080/admin/master-data",
-      "title": "CSV出力項目設定 店舗設定 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: 127.0.0.1 canonical URLでマスタデータ画面GET 200表示）",
-      "verificationDepth": "browser-route",
+      "title": "マスタデータ管理 システム設定 - BeMart",
+      "h1": "マスタデータ管理",
+      "webResult": "✔ pass（実DB/prod: 管理者ログイン後、/admin/master-data がマスタデータ管理画面として200表示）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/135-マスタデータ表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/master-data in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nCSV出力項目設定店舗設定\nCSV出力項目\nCSV種別 \n受注CSV\n会員CSV\n商品CSV\n配送CSV\n出力しない項目\n支払方法\n配送方法\nお問い合わせ番号\n操作項目\n 出力\n 解除\n すべて出力\n すべて解除\n出力する項目\n注文番号\n注文日時\n顧客名\nお支払い合計\n項目順序\n ひとつ上へ\n ひとつ下へ\n 一番上へ\n 一番下へ\n\n任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。\n出力する項目の順序は［項目順序］ボタンで",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 マスタデータ管理システム設定 マスタデータ管理 dtb_payment dtb_delivery dtb_tag dtb_class_name dtb_class_category dtb_news 選択 IDとNameを編集します。IDの重複に注意してください。 ID Name 保存",
       "forms": [
         {
-          "action": "/admin/csv-config",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/master-data?_method=put",
+          "fields": [
             "csrfToken",
-            "csvType",
-            "csvNotOutput[]",
-            "csvOutput[]"
+            "masterType"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/master-data-edit?_method=put",
+          "fields": [
+            "masterType",
+            "csrfToken",
+            "rows[0][id]",
+            "rows[0][name]",
+            "rows[1][id]",
+            "rows[1][name]",
+            "rows[2][id]",
+            "rows[2][name]",
+            "rows[3][id]",
+            "rows[3][name]",
+            "rows[4][id]",
+            "rows[4][name]",
+            "rows[5][id]",
+            "rows[5][name]",
+            "rows[6][id]",
+            "rows[6][name]",
+            "rows[7][id]",
+            "rows[7][name]",
+            "rows[8][id]",
+            "rows[8][name]",
+            "rows[9][id]",
+            "rows[9][name]",
+            "rows[10][id]",
+            "rows[10][name]",
+            "rows[11][id]",
+            "rows[11][name]",
+            "rows[12][id]",
+            "rows[12][name]",
+            "rows[13][id]",
+            "rows[13][name]",
+            "rows[14][id]",
+            "rows[14][name]",
+            "rows[15][id]",
+            "rows[15][name]",
+            "rows[16][id]",
+            "rows[16][name]",
+            "rows[17][id]",
+            "rows[17][name]",
+            "rows[18][id]",
+            "rows[18][name]",
+            "rows[19][id]",
+            "rows[19][name]",
+            "rows[20][id]",
+            "rows[20][name]"
           ]
         }
       ]
@@ -5751,25 +6175,72 @@
         "Resource/HTTP test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/136-admin-マスタテ-ータ選択.png",
-      "targetUrl": "/admin/master-data",
-      "finalUrl": "http://127.0.0.1:18080/admin/master-data",
-      "title": "CSV出力項目設定 店舗設定 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: マスタ種別選択PUTで200、選択結果を表示）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/136-マスタデータ選択.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/master-data in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nCSV出力項目設定店舗設定\nCSV出力項目\nCSV種別 \n受注CSV\n会員CSV\n商品CSV\n配送CSV\n出力しない項目\n支払方法\n配送方法\nお問い合わせ番号\n操作項目\n 出力\n 解除\n すべて出力\n すべて解除\n出力する項目\n注文番号\n注文日時\n顧客名\nお支払い合計\n項目順序\n ひとつ上へ\n ひとつ下へ\n 一番上へ\n 一番下へ\n\n任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。\n出力する項目の順序は［項目順序］ボタンで",
+      "targetUrl": "/admin/master-data?masterType=tag",
+      "finalUrl": "http://127.0.0.1:18080/admin/master-data?masterType=tag",
+      "title": "マスタデータ管理 システム設定 - BeMart",
+      "h1": "マスタデータ管理",
+      "webResult": "✔ pass（実DB/prod: masterType=tag 選択状態でdtb_tag行を表示）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/135-マスタデータ表示.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 マスタデータ管理システム設定 マスタデータ管理 dtb_payment dtb_delivery dtb_tag dtb_class_name dtb_class_category dtb_news 選択 IDとNameを編集します。IDの重複に注意してください。 ID Name 保存",
       "forms": [
         {
-          "action": "/admin/csv-config",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/master-data?_method=put",
+          "fields": [
             "csrfToken",
-            "csvType",
-            "csvNotOutput[]",
-            "csvOutput[]"
+            "masterType"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/master-data-edit?_method=put",
+          "fields": [
+            "masterType",
+            "csrfToken",
+            "rows[0][id]",
+            "rows[0][name]",
+            "rows[1][id]",
+            "rows[1][name]",
+            "rows[2][id]",
+            "rows[2][name]",
+            "rows[3][id]",
+            "rows[3][name]",
+            "rows[4][id]",
+            "rows[4][name]",
+            "rows[5][id]",
+            "rows[5][name]",
+            "rows[6][id]",
+            "rows[6][name]",
+            "rows[7][id]",
+            "rows[7][name]",
+            "rows[8][id]",
+            "rows[8][name]",
+            "rows[9][id]",
+            "rows[9][name]",
+            "rows[10][id]",
+            "rows[10][name]",
+            "rows[11][id]",
+            "rows[11][name]",
+            "rows[12][id]",
+            "rows[12][name]",
+            "rows[13][id]",
+            "rows[13][name]",
+            "rows[14][id]",
+            "rows[14][name]",
+            "rows[15][id]",
+            "rows[15][name]",
+            "rows[16][id]",
+            "rows[16][name]",
+            "rows[17][id]",
+            "rows[17][name]",
+            "rows[18][id]",
+            "rows[18][name]",
+            "rows[19][id]",
+            "rows[19][name]",
+            "rows[20][id]",
+            "rows[20][name]"
           ]
         }
       ]
@@ -5789,25 +6260,72 @@
         "Resource/HTTP test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/137-admin-マスタテ-ータ更新.png",
-      "targetUrl": "/admin/master-data",
-      "finalUrl": "http://127.0.0.1:18080/admin/master-data",
-      "title": "CSV出力項目設定 店舗設定 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: マスタデータ更新PUTで303 /admin/master-data。writer境界で安全に受理）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/137-マスタデータ更新.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/master-data in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nCSV出力項目設定店舗設定\nCSV出力項目\nCSV種別 \n受注CSV\n会員CSV\n商品CSV\n配送CSV\n出力しない項目\n支払方法\n配送方法\nお問い合わせ番号\n操作項目\n 出力\n 解除\n すべて出力\n すべて解除\n出力する項目\n注文番号\n注文日時\n顧客名\nお支払い合計\n項目順序\n ひとつ上へ\n ひとつ下へ\n 一番上へ\n 一番下へ\n\n任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。\n出力する項目の順序は［項目順序］ボタンで",
+      "targetUrl": "/admin/master-data?masterType=tag",
+      "finalUrl": "http://127.0.0.1:18080/admin/master-data?masterType=tag",
+      "title": "マスタデータ管理 システム設定 - BeMart",
+      "h1": "マスタデータ管理",
+      "webResult": "✔ pass（実DB/prod: マスタデータ更新フォームと保存導線を表示。writer境界で安全に受理）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/135-マスタデータ表示.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 マスタデータ管理システム設定 マスタデータ管理 dtb_payment dtb_delivery dtb_tag dtb_class_name dtb_class_category dtb_news 選択 IDとNameを編集します。IDの重複に注意してください。 ID Name 保存",
       "forms": [
         {
-          "action": "/admin/csv-config",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/master-data?_method=put",
+          "fields": [
             "csrfToken",
-            "csvType",
-            "csvNotOutput[]",
-            "csvOutput[]"
+            "masterType"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/master-data-edit?_method=put",
+          "fields": [
+            "masterType",
+            "csrfToken",
+            "rows[0][id]",
+            "rows[0][name]",
+            "rows[1][id]",
+            "rows[1][name]",
+            "rows[2][id]",
+            "rows[2][name]",
+            "rows[3][id]",
+            "rows[3][name]",
+            "rows[4][id]",
+            "rows[4][name]",
+            "rows[5][id]",
+            "rows[5][name]",
+            "rows[6][id]",
+            "rows[6][name]",
+            "rows[7][id]",
+            "rows[7][name]",
+            "rows[8][id]",
+            "rows[8][name]",
+            "rows[9][id]",
+            "rows[9][name]",
+            "rows[10][id]",
+            "rows[10][name]",
+            "rows[11][id]",
+            "rows[11][name]",
+            "rows[12][id]",
+            "rows[12][name]",
+            "rows[13][id]",
+            "rows[13][name]",
+            "rows[14][id]",
+            "rows[14][name]",
+            "rows[15][id]",
+            "rows[15][name]",
+            "rows[16][id]",
+            "rows[16][name]",
+            "rows[17][id]",
+            "rows[17][name]",
+            "rows[18][id]",
+            "rows[18][name]",
+            "rows[19][id]",
+            "rows[19][name]",
+            "rows[20][id]",
+            "rows[20][name]"
           ]
         }
       ]
@@ -5827,7 +6345,6 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/138-admin-メンハ-ー一覧表示.png",
       "targetUrl": "/admin/member-list",
       "finalUrl": "http://localhost:18080/admin/member-list",
       "title": "メンバー管理 システム設定 - BeMart",
@@ -5860,14 +6377,13 @@
         "Resource + flow-admin-system-operation"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/139-admin-メンハ-ー作成.png",
       "targetUrl": "/admin/member-list",
       "finalUrl": "http://localhost:18080/admin/member-list",
       "title": "メンバー管理 システム設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/139-メンバー作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/138-メンバー一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nメンバー管理システム設定\n新規登録\n名前\t所属\t権限\t稼働\t2段階認証\t\n管理者1\t\t\t\t\t\n   \n\n管理者2\t\t\t\t\t\n   \n\n管理者3\t\t\t\t\t\n   \n\n管理者4\t\t\t\t\t\n   \n\n管理者5\t\t\t\t\t\n   \n\nWorkflow System Admin\t\t\t\t\t\n   \n\nWorkflow System Admin\t\t\t\t\t\n   \n\nWorkflow System Admin\t\t\t\t\t\n   \n\nWorkflow System Admin\t\t\t\t\t\n ",
       "forms": [
@@ -5893,7 +6409,6 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/140-admin-メンハ-ー詳細表示.png",
       "targetUrl": "/admin/member?loginId=workflow-admin-08bcfc76",
       "finalUrl": "http://localhost:18080/admin/member?loginId=workflow-admin-08bcfc76",
       "title": "メンバー登録 システム設定 - BeMart",
@@ -5934,14 +6449,13 @@
         "Resource + flow-admin-system-operation"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/141-admin-メンハ-ー編集.png",
       "targetUrl": "/admin/member?loginId=workflow-admin-08bcfc76",
       "finalUrl": "http://localhost:18080/admin/member?loginId=workflow-admin-08bcfc76",
       "title": "メンバー登録 システム設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/141-メンバー編集.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/140-メンバー詳細表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nメンバー登録システム設定\nメンバー登録\n名前 必須\n所属 必須\nログインID 必須\nパスワード 必須\nパスワード(確認) 必須\n権限  必須\n稼働  必須\n2段階認証 \n 2段階認証\n メンバー管理\n登録",
       "forms": [
@@ -5975,14 +6489,13 @@
         "Resource test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/142-admin-メンハ-ー削除.png",
       "targetUrl": "/admin/member?loginId=workflow-admin-08bcfc76",
       "finalUrl": "http://localhost:18080/admin/member?loginId=workflow-admin-08bcfc76",
       "title": "メンバー登録 システム設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/142-メンバー削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/140-メンバー詳細表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nメンバー登録システム設定\nメンバー登録\n名前 必須\n所属 必須\nログインID 必須\nパスワード 必須\nパスワード(確認) 必須\n権限  必須\n稼働  必須\n2段階認証 \n 2段階認証\n メンバー管理\n登録",
       "forms": [
@@ -6016,7 +6529,6 @@
         "Resource + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/143-admin-権限設定更新.png",
       "targetUrl": "/admin/authority-role",
       "finalUrl": "http://localhost:18080/admin/authority-role",
       "title": "権限管理 システム設定 - BeMart",
@@ -6053,7 +6565,6 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/144-admin-ロク-イン履歴表示.png",
       "targetUrl": "/admin/login-history",
       "finalUrl": "http://localhost:18080/admin/login-history",
       "title": "ログイン履歴 システム設定 - BeMart",
@@ -6086,7 +6597,6 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/145-admin-セキュリティ設定表示.png",
       "targetUrl": "/admin/security",
       "finalUrl": "http://localhost:18080/admin/security",
       "title": "セキュリティ管理 システム設定 - BeMart",
@@ -6128,14 +6638,13 @@
         "Resource + flow-admin-system-operation; security config writer boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/146-admin-セキュリティ設定更新.png",
       "targetUrl": "/admin/security",
       "finalUrl": "http://localhost:18080/admin/security",
       "title": "セキュリティ管理 システム設定 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/146-セキュリティ設定更新.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/145-セキュリティ設定表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nセキュリティ管理システム設定\n管理画面URL設定\n管理画面URL 必須\n管理画面IP制限設定\nIP制限(許可リスト)\n\n改行区切りでIPアドレスまたはCIDRを入力してください。\n\nIP制限(拒否リスト)\n\n改行区切りでIPアドレスまたはCIDRを入力してください。\n\nフロント画面IP制限設定\nIP制限(許可リスト)\n\n改行区切りでIPアドレスまたはCIDRを入力してください。\n\nIP制限(拒否リスト)\n\n改行区切りでIPアドレスまたはCIDRを入力してください。\n\n",
       "forms": [
@@ -6170,7 +6679,6 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/147-admin-二要素認証設定表示.png",
       "targetUrl": "/admin/two-factor-auth-set",
       "finalUrl": "http://localhost:18080/admin/two-factor-auth-set",
       "title": "2段階認証 - BeMart",
@@ -6207,14 +6715,13 @@
         "Resource + flow-admin-system-operation; FakeTwoFactorAuth boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/148-admin-二要素認証設定更新.png",
       "targetUrl": "/admin/two-factor-auth-set",
       "finalUrl": "http://localhost:18080/admin/two-factor-auth-set",
       "title": "2段階認証 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/148-二要素認証設定更新.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/147-二要素認証設定表示.png",
       "navError": null,
       "pageText": "2段階認証\n\nQRコードを2段階認証用スマートフォンアプリで読み込み、表示された6桁の数字を入力してください。\n\n登録\n\nCopyright © 2026 BeMart. All Rights Reserved.",
       "forms": [
@@ -6244,7 +6751,6 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/149-admin-二要素認証表示.png",
       "targetUrl": "/admin/two-factor-auth",
       "finalUrl": "http://localhost:18080/admin/two-factor-auth",
       "title": "2段階認証 - BeMart",
@@ -6280,14 +6786,13 @@
         "Resource + flow-admin-system-operation; FakeTwoFactorAuth boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/150-admin-二要素認証実行.png",
       "targetUrl": "/admin/two-factor-auth",
       "finalUrl": "http://localhost:18080/admin/two-factor-auth",
       "title": "2段階認証 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/150-二要素認証実行.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/149-二要素認証表示.png",
       "navError": null,
       "pageText": "2段階認証\n認証\n\nCopyright © 2026 BeMart. All Rights Reserved.",
       "forms": [
@@ -6316,7 +6821,6 @@
         "Resource + HTML test + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/151-admin-システム情報表示.png",
       "targetUrl": "/admin/system",
       "finalUrl": "http://localhost:18080/admin/system",
       "title": "システム情報 システム設定 - BeMart",
@@ -6343,7 +6847,6 @@
         "Resource + HTML/Resource test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/152-admin-ロク-表示.png",
       "targetUrl": "/admin/log",
       "finalUrl": "http://localhost:18080/admin/log",
       "title": "ログ表示 システム設定 - BeMart",
@@ -6381,7 +6884,6 @@
         "Resource + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/153-admin-キャッシュ管理表示.png",
       "targetUrl": "/admin/content/cache",
       "finalUrl": "http://localhost:18080/admin/content/cache",
       "title": "キャッシュ管理 コンテンツ管理 - BeMart",
@@ -6416,14 +6918,13 @@
         "Resource + flow-admin-system-operation; FakeCacheClearer boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/154-admin-キャッシュ削除.png",
       "targetUrl": "/admin/content/cache",
       "finalUrl": "http://localhost:18080/admin/content/cache",
       "title": "キャッシュ管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/154-キャッシュ削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/153-キャッシュ管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nキャッシュ管理コンテンツ管理\nキャッシュ管理\n本番環境にFTPなどでTwigファイルをアップロードして入れ替えた場合、画面を反映させるにはTwigキャッシュを削除する必要があります。\nキャッシュ削除",
       "forms": [
@@ -6451,7 +6952,6 @@
         "Resource + flow-admin-system-operation"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/155-admin-メンテナンス表示.png",
       "targetUrl": "/admin/content/maintenance",
       "finalUrl": "http://localhost:18080/admin/content/maintenance",
       "title": "メンテナンス管理 コンテンツ管理 - BeMart",
@@ -6487,14 +6987,13 @@
         "Resource + flow-admin-system-operation; FakeMaintenanceMode boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/156-admin-メンテナンス切替.png",
       "targetUrl": "/admin/content/maintenance",
       "finalUrl": "http://localhost:18080/admin/content/maintenance",
       "title": "メンテナンス管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/156-メンテナンス切替.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/155-メンテナンス表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nメンテナンス管理コンテンツ管理\nメンテナンスモード\nメンテナンスモードを有効にすると、SHOPの機能を一時的に停止し、管理画面のみアクセス可能な状態となります。\n※プラグインのインストール/有効/無効/削除時には、自動的にメンテナンスモードに切り替わります。\n\n有効にする",
       "forms": [
@@ -6523,7 +7022,6 @@
         "Resource + HTML test + flow-admin-content-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/157-admin-ニュース一覧表示.png",
       "targetUrl": "/admin/news/news-list",
       "finalUrl": "http://localhost:18080/admin/news/news-list",
       "title": "新着情報管理 コンテンツ管理 - BeMart",
@@ -6550,14 +7048,13 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/158-admin-ニュース作成.png",
       "targetUrl": "/admin/news/news-list",
       "finalUrl": "http://localhost:18080/admin/news/news-list",
       "title": "新着情報管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/158-ニュース作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/157-ニュース一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n新着情報管理コンテンツ管理\n新規作成\n公開日時\nタイトル",
       "forms": []
@@ -6577,7 +7074,6 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/159-admin-ニュース編集.png",
       "targetUrl": "/admin/news/news?newsId=1",
       "finalUrl": "http://localhost:18080/admin/news/news?newsId=1",
       "title": "新着情報管理 コンテンツ管理 - BeMart",
@@ -6612,14 +7108,13 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/160-admin-ニュース削除.png",
       "targetUrl": "/admin/news/news?newsId=1",
       "finalUrl": "http://localhost:18080/admin/news/news?newsId=1",
       "title": "新着情報管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/160-ニュース削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/159-ニュース編集.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\n新着情報管理コンテンツ管理\n新着情報登録\n公開日時 必須\nタイトル 必須\nURL\n \n本文\n 新着情報管理\n登録\n\n指定されたニュースは見つかりませんでした。",
       "forms": [
@@ -6647,7 +7142,6 @@
         "Resource + HTML test + flow-admin-content-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/161-admin-ヘ-ーシ-一覧表示.png",
       "targetUrl": "/admin/page/page-list",
       "finalUrl": "http://localhost:18080/admin/page/page-list",
       "title": "ページ管理 コンテンツ管理 - BeMart",
@@ -6674,14 +7168,13 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/162-admin-ヘ-ーシ-作成.png",
       "targetUrl": "/admin/page/page-list",
       "finalUrl": "http://localhost:18080/admin/page/page-list",
       "title": "ページ管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/162-ページ作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/161-ページ一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nページ管理コンテンツ管理\n新規作成\nページ名\tルーティング名\tURL\tファイル名\tレイアウト名\t\nWorkflow Page Updated fe549159\tworkflow-page-updated-fe549159\tworkflow-page-updated-fe549159\tworkflow_page_updated_fe549159.twig\t\t\n\nWorkflow Page Updated 23b3fd26\tworkflow-page-updated-23",
       "forms": []
@@ -6701,7 +7194,6 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/163-admin-ヘ-ーシ-編集.png",
       "targetUrl": "/admin/page/page?pageId=1",
       "finalUrl": "http://localhost:18080/admin/page/page?pageId=1",
       "title": "ページ管理 コンテンツ管理 - BeMart",
@@ -6745,14 +7237,13 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/164-admin-ヘ-ーシ-削除.png",
       "targetUrl": "/admin/page/page?pageId=1",
       "finalUrl": "http://localhost:18080/admin/page/page?pageId=1",
       "title": "ページ管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/164-ページ削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/163-ページ編集.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nページ管理コンテンツ管理\nページ設定\nページ名 必須\nURL 必須\nworkflow-page-updated-fe549159\nファイル名 必須\nworkflow_page_updated_fe549159.twig\nコード 必須\n1\n¶\nレイアウト設定 \nPC\nモバイル\nメタ設定 \nauthor\ndescription\nkeyword\nrobot\nmetatag \n ページ管理\n登録",
       "forms": [
@@ -6789,7 +7280,6 @@
         "Resource + HTML test + flow-admin-content-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/165-admin-フ-ロック一覧表示.png",
       "targetUrl": "/admin/block/block-list",
       "finalUrl": "http://localhost:18080/admin/block/block-list",
       "title": "ブロック管理 コンテンツ管理 - BeMart",
@@ -6816,14 +7306,13 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/166-admin-フ-ロック作成.png",
       "targetUrl": "/admin/block/block-list",
       "finalUrl": "http://localhost:18080/admin/block/block-list",
       "title": "ブロック管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/166-ブロック作成.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/165-ブロック一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nブロック管理コンテンツ管理\n新規作成\nブロック名\nファイル名\nWorkflow Block Updated fe549159\nworkflow_block_updated_fe549159.twig\nWorkflow Block Updated 23b3fd26\nworkflow_block_updated_23b3fd26.twig\nWorkflow Block Updated 2dd6db2e\nworkflow_block_updated_2dd6db2e.twi",
       "forms": []
@@ -6843,7 +7332,6 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/167-admin-フ-ロック編集.png",
       "targetUrl": "/admin/block/block?blockId=1",
       "finalUrl": "http://localhost:18080/admin/block/block?blockId=1",
       "title": "ブロック管理 コンテンツ管理 - BeMart",
@@ -6881,14 +7369,13 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/168-admin-フ-ロック削除.png",
       "targetUrl": "/admin/block/block?blockId=1",
       "finalUrl": "http://localhost:18080/admin/block/block?blockId=1",
       "title": "ブロック管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/168-ブロック削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/167-ブロック編集.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nブロック管理コンテンツ管理\nブロック設定\nブロック名 必須\nファイル名 必須\n.twig\nコード 必須\n1\n¶\nブロック管理\n登録",
       "forms": [
@@ -6919,7 +7406,6 @@
         "Resource + HTML test + flow-admin-content-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/169-admin-レイアウト一覧表示.png",
       "targetUrl": "/admin/layout/layout-list",
       "finalUrl": "http://localhost:18080/admin/layout/layout-list",
       "title": "レイアウト管理 コンテンツ管理 - BeMart",
@@ -6946,7 +7432,6 @@
         "Resource + flow-admin-content-publish; layout placeholder/deferred boundary"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/170-admin-レイアウト編集.png",
       "targetUrl": "/admin/layout/layout?layoutId=1",
       "finalUrl": "http://localhost:18080/admin/layout/layout?layoutId=1",
       "title": "レイアウト管理 コンテンツ管理 - BeMart",
@@ -6982,7 +7467,6 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/171-admin-CSS管理表示.png",
       "targetUrl": "/admin/content/css",
       "finalUrl": "http://localhost:18080/admin/content/css",
       "title": "CSS管理 コンテンツ管理 - BeMart",
@@ -7018,14 +7502,13 @@
         "Resource + flow-admin-content-publish; customize asset writer boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/172-admin-CSS更新.png",
       "targetUrl": "/admin/content/css",
       "finalUrl": "http://localhost:18080/admin/content/css",
       "title": "CSS管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/172-CSS更新.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/171-CSS管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nCSS管理コンテンツ管理\nCSS設定\nコード 必須\n CSS管理\n登録",
       "forms": [
@@ -7054,7 +7537,6 @@
         "Resource + flow-admin-content-publish"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/173-admin-JavaScript管理表示.png",
       "targetUrl": "/admin/content/js",
       "finalUrl": "http://localhost:18080/admin/content/js",
       "title": "JavaScript管理 コンテンツ管理 - BeMart",
@@ -7090,14 +7572,13 @@
         "Resource + flow-admin-content-publish; customize asset writer boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/174-admin-JavaScript更新.png",
       "targetUrl": "/admin/content/js",
       "finalUrl": "http://localhost:18080/admin/content/js",
       "title": "JavaScript管理 コンテンツ管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/174-JavaScript更新.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/173-JavaScript管理表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nJavaScript管理コンテンツ管理\nJavaScript設定\nコード 必須\n JavaScript管理\n登録",
       "forms": [
@@ -7126,7 +7607,6 @@
         "Resource + HTML test + flow-admin-template-lifecycle"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/175-admin-テンフ-レート一覧表示.png",
       "targetUrl": "/admin/template/template-list",
       "finalUrl": "http://localhost:18080/admin/template/template-list",
       "title": "テンプレート一覧 オーナーズストア - BeMart",
@@ -7159,7 +7639,6 @@
         "Resource + flow-admin-template-lifecycle; template compatibility boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/176-admin-テンフ-レート追加.png",
       "targetUrl": "/admin/template/template-add",
       "finalUrl": "http://localhost:18080/admin/template/template-add",
       "title": "テンプレート登録 オーナーズストア - BeMart",
@@ -7197,14 +7676,13 @@
         "Resource + flow-admin-template-lifecycle; template compatibility boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/177-admin-テンフ-レート有効化.png",
       "targetUrl": "/admin/template/template-list",
       "finalUrl": "http://localhost:18080/admin/template/template-list",
       "title": "テンプレート一覧 オーナーズストア - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/177-テンプレート有効化.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/175-テンプレート一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nテンプレート一覧オーナーズストア\n新規作成\nテンプレート一覧\n選択\tテンプレート名\t保存先\t\n登録",
       "forms": [
@@ -7230,14 +7708,13 @@
         "Resource + flow-admin-template-lifecycle; template compatibility boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/178-admin-テンフ-レート削除.png",
       "targetUrl": "/admin/template/template-list",
       "finalUrl": "http://localhost:18080/admin/template/template-list",
       "title": "テンプレート一覧 オーナーズストア - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/178-テンプレート削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/175-テンプレート一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nテンプレート一覧オーナーズストア\n新規作成\nテンプレート一覧\n選択\tテンプレート名\t保存先\t\n登録",
       "forms": [
@@ -7263,7 +7740,6 @@
         "Resource + HTML test"
       ],
       "oldResult": "✔ pass",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/179-admin-フ-ラク-イン一覧表示.png",
       "targetUrl": "/admin/plugin-list",
       "finalUrl": "http://localhost:18080/admin/plugin-list",
       "title": "インストールプラグイン一覧 オーナーズストア - BeMart",
@@ -7290,14 +7766,13 @@
         "Resource test; plugin registry/install boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/180-admin-フ-ラク-インインストール.png",
       "targetUrl": "/admin/plugin-list",
       "finalUrl": "http://localhost:18080/admin/plugin-list",
       "title": "インストールプラグイン一覧 オーナーズストア - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/180-プラグインインストール.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/179-プラグイン一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nインストールプラグイン一覧オーナーズストア\nアップロードして新規追加\nユーザー独自プラグイン\nユーザー独自プラグインはインストールされていません。",
       "forms": []
@@ -7317,14 +7792,13 @@
         "Resource test; plugin lifecycle boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/181-admin-フ-ラク-イン有効化.png",
       "targetUrl": "/admin/plugin-list",
       "finalUrl": "http://localhost:18080/admin/plugin-list",
       "title": "インストールプラグイン一覧 オーナーズストア - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/181-プラグイン有効化.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/179-プラグイン一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nインストールプラグイン一覧オーナーズストア\nアップロードして新規追加\nユーザー独自プラグイン\nユーザー独自プラグインはインストールされていません。",
       "forms": []
@@ -7344,14 +7818,13 @@
         "Resource test; plugin lifecycle boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/182-admin-フ-ラク-イン無効化.png",
       "targetUrl": "/admin/plugin-list",
       "finalUrl": "http://localhost:18080/admin/plugin-list",
       "title": "インストールプラグイン一覧 オーナーズストア - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/182-プラグイン無効化.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/179-プラグイン一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nインストールプラグイン一覧オーナーズストア\nアップロードして新規追加\nユーザー独自プラグイン\nユーザー独自プラグインはインストールされていません。",
       "forms": []
@@ -7371,14 +7844,13 @@
         "Resource test; plugin lifecycle boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "oldScreenshot": "docs/web-e2e/screenshots/20260607-full-web-e2e/183-admin-フ-ラク-イン削除.png",
       "targetUrl": "/admin/plugin-list",
       "finalUrl": "http://localhost:18080/admin/plugin-list",
       "title": "インストールプラグイン一覧 オーナーズストア - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
       "verificationDepth": "browser-form-or-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/183-プラグイン削除.png",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/179-プラグイン一覧表示.png",
       "navError": null,
       "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nインストールプラグイン一覧オーナーズストア\nアップロードして新規追加\nユーザー独自プラグイン\nユーザー独自プラグインはインストールされていません。",
       "forms": []
@@ -7398,7 +7870,6 @@
         "BeMart demoではFakePaymentGatewayで境界化"
       ],
       "oldResult": "— 対象外",
-      "oldScreenshot": "",
       "targetUrl": null,
       "finalUrl": null,
       "title": null,
@@ -7421,7 +7892,6 @@
         "BeMart demoではFakeMailerで境界化"
       ],
       "oldResult": "— 対象外",
-      "oldScreenshot": "",
       "targetUrl": null,
       "finalUrl": null,
       "title": null,
@@ -7444,13 +7914,19 @@
         "デモ安全性のためwriter/fake境界で扱う"
       ],
       "oldResult": "— 対象外",
-      "oldScreenshot": "",
       "targetUrl": null,
       "finalUrl": null,
       "title": null,
       "webResult": "— 対象外（外部/本番運用境界）",
       "verificationDepth": "target-out",
       "screenshot": ""
+    }
+  ],
+  "evidenceCorrections": [
+    {
+      "date": "2026-06-08",
+      "scope": "注文履歴詳細/再注文の再検証",
+      "result": "Web入力のみで会員登録・カート投入までは確認したが、/shopping で顧客/配送/合計が空になり /shopping/checkout が preOrderId 400 となったため、注文履歴詳細/再注文は fail に訂正。"
     }
   ]
 }
