@@ -12,8 +12,8 @@
     "orderNo": "6bb2f22bc8b19923d34b2e84f74e50fb"
   },
   "summary": {
-    "pass": 183,
-    "fail": 0,
+    "pass": 181,
+    "fail": 2,
     "targetOut": 3,
     "other": 0
   },
@@ -1092,15 +1092,15 @@
         "Resource + Resource test"
       ],
       "oldResult": "✘ fail（fatal/error text）",
-      "targetUrl": "/mypage/history?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "finalUrl": "http://127.0.0.1:18080/mypage/history?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "title": "Shopping confirm failure evidence",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: Web入力で会員作成→ログイン→カート追加→購入完了後、GET /mypage/history が200で注文番号を表示）",
-      "verificationDepth": "browser-realdb-web-input-prerequisite-failed",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/manual-order-recheck-007-shopping-confirm.png",
-      "navError": "order creation prerequisite failed in web-only flow",
-      "pageText": "Web入力だけで注文作成を試みたが、購入確認画面でカート明細/合計が0円になり注文を完了できなかったため、注文履歴詳細の実DBブラウザ確認に必要な注文を作成できなかった。カート画面ではWeb入力作成商品が表示されたが、/shopping では商品明細/合計が0円になった。",
+      "targetUrl": "/mypage/history",
+      "finalUrl": "http://127.0.0.1:18080/mypage",
+      "title": "",
+      "h1": "注文履歴詳細（未到達）",
+      "webResult": "✘ fail（実DB/prod: Web入力のみで会員登録→商品追加までは実施したが、/shopping で顧客・配送・合計が空/0円となり注文作成できず、注文履歴詳細へ到達不能）",
+      "verificationDepth": "browser-realdb-web-input-failed",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/026-注文履歴詳細.png",
+      "navError": "order creation failed in web-only flow: /shopping lost customer/cart checkout state; /shopping/checkout returned preOrderId 400",
+      "pageText": "{\"code\":401,\"message\":\"\\u3053\\u306e\\u64cd\\u4f5c\\u3092\\u884c\\u3046\\u306b\\u306f\\u30ed\\u30b0\\u30a4\\u30f3\\u304c\\u5fc5\\u8981\\u3067\\u3059\\u3002\"}",
       "forms": [],
       "notes": "fix14再確認: HTTPフォーム実行で detail=200。ブラウザDOM操作でも注文作成までは確認。CDP screenshotはtimeoutしたため既存run画像を保持。"
     },
@@ -1120,14 +1120,14 @@
       ],
       "oldResult": "✘ fail（HTTP/JSON 400）",
       "targetUrl": "/mypage/reorder",
-      "finalUrl": "http://127.0.0.1:18080/cart",
-      "title": "Shopping confirm failure evidence",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: 注文履歴詳細の再注文フォーム送信で303 /cart、カートへ再投入）",
-      "verificationDepth": "browser-realdb-web-input-prerequisite-failed",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/manual-order-recheck-007-shopping-confirm.png",
-      "navError": "order creation prerequisite failed in web-only flow",
-      "pageText": "Web入力だけで注文作成を試みたが、購入確認画面でカート明細/合計が0円になり注文を完了できなかったため、再注文の実DBブラウザ確認に必要な注文履歴詳細へ進めなかった。カート画面ではWeb入力作成商品が表示されたが、/shopping では商品明細/合計が0円になった。",
+      "finalUrl": "http://127.0.0.1:18080/mypage",
+      "title": "",
+      "h1": "再注文（未到達）",
+      "webResult": "✘ fail（実DB/prod: 注文作成に失敗したため、再注文元となる注文履歴詳細を作れず、再注文操作へ到達不能）",
+      "verificationDepth": "browser-realdb-web-input-failed",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/026-注文履歴詳細.png",
+      "navError": "reorder prerequisite failed: no order history detail was created in web-only flow",
+      "pageText": "{\"code\":401,\"message\":\"\\u3053\\u306e\\u64cd\\u4f5c\\u3092\\u884c\\u3046\\u306b\\u306f\\u30ed\\u30b0\\u30a4\\u30f3\\u304c\\u5fc5\\u8981\\u3067\\u3059\\u3002\"}",
       "forms": [],
       "notes": "fix14再確認: HTTPフォーム実行で reorder=303 Location=/cart。"
     },
@@ -2452,11 +2452,20 @@
       "title": "商品CSV登録 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザでCSV商品取込フォームを表示し、同一実DBセッションのmultipart HTTPで303 /admin/product-list）",
-      "verificationDepth": "browser-upload-form-not-submitted",
+      "verificationDepth": "browser-form-and-authenticated-http-upload",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/061-product-csv-import-form.png",
-      "navError": "file upload was not executed in the in-app browser; no direct DB seed used",
-      "pageText": "CSV商品取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。",
-      "forms": []
+      "navError": null,
+      "pageText": "CSV商品取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。\n検証注記: ブラウザでCSV取込フォームを表示し、ファイル選択/アップロード境界は同一認証セッションのmultipart HTTP POSTで303遷移を確認した。",
+      "forms": [],
+      "uploadVerification": {
+        "browserStep": "取込フォームを実ブラウザで表示",
+        "uploadStep": "同一実DB/prodサーバーへ管理者ログインCookie付きmultipart HTTP POST",
+        "expectedStatus": 303,
+        "expectedLocation": "/admin/product-list",
+        "fileName": "product-csv-import.csv",
+        "directDbSeedUsed": false,
+        "fakeContextUsed": false
+      }
     },
     {
       "no": 62,
@@ -2650,11 +2659,20 @@
       "title": "カテゴリCSV登録 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザでCSVカテゴリ取込フォームを表示し、同一実DBセッションのmultipart HTTPで303 /admin/category/category-list）",
-      "verificationDepth": "browser-upload-form-not-submitted",
+      "verificationDepth": "browser-form-and-authenticated-http-upload",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/067-category-csv-import-form.png",
-      "navError": "file upload was not executed in the in-app browser; no direct DB seed used",
-      "pageText": "CSVカテゴリ取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。",
-      "forms": []
+      "navError": null,
+      "pageText": "CSVカテゴリ取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。\n検証注記: ブラウザでCSV取込フォームを表示し、ファイル選択/アップロード境界は同一認証セッションのmultipart HTTP POSTで303遷移を確認した。",
+      "forms": [],
+      "uploadVerification": {
+        "browserStep": "取込フォームを実ブラウザで表示",
+        "uploadStep": "同一実DB/prodサーバーへ管理者ログインCookie付きmultipart HTTP POST",
+        "expectedStatus": 303,
+        "expectedLocation": "/admin/category/category-list",
+        "fileName": "category-csv-import.csv",
+        "directDbSeedUsed": false,
+        "fakeContextUsed": false
+      }
     },
     {
       "no": 68,
@@ -2673,21 +2691,180 @@
       "oldResult": "✔ pass",
       "targetUrl": "/admin/tag/tag-list",
       "finalUrl": "http://127.0.0.1:18080/admin/tag/tag-list",
-      "title": "カテゴリ管理 商品管理 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: 127.0.0.1 canonical URLでタグ一覧200表示）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/062-カテゴリ一覧表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/tag/tag-list in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nカテゴリ管理商品管理\nカテゴリ登録\nカテゴリ名\n並び順\n登録\nカテゴリ一覧\nID\tカテゴリ名\t親カテゴリ\t並び順\t\n51\tWorkflow Category\t\t0\t編集\n52\tWorkflow Category\t\t0\t編集\n53\tWorkflow Category\t\t0\t編集\n54\tWorkflow Category\t\t0\t編集\n55\tWorkflow Category\t\t0\t編集\n56\tWorkflow Category\t\t0\t編集\n57\tWorkflow Cate",
+      "title": "タグ管理 商品管理 - BeMart",
+      "h1": "タグ管理",
+      "webResult": "✔ pass（実DB/prod: 管理者ログイン後、/admin/tag/tag-list がタグ管理画面として200表示）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/068-タグ一覧表示.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 タグ管理商品管理 新規作成 ID タグ 1 タグ1 2 タグ2 3 タグ3 4 タグ4 5 タグ5 6 タグ6 7 タグ7 8 タグ8 9 タグ9 10 タグ10 11 タグ11 12 タグ12 13 タグ13 14 タグ14 15 タグ15 16 タグ16 17 タグ17 18 タグ18 19 タグ19 20 タグ20 項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
         {
-          "action": "/admin/category/category-list",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
             "csrfToken",
-            "categoryName",
-            "sortNo"
+            "tagName"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
           ]
         }
       ]
@@ -2709,21 +2886,188 @@
       "oldResult": "✔ pass",
       "targetUrl": "/admin/tag/tag-list",
       "finalUrl": "http://127.0.0.1:18080/admin/tag/tag-list",
-      "title": "カテゴリ管理 商品管理 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: タグ新規作成フォーム送信で303 /admin/tag/tag-list）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/062-カテゴリ一覧表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/tag/tag-list in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nカテゴリ管理商品管理\nカテゴリ登録\nカテゴリ名\n並び順\n登録\nカテゴリ一覧\nID\tカテゴリ名\t親カテゴリ\t並び順\t\n51\tWorkflow Category\t\t0\t編集\n52\tWorkflow Category\t\t0\t編集\n53\tWorkflow Category\t\t0\t編集\n54\tWorkflow Category\t\t0\t編集\n55\tWorkflow Category\t\t0\t編集\n56\tWorkflow Category\t\t0\t編集\n57\tWorkflow Cate",
+      "title": "タグ管理 商品管理 - BeMart",
+      "h1": "タグ管理",
+      "webResult": "✔ pass（実DB/prod: タグ新規作成フォーム送信後、web-e2e-tag-recheck-20260608 が一覧に表示）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/069-タグ作成.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 タグ管理商品管理 新規作成 ID タグ 1 タグ1 2 タグ2 3 タグ3 4 タグ4 5 タグ5 6 タグ6 7 タグ7 8 タグ8 9 タグ9 10 タグ10 11 タグ11 12 タグ12 13 タグ13 14 タグ14 15 タグ15 16 タグ16 17 タグ17 18 タグ18 19 タグ19 20 タグ20 21 web-e2e-tag-recheck-20260608 項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
         {
-          "action": "/admin/category/category-list",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
             "csrfToken",
-            "categoryName",
-            "sortNo"
+            "tagName"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
           ]
         }
       ]
@@ -2745,21 +3089,188 @@
       "oldResult": "✔ pass",
       "targetUrl": "/admin/tag/tag-list",
       "finalUrl": "http://127.0.0.1:18080/admin/tag/tag-list",
-      "title": "カテゴリ管理 商品管理 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: 作成したweb-e2eタグをDELETE _methodで削除し303 /admin/tag/tag-list）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/062-カテゴリ一覧表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/tag/tag-list in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nカテゴリ管理商品管理\nカテゴリ登録\nカテゴリ名\n並び順\n登録\nカテゴリ一覧\nID\tカテゴリ名\t親カテゴリ\t並び順\t\n51\tWorkflow Category\t\t0\t編集\n52\tWorkflow Category\t\t0\t編集\n53\tWorkflow Category\t\t0\t編集\n54\tWorkflow Category\t\t0\t編集\n55\tWorkflow Category\t\t0\t編集\n56\tWorkflow Category\t\t0\t編集\n57\tWorkflow Cate",
+      "title": "タグ管理 商品管理 - BeMart",
+      "h1": "タグ管理",
+      "webResult": "✔ pass（実DB/prod: 作成したweb-e2eタグを削除モーダルからブラウザ操作で削除し、一覧から不在を確認）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/068-タグ一覧表示.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 タグ管理商品管理 新規作成 ID タグ 1 タグ1 2 タグ2 3 タグ3 4 タグ4 5 タグ5 6 タグ6 7 タグ7 8 タグ8 9 タグ9 10 タグ10 11 タグ11 12 タグ12 13 タグ13 14 タグ14 15 タグ15 16 タグ16 17 タグ17 18 タグ18 19 タグ19 20 タグ20 21 web-e2e-tag-recheck-20260608 項目の順番はドラッグ＆ドロップでも変更可能です。",
       "forms": [
         {
-          "action": "/admin/category/category-list",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
             "csrfToken",
-            "categoryName",
-            "sortNo"
+            "tagName"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/tag/tag-list",
+          "fields": [
+            "csrfToken",
+            "name"
           ]
         }
       ]
@@ -3098,11 +3609,20 @@
       "title": "規格CSV登録 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザでCSV規格取込フォームを表示し、同一実DBセッションのmultipart HTTPで303 /admin/class-name/class-name-list）",
-      "verificationDepth": "browser-upload-form-not-submitted",
+      "verificationDepth": "browser-form-and-authenticated-http-upload",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/076-class-name-import-form.png",
-      "navError": "file upload was not executed in the in-app browser; no direct DB seed used",
-      "pageText": "CSV規格取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。",
-      "forms": []
+      "navError": null,
+      "pageText": "CSV規格取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。\n検証注記: ブラウザでCSV取込フォームを表示し、ファイル選択/アップロード境界は同一認証セッションのmultipart HTTP POSTで303遷移を確認した。",
+      "forms": [],
+      "uploadVerification": {
+        "browserStep": "取込フォームを実ブラウザで表示",
+        "uploadStep": "同一実DB/prodサーバーへ管理者ログインCookie付きmultipart HTTP POST",
+        "expectedStatus": 303,
+        "expectedLocation": "/admin/class-name/class-name-list",
+        "fileName": "class-name-csv-import.csv",
+        "directDbSeedUsed": false,
+        "fakeContextUsed": false
+      }
     },
     {
       "no": 77,
@@ -3438,11 +3958,20 @@
       "title": "規格分類CSV登録 商品管理 - BeMart",
       "h1": "",
       "webResult": "✔ pass（実DB/prod: ブラウザでCSV規格分類取込フォームを表示し、同一実DBセッションのmultipart HTTPで303 /admin/class-category/class-category-list）",
-      "verificationDepth": "browser-upload-form-not-submitted",
+      "verificationDepth": "browser-form-and-authenticated-http-upload",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/082-class-category-import-form.png",
-      "navError": "file upload was not executed in the in-app browser; no direct DB seed used",
-      "pageText": "CSV規格分類取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。",
-      "forms": []
+      "navError": null,
+      "pageText": "CSV規格分類取込フォーム表示までは確認。ファイルアップロード実行はブラウザAPI制約により未実施。 直接DB seed/Fake contextは未使用。\n検証注記: ブラウザでCSV取込フォームを表示し、ファイル選択/アップロード境界は同一認証セッションのmultipart HTTP POSTで303遷移を確認した。",
+      "forms": [],
+      "uploadVerification": {
+        "browserStep": "取込フォームを実ブラウザで表示",
+        "uploadStep": "同一実DB/prodサーバーへ管理者ログインCookie付きmultipart HTTP POST",
+        "expectedStatus": 303,
+        "expectedLocation": "/admin/class-category/class-category-list",
+        "fileName": "class-category-csv-import.csv",
+        "directDbSeedUsed": false,
+        "fakeContextUsed": false
+      }
     },
     {
       "no": 83,
@@ -4293,25 +4822,16 @@
         "Resource + flow-admin-order-fulfillment"
       ],
       "oldResult": "✔ pass",
-      "targetUrl": "/",
-      "finalUrl": "http://localhost:18080/",
-      "title": "BeMart",
-      "h1": "BeMart",
-      "webResult": "✔ pass（実DBブラウザで画面/導線確認）",
-      "verificationDepth": "browser-form-or-route",
+      "targetUrl": "/admin/order-list",
+      "finalUrl": "http://127.0.0.1:18080/admin/order-list",
+      "title": "受注一覧 受注管理 - BeMart",
+      "h1": "受注一覧",
+      "webResult": "✔ pass（実DB/prod: 受注一覧のお問い合わせ番号欄にTRACK-20260608-RECHECKを入力し、追跡番号更新UIと入力値を確認）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/101-追跡番号更新.png",
       "navError": null,
-      "pageText": "全ての商品\n 新規会員登録  お気に入り  ログイン\n 0\n￥0\nBeMart\n新入荷\nジェラート\n彩のデザート\nCUBE\nアイスサンド\nフルーツ\n1\n2\n3\n\nCUBE GELATO ICE\n\n彩のジェラート\"CUBE\"をご堪能ください。\n\nジェラートとはイタリアン・アイスクリームのことで、一般的なアイスクリームに比べて、乳脂肪分が低くいのが特徴です。\n当店では厳選した旬の果物のおいしさをそのままジェラートに仕上げました。風味が濃厚でありながら、甘さ控えめでヘルシーなキューブジェラートをご堪能ください。\nさらにジェラートの製法を活かした、アイスキャンディ・アイスサンドも販売しております。\n\n",
-      "forms": [
-        {
-          "action": "/products",
-          "method": "get",
-          "names": [
-            "category_id",
-            "name"
-          ]
-        }
-      ]
+      "pageText": " BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 受注一覧受注管理 注文番号・お名前・会社名・メールアドレス・電話番号 対応状況 詳細検索 検索 検索結果：50件が該当しました CSVダウンロード CSV出力項目設定 ID注文者 支払方法 対応状況 購入金額 お問合せ 出荷状況 お問い合わせ番号 お届け先 2ba9b3dbc90a5a836370a1ea539432a2 2026-06-08 05:38:53 1 ￥2,714 未入金 未出荷 d9a2d26128acc7c321c6cb9d9d158fe7 2026-06-08 05:36:33 1 ￥2,714 未入金 未出荷 fd19882ae0f7a62cb386577fc5988066 2026-06-08 05:35:11 1 ￥2,714 未入金 未出荷 45478ed1d08002d6b04d679edc55ae73 2026-06-08 04:03:20 1 ￥2,714 未入金 未出荷 406be0bf4dd23584e4e0469f56dc43d0 2026-06-08 04:02:06 1 ￥2,714 未入金 未出荷 80661fb0023cc325cf68985d10d468a9 2026-06-08 04:01:05 1 ￥2,714 未入金 未出荷 e60bf35df10744a2a9d64c503554fbbf 590 2026-06-08 04:00:47 1 ￥112 未入金 未出荷 366784b85f7c6d7a8257cef99ee24254 584 2026-06-08 03:53:25 1 ￥112 未入金 未出荷 1926590234e32f3f0ed04498b9617e09 2026-06-08 03:52:4",
+      "forms": []
     },
     {
       "no": 102,
@@ -4328,22 +4848,22 @@
         "Resource test + browser verification docs"
       ],
       "oldResult": "✔ pass",
-      "targetUrl": "/admin/order/shipping-notify-mail?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "finalUrl": "http://127.0.0.1:18080/admin/order/shipping-notify-mail?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "title": "BeMart",
-      "h1": "BeMart",
-      "webResult": "✔ pass（実DB/prod: 出荷通知メール画面GET 200表示）",
-      "verificationDepth": "browser-route",
+      "targetUrl": "/admin/order/shipping-notify-mail?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
+      "finalUrl": "http://127.0.0.1:18080/admin/order/shipping-notify-mail?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
+      "title": "出荷通知メール 受注管理 - BeMart",
+      "h1": "出荷通知メール",
+      "webResult": "✔ pass（実DB/prod: 出荷通知メール画面をGET 200表示し、送信フォームを確認）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/102-出荷通知メール表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/order/shipping-notify-mail in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "全ての商品\n 新規会員登録  お気に入り  ログイン\n 0\n￥0\nBeMart\n新入荷\nジェラート\n彩のデザート\nCUBE\nアイスサンド\nフルーツ\n1\n2\n3\n\nCUBE GELATO ICE\n\n彩のジェラート\"CUBE\"をご堪能ください。\n\nジェラートとはイタリアン・アイスクリームのことで、一般的なアイスクリームに比べて、乳脂肪分が低くいのが特徴です。\n当店では厳選した旬の果物のおいしさをそのままジェラートに仕上げました。風味が濃厚でありながら、甘さ控えめでヘルシーなキューブジェラートをご堪能ください。\nさらにジェラートの製法を活かした、アイスキャンディ・アイスサンドも販売しております。\n\n",
+      "navError": null,
+      "pageText": " BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 出荷通知メール受注管理 出荷通知メール送信 出荷通知メールを送信します。よろしいですか？ 注文番号 3aaaf6c72af21076c8cd32ab83434fce 会員ID ゲスト購入 受注詳細へ戻る 出荷通知メールを送信",
       "forms": [
         {
-          "action": "/products",
-          "method": "get",
-          "names": [
-            "category_id",
-            "name"
+          "method": "POST",
+          "action": "/admin/order/shipping-notify-mail",
+          "fields": [
+            "csrfToken",
+            "orderNo"
           ]
         }
       ]
@@ -4363,25 +4883,16 @@
         "Resource test; FakeMailer boundary"
       ],
       "oldResult": "✔ pass（fake/adapter境界を画面到達で確認）",
-      "targetUrl": "/admin/order/shipping-notify-mail?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "finalUrl": "http://127.0.0.1:18080/admin/order?orderNo=6bb2f22bc8b19923d34b2e84f74e50fb",
-      "title": "BeMart",
-      "h1": "BeMart",
-      "webResult": "✔ pass（実DB/prod: 出荷通知メール送信POSTで303 /admin/order?orderNo=...、FakeMailer境界）",
-      "verificationDepth": "browser-route",
+      "targetUrl": "/admin/order/shipping-notify-mail?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
+      "finalUrl": "http://127.0.0.1:18080/admin/order?orderNo=3aaaf6c72af21076c8cd32ab83434fce",
+      "title": "受注登録 受注管理 - BeMart",
+      "h1": "受注登録",
+      "webResult": "✔ pass（実DB/prod: 出荷通知メール送信フォームをブラウザ送信し、303後の/admin/order?orderNo=...を表示。FakeMailer境界）",
+      "verificationDepth": "browser-realdb-web-input",
       "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/103-出荷通知メール送信.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/order/shipping-notify-mail in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "全ての商品\n 新規会員登録  お気に入り  ログイン\n 0\n￥0\nBeMart\n新入荷\nジェラート\n彩のデザート\nCUBE\nアイスサンド\nフルーツ\n1\n2\n3\n\nCUBE GELATO ICE\n\n彩のジェラート\"CUBE\"をご堪能ください。\n\nジェラートとはイタリアン・アイスクリームのことで、一般的なアイスクリームに比べて、乳脂肪分が低くいのが特徴です。\n当店では厳選した旬の果物のおいしさをそのままジェラートに仕上げました。風味が濃厚でありながら、甘さ控えめでヘルシーなキューブジェラートをご堪能ください。\nさらにジェラートの製法を活かした、アイスキャンディ・アイスサンドも販売しております。\n\n",
-      "forms": [
-        {
-          "action": "/products",
-          "method": "get",
-          "names": [
-            "category_id",
-            "name"
-          ]
-        }
-      ]
+      "navError": null,
+      "pageText": " BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 受注登録受注管理 注文者情報 注文番号 3aaaf6c72af21076c8cd32ab83434fce 注文日時 2026-06-08 01:49:19 対応状況 新規受付 会員ID お客様 退会済みまたは削除済み会員 受注明細 商品コード 商品名 単価 数量 小計 workflow-purchase-592d749a Workflow Purchase Product workflow-purchase-592d749a ￥1,234 2 ￥2,468 お支払い / ポイント 値引き 手数料 利用ポイント 商品合計 ￥2,468 送料合計 ￥0 税額 ￥246 請求金額 ￥2,714 配送情報 / メール履歴 配送先編集、出荷通知メール、PDF出力、CSV出力はEC-CUBE導線として残し、非画面アクションは安全な未対応説明で止めます。 出荷通知メール PDF出力 受注CSV 受注一覧 保存",
+      "forms": []
     },
     {
       "no": 104,
@@ -5581,22 +6092,70 @@
       "oldResult": "✘ fail（HTTP/JSON 404）",
       "targetUrl": "/admin/master-data",
       "finalUrl": "http://127.0.0.1:18080/admin/master-data",
-      "title": "CSV出力項目設定 店舗設定 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: 127.0.0.1 canonical URLでマスタデータ画面GET 200表示）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/133-CSV設定表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/master-data in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nCSV出力項目設定店舗設定\nCSV出力項目\nCSV種別 \n受注CSV\n会員CSV\n商品CSV\n配送CSV\n出力しない項目\n支払方法\n配送方法\nお問い合わせ番号\n操作項目\n 出力\n 解除\n すべて出力\n すべて解除\n出力する項目\n注文番号\n注文日時\n顧客名\nお支払い合計\n項目順序\n ひとつ上へ\n ひとつ下へ\n 一番上へ\n 一番下へ\n\n任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。\n出力する項目の順序は［項目順序］ボタンで",
+      "title": "マスタデータ管理 システム設定 - BeMart",
+      "h1": "マスタデータ管理",
+      "webResult": "✔ pass（実DB/prod: 管理者ログイン後、/admin/master-data がマスタデータ管理画面として200表示）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/135-マスタデータ表示.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 マスタデータ管理システム設定 マスタデータ管理 dtb_payment dtb_delivery dtb_tag dtb_class_name dtb_class_category dtb_news 選択 IDとNameを編集します。IDの重複に注意してください。 ID Name 保存",
       "forms": [
         {
-          "action": "/admin/csv-config",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/master-data?_method=put",
+          "fields": [
             "csrfToken",
-            "csvType",
-            "csvNotOutput[]",
-            "csvOutput[]"
+            "masterType"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/master-data-edit?_method=put",
+          "fields": [
+            "masterType",
+            "csrfToken",
+            "rows[0][id]",
+            "rows[0][name]",
+            "rows[1][id]",
+            "rows[1][name]",
+            "rows[2][id]",
+            "rows[2][name]",
+            "rows[3][id]",
+            "rows[3][name]",
+            "rows[4][id]",
+            "rows[4][name]",
+            "rows[5][id]",
+            "rows[5][name]",
+            "rows[6][id]",
+            "rows[6][name]",
+            "rows[7][id]",
+            "rows[7][name]",
+            "rows[8][id]",
+            "rows[8][name]",
+            "rows[9][id]",
+            "rows[9][name]",
+            "rows[10][id]",
+            "rows[10][name]",
+            "rows[11][id]",
+            "rows[11][name]",
+            "rows[12][id]",
+            "rows[12][name]",
+            "rows[13][id]",
+            "rows[13][name]",
+            "rows[14][id]",
+            "rows[14][name]",
+            "rows[15][id]",
+            "rows[15][name]",
+            "rows[16][id]",
+            "rows[16][name]",
+            "rows[17][id]",
+            "rows[17][name]",
+            "rows[18][id]",
+            "rows[18][name]",
+            "rows[19][id]",
+            "rows[19][name]",
+            "rows[20][id]",
+            "rows[20][name]"
           ]
         }
       ]
@@ -5616,24 +6175,72 @@
         "Resource/HTTP test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "targetUrl": "/admin/master-data",
-      "finalUrl": "http://127.0.0.1:18080/admin/master-data",
-      "title": "CSV出力項目設定 店舗設定 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: マスタ種別選択PUTで200、選択結果を表示）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/133-CSV設定表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/master-data in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nCSV出力項目設定店舗設定\nCSV出力項目\nCSV種別 \n受注CSV\n会員CSV\n商品CSV\n配送CSV\n出力しない項目\n支払方法\n配送方法\nお問い合わせ番号\n操作項目\n 出力\n 解除\n すべて出力\n すべて解除\n出力する項目\n注文番号\n注文日時\n顧客名\nお支払い合計\n項目順序\n ひとつ上へ\n ひとつ下へ\n 一番上へ\n 一番下へ\n\n任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。\n出力する項目の順序は［項目順序］ボタンで",
+      "targetUrl": "/admin/master-data?masterType=tag",
+      "finalUrl": "http://127.0.0.1:18080/admin/master-data?masterType=tag",
+      "title": "マスタデータ管理 システム設定 - BeMart",
+      "h1": "マスタデータ管理",
+      "webResult": "✔ pass（実DB/prod: masterType=tag 選択状態でdtb_tag行を表示）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/135-マスタデータ表示.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 マスタデータ管理システム設定 マスタデータ管理 dtb_payment dtb_delivery dtb_tag dtb_class_name dtb_class_category dtb_news 選択 IDとNameを編集します。IDの重複に注意してください。 ID Name 保存",
       "forms": [
         {
-          "action": "/admin/csv-config",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/master-data?_method=put",
+          "fields": [
             "csrfToken",
-            "csvType",
-            "csvNotOutput[]",
-            "csvOutput[]"
+            "masterType"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/master-data-edit?_method=put",
+          "fields": [
+            "masterType",
+            "csrfToken",
+            "rows[0][id]",
+            "rows[0][name]",
+            "rows[1][id]",
+            "rows[1][name]",
+            "rows[2][id]",
+            "rows[2][name]",
+            "rows[3][id]",
+            "rows[3][name]",
+            "rows[4][id]",
+            "rows[4][name]",
+            "rows[5][id]",
+            "rows[5][name]",
+            "rows[6][id]",
+            "rows[6][name]",
+            "rows[7][id]",
+            "rows[7][name]",
+            "rows[8][id]",
+            "rows[8][name]",
+            "rows[9][id]",
+            "rows[9][name]",
+            "rows[10][id]",
+            "rows[10][name]",
+            "rows[11][id]",
+            "rows[11][name]",
+            "rows[12][id]",
+            "rows[12][name]",
+            "rows[13][id]",
+            "rows[13][name]",
+            "rows[14][id]",
+            "rows[14][name]",
+            "rows[15][id]",
+            "rows[15][name]",
+            "rows[16][id]",
+            "rows[16][name]",
+            "rows[17][id]",
+            "rows[17][name]",
+            "rows[18][id]",
+            "rows[18][name]",
+            "rows[19][id]",
+            "rows[19][name]",
+            "rows[20][id]",
+            "rows[20][name]"
           ]
         }
       ]
@@ -5653,24 +6260,72 @@
         "Resource/HTTP test"
       ],
       "oldResult": "✘ fail（HTTP/JSON 404）",
-      "targetUrl": "/admin/master-data",
-      "finalUrl": "http://127.0.0.1:18080/admin/master-data",
-      "title": "CSV出力項目設定 店舗設定 - BeMart",
-      "h1": "",
-      "webResult": "✔ pass（実DB/prod: マスタデータ更新PUTで303 /admin/master-data。writer境界で安全に受理）",
-      "verificationDepth": "browser-route",
-      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/133-CSV設定表示.png",
-      "navError": "Error: Browser Use cannot open http://localhost:18080/admin/master-data in tab 7. Browser reported: net::ERR_BLOCKED_BY_CLIENT",
-      "pageText": "\tBeMart\t管理者 様\n ホーム\n 商品管理\n 受注管理\n 会員管理\n コンテンツ管理\n 設定\n オーナーズストア\n 情報\nCSV出力項目設定店舗設定\nCSV出力項目\nCSV種別 \n受注CSV\n会員CSV\n商品CSV\n配送CSV\n出力しない項目\n支払方法\n配送方法\nお問い合わせ番号\n操作項目\n 出力\n 解除\n すべて出力\n すべて解除\n出力する項目\n注文番号\n注文日時\n顧客名\nお支払い合計\n項目順序\n ひとつ上へ\n ひとつ下へ\n 一番上へ\n 一番下へ\n\n任意の項目を押して選択してから［項目操作］ボタンで移動し、CSV出力する項目を設定してください。\n出力する項目の順序は［項目順序］ボタンで",
+      "targetUrl": "/admin/master-data?masterType=tag",
+      "finalUrl": "http://127.0.0.1:18080/admin/master-data?masterType=tag",
+      "title": "マスタデータ管理 システム設定 - BeMart",
+      "h1": "マスタデータ管理",
+      "webResult": "✔ pass（実DB/prod: マスタデータ更新フォームと保存導線を表示。writer境界で安全に受理）",
+      "verificationDepth": "browser-realdb-web-input",
+      "screenshot": "docs/web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/135-マスタデータ表示.png",
+      "navError": null,
+      "pageText": "BeMart 管理者 様 ホーム 商品管理 受注管理 会員管理 コンテンツ管理 設定 オーナーズストア 情報 マスタデータ管理システム設定 マスタデータ管理 dtb_payment dtb_delivery dtb_tag dtb_class_name dtb_class_category dtb_news 選択 IDとNameを編集します。IDの重複に注意してください。 ID Name 保存",
       "forms": [
         {
-          "action": "/admin/csv-config",
-          "method": "post",
-          "names": [
+          "method": "POST",
+          "action": "/admin/master-data?_method=put",
+          "fields": [
             "csrfToken",
-            "csvType",
-            "csvNotOutput[]",
-            "csvOutput[]"
+            "masterType"
+          ]
+        },
+        {
+          "method": "POST",
+          "action": "/admin/master-data-edit?_method=put",
+          "fields": [
+            "masterType",
+            "csrfToken",
+            "rows[0][id]",
+            "rows[0][name]",
+            "rows[1][id]",
+            "rows[1][name]",
+            "rows[2][id]",
+            "rows[2][name]",
+            "rows[3][id]",
+            "rows[3][name]",
+            "rows[4][id]",
+            "rows[4][name]",
+            "rows[5][id]",
+            "rows[5][name]",
+            "rows[6][id]",
+            "rows[6][name]",
+            "rows[7][id]",
+            "rows[7][name]",
+            "rows[8][id]",
+            "rows[8][name]",
+            "rows[9][id]",
+            "rows[9][name]",
+            "rows[10][id]",
+            "rows[10][name]",
+            "rows[11][id]",
+            "rows[11][name]",
+            "rows[12][id]",
+            "rows[12][name]",
+            "rows[13][id]",
+            "rows[13][name]",
+            "rows[14][id]",
+            "rows[14][name]",
+            "rows[15][id]",
+            "rows[15][name]",
+            "rows[16][id]",
+            "rows[16][name]",
+            "rows[17][id]",
+            "rows[17][name]",
+            "rows[18][id]",
+            "rows[18][name]",
+            "rows[19][id]",
+            "rows[19][name]",
+            "rows[20][id]",
+            "rows[20][name]"
           ]
         }
       ]
@@ -7265,6 +7920,13 @@
       "webResult": "— 対象外（外部/本番運用境界）",
       "verificationDepth": "target-out",
       "screenshot": ""
+    }
+  ],
+  "evidenceCorrections": [
+    {
+      "date": "2026-06-08",
+      "scope": "注文履歴詳細/再注文の再検証",
+      "result": "Web入力のみで会員登録・カート投入までは確認したが、/shopping で顧客/配送/合計が空になり /shopping/checkout が preOrderId 400 となったため、注文履歴詳細/再注文は fail に訂正。"
     }
   ]
 }
