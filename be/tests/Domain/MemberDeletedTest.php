@@ -62,6 +62,7 @@ final class MemberDeletedTest extends TestCase
         // FakeQuery fixtures are static; soft-delete persistence is covered by the SQL suite.
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testIdempotentReDeleteIsNoOp(): void
     {
         $this->markTestSkipped('Idempotent re-delete needs mutable persistence; covered by the SQL suite.');

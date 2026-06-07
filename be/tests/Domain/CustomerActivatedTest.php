@@ -44,6 +44,7 @@ final class CustomerActivatedTest extends TestCase
         // FakeQuery fixtures are static; activation persistence is covered by the SQL suite.
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testActivateIsIdempotent(): void
     {
         $this->markTestSkipped('Activation replay needs mutable persistence; covered by the SQL suite.');

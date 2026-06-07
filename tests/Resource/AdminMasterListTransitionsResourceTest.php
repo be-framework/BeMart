@@ -26,6 +26,7 @@ use function str_contains;
  * Phase 3 ALPS-audit remediation — JSON resource coverage for the two
  * generic admin-list transitions doSortNoMove / doToggleVisible.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminMasterListTransitionsResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

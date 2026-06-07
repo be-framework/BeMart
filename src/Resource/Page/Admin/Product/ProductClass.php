@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminProductClassForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -41,8 +43,11 @@ class ProductClass extends ResourceObject
     }
 
     /**
+     * ALPS `goAdminProductProductClass` に対応する GET 操作。
      * @psalm-taint-source input $productCode
      */
+    #[Alps('goAdminProductProductClass')]
+    #[JsonSchema(schema: 'get-admin-product-product-class.json', params: 'get-admin-product-product-class.param.json')]
     #[Link(rel: 'goProduct', href: 'page://self/admin/product/edit', method: 'get')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     public function onGet(string $productCode = ''): static

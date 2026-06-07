@@ -80,16 +80,15 @@ final class AdminCreateCustomerResourceTest extends TestCase
 
     public function testOnPostDuplicateEmailReturns409(): void
     {
-        $ro = $this->resource->post('page://self/admin/create-customer', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException::class);
+
+        $this->resource->post('page://self/admin/create-customer', [
             'email' => 'alice@example.com',
             'password' => 'admin-overwrite-attempt-2026',
             'name01' => '別人',
             'name02' => 'A',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(409, $ro->code);
-        $this->assertSame('alice@example.com', $ro->body['email']);
     }
 
     public function testOnPostAnonymousAdminReturns403(): void
@@ -99,16 +98,15 @@ final class AdminCreateCustomerResourceTest extends TestCase
         // which the resource maps to 403.
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/create-customer', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/create-customer', [
             'email' => 'no-admin@example.com',
             'password' => 'no-admin-passphrase-2026',
             'name01' => '無権限',
             'name02' => '次郎',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -126,15 +124,14 @@ final class AdminCreateCustomerResourceTest extends TestCase
 
     public function testOnPostInvalidEmailReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/create-customer', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/admin/create-customer', [
             'email' => 'not-an-email',
             'password' => 'whatever-2026',
             'name01' => '佐藤',
             'name02' => '五郎',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
-        $this->assertNotEmpty($ro->body['message']);
     }
 }

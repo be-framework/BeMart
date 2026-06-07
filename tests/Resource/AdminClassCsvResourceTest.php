@@ -77,8 +77,9 @@ final class AdminClassCsvResourceTest extends TestCase
     public function testExportAnonymousReturns403(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/class-name/class-name-export');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/class-name/class-name-export');
     }
 
     public function testImportClassNameCsv(): void

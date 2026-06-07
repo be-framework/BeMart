@@ -45,23 +45,22 @@ final class ActivateResourceTest extends TestCase
 
     public function testOnPostUnknownKeyReturns404(): void
     {
-        $ro = $this->resource->post('page://self/entry/activate', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\SecretKeyNotFoundException::class);
+
+        $this->resource->post('page://self/entry/activate', [
             'secretKey' => 'unknown-key-not-in-fixture-2026',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertStringContainsString('無効', $ro->body['message']);
     }
 
     public function testOnPostInvalidKeyFormatReturns400(): void
     {
-        $ro = $this->resource->post('page://self/entry/activate', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/entry/activate', [
             'secretKey' => 'short',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

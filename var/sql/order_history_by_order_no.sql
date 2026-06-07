@@ -14,7 +14,7 @@ SELECT o.order_no,
        o.order_status_id,
        o.order_date,
        o.payment_date,
-       (SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
+       (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(JSON_OBJECT(
            'name01', s.name01,
            'name02', s.name02,
            'kana01', s.kana01,
@@ -27,24 +27,24 @@ SELECT o.order_no,
            'deliveryName', s.delivery_name,
            'deliveryDate', s.delivery_date,
            'deliveryTime', s.delivery_time,
-           'items', (SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
+           'items', (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(JSON_OBJECT(
                'productCode', oi.product_code,
                'productName', oi.product_name,
                'quantity', oi.quantity,
                'unitPrice', oi.price
-           ) ORDER BY oi.id ASC), JSON_ARRAY())
+           ) ORDER BY oi.id ASC SEPARATOR ','), ']'), JSON_ARRAY())
               FROM dtb_order_item oi
               WHERE oi.order_id = o.id
                 AND (oi.shipping_id = s.id OR oi.shipping_id IS NULL))
-       ) ORDER BY s.sort_no IS NULL, s.sort_no ASC, s.id ASC), JSON_ARRAY())
+       ) ORDER BY s.sort_no IS NULL, s.sort_no ASC, s.id ASC SEPARATOR ','), ']'), JSON_ARRAY())
         FROM dtb_shipping s
         LEFT JOIN mtb_pref pref ON pref.id = s.pref_id
         WHERE s.order_id = o.id) AS shippings_json,
-       (SELECT COALESCE(JSON_ARRAYAGG(JSON_OBJECT(
+       (SELECT COALESCE(CONCAT('[', GROUP_CONCAT(JSON_OBJECT(
            'sendDate', mh.send_date,
            'mailSubject', mh.mail_subject,
            'mailBody', mh.mail_body
-       ) ORDER BY mh.send_date ASC, mh.id ASC), JSON_ARRAY())
+       ) ORDER BY mh.send_date ASC, mh.id ASC SEPARATOR ','), ']'), JSON_ARRAY())
         FROM dtb_mail_history mh
         WHERE mh.order_id = o.id) AS mail_histories_json
 FROM dtb_order o

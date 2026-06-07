@@ -84,8 +84,8 @@ final class FavoriteListResourceTest extends TestCase
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->get('page://self/mypage/favorite-list');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
 
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+        $this->resource->get('page://self/mypage/favorite-list');
     }
 }

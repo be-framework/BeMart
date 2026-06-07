@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -13,6 +14,7 @@ use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -47,31 +49,22 @@ class Confirm extends ResourceObject
     }
 
     /**
+     * ALPS `goShopping` に対応する GET 操作。
      * @psalm-taint-source input $preOrderId
      * @psalm-taint-source input $paymentMethodId
      */
+    #[Alps('goShopping')]
+    #[JsonSchema(schema: 'get-shopping-confirm.json', params: 'get-shopping-confirm.param.json')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
     #[Link(rel: 'goShoppingError', href: 'page://self/shopping/error')]
     public function onGet(
         string $preOrderId = 'aceface0000000000000000000000000000a11ce',
         int $paymentMethodId = 2,
     ): static {
-        try {
-            $final = ($this->becoming)(new ConfirmOrderInput(
-                preOrderId: $preOrderId,
-                paymentMethodId: $paymentMethodId,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (PreOrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Pre-order not found.', 'preOrderId' => $preOrderId];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ConfirmOrderInput(
+            preOrderId: $preOrderId,
+            paymentMethodId: $paymentMethodId,
+        ));
 
         if ($final instanceof OrderConfirmFailed) {
             // verify() rejected the pre-order — bounce to ShoppingError.

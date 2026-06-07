@@ -27,6 +27,7 @@ use function dirname;
  * surfaces a populated customer summary. PUT covers happy-path edits
  * + CSRF rejection + AUTHZ failure + 404 + mass-assignment safety.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderResourceTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

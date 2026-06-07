@@ -131,6 +131,7 @@ final class ShoppingShippingMultipleEditHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="phoneNumber"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShippingMultipleEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/shipping-multiple-edit')->toString();

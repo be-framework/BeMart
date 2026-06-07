@@ -66,12 +66,12 @@ final class AdminTemplateManageResourceTest extends TestCase
 
     public function testSelectUnknownReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/template/template-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\TemplateNotFoundException::class);
+
+        $this->resource->put('page://self/admin/template/template-list', [
             'templateId' => 'no-such',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testDelete(): void
@@ -117,11 +117,12 @@ final class AdminTemplateManageResourceTest extends TestCase
     public function testInstallAnonymousReturns403(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/template/template-add', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/template/template-add', [
             'templateCode' => 'x',
             'templateName' => 'y',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

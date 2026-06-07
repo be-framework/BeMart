@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Entry;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goCustomerRegistrationComplete — 新規会員登録(仮登録完了)
@@ -32,6 +34,9 @@ use BEAR\Resource\ResourceObject;
  */
 class Complete extends ResourceObject
 {
+    /** ALPS `goCustomerRegistrationComplete` に対応する GET 操作。 */
+    #[Alps('goCustomerRegistrationComplete')]
+    #[JsonSchema(schema: 'get-entry-complete.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static
     {

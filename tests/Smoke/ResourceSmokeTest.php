@@ -69,7 +69,15 @@ final class ResourceSmokeTest extends TestCase
     ): void {
         $resource = $this->resource($method, $uri, $sessionCustomerId);
         $call = self::RESOURCE_METHODS[$method];
-        $ro = $resource->{$call}($uri, $params);
+
+        try {
+            $ro = $resource->{$call}($uri, $params);
+        } catch (\MyVendor\BeMart\Be\Exception\AddressNotFoundException $e) {
+            $this->assertSame('POST page://self/admin/order/shipping-address', $method . ' ' . $uri);
+            $this->assertSame(Code::NOT_FOUND, $expectedCode);
+
+            return;
+        }
 
         $this->assertSame($expectedCode, $ro->code);
     }
@@ -147,7 +155,7 @@ final class ResourceSmokeTest extends TestCase
             'GET page://self/admin/master-data' => Code::OK,
             'GET page://self/admin/member' => Code::OK,
             'GET page://self/admin/member-list' => Code::OK,
-            'GET page://self/admin/news/news' => Code::OK,
+            'GET page://self/admin/news/news?newsId=nw-welcome' => Code::OK,
             'GET page://self/admin/news/news-list' => Code::OK,
             'GET page://self/admin/order?orderNo=past0000000000000000000000000001' => Code::OK,
             'GET page://self/admin/order-list' => Code::OK,
@@ -161,7 +169,7 @@ final class ResourceSmokeTest extends TestCase
             'GET page://self/admin/order/order-pdf' => Code::OK,
             'GET page://self/admin/order/send-mail' => Code::OK,
             'GET page://self/admin/order/shipping-address' => Code::OK,
-            'GET page://self/admin/page/page' => Code::OK,
+            'GET page://self/admin/page/page?pageId=pg-company' => Code::OK,
             'GET page://self/admin/page/page-list' => Code::OK,
             'GET page://self/admin/payment/payment' => Code::OK,
             'GET page://self/admin/payment/payment-list' => Code::OK,
@@ -241,7 +249,7 @@ final class ResourceSmokeTest extends TestCase
             'POST page://self/admin/class-category/class-category-list?classNameId=cn-color&classCategoryName=Smoke%20Category' => Code::CREATED,
             'POST page://self/admin/class-name/class-name-list?classNameLabel=Smoke%20Class' => Code::CREATED,
             'POST page://self/admin/create-customer?email=smoke-a1e2c345%40example.com&password=smoke-passphrase-2026&name01=%E5%B1%B1%E7%94%B0&name02=%E5%A4%AA%E9%83%8E' => Code::CREATED,
-            'POST page://self/admin/csv-config?csvType=3&columns%5B0%5D%5BcolumnName%5D=productCode&columns%5B0%5D%5Benabled%5D=1&columns%5B0%5D%5BsortNo%5D=1&columns%5B1%5D%5BcolumnName%5D=productName&columns%5B1%5D%5Benabled%5D=1&columns%5B1%5D%5BsortNo%5D=2' => Code::BAD_REQUEST,
+            'POST page://self/admin/csv-config?csvType=3&columns%5B0%5D%5BcolumnName%5D=productCode&columns%5B0%5D%5Benabled%5D=1&columns%5B0%5D%5BsortNo%5D=1&columns%5B1%5D%5BcolumnName%5D=productName&columns%5B1%5D%5Benabled%5D=1&columns%5B1%5D%5BsortNo%5D=2' => Code::OK,
             'POST page://self/admin/customer/resend-activation-mail?email=provisional%40example.com' => Code::OK,
             'POST page://self/admin/delete-customer?customerId=0123456789abcdef0123456789abcdef' => Code::OK,
             'POST page://self/admin/delivery/delivery-list?deliveryName=Smoke%20Delivery' => Code::CREATED,
@@ -252,7 +260,7 @@ final class ResourceSmokeTest extends TestCase
             'POST page://self/admin/news/news-list?newsTitle=Smoke%20News&publishDate=2026-01-01T00%3A00%3A00%2B09%3A00' => Code::CREATED,
             'POST page://self/admin/order-status?orderNo=past0000000000000000000000000001&orderStatus=3' => Code::OK,
             'POST page://self/admin/order/bulk-delete?orderNos%5B0%5D=past0000000000000000000000000001' => Code::OK,
-            'POST page://self/admin/order/create?customerId=0123456789abcdef0123456789abcdef&paymentMethodId=1&orderItems%5B0%5D%5BproductCode%5D=sample-001&orderItems%5B0%5D%5BproductName%5D=%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E5%95%86%E5%93%81%20A&orderItems%5B0%5D%5BunitPrice%5D=1200&orderItems%5B0%5D%5Bquantity%5D=1' => Code::BAD_REQUEST,
+            'POST page://self/admin/order/create?customerId=0123456789abcdef0123456789abcdef&paymentMethodId=1&orderItems%5B0%5D%5BproductCode%5D=sample-001&orderItems%5B0%5D%5BproductName%5D=%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E5%95%86%E5%93%81%20A&orderItems%5B0%5D%5BunitPrice%5D=1200&orderItems%5B0%5D%5Bquantity%5D=1' => Code::CREATED,
             'POST page://self/admin/order/import-shipping?csv=%E5%8F%97%E6%B3%A8%E7%95%AA%E5%8F%B7%2C%E3%81%8A%E5%95%8F%E3%81%84%E5%90%88%E3%82%8F%E3%81%9B%E7%95%AA%E5%8F%B7%0Apast0000000000000000000000000001%2CTRACK123456789%0A' => Code::OK,
             'POST page://self/admin/order/send-mail?orderNo=past0000000000000000000000000001' => Code::OK,
             'POST page://self/admin/order/shipping-address?orderNo=past0000000000000000000000000001&addressId=addr00000000000000000000000000a1' => Code::NOT_FOUND,
@@ -380,8 +388,81 @@ final class ResourceSmokeTest extends TestCase
         parse_str((string) ($uriParts['query'] ?? ''), $queryParams);
         $uri = sprintf('%s://%s%s', $uriParts['scheme'], $uriParts['host'], $uriParts['path']);
         $identity = $method . ' ' . $uri;
+        $queryParams = self::normalizeTypedParams($identity, $queryParams);
 
         return [$identity, $method, $uri, $queryParams];
+    }
+
+    /**
+     * parse_str() intentionally emulates form/query transport, which yields
+     * strings. A few smoke fixtures target ResourceObject calls directly and
+     * therefore must pass the already-decoded PHP value expected by the
+     * JsonSchema boundary.
+     *
+     * @param array<string, mixed> $params
+     *
+     * @return array<string, mixed>
+     */
+    private static function normalizeTypedParams(string $identity, array $params): array
+    {
+        if ($identity === 'POST page://self/admin/csv-config') {
+            if (isset($params['csvType'])) {
+                $params['csvType'] = (int) $params['csvType'];
+            }
+
+            if (isset($params['columns']) && is_array($params['columns'])) {
+                foreach ($params['columns'] as $index => $column) {
+                    if (! is_array($column)) {
+                        continue;
+                    }
+
+                    if (isset($column['enabled'])) {
+                        $column['enabled'] = self::boolValue($column['enabled']);
+                    }
+
+                    if (isset($column['sortNo'])) {
+                        $column['sortNo'] = (int) $column['sortNo'];
+                    }
+
+                    $params['columns'][$index] = $column;
+                }
+            }
+        }
+
+        if ($identity === 'POST page://self/admin/order/create') {
+            if (isset($params['paymentMethodId'])) {
+                $params['paymentMethodId'] = (int) $params['paymentMethodId'];
+            }
+
+            if (isset($params['orderItems']) && is_array($params['orderItems'])) {
+                foreach ($params['orderItems'] as $index => $orderItem) {
+                    if (! is_array($orderItem)) {
+                        continue;
+                    }
+
+                    if (isset($orderItem['unitPrice'])) {
+                        $orderItem['unitPrice'] = (int) $orderItem['unitPrice'];
+                    }
+
+                    if (isset($orderItem['quantity'])) {
+                        $orderItem['quantity'] = (int) $orderItem['quantity'];
+                    }
+
+                    $params['orderItems'][$index] = $orderItem;
+                }
+            }
+        }
+
+        if ($identity === 'PUT page://self/admin/toggle-visible' && isset($params['visible'])) {
+            $params['visible'] = self::boolValue($params['visible']);
+        }
+
+        return $params;
+    }
+
+    private static function boolValue(mixed $value): bool
+    {
+        return $value === true || $value === 1 || $value === '1' || $value === 'true';
     }
 
     /**

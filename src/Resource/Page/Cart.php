@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Input\GetCartsInput;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_map;
 use function assert;
@@ -36,8 +38,11 @@ class Cart extends ResourceObject
     }
 
     /**
+     * ALPS `goCart` に対応する GET 操作。
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('goCart')]
+    #[JsonSchema(schema: 'get-cart.json', params: 'get-cart.param.json')]
     #[Link(rel: 'doAddCartItem', href: 'page://self/cart/item', method: 'post')]
     #[Link(rel: 'goShoppingNonMember', href: 'page://self/shopping/non-member')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]

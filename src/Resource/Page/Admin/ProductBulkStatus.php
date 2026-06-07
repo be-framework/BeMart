@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminProductsStatusBulkUpdated;
 use MyVendor\BeMart\Be\Input\AdminBulkUpdateProductStatusInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -32,33 +34,24 @@ class ProductBulkStatus extends ResourceObject
     }
 
     /**
+     * ALPS `doBulkUpdateProductStatus` に対応する POST 操作。
      * @param list<string> $productCodes
      *
      * @psalm-taint-source input $productCodes
      * @psalm-taint-source input $productStatus
      */
+    #[Alps('doBulkUpdateProductStatus')]
+    #[JsonSchema(schema: 'post-admin-product-bulk-status.json', params: 'post-admin-product-bulk-status.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[CsrfProtected]
     public function onPost(
         array $productCodes,
         int $productStatus,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminBulkUpdateProductStatusInput(
-                productCodes: $productCodes,
-                productStatus: $productStatus,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminBulkUpdateProductStatusInput(
+            productCodes: $productCodes,
+            productStatus: $productStatus,
+        ));
 
         assert($final instanceof AdminProductsStatusBulkUpdated);
 
