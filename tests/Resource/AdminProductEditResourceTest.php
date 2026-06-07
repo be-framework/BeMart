@@ -80,9 +80,9 @@ final class AdminProductEditResourceTest extends TestCase
 
     public function testOnGetUnknownProductReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/product/edit', ['productCode' => 'does-not-exist-zzz']);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductNotFoundException::class);
 
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->resource->get('page://self/admin/product/edit', ['productCode' => 'does-not-exist-zzz']);
     }
 
     public function testOnGetRejectsAnonymousAdmin(): void

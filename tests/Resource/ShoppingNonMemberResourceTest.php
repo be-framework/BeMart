@@ -80,7 +80,9 @@ final class ShoppingNonMemberResourceTest extends TestCase
 
     public function testOnPostInvalidEmailReturns400(): void
     {
-        $ro = $this->resource->post('page://self/shopping/non-member', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/shopping/non-member', [
             'name01' => '田中',
             'name02' => '太郎',
             'kana01' => 'タナカ',
@@ -93,10 +95,6 @@ final class ShoppingNonMemberResourceTest extends TestCase
             'addr02' => '神宮前1-2-3',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
-        $this->assertNotEmpty($ro->body['message']);
-        $this->assertSame('not-an-email', $ro->body['email']);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

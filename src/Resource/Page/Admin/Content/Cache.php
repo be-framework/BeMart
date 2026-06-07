@@ -62,14 +62,7 @@ class Cache extends ResourceObject
     #[CsrfProtected]
     public function onPut(): static
     {
-        try {
-            $final = ($this->becoming)(new ClearCacheInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ClearCacheInput());
 
         assert($final instanceof CacheCleared);
 

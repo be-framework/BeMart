@@ -58,14 +58,7 @@ class PluginList extends ResourceObject
     #[Link(rel: 'doUninstallPlugin', href: 'page://self/admin/plugin', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetPluginListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetPluginListInput());
 
         assert($final instanceof PluginListFetched);
 
@@ -94,25 +87,11 @@ class PluginList extends ResourceObject
         string $pluginName,
         string $pluginVersion,
     ): static {
-        try {
-            $final = ($this->becoming)(new InstallPluginInput(
-                pluginCode: $pluginCode,
-                pluginName: $pluginName,
-                pluginVersion: $pluginVersion,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new InstallPluginInput(
+            pluginCode: $pluginCode,
+            pluginName: $pluginName,
+            pluginVersion: $pluginVersion,
+        ));
 
         assert($final instanceof PluginInstalled);
 

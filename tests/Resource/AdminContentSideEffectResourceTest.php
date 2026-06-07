@@ -90,7 +90,8 @@ final class AdminContentSideEffectResourceTest extends TestCase
     public function testCssAnonymousReturns403(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->put('page://self/admin/content/css', ['css' => 'x', 'csrfToken' => FakeCsrfToken::TOKEN]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->put('page://self/admin/content/css', ['css' => 'x', 'csrfToken' => FakeCsrfToken::TOKEN]);
     }
 }

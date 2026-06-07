@@ -58,34 +58,17 @@ class ExportOrderPdf extends ResourceObject
     #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     public function onGet(array|string $orderNos = [], string $orderNo = ''): static
     {
-        try {
-            $normalizedOrderNos = $this->normalizeOrderNos($orderNos, $orderNo);
-            if ($normalizedOrderNos === []) {
-                $this->code = Code::BAD_REQUEST;
-                $this->body = ['message' => '注文番号リストが不正です。1〜100件の有効な注文番号を指定してください。'];
-
-                return $this;
-            }
-
-            $final = ($this->becoming)(new AdminExportOrderPdfInput(
-                orderNos: $normalizedOrderNos,
-            ));
-        } catch (SemanticVariableException $e) {
+        $normalizedOrderNos = $this->normalizeOrderNos($orderNos, $orderNo);
+        if ($normalizedOrderNos === []) {
             $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
+            $this->body = ['message' => '注文番号リストが不正です。1〜100件の有効な注文番号を指定してください。'];
 
             return $this;
         }
+
+        $final = ($this->becoming)(new AdminExportOrderPdfInput(
+            orderNos: $normalizedOrderNos,
+        ));
 
         assert($final instanceof AdminOrderPdfExported);
 

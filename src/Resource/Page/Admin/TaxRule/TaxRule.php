@@ -45,19 +45,7 @@ class TaxRule extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $taxRuleId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteTaxRuleInput(taxRuleId: $taxRuleId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (TaxRuleNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された税率ルールは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteTaxRuleInput(taxRuleId: $taxRuleId));
 
         assert($final instanceof TaxRuleDeleted);
 

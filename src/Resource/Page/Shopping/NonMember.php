@@ -143,50 +143,19 @@ class NonMember extends ResourceObject
         string $addr02,
         string $sessionPrefix = 'session-prefix-1',
     ): static {
-        try {
-            $final = ($this->becoming)(new SubmitNonMemberInput(
-                name01: $name01,
-                name02: $name02,
-                kana01: $kana01,
-                kana02: $kana02,
-                email: $email,
-                phoneNumber: $phoneNumber,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-                sessionPrefix: $sessionPrefix,
-            ));
-        } catch (SemanticVariableException $e) {
-            // Be Framework Semantics rejected a guest field. Bridge the
-            // domain verdict onto a repopulated NonMemberForm so the HTML
-            // page re-renders with the entered values + the inline error.
-            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
-            $form = $this->formFactory->newInstance(NonMemberForm::class);
-            assert($form instanceof NonMemberForm);
-            $form->fillValues([
-                'name01' => $name01,
-                'name02' => $name02,
-                'kana01' => $kana01,
-                'kana02' => $kana02,
-                'email' => $email,
-                'phoneNumber' => $phoneNumber,
-                'postalCode' => $postalCode,
-                'pref' => $pref,
-                'addr01' => $addr01,
-                'addr02' => $addr02,
-            ]);
-            $form->setDomainError('email', $message);
-
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $message,
-                'email' => $email,
-                'form' => $form,
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SubmitNonMemberInput(
+            name01: $name01,
+            name02: $name02,
+            kana01: $kana01,
+            kana02: $kana02,
+            email: $email,
+            phoneNumber: $phoneNumber,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            sessionPrefix: $sessionPrefix,
+        ));
 
         assert($final instanceof NonMemberSubmitted);
 

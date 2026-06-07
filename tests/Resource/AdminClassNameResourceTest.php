@@ -75,11 +75,12 @@ final class AdminClassNameResourceTest extends TestCase
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/class-name/class-name-list', [
             'classNameLabel' => 'Color',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testCreateRejectsMissingCsrf(): void
@@ -105,8 +106,9 @@ final class AdminClassNameResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/class-name/class-name-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/class-name/class-name-list');
     }
 
     public function testPutRenamesAxis(): void
@@ -125,12 +127,13 @@ final class AdminClassNameResourceTest extends TestCase
 
     public function testPutUnknownIdReturns404(): void
     {
-        $ro = $this->resource->put('page://self/admin/class-name/class-name', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ClassNameNotFoundException::class);
+
+        $this->resource->put('page://self/admin/class-name/class-name', [
             'classNameId' => 'nonexistent-zzz',
             'classNameLabel' => 'X',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testDeleteHappyPath(): void

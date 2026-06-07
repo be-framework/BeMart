@@ -42,14 +42,7 @@ class TagList extends ResourceObject
     #[Link(rel: 'doDeleteTag', href: 'page://self/admin/tag/tag', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminTagListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminTagListInput());
 
         assert($final instanceof AdminTagListFetched);
 
@@ -77,19 +70,7 @@ class TagList extends ResourceObject
     #[CsrfProtected]
     public function onPost(string $tagName): static
     {
-        try {
-            $final = ($this->becoming)(new CreateTagInput(tagName: $tagName));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateTagInput(tagName: $tagName));
 
         assert($final instanceof TagCreated);
 

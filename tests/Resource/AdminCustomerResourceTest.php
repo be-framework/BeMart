@@ -94,25 +94,20 @@ final class AdminCustomerResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->get('page://self/admin/customer', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/customer', [
             'email' => 'alice@example.com',
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
-        // Anti-enumeration: the body MUST NOT echo the email back to a
-        // non-admin caller (no signal about whether the email resolved).
-        $this->assertArrayNotHasKey('email', $ro->body);
     }
 
     public function testOnGetUnknownEmailReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/customer', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CustomerNotFoundException::class);
+
+        $this->resource->get('page://self/admin/customer', [
             'email' => 'nosuch@example.com',
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertStringContainsString('会員', $ro->body['message']);
     }
 
     public function testOnGetBadEmailFormatReturns400(): void

@@ -68,19 +68,7 @@ class Shopping extends ResourceObject
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(string $sessionPrefix = 'session-prefix-1'): static
     {
-        try {
-            $final = ($this->becoming)(new GetShoppingInput(sessionPrefix: $sessionPrefix));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetShoppingInput(sessionPrefix: $sessionPrefix));
 
         assert($final instanceof ShoppingFetched);
 

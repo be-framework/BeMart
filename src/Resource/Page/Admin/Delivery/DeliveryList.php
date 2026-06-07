@@ -47,14 +47,7 @@ class DeliveryList extends ResourceObject
     #[Link(rel: 'doDeleteDelivery', href: 'page://self/admin/delivery/delivery', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminDeliveryListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminDeliveryListInput());
 
         assert($final instanceof AdminDeliveryListFetched);
 
@@ -80,22 +73,10 @@ class DeliveryList extends ResourceObject
         string $deliveryName,
         bool $visible = true,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateDeliveryInput(
-                deliveryName: $deliveryName,
-                visible: $visible,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateDeliveryInput(
+            deliveryName: $deliveryName,
+            visible: $visible,
+        ));
 
         assert($final instanceof DeliveryCreated);
 

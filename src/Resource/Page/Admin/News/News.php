@@ -83,19 +83,7 @@ class News extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetAdminNewsInput(newsId: $newsId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (NewsNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたニュースは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminNewsInput(newsId: $newsId));
 
         assert($final instanceof AdminNewsFetched);
 
@@ -155,31 +143,14 @@ class News extends ResourceObject
         string|null $publishDate = null,
         bool|null $linkMethod = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateNewsInput(
-                newsId: $newsId,
-                newsTitle: $newsTitle,
-                newsDescription: $newsDescription,
-                newsUrl: $newsUrl,
-                publishDate: $publishDate,
-                linkMethod: $linkMethod,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (NewsNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたニュースは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateNewsInput(
+            newsId: $newsId,
+            newsTitle: $newsTitle,
+            newsDescription: $newsDescription,
+            newsUrl: $newsUrl,
+            publishDate: $publishDate,
+            linkMethod: $linkMethod,
+        ));
 
         assert($final instanceof NewsUpdated);
 
@@ -207,19 +178,7 @@ class News extends ResourceObject
     #[CsrfProtected]
     public function onDelete(string $newsId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteNewsInput(newsId: $newsId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (NewsNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたニュースは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteNewsInput(newsId: $newsId));
 
         assert($final instanceof NewsDeleted);
 

@@ -76,14 +76,7 @@ class Maintenance extends ResourceObject
     #[CsrfProtected]
     public function onPut(bool $enabled): static
     {
-        try {
-            $final = ($this->becoming)(new ToggleMaintenanceInput(enabled: $enabled));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ToggleMaintenanceInput(enabled: $enabled));
 
         assert($final instanceof MaintenanceToggled);
 

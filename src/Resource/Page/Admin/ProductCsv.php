@@ -65,14 +65,7 @@ class ProductCsv extends ResourceObject
     #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new AdminExportProductInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminExportProductInput());
 
         assert($final instanceof AdminProductCsvExported);
 
@@ -148,36 +141,16 @@ class ProductCsv extends ResourceObject
             $searchWord = $searchWordColumn !== null && isset($row[$searchWordColumn]) ? trim($row[$searchWordColumn]) : null;
             $note = $noteColumn !== null && isset($row[$noteColumn]) ? trim($row[$noteColumn]) : null;
 
-            try {
-                $final = ($this->becoming)(new AdminCreateProductInput(
-                    productCode: $productCode,
-                    productName: trim((string) ($row[$columns['productName']] ?? '')),
-                    price02: (int) trim((string) ($row[$columns['price02']] ?? '0')),
-                    stock: $stockCell === '' ? null : (int) $stockCell,
-                    productStatus: $statusCell === '' ? null : (int) $statusCell,
-                    description: $description,
-                    searchWord: $searchWord,
-                    note: $note,
-                ));
-            } catch (SemanticVariableException $e) {
-                fclose($handle);
-                $this->code = Code::BAD_REQUEST;
-                $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.', 'productCode' => $productCode];
-
-                return $this;
-            } catch (UnauthorizedAdminAccessException) {
-                fclose($handle);
-                $this->code = Code::FORBIDDEN;
-                $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-                return $this;
-            } catch (ProductCodeAlreadyInUseException) {
-                fclose($handle);
-                $this->code = 409;
-                $this->body = ['message' => 'この商品コードは既に使用されています。', 'productCode' => $productCode];
-
-                return $this;
-            }
+            $final = ($this->becoming)(new AdminCreateProductInput(
+                productCode: $productCode,
+                productName: trim((string) ($row[$columns['productName']] ?? '')),
+                price02: (int) trim((string) ($row[$columns['price02']] ?? '0')),
+                stock: $stockCell === '' ? null : (int) $stockCell,
+                productStatus: $statusCell === '' ? null : (int) $statusCell,
+                description: $description,
+                searchWord: $searchWord,
+                note: $note,
+            ));
 
             assert($final instanceof AdminProductCreated);
             $count++;

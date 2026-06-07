@@ -65,19 +65,7 @@ class CsvClassCategory extends AbstractCsvUpload
     #[CsrfProtected]
     public function onPost(string $csv = ''): static
     {
-        try {
-            $final = ($this->becoming)(new ImportClassCategoryCsvInput(csv: $csv));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid CSV.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ImportClassCategoryCsvInput(csv: $csv));
 
         assert($final instanceof ClassCategoryCsvImported);
 
