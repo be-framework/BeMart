@@ -118,6 +118,7 @@ class ShippingEdit extends ResourceObject
         string $addr01 = '',
         string $addr02 = '',
         string $phoneNumber = '',
+            string|null $csrfToken = null,
     ): static {
         $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/shopping';

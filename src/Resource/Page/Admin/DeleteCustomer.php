@@ -76,6 +76,7 @@ class DeleteCustomer extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string $customerId,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminDeleteCustomerInput(
             customerId: $customerId,

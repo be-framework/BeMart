@@ -132,6 +132,7 @@ class Order extends ResourceObject
         int|null $discount = null,
         int|null $charge = null,
         int|null $usePoint = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminUpdateOrderInput(
             orderNo: $orderNo,

@@ -118,7 +118,7 @@ class TwoFactorAuthSet extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPut(string $loginId, string $authKey, string $deviceToken): static
+    public function onPut(string $loginId, string $authKey, string $deviceToken, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new SetTwoFactorAuthInput(
             loginId: $loginId,

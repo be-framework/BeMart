@@ -15,6 +15,17 @@
       "title": "規格名（入力）",
       "description": "商品バリエーション軸の名前（例: カラー、サイズ）。EC-CUBEの\"class\"はOOPのクラスではなく商品規格を意味する",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Business validation is not performed by JSON Schema; CsrfProtectedInterceptor validates the token value."
     }
   },
   "additionalProperties": false,

@@ -119,6 +119,7 @@ class Page extends ResourceObject
         string|null $pageName = null,
         string|null $pageUrl = null,
         string|null $pageFileName = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdatePageInput(
             pageId: $pageId,
@@ -150,7 +151,7 @@ class Page extends ResourceObject
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[CsrfProtected]
-    public function onDelete(string $pageId): static
+    public function onDelete(string $pageId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeletePageInput(pageId: $pageId));
 

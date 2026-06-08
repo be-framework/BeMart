@@ -86,6 +86,7 @@ class TaxRuleList extends ResourceObject
         float $taxRate,
         string $applyDate,
         int $roundingType = 1,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreateTaxRuleInput(
             taxRate: $taxRate,

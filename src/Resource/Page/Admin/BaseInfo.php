@@ -139,6 +139,7 @@ class BaseInfo extends ResourceObject
         string|null $businessHour = null,
         string|null $shopEmail01 = null,
         string|null $shopMessage = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateBaseInfoInput(
             shopName: $shopName,

@@ -97,6 +97,7 @@ class AddressList extends ResourceObject
         string|null $kana01 = null,
         string|null $kana02 = null,
         string|null $companyName = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreateCustomerAddressInput(
             name01: $name01,

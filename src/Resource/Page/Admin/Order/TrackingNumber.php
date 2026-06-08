@@ -55,6 +55,7 @@ class TrackingNumber extends ResourceObject
     public function onPut(
         string $orderNo,
         string $trackingNumber,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateTrackingNumberInput(
             orderNo: $orderNo,

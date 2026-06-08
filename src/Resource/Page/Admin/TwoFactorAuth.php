@@ -94,7 +94,7 @@ class TwoFactorAuth extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPost(string $loginId, string $deviceToken): static
+    public function onPost(string $loginId, string $deviceToken, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
             loginId: $loginId,

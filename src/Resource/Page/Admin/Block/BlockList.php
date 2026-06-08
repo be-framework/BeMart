@@ -65,6 +65,7 @@ class BlockList extends ResourceObject
     public function onPost(
         string $blockName,
         string $blockFileName,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreateBlockInput(
             blockName: $blockName,

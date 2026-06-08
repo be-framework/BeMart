@@ -63,7 +63,7 @@ class CsvClassCategory extends AbstractCsvUpload
     #[Alps('doImportClassCategoryCsv')]
     #[JsonSchema(schema: 'post-admin-product-csv-class-category.json', params: 'post-admin-product-csv-class-category.param.json')]
     #[CsrfProtected]
-    public function onPost(string $csv = ''): static
+    public function onPost(string $csv = '', string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new ImportClassCategoryCsvInput(csv: $csv));
 

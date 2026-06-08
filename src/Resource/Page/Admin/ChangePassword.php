@@ -111,6 +111,7 @@ class ChangePassword extends ResourceObject
         string $currentPassword,
         string $changePasswordFirst,
         string $changePasswordSecond,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new ChangeAdminPasswordInput(
             currentPassword: $currentPassword,

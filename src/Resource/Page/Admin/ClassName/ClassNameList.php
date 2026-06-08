@@ -76,7 +76,7 @@ class ClassNameList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-class-name-class-name-list.json', params: 'post-admin-class-name-class-name-list.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
     #[CsrfProtected]
-    public function onPost(string $classNameLabel): static
+    public function onPost(string $classNameLabel, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new CreateClassNameInput(classNameLabel: $classNameLabel));
 

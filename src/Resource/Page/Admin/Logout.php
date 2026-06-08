@@ -65,10 +65,10 @@ class Logout extends ResourceObject
      *
      */
     #[Alps('doAdminLogout')]
-    #[JsonSchema(schema: 'post-admin-logout.json')]
+    #[JsonSchema(schema: 'post-admin-logout.json', params: 'post-admin-logout.param.json')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     #[CsrfProtected]
-    public function onPost(): static
+    public function onPost(string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new AdminLogoutInput());
 

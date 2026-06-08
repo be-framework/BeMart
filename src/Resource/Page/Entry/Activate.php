@@ -90,7 +90,7 @@ class Activate extends ResourceObject
     #[JsonSchema(schema: 'post-entry-activate.json', params: 'post-entry-activate.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
-    public function onPost(string $secretKey): static
+    public function onPost(string $secretKey, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new ActivateCustomerInput(secretKey: $secretKey));
 

@@ -64,7 +64,7 @@ class CsvClassName extends AbstractCsvUpload
     #[JsonSchema(schema: 'post-admin-product-csv-class-name.json', params: 'post-admin-product-csv-class-name.param.json')]
     #[Link(rel: 'goExportClassCategory', href: 'page://self/admin/class-category/class-category-export')]
     #[CsrfProtected]
-    public function onPost(string $csv = ''): static
+    public function onPost(string $csv = '', string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new ImportClassNameCsvInput(csv: $csv));
 

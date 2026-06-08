@@ -59,7 +59,7 @@ class Plugin extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-plugin.json', params: 'delete-admin-plugin.param.json')]
     #[Link(rel: 'goPluginList', href: 'page://self/admin/plugin-list', method: 'get')]
     #[CsrfProtected]
-    public function onDelete(string $pluginCode): static
+    public function onDelete(string $pluginCode, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new UninstallPluginInput(pluginCode: $pluginCode));
 

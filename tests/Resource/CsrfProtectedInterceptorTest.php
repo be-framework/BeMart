@@ -9,7 +9,6 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Exception\CsrfTokenInvalidException;
 use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
-use MyVendor\BeMart\Support\Resource\RequestQueryContext;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\MethodInvocation;
 use Ray\Aop\ReflectionMethod;
@@ -18,11 +17,9 @@ final class CsrfProtectedInterceptorTest extends TestCase
 {
     public function testValidTokenProceeds(): void
     {
-        $context = new RequestQueryContext();
-        $context->push(['csrfToken' => FakeCsrfToken::TOKEN]);
-        $invocation = new CsrfProtectedMethodInvocation();
+        $invocation = new CsrfProtectedMethodInvocation(namedArguments: ['csrfToken' => FakeCsrfToken::TOKEN]);
 
-        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken(), $context))->invoke($invocation);
+        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken()))->invoke($invocation);
 
         $this->assertSame('proceeded', $result);
         $this->assertTrue($invocation->proceeded);
@@ -30,31 +27,28 @@ final class CsrfProtectedInterceptorTest extends TestCase
 
     public function testInvalidTokenThrowsForbiddenException(): void
     {
-        $context = new RequestQueryContext();
-        $context->push(['csrfToken' => 'attacker-token']);
-
         $this->expectException(CsrfTokenInvalidException::class);
 
-        (new CsrfProtectedInterceptor(new FakeCsrfToken(), $context))->invoke(new CsrfProtectedMethodInvocation());
+        (new CsrfProtectedInterceptor(new FakeCsrfToken()))->invoke(
+            new CsrfProtectedMethodInvocation(namedArguments: ['csrfToken' => 'attacker-token']),
+        );
     }
 
     public function testMissingTokenThrowsForbiddenException(): void
     {
-        $context = new RequestQueryContext();
-        $context->push([]);
-
         $this->expectException(CsrfTokenInvalidException::class);
 
-        (new CsrfProtectedInterceptor(new FakeCsrfToken(), $context))->invoke(new CsrfProtectedMethodInvocation());
+        (new CsrfProtectedInterceptor(new FakeCsrfToken()))->invoke(new CsrfProtectedMethodInvocation());
     }
 
     public function testCustomBodyFieldIsUsed(): void
     {
-        $context = new RequestQueryContext();
-        $context->push(['_csrf' => FakeCsrfToken::TOKEN]);
-        $invocation = new CsrfProtectedMethodInvocation('onPostWithCustomBodyField');
+        $invocation = new CsrfProtectedMethodInvocation(
+            methodName: 'onPostWithCustomBodyField',
+            namedArguments: ['_csrf' => FakeCsrfToken::TOKEN],
+        );
 
-        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken(), $context))->invoke($invocation);
+        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken()))->invoke($invocation);
 
         $this->assertSame('proceeded', $result);
         $this->assertTrue($invocation->proceeded);
@@ -81,6 +75,8 @@ final class CsrfProtectedMethodInvocation implements MethodInvocation
 
     public function __construct(
         private readonly string $methodName = 'onPost',
+        /** @var array<string, mixed> */
+        private readonly array $namedArguments = [],
     ) {
     }
 
@@ -96,7 +92,7 @@ final class CsrfProtectedMethodInvocation implements MethodInvocation
 
     public function getNamedArguments(): ArrayObject
     {
-        return new ArrayObject([]);
+        return new ArrayObject($this->namedArguments);
     }
 
     public function proceed(): mixed

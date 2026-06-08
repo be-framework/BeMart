@@ -142,6 +142,7 @@ class NonMember extends ResourceObject
         string $addr01,
         string $addr02,
         string $sessionPrefix = 'session-prefix-1',
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new SubmitNonMemberInput(
             name01: $name01,

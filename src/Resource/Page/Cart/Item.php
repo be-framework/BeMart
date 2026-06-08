@@ -64,6 +64,7 @@ class Item extends ResourceObject
         int|null $quantity = null,
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
         string|null $operation = null,
+            string|null $csrfToken = null,
     ): static
     {
         if ($operation === 'remove') {
@@ -133,6 +134,7 @@ class Item extends ResourceObject
         string $productCode,
         int $quantity,
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateCartItemQuantityInput(
             productCode: $productCode,
@@ -171,6 +173,7 @@ class Item extends ResourceObject
     public function onDelete(
         string $productCode,
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
+            string|null $csrfToken = null,
     ): static
     {
         $final = ($this->becoming)(new RemoveCartItemInput(

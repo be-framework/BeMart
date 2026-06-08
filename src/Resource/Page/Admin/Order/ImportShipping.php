@@ -80,7 +80,7 @@ class ImportShipping extends ResourceObject
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]
     #[Link(rel: 'goExportCustomer', href: 'page://self/admin/customer-csv')]
     #[CsrfProtected]
-    public function onPost(string $csv): static
+    public function onPost(string $csv, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new AdminImportShippingCsvInput(csv: $csv));
 

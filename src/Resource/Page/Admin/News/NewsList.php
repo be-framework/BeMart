@@ -72,6 +72,7 @@ class NewsList extends ResourceObject
         string|null $newsDescription = null,
         string|null $newsUrl = null,
         bool $linkMethod = false,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreateNewsInput(
             newsTitle: $newsTitle,

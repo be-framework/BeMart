@@ -79,6 +79,7 @@ class Layout extends ResourceObject
     public function onPut(
         string $layoutId,
         string|null $layoutName = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateLayoutInput(
             layoutId: $layoutId,

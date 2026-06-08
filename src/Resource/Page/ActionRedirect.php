@@ -36,7 +36,7 @@ class ActionRedirect extends ResourceObject
     #[Alps('doActionRedirect')]
     #[JsonSchema(schema: 'post-action-redirect.json', params: 'post-action-redirect.param.json')]
     #[CsrfProtected]
-    public function onPost(string|null $returnTo = null): static
+    public function onPost(string|null $returnTo = null, string|null $csrfToken = null): static
     {
         $this->redirect($returnTo);
 

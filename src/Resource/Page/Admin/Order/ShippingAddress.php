@@ -121,6 +121,7 @@ class ShippingAddress extends ResourceObject
     public function onPost(
         string $orderNo,
         string $addressId,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminSelectShippingAddressInput(
             orderNo: $orderNo,
@@ -159,6 +160,7 @@ class ShippingAddress extends ResourceObject
         string $addr01,
         string $addr02,
         string $phoneNumber,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminUpdateShippingAddressInput(
             orderNo: $orderNo,

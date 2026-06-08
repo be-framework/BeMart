@@ -33,7 +33,7 @@ class UnsupportedRoute extends ResourceObject
     #[Alps('doUnsupportedRoute')]
     #[JsonSchema(schema: 'post-unsupported-route.json', params: 'post-unsupported-route.param.json')]
     #[CsrfProtected]
-    public function onPost(string $routeName = '', string|null $returnTo = null): static
+    public function onPost(string $routeName = '', string|null $returnTo = null, string|null $csrfToken = null): static
     {
         $this->code = Code::OK;
         $this->headers['Location'] = $this->safeReturnTo($returnTo);

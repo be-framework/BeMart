@@ -71,7 +71,7 @@ class ShippingMultiple extends ResourceObject
     #[JsonSchema(schema: 'post-shopping-shipping-multiple.json', params: 'post-shopping-shipping-multiple.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
-    public function onPost(array $allocations = []): static
+    public function onPost(array $allocations = [], string|null $csrfToken = null): static
     {
         $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/shopping';

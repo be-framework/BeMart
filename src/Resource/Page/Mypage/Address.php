@@ -179,6 +179,7 @@ class Address extends ResourceObject
         string|null $addr01 = null,
         string|null $addr02 = null,
         string|null $phoneNumber = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateCustomerAddressInput(
             addressId: $addressId,
@@ -224,7 +225,7 @@ class Address extends ResourceObject
     #[Link(rel: 'goFavoriteList', href: 'page://self/mypage/favorite-list')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[CsrfProtected]
-    public function onDelete(string $addressId): static
+    public function onDelete(string $addressId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteCustomerAddressInput(addressId: $addressId));
 

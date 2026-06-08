@@ -37,7 +37,7 @@ class Tag extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-tag-tag.json', params: 'delete-admin-tag-tag.param.json')]
     #[Link(rel: 'goTagList', href: 'page://self/admin/tag/tag-list')]
     #[CsrfProtected]
-    public function onDelete(string $tagId): static
+    public function onDelete(string $tagId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteTagInput(tagId: $tagId));
 

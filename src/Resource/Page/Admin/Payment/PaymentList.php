@@ -79,6 +79,7 @@ class PaymentList extends ResourceObject
         int|null $ruleMin = null,
         int|null $ruleMax = null,
         bool $visible = true,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreatePaymentMethodAdminInput(
             paymentMethodName: $paymentMethodName,

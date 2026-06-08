@@ -70,7 +70,7 @@ class Csv extends ResourceObject
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order')]
     #[CsrfProtected]
-    public function onPost(string $csv): static
+    public function onPost(string $csv, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new ImportCategoryCsvInput(csv: $csv));
 

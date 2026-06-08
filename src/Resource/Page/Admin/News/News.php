@@ -142,6 +142,7 @@ class News extends ResourceObject
         string|null $newsUrl = null,
         string|null $publishDate = null,
         bool|null $linkMethod = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateNewsInput(
             newsId: $newsId,
@@ -176,7 +177,7 @@ class News extends ResourceObject
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     #[CsrfProtected]
-    public function onDelete(string $newsId): static
+    public function onDelete(string $newsId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteNewsInput(newsId: $newsId));
 

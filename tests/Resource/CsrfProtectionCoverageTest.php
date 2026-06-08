@@ -10,6 +10,7 @@ use PHPUnit\Framework\TestCase;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
+use ReflectionNamedType;
 
 use function class_exists;
 use function dirname;
@@ -58,7 +59,7 @@ final class CsrfProtectionCoverageTest extends TestCase
         );
     }
 
-    public function testMutatingResourceMethodsDoNotAcceptCsrfTokenParameter(): void
+    public function testCsrfProtectedMutatingResourceMethodsAcceptOptionalNullableCsrfTokenParameter(): void
     {
         $violations = [];
 
@@ -78,10 +79,31 @@ final class CsrfProtectionCoverageTest extends TestCase
                     continue;
                 }
 
+                if ($method->getAttributes(CsrfProtected::class) === []) {
+                    continue;
+                }
+
+                $csrfToken = null;
                 foreach ($method->getParameters() as $parameter) {
                     if ($parameter->getName() === 'csrfToken') {
-                        $violations[] = $class . '::' . $methodName . '($csrfToken)';
+                        $csrfToken = $parameter;
+                        break;
                     }
+                }
+
+                if ($csrfToken === null) {
+                    $violations[] = $class . '::' . $methodName . ' is missing optional ?string $csrfToken = null';
+
+                    continue;
+                }
+
+                $type = $csrfToken->getType();
+                if (! $type instanceof ReflectionNamedType || $type->getName() !== 'string' || ! $type->allowsNull()) {
+                    $violations[] = $class . '::' . $methodName . '($csrfToken) must be typed as string|null';
+                }
+
+                if (! $csrfToken->isOptional() || ! $csrfToken->isDefaultValueAvailable() || $csrfToken->getDefaultValue() !== null) {
+                    $violations[] = $class . '::' . $methodName . '($csrfToken) must be optional with default null';
                 }
             }
         }
@@ -89,7 +111,7 @@ final class CsrfProtectionCoverageTest extends TestCase
         $this->assertSame(
             [],
             $violations,
-            "CSRF is supplied through RequestQueryContext, not Resource signatures:\n" . implode("\n", $violations),
+            "CSRF-protected mutating Resource methods must accept optional string|null \$csrfToken = null:\n" . implode("\n", $violations),
         );
     }
 

@@ -91,7 +91,7 @@ class Reset extends ResourceObject
     #[JsonSchema(schema: 'post-reset.json', params: 'post-reset.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
-    public function onPost(string $resetKey, string $password): static
+    public function onPost(string $resetKey, string $password, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new ResetPasswordInput(
             resetKey: $resetKey,

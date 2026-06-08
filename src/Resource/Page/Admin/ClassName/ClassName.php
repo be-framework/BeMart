@@ -47,6 +47,7 @@ class ClassName extends ResourceObject
     public function onPut(
         string $classNameId,
         string|null $classNameLabel = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateClassNameInput(
             classNameId: $classNameId,
@@ -72,7 +73,7 @@ class ClassName extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-class-name-class-name.json', params: 'delete-admin-class-name-class-name.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
     #[CsrfProtected]
-    public function onDelete(string $classNameId): static
+    public function onDelete(string $classNameId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteClassNameInput(classNameId: $classNameId));
 

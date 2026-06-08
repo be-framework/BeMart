@@ -101,6 +101,7 @@ class Security extends ResourceObject
         string $frontAllowHosts = '',
         string $frontDenyHosts = '',
         string $trustedHosts = '',
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateSecurityInput(
             adminAllowHosts: $adminAllowHosts,

@@ -174,6 +174,17 @@
       "description": "1=公務員〜18=その他の18区分 Fake観察数値 7〜18; 観察値 '7', '18'; null 3/5。",
       "example": 7,
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Business validation is not performed by JSON Schema; CsrfProtectedInterceptor validates the token value."
     }
   },
   "additionalProperties": false,

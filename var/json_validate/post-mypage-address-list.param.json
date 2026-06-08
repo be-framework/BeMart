@@ -120,6 +120,17 @@
       "description": "法人顧客の社名。B2B取引やインボイスで使用 Fake観察文字長 10〜11; 観察値 'Acme Corp.', '株式会社EC-CUBE'; null 24/32。",
       "example": "Acme Corp.",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Business validation is not performed by JSON Schema; CsrfProtectedInterceptor validates the token value."
     }
   },
   "additionalProperties": false,

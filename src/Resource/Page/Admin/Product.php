@@ -124,6 +124,7 @@ class Product extends ResourceObject
         string|null $description = null,
         string|null $searchWord = null,
         string|null $note = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminCreateProductInput(
             productCode: $productCode,
@@ -177,6 +178,7 @@ class Product extends ResourceObject
         string|null $description = null,
         string|null $searchWord = null,
         string|null $note = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminUpdateProductInput(
             productCode: $productCode,
@@ -216,6 +218,7 @@ class Product extends ResourceObject
     #[CsrfProtected]
     public function onDelete(
         string $productCode,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminDeleteProductInput(productCode: $productCode));
 

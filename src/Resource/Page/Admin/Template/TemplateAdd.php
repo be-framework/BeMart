@@ -79,7 +79,7 @@ class TemplateAdd extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
     #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
-    public function onPost(string $templateCode, string $templateName): static
+    public function onPost(string $templateCode, string $templateName, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new InstallTemplateInput(
             templateCode: $templateCode,

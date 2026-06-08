@@ -85,7 +85,7 @@ class MasterData extends ResourceObject
     #[JsonSchema(schema: 'put-admin-master-data.json', params: 'put-admin-master-data.param.json')]
     #[Link(rel: 'doUpdateMasterData', href: 'page://self/admin/master-data-edit', method: 'put')]
     #[CsrfProtected]
-    public function onPut(string $masterType = 'tag'): static
+    public function onPut(string $masterType = 'tag', string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new SelectMasterDataInput(masterType: $masterType));
 

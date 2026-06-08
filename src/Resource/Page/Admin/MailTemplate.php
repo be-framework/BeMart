@@ -115,6 +115,7 @@ class MailTemplate extends ResourceObject
     public function onPost(
         int $mailTemplateId,
         string $mailSubject,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateMailTemplateInput(
             mailTemplateId: $mailTemplateId,
@@ -149,7 +150,7 @@ class MailTemplate extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-mail-template.json', params: 'delete-admin-mail-template.param.json')]
     #[Link(rel: 'goMailTemplateList', href: 'page://self/admin/mail-template', method: 'get')]
     #[CsrfProtected]
-    public function onDelete(int $mailTemplateId): static
+    public function onDelete(int $mailTemplateId, string|null $csrfToken = null): static
     {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;

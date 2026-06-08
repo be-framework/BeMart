@@ -132,6 +132,17 @@
       "description": "番地・ビル名・部屋番号等の詳細住所 Fake観察文字長 5〜8; 観察値 '神宮前1-1-1', '丸の内2-2-2', '梅田1-1-1', '1-2-3'; null 18/33。",
       "example": "神宮前1-1-1",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Business validation is not performed by JSON Schema; CsrfProtectedInterceptor validates the token value."
     }
   },
   "additionalProperties": false,

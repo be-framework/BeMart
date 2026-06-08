@@ -62,7 +62,7 @@ class Checkout extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfProtected]
-    public function onPost(string $preOrderId): static
+    public function onPost(string $preOrderId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new CheckoutInput(
             preOrderId: $preOrderId,

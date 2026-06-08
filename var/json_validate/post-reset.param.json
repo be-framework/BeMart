@@ -28,6 +28,17 @@
       "description": "書き込み専用（ハッシュ化して保存） Fake観察文字長 50〜63; 観察値 '$2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi', '$2y$10$deputyplaceholder.hash.never.verified.0123456789abcdef', '$2y$10$zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876', '$2y$12$lbpzHVyv.ytzJju.4xk9Au5tPePdQe1WFH6sLWeWwcvIKbn0vMnE.', '$2y$10$shopownerplaceholder.hash.never.verified.0123456789ab', '$2y$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123', '$2y$10$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS', '$2y$12$placeholder.hash.never.verified.never.0123456789abcde'。",
       "example": "$2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Business validation is not performed by JSON Schema; CsrfProtectedInterceptor validates the token value."
     }
   },
   "additionalProperties": false,

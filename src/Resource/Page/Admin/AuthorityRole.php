@@ -115,6 +115,7 @@ class AuthorityRole extends ResourceObject
     public function onPost(
         string $loginId,
         int $authority,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateAuthorityRoleInput(
             loginId: $loginId,

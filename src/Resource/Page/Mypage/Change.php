@@ -139,6 +139,7 @@ class Change extends ResourceObject
         int|null $pref = null,
         string|null $addr01 = null,
         string|null $addr02 = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateCustomerInput(
             email: $email,

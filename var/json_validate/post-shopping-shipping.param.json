@@ -16,6 +16,17 @@
       "$comment": "配送先ID（入力）は業務上IDだが、HTTPフォームでは文字列として届く。Resource/Semantic層の検証を通すためtransport schemaではstring|integerを許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
       "minLength": 0,
       "maxLength": 128
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Business validation is not performed by JSON Schema; CsrfProtectedInterceptor validates the token value."
     }
   },
   "additionalProperties": false,
