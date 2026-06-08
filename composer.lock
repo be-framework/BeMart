@@ -5114,12 +5114,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.DevTools.git",
-                "reference": "fa27e8c2791d8aea7d01032b4f78f0bc34cf8cab"
+                "reference": "646752ce5e5eb6b1c2669786473b329668a0694b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/fa27e8c2791d8aea7d01032b4f78f0bc34cf8cab",
-                "reference": "fa27e8c2791d8aea7d01032b4f78f0bc34cf8cab",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/646752ce5e5eb6b1c2669786473b329668a0694b",
+                "reference": "646752ce5e5eb6b1c2669786473b329668a0694b",
                 "shasum": ""
             },
             "require": {
