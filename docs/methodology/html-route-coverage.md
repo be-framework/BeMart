@@ -5,6 +5,9 @@ title: "HTML Route Coverage Baseline"
 
 # HTML Route Coverage Baseline
 
+> **Historical note (2026-06-08):** この文書は Aura.Router / EC-CUBE route名互換を前提にした過去のbaselineである。現在の方針は [`standard-first-rule.md`](standard-first-rule.md) と Web Router全廃後の canonical Resource path を正とする。新規実装で Aura.Router、`url()` / `path()`、EC-CUBE route名互換を復活させない。
+
+
 作成日: 2026-05-26
 対象: BeMart HTML front controller / Twig route helpers / admin route coverage
 
