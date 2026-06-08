@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\EntryPoint;
 
-use MyVendor\BeMart\Bootstrap;
+use MyVendor\BeMart\BootstrapContextResolver;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
@@ -55,9 +55,9 @@ final class BootstrapContextTest extends TestCase
     /** @param non-empty-string $defaultContext */
     private function context(string $defaultContext): string
     {
-        $method = new ReflectionMethod(Bootstrap::class, 'context');
+        $method = new ReflectionMethod(BootstrapContextResolver::class, 'resolve');
 
         /** @var string */
-        return $method->invoke(new Bootstrap(), $defaultContext);
+        return $method->invoke(new BootstrapContextResolver(), $defaultContext);
     }
 }
