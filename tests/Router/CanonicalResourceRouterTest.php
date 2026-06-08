@@ -66,6 +66,21 @@ final class CanonicalResourceRouterTest extends TestCase
         $this->assertSame(['productCode' => 'sample-001'], $match->query);
     }
 
+    public function testPostBodyParamsWinOverQueryParams(): void
+    {
+        $match = $this->router->match(
+            ['_GET' => ['productCode' => 'query-code'], '_POST' => ['productCode' => 'body-code', 'name' => 'BeMart product']],
+            ['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/admin/product?productCode=query-code'],
+        );
+
+        $this->assertSame('post', $match->method);
+        $this->assertSame('page://self/admin/product', $match->path);
+        $this->assertSame([
+            'productCode' => 'body-code',
+            'name' => 'BeMart product',
+        ], $match->query);
+    }
+
     public function testPostMethodOverrideDispatchesToDeleteAndRemovesMethodField(): void
     {
         $match = $this->router->match(
