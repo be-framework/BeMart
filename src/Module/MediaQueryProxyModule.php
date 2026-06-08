@@ -7,9 +7,7 @@ namespace MyVendor\BeMart\Module;
 use Override;
 use Ray\Di\AbstractModule;
 use Ray\MediaQuery\DbQueryConfig;
-use Ray\MediaQuery\MediaQueryBaseModule;
-use Ray\MediaQuery\MediaQueryDbModule;
-use Ray\MediaQuery\Queries;
+use Ray\MediaQuery\MediaQueryModule;
 
 use function dirname;
 
@@ -20,17 +18,17 @@ final class MediaQueryProxyModule extends AbstractModule
     protected function configure(): void
     {
         $root = dirname(__DIR__, 2);
-        $queries = Queries::fromClasses(MediaQueryRuntimeModule::queryClasses());
-
         /**
+         * A plain MediaQuery directory scan would discover non-query helper
+         * classes in be/src/Reason/Query. Use MediaQueryModule with a
+         * #[DbQuery]-filtered Queries object to exclude them.
+         *
          * @psalm-suppress InternalClass
          * @psalm-suppress InternalMethod
          */
-        $this->install(new MediaQueryBaseModule($queries));
-        /**
-         * @psalm-suppress InternalClass
-         * @psalm-suppress InternalMethod
-         */
-        $this->install(new MediaQueryDbModule(new DbQueryConfig($root . '/var/sql')));
+        $this->install(new MediaQueryModule(
+            MediaQueryQueries::fromAppRoot($root),
+            [new DbQueryConfig($root . '/var/sql')],
+        ));
     }
 }
