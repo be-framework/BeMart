@@ -90,6 +90,7 @@ class Calendar extends ResourceObject
         string $title = '',
         string $holiday = '',
         int|null $calendarId = null,
+            string|null $csrfToken = null,
     ): static {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
@@ -120,7 +121,7 @@ class Calendar extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-calendar.json', params: 'delete-admin-calendar.param.json')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
-    public function onDelete(int|null $calendarId = null): static
+    public function onDelete(int|null $calendarId = null, string|null $csrfToken = null): static
     {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;

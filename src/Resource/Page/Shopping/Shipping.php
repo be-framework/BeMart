@@ -79,7 +79,7 @@ class Shipping extends ResourceObject
     #[JsonSchema(schema: 'post-shopping-shipping.json', params: 'post-shopping-shipping.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
-    public function onPost(string|null $shippingAddressId = null): static
+    public function onPost(string|null $shippingAddressId = null, string|null $csrfToken = null): static
     {
         $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/shopping';

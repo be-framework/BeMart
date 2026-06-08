@@ -100,6 +100,7 @@ class CsvConfig extends ResourceObject
     public function onPost(
         int $csvType,
         array $columns,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateCsvInput(
             csvType: $csvType,

@@ -115,7 +115,7 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-admin-login.json', params: 'post-admin-login.param.json')]
     #[Link(rel: 'goAdminTop', href: 'page://self/admin/index')]
     #[CsrfProtected]
-    public function onPost(string $loginId, string $password): static
+    public function onPost(string $loginId, string $password, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new AdminLoginInput(
             loginId: $loginId,

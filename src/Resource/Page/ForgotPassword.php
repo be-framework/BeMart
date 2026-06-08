@@ -86,7 +86,7 @@ class ForgotPassword extends ResourceObject
     #[JsonSchema(schema: 'post-forgot-password.json', params: 'post-forgot-password.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
-    public function onPost(string $email): static
+    public function onPost(string $email, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new RequestPasswordResetInput(email: $email));
 

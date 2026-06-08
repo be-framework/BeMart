@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "put-admin-content-cache.param.json",
+  "title": "PUT /admin/content/cache request parameters",
+  "description": "管理画面のキャッシュ削除フォーム送信のrequest parameter schema。CSRFトークンはResource引数として明示され、CsrfProtectedInterceptorが検証する。",
+  "type": "object",
+  "properties": {
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Missing or invalid values intentionally pass JSON Schema so CsrfProtectedInterceptor can return the CSRF-specific 403 response."
+    }
+  },
+  "additionalProperties": false,
+  "$comment": "Request schema is transport-level; CSRF validity is checked by CsrfProtectedInterceptor, not JSON Schema."
+}

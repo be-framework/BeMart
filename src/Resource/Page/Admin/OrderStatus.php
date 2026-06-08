@@ -115,6 +115,7 @@ class OrderStatus extends ResourceObject
     public function onPut(
         array $orderStatuses = [],
         string|null $orderStatusRows = null,
+            string|null $csrfToken = null,
     ): static {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
@@ -151,6 +152,7 @@ class OrderStatus extends ResourceObject
     public function onPost(
         string $orderNo,
         int $orderStatus,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminUpdateOrderStatusInput(
             orderNo: $orderNo,

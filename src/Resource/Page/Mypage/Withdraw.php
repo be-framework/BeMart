@@ -108,6 +108,7 @@ class Withdraw extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string|null $sessionPrefix = null,
+            string|null $csrfToken = null,
     ): static {
         $input = $sessionPrefix === null
             ? new WithdrawCustomerInput()

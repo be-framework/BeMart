@@ -118,6 +118,7 @@ class Payment extends ResourceObject
         int|null $ruleMin = null,
         int|null $ruleMax = null,
         bool|null $visible = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdatePaymentMethodAdminInput(
             paymentId: $paymentId,
@@ -152,7 +153,7 @@ class Payment extends ResourceObject
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[CsrfProtected]
-    public function onDelete(string $paymentId): static
+    public function onDelete(string $paymentId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeletePaymentMethodAdminInput(paymentId: $paymentId));
 

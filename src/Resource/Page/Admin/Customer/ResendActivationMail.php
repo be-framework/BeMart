@@ -62,6 +62,7 @@ class ResendActivationMail extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string $email,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new ResendActivationMailInput(email: $email));
 

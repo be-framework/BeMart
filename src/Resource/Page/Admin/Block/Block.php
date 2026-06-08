@@ -82,6 +82,7 @@ class Block extends ResourceObject
         string $blockId,
         string|null $blockName = null,
         string|null $blockFileName = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateBlockInput(
             blockId: $blockId,
@@ -111,7 +112,7 @@ class Block extends ResourceObject
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     #[CsrfProtected]
-    public function onDelete(string $blockId): static
+    public function onDelete(string $blockId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));
 

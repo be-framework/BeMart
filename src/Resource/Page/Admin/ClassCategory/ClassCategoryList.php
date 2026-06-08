@@ -85,6 +85,7 @@ class ClassCategoryList extends ResourceObject
     public function onPost(
         string $classNameId,
         string $classCategoryName,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreateClassCategoryInput(
             classNameId: $classNameId,

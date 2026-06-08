@@ -49,7 +49,7 @@ class UnsupportedRoute extends ResourceObject
     #[Alps('doAdminUnsupportedRoute')]
     #[JsonSchema(schema: 'post-admin-unsupported-route.json', params: 'post-admin-unsupported-route.param.json')]
     #[CsrfProtected]
-    public function onPost(string $routeName = '', string|null $returnTo = null): static
+    public function onPost(string $routeName = '', string|null $returnTo = null, string|null $csrfToken = null): static
     {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;

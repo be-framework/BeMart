@@ -56,6 +56,7 @@ class BulkDelete extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         array $orderNos,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminBulkDeleteOrderInput(
             orderNos: $orderNos,

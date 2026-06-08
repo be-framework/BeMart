@@ -47,6 +47,7 @@ class ProductBulkStatus extends ResourceObject
     public function onPost(
         array $productCodes,
         int $productStatus,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminBulkUpdateProductStatusInput(
             productCodes: $productCodes,

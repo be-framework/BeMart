@@ -93,6 +93,7 @@ class CreateCustomer extends ResourceObject
         string|null $birth = null,
         int|null $sex = null,
         int|null $job = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminCreateCustomerInput(
             email: $email,

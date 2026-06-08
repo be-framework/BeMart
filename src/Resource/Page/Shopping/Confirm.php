@@ -80,6 +80,7 @@ class Confirm extends ResourceObject
     public function onPost(
         string $preOrderId,
         int $payment = 2,
+            string|null $csrfToken = null,
     ): static {
         return $this->confirmOrder($preOrderId, $payment);
     }

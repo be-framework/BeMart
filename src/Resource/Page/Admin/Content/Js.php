@@ -76,7 +76,7 @@ class Js extends ResourceObject
     #[Alps('doUpdateContentJs')]
     #[JsonSchema(schema: 'put-admin-content-js.json', params: 'put-admin-content-js.param.json')]
     #[CsrfProtected]
-    public function onPut(string $js = ''): static
+    public function onPut(string $js = '', string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new UpdateContentJsInput(js: $js));
 

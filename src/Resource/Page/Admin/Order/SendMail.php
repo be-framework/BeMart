@@ -102,6 +102,7 @@ class SendMail extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string $orderNo,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminSendOrderMailInput(orderNo: $orderNo));
 

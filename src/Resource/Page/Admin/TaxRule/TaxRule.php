@@ -43,7 +43,7 @@ class TaxRule extends ResourceObject
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
-    public function onDelete(string $taxRuleId): static
+    public function onDelete(string $taxRuleId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteTaxRuleInput(taxRuleId: $taxRuleId));
 

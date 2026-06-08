@@ -93,6 +93,17 @@
       "description": "管理者のみが参照する内部メモ。フロントには表示されない Fake観察文字長 11〜25; 観察値 'internal note A', 'internal note C', 'internal note B', '管理画面名称変更 smoke 2026-05-23', 'Codex smoke'; null 10/42。",
       "example": "internal note A",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Business validation is not performed by JSON Schema; CsrfProtectedInterceptor validates the token value."
     }
   },
   "additionalProperties": false,

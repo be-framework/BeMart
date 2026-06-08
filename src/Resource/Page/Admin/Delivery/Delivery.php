@@ -109,6 +109,7 @@ class Delivery extends ResourceObject
         string $deliveryId,
         string|null $deliveryName = null,
         bool|null $visible = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateDeliveryInput(
             deliveryId: $deliveryId,
@@ -137,7 +138,7 @@ class Delivery extends ResourceObject
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[CsrfProtected]
-    public function onDelete(string $deliveryId): static
+    public function onDelete(string $deliveryId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteDeliveryInput(deliveryId: $deliveryId));
 

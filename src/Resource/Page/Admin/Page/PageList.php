@@ -71,6 +71,7 @@ class PageList extends ResourceObject
         string $pageName,
         string $pageUrl,
         string $pageFileName,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreatePageInput(
             pageName: $pageName,

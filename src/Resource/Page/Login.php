@@ -118,7 +118,7 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-login.json', params: 'post-login.param.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
-    public function onPost(string $email, string $password): static
+    public function onPost(string $email, string $password, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new LoginInput(
             email: $email,

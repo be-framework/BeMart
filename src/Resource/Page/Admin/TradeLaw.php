@@ -128,7 +128,7 @@ class TradeLaw extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goContentCss', href: 'page://self/admin/content/css')]
     #[CsrfProtected]
-    public function onPost(string $tradeLawBody): static
+    public function onPost(string $tradeLawBody, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new UpdateTradeLawInput(tradeLawBody: $tradeLawBody));
 

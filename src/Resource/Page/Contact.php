@@ -98,6 +98,7 @@ class Contact extends ResourceObject
         string $contactName02,
         string $contactEmail,
         string $contactContents,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new SubmitContactInput(
             contactName01: $contactName01,

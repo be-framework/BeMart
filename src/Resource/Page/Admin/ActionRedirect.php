@@ -46,7 +46,7 @@ class ActionRedirect extends ResourceObject
     #[Alps('doAdminActionRedirect')]
     #[JsonSchema(schema: 'post-admin-action-redirect.json', params: 'post-admin-action-redirect.param.json')]
     #[CsrfProtected]
-    public function onPost(string|null $returnTo = null): static
+    public function onPost(string|null $returnTo = null, string|null $csrfToken = null): static
     {
         if (! $this->authorized()) {
             return $this;

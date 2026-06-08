@@ -43,12 +43,9 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
-use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
-use MyVendor\BeMart\Support\Resource\RequestQueryCapturingInvoker;
-use MyVendor\BeMart\Support\Resource\RequestQueryContext;
 use Ray\Di\Scope;
 use Ray\WebFormModule\FormFactory;
 
@@ -79,8 +76,6 @@ final class AppModule extends AbstractAppModule
             ),
         );
 
-        $this->bind(RequestQueryContext::class)->in(Scope::SINGLETON);
-        $this->bind(InvokerInterface::class)->to(RequestQueryCapturingInvoker::class);
         $this->bindPriorityInterceptor(
             $this->matcher->subclassesOf(ResourceObject::class),
             $this->matcher->annotatedWith(CsrfProtected::class),

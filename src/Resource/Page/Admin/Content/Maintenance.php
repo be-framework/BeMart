@@ -74,7 +74,7 @@ class Maintenance extends ResourceObject
     #[JsonSchema(schema: 'put-admin-content-maintenance.json', params: 'put-admin-content-maintenance.param.json')]
     #[Link(rel: 'goSystemInfo', href: 'page://self/admin/system')]
     #[CsrfProtected]
-    public function onPut(bool $enabled): static
+    public function onPut(bool $enabled, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new ToggleMaintenanceInput(enabled: $enabled));
 

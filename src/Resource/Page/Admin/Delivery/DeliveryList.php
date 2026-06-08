@@ -72,6 +72,7 @@ class DeliveryList extends ResourceObject
     public function onPost(
         string $deliveryName,
         bool $visible = true,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreateDeliveryInput(
             deliveryName: $deliveryName,

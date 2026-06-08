@@ -156,6 +156,7 @@ class Member extends ResourceObject
         string $password,
         string $name,
         int $authority,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreateMemberInput(
             loginId: $loginId,
@@ -198,6 +199,7 @@ class Member extends ResourceObject
     public function onPut(
         string $loginId,
         string|null $name = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateMemberInput(
             loginId: $loginId,
@@ -230,7 +232,7 @@ class Member extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-member.json', params: 'delete-admin-member.param.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     #[CsrfProtected]
-    public function onDelete(string $loginId): static
+    public function onDelete(string $loginId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteMemberInput(loginId: $loginId));
 

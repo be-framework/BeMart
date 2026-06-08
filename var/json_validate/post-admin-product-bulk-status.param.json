@@ -31,6 +31,17 @@
       ],
       "example": "1",
       "$comment": "商品ステータス（入力）は本来数値/列挙の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "CSRFトークン（入力）",
+      "description": "unsafe HTTPフォーム送信を同一セッションの意図した操作として検証するためのCSRFトークン。Resource引数として明示し、Interceptorが検証する。",
+      "$comment": "Transport-level CSRF token. Business validation is not performed by JSON Schema; CsrfProtectedInterceptor validates the token value."
     }
   },
   "additionalProperties": false,

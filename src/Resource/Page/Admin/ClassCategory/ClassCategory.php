@@ -49,6 +49,7 @@ class ClassCategory extends ResourceObject
     public function onPut(
         string $classCategoryId,
         string|null $classCategoryName = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new UpdateClassCategoryInput(
             classCategoryId: $classCategoryId,
@@ -75,7 +76,7 @@ class ClassCategory extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-class-category-class-category.json', params: 'delete-admin-class-category-class-category.param.json')]
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
     #[CsrfProtected]
-    public function onDelete(string $classCategoryId): static
+    public function onDelete(string $classCategoryId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DeleteClassCategoryInput(classCategoryId: $classCategoryId));
 

@@ -49,7 +49,7 @@ class Reorder extends ResourceObject
     #[JsonSchema(schema: 'post-mypage-reorder.json', params: 'post-mypage-reorder.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfProtected]
-    public function onPost(string $orderNo): static
+    public function onPost(string $orderNo, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
 

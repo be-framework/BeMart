@@ -98,6 +98,7 @@ class ShippingNotifyMail extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string $orderNo,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new SendShippingNotifyMailInput(orderNo: $orderNo));
 

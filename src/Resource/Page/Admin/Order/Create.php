@@ -69,6 +69,7 @@ class Create extends ResourceObject
         int $deliveryFeeTotal = 0,
         int $charge = 0,
         int $discount = 0,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminCreateOrderInput(
             customerId: $customerId,

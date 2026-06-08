@@ -53,7 +53,7 @@ class PluginEnable extends ResourceObject
     #[JsonSchema(schema: 'post-admin-plugin-enable.json', params: 'post-admin-plugin-enable.param.json')]
     #[Link(rel: 'goPluginList', href: 'page://self/admin/plugin-list', method: 'get')]
     #[CsrfProtected]
-    public function onPost(string $pluginCode): static
+    public function onPost(string $pluginCode, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new EnablePluginInput(pluginCode: $pluginCode));
 

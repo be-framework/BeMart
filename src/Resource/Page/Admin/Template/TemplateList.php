@@ -70,7 +70,7 @@ class TemplateList extends ResourceObject
     #[JsonSchema(schema: 'put-admin-template-template-list.json', params: 'put-admin-template-template-list.param.json')]
     #[Link(rel: 'doDownloadTemplate', href: 'page://self/admin/template/template-list', method: 'post')]
     #[CsrfProtected]
-    public function onPut(string $templateId): static
+    public function onPut(string $templateId, string|null $csrfToken = null): static
     {
         return $this->run('doSelectTemplate', static fn (BecomingInterface $b) => $b(new SelectTemplateInput(templateId: $templateId)), 'テンプレートを適用しました。');
     }
@@ -84,7 +84,7 @@ class TemplateList extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-template-template-list.json', params: 'delete-admin-template-template-list.param.json')]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list', method: 'get')]
     #[CsrfProtected]
-    public function onDelete(string $templateId): static
+    public function onDelete(string $templateId, string|null $csrfToken = null): static
     {
         return $this->run('doDeleteTemplate', static fn (BecomingInterface $b) => $b(new DeleteTemplateInput(templateId: $templateId)), 'テンプレートを削除しました。');
     }
@@ -98,7 +98,7 @@ class TemplateList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-template-template-list.json', params: 'post-admin-template-template-list.param.json')]
     #[Link(rel: 'doDeleteTemplate', href: 'page://self/admin/template/template-list', method: 'delete')]
     #[CsrfProtected]
-    public function onPost(string $templateId): static
+    public function onPost(string $templateId, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new DownloadTemplateInput(templateId: $templateId));
 

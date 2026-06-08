@@ -88,7 +88,7 @@ class ProductCsv extends ResourceObject
     #[JsonSchema(schema: 'post-admin-product-csv.json', params: 'post-admin-product-csv.param.json')]
     #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
     #[CsrfProtected]
-    public function onPost(string $csv): static
+    public function onPost(string $csv, string|null $csrfToken = null): static
     {
         $handle = fopen('php://memory', 'w+');
         if ($handle === false) {

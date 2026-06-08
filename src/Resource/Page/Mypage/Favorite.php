@@ -44,7 +44,7 @@ class Favorite extends ResourceObject
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     #[Link(rel: 'goProduct', href: 'page://self/product')]
     #[CsrfProtected]
-    public function onPost(string $productCode): static
+    public function onPost(string $productCode, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new AddFavoriteInput(productCode: $productCode));
 
@@ -80,7 +80,7 @@ class Favorite extends ResourceObject
     #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
-    public function onDelete(string $productCode): static
+    public function onDelete(string $productCode, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));
 

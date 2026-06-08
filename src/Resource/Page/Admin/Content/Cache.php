@@ -57,10 +57,10 @@ class Cache extends ResourceObject
     /** Clears the application cache (doClearCache). */
     /** ALPS `doClearCache` に対応する PUT 操作。 */
     #[Alps('doClearCache')]
-    #[JsonSchema(schema: 'put-admin-content-cache.json')]
+    #[JsonSchema(schema: 'put-admin-content-cache.json', params: 'put-admin-content-cache.param.json')]
     #[Link(rel: 'goMaintenance', href: 'page://self/admin/content/maintenance')]
     #[CsrfProtected]
-    public function onPut(): static
+    public function onPut(string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new ClearCacheInput());
 

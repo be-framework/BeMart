@@ -86,6 +86,7 @@ class CategoryList extends ResourceObject
         string $categoryName,
         int $sortNo,
         string|null $parentId = null,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new CreateCategoryInput(
             categoryName: $categoryName,

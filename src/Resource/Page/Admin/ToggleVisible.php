@@ -58,6 +58,7 @@ class ToggleVisible extends ResourceObject
         string $masterType,
         string $rowId,
         bool $visible,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new ToggleVisibleInput(
             masterType: $masterType,

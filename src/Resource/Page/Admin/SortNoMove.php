@@ -57,6 +57,7 @@ class SortNoMove extends ResourceObject
         string $masterType,
         string $rowId,
         int $sortNo,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new SortNoMoveInput(
             masterType: $masterType,

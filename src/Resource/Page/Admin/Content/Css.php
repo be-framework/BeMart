@@ -79,7 +79,7 @@ class Css extends ResourceObject
     #[JsonSchema(schema: 'put-admin-content-css.json', params: 'put-admin-content-css.param.json')]
     #[Link(rel: 'goContentJs', href: 'page://self/admin/content/js')]
     #[CsrfProtected]
-    public function onPut(string $css = ''): static
+    public function onPut(string $css = '', string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new UpdateContentCssInput(css: $css));
 

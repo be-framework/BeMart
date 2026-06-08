@@ -51,6 +51,7 @@ class ProductCopy extends ResourceObject
     public function onPost(
         string $productCode,
         string $newProductCode,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new AdminCopyProductInput(
             productCode: $productCode,

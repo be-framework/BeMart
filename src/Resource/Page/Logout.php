@@ -61,10 +61,10 @@ class Logout extends ResourceObject
      *
      */
     #[Alps('doLogout')]
-    #[JsonSchema(schema: 'post-logout.json')]
+    #[JsonSchema(schema: 'post-logout.json', params: 'post-logout.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
-    public function onPost(): static
+    public function onPost(string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new LogoutInput());
 

@@ -86,6 +86,7 @@ class PluginList extends ResourceObject
         string $pluginCode,
         string $pluginName,
         string $pluginVersion,
+            string|null $csrfToken = null,
     ): static {
         $final = ($this->becoming)(new InstallPluginInput(
             pluginCode: $pluginCode,

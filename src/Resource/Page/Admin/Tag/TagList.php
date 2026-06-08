@@ -66,7 +66,7 @@ class TagList extends ResourceObject
     #[JsonSchema(schema: 'post-admin-tag-tag-list.json', params: 'post-admin-tag-tag-list.param.json')]
     #[Link(rel: 'goTagList', href: 'page://self/admin/tag/tag-list')]
     #[CsrfProtected]
-    public function onPost(string $tagName): static
+    public function onPost(string $tagName, string|null $csrfToken = null): static
     {
         $final = ($this->becoming)(new CreateTagInput(tagName: $tagName));
 
