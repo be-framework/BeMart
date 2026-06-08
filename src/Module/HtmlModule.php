@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use BEAR\Dev\Html\LinkHeaderModule;
+use BEAR\Package\Provide\Representation\RouterReverseLinker;
+use BEAR\Resource\ReverseLinkerInterface;
 use Madapaja\TwigModule\TwigModule;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
@@ -27,8 +30,9 @@ final class HtmlModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
-        // TwigModule binds RenderInterface -> TwigRenderer.
-        $this->override(new TwigModule(options: $this->twigOptions));
+        // RenderInterface -> LinkHeaderRenderer -> TwigRenderer.
+        $this->override(new LinkHeaderModule(new TwigModule(options: $this->twigOptions)));
+        $this->bind(ReverseLinkerInterface::class)->to(RouterReverseLinker::class);
         $this->bind(CustomerSession::class)->to(HtmlSessionAdapter::class);
         $this->bind(AdminSession::class)->to(HtmlAdminSessionAdapter::class);
         $this->bind(Environment::class)->toProvider(HtmlTwigEnvironmentProvider::class);
