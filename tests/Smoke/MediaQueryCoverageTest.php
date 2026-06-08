@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Smoke;
 
-use MyVendor\BeMart\Module\MediaQueryRuntimeModule;
+use MyVendor\BeMart\Module\MediaQueryQueries;
 use PHPUnit\Framework\Attributes\CoversNothing;
 use PHPUnit\Framework\TestCase;
 use Ray\MediaQuery\Annotation\DbQuery;
@@ -40,7 +40,7 @@ final class MediaQueryCoverageTest extends TestCase
     {
         $seen = [];
         $duplicates = [];
-        foreach (MediaQueryRuntimeModule::queryClasses() as $class) {
+        foreach (MediaQueryQueries::classes() as $class) {
             $reflection = new ReflectionClass($class);
             foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
                 $attributes = $method->getAttributes(DbQuery::class);
@@ -82,7 +82,7 @@ final class MediaQueryCoverageTest extends TestCase
     private static function dbQueryMethods(): array
     {
         $methods = [];
-        foreach (MediaQueryRuntimeModule::queryClasses() as $class) {
+        foreach (MediaQueryQueries::classes() as $class) {
             $reflection = new ReflectionClass($class);
             foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
                 $attributes = $method->getAttributes(DbQuery::class);
