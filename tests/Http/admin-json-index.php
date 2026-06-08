@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
-putenv('APP_CONTEXT=admin-test-hal-api-app');
+use MyVendor\BeMart\Bootstrap;
 
-require __DIR__ . '/../../public/index.php';
+require __DIR__ . '/../../vendor/autoload.php';
+
+exit((new Bootstrap())('admin-test-hal-api-app', $GLOBALS, $_SERVER));
