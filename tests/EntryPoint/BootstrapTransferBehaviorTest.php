@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\EntryPoint;
 
-use MyVendor\BeMart\Bootstrap;
+use MyVendor\BeMart\BootstrapRequestFactory;
+use MyVendor\BeMart\Provide\Transfer\BeMartResponder;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
@@ -110,28 +111,28 @@ final class BootstrapTransferBehaviorTest extends TestCase
 
     private function httpStatusCode(int $resourceCode, bool $isHtml, bool $isRedirect): int
     {
-        $method = new ReflectionMethod(Bootstrap::class, 'httpStatusCode');
+        $method = new ReflectionMethod(BeMartResponder::class, 'httpStatusCode');
 
         /** @var int */
-        return $method->invoke(new Bootstrap(), $resourceCode, $isHtml, $isRedirect);
+        return $method->invoke(new BeMartResponder(), $resourceCode, $isHtml, $isRedirect);
     }
 
     /** @param array<string, mixed> $headers */
     private function isDownloadResponse(array $headers, bool $isHtml): bool
     {
-        $method = new ReflectionMethod(Bootstrap::class, 'isDownloadResponse');
+        $method = new ReflectionMethod(BeMartResponder::class, 'isDownloadResponse');
 
         /** @var bool */
-        return $method->invoke(new Bootstrap(), $headers, $isHtml);
+        return $method->invoke(new BeMartResponder(), $headers, $isHtml);
     }
 
     /** @param mixed $body */
     private function downloadBody(mixed $body): string
     {
-        $method = new ReflectionMethod(Bootstrap::class, 'downloadBody');
+        $method = new ReflectionMethod(BeMartResponder::class, 'downloadBody');
 
         /** @var string */
-        return $method->invoke(new Bootstrap(), $body);
+        return $method->invoke(new BeMartResponder(), $body);
     }
 
     /**
@@ -139,10 +140,10 @@ final class BootstrapTransferBehaviorTest extends TestCase
      */
     private function requestFromTarget(string $method, string $target, array $body): object
     {
-        $reflectedMethod = new ReflectionMethod(Bootstrap::class, 'requestFromTarget');
+        $reflectedMethod = new ReflectionMethod(BootstrapRequestFactory::class, 'requestFromTarget');
 
         /** @var object */
-        return $reflectedMethod->invoke(new Bootstrap(), $method, $target, $body);
+        return $reflectedMethod->invoke(new BootstrapRequestFactory(), $method, $target, $body);
     }
 
     /**
@@ -156,20 +157,20 @@ final class BootstrapTransferBehaviorTest extends TestCase
      */
     private function routingInput(object $request, array $server): array
     {
-        $reflectedMethod = new ReflectionMethod(Bootstrap::class, 'routingInput');
+        $reflectedMethod = new ReflectionMethod(BootstrapRequestFactory::class, 'routingInput');
 
         /** @var array{
          *     0: array{_GET: array<string, mixed>, _POST: array<string, mixed>},
          *     1: array{REQUEST_METHOD: string, REQUEST_URI: string, CONTENT_TYPE?: string, HTTP_RAW_POST_DATA?: string}
          * } */
-        return $reflectedMethod->invoke(new Bootstrap(), $request, $server);
+        return $reflectedMethod->invoke(new BootstrapRequestFactory(), $request, $server);
     }
 
     private function uploadedCsvBody(): string|null
     {
-        $method = new ReflectionMethod(Bootstrap::class, 'uploadedCsvBody');
+        $method = new ReflectionMethod(BootstrapRequestFactory::class, 'uploadedCsvBody');
 
         /** @var string|null */
-        return $method->invoke(new Bootstrap());
+        return $method->invoke(new BootstrapRequestFactory());
     }
 }

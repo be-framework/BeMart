@@ -45,10 +45,12 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\ResourceObject;
+use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
 use MyVendor\BeMart\Support\Resource\RequestQueryCapturingInvoker;
 use MyVendor\BeMart\Support\Resource\RequestQueryContext;
+use MyVendor\BeMart\Provide\Transfer\BeMartResponder;
 use Ray\Di\Scope;
 use Ray\WebFormModule\FormFactory;
 
@@ -71,6 +73,7 @@ final class AppModule extends AbstractAppModule
         // factory normally overrides it. Install explicitly so tests can use
         // `new Injector(new *Module(...))` without the factory.
         $this->override(new AppMetaModule($this->appMeta));
+        $this->bind(TransferInterface::class)->to(BeMartResponder::class);
 
         $this->install(
             new JsonSchemaModule(
