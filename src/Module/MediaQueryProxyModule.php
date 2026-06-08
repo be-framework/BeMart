@@ -19,8 +19,9 @@ final class MediaQueryProxyModule extends AbstractModule
     {
         $root = dirname(__DIR__, 2);
         /**
-         * MediaQuerySqlModule would discover non-query helper classes in be/src/Reason/Query.
-         * Use the advanced module with a #[DbQuery]-filtered Queries object instead.
+         * A plain MediaQuery directory scan would discover non-query helper
+         * classes in be/src/Reason/Query. Use MediaQueryModule with a
+         * #[DbQuery]-filtered Queries object to exclude them.
          *
          * @psalm-suppress InternalClass
          * @psalm-suppress InternalMethod
