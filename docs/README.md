@@ -22,7 +22,7 @@ title: "docs/ — ドキュメント索引"
 | 次の作業を始める | [`HOW_TO_CONTINUE.md`](HOW_TO_CONTINUE.md) → [`migration-status.md`](migration-status.md) §4 |
 | flow / workflow の意味を知る | [`flow-ontology.md`](flow-ontology.md) → [`../tests/README.md`](../tests/README.md) |
 | ALPS 生成の背景を読む | [`archive/alps-profile-generation.md`](archive/alps-profile-generation.md) |
-| 境界ルールを再利用する | [`skills/index.md`](skills/index.md) → [`methodology/`](methodology/) |
+| 境界ルールを再利用する | [`methodology/standard-first-rule.md`](methodology/standard-first-rule.md) → [`skills/index.md`](skills/index.md) → [`methodology/`](methodology/) |
 
 ## Canonical Documents
 
@@ -50,7 +50,7 @@ title: "docs/ — ドキュメント索引"
 
 | ディレクトリ | 内容 |
 |---|---|
-| [`methodology/`](methodology/) | 再利用可能な方法論・原則。`hypermedia-test-principle.md`（hypermedia テスト＝移植契約）、`FRAMEWORK_REVIEW.md`（元139 transition sliceの歴史的フレームワーク実務レビュー）、`be-bear-ai-era.md`（Be + BEAR の AI コーディング時代における潜在能力の論評）。 |
+| [`methodology/`](methodology/) | 再利用可能な方法論・原則。`standard-first-rule.md`（BEAR境界を触る前の標準参照ルール）、`ai-standardization-retrospective.md`（AI独自実装の反省）、`hypermedia-test-principle.md`（hypermedia テスト＝移植契約）、`FRAMEWORK_REVIEW.md`（元139 transition sliceの歴史的フレームワーク実務レビュー）、`be-bear-ai-era.md`（Be + BEAR の AI コーディング時代における潜在能力の論評）。 |
 | [`alps-doc/`](alps-doc/) | ALPS descriptor の `link rel="describedby"` から参照される長文補足の公開コピー。root の `../alps-doc/` を canonical とし、GitHub Pages の相対リンク切れを避けるため同期する。 |
 | [`phases/`](phases/) | フェーズ別の成果物。`alps-audit-phase3.md`（Phase 3 準備の ALPS 監査）、`admin-fanout-plan.md`（admin 移植のファンアウト計画）。 |
 | [`skills/`](skills/) | 移植で発見した skill gap（G-14 〜 G-25）。各エントリは独立して読める移植知見。索引は [`skills/index.md`](skills/index.md)。 |

@@ -9,6 +9,8 @@ BeMart の移植中に再利用可能な原則として切り出した文書群�
 
 | 文書 | 内容 |
 |---|---|
+| [`ai-standardization-retrospective.md`](ai-standardization-retrospective.md) | AI独自実装の失敗履歴と標準回帰の反省 |
+| [`standard-first-rule.md`](standard-first-rule.md) | BEAR.Sunday境界を触る前の標準参照ルール |
 | [`hypermedia-test-principle.md`](hypermedia-test-principle.md) | Hypermedia test を移植契約として扱う原則 |
 | [`query-naming.md`](query-naming.md) | Query / Command 名の境界と命名 |
 | [`sql-test-baseline.md`](sql-test-baseline.md) | SQL テストの基準線と扱い |
