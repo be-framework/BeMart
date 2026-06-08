@@ -8,8 +8,11 @@ use Ray\MediaQuery\Annotation\DbQuery;
 use Ray\MediaQuery\Queries;
 use ReflectionClass;
 use ReflectionMethod;
+use RuntimeException;
 
 use function dirname;
+use function is_dir;
+use function is_readable;
 use function sort;
 
 /** Discovers BeMart MediaQuery interfaces from #[DbQuery] methods. */
@@ -24,7 +27,12 @@ final class MediaQueryQueries
     public static function classes(string|null $appRoot = null): array
     {
         $root = $appRoot ?? dirname(__DIR__, 2);
-        $queries = Queries::fromDir($root . '/be/src/Reason/Query');
+        $queryDir = $root . '/be/src/Reason/Query';
+        if (! is_dir($queryDir) || ! is_readable($queryDir)) {
+            throw new RuntimeException('MediaQuery directory is not readable: ' . $queryDir);
+        }
+
+        $queries = Queries::fromDir($queryDir);
         $classes = [];
         foreach ($queries->classes as $class) {
             if (! self::hasDbQueryMethod($class)) {
