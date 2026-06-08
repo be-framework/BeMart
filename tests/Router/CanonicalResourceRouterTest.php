@@ -82,4 +82,33 @@ final class CanonicalResourceRouterTest extends TestCase
     {
         $this->assertFalse($this->router->generate('product_detail', ['id' => 'sample-001']));
     }
+
+    public function testCliArgvMapsToResourcePathAndQuery(): void
+    {
+        $match = $this->router->match(
+            ['argv' => ['bin/fake.php', 'post', '/shopping/checkout?csrfToken=token-1'], '_GET' => [], '_POST' => []],
+            ['argv' => ['bin/fake.php', 'post', '/shopping/checkout?csrfToken=token-1'], 'argc' => 3],
+        );
+
+        $this->assertSame('post', $match->method);
+        $this->assertSame('page://self/shopping/checkout', $match->path);
+        $this->assertSame(['csrfToken' => 'token-1'], $match->query);
+    }
+
+    public function testJsonBodyIsRequestQueryWhenPostSuperglobalIsEmpty(): void
+    {
+        $match = $this->router->match(
+            ['_GET' => [], '_POST' => []],
+            [
+                'REQUEST_METHOD' => 'POST',
+                'REQUEST_URI' => '/entry',
+                'CONTENT_TYPE' => 'application/json',
+                'HTTP_RAW_POST_DATA' => '{"email":"customer@example.com","csrfToken":"token-1"}',
+            ],
+        );
+
+        $this->assertSame('post', $match->method);
+        $this->assertSame('page://self/entry', $match->path);
+        $this->assertSame(['email' => 'customer@example.com', 'csrfToken' => 'token-1'], $match->query);
+    }
 }
