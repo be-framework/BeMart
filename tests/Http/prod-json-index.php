@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-putenv('APP_CONTEXT=http-prod-hal-api-app');
+use MyVendor\BeMart\Bootstrap;
 
 $sessionPath = __DIR__ . '/../../var/tmp/http-prod/session';
 if (! is_dir($sessionPath)) {
@@ -33,4 +33,6 @@ if (is_string($csrfToken) && $csrfToken !== '') {
     $_SESSION['_csrf_token'] = $csrfToken;
 }
 
-require __DIR__ . '/../../public/index.php';
+require __DIR__ . '/../../vendor/autoload.php';
+
+exit((new Bootstrap())('http-prod-hal-api-app', $GLOBALS, $_SERVER));

@@ -12,14 +12,13 @@ tests/
 ├── Resource/      resource-unit tests (page://*, app://*)
 ├── Auth/          session-adapter tests
 ├── Module/        Ray.Di wiring tests
-├── Router/        Aura.Router route-map tests
-├── EntryPoint/    bin/app.php CLI entry-point tests
+├── Router/        canonical resource router tests
 ├── Hypermedia/    in-process workflow tests
 │   ├── FlowCustomerInquiryTest.php  semantic inquiry workflow
 ├── Http/          real-HTTP workflow tests
 │   ├── FlowCustomerInquiryTest.php  extends Hypermedia\FlowCustomerInquiryTest
 │   ├── HttpResource.php      ResourceInterface over a koriym/php-server + curl
-│   ├── index.php             server entry — sets APP_CONTEXT=html, requires public/index.php
+│   ├── index.php             server entry — dispatches the html-test context directly
 │   └── log/                  per-run request/response log (git-ignored)
 └── Support/       shared workflow base and test exceptions
 ```
@@ -33,7 +32,7 @@ suite.
 
 | Suite | Directories | What it proves |
 |---|---|---|
-| `resource` | `tests/Resource`, `tests/Auth`, `tests/Module`, `tests/Router`, `tests/EntryPoint`, `be/tests` | units behave in isolation |
+| `fake` | `tests/Resource`, `tests/Auth`, `tests/Module`, `tests/Router`, `be/tests` | units behave in isolation |
 | `hypermedia` | `tests/Hypermedia` | a full user workflow holds **in-process** |
 | `http` | `tests/Http` | the same workflow holds over a **real HTTP / cookie boundary** |
 
