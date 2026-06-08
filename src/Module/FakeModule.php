@@ -52,9 +52,10 @@ final class FakeModule extends AbstractAppModule
     protected function configure(): void
     {
         $this->install(new AppModule($this->appMeta));
+        $root = dirname(__DIR__, 2);
         $this->install(new FakeQueryModule(
-            dirname(__DIR__, 2) . '/be/var/fake/query',
-            MediaQueryRuntimeModule::queryClasses(),
+            $root . '/be/var/fake/query',
+            MediaQueryQueries::fromAppRoot($root),
         ));
 
         $inventory = new FakeInventoryAllocator();
