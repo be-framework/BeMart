@@ -9,6 +9,7 @@ BeMart の移植中に再利用可能な原則として切り出した文書群�
 
 | 文書 | 内容 |
 |---|---|
+| [`architecture-audit-baseline.md`](architecture-audit-baseline.md) | BEAR.Sunday境界標準逸脱の監査baseline |
 | [`hypermedia-test-principle.md`](hypermedia-test-principle.md) | Hypermedia test を移植契約として扱う原則 |
 | [`query-naming.md`](query-naming.md) | Query / Command 名の境界と命名 |
 | [`sql-test-baseline.md`](sql-test-baseline.md) | SQL テストの基準線と扱い |
