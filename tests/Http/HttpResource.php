@@ -25,8 +25,10 @@ use function explode;
 use function file_exists;
 use function file_put_contents;
 use function getenv;
+use function html_entity_decode;
 use function http_build_query;
 use function implode;
+use function in_array;
 use function is_array;
 use function is_dir;
 use function is_string;
@@ -50,6 +52,8 @@ use function trim;
 
 use const DEBUG_BACKTRACE_IGNORE_ARGS;
 use const DIRECTORY_SEPARATOR;
+use const ENT_HTML5;
+use const ENT_QUOTES;
 use const FILE_APPEND;
 use const JSON_THROW_ON_ERROR;
 use const PHP_EOL;
@@ -132,14 +136,26 @@ final class HttpResource implements ResourceInterface
             throw new UnsupportedResourceOperationException('href requires a source response.');
         }
 
+        $href = $this->halHref($rel, $ro)
+            ?? $this->semanticHtmlHref($rel, $ro->view)
+            ?? $this->linkHeaderHref($rel, $ro->headers);
+        if ($href === null) {
+            throw new HalLinkNotFoundException(sprintf('HAL/HTML link rel `%s` is not available.', $rel));
+        }
+
+        return $this->get($href, $query);
+    }
+
+    private function halHref(string $rel, ResourceObject $ro): string|null
+    {
         $body = $ro->body;
         if (! is_array($body)) {
-            throw new UnsupportedResourceOperationException('href requires an array response body.');
+            return null;
         }
 
         $links = $body['_links'] ?? null;
         if (! is_array($links) || ! array_key_exists($rel, $links)) {
-            throw new HalLinkNotFoundException(sprintf('HAL link rel `%s` is not available.', $rel));
+            return null;
         }
 
         $link = $links[$rel];
@@ -152,7 +168,118 @@ final class HttpResource implements ResourceInterface
             throw new HalLinkNotFoundException(sprintf('HAL link rel `%s` does not contain an href.', $rel));
         }
 
-        return $this->get($href, $query);
+        return $href;
+    }
+
+    private function semanticHtmlHref(string $rel, string|null $view): string|null
+    {
+        if (! is_string($view) || $view === '') {
+            return null;
+        }
+
+        if (preg_match_all('/<(?:a|area|link)\b(?P<attrs>[^>]*)>/i', $view, $matches) !== 1) {
+            return null;
+        }
+
+        foreach ($matches['attrs'] as $attrs) {
+            if (! is_string($attrs) || ! $this->hasLinkToken($attrs, $rel)) {
+                continue;
+            }
+
+            $href = $this->attribute($attrs, 'href');
+            if ($href !== null && $href !== '') {
+                return $href;
+            }
+        }
+
+        return null;
+    }
+
+    /** @param array<string, mixed> $headers */
+    private function linkHeaderHref(string $rel, array $headers): string|null
+    {
+        $header = $this->headerValue($headers, 'Link');
+        if ($header === null) {
+            return null;
+        }
+
+        $links = preg_split('/,\s*(?=<)/', $header);
+        if (! is_array($links)) {
+            return null;
+        }
+
+        foreach ($links as $link) {
+            if (preg_match('/^\s*<([^>]*)>\s*(.*)$/', $link, $match) !== 1) {
+                continue;
+            }
+
+            $linkRel = $this->linkHeaderParam($match[2], 'rel');
+            if ($linkRel === null || ! $this->containsToken($linkRel, $rel)) {
+                continue;
+            }
+
+            return html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5);
+        }
+
+        return null;
+    }
+
+    private function hasLinkToken(string $attrs, string $rel): bool
+    {
+        $relAttr = $this->attribute($attrs, 'rel');
+        if ($relAttr !== null && $this->containsToken($relAttr, $rel)) {
+            return true;
+        }
+
+        $classAttr = $this->attribute($attrs, 'class');
+
+        return $classAttr !== null && $this->containsToken($classAttr, $rel);
+    }
+
+    private function attribute(string $attrs, string $name): string|null
+    {
+        if (preg_match('/\b' . $name . '\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))/i', $attrs, $match) !== 1) {
+            return null;
+        }
+
+        $value = $match[1] ?? $match[2] ?? $match[3] ?? '';
+
+        return html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
+    }
+
+    private function linkHeaderParam(string $attrs, string $name): string|null
+    {
+        if (preg_match('/(?:^|;)\s*' . $name . '\s*=\s*(?:"([^"]*)"|([^;\s]+))/i', $attrs, $match) !== 1) {
+            return null;
+        }
+
+        return $match[1] ?? $match[2] ?? null;
+    }
+
+    private function containsToken(string $value, string $token): bool
+    {
+        $tokens = preg_split('/\s+/', trim($value));
+        if (! is_array($tokens)) {
+            return false;
+        }
+
+        return in_array($token, $tokens, true);
+    }
+
+    /** @param array<string, mixed> $headers */
+    private function headerValue(array $headers, string $name): string|null
+    {
+        foreach ($headers as $header => $value) {
+            if (! is_string($header) || ! is_string($value)) {
+                continue;
+            }
+
+            if (strtolower($header) === strtolower($name)) {
+                return $value;
+            }
+        }
+
+        return null;
     }
 
     /** @param array<string, mixed> $query */
@@ -227,7 +354,21 @@ final class HttpResource implements ResourceInterface
     /** @param array<string, mixed> $query */
     private function url(string $method, string $uri, array $query): string
     {
+        if (str_starts_with($uri, 'http://') || str_starts_with($uri, 'https://')) {
+            if ($method !== 'GET' || $query === []) {
+                return $uri;
+            }
+
+            $separator = str_contains($uri, '?') ? '&' : '?';
+
+            return $uri . $separator . http_build_query($query);
+        }
+
         $uri = self::httpPath($uri);
+        if (! str_starts_with($uri, '/')) {
+            $uri = '/' . $uri;
+        }
+
         if ($method !== 'GET' || $query === []) {
             return $this->baseUri . $uri;
         }
