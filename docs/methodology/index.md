@@ -14,5 +14,6 @@ BeMart の移植中に再利用可能な原則として切り出した文書群�
 | [`sql-test-baseline.md`](sql-test-baseline.md) | SQL テストの基準線と扱い |
 | [`html-route-coverage.md`](html-route-coverage.md) | HTML route coverage の考え方 |
 | [`csrf-protection.md`](csrf-protection.md) | CSRF 境界の整理 |
+| [`context-composition-plan.md`](context-composition-plan.md) | BEAR.Package Injector/context composition へ戻すための調査計画 |
 | [`FRAMEWORK_REVIEW.md`](FRAMEWORK_REVIEW.md) | Be Framework 実務レビューの歴史的スナップショット |
 | [`be-bear-ai-era.md`](be-bear-ai-era.md) | Be + BEAR と AI コーディング時代の設計論 |
