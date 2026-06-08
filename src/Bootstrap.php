@@ -41,6 +41,7 @@ final class Bootstrap
         try {
             $response = $app->resource->{$request->method}->uri($request->path)($request->query);
             assert($response instanceof ResourceObject);
+            $server['_BEMART_CONTEXT'] = $context;
             $response->transfer($app->responder, $server);
 
             return 0;
