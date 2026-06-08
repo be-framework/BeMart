@@ -33,7 +33,7 @@
     },
     "require-dev": {
         "bear/api-doc": "1.x",
-        "bear/devtools": "dev-codex/httpresource-hal-follow-dev as 1.x-dev",
+        "bear/devtools": "dev-html-link-renderer-devtool as 1.x-dev",
         "cweagans/composer-patches": "^1.7",
         "koriym/php-server": "^1.0",
         "koriym/sql-quality": "^0.2.0",
