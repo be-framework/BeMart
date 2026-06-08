@@ -5114,12 +5114,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.DevTools.git",
-                "reference": "40f42da1a1ce20841ae5ecf5289cc8d8bd9ac471"
+                "reference": "6e2755280ecbb169fafc709828dd1a9078b35e42"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/40f42da1a1ce20841ae5ecf5289cc8d8bd9ac471",
-                "reference": "40f42da1a1ce20841ae5ecf5289cc8d8bd9ac471",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/6e2755280ecbb169fafc709828dd1a9078b35e42",
+                "reference": "6e2755280ecbb169fafc709828dd1a9078b35e42",
                 "shasum": ""
             },
             "require": {
@@ -5229,7 +5229,7 @@
                 "source": "https://github.com/bearsunday/BEAR.DevTools/tree/html-link-renderer-devtool",
                 "issues": "https://github.com/bearsunday/BEAR.DevTools/issues"
             },
-            "time": "2026-06-08T11:30:14+00:00"
+            "time": "2026-06-08T11:36:10+00:00"
         },
         {
             "name": "composer/pcre",
