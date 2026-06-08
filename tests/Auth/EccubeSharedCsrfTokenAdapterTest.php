@@ -22,7 +22,7 @@ use function putenv;
  *
  * These tests run under PHP_SAPI=cli (PHPUnit), so the CLI fallback is
  * exercised directly. The HTTP path is covered transitively by
- * ProdModuleTest and AppEntryPointTest (subprocess).
+ * ProdModuleTest and subprocess entrypoint coverage.
  */
 final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 {

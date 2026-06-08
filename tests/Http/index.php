@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-putenv('APP_CONTEXT=html-test-hal-api-app');
+use MyVendor\BeMart\Bootstrap;
 
 $sessionPath = __DIR__ . '/../../var/tmp/html/session';
 if (! is_dir($sessionPath)) {
@@ -10,5 +10,14 @@ if (! is_dir($sessionPath)) {
 }
 
 session_save_path($sessionPath);
+if (session_status() !== PHP_SESSION_ACTIVE) {
+    session_start([
+        'use_strict_mode' => false,
+        'cookie_httponly' => true,
+        'cookie_samesite' => 'Lax',
+    ]);
+}
 
-require __DIR__ . '/../../public/index.php';
+require __DIR__ . '/../../vendor/autoload.php';
+
+exit((new Bootstrap())('html-test-hal-api-app', $GLOBALS, $_SERVER));
