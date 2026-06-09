@@ -11,21 +11,18 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminLoginForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function session_status;
-use function str_contains;
-
-use const PHP_SESSION_ACTIVE;
 
 /**
  * EC-CUBE doAdminLogin — 管理者ログイン (Wave 4).
@@ -46,12 +43,11 @@ use const PHP_SESSION_ACTIVE;
  * body carries admin shape (adminId / loginId / name / authority)
  * rather than customer shape.
  *
- * In the html context, public/index.php starts a PHP session before
- * dispatch and this resource mirrors `adminId` into the flat session
- * key read by HtmlAdminSessionAdapter. The write is guarded by
- * an html APP_CONTEXT and PHP_SESSION_ACTIVE so app/test/prod contexts
- * keep their existing session behaviour and are not polluted by direct
- * `$_SESSION` writes.
+ * Password verification now establishes only a pre-auth 2FA login
+ * challenge. The flat admin session key read by
+ * {@see HtmlAdminSessionAdapter} is written after the existing-device
+ * challenge or first-device setup succeeds, so login-context 2FA
+ * resources never need to trust client-supplied identity.
  *
  * Source-of-truth gap: alps.json does not currently carry a
  * `doAdminLogin` transition id (only customer `doLogin`). Using the
@@ -69,6 +65,8 @@ class Login extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
+        private readonly TwoFactorAuthInterface $twoFactorAuth,
+        private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
     ) {
     }
 
@@ -124,18 +122,24 @@ class Login extends ResourceObject
 
         assert($final instanceof AdminAuthenticated);
 
-        if (str_contains((string) getenv('APP_CONTEXT'), 'html') && session_status() === PHP_SESSION_ACTIVE) {
-            $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = $final->adminId;
+        if ($this->twoFactorAuth->isEnabled($final->loginId)) {
+            $this->loginChallenge->startVerification($final->adminId, $final->loginId);
+            $location = '/admin/two-factor-auth';
+        } else {
+            $this->loginChallenge->startSetup(
+                $final->adminId,
+                $final->loginId,
+                $this->twoFactorAuth->generateSecret(),
+            );
+            $location = '/admin/two-factor-auth-set';
         }
 
-        // Post/Redirect/Get: a successful login redirects to the admin
-        // dashboard. EC-CUBE's doAdminLogin redirects to the
-        // `admin_homepage` route (`/admin`) — the dashboard reads the
-        // authenticated admin from the session, so the adminId is NOT a
-        // URL segment (there is no `/admin/{adminId}` route). JSON
-        // clients still read `adminId` off the body below.
+        // Post/Redirect/Get: a successful password check redirects to the
+        // next login-context 2FA step. JSON clients still read the
+        // authenticated admin proof off the body below, but the trusted
+        // identity used by 2FA is the session-backed challenge above.
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/index';
+        $this->headers['Location'] = $location;
         $this->body = [
             'adminId' => $final->adminId,
             'loginId' => $final->loginId,
