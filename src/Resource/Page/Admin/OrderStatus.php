@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\AdminUpdateOrderStatusInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderStatusForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function count;
@@ -70,6 +72,8 @@ class OrderStatus extends ResourceObject
      * has a per-order status-change transition on POST, but not yet a
      * master-data transition for editing status labels/colors.
      */
+    #[Alps('doUpdateOrderStatus')]
+    #[JsonSchema(schema: 'get-admin-order-status.json')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -105,6 +109,8 @@ class OrderStatus extends ResourceObject
      * @psalm-taint-source input $orderStatuses
      * @psalm-taint-source input $orderStatusRows
      */
+    #[Alps('doUpdateOrderStatusList')]
+    #[JsonSchema(schema: 'put-admin-order-status.json', params: 'put-admin-order-status.param.json')]
     #[CsrfProtected]
     public function onPut(
         array $orderStatuses = [],
@@ -136,37 +142,20 @@ class OrderStatus extends ResourceObject
      * @psalm-taint-source input $orderNo
      * @psalm-taint-source input $orderStatus
      */
+    #[Alps('doUpdateOrderStatus')]
+    #[JsonSchema(schema: 'post-admin-order-status.json', params: 'post-admin-order-status.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
+    #[Link(rel: 'goOrderShippingAddress', href: 'page://self/admin/order/shipping-address', method: 'get')]
     #[CsrfProtected]
     public function onPost(
         string $orderNo,
         int $orderStatus,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminUpdateOrderStatusInput(
-                orderNo: $orderNo,
-                orderStatus: $orderStatus,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'orderNo' => $orderNo,
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminUpdateOrderStatusInput(
+            orderNo: $orderNo,
+            orderStatus: $orderStatus,
+        ));
 
         assert($final instanceof AdminOrderStatusUpdated);
 

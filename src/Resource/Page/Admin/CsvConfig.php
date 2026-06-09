@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Input\UpdateCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminCsvConfigForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -54,7 +56,10 @@ class CsvConfig extends ResourceObject
      * Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
      * persists a submitted vector; this GET serves the editor body.
      */
-    public function onGet(int $id = 1): static
+    #[Alps('doUpdateCsv')]
+    #[JsonSchema(schema: 'get-admin-csv-config.json', params: 'get-admin-csv-config.param.json')]
+    #[Link(rel: 'doUpdateCsv', href: 'page://self/admin/csv-config', method: 'post')]
+    public function onGet(int $csvType = 1): static
     {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
@@ -69,7 +74,7 @@ class CsvConfig extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'form' => $form,
-            'id' => $id,
+            'csvType' => $csvType,
             'outputColumns' => AdminCsvConfigForm::outputColumns(),
             'notOutputColumns' => AdminCsvConfigForm::notOutputColumns(),
         ];
@@ -87,28 +92,19 @@ class CsvConfig extends ResourceObject
      * @psalm-taint-source input $csvType
      * @psalm-taint-source input $columns
      */
+    #[Alps('doUpdateCsv')]
+    #[JsonSchema(schema: 'post-admin-csv-config.json', params: 'post-admin-csv-config.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
+    #[Link(rel: 'goExportProduct', href: 'page://self/admin/product-csv', method: 'get')]
     #[CsrfProtected]
     public function onPost(
         int $csvType,
         array $columns,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateCsvInput(
-                csvType: $csvType,
-                columns: $columns,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateCsvInput(
+            csvType: $csvType,
+            columns: $columns,
+        ));
 
         assert($final instanceof CsvConfigUpdated);
 

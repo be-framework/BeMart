@@ -19,12 +19,12 @@ use Ray\WebFormModule\AbstractForm;
  *
  *  - **Field definition** — `init()` declares the add-cart inputs with
  *    the EC-CUBE field names / attributes (`quantity` IntegerType with
- *    `min` / `maxlength`, the `product_id` hidden) so the rendered
+ *    `min` / `maxlength`, the `productCode` hidden) so the rendered
  *    `<input>` markup reproduces EC-CUBE's `ec-numberInput` shape.
  *  - **HTML rendering** — `{{ form.input('quantity')|raw }}` in
  *    `Product.html.twig`.
  *  - **Repopulation** — {@see fillValues()} so a POST that the Be domain
- *    rejects re-shows the entered quantity, and the hidden `product_id`
+ *    rejects re-shows the entered quantity, and the hidden `productCode`
  *    can be seeded with the current product code.
  *
  * SCOPE — EC-CUBE's `AddCartType` also builds `classcategory_id1` /
@@ -36,7 +36,7 @@ use Ray\WebFormModule\AbstractForm;
  * from BeMart's data. EC-CUBE's `detail.twig` guards every
  * `classcategory_id*` block behind `{% if form.classcategory_idN is
  * defined %}`; with no class data those branches do not render on either
- * side. This form therefore declares only `product_id` + `quantity`,
+ * side. This form therefore declares only `productCode` + `quantity`,
  * matching a class-less product. The class-selection inputs are flagged
  * as a MISSING BODY FIELD follow-up — a Product vertical-slice
  * enrichment (ProductClass aggregation) is needed before they can be
@@ -67,7 +67,7 @@ final class AddCartForm extends AbstractForm
      * Declares the add-cart form fields.
      *
      * Field names / attributes are ported from EC-CUBE's `AddCartType`:
-     *   - `product_id` — a hidden input carrying the product identity.
+     *   - `productCode` — a hidden input carrying the product identity.
      *     EC-CUBE seeds it with `Product->getId()`; BeMart seeds it with
      *     the product code via {@see fillValues()}.
      *   - `quantity` — an integer input, `data: 1`, `attr: {min: 1,
@@ -77,7 +77,7 @@ final class AddCartForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('product_id', 'hidden');
+        $this->setField('productCode', 'hidden');
         $this->setField('csrfToken', 'hidden');
 
         $this->setField('quantity', 'number')->setAttribs([
@@ -95,7 +95,7 @@ final class AddCartForm extends AbstractForm
     /**
      * Repopulates the form inputs with values.
      *
-     * Used to seed the hidden `product_id` with the current product code
+     * Used to seed the hidden `productCode` with the current product code
      * on `onGet`, and to re-show the submitted quantity after a Be-domain
      * rejection.
      *

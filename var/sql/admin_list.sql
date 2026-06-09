@@ -1,1 +1,1 @@
-SELECT id, login_id, password, name, authority_id, work_id, sort_no FROM dtb_member ORDER BY login_id ASC LIMIT :limit OFFSET :offset
+SELECT CAST(id AS CHAR) AS id, login_id, password, COALESCE(name, '') AS name, COALESCE(authority_id, 0) AS authority_id, COALESCE(work_id, 1) AS work_id, COALESCE(sort_no, 0) AS sort_no FROM dtb_member ORDER BY login_id ASC LIMIT :limit OFFSET :offset

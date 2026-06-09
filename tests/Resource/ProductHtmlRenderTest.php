@@ -43,7 +43,7 @@ use function trim;
  * Ray.WebFormModule form-page recipe (see var/templates/README.md): the
  * Product resource exposes a real {@see AddCartForm} (an AbstractForm)
  * as `body.form`, the port renders `{{ form.input('quantity') }}` /
- * `{{ form.input('product_id') }}`, and this test renders EC-CUBE's
+ * `{{ form.input('productCode') }}`, and this test renders EC-CUBE's
  * `form_widget(form.quantity)` / `form_rest(form)` calls through the
  * SAME `AddCartForm` instance so the inputs diff to ZERO.
  *
@@ -159,8 +159,8 @@ final class ProductHtmlRenderTest extends TestCase
             'class="ec-price__price"',
             '<div class="ec-productRole__code">',
             // Slice 9: url('product_add_cart', {id}) now resolves through
-            // the shared Aura route map to EC-CUBE's real path pattern.
-            '<form action="/products/add_cart/sample-001" method="post" id="form1"',
+            // the canonical Resource path to EC-CUBE's real path pattern.
+            '<form action="/cart/item" method="post" id="form1"',
             '<div class="ec-numberInput">',
             'class="ec-blockBtn--action add-cart"',
             '<div class="ec-modal">',
@@ -185,8 +185,8 @@ final class ProductHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="quantity"', $html);
         $this->assertStringContainsString('type="number"', $html);
         $this->assertStringContainsString('min="1"', $html);
-        // product_id — hidden input seeded with the product code.
-        $this->assertStringContainsString('type="hidden" name="product_id" value="sample-001"', $html);
+        // productCode — hidden input seeded with the product code.
+        $this->assertStringContainsString('type="hidden" name="productCode" value="sample-001"', $html);
     }
 
     /**
@@ -195,6 +195,7 @@ final class ProductHtmlRenderTest extends TestCase
      * image-less) product. Every difference must be in the residual
      * allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testProductDetailHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource
@@ -258,9 +259,9 @@ final class ProductHtmlRenderTest extends TestCase
             // The add-to-cart form's hidden CSRF input. EC-CUBE's
             // detail.twig drives add-cart through AJAX with the
             // `eccube-csrf-token` meta; BeMart's ported form carries the
-            // token as a hidden `_token` input (CsrfToken
-            // reference). Residual by its `_token` field name.
-            'name="_token"',
+            // token as a hidden `csrfToken` input (CsrfToken
+            // reference). Residual by its `csrfToken` field name.
+            'name="csrfToken"',
             'name="csrfToken"',
         ] as $family) {
             if (str_contains($line, $family)) {
@@ -445,8 +446,8 @@ final class ProductHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
         $twig->addFunction(new TwigFunction('class_categories_as_json', static fn ($p): string => '{}'));
@@ -454,13 +455,13 @@ final class ProductHtmlRenderTest extends TestCase
         // FORM-PAGE recipe: EC-CUBE's `form_widget(form.quantity)` and
         // `form_rest(form)` render through BeMart's real AddCartForm so
         // the add-cart `<input>`s are byte-identical to BeMart's port.
-        // `form_rest` renders the un-rendered hidden `product_id` — the
-        // same input BeMart's template emits as `form.input('product_id')`.
+        // `form_rest` renders the un-rendered hidden `productCode` — the
+        // same input BeMart's template emits as `form.input('productCode')`.
         // Seeded identically to the Product resource's onGet form so the
         // hidden input diffs to ZERO.
         $form = (new FormFactory())->newInstance(AddCartForm::class);
         if ($form instanceof AddCartForm) {
-            $form->fillValues(['product_id' => 'sample-001', 'quantity' => 1]);
+            $form->fillValues(['productCode' => 'sample-001', 'quantity' => 1]);
         }
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form): Markup {
             if ($form instanceof AddCartForm && is_string($field) && $field !== '') {
@@ -470,7 +471,7 @@ final class ProductHtmlRenderTest extends TestCase
             return new Markup('', 'UTF-8');
         }));
         $twig->addFunction(new TwigFunction('form_rest', static function ($f = '') use ($form): Markup {
-            return new Markup($form instanceof AddCartForm ? $form->input('product_id') : '', 'UTF-8');
+            return new Markup($form instanceof AddCartForm ? $form->input('productCode') : '', 'UTF-8');
         }));
         $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
         $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));

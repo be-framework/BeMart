@@ -118,6 +118,7 @@ final class AdminBlockHtmlRenderTest extends TestCase
         $this->assertStringContainsString('class="c-conversionArea"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testBlockEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/block/block')->toString();
@@ -167,10 +168,10 @@ final class AdminBlockHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // Form: EC-CUBE's hidden `_token` CSRF input. BeMart keeps the
+            // Form: EC-CUBE's hidden `csrfToken` CSRF input. BeMart keeps the
             // hidden input with an empty value.
-            'name="_token"',
-            'csrf_token',
+            'name="csrfToken"',
+            'csrfcsrfToken',
             // Form: EC-CUBE's hidden `id` + `DeviceType` bookkeeping
             // inputs (BlockType carries them; the AdminBlockForm declares
             // only name/file_name/block_html). The form_widget for an
@@ -207,7 +208,7 @@ final class AdminBlockHtmlRenderTest extends TestCase
 
         return $twig->render('Content/block_edit.twig', [
             'form' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'id' => 'id',
                 'DeviceType' => 'DeviceType',
                 'name' => 'name',
@@ -261,15 +262,15 @@ final class AdminBlockHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 
         // EC-CUBE's `form_widget(form.<field>)` renders through BeMart's
         // real AdminBlockForm so the inputs are byte-identical to
         // BeMart's port. Fields the AdminBlockForm does NOT declare
-        // (`_token`, `id`, `DeviceType` — EC-CUBE bookkeeping / CSRF
+        // (`csrfToken`, `id`, `DeviceType` — EC-CUBE bookkeeping / CSRF
         // runtime) render empty here, mirroring BeMart's port; both are
         // residual families.
         $formFields = ['name', 'file_name', 'block_html'];

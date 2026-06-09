@@ -16,7 +16,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` / `path(...)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` / `canonical-path ...)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `form_widget(searchForm.multi)` -> `searchForm.input('multi')` — the
      real AdminOrderSearchForm keyword box (Ray.WebFormModule).
@@ -63,7 +63,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_order' %}
+{% set route = 'admin-order' %}
 {% set title = '受注一覧' %}
 {% set sub_title = '受注管理' %}
 
@@ -89,14 +89,14 @@
 
             $('#btn_bulk_delete').on('click', function(event) {
                 event.preventDefault();
-                $('#form_bulk').attr('action', "{{ url('admin_order_bulk_delete') }}").submit();
+                $('#form_bulk').attr('action', "/admin/order/bulk-delete").submit();
                 return false;
             });
 
             // PDF出力(複数)
             $('#bulkExportPdf').on('click', function(event) {
                 window.open('', 'newwin', 'toolbar=no, location=no, directories=no, status=no, menubar=no, scrollbars=yes, resizable=yes, width=700, height=700');
-                $('#form_bulk').attr('action', "{{ url('admin_order_export_pdf') }}");
+                $('#form_bulk').attr('action', "/admin/order/export-order-pdf");
                 $('#form_bulk').attr('target', 'newwin');
                 $('#form_bulk').submit();
                 return false;
@@ -113,10 +113,10 @@
                 $.ajax({
                     type: 'POST',
                     url: url,
-                    data: {'tracking_number': tracking_number, '_token': '{{ csrf_token('admin_order') }}'}
+                    data: {'trackingNumber': tracking_number, 'csrfToken': '{{ csrf_token('admin_order') }}'}
                 }).done(function(data, textStatus, jqXHR) {
                     if (data['status'] == 'OK') {
-                        $('#tracking_number_' + id).val(data['tracking_number']);
+                        $('#tracking_number_' + id).val(data['trackingNumber']);
                         if (typeof callback == 'function') {
                             callback();
                         }
@@ -183,7 +183,7 @@
 
             // 完了ボタン
             $('#bulkChangeComplete').on('click', function() {
-                location.href = '{{ url('admin_order', { 'resume': 1 }) }}';
+                location.href = '/admin/order-list?resume=1';
             });
 
         });
@@ -195,7 +195,7 @@
 {% block main %}
     <!--検索条件設定テーブルここから-->
     <div class="c-outsideBlock">
-        <form name="search_form" id="search_form" method="POST" action="{{ url('admin_order') }}">
+        <form name="search_form" id="search_form" method="get" action="/admin/order-list">
             <div class="c-outsideBlock__contents">
                 <div class="row">
                     <div class="col-12">
@@ -363,7 +363,7 @@
                 {% if count %}
 
                     <form id="form_bulk" method="POST" action="">
-                        <input type="hidden" name="_token" value="{{ csrf_token('admin_order') }}">
+                        <input type="hidden" name="csrfToken" value="{{ csrf_token('admin_order') }}">
                         <div class="row justify-content-between mb-2">
                             <div class="col-7">
                                 <div class="row justify-content-between">
@@ -395,10 +395,10 @@
                                                 <span>CSVダウンロード</span>
                                             </button>
                                             <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="{{ url('admin_order_export_order') }}" id="orderCsvDownload">
+                                                <a class="dropdown-item" href="/admin/order/export-order" id="orderCsvDownload">
                                                     受注CSV
                                                 </a>
-                                                <a class="dropdown-item" href="{{ url('admin_order_export_shipping') }}" id="shippingCsvDownload">
+                                                <a class="dropdown-item" href="/admin/order/export-shipping" id="shippingCsvDownload">
                                                     出荷CSV
                                                 </a>
                                             </div>
@@ -410,10 +410,10 @@
                                                 <span>CSV出力項目設定</span>
                                             </button>
                                             <div class="dropdown-menu">
-                                                <a class="dropdown-item" href="{{ url('admin_setting_shop_csv') }}" id="orderCsvSetting">
+                                                <a class="dropdown-item" href="/admin/csv-config" id="orderCsvSetting">
                                                     受注CSV
                                                 </a>
-                                                <a class="dropdown-item" href="{{ url('admin_setting_shop_csv') }}" id="shippingCsvSetting">
+                                                <a class="dropdown-item" href="/admin/csv-config" id="shippingCsvSetting">
                                                     出荷CSV
                                                 </a>
                                             </div>
@@ -446,13 +446,13 @@
                                         <tr>
                                             <td class="align-middle text-center ps-3">
                                                 <input type="checkbox" id="check_{{ Order.orderNo }}" data-id="{{ Order.orderNo }}" name="ids[]" value="{{ Order.orderNo }}"
-                                                       data-preview-notify-mail-url="{{ url('admin_shipping_preview_notify_mail', { id: Order.orderNo}) }}"
-                                                       data-notify-mail-url="{{ url('admin_shipping_notify_mail', { id: Order.orderNo}) }}"
-                                                       data-update-status-url="{{ url('admin_shipping_update_order_status', { id: Order.orderNo}) }}"
+                                                       data-preview-notify-mail-url="/admin/order/mail-confirm?orderNo={{ Order.orderNo }}"
+                                                       data-notify-mail-url="/admin/order/shipping-notify-mail?orderNo={{ Order.orderNo }}"
+                                                       data-update-status-url="/admin/order?orderNo={{ Order.orderNo }}&_method=put"
                                                 />
                                             </td>
                                             <td class="align-middle text-start">
-                                                <a class="action-edit" href="{{ url('admin_order_edit', { id : Order.orderNo }) }}">{{ Order.orderNo }}<br>{{ Order.customerId }}<br>{{ Order.orderDate }}</a>
+                                                <a class="action-edit" href="/admin/order/edit?orderNo={{ Order.orderNo }}">{{ Order.orderNo }}<br>{{ Order.customerId }}<br>{{ Order.orderDate }}</a>
                                             </td>
                                             <td class="align-middle text-center">
                                             </td>
@@ -470,7 +470,7 @@
                                             </td>
                                             <td class="align-middle text-center">
                                                 <div class="input-group input-group-sm">
-                                                    <input type="text" id="tracking_number_{{ Order.orderNo }}" class="form-control update_tracking_number" placeholder="お問い合わせ番号" value="" data-shipping_id="{{ Order.orderNo }}" data-url="{{ url('admin_shipping_update_tracking_number', { id : Order.orderNo }) }}"/>
+                                                    <input type="text" id="tracking_number_{{ Order.orderNo }}" class="form-control update_tracking_number" placeholder="お問い合わせ番号" value="" data-shipping_id="{{ Order.orderNo }}" data-url="/admin/order/tracking-number?orderNo={{ Order.orderNo }}&_method=put"/>
                                                     <span class="input-group-btn">
                                                 <button type="button" class="btn btn-default update_tracking_number" data-target="#tracking_number_{{ Order.orderNo }}">
                                                     <i class="fa fa-check fa-lg text-secondary" aria-hidden="true"></i>
@@ -486,22 +486,22 @@
                                                     <div class="px-1 d-inline-block">
                                                         <a class="btn btn-ec-actionIcon confirmationModal"
                                                            data-type="mail" data-bulk-update="false"
-                                                           data-preview-notify-mail-url="{{ url('admin_shipping_preview_notify_mail', { id: Order.orderNo}) }}"
-                                                           data-notify-mail-url="{{ url('admin_shipping_notify_mail', { id: Order.orderNo}) }}"
+                                                           data-preview-notify-mail-url="/admin/order/mail-confirm?orderNo={{ Order.orderNo }}"
+                                                           data-notify-mail-url="/admin/order/shipping-notify-mail?orderNo={{ Order.orderNo }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" title="出荷メール送信">
                                                             <i class="fa fa-send fa-lg text-secondary" aria-hidden="true"></i>
                                                         </a>
                                                     </div>
                                                     <div class="px-1 d-inline-block">
-                                                        <a class="btn btn-ec-actionIcon pdf-print" href="{{ url('admin_order_export_pdf') }}?ids[]={{ Order.orderNo }}" data-bs-toggle="tooltip" data-bs-placement="top" title="納品書出力">
+                                                        <a class="btn btn-ec-actionIcon pdf-print" href="/admin/order/export-order-pdf?ids[]={{ Order.orderNo }}" data-bs-toggle="tooltip" data-bs-placement="top" title="納品書出力">
                                                             <i class="fa fa-table fa-lg text-secondary" aria-hidden="true"></i>
                                                         </a>
                                                     </div>
                                                     <div class="px-1 d-inline-block">
                                                         <a class="btn btn-ec-actionIcon confirmationModal" href="javascript:;"
                                                            data-id="{{ Order.orderNo }}" data-type="status" data-bulk-update="false"
-                                                           data-update-status-url="{{ url('admin_shipping_update_order_status', { id: Order.orderNo}) }}"
-                                                           data-preview-notify-mail-url="{{ url('admin_shipping_preview_notify_mail', { id: Order.orderNo}) }}"
+                                                           data-update-status-url="/admin/order?orderNo={{ Order.orderNo }}&_method=put"
+                                                           data-preview-notify-mail-url="/admin/order/mail-confirm?orderNo={{ Order.orderNo }}"
                                                            data-bs-toggle="tooltip" data-bs-placement="top" title="出荷済にする">
                                                             <i class="fa fa-check fa-lg text-secondary" aria-hidden="true"></i>
                                                         </a>

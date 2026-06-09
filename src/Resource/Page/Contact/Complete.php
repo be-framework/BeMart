@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Contact;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goContactComplete — お問い合わせ(完了)
@@ -21,29 +23,31 @@ use BEAR\Resource\ResourceObject;
  * is added: no Be Framework, no domain logic, no Reasons. It exposes
  * only the complete-screen shape + the outbound `goTop` transition.
  *
- * `Contact/complete.twig` is a static inquiry-sent confirmation (the
- * completion message + a top-page button) — it reads no dynamic data,
- * so the thin-renderer body carries nothing to surface.
+ * `Contact/complete.twig` is mostly static (the completion message +
+ * a top-page button), but the Resource also carries the public receipt
+ * `ticketId` issued by doSubmitContact.
  *
  * Maps to `page://self/contact/complete`.
  */
 class Complete extends ResourceObject
 {
+    /** ALPS `goContactComplete` に対応する GET 操作。 */
+    #[Alps('goContactComplete')]
+    #[JsonSchema(schema: 'get-contact-complete.json', params: 'get-contact-complete.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
-    public function onGet(): static
+    public function onGet(string $ticketId = ''): static
     {
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goContactComplete',
-            'fields' => [],
+            'fields' => ['ticketId'],
+            'ticketId' => $ticketId,
             'submitTo' => null,
             'staticContent' => [
                 'page' => 'contact-complete',
                 'title' => 'お問い合わせ(完了)',
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
+            'links' => ['goTop' => 'page://self/'],
         ];
 
         return $this;

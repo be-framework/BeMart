@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\LoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function getenv;
@@ -82,6 +84,8 @@ class Login extends ResourceObject
      * renders into the form's hidden `_csrf_token` input so the
      * subsequent POST passes CSRF validation.
      */
+    #[Alps('goLogin')]
+    #[JsonSchema(schema: 'get-login.json')]
     #[Link(rel: 'doLogin', href: 'page://self/login', method: 'post')]
     #[Link(rel: 'goCustomerRegistration', href: 'page://self/entry')]
     #[Link(rel: 'doRequestPasswordReset', href: 'page://self/forgot-password', method: 'post')]
@@ -110,45 +114,16 @@ class Login extends ResourceObject
      * @psalm-taint-source input $email
      * @psalm-taint-source input $password
      */
+    #[Alps('doLogin')]
+    #[JsonSchema(schema: 'post-login.json', params: 'post-login.param.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
     public function onPost(string $email, string $password): static
     {
-        try {
-            $final = ($this->becoming)(new LoginInput(
-                email: $email,
-                password: $password,
-            ));
-        } catch (SemanticVariableException $e) {
-            // Be Framework Semantics rejected the input shape (malformed
-            // email / out-of-range password). Bridge the domain verdict
-            // onto the form: repopulate the email, attach the ja message
-            // as an inline field error. EC-CUBE shows this in
-            // `ec-errorMessage`.
-            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $message,
-                'email' => $email,
-                'form' => $this->failedForm($email, $message),
-            ];
-
-            return $this;
-        } catch (LoginFailedException) {
-            // Wrong credentials. The top-level body deliberately does NOT
-            // echo the email — that would leak user-enumeration signal.
-            // The repopulated email lives INSIDE `body['form']` only, so
-            // the HTML page re-shows it (EC-CUBE's getLastUsername UX)
-            // while the JSON body stays enumeration-safe.
-            $message = 'メールアドレスまたはパスワードが正しくありません。';
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = [
-                'message' => $message,
-                'form' => $this->failedForm($email, $message),
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new LoginInput(
+            email: $email,
+            password: $password,
+        ));
 
         assert($final instanceof CustomerAuthenticated);
 
@@ -190,9 +165,9 @@ class Login extends ResourceObject
 
         // Repopulate the email (EC-CUBE getLastUsername UX). The password
         // is deliberately not repopulated.
-        $form->fillValues(['login_email' => $email]);
+        $form->fillValues(['email' => $email]);
         // Bridge the Be-domain verdict onto the form's error state.
-        $form->setDomainError('login_email', $message);
+        $form->setDomainError('email', $message);
 
         return $form;
     }
@@ -203,8 +178,8 @@ class Login extends ResourceObject
         assert($form instanceof LoginForm);
 
         $form->fillValues([
-            'login_email' => self::POC_LOGIN_EMAIL,
-            'login_pass' => self::POC_LOGIN_PASSWORD,
+            'email' => self::POC_LOGIN_EMAIL,
+            'password' => self::POC_LOGIN_PASSWORD,
         ]);
 
         return $form;

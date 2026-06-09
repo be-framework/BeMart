@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AddCartForm;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -29,7 +31,7 @@ use function assert;
  * action, which EC-CUBE renders as a FORM (`AddCartType` — quantity +,
  * for class products, the product-class selects). The resource builds
  * an {@see AddCartForm} (Ray.WebFormModule AbstractForm), seeds its
- * hidden `product_id` with the product code, and exposes it as
+ * hidden `productCode` with the product code, and exposes it as
  * `body['form']` so the HTML port can render the real quantity
  * `<input>` via `{{ form.input('quantity') }}`. The form is a
  * field-definition + renderer only — VALIDATION AUTHORITY STAYS WITH the
@@ -59,20 +61,15 @@ class Product extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Alps('goProduct')]
+    #[JsonSchema(schema: 'get-product.json', params: 'get-product.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/products')]
     #[Link(rel: 'doAddCartItem', href: 'page://self/cart/item', method: 'post')]
     #[Link(rel: 'doAddFavorite', href: 'page://self/mypage/favorite', method: 'post')]
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     public function onGet(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new GetProductInput($productCode));
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetProductInput($productCode));
 
         assert($final instanceof ProductFetched);
 
@@ -93,7 +90,7 @@ class Product extends ResourceObject
             'mainImage' => $final->imagePath ?? ProductImageCatalog::forProductCode($final->productCode),
             // Phase 3: the add-to-cart form. EC-CUBE renders the add-cart
             // quantity input through `AddCartType`; BeMart renders it
-            // through this AddCartForm. The hidden `product_id` is seeded
+            // through this AddCartForm. The hidden `productCode` is seeded
             // with the product code. JSON contexts ignore `form`.
             'form' => $this->addCartForm($final->productCode),
             // CSRF reference for the add-to-cart POST: the HTML port
@@ -108,7 +105,7 @@ class Product extends ResourceObject
     /**
      * Builds an AddCartForm for the given product.
      *
-     * The hidden `product_id` is seeded with the product code so the
+     * The hidden `productCode` is seeded with the product code so the
      * POST carries the product identity, and `quantity` keeps its
      * EC-CUBE default of 1. Validation authority stays with Be — the
      * form is a renderer here, never a validator.
@@ -119,7 +116,7 @@ class Product extends ResourceObject
         assert($form instanceof AddCartForm);
 
         $form->fillValues([
-            'product_id' => $productCode,
+            'productCode' => $productCode,
             'csrfToken' => $this->csrf->token,
             'quantity' => 1,
         ]);

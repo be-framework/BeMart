@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Template;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,6 +20,7 @@ use MyVendor\BeMart\Be\Input\DeleteTemplateInput;
 use MyVendor\BeMart\Be\Input\DownloadTemplateInput;
 use MyVendor\BeMart\Be\Input\GetAdminTemplateListInput;
 use MyVendor\BeMart\Be\Input\SelectTemplateInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -33,17 +35,17 @@ class TemplateList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goTemplateList` に対応する GET 操作。 */
+    #[Alps('goTemplateList')]
+    #[JsonSchema(schema: 'get-admin-template-template-list.json')]
     #[Link(rel: 'goTemplateAdd', href: 'page://self/admin/template/template-add')]
+    #[Link(rel: 'goTemplateInstall', href: 'page://self/admin/template/template-add', method: 'get')]
+    #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
+    #[Link(rel: 'doDownloadTemplate', href: 'page://self/admin/template/template-list', method: 'post')]
+    #[Link(rel: 'doDeleteTemplate', href: 'page://self/admin/template/template-list', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminTemplateListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminTemplateListInput());
 
         assert($final instanceof AdminTemplateListFetched);
 
@@ -60,9 +62,13 @@ class TemplateList extends ResourceObject
     }
 
     /** Activates a template (doSelectTemplate). ALPS idempotent → PUT.
+     * ALPS `doSelectTemplate` に対応する PUT 操作。
      *
      * @psalm-taint-source input $templateId
      */
+    #[Alps('doSelectTemplate')]
+    #[JsonSchema(schema: 'put-admin-template-template-list.json', params: 'put-admin-template-template-list.param.json')]
+    #[Link(rel: 'doDownloadTemplate', href: 'page://self/admin/template/template-list', method: 'post')]
     #[CsrfProtected]
     public function onPut(string $templateId): static
     {
@@ -70,9 +76,13 @@ class TemplateList extends ResourceObject
     }
 
     /** Deletes a template (doDeleteTemplate). ALPS idempotent → DELETE.
+     * ALPS `doDeleteTemplate` に対応する DELETE 操作。
      *
      * @psalm-taint-source input $templateId
      */
+    #[Alps('doDeleteTemplate')]
+    #[JsonSchema(schema: 'delete-admin-template-template-list.json', params: 'delete-admin-template-template-list.param.json')]
+    #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list', method: 'get')]
     #[CsrfProtected]
     public function onDelete(string $templateId): static
     {
@@ -80,25 +90,17 @@ class TemplateList extends ResourceObject
     }
 
     /** Downloads a template zip (doDownloadTemplate). ALPS unsafe → POST.
+     * ALPS `doDownloadTemplate` に対応する POST 操作。
      *
      * @psalm-taint-source input $templateId
      */
+    #[Alps('doDownloadTemplate')]
+    #[JsonSchema(schema: 'post-admin-template-template-list.json', params: 'post-admin-template-template-list.param.json')]
+    #[Link(rel: 'doDeleteTemplate', href: 'page://self/admin/template/template-list', method: 'delete')]
     #[CsrfProtected]
     public function onPost(string $templateId): static
     {
-        try {
-            $final = ($this->becoming)(new DownloadTemplateInput(templateId: $templateId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (TemplateNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたテンプレートは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DownloadTemplateInput(templateId: $templateId));
 
         assert($final instanceof TemplateDownloaded);
 
@@ -118,24 +120,12 @@ class TemplateList extends ResourceObject
      */
     private function run(string $transitionId, callable $run, string $message): static
     {
-        try {
-            $final = $run($this->becoming);
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (TemplateNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたテンプレートは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = $run($this->becoming);
 
         assert($final instanceof TemplateSelected || $final instanceof TemplateDeleted);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_store_template';
+        $this->headers['Location'] = '/admin/template/template-list';
         $this->body = [
             'transitionId' => $transitionId,
             'templateId' => $final->templateId,

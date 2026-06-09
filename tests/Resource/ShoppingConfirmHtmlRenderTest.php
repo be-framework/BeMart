@@ -160,7 +160,7 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         foreach ([
             '<h1>ご注文内容のご確認</h1>',
             '<ul class="ec-progress">',
-            // Slice 9: url('shopping_checkout') now resolves through Aura route map.
+            // Slice 9: url('shopping_checkout') now resolves through canonical Resource path.
             '<form id="shopping-form" method="post" action="/shopping/checkout">',
             '<div class="ec-orderRole">',
             '<div class="ec-orderAccount">',
@@ -174,6 +174,7 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         }
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShoppingConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/confirm')->toString();
@@ -319,7 +320,7 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
                 'taxable_total' => 18290, 'payment_total' => 18290,
                 'message' => '',
             ]),
-            'form' => new EcCubeStub(['_token' => '__token__']),
+            'form' => new EcCubeStub(['csrfToken' => '_csrfToken__']),
             'activeTradeLaws' => [],
             'BaseInfo' => new EcCubeStub(['isOptionPoint' => false]),
             'eccube_config' => ['locale' => 'ja'],
@@ -374,16 +375,16 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => true));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
         $twig->addFunction(new TwigFunction('is_reduced_tax_rate', static fn ($x = null): bool => false));
-        // EC-CUBE's `form_widget(form._token)` — the CSRF hidden. Stubbed
-        // to the same empty-value `_token` hidden BeMart's port emits.
+        // EC-CUBE's `form_widget(form.csrfToken)` — the CSRF hidden. Stubbed
+        // to the same empty-value `csrfToken` hidden BeMart's port emits.
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

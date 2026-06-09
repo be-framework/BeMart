@@ -79,24 +79,24 @@ final class FavoriteResourceTest extends TestCase
 
     public function testOnPostUnknownProductReturns404(): void
     {
-        $ro = $this->resource->post('page://self/mypage/favorite', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\ProductNotFoundException::class);
+
+        $this->resource->post('page://self/mypage/favorite', [
             'productCode' => 'missing-zzz',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnPostUnauthenticatedReturns401(): void
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->post('page://self/mypage/favorite', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
+
+        $this->resource->post('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -143,12 +143,12 @@ final class FavoriteResourceTest extends TestCase
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->delete('page://self/mypage/favorite', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
+
+        $this->resource->delete('page://self/mypage/favorite', [
             'productCode' => 'sample-001',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
     }
 
     public function testOnDeleteMissingCsrfReturns403(): void

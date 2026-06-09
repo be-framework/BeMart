@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goTop — トップページ (Wave 3H pure renderer).
@@ -34,6 +36,8 @@ class Index extends ResourceObject
      *     recommendedProducts, categoryNav into `body`. For now the
      *     resource declares the hypermedia surface only.
      */
+    #[Alps('goTop')]
+    #[JsonSchema(schema: 'get-index.json')]
     #[Link(rel: 'goProductList', href: 'page://self/products')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'goContactForm', href: 'page://self/contact')]

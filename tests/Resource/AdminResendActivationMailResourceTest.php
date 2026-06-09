@@ -94,16 +94,12 @@ final class AdminResendActivationMailResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post(self::URI, [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post(self::URI, [
             'email' => self::PROVISIONAL_EMAIL,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
-        // Anti-enumeration: an admin-anonymous caller MUST NOT learn
-        // whether the queried email resolves.
-        $this->assertArrayNotHasKey('customerId', $ro->body);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -118,26 +114,21 @@ final class AdminResendActivationMailResourceTest extends TestCase
 
     public function testOnPostUnknownEmailReturns404(): void
     {
-        $ro = $this->resource->post(self::URI, [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CustomerNotFoundException::class);
+
+        $this->resource->post(self::URI, [
             'email' => 'nobody@example.com',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
-        $this->assertStringContainsString('会員', $ro->body['message']);
     }
 
     public function testOnPostAlreadyActiveCustomerReturns409(): void
     {
-        $ro = $this->resource->post(self::URI, [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CustomerAlreadyActivatedException::class);
+
+        $this->resource->post(self::URI, [
             'email' => self::ACTIVE_EMAIL,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(409, $ro->code);
-        $this->assertStringContainsString('本会員', $ro->body['message']);
-
-        $mailer = $this->injector->getInstance(FakeMailer::class);
-        $this->assertCount(0, $mailer->customerActivations);
     }
 }

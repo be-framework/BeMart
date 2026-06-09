@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -17,6 +19,7 @@ use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminMasterDataForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -39,8 +42,12 @@ class MasterData extends ResourceObject
     }
 
     /**
+     * ALPS `goMasterData` に対応する GET 操作。
      * @psalm-taint-source input $masterType
      */
+    #[Alps('goMasterData')]
+    #[JsonSchema(schema: 'get-admin-master-data.json', params: 'get-admin-master-data.param.json')]
+    #[Link(rel: 'doSelectMasterData', href: 'page://self/admin/master-data', method: 'put')]
     public function onGet(string $masterType = 'tag'): static
     {
         if ($this->adminSession->adminId === null) {
@@ -50,14 +57,7 @@ class MasterData extends ResourceObject
             return $this;
         }
 
-        try {
-            $rows = $this->masters->listRows($masterType);
-        } catch (MasterTypeFormatException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '指定されたマスタデータは見つかりませんでした。'];
-
-            return $this;
-        }
+        $rows = $this->masters->listRows($masterType);
 
         $masterTypes = $this->masters->listMasterTypes();
         $form = $this->formFactory->newInstance(AdminMasterDataForm::class);
@@ -81,27 +81,25 @@ class MasterData extends ResourceObject
      *
      * @psalm-taint-source input $masterType
      */
+    #[Alps('doSelectMasterData')]
+    #[JsonSchema(schema: 'put-admin-master-data.json', params: 'put-admin-master-data.param.json')]
+    #[Link(rel: 'doUpdateMasterData', href: 'page://self/admin/master-data-edit', method: 'put')]
     #[CsrfProtected]
     public function onPut(string $masterType = 'tag'): static
     {
-        try {
-            $final = ($this->becoming)(new SelectMasterDataInput(masterType: $masterType));
-        } catch (SemanticVariableException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '指定されたマスタデータは見つかりませんでした。'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SelectMasterDataInput(masterType: $masterType));
 
         assert($final instanceof MasterDataSelected);
 
+        $masterTypes = $this->masters->listMasterTypes();
+        $form = $this->formFactory->newInstance(AdminMasterDataForm::class);
+        assert($form instanceof AdminMasterDataForm);
+        $form->fillValues($masterTypes, $final->masterType);
+
         $this->code = Code::OK;
         $this->body = [
+            'form' => $form,
+            'masterTypes' => $masterTypes,
             'transitionId' => 'doSelectMasterData',
             'selectedMaster' => $final->masterType,
             'rows' => $final->rows,

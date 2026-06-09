@@ -1,0 +1,369 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "put-admin-master-data.json",
+  "title": "PUT /admin/master-data response",
+  "description": "PUT /admin/master-data response の response body schema。マスタ種別選択後も同一HTML画面を再描画できるよう、選択結果だけでなくフォーム文脈・マスタ種別一覧・選択中マスタ・行データを返す。",
+  "type": "object",
+  "properties": {
+    "message": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "マスタデータメッセージ",
+      "description": "/admin/master-data のレスポンスに含まれる処理結果メッセージ。注文時お問い合わせ欄ではなく、画面遷移や完了表示のための通知文。",
+      "example": "配送は平日希望です。"
+    },
+    "form": {
+      "type": [
+        "object",
+        "array",
+        "null"
+      ],
+      "title": "入力フォーム",
+      "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
+      "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+    },
+    "masterTypes": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "マスタ種別一覧",
+      "description": "/admin/master-data のレスポンスで扱うマスタ種別一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "title": "マスタ種別",
+        "description": "/admin/master-data のレスポンスに含まれるマスタ種別。親コレクション `masterTypes` の1行を表し、固定できる業務列はschema propertyで明示する。",
+        "properties": {
+          "table": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "マスタテーブル",
+            "description": "/admin/master-data の画面表示に使うマスタテーブル。業務エンティティそのものではなくテンプレート/一覧表示の補助値。"
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "表示ラベル",
+            "description": "/admin/master-data のレスポンスで表示またはテンプレート描画に使う表示ラベル。同名propertyでも親文脈 `root` によって意味を分ける。"
+          },
+          "value": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "マスタ値",
+            "description": "/admin/master-data のマスタ種別またはマスタ行に表示される値。選択肢の表示/保存単位として扱う。"
+          }
+        },
+        "$comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+      },
+      "minItems": 0
+    },
+    "transitionId": {
+      "title": "ALPS遷移ID",
+      "description": "このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 96,
+      "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
+      "example": "doAddCartItem"
+    },
+    "selectedMaster": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 255,
+      "title": "選択中マスタ",
+      "description": "/admin/master-data の処理文脈から派生した選択中マスタ。ALPS基礎語だけでは単位や用途が不足するため、このResource上の意味を明示する。"
+    },
+    "rows": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "行データ",
+      "description": "/admin/master-data のマスタ/CSV行データ。列集合は対象マスタにより変わるため、既知列を優先して契約する。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "title": "行",
+        "description": "/admin/master-data のレスポンスに含まれる行。親コレクション `rows` の1行を表し、固定できる業務列はschema propertyで明示する。",
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 32,
+            "title": "処理表示名",
+            "description": "Fake観察文字長 1〜7; 観察値 'テスト管理者', '副管理者', '店舗オーナー', '削除済み管理者', 'Red', 'Blue', 'S', 'Color'。",
+            "example": "テスト管理者"
+          },
+          "id": {
+            "type": [
+              "string",
+              "integer",
+              "null"
+            ],
+            "title": "ID",
+            "description": "Fake観察文字長 13〜32; 観察値 'ad000000000000000000000000000001', 'ad000000000000000000000000000003', 'fedcba9876543210fedcba9876543210', '10000000aaaa1111bbbb2222cccc3333', 'ad000000000000000000000000000002', '0123456789abcdef0123456789abcdef', 'aaaaaaaa00000000bbbbbbbb11111111', '20000000dddd2222eeee3333ffff4444'。",
+            "example": "ad000000000000000000000000000001",
+            "minLength": 0,
+            "maxLength": 128,
+            "$comment": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。"
+          }
+        },
+        "$comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
+      },
+      "minItems": 0
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "productCode": {
+      "title": "商品コード",
+      "description": "SKU/品番。在庫管理や受注明細での識別に使用 SKUとして在庫・カート・受注明細を接続する。Fake観察ではASCII英数とハイフン中心。",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+      "example": "sample-001"
+    },
+    "email": {
+      "title": "メールアドレス",
+      "description": "会員のログインIDを兼ねる。有効会員間で一意 ログインID/通知先として使うためRFC準拠のemail形式。",
+      "type": "string",
+      "format": "email",
+      "minLength": 3,
+      "maxLength": 254,
+      "example": "alice@example.com"
+    },
+    "postalCode": {
+      "title": "郵便番号",
+      "description": "日本の郵便番号。ハイフンなし7桁またはハイフン付き8桁 日本国内住所向け。ハイフンなし7桁またはハイフン付き8桁。",
+      "type": "string",
+      "pattern": "^\\d{3}-?\\d{4}$",
+      "example": "1500001"
+    },
+    "phoneNumber": {
+      "title": "電話番号",
+      "description": "日本の電話番号形式（ハイフン区切り） 日本国内電話番号。Fakeはハイフンなし中心、入力ではハイフン付きも許容。",
+      "type": "string",
+      "pattern": "^0\\d{1,4}-?\\d{1,4}-?\\d{3,4}$",
+      "minLength": 10,
+      "maxLength": 13,
+      "example": "0312345678"
+    },
+    "price": {
+      "title": "金額",
+      "description": "EC-CUBEの商品価格・送料・手数料・売上金額。日本円の整数金額として扱う。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 999999999,
+      "example": 1200
+    },
+    "quantity": {
+      "title": "数量",
+      "description": "購入数量。カート明細と受注明細で共通使用 購入/調整数量。入力は1以上、調整後や集計では0以上を許容する場合がある。",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 999,
+      "example": 2
+    },
+    "nonNegativeInteger": {
+      "title": "非負整数",
+      "description": "件数、在庫、ページ番号、集計値など0以上の整数。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "example": 1
+    },
+    "opaqueId": {
+      "title": "不透明ID",
+      "description": "BeMart/Fake/アプリ層で外部に公開する文字列ID。DB採番値としての数値演算には使わない。",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:@/-]+$",
+      "example": "customer-001"
+    },
+    "dbId": {
+      "title": "DB採番ID",
+      "description": "EC-CUBEマスタや内部行を指す非負整数ID。表示やフォーム境界では文字列化される場合があるが、意味は採番ID。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "example": 1
+    },
+    "mixedBoundaryId": {
+      "title": "互換境界ID",
+      "description": "同一ResourceでFake文字列IDとEC-CUBE整数IDの両方が観察される互換境界専用ID。恒久的なドメイン型ではない。",
+      "type": [
+        "string",
+        "integer"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "example": "pay-cod",
+      "$comment": "mixedBoundaryIdは移行互換のための例外。可能ならopaqueIdまたはdbIdへ分解する。"
+    },
+    "pref": {
+      "title": "都道府県ID",
+      "description": "日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用 確定住所は1〜47。入力フォームの未選択初期値として0を許容する。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 47,
+      "example": 13
+    },
+    "productStatus": {
+      "title": "商品ステータス",
+      "description": "1=公開（フロント表示）, 2=非公開（フロント非表示）, 3=廃止（論理削除、管理画面でもデフォルト非表示）",
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3
+      ],
+      "example": 1
+    },
+    "customerStatus": {
+      "title": "会員ステータス",
+      "description": "1=仮会員（メール未認証）, 2=本会員（認証済み）, 3=退会。退会時はメールアドレスが無効化される",
+      "type": "integer",
+      "enum": [
+        1,
+        2,
+        3
+      ],
+      "example": 2
+    },
+    "orderStatus": {
+      "title": "注文ステータス",
+      "description": "1=新規受付, 3=注文取消, 4=対応中, 5=発送済み, 6=入金済み, 7=決済処理中, 8=購入処理中, 9=返品。Symfony Workflowステートマシンで遷移を制御。許可される遷移: pay(1->6), packing(1,6->4), cancel(1,4,6->3), back_to_in_progress(3->4), ship(1,6,4->5), return(5->9), cancel_return(9->5)。7と8はPurchaseFlow内で直接セットされステートマシン遷移の対象外 EC-CUBE受注状態。Fake/管理画面で扱う状態ID。",
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 9,
+      "example": 1
+    },
+    "cartKey": {
+      "title": "カートキー",
+      "description": "カート分離キー。形式: {セッションプレフィックス}_{販売種別ID}。EC-CUBEは販売種別ごとにカートを分離するため、異なる販売種別の商品は別カートになる",
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 128,
+      "pattern": "^.+_[0-9]+$",
+      "example": "session-prefix-1_1"
+    },
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "fake-csrf-token-bemart-2026"
+    },
+    "uriReference": {
+      "title": "URI参照",
+      "description": "画面遷移・リダイレクト・リンク先を表す相対または絶対URI。",
+      "type": "string",
+      "format": "uri-reference",
+      "minLength": 1,
+      "maxLength": 2048,
+      "example": "/products"
+    },
+    "transitionId": {
+      "title": "ALPS遷移ID",
+      "description": "alps.json に定義された safe/unsafe descriptor のID。",
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 96,
+      "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
+      "example": "doAddCartItem"
+    },
+    "date": {
+      "title": "日付",
+      "description": "業務上の日付。",
+      "type": "string",
+      "format": "date",
+      "example": "2026-01-01"
+    },
+    "dateTime": {
+      "title": "日時",
+      "description": "業務イベント発生日時。",
+      "type": "string",
+      "format": "date-time",
+      "example": "2026-01-01T00:00:00+09:00"
+    },
+    "link": {
+      "title": "ハイパーメディアリンク",
+      "description": "ALPS遷移に対応するリンク。hrefはURI参照。",
+      "type": "object",
+      "required": [
+        "href"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "href": {
+          "title": "URI参照",
+          "description": "画面遷移・リダイレクト・リンク先を表す相対または絶対URI。",
+          "type": "string",
+          "format": "uri-reference",
+          "minLength": 1,
+          "maxLength": 2048,
+          "example": "/products"
+        },
+        "rel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "get",
+            "post",
+            "put",
+            "patch",
+            "delete",
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE"
+          ]
+        }
+      }
+    }
+  },
+  "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
+  "required": [
+    "form",
+    "masterTypes",
+    "transitionId",
+    "selectedMaster",
+    "rows"
+  ]
+}

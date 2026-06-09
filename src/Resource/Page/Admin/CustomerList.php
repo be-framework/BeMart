@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Final\CustomerListFetched;
 use MyVendor\BeMart\Be\Input\GetCustomerListInput;
 use MyVendor\BeMart\Form\AdminCustomerSearchForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -58,6 +60,8 @@ class CustomerList extends ResourceObject
      * @psalm-taint-source input $emailKeyword
      * @psalm-taint-source input $limit
      */
+    #[Alps('goCustomerList')]
+    #[JsonSchema(schema: 'get-admin-customer-list.json', params: 'get-admin-customer-list.param.json')]
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
     #[Link(rel: 'doCreateCustomer', href: 'page://self/admin/customer', method: 'post')]
     public function onGet(
@@ -65,23 +69,11 @@ class CustomerList extends ResourceObject
         string|null $emailKeyword = null,
         int $limit = 50,
     ): static {
-        try {
-            $final = ($this->becoming)(new GetCustomerListInput(
-                nameKeyword: $nameKeyword,
-                emailKeyword: $emailKeyword,
-                limit: $limit,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetCustomerListInput(
+            nameKeyword: $nameKeyword,
+            emailKeyword: $emailKeyword,
+            limit: $limit,
+        ));
 
         assert($final instanceof CustomerListFetched);
 

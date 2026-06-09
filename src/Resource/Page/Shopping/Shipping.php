@@ -4,10 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goShoppingShipping — お届け先選択画面 (Wave 3H pure renderer).
@@ -26,12 +28,15 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 class Shipping extends ResourceObject
 {
     /**
+     * ALPS `goShoppingShipping` に対応する GET 操作。
      * @todo Wave-future: surface the authenticated customer's
      *     registered shipping addresses (name01/name02/postalCode/pref/
      *     addr01/addr02/phoneNumber per ALPS #ShoppingShipping) so the
      *     UI can render the radio-button list. Requires AddressStorage
      *     scoped to the current session/customer.
      */
+    #[Alps('goShoppingShipping')]
+    #[JsonSchema(schema: 'get-shopping-shipping.json')]
     #[Link(rel: 'doSelectShippingAddress', href: 'page://self/shopping/shipping', method: 'post')]
     #[Link(rel: 'goShoppingShippingEdit', href: 'page://self/shopping/shipping-edit')]
     #[Link(rel: 'goShoppingShippingMultiple', href: 'page://self/shopping/shipping-multiple')]
@@ -70,6 +75,8 @@ class Shipping extends ResourceObject
      *
      * @psalm-taint-source input $shippingAddressId
      */
+    #[Alps('doSelectShippingAddress')]
+    #[JsonSchema(schema: 'post-shopping-shipping.json', params: 'post-shopping-shipping.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
     public function onPost(string|null $shippingAddressId = null): static

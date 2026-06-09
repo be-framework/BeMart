@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Compatibility\Eccube;
 
+use MyVendor\BeMart\Be\Reason\Query\TwoFactorAuthStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use Override;
 
-use function array_key_exists;
 use function bindec;
 use function chr;
 use function decbin;
@@ -33,10 +33,7 @@ use const STR_PAD_LEFT;
  *
  * The RFC 6238 arithmetic (base32 secret → HMAC-SHA1 → 6-digit code with
  * a ±1 step window) mirrors `robthree/twofactorauth`, which EC-CUBE 4.3
- * uses. Secret persistence is the residual cutover concern: this default
- * keeps an in-process map (bound as a singleton) so the transition is
- * exercisable end to end; wiring it to `dtb_member.two_factor_auth_secret`
- * is the production-DB bring-up step (tracked in migration-status §4).
+ * uses. Secrets are stored in EC-CUBE's `dtb_member.two_factor_auth_key`.
  */
 final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
 {
@@ -44,8 +41,9 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
     private const int PERIOD = 30;
     private const int DIGITS = 6;
 
-    /** @var array<string, string> loginId => base32 secret */
-    private array $secrets = [];
+    public function __construct(private readonly TwoFactorAuthStorageInterface $storage)
+    {
+    }
 
     #[Override]
     public function generateSecret(int $length = 16): string
@@ -59,15 +57,21 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
     }
 
     #[Override]
+    public function generateDeviceToken(string $secret): string
+    {
+        return $this->codeAt($secret, (int) (time() / self::PERIOD));
+    }
+
+    #[Override]
     public function enable(string $loginId, string $secret): void
     {
-        $this->secrets[$loginId] = $secret;
+        $this->storage->enable($loginId, $secret);
     }
 
     #[Override]
     public function isEnabled(string $loginId): bool
     {
-        return array_key_exists($loginId, $this->secrets);
+        return $this->storage->secret($loginId)->secret !== null;
     }
 
     #[Override]
@@ -88,7 +92,7 @@ final class EccubeTwoFactorAuth implements TwoFactorAuthInterface
     #[Override]
     public function verify(string $loginId, string $token): bool
     {
-        $secret = $this->secrets[$loginId] ?? null;
+        $secret = $this->storage->secret($loginId)->secret;
         if ($secret === null) {
             return false;
         }

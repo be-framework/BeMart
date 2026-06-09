@@ -66,7 +66,7 @@ final class ShoppingShippingHtmlRenderTest extends TestCase
         '<title>EC-CUBE / お届け先の指定</title>',
         '<meta name="author" content="">',
         // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
         // --- form action / add-new link: the shippingId route param ----
         // EC-CUBE's `url('shopping_shipping', {'id': shippingId})` and
         // `url('shopping_shipping_edit', {'id': shippingId})` append the
@@ -74,8 +74,8 @@ final class ShoppingShippingHtmlRenderTest extends TestCase
         // renderer with no per-shipping context — `shippingId` is a
         // MISSING BODY FIELD follow-up — so the port posts to / links
         // the bare routes. Same routes, the id param absent.
-        '<div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping/shipping/edit?id=1">新規お届け先を追加する</a></div>',
-        '<div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping/shipping/edit">新規お届け先を追加する</a></div>',
+        '<div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping/shipping-edit?id=1">新規お届け先を追加する</a></div>',
+        '<div class="ec-addressRole__actions"><a class="ec-inlineBtn" href="/shopping/shipping-edit">新規お届け先を追加する</a></div>',
         '<form method="post" action="/shopping/shipping?id=1">',
         '<form method="post" action="/shopping/shipping">',
     ];
@@ -125,6 +125,7 @@ final class ShoppingShippingHtmlRenderTest extends TestCase
         }
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShippingHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/shipping')->toString();
@@ -200,7 +201,7 @@ final class ShoppingShippingHtmlRenderTest extends TestCase
             // ec-addressList skeleton, exactly the pure-renderer port.
             'Customer' => new EcCubeStub(['CustomerAddresses' => []]),
             'form' => new EcCubeStub([
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
                 'addresses' => new EcCubeStub([
                     'vars' => new EcCubeStub(['choices' => [], 'value' => null, 'full_name' => 'addresses']),
                 ]),
@@ -250,13 +251,13 @@ final class ShoppingShippingHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

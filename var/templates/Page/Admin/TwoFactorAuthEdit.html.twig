@@ -3,7 +3,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_system_two_factor_auth_edit' %}
+{% set route = 'admin-setting-system-two-factor-auth-edit' %}
 {% set title = '2段階認証' %}
 {% set sub_title = 'システム設定' %}
 
@@ -37,8 +37,8 @@ $(function () {
 
 {% block main %}
     <form name="two_factor_auth_form" role="form" id="two_factor_auth_form" method="post" action="" novalidate>
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
-        {{ form.input('auth_key')|raw }}
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        {{ form.input('authKey')|raw }}
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -74,10 +74,10 @@ $(function () {
                                     <div class="col">
                                         <div class="row">
                                             <div class="col">
-                                                {{ form.input('device_token')|raw }}
+                                                {{ form.input('deviceToken')|raw }}
                                             </div>
-                                            {% if form.error('device_token') %}
-                                                <span class="invalid-feedback d-block">{{ form.error('device_token') }}</span>
+                                            {% if form.error('deviceToken') %}
+                                                <span class="invalid-feedback d-block">{{ form.error('deviceToken') }}</span>
                                             {% endif %}
                                             {% if message is defined and message %}
                                                 <div class="text-danger mb-3 text-start small">{{ message }}</div>

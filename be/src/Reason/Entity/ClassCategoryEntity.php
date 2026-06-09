@@ -22,10 +22,15 @@ final readonly class ClassCategoryEntity implements \Ray\MediaQuery\ToScalarInte
 {
     use MediaQueryJsonEntityTrait;
 
+    public string $classCategoryId;
+    public string $classNameId;
+
     public function __construct(
-        public string $classCategoryId,
-        public string $classNameId,
+        int|string $classCategoryId,
+        int|string $classNameId,
         public string $name,
     ) {
+        $this->classCategoryId = (string) $classCategoryId;
+        $this->classNameId = (string) $classNameId;
     }
 }

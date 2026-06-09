@@ -84,12 +84,12 @@ final class AdminPluginDisableResourceTest extends TestCase
 
     public function testOnPostUnknownPluginReturns404(): void
     {
-        $ro = $this->resource->post('page://self/admin/plugin-disable', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\PluginNotFoundException::class);
+
+        $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'NoSuch/Plugin',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -105,11 +105,11 @@ final class AdminPluginDisableResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/plugin-disable', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/plugin-disable', [
             'pluginCode' => 'Sample/SamplePlugin',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 }

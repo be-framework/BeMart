@@ -30,7 +30,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_withdraw' %}
+{% set route = 'mypage-withdraw' %}
 {% set title = 'マイページ' %}
 
 {% block main %}
@@ -42,8 +42,8 @@
             {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'withdraw', name01: name01|default(''), name02: name02|default('') } %}
         </div>
         <div class="ec-withdrawRole">
-            <form method="post" action="{{ url('mypage_withdraw') }}">
-                <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+            <form method="post" action="/mypage/withdraw">
+                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                 <div class="ec-off3Grid">
                     <div class="ec-off3Grid__cell">
                         <div style="font-size:100px;text-align:center;">

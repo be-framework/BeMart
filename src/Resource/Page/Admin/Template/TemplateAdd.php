@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Template;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use Be\Framework\BecomingInterface;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\TemplateInstalled;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Input\InstallTemplateInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminTemplateAddForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -27,7 +29,7 @@ use function assert;
  * a template code, a template name and a zip-archive file-upload form.
  * The matching `doTemplateInstall` write transition is a Phase-A stub —
  * this port renders the upload shell only, mirroring the Product
- * CSV-upload Tier-2 wave ({@see \MyVendor\BeMart\Resource\Page\Admin\Product\AbstractCsvUpload}).
+ * CSV-upload Tier-2 wave ({@see \MyVendor\BeMart\Support\Resource\AbstractCsvUpload}).
  *
  * AUTHZ is a direct admin-session check (Pattern B — no Be transition is
  * invoked on the GET path; an anonymous admin → 403). The form renders
@@ -42,7 +44,11 @@ class TemplateAdd extends ResourceObject
     ) {
     }
 
+    /** ALPS `goAdminTemplateTemplateAdd` に対応する GET 操作。 */
+    #[Alps('goAdminTemplateTemplateAdd')]
+    #[JsonSchema(schema: 'get-admin-template-template-add.json')]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
+    #[Link(rel: 'doInstallTemplate', href: 'page://self/admin/template/template-add', method: 'post')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -68,26 +74,22 @@ class TemplateAdd extends ResourceObject
      * @psalm-taint-source input $templateCode
      * @psalm-taint-source input $templateName
      */
+    #[Alps('doInstallTemplate')]
+    #[JsonSchema(schema: 'post-admin-template-template-add.json', params: 'post-admin-template-template-add.param.json')]
     #[CsrfProtected]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
+    #[Link(rel: 'doSelectTemplate', href: 'page://self/admin/template/template-list', method: 'put')]
     public function onPost(string $templateCode, string $templateName): static
     {
-        try {
-            $final = ($this->becoming)(new InstallTemplateInput(
-                templateCode: $templateCode,
-                templateName: $templateName,
-            ));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new InstallTemplateInput(
+            templateCode: $templateCode,
+            templateName: $templateName,
+        ));
 
         assert($final instanceof TemplateInstalled);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_store_template';
+        $this->headers['Location'] = '/admin/template/template-list';
         $this->body = [
             'transitionId' => 'doInstallTemplate',
             'templateId' => $final->templateId,

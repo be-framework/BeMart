@@ -20,7 +20,7 @@ final class HttpResourceHrefTest extends TestCase
     public function testFollowsHtmlSemanticLinkBeforeLinkHeader(): void
     {
         $source = $this->source(
-            '<a class="goProductList" href="/products/list">Products</a>',
+            '<a class="goProductList" href="/products">Products</a>',
             ['Link' => '</cart>; rel="goProductList"; method="get"'],
         );
 
@@ -43,8 +43,8 @@ final class HttpResourceHrefTest extends TestCase
     public function testFollowsHalBeforeHtmlAndLinkHeader(): void
     {
         $source = $this->source(
-            '<a class="goCart" href="/products/list">Products</a>',
-            ['Link' => '</products/list>; rel="goCart"; method="get"'],
+            '<a class="goCart" href="/products">Products</a>',
+            ['Link' => '</products>; rel="goCart"; method="get"'],
         );
         $source->body = [
             '_links' => [

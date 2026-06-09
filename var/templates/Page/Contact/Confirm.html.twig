@@ -52,7 +52,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'other_page' %}
-{% set route = 'contact_confirm' %}
+{% set route = 'contact-confirm' %}
 {% set title = 'お問い合わせ' %}
 
 {% block main %}
@@ -62,8 +62,8 @@
         </div>
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
-                <form method="post" action="{{ url('contact') }}" class="h-adr">
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                <form method="post" action="/contact" class="h-adr">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                     <p>{{ "内容によっては回答をさしあげるのにお時間をいただくこともございます。\nまた、休業日は翌営業日以降の対応となりますのでご了承ください。\n"|nl2br }}</p>
                     <div class="ec-borderedDefs">
                         <dl>

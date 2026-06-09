@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedOrderAccessException;
 use MyVendor\BeMart\Be\Final\Reordered;
 use MyVendor\BeMart\Be\Input\ReorderInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -40,38 +42,16 @@ class Reorder extends ResourceObject
     }
 
     /**
+     * ALPS `doReorder` に対応する POST 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('doReorder')]
+    #[JsonSchema(schema: 'post-mypage-reorder.json', params: 'post-mypage-reorder.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfProtected]
     public function onPost(string $orderNo): static
     {
-        try {
-            $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'orderNo' => $orderNo,
-            ];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        } catch (UnauthorizedOrderAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この注文へのアクセス権限がありません。', 'orderNo' => $orderNo];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Order not found.', 'orderNo' => $orderNo];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
 
         assert($final instanceof Reordered);
 

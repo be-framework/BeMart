@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -53,6 +55,8 @@ class Withdraw extends ResourceObject
      * mirrors the Symfony token into the session for the subsequent
      * POST.
      */
+    #[Alps('goMypageWithdraw')]
+    #[JsonSchema(schema: 'get-mypage-withdraw.json')]
     #[Link(rel: 'doWithdrawCustomer', href: 'page://self/mypage/withdraw', method: 'post')]
     public function onGet(): static
     {
@@ -94,30 +98,22 @@ class Withdraw extends ResourceObject
     }
 
     /**
+     * ALPS `doWithdrawCustomer` に対応する POST 操作。
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('doWithdrawCustomer')]
+    #[JsonSchema(schema: 'post-mypage-withdraw.json', params: 'post-mypage-withdraw.param.json')]
+    #[Link(rel: 'goMypageWithdrawComplete', href: 'page://self/mypage/withdraw-complete')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
     public function onPost(
         string|null $sessionPrefix = null,
     ): static {
-        try {
-            $input = $sessionPrefix === null
-                ? new WithdrawCustomerInput()
-                : new WithdrawCustomerInput(sessionPrefix: $sessionPrefix);
+        $input = $sessionPrefix === null
+            ? new WithdrawCustomerInput()
+            : new WithdrawCustomerInput(sessionPrefix: $sessionPrefix);
 
-            $final = ($this->becoming)($input);
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)($input);
 
         assert($final instanceof CustomerWithdrawn);
 

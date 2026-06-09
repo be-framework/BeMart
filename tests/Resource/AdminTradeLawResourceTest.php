@@ -85,12 +85,12 @@ final class AdminTradeLawResourceTest extends TestCase
 
     public function testOnPostEmptyBodyReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/trade-law', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => '   ',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -106,12 +106,11 @@ final class AdminTradeLawResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/trade-law', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/trade-law', [
             'tradeLawBody' => 'whatever non-empty',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 }

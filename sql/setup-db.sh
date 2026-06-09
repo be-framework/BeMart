@@ -2,10 +2,11 @@
 #
 # sql/setup-db.sh — reproducible EC-CUBE 4.3 production database bring-up.
 #
-# Creates the target database, loads the EC-CUBE 4.3 schema, then loads the
-# mtb_* master/reference seed. The result is a database with the full schema
-# and all canonical reference data — ready for dtb_* operational data, which
-# is migrated separately and is OUT OF SCOPE for this script.
+# Creates the target database, loads the EC-CUBE 4.3 schema, applies BeMart
+# schema migrations, then loads the mtb_* master/reference seed. The result is
+# a database with the full schema and all canonical reference data — ready for
+# dtb_* operational data, which is migrated separately and is OUT OF SCOPE for
+# this script.
 #
 # Usage:
 #   sql/setup-db.sh DATABASE_URL
@@ -39,6 +40,7 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCHEMA_FILE="${SCRIPT_DIR}/schema/ec-cube-4.3-mysql-mysqldump.sql"
+MIGRATIONS_DIR="${SCRIPT_DIR}/migrations"
 SEED_FILE="${SCRIPT_DIR}/seed/mtb-master.sql"
 
 HOST=""
@@ -123,27 +125,47 @@ mysql_run() {
 
 echo "setup-db: target  = ${USER}@${HOST}:${PORT}/${DB}"
 echo "setup-db: schema  = ${SCHEMA_FILE}"
+echo "setup-db: migrate = ${MIGRATIONS_DIR}"
 echo "setup-db: seed    = ${SEED_FILE}"
 
 # --- 1. (re)create database -------------------------------------------------
 # DROP + CREATE so the run is idempotent: the schema dump uses bare
 # `CREATE TABLE`, so a re-run against an existing schema would otherwise fail
 # with "table already exists". A fresh database is the clean reload path.
-echo "setup-db: [1/3] (re)creating database '${DB}' ..."
+echo "setup-db: [1/4] (re)creating database '${DB}' ..."
 mysql_run -e "DROP DATABASE IF EXISTS \`${DB}\`;"
 mysql_run -e "CREATE DATABASE \`${DB}\` \
     DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin;"
 
 # --- 2. load schema (FK checks off) -----------------------------------------
-echo "setup-db: [2/3] loading schema (FOREIGN_KEY_CHECKS off) ..."
+echo "setup-db: [2/4] loading schema (FOREIGN_KEY_CHECKS off) ..."
 {
     echo "SET FOREIGN_KEY_CHECKS=0;"
     cat "$SCHEMA_FILE"
     echo "SET FOREIGN_KEY_CHECKS=1;"
 } | mysql_run "$DB"
 
-# --- 3. load mtb_* master seed ----------------------------------------------
-echo "setup-db: [3/3] loading mtb_* master seed ..."
+# --- 3. apply BeMart schema migrations --------------------------------------
+echo "setup-db: [3/4] applying BeMart schema migrations ..."
+MIGRATION_FILES=()
+if [[ -d "$MIGRATIONS_DIR" ]]; then
+    for file in "$MIGRATIONS_DIR"/*.sql; do
+        [[ -e "$file" ]] || continue
+        MIGRATION_FILES+=("$file")
+    done
+fi
+
+if [[ ${#MIGRATION_FILES[@]} -eq 0 ]]; then
+    echo "setup-db:       (no migrations)"
+else
+    for file in "${MIGRATION_FILES[@]}"; do
+        echo "setup-db:       $(basename "$file")"
+        mysql_run "$DB" < "$file"
+    done
+fi
+
+# --- 4. load mtb_* master seed ----------------------------------------------
+echo "setup-db: [4/4] loading mtb_* master seed ..."
 mysql_run "$DB" < "$SEED_FILE"
 
 # --- summary ----------------------------------------------------------------

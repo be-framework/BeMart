@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -11,6 +12,7 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminCustomerCsvExported;
 use MyVendor\BeMart\Be\Input\AdminExportCustomerInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -36,17 +38,14 @@ class CustomerCsv extends ResourceObject
     ) {
     }
 
+    /** ALPS `goExportCustomer` に対応する GET 操作。 */
+    #[Alps('goExportCustomer')]
+    #[JsonSchema(schema: 'get-admin-customer-csv.json')]
     #[Link(rel: 'goCustomerList', href: 'page://self/admin/customer-list')]
+    #[Link(rel: 'goExportClassName', href: 'page://self/admin/class-name/class-name-export')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new AdminExportCustomerInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminExportCustomerInput());
 
         assert($final instanceof AdminCustomerCsvExported);
 

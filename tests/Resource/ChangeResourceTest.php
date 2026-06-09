@@ -71,10 +71,9 @@ final class ChangeResourceTest extends TestCase
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->get('page://self/mypage/change');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
 
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('ログイン', $ro->body['message']);
+        $this->resource->get('page://self/mypage/change');
     }
 
     public function testOnPostPatchesAndReturns200(): void
@@ -92,26 +91,24 @@ final class ChangeResourceTest extends TestCase
 
     public function testOnPostEmailCollisionReturns409(): void
     {
-        $ro = $this->resource->post('page://self/mypage/change', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException::class);
+
+        $this->resource->post('page://self/mypage/change', [
             'email' => 'bob@example.com',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(409, $ro->code);
-        $this->assertSame('bob@example.com', $ro->body['email']);
     }
 
     public function testOnPostWithoutSessionReturns401(): void
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->post('page://self/mypage/change', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
+
+        $this->resource->post('page://self/mypage/change', [
             'email' => 'alice@example.com',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('ログイン', $ro->body['message']);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -125,11 +122,11 @@ final class ChangeResourceTest extends TestCase
 
     public function testOnPostInvalidEmailReturns400(): void
     {
-        $ro = $this->resource->post('page://self/mypage/change', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/mypage/change', [
             'email' => 'not-an-email',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 }

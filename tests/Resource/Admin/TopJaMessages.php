@@ -31,7 +31,7 @@ final class TopJaMessages
             'admin.login' => 'ログイン',
             'admin.login.enable_javascript' => 'JavaScript を有効にしてご利用ください',
             'admin.login.login' => 'ログイン',
-            'admin.login.login_id' => 'ログインID',
+            'admin.login.loginId' => 'ログインID',
             'admin.login.password' => 'パスワード',
             // --- change_password.twig -----------------------------------
             'admin.change_password' => 'パスワード変更',

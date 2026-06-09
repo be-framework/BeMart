@@ -93,9 +93,9 @@ final class AdminOrderListHtmlRenderTest extends TestCase
         // EC-CUBE's bulk form hidden CSRF input: `name` is the
         // `Constant::TOKEN_NAME` PHP constant (the `constant()` Twig fn
         // returns the constant NAME in the stub), the value is
-        // `csrf_token(...)`. BeMart's port names it `_token` literally
+        // `csrfcsrfToken(...)`. BeMart's port names it `csrfToken` literally
         // with an empty value — no per-request CSRF widget.
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
         '<input type="hidden" name="Eccube\\Common\\Constant::TOKEN_NAME" value="">',
     ];
 
@@ -173,6 +173,7 @@ final class AdminOrderListHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering. Every difference must be in the residual
      * allowlist or a residual family.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testOrderListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/order-list')->toString();
@@ -228,9 +229,9 @@ final class AdminOrderListHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // Bulk form: EC-CUBE's hidden CSRF input + `csrf_token_for_anchor`.
-            'name="_token"',
-            'csrf_token',
+            // Bulk form: EC-CUBE's hidden CSRF input + `csrfcsrfToken_for_anchor`.
+            'name="csrfToken"',
+            'csrfcsrfToken',
             'Constant::TOKEN_NAME',
             // Order list: EC-CUBE keys order rows by the per-shipment
             // `Shipping.id`; BeMart's AdminOrderListFetched projection is
@@ -353,7 +354,7 @@ final class AdminOrderListHtmlRenderTest extends TestCase
 
         return $twig->render('Order/index.twig', [
             'searchForm' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'multi' => 'multi',
                 'name' => 'name',
                 'kana' => 'kana',
@@ -439,8 +440,8 @@ final class AdminOrderListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 

@@ -69,7 +69,7 @@ final class AdminMemberHtmlRenderTest extends TestCase
      * EC-CUBE lines with no BeMart counterpart and vice versa. The form
      * inputs are rendered by a real AdminMemberForm on BOTH sides so they
      * diff to zero; the residual is the admin-frame baseline plus the
-     * form `_token` hidden input and the omitted `Authority` / `Work`
+     * form `csrfToken` hidden input and the omitted `Authority` / `Work`
      * master-data controls.
      *
      * @var list<string>
@@ -88,11 +88,11 @@ final class AdminMemberHtmlRenderTest extends TestCase
         '</script>',
         '<title>メンバー登録 システム設定 - BeMart</title>',
         '<title>システム設定 メンバー登録 - EC-CUBE</title>',
-        // Form: EC-CUBE's `_token` hidden CSRF input is rendered by the
+        // Form: EC-CUBE's `csrfToken` hidden CSRF input is rendered by the
         // Symfony FormView; BeMart's port keeps the hidden input
         // (structure) with an empty value — the html context has no
         // per-request CSRF widget.
-        '<input type="hidden" id="member__token" name="_token" value="">',
+        '<input type="hidden" id="member_csrfToken" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -167,7 +167,7 @@ final class AdminMemberHtmlRenderTest extends TestCase
         ])->toString();
 
         $this->assertStringContainsString('id="admin_member_name"', $html);
-        $this->assertStringContainsString('id="admin_member_login_id"', $html);
+        $this->assertStringContainsString('id="admin_member_loginId"', $html);
         // The seed admin's profile is repopulated from the resource body.
         $this->assertStringContainsString('value="テスト管理者"', $html);
         $this->assertStringContainsString('value="test-admin"', $html);
@@ -178,6 +178,7 @@ final class AdminMemberHtmlRenderTest extends TestCase
      * against EC-CUBE's own rendering. Every difference must be in the
      * residual allowlist or a residual family.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testMemberEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/member', [
@@ -229,9 +230,9 @@ final class AdminMemberHtmlRenderTest extends TestCase
             'last_login',
             'nav-',
             'fa-fw',
-            // Form: EC-CUBE's hidden `_token` CSRF input.
-            'name="_token"',
-            'csrf_token',
+            // Form: EC-CUBE's hidden `csrfToken` CSRF input.
+            'name="csrfToken"',
+            'csrfcsrfToken',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -275,10 +276,10 @@ final class AdminMemberHtmlRenderTest extends TestCase
             // MemberFetched projection carries them only as bare ints, so
             // AdminMemberForm omits them; they render empty on both sides.
             'form' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'name' => 'name',
                 'department' => 'department',
-                'login_id' => 'login_id',
+                'loginId' => 'loginId',
                 'plain_password' => new EcCubeStub([
                     'first' => 'plain_password_first',
                     'second' => 'plain_password_second',
@@ -332,19 +333,19 @@ final class AdminMemberHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 
         // EC-CUBE's `form_widget(form.<field>)` renders through BeMart's
         // real AdminMemberForm so the inputs are byte-identical to
-        // BeMart's port. `_token`, `Authority` and `Work` are NOT
+        // BeMart's port. `csrfToken`, `Authority` and `Work` are NOT
         // declared by AdminMemberForm (CSRF is EC-CUBE-runtime;
         // Authority/Work need a master-data option set out of the Wave 8
         // slice) — they render empty here, mirroring BeMart's port.
         $formFields = [
-            'name', 'department', 'login_id',
+            'name', 'department', 'loginId',
             'plain_password_first', 'plain_password_second',
             'two_factor_auth_enabled',
         ];
