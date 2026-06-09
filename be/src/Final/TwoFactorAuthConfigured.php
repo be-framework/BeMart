@@ -16,7 +16,9 @@ use Ray\InputQuery\Attribute\Input;
  *   SetTwoFactorAuthInput → TwoFactorAuthConfigured   (Direct, idempotent)
  *
  * Login-context transition (no admin-session AUTHZ — the device is set up
- * during the login ladder). The confirmation `deviceToken` is verified
+ * during the login ladder). The HTTP adapter must derive `loginId` and
+ * candidate `authKey` from the password-verified pending challenge, not
+ * from client form fields. The confirmation `deviceToken` is verified
  * against the CANDIDATE `authKey` FIRST
  * ({@see TwoFactorAuthInterface::verifySecret}); only on success is the
  * secret committed via {@see TwoFactorAuthInterface::enable}. A wrong
@@ -43,9 +45,8 @@ final readonly class TwoFactorAuthConfigured
 
         // SECURITY CONTRACT: enable() overwrites the secret for $loginId
         // with no ownership check, so the adapter driving this transition
-        // MUST bind $loginId to the just-authenticated login (see
-        // TwoFactorAuthInterface::enable) — a raw client-supplied $loginId
-        // here would allow overwriting another admin's 2FA device.
+        // MUST bind both $loginId and $authKey to the just-authenticated
+        // pending login challenge (see TwoFactorAuthInterface::enable).
         $twoFactorAuth->enable($loginId, $authKey);
 
         $this->loginId = $loginId;
