@@ -1,177 +1,177 @@
 {
-    "name": "be-framework/be-mart",
-    "type": "project",
-    "license": "MIT",
-    "description": "BeMart — AI-driven EC-CUBE → BEAR.Sunday + Be Framework migration. BEAR.Sunday application layer.",
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/bearsunday/BEAR.DevTools.git"
-        },
-        {
-            "type": "path",
-            "url": "be",
-            "options": {
-                "symlink": true
-            }
-        }
-    ],
-    "require": {
-        "php": "^8.3",
-        "be-framework/be": "0.x-dev as 0.1.0",
-        "bear/devtools": "dev-html-link-renderer-dev-deps as 1.x-dev",
-        "bear/package": "^1.14",
-        "bear/sunday": "^1.6",
-        "madapaja/twig-module": "^2.7",
-        "my-vendor/be-mart-be": "@dev",
-        "nyholm/psr7": "^1.8",
-        "ray/di": "^2.18",
-        "ray/input-query": "^1.0",
-        "ray/media-query": "^1.1",
-        "ray/web-form-module": "^1.0",
-        "setasign/fpdi": "^2.2",
-        "tecnickcom/tcpdf": "^6.2"
+  "name": "be-framework/be-mart",
+  "type": "project",
+  "license": "MIT",
+  "description": "BeMart — AI-driven EC-CUBE → BEAR.Sunday + Be Framework migration. BEAR.Sunday application layer.",
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/bearsunday/BEAR.DevTools.git"
     },
-    "require-dev": {
-        "bear/api-doc": "1.x",
-        "cweagans/composer-patches": "^1.7",
-        "koriym/php-server": "^1.0",
-        "koriym/sql-quality": "^0.2.0",
-        "phpunit/phpunit": "^10.0",
-        "ray/fake-query": "dev-codex/fake-query-release-hardening as 1.x-dev",
-        "vimeo/psalm": "^6.16"
-    },
-    "autoload": {
-        "psr-4": {
-            "MyVendor\\BeMart\\": "src/"
-        }
-    },
-    "autoload-dev": {
-        "psr-4": {
-            "MyVendor\\BeMart\\Tests\\": "tests/",
-            "MyVendor\\BeMart\\Be\\Tests\\": "be/tests/",
-            "MyVendor\\BeMart\\Be\\Reason\\Fake\\": "tests/Fake/Reason/"
-        }
-    },
-    "scripts": {
-        "test": "php -d memory_limit=512M ./vendor/bin/phpunit",
-        "test:fake": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite fake",
-        "test:sql": "echo 'SQL PHPUnit suite is disabled; Sql folders are ignored by phpunit.xml.'",
-        "test:http": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite http",
-        "test:smoke": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite smoke",
-        "setup:eccube-reference": "php bin/setup-eccube-reference.php",
-        "tests": [
-            "@sa",
-            "@test"
-        ],
-        "test:full": [
-            "@setup:eccube-reference",
-            "@test"
-        ],
-        "sa": [
-            "@cs",
-            "@psalm"
-        ],
-        "cs": [
-            "@cs:alps"
-        ],
-        "cs:alps": "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
-        "psalm": "./vendor/bin/psalm --no-cache --no-progress",
-        "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
-        "sql:quality": "vendor/bin/sql-quality analyze --sql-dir=var/sql --params=var/sql-quality/sql_params.php --dsn=\"mysql:host=127.0.0.1;port=3306;dbname=eccubedb_test;charset=utf8mb4\" --user=dbuser --password=secret --format=markdown --output=build/sql-quality --lang=ja",
-        "coverage": "php -d memory_limit=512M -dzend_extension=xdebug.so -dxdebug.mode=coverage -dpcov.enabled=0 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage",
-        "coverage:smoke": "XDEBUG_MODE=coverage php -d memory_limit=512M -d pcov.directory=$PWD -dxdebug.mode=coverage ./vendor/bin/phpunit --testsuite smoke --coverage-text=build/smoke-coverage.txt --only-summary-for-coverage-text --coverage-clover=build/smoke-coverage.xml --coverage-html=build/smoke-coverage",
-        "pcov": "php -d memory_limit=512M -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage --coverage-clover=coverage.xml",
-        "doc": [
-            "@doc:alps",
-            "@doc:api"
-        ],
-        "doc:alps": [
-            "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
-            "PATH=${PATH#$PWD/vendor/bin:} asd -f html -o alps.json.html alps.json",
-            "PATH=${PATH#$PWD/vendor/bin:} asd -f svg -o alps.svg alps.json",
-            "@doc:sync-alps"
-        ],
-        "doc:api": [
-            "@apidoc",
-            "@doc:normalize"
-        ],
-        "doc:sync-alps": [
-            "cp alps.json.html docs/alps.json.html",
-            "cp alps.svg docs/alps.svg"
-        ],
-        "doc:normalize": "perl -pi -e 's/[ \\t]+$//' docs/api/index.html",
-        "apidoc": "./vendor/bin/apidoc",
-        "apidoc:audit": "./vendor/bin/apidoc audit",
-        "apidoc:terms": "./vendor/bin/apidoc terms",
-        "clean": [
-            "./vendor/bin/psalm --clear-cache",
-            "rm -rf .phpunit.cache var/tmp/*/*.php"
-        ],
-        "build": [
-            "@clean",
-            "@sa",
-            "@test"
-        ],
-        "stree": "ls -t var/log/*.json | head -1 | xargs -I{} vendor/bin/stree {}",
-        "app": "php bin/app.php",
-        "fake": "php bin/fake.php",
-        "dev": "php bin/dev.php",
-        "page": "php bin/page.php",
-        "prod": "php bin/prod.php",
-        "serve": "@serve:api",
-        "serve:api": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8080 -t public public/index.php",
-        "serve:page": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php",
-        "architecture:audit": "python3 scripts/bear_standard_audit.py ."
-    },
-    "scripts-descriptions": {
-        "test": "Run the default PHPUnit suite.",
-        "tests": "Run static analysis and the default PHPUnit suite.",
-        "test:full": "Prepare the EC-CUBE reference source, then run the default PHPUnit suite.",
-        "test:fake": "Run the fake-context PHPUnit suite.",
-        "test:sql": "Disabled: Sql folders are ignored by phpunit.xml.",
-        "test:http": "Run the HTTP PHPUnit suite.",
-        "test:smoke": "Run smoke tests.",
-        "setup:eccube-reference": "Clone or update the ignored EC-CUBE 4.3 reference source used by HTML parity tests.",
-        "sa": "Run static analysis.",
-        "cs": "Run lightweight consistency checks.",
-        "cs:alps": "Validate the canonical ALPS profile with asd.",
-        "psalm": "Run Psalm without cache/progress output.",
-        "psalm-taint": "Run Psalm taint analysis.",
-        "sql:quality": "Analyze var/sql SELECT queries with Koriym.SqlQuality (standalone, on-demand; requires a live MySQL prepared by sql/setup-db.sh + sql/seed/analysis-sample.sql). Not part of sa/tests/build.",
-        "coverage": "Run PHPUnit with Xdebug coverage output.",
-        "coverage:smoke": "Run the smoke suite with coverage summary and Clover output.",
-        "pcov": "Run PHPUnit with PCOV coverage output.",
-        "doc": "Generate all published documentation artifacts.",
-        "doc:alps": "Generate ALPS HTML/SVG artifacts with asd and sync them to docs/.",
-        "doc:api": "Generate BEAR.ApiDoc artifacts into docs/api.",
-        "doc:sync-alps": "Copy root ALPS artifacts into docs/ for GitHub Pages.",
-        "doc:normalize": "Normalize generated documentation whitespace.",
-        "apidoc": "Generate BEAR.ApiDoc documentation into docs/api.",
-        "apidoc:audit": "Print BEAR.ApiDoc documentation coverage audit.",
-        "apidoc:terms": "Print BEAR.ApiDoc term usage index.",
-        "clean": "Clear analysis and generated test caches.",
-        "build": "Clean, run static analysis, and run tests.",
-        "serve": "Serve the API entrypoint.",
-        "serve:api": "Serve the API entrypoint on 127.0.0.1:8080.",
-        "serve:page": "Serve the page entrypoint on 127.0.0.1:8081.",
-        "architecture:audit": "Audit BEAR.Sunday framework-boundary standard drift. This currently reports known debt and is used to guide standardization PRs."
-    },
-    "config": {
-        "sort-packages": true,
-        "allow-plugins": {
-            "aura/installer-default": false,
-            "cweagans/composer-patches": true
-        }
-    },
-    "extra": {
-        "patches": {
-            "ray/fake-query": {
-                "Support BeMart MediaQuery fake fixtures": "patches/ray-fake-query-be-bemart.patch"
-            },
-            "aura/html": {
-                "Declare nullable input helper specs for PHP 8.5": "patches/aura-html-php85-nullable.patch"
-            }
-        }
+    {
+      "type": "path",
+      "url": "be",
+      "options": {
+        "symlink": true
+      }
     }
+  ],
+  "require": {
+    "php": "^8.3",
+    "be-framework/be": "0.x-dev as 0.1.0",
+    "bear/devtools": "dev-html-link-renderer-dev-deps as 1.x-dev",
+    "bear/package": "^1.14",
+    "bear/sunday": "^1.6",
+    "madapaja/twig-module": "^2.7",
+    "my-vendor/be-mart-be": "@dev",
+    "nyholm/psr7": "^1.8",
+    "ray/di": "^2.18",
+    "ray/input-query": "^1.0",
+    "ray/media-query": "^1.1",
+    "ray/web-form-module": "^1.0",
+    "setasign/fpdi": "^2.2",
+    "tecnickcom/tcpdf": "^6.2"
+  },
+  "require-dev": {
+    "bear/api-doc": "1.x",
+    "cweagans/composer-patches": "^1.7",
+    "koriym/php-server": "^1.0",
+    "koriym/sql-quality": "^0.2.0",
+    "phpunit/phpunit": "^10.0",
+    "ray/fake-query": "dev-codex/fake-query-release-hardening as 1.x-dev",
+    "vimeo/psalm": "^6.16"
+  },
+  "autoload": {
+    "psr-4": {
+      "MyVendor\\BeMart\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "MyVendor\\BeMart\\Tests\\": "tests/",
+      "MyVendor\\BeMart\\Be\\Tests\\": "be/tests/",
+      "MyVendor\\BeMart\\Be\\Reason\\Fake\\": "tests/Fake/Reason/"
+    }
+  },
+  "scripts": {
+    "test": "php -d memory_limit=512M ./vendor/bin/phpunit",
+    "test:fake": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite fake",
+    "test:sql": "echo 'SQL PHPUnit suite is disabled; Sql folders are ignored by phpunit.xml.'",
+    "test:http": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite http",
+    "test:smoke": "php -d memory_limit=512M ./vendor/bin/phpunit --testsuite smoke",
+    "setup:eccube-reference": "php bin/setup-eccube-reference.php",
+    "tests": [
+      "@sa",
+      "@test"
+    ],
+    "test:full": [
+      "@setup:eccube-reference",
+      "@test"
+    ],
+    "sa": [
+      "@cs",
+      "@psalm"
+    ],
+    "cs": [
+      "@cs:alps"
+    ],
+    "cs:alps": "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
+    "psalm": "./vendor/bin/psalm --no-cache --no-progress",
+    "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
+    "sql:quality": "vendor/bin/sql-quality analyze --sql-dir=var/sql --params=var/sql-quality/sql_params.php --dsn=\"mysql:host=127.0.0.1;port=3306;dbname=eccubedb_test;charset=utf8mb4\" --user=dbuser --password=secret --format=markdown --output=build/sql-quality --lang=ja",
+    "coverage": "php -d memory_limit=512M -dzend_extension=xdebug.so -dxdebug.mode=coverage -dpcov.enabled=0 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage",
+    "coverage:smoke": "XDEBUG_MODE=coverage php -d memory_limit=512M -d pcov.directory=$PWD -dxdebug.mode=coverage ./vendor/bin/phpunit --testsuite smoke --coverage-text=build/smoke-coverage.txt --only-summary-for-coverage-text --coverage-clover=build/smoke-coverage.xml --coverage-html=build/smoke-coverage",
+    "pcov": "php -d memory_limit=512M -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage --coverage-clover=coverage.xml",
+    "doc": [
+      "@doc:alps",
+      "@doc:api"
+    ],
+    "doc:alps": [
+      "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
+      "PATH=${PATH#$PWD/vendor/bin:} asd -f html -o alps.json.html alps.json",
+      "PATH=${PATH#$PWD/vendor/bin:} asd -f svg -o alps.svg alps.json",
+      "@doc:sync-alps"
+    ],
+    "doc:api": [
+      "@apidoc",
+      "@doc:normalize"
+    ],
+    "doc:sync-alps": [
+      "cp alps.json.html docs/alps.json.html",
+      "cp alps.svg docs/alps.svg"
+    ],
+    "doc:normalize": "perl -pi -e 's/[ \\t]+$//' docs/api/index.html",
+    "apidoc": "./vendor/bin/apidoc",
+    "apidoc:audit": "./vendor/bin/apidoc audit",
+    "apidoc:terms": "./vendor/bin/apidoc terms",
+    "clean": [
+      "./vendor/bin/psalm --clear-cache",
+      "rm -rf .phpunit.cache var/tmp/*/*.php"
+    ],
+    "build": [
+      "@clean",
+      "@sa",
+      "@test"
+    ],
+    "stree": "ls -t var/log/*.json | head -1 | xargs -I{} vendor/bin/stree {}",
+    "app": "php bin/app.php",
+    "fake": "php bin/fake.php",
+    "dev": "php bin/dev.php",
+    "page": "php bin/page.php",
+    "prod": "php bin/prod.php",
+    "serve": "@serve:api",
+    "serve:api": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8080 -t public public/index.php",
+    "serve:page": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php",
+    "architecture:audit": "python3 scripts/bear_standard_audit.py ."
+  },
+  "scripts-descriptions": {
+    "test": "Run the default PHPUnit suite.",
+    "tests": "Run static analysis and the default PHPUnit suite.",
+    "test:full": "Prepare the EC-CUBE reference source, then run the default PHPUnit suite.",
+    "test:fake": "Run the fake-context PHPUnit suite.",
+    "test:sql": "Disabled: Sql folders are ignored by phpunit.xml.",
+    "test:http": "Run the HTTP PHPUnit suite.",
+    "test:smoke": "Run smoke tests.",
+    "setup:eccube-reference": "Clone or update the ignored EC-CUBE 4.3 reference source used by HTML parity tests.",
+    "sa": "Run static analysis.",
+    "cs": "Run lightweight consistency checks.",
+    "cs:alps": "Validate the canonical ALPS profile with asd.",
+    "psalm": "Run Psalm without cache/progress output.",
+    "psalm-taint": "Run Psalm taint analysis.",
+    "sql:quality": "Analyze var/sql SELECT queries with Koriym.SqlQuality (standalone, on-demand; requires a live MySQL prepared by sql/setup-db.sh + sql/seed/analysis-sample.sql). Not part of sa/tests/build.",
+    "coverage": "Run PHPUnit with Xdebug coverage output.",
+    "coverage:smoke": "Run the smoke suite with coverage summary and Clover output.",
+    "pcov": "Run PHPUnit with PCOV coverage output.",
+    "doc": "Generate all published documentation artifacts.",
+    "doc:alps": "Generate ALPS HTML/SVG artifacts with asd and sync them to docs/.",
+    "doc:api": "Generate BEAR.ApiDoc artifacts into docs/api.",
+    "doc:sync-alps": "Copy root ALPS artifacts into docs/ for GitHub Pages.",
+    "doc:normalize": "Normalize generated documentation whitespace.",
+    "apidoc": "Generate BEAR.ApiDoc documentation into docs/api.",
+    "apidoc:audit": "Print BEAR.ApiDoc documentation coverage audit.",
+    "apidoc:terms": "Print BEAR.ApiDoc term usage index.",
+    "clean": "Clear analysis and generated test caches.",
+    "build": "Clean, run static analysis, and run tests.",
+    "serve": "Serve the API entrypoint.",
+    "serve:api": "Serve the API entrypoint on 127.0.0.1:8080.",
+    "serve:page": "Serve the page entrypoint on 127.0.0.1:8081.",
+    "architecture:audit": "Audit BEAR.Sunday framework-boundary standard drift. This currently reports known debt and is used to guide standardization PRs."
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "aura/installer-default": false,
+      "cweagans/composer-patches": true
+    }
+  },
+  "extra": {
+    "patches": {
+      "ray/fake-query": {
+        "Support BeMart MediaQuery fake fixtures": "patches/ray-fake-query-be-bemart.patch"
+      },
+      "aura/html": {
+        "Declare nullable input helper specs for PHP 8.5": "patches/aura-html-php85-nullable.patch"
+      }
+    }
+  }
 }
