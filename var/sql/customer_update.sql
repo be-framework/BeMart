@@ -1,3 +1,100 @@
-UPDATE dtb_customer
-SET email=JSON_VALUE(CAST(:customer AS CHAR), '$.email'), password=JSON_VALUE(CAST(:customer AS CHAR), '$.passwordHash'), name01=JSON_VALUE(CAST(:customer AS CHAR), '$.name01'), name02=JSON_VALUE(CAST(:customer AS CHAR), '$.name02'), kana01=JSON_VALUE(CAST(:customer AS CHAR), '$.kana01'), kana02=JSON_VALUE(CAST(:customer AS CHAR), '$.kana02'), company_name=JSON_VALUE(CAST(:customer AS CHAR), '$.companyName'), phone_number=JSON_VALUE(CAST(:customer AS CHAR), '$.phoneNumber'), postal_code=JSON_VALUE(CAST(:customer AS CHAR), '$.postalCode'), pref_id=CAST(JSON_VALUE(CAST(:customer AS CHAR), '$.pref') AS UNSIGNED), addr01=JSON_VALUE(CAST(:customer AS CHAR), '$.addr01'), addr02=JSON_VALUE(CAST(:customer AS CHAR), '$.addr02'), birth=JSON_VALUE(CAST(:customer AS CHAR), '$.birth'), sex_id=CAST(JSON_VALUE(CAST(:customer AS CHAR), '$.sex') AS UNSIGNED), job_id=CAST(JSON_VALUE(CAST(:customer AS CHAR), '$.job') AS UNSIGNED), customer_status_id=CAST(JSON_VALUE(CAST(:customer AS CHAR), '$.customerStatus') AS UNSIGNED), secret_key=COALESCE(JSON_VALUE(CAST(:customer AS CHAR), '$.secretKey'), ''), point=CAST(JSON_VALUE(CAST(:customer AS CHAR), '$.initialPoint') AS SIGNED), update_date=NOW()
-WHERE JSON_VALUE(CAST(:customer AS CHAR), '$.customerId') REGEXP '^[0-9]+$' AND id=CAST(JSON_VALUE(CAST(:customer AS CHAR), '$.customerId') AS UNSIGNED)
+UPDATE
+  dtb_customer
+SET
+  email = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.email'
+  ),
+  password = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.passwordHash'
+  ),
+  name01 = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.name01'
+  ),
+  name02 = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.name02'
+  ),
+  kana01 = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.kana01'
+  ),
+  kana02 = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.kana02'
+  ),
+  company_name = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.companyName'
+  ),
+  phone_number = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.phoneNumber'
+  ),
+  postal_code = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.postalCode'
+  ),
+  pref_id = CAST(
+    JSON_VALUE(
+      CAST(:customer AS CHAR),
+      '$.pref'
+    ) AS UNSIGNED
+  ),
+  addr01 = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.addr01'
+  ),
+  addr02 = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.addr02'
+  ),
+  birth = JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.birth'
+  ),
+  sex_id = CAST(
+    JSON_VALUE(
+      CAST(:customer AS CHAR),
+      '$.sex'
+    ) AS UNSIGNED
+  ),
+  job_id = CAST(
+    JSON_VALUE(
+      CAST(:customer AS CHAR),
+      '$.job'
+    ) AS UNSIGNED
+  ),
+  customer_status_id = CAST(
+    JSON_VALUE(
+      CAST(:customer AS CHAR),
+      '$.customerStatus'
+    ) AS UNSIGNED
+  ),
+  secret_key = COALESCE(
+    JSON_VALUE(
+      CAST(:customer AS CHAR),
+      '$.secretKey'
+    ),
+    ''
+  ),
+  point = CAST(
+    JSON_VALUE(
+      CAST(:customer AS CHAR),
+      '$.initialPoint'
+    ) AS SIGNED
+  ),
+  update_date = NOW()
+WHERE
+  JSON_VALUE(
+    CAST(:customer AS CHAR),
+    '$.customerId'
+  ) REGEXP '^[0-9]+$'
+  AND id = CAST(
+    JSON_VALUE(
+      CAST(:customer AS CHAR),
+      '$.customerId'
+    ) AS UNSIGNED
+  )

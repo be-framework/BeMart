@@ -1,7 +1,29 @@
-SELECT fav.customer_id, pc.product_code, p.name AS product_name, pc.price02 AS unit_price, (SELECT pi.file_name FROM dtb_product_image pi WHERE pi.product_id = p.id ORDER BY pi.sort_no ASC, pi.id ASC LIMIT 1) AS main_image
-FROM dtb_customer_favorite_product fav
-INNER JOIN dtb_product p ON p.id = fav.product_id
-INNER JOIN dtb_product_class pc ON pc.product_id = p.id
-WHERE :customerId REGEXP '^[0-9]+$' AND fav.customer_id = CAST(:customerId AS UNSIGNED)
-  AND pc.class_category_id1 IS NULL AND pc.class_category_id2 IS NULL
-ORDER BY fav.id ASC
+SELECT
+  fav.customer_id,
+  pc.product_code,
+  p.name AS product_name,
+  pc.price02 AS unit_price,
+  (
+    SELECT
+      pi.file_name
+    FROM
+      dtb_product_image pi
+    WHERE
+      pi.product_id = p.id
+    ORDER BY
+      pi.sort_no ASC,
+      pi.id ASC
+    LIMIT
+      1
+  ) AS main_image
+FROM
+  dtb_customer_favorite_product fav
+  INNER JOIN dtb_product p ON p.id = fav.product_id
+  INNER JOIN dtb_product_class pc ON pc.product_id = p.id
+WHERE
+  :customerId REGEXP '^[0-9]+$'
+  AND fav.customer_id = CAST(:customerId AS UNSIGNED)
+  AND pc.class_category_id1 IS NULL
+  AND pc.class_category_id2 IS NULL
+ORDER BY
+  fav.id ASC

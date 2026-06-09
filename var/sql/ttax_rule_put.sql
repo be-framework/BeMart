@@ -1,4 +1,73 @@
-INSERT INTO dtb_tax_rule (id, tax_rate, rounding_type_id, apply_date, create_date, update_date, discriminator_type)
-SELECT CAST(JSON_VALUE(CAST(:taxRule AS CHAR), '$.taxRuleId') AS UNSIGNED), CAST(JSON_VALUE(CAST(:taxRule AS CHAR), '$.taxRate') AS DECIMAL(10,2)), CAST(JSON_VALUE(CAST(:taxRule AS CHAR), '$.roundingType') AS UNSIGNED), CASE WHEN LENGTH(REPLACE(JSON_VALUE(CAST(:taxRule AS CHAR), '$.applyDate'), 'T', ' ')) = 10 THEN CONCAT(REPLACE(JSON_VALUE(CAST(:taxRule AS CHAR), '$.applyDate'), 'T', ' '), ' 00:00:00') ELSE REPLACE(JSON_VALUE(CAST(:taxRule AS CHAR), '$.applyDate'), 'T', ' ') END, NOW(), NOW(), 'taxrule'
-WHERE JSON_VALUE(CAST(:taxRule AS CHAR), '$.taxRuleId') REGEXP '^[0-9]+$'
-ON DUPLICATE KEY UPDATE tax_rate=VALUES(tax_rate), rounding_type_id=VALUES(rounding_type_id), apply_date=VALUES(apply_date), update_date=NOW()
+INSERT INTO dtb_tax_rule (
+  id, tax_rate, rounding_type_id, apply_date,
+  create_date, update_date, discriminator_type
+)
+SELECT
+  CAST(
+    JSON_VALUE(
+      CAST(:taxRule AS CHAR),
+      '$.taxRuleId'
+    ) AS UNSIGNED
+  ),
+  CAST(
+    JSON_VALUE(
+      CAST(:taxRule AS CHAR),
+      '$.taxRate'
+    ) AS DECIMAL(10, 2)
+  ),
+  CAST(
+    JSON_VALUE(
+      CAST(:taxRule AS CHAR),
+      '$.roundingType'
+    ) AS UNSIGNED
+  ),
+  CASE WHEN LENGTH(
+    REPLACE(
+      JSON_VALUE(
+        CAST(:taxRule AS CHAR),
+        '$.applyDate'
+      ),
+      'T',
+      ' '
+    )
+  ) = 10 THEN
+    CONCAT(
+      REPLACE(
+        JSON_VALUE(
+          CAST(:taxRule AS CHAR),
+          '$.applyDate'
+        ),
+        'T',
+        ' '
+      ),
+      ' 00:00:00'
+    )
+  ELSE
+    REPLACE(
+      JSON_VALUE(
+        CAST(:taxRule AS CHAR),
+        '$.applyDate'
+      ),
+      'T',
+      ' '
+    )
+  END,
+  NOW(),
+  NOW(),
+  'taxrule'
+WHERE
+  JSON_VALUE(
+    CAST(:taxRule AS CHAR),
+    '$.taxRuleId'
+  ) REGEXP '^[0-9]+$' ON DUPLICATE KEY
+UPDATE
+  tax_rate =
+VALUES
+  (tax_rate),
+  rounding_type_id =
+VALUES
+  (rounding_type_id),
+  apply_date =
+VALUES
+  (apply_date),
+  update_date = NOW()
