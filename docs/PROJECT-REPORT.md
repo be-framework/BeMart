@@ -1,19 +1,19 @@
 ---
 layout: default
-title: "BeMart 実証総括 — Final Report"
+title: "BeMart 実証総括 — Project Report"
 ---
 
-# BeMart 実証総括 — Final Report
+# BeMart 実証総括 — Project Report
 
-BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.MediaQuery → HTML** で組み直すアプリケーション・オーバーホールの実証プロジェクトです。本書は「何を示せたか・何を学んだか・どこに限界を引いたか」を一枚に束ねた総括であり、各論は本文中のリンク先（`migration-status.md` / `HANDOVER.md` / `skills/` / `methodology/`）が正です。
+BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.MediaQuery → HTML** で組み直すアプリケーション・オーバーホールの実証プロジェクトです。本書は、現時点で「何を示せたか・何を学んだか・どこに限界を引いたか」を一枚に束ねた総括であり、各論は本文中のリンク先（`migration-status.md` / `HANDOVER.md` / `skills/` / `methodology/`）が正です。
 
-> 主張: 私たちは EC-CUBE 4.3 の全機能を [`alps.json`](../alps.json) と [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) に棚卸しし、移植手法の実証として価値のある範囲を完了した。残差分は未知の不足ではなく、意図的に保留した既知の境界である。
+> 主張: 私たちは EC-CUBE 4.3 の全機能を [`alps.json`](../alps.json) と [`eccube-feature-alps-status.html`](eccube-feature-alps-status.html) に棚卸しし、移植手法の実証として価値のある範囲に到達している。残差分は未知の不足ではなく、意図的に保留した既知の境界である。
 
 ## 1. 何を実証したか
 
-- **意味論ファースト移植** — `alps.json` を契約（source of truth）とし、Be ドメイン・BEAR リソース・SQL・HTML はその投影として実装する。現行 `alps.json` は 532 descriptor / 207 transition descriptor を持ち、147 の振る舞い契約と 60 の `alps-route-gate` 契約に分かれる。
-- **Fake → Schema → Ray.MediaQuery の契約先行永続化** — まず Fake で契約を固定し、EC-CUBE スキーマ照合の後に同じ契約を満たす SQL を実装。SQL境界は PHP PDO adapter ではなく、51 interface / 143 `#[DbQuery]` / 143 SQL file の Ray.MediaQuery 境界へ切り替えた（[G-23](skills/G-23-hypermedia-test-is-migration-contract.md) / [G-24](skills/G-24-ray-media-query-boundary.md) / [G-25](skills/G-25-bdr-domain-noun-values.md)）。
-- **ハイパーメディア＝移植契約** — リソースの link / form を移植契約として扱い、Final 直叩きの統合テストを書かない（[methodology/hypermedia-test-principle.md](methodology/hypermedia-test-principle.md)）。
+- **意味論ファースト移植** — `alps.json` を契約（source of truth）とし、Be ドメイン・BEAR リソース・SQL・HTML はその投影として実装する。現行 `alps.json` は 534 descriptor / 207 transition descriptor を持ち、safe / unsafe / idempotent な遷移を機械可読な契約として表す。
+- **Fake → Schema → Ray.MediaQuery の契約先行永続化** — まず Fake で契約を固定し、EC-CUBE スキーマ照合の後に同じ契約を満たす SQL を実装。SQL境界は PHP PDO adapter ではなく、54 interface / 150 `#[DbQuery]` / 150 SQL file の Ray.MediaQuery 境界へ切り替えた（[G-23](skills/G-23-hypermedia-test-is-migration-contract.md) / [G-24](skills/G-24-ray-media-query-boundary.md) / [G-25](skills/G-25-bdr-domain-noun-values.md)）。
+- **状態遷移契約＝複数境界の証拠** — リソースの link / form を移植契約として扱い、同じ workflow を PHP Resource、実 HTTP、HTML affordance / browser evidence へ投影する。Final 直叩きの統合テストを書かない（[methodology/hypermedia-test-principle.md](methodology/hypermedia-test-principle.md)）。
 - **Context が実装を選ぶ** — アプリケーションコードは Fake/SQL・HTML/JSON・test/prod の別を知らない。選択は DI binding が行う。
 - **明示的境界** — ドメイン / リソース / HTML / SQL / compatibility adapter / production cutover の境界を隠さず、テストで境界契約を固定する。
 - **Be Framework を実規模で運用** — `Input → Being → Final` の構造を実アプリ規模で運用し、Final を状態遷移成立の証明として扱った。実務知見は [methodology/FRAMEWORK_REVIEW.md](methodology/FRAMEWORK_REVIEW.md)。
@@ -22,11 +22,12 @@ BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.Media
 
 | レイヤ | 到達 |
 |---|---|
-| ALPS spec | 532 descriptor · 207 transition descriptor（147 behavioral + 60 route-gate） |
-| Be domain (`be/src`) | 147 Input · 148 Final · 155 Semantic · 14 Being |
-| BEAR Resource (`src/Resource`) | 147 page/support resource files |
-| SQL persistence (`var/sql` + MediaQuery) | 51 interface · 143 `#[DbQuery]` · 143 SQL file |
-| HTML (`var/templates`) | 131 Twig template（storefront + in-scope admin + shared blocks/frames） |
+| ALPS spec | 534 descriptor · 207 transition descriptor |
+| Be domain (`be/src`) | 147 Input · 148 Final · 157 Semantic · 14 Being |
+| BEAR Resource (`src/Resource/Page`) | 146 page resource files |
+| SQL persistence (`var/sql` + MediaQuery) | 54 interface · 150 `#[DbQuery]` · 150 SQL file |
+| HTML (`var/templates`) | 133 Twig template（storefront + in-scope admin + shared blocks/frames） |
+| Web E2E | 186 features · 181 pass / 2 fail / 3 out-of-scope · 140 screenshots |
 | Test | `migration-status.md` のベースラインを正とする。SQL suite は MariaDB/MySQL 依存。 |
 
 最新値は [`migration-status.md`](migration-status.md) が正（本表は総括時点のスナップショット）。
@@ -34,7 +35,7 @@ BeMart は EC-CUBE 4.3 を **ALPS → Be Framework → BEAR.Sunday → Ray.Media
 ## 3. 得られた知見
 
 - **移植 skill gap（G-14 〜 G-25）** — 同型の問題が 2 度現れた時点で「ad-hoc メモ」から「named G-NN」へ昇格した、独立して読める移植ルール集。索引は [skills/index.md](skills/index.md)。Ray.Di binding、Final 設計判断、Semantic 命名、idempotent DELETE、Ray.MediaQuery 境界など。`be-framework-skills` / `alps-skills` への上流貢献候補も同ファイルに整理。
-- **方法論** — [methodology/](methodology/) に再利用可能な原則（hypermedia-test、query-naming、sql-test-baseline、html-route-coverage、csrf-protection）。
+- **方法論** — [methodology/](methodology/) に再利用可能な原則（workflow/state-transition projection、query-naming、sql-test-baseline、html-route-coverage、csrf-protection）。
 - **AI 時代の移植・API 設計** — [methodology/be-bear-ai-era.md](methodology/be-bear-ai-era.md)。意味論を URL/契約に載せることで LLM が外部参照ゼロで理解できる（AX）という副産物。
 - **構築プロセスの決定ログ** — Pilot 1–15 / Wave 1–6 / Ray.MediaQuery cutover の経緯は [HANDOVER.md](HANDOVER.md)。
 - **境界の切り方** — 未完了を「できていない画面」ではなく、compatibility fidelity、HTML enrichment、production cutover、out-of-scope plugin runtime として分類できた。これは移植作業そのものの成果である。
