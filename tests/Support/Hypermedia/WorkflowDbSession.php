@@ -29,6 +29,8 @@ final class WorkflowDbSession
         $session = WorkflowTestSession::fromCurrent();
         $injector = Injector::getInstance('html-prod-hal-api-app');
 
+        // Internal hook shape: callers that only need the injector should use
+        // startForAdmin() or startWithCsrfToken(), which adapt this signature.
         $beforeTransaction?->__invoke($session, $injector);
 
         $db = $injector->getInstance(ExtendedPdoInterface::class);
@@ -92,9 +94,12 @@ final class WorkflowDbSession
     public function restore(Closure|null $afterRollback = null): void
     {
         $this->rollBack();
-        $afterRollback?->__invoke();
-        $this->session->restore();
-        $this->resource = null;
+        try {
+            $afterRollback?->__invoke();
+        } finally {
+            $this->session->restore();
+            $this->resource = null;
+        }
     }
 
     private function rollBack(): void
