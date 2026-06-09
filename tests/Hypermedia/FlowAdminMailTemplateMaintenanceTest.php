@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
-use BEAR\ApiDoc\Annotation\Alps;
 use Aura\Sql\ExtendedPdoInterface;
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
-use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowFixtureBoundary;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
@@ -35,6 +35,7 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
     private static ResourceInterface|null $dbResource = null;
     private static string $orderNo;
     private static string $paymentId;
+    private static WorkflowFixtureBoundary|null $fixtures = null;
     private static WorkflowTestSession|null $session = null;
 
     public static function setUpBeforeClass(): void
@@ -43,16 +44,13 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
         self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
-        $mailTemplates = self::$injector->getInstance(MailTemplateStorageInterface::class);
-        assert($mailTemplates instanceof MailTemplateStorageInterface);
-        if ($mailTemplates->list() === []) {
-            $mailTemplates->put(new MailTemplateEntity(
-                mailTemplateId: 1,
-                mailTemplateName: 'Workflow mail template',
-                fileName: 'Mail/workflow.twig',
-                subject: 'Workflow mail template subject',
-            ));
-        }
+        self::$fixtures = WorkflowFixtureBoundary::fromInjector(self::$injector);
+        self::$fixtures->ensureMailTemplateListVisible(new MailTemplateEntity(
+            mailTemplateId: 1,
+            mailTemplateName: 'Workflow mail template',
+            fileName: 'Mail/workflow.twig',
+            subject: 'Workflow mail template subject',
+        ));
 
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
         assert($db instanceof ExtendedPdoInterface);
@@ -70,11 +68,13 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
+        self::$fixtures?->cleanup();
         self::$session?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
+        self::$fixtures = null;
         self::$session = null;
 
         parent::tearDownAfterClass();

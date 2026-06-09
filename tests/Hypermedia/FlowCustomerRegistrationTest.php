@@ -11,10 +11,10 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
-use MyVendor\BeMart\Be\Reason\Query\CustomerCommandInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowFixtureBoundary;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
@@ -36,6 +36,7 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
     private static string $email;
     private static string $activationEmail;
     private static string $activationSecretKey;
+    private static WorkflowFixtureBoundary|null $fixtures = null;
     private static WorkflowTestSession|null $session = null;
 
     public static function setUpBeforeClass(): void
@@ -49,8 +50,7 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
         assert($db instanceof ExtendedPdoInterface);
         self::$db = $db;
 
-        $customerCommand = self::$injector->getInstance(CustomerCommandInterface::class);
-        assert($customerCommand instanceof CustomerCommandInterface);
+        self::$fixtures = WorkflowFixtureBoundary::fromInjector(self::$injector);
         $customerIds = self::$injector->getInstance(CustomerIdProvider::class);
         assert($customerIds instanceof CustomerIdProvider);
         $passwordHasher = self::$injector->getInstance(PasswordHasherInterface::class);
@@ -58,7 +58,7 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
 
         self::$activationEmail = 'workflow-activation-' . bin2hex(random_bytes(4)) . '@example.com';
         self::$activationSecretKey = 'workflow-activation-' . bin2hex(random_bytes(8));
-        $customerCommand->register(new CustomerEntity(
+        self::$fixtures->registerActivationCustomer(new CustomerEntity(
             customerId: $customerIds->get(),
             email: self::$activationEmail,
             passwordHash: $passwordHasher->hash(self::PASSWORD),
@@ -89,11 +89,13 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
+        self::$fixtures?->cleanup();
         self::$session?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
+        self::$fixtures = null;
         self::$session = null;
 
         parent::tearDownAfterClass();
