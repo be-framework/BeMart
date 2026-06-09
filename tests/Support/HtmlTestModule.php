@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
-namespace MyVendor\BeMart\Module;
+namespace MyVendor\BeMart\Tests\Support;
 
 use BEAR\Package\AbstractAppModule;
+use MyVendor\BeMart\Module\HtmlModule;
+use MyVendor\BeMart\Module\TestModule;
 use Override;
 
 /** PHPUnit HTML/Page context: TestModule + HTML presentation. */

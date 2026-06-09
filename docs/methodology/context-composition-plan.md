@@ -76,7 +76,7 @@ BeMart の `src/Injector.php` は現在、`APP_CONTEXT` 文字列を `match` で
 | `http-test-hal-api-app`, `cli-http-test-hal-api-app` | `HttpTestModule` | `TestModule` + BEAR Package `HalModule`。 |
 | `test-hal-api-app`, `cli-test-hal-api-app` | `TestModule` | `FakeModule` + `DevModule`。 |
 | `html-hal-app`, `cli-html-hal-app` | `HtmlHalModule` | `HalApiModule` + `HtmlModule`。 |
-| `html-test-hal-api-app`, `cli-html-test-hal-api-app` | `HtmlTestModule` | `TestModule` + `HtmlModule(debug/cache off)`。 |
+| `html-test-hal-api-app`, `cli-html-test-hal-api-app` | BEAR.Package context composition + test fixture `MyVendor\BeMart\Tests\Support\HtmlTestModule` | `TestModule` + `HtmlModule(debug/cache off)`。 |
 | `prod-hal-api-app`, `cli-prod-hal-api-app` | `ProdModule` | `AppModule` + prod session override + prod CSRF override + `SqlModule`。 |
 | `html-prod-hal-api-app`, `cli-html-prod-hal-api-app` | `HtmlProdModule` | `ProdModule` + `HtmlModule`。 |
 
