@@ -7,7 +7,7 @@ title: "HOW_TO_CONTINUE.md"
 
 別マシン / 別セッションでこの **BeMart** プロジェクト（EC-CUBE 4.3 → BEAR.Sunday +
 Be Framework 移植）の作業を再開するための引き継ぎガイド。
-最終更新: 2026-06-01（ALPS route-gate / Ray.MediaQuery cutover / documentation refresh）
+最終更新: 2026-06-09（PR closeout / API doc refresh / evidence documentation refresh）
 
 ---
 
@@ -15,15 +15,15 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 
 - **ブランチ**: セッションごとに異なる。まず `git branch --show-current` と `git status --short` を確認する。
 - **リモート**: `https://github.com/be-framework/BeMart.git`
-- **テスト**: `docs/migration-status.md` の現行ベースライン参照。HTTP workflow は `tests/Hypermedia/WorkflowTest.php` と `tests/Http/WorkflowTest.php` で同一シナリオを in-process / 実HTTP の2トランスポートで検証。
+- **テスト**: `docs/migration-status.md` の現行ベースライン参照。HTTP workflow は `tests/Hypermedia/Flow*.php` と `tests/Http/Flow*.php` で同一シナリオを in-process / 実HTTP の2トランスポートで検証。
 
 移植は ALPS を契約として進行している:
 
 | フェーズ | 内容 | 状態 |
 |---|---|---|
-| **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了。現在の `be/src` は 147 Input / 148 Final / 155 Semantic / 14 Being。 |
-| **Phase 2** | Fake → SQL → Ray.MediaQuery 境界 | 完了。現在は 51 MediaQuery interface / 143 `#[DbQuery]` / 143 SQL file。 |
-| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | in-scope 完了。`var/templates` は 131 Twig template。Storefront と admin editor waves は移植済み。Store/Plugin install/search subtree は plugin runtime 除外により out of scope。 |
+| **Phase A** | ALPS 状態遷移 → Be ドメイン層 + BEAR JSON リソース | 完了。現在の `be/src` は 147 Input / 148 Final / 157 Semantic / 14 Being。 |
+| **Phase 2** | Fake → SQL → Ray.MediaQuery 境界 | 完了。現在は 54 MediaQuery interface / 150 `#[DbQuery]` / 150 SQL file。 |
+| **Phase 3** | HTML プレゼンテーション層（EC-CUBE テンプレート忠実移植） | in-scope 完了。`var/templates` は 133 Twig template。Storefront と admin editor waves は移植済み。Store/Plugin install/search subtree は plugin runtime 除外により out of scope。 |
 | **Route-gate / compatibility** | EC-CUBE route と安全退避 / 互換 adapter 境界の明示 | `alps-route-gate` descriptor と `docs/eccube-feature-alps-status.html` で追跡。Hard ActionRedirect は接続済みだが、byte/fidelity 完全互換は residual。 |
 
 > **現在の移植ステータス（レイヤ別マトリクス・残作業 punch-list）の正は
@@ -99,7 +99,7 @@ SQL
 
 ```bash
 vendor/bin/phpunit                          # 全テスト（OK なら緑）
-vendor/bin/phpunit tests/Hypermedia/WorkflowTest.php tests/Http/WorkflowTest.php  # 同一workflowをin-process/実HTTPで検証
+vendor/bin/phpunit tests/Hypermedia tests/Http  # 同一workflowをin-process/実HTTPで検証
 /opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never  # malt DB 経由
 composer psalm                              # 型解析
 composer psalm-taint                        # taint mode
@@ -139,7 +139,7 @@ Admin Tier-2 以降は、ページ単位で次の4層を完了条件にする。
 
 1. **Resource hypermedia** — `tests/Resource/*ResourceTest.php` で `ResourceInterface` 経由の `page://self/...` 契約を検証。
 2. **HTML render-diff** — `tests/Resource/*HtmlRenderTest.php` で EC-CUBE 実テンプレートとの差分を residual allowlist で説明。
-3. **HTTP workflow** — `tests/Hypermedia/WorkflowTest.php` の同一 assertion を `tests/Http/WorkflowTest.php` が継承し、`HttpResource` 経由で実HTTP / Cookie境界を越えて検証する。HTTP サーバは `koriym/php-server` でテスト内起動する（手動起動しない）。POST成功後に `Location` を返すものは `303 See Other + Location` として固定する。
+3. **HTTP workflow** — `tests/Hypermedia/Flow*.php` の同一 assertion を `tests/Http/Flow*.php` が継承し、`HttpResource` 経由で実HTTP / Cookie境界を越えて検証する。HTML render / link-follow / Web E2E は同じ遷移が画面 affordance として残ることを確認する。HTTP サーバは `koriym/php-server` でテスト内起動する（手動起動しない）。POST成功後に `Location` を返すものは `303 See Other + Location` として固定する。
 4. **Browser smoke** — storefront は実ブラウザでトップ → 商品一覧 → 商品詳細 → カート/ログイン/問い合わせ導線を確認。商品一覧は populated branch / category / sort / list add-cart まで接続済み。Admin はログイン後に商品・受注・会員・カテゴリ・テンプレート周辺の主要導線を確認する。
 
 
@@ -194,7 +194,7 @@ BeMart/
 │   └── src/{Input,Being,Final,Reason,Semantic,Exception}/
 │       └── Reason/Query/*Interface.php   # Ray.MediaQuery interface境界
 ├── sql/                      # EC-CUBE スキーマダンプ・mtb_* seed・setup-db.sh（Phase 2）
-├── var/sql/                  # Ray.MediaQuery SQL files（143 query）
+├── var/sql/                  # Ray.MediaQuery SQL files（150 query）
 ├── var/templates/            # HTML テンプレート（EC-CUBE 移植、Phase 3）
 ├── tests/                    # BEAR 層のテスト（render-diff / hypermedia 含む）
 └── .claude/                  # /run migrate ワークフロー（commands / workflows / prompts）

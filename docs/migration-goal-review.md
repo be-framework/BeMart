@@ -5,12 +5,12 @@ title: "EC-CUBE セマンティックオーバーホール：移行目標レビ�
 
 # EC-CUBE セマンティックオーバーホール：移行目標レビュー
 
-Last updated: 2026-06-04
-Evidence snapshot: `1ccc7d5` (`origin/be-first-migration-bootstrap` after PR #34)
+Last updated: 2026-06-09
+Evidence snapshot: `f4d77609` (`1.x` after PR closeout and API doc refresh)
 
 この文書は、BeMart を「EC-CUBE 互換実装」ではなく、巨大既存アプリケーションを意味と境界へ分解して再構成する **semantic overhaul** として再確認するためのレビューである。
 
-`FINAL-REPORT.md` は実証総括、`migration-status.md` は到達点の正、`HANDOVER.md` は作業履歴である。本書はその上に立ち、プロジェクトの目標、達成証拠、残差分類、実証実験としての結論、次フェーズの進め方を一枚に束ねる。
+`PROJECT-REPORT.md` は実証総括、`migration-status.md` は到達点の正、`HANDOVER.md` は作業履歴である。本書はその上に立ち、プロジェクトの目標、達成証拠、残差分類、実証実験としての結論、次フェーズの進め方を一枚に束ねる。
 
 ---
 
@@ -29,7 +29,7 @@ BeMart の目標は、EC-CUBE 4.3 を別フレームワークへ単純に移す�
 | EC-CUBE の意味を機械可読な契約へ逆算できたか | `alps.json` と route/status 表で成立 |
 | 契約からドメイン、リソース、SQL、HTML を投影できたか | 5 レイヤの移植で成立 |
 | Fake と SQL を同じ契約の実装として交換可能にできたか | Ray.MediaQuery とテスト境界で成立 |
-| HTTP / HTML の遷移を affordance として残せたか | route-gate / hypermedia / fallback 方針で成立 |
+| 状態遷移契約を複数境界へ投影できたか | PHP Resource / HTTP / HTML affordance / browser evidence で成立 |
 | 未完了を未知の穴ではなく名前付き残差へ分類できたか | 本書と `migration-status.md` §4 で成立 |
 
 ---
@@ -40,14 +40,15 @@ BeMart の目標は、EC-CUBE 4.3 を別フレームワークへ単純に移す�
 
 | レイヤ | 証拠 |
 |---|---|
-| ALPS | `alps.json` は 532 descriptor / 207 transition descriptor。147 behavioral transition と 60 route-gate transition に分かれ、機能とルート接続の両方を契約化している。 |
-| Be domain | `be/src` は 147 Input / 148 Final / 14 Being を持つ。Final は「状態遷移が成立した証明」として使われる。Semantic は現ファイル棚卸しで 155、`migration-status.md` 記録では 154。ここは後述のドキュメント不整合として扱う。 |
-| BEAR Resource | `src/Resource/Page` は 147 resource file。EC-CUBE route name / URL path / resource URI を接続し、BEAR ResourceObject を HTTP 境界として使っている。 |
-| SQL / Ray.MediaQuery | `MediaQueryRuntimeModule::queryClasses()` が 51 query interface を登録する。`var/sql` は現棚卸しで 143 SQL file、`migration-status.md` 記録では 142 SQL file。Fake から SQL への移植後、境界は interface + SQL file へ整理済み。 |
-| HTML | `var/templates` は 131 Twig template。storefront と in-scope admin editor waves、共有 Block / frame を含む。 |
-| Hypermedia / HTTP | `tests/Hypermedia/WorkflowTest.php` と `tests/Http/WorkflowTest.php` が同じ workflow を in-process と実 HTTP / cookie boundary で検証する。 |
-| Browser / site exploration | `docs/html-screen-migration-matrix.md` と `docs/ec-cube-site-exploration-gaps-2026-05-23.md` が、実 HTTP 探索で EC-CUBE と BeMart の到達・欠落を確認している。 |
-| Test baseline | `migration-status.md` は 2026-06-01 の非 SQL suite 検証として 1322 tests / 22258 assertions / 220 skipped を記録する。SQL suite は MariaDB / `DATABASE_URL` 依存。 |
+| ALPS | `alps.json` は 534 descriptor / 207 transition descriptor。safe / unsafe / idempotent な状態遷移を、実装から独立した契約として表す。 |
+| Be domain | `be/src` は 147 Input / 148 Final / 157 Semantic / 14 Being を持つ。Final は「状態遷移が成立した証明」として使われる。 |
+| BEAR Resource | `src/Resource/Page` は 146 resource file。EC-CUBE route name / URL path / resource URI を接続し、BEAR ResourceObject を HTTP 境界として使っている。 |
+| SQL / Ray.MediaQuery | `be/src/Reason/Query` は 54 query interface / 150 `#[DbQuery]` を持ち、`var/sql` は 150 SQL file。Fake から SQL への移植後、境界は interface + SQL file へ整理済み。 |
+| API contract | `docs/api/openapi.json` は 236 operations、`docs/api/schemas` は 235 JSON Schema を持つ。 |
+| HTML | `var/templates` は 133 Twig template。storefront と in-scope admin editor waves、共有 Block / frame を含む。 |
+| Workflow evidence | `tests/Hypermedia/Flow*.php` と `tests/Http/Flow*.php` が同じ workflow を PHP Resource と実 HTTP / cookie boundary で検証する。HTML render / link-follow / Web E2E は同じ遷移が `rel` / `class` / `href` / `form action` として画面に残ることを確認する。 |
+| Browser / site exploration | `docs/web-e2e/feature-implementation-matrix.md` が 186 features を 1 行ずつ整理し、最新 run は 181 pass / 2 fail / 3 out-of-scope と 140 screenshots を保持する。 |
+| Test baseline | PR closeout 後の `1.x` で `composer psalm` と `composer test` が green。PHPUnit は 1734 tests / 26059 assertions。SQL target-engine verification は MariaDB 10.11 残差として別管理する。 |
 
 この証拠から言えることは、BeMart は「少数のサンプル移植」ではなく、EC-CUBE の広い面を ALPS 契約から多層に投影した実装付き実証である、ということだ。
 
@@ -105,15 +106,15 @@ BeMart の目標は、EC-CUBE 4.3 を別フレームワークへ単純に移す�
 
 ここは追加実装よりも、検証環境と受け入れ条件を整えることが先である。
 
-### E. ドキュメント不整合
+### E. 公開/生成物境界
 
-作業が進んだ結果、ステータス文書と現ファイル棚卸しに小さなズレが出ているもの。
+生成物と公開物は、手編集する文書と同じ扱いにしない。
 
-- `migration-status.md` は Semantic 154 と記録するが、現棚卸しは `be/src/Semantic` 155 file。
-- `migration-status.md` は SQL 142 file と記録するが、現棚卸しは `var/sql` 143 file。
-- `docs/html-screen-migration-matrix.md` は 2026-05-22/23 時点の古い route/template 数を含む。
+- `docs/api/index.html` / `docs/api/openapi.json` / `docs/api/terms.html` / `docs/api/llms.txt` は BEAR.ApiDoc 由来の公開成果物である。
+- `docs/api/paths/**/*.md` は詳細生成Markdownであり、Twig / JSON の literal を含むため GitHub Pages の Liquid 処理対象にしない。
+- `alps.json.html` / `alps.svg` / `docs/alps-doc/` も生成元から同期する。生成元がある場合は手で直さない。
 
-これらは実装の欠落ではないが、プロジェクトを方法論として提示するには先に揃えるべきである。
+これは実装の欠落ではなく、公開ドキュメントを安定して提供するための境界である。
 
 ---
 
@@ -138,10 +139,10 @@ BeMart は前者に対して、実装とテストと文書で肯定的な答え�
 
 次は新機能を増やす前に、プロジェクトを方法論として提示できる状態へ整える。
 
-### Phase 1 — 証拠整合（Evidence alignment）
+### Phase 1 — 証拠公開（Evidence publication）
 
-- `migration-status.md`、`README.md`、`docs/README.md`、`html-screen-migration-matrix.md` の数値を現棚卸しへ揃える。
-- Semantic / SQL file 数の差分を調べ、正しいカウントルールを文書化する。
+- `README.md`、`docs/index.html`、`docs/README.md` から `feature-evidence.md` と Web E2E 証跡へ辿れるようにする。
+- 主要数値は `migration-status.md` と `feature-evidence.md` を正とし、古い歴史的文書ではスナップショットであることを明示する。
 - `eccube-feature-alps-status.html` の route/function status と `migration-status.md` §4 の残差分類を対応させる。
 
 ### Phase 2 — 検証ゲート（Verification gate）
@@ -149,7 +150,7 @@ BeMart は前者に対して、実装とテストと文書で肯定的な答え�
 - `DATABASE_URL` ありの MariaDB 10.11 で SQL suite を実行する。
 - `order_item_register.sql` の `JSON_TABLE` portability を確認し、必要なら MariaDB 互換の INSERT に書き換える。
 - `tools/ec-cube-source/` ありで render-diff tests を再実行する。
-- Hypermedia / HTTP / smoke suite を最新 base で再実行する。
+- Workflow evidence / smoke suite を最新 base で再実行する。
 
 ### Phase 3 — 残差ハードニング（Residual hardening）
 
@@ -159,7 +160,7 @@ BeMart は前者に対して、実装とテストと文書で肯定的な答え�
 
 ### Phase 4 — 方法論パッケージ化（Methodology packaging）
 
-- `FINAL-REPORT.md`、本書、`skills/`、`methodology/` を、外部読者が追える順序へ整理する。
+- `PROJECT-REPORT.md`、本書、`skills/`、`methodology/` を、外部読者が追える順序へ整理する。
 - 「semantic migration の実行手順」と「完全代替へ残る互換作業」を分けて説明する。
 - Be Framework / BEAR.Sunday / Ray.MediaQuery に再利用可能な改善提案を切り出す。
 
