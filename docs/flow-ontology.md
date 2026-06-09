@@ -78,7 +78,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | 商品を作成・編集し、顧客向け画面で表示されることを確認する。 |
 | Start condition | admin が管理画面にログイン済み。 |
 | Goal condition | 対象商品が storefront の商品一覧と商品詳細で確認できる。 |
-| Success evidence | Hypermedia test、HTTP test、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、browser smoke。 |
 | Out of scope | 商品 CSV import/export、画像アップロードの byte fidelity、購入 checkout。 |
 
 ### `flow-customer-purchase`
@@ -89,7 +89,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | 商品を探し、カートに入れ、注文手続きを完了する。 |
 | Start condition | storefront にアクセス可能。会員/非会員 checkout のどちらを対象にするかはテストケースで明示する。 |
 | Goal condition | 購入完了画面に到達し、注文・明細 snapshot が記録される。 |
-| Success evidence | Hypermedia test、HTTP test、SQL suite、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、SQL suite、browser smoke。 |
 | Out of scope | 決済代行の本番 capture、メール本文の byte fidelity、PDF/CSV 出力。 |
 
 ### `flow-admin-order-fulfillment`
@@ -100,7 +100,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | 受注を確認し、配送情報、対応状況、通知、帳票を扱う。 |
 | Start condition | admin がログイン済みで、対象受注が存在する。 |
 | Goal condition | 受注編集・配送編集・通知/帳票導線が安全に辿れる。 |
-| Success evidence | Hypermedia test、HTTP test、PDF/Mail compatibility tests、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、PDF/Mail compatibility tests、browser smoke。 |
 | Out of scope | 帳票レイアウト完全一致、外部配送連携。 |
 
 ### `flow-customer-registration`
@@ -111,7 +111,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | 会員情報を入力し、登録確認・完了・有効化へ進む。 |
 | Start condition | 匿名 visitor。 |
 | Goal condition | 登録済み顧客としてログインまたはマイページ導線に進める。 |
-| Success evidence | Hypermedia test、HTTP test、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、browser smoke。 |
 | Out of scope | 本番メール配送の到達性、外部本人確認。 |
 
 ### `flow-customer-account-maintenance`
@@ -122,7 +122,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | マイページで会員情報、配送先、お気に入り、退会を管理する。 |
 | Start condition | customer がログイン済み。 |
 | Goal condition | 情報変更、配送先操作、お気に入り確認/削除、退会導線が成立する。 |
-| Success evidence | Hypermedia test、HTTP test、render-diff、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、render-diff、browser smoke。 |
 | Out of scope | 退会後の長期履歴保持ポリシー、ポイント精算の完全互換。 |
 
 ### `flow-customer-inquiry`
@@ -133,7 +133,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | 問い合わせを入力し、確認して送信する。 |
 | Start condition | storefront visitor。 |
 | Goal condition | 問い合わせ完了画面に到達し、受付番号 `ticketId` が発行され、そこから公開された終端リンクを辿れる。送信境界の成立は Be / Mail contract で確認する。 |
-| Success evidence | Hypermedia test、HTTP test、mail body fixture、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、mail body fixture、browser smoke。 |
 | Out of scope | 問い合わせ本文の readback resource、本番 SMTP 到達性。 |
 
 ### `flow-admin-content-publish`
@@ -144,7 +144,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | ニュース、ページ、ブロック、レイアウトを編集し、表示面に反映する。 |
 | Start condition | admin がログイン済み。 |
 | Goal condition | 管理画面で保存したコンテンツが該当表示面で確認できる。 |
-| Success evidence | Hypermedia test、HTTP test、render-diff、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、render-diff、browser smoke。 |
 | Out of scope | plugin runtime に依存する block / page 拡張。 |
 
 ### `flow-admin-shop-configuration`
@@ -155,7 +155,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | 店舗基本情報、配送、支払、税、営業日などを設定する。 |
 | Start condition | admin がログイン済み。 |
 | Goal condition | 保存済み設定が購入・表示・管理画面に反映される。 |
-| Success evidence | Hypermedia test、HTTP test、SQL suite、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、SQL suite、browser smoke。 |
 | Out of scope | 外部決済・配送事業者との本番連携。 |
 
 ### `flow-admin-system-operation`
@@ -166,7 +166,7 @@ Flow の検証は「エラーなく遷移できた」ではなく、「その業
 | Intent | 管理者、権限、ログ、2FA、セキュリティ設定を運用する。 |
 | Start condition | admin がログイン済み、または 2FA 設定では pre-auth challenge state が存在する。 |
 | Goal condition | 管理運用の認証・権限・監査導線が成立する。 |
-| Success evidence | Hypermedia test、HTTP test、security regression tests、browser smoke。 |
+| Success evidence | Workflow evidence（PHP Resource / HTTP）、security regression tests、browser smoke。 |
 | Out of scope | 組織外 IdP / SSO 連携。 |
 
 ### `flow-admin-csv-exchange`

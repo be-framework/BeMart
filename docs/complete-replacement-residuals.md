@@ -5,8 +5,8 @@ title: "完全置換残差（Complete Replacement Residuals）"
 
 # 完全置換残差（Complete Replacement Residuals）
 
-Last updated: 2026-06-04
-Evidence snapshot: `1ccc7d5` (`origin/be-first-migration-bootstrap` after PR #34)
+Last updated: 2026-06-09
+Evidence snapshot: `f4d77609` (`1.x` after PR closeout and API doc refresh)
 
 BeMart は、EC-CUBE 4.3 の機能領域をほぼ横断的にカバーしている。`migration-status.md` の Feature matrix と Phase log が示す通り、ALPS、Be domain、BEAR Resource、SQL、HTML の主要面は最終段階に達している。
 
@@ -43,13 +43,13 @@ BeMart は、EC-CUBE 4.3 の機能領域をほぼ横断的にカバーしてい�
 
 | 領域 | 現状 | 必要な検証 | 完了証拠 |
 |---|---|---|---|
-| SQL suite | SQL suite は MariaDB / `DATABASE_URL` 依存。非 SQL suite は 2026-06-01 に green baseline 記録あり。 | MariaDB 10.11 target engine で `DATABASE_URL=... vendor/bin/phpunit --testsuite sql` を green にする。 | target MariaDB で SQL suite green のログ。skip ではなく実実行。 |
+| SQL suite | PR closeout 後の `1.x` で `composer psalm` と `composer test` は green。SQL suite は MariaDB / `DATABASE_URL` 依存で、target-engine 確認は別残差として残る。 | MariaDB 10.11 target engine で `DATABASE_URL=... vendor/bin/phpunit --testsuite sql` を green にする。 | target MariaDB で SQL suite green のログ。skip ではなく実実行。 |
 | `order_item_register.sql` | `doCreateOrder` / `doCheckout` は order item snapshot を書く設計。SQL file は `JSON_TABLE` を使う。 | MariaDB 10.11 で `JSON_TABLE` が期待通り動くか確認。動かない場合は MariaDB 互換 INSERT に書き換える。 | `SqlOrderItemCommandTest` と checkout/admin order snapshot tests の SQL green。 |
 | Production DB bring-up | seed script と prod `SqlModule` binding はある。 | EC-CUBE schema + `mtb_*` seed + prod context の起動確認。 | clean DB から setup script 実行、prod context smoke、主要 read/write route の確認。 |
 | Prod context wiring | `SqlModule` / `MediaQueryRuntimeModule` は prod SQL binding を持つ。 | Fake が prod path に混入しないこと、log/side-effect が prod 契約に沿うこと。 | prod module tests が live DB で green。Fake storage 参照がないことの regression test。 |
 | Render-diff | HTML render tests は `tools/ec-cube-source/` 4.3 clone がある時に EC-CUBE 実テンプレートと比較する。 | EC-CUBE source clone ありで render-diff suite を再実行し、residual allowlist が最新であることを確認する。 | render-diff tests green。残差 allowlist が説明付きで残る。 |
-| HTTP / Hypermedia | `tests/Hypermedia/WorkflowTest.php` と `tests/Http/WorkflowTest.php` が同一 workflow を in-process / real HTTP で検証する。 | 最新 base で fake/http/smoke suite を再実行する。cookie/session 境界の回帰を捕捉する。 | `composer test:fake`, `composer test:http`, `composer test:smoke` green。 |
-| Browser smoke | 2026-05-23 の実サイト探索と browser verification JSON がある。 | 最新 base で storefront/admin の主要導線を再 smoke。Feature status の browser column を更新する。 | `docs/eccube-feature-browser-verification.json` と生成 HTML の確認済み行更新。 |
+| Workflow evidence | `tests/Hypermedia/Flow*.php` と `tests/Http/Flow*.php` が同一 workflow を in-process / real HTTP で検証する。HTML link-follow と Web E2E は画面 affordance 側の証拠を補う。 | 最新 base で fake/http/smoke suite を再実行する。cookie/session 境界と HTML affordance の回帰を捕捉する。 | `composer test:fake`, `composer test:http`, `composer test:smoke` green。 |
+| Browser smoke | 2026-06-08 の Web E2E run は 186 features を実DB/prod context で検証し、181 pass / 2 fail / 3 out-of-scope と 140 screenshots を保持する。 | 失敗2件（注文履歴詳細 / 再注文）と production verification 残差を閉じる。新しい全件runを追加する場合は証跡保持方針に従う。 | `docs/web-e2e/feature-implementation-matrix.md` と最新run report の更新。 |
 | Compatibility adapters | PDF/CSV/Mail/Template/MasterData などは adapter boundary に隔離済み。 | adapter が本番副作用を起こす経路で、file/network/db/error handling の契約を確認する。 | adapter ごとの fixture / failure-mode tests。 |
 | Security production cutover | CSRF、session、2FA、admin auth は route-level に接続されている。 | pre-auth 2FA challenge、secure cookie、strict session、CSRF token 発行/検証、admin authorization を本番設定で確認する。 | security regression tests と production config checklist。 |
 

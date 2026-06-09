@@ -14,6 +14,7 @@
       --link: #005ea8;
       --background: #ffffff;
       --section: #f7f9fb;
+      --accent: #1f6f8b;
     }
 
     * {
@@ -30,7 +31,7 @@
     }
 
     main {
-      width: min(880px, calc(100% - 32px));
+      width: min(1040px, calc(100% - 32px));
       margin: 0 auto;
       padding: 40px 0 56px;
     }
@@ -77,6 +78,41 @@
       color: var(--muted);
     }
 
+    .thesis {
+      max-width: 820px;
+      font-size: 17px;
+      color: var(--text);
+    }
+
+    .statGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 12px;
+      margin: 24px 0 32px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      background: var(--section);
+      padding: 14px 16px;
+      min-height: 86px;
+    }
+
+    .stat strong {
+      display: block;
+      color: var(--accent);
+      font-size: 24px;
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .stat span {
+      display: block;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
     .primarySource {
       margin: 24px 0 32px;
       padding: 18px 20px;
@@ -111,6 +147,34 @@
       color: var(--muted);
     }
 
+    .shotGrid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin: 16px 0 8px;
+    }
+
+    .shot {
+      border: 1px solid var(--line);
+      background: #fff;
+      overflow: hidden;
+    }
+
+    .shot img {
+      display: block;
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      object-fit: cover;
+      object-position: top;
+    }
+
+    .shot span {
+      display: block;
+      padding: 8px 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
     footer {
       border-top: 1px solid var(--line);
       margin-top: 32px;
@@ -137,11 +201,25 @@
     <header>
       <img class="projectName" src="assets/bemart-title.png" alt="BeMart">
       <h1 class="projectName">BeMart Documentation</h1>
+      <p class="thesis">
+        BeMart は、EC-CUBE 4.3 の業務意味、状態遷移、入力制約、SQL、HTML affordance を
+        分解し、ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery / Twig HTML / workflow evidence
+        へ再配置したアプリケーション・オーバーホールの実証です。
+      </p>
       <p class="summary">
-        EC-CUBE 4.3 の意味論を ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery SQL /
-        HTML / workflow test へ分解し、境界ごとに再構成した実証プロジェクトです。
+        これは controller rewrite ではありません。巨大な既存アプリケーションを、
+        読める意味、明示された境界、検証可能な契約へ変換できるかを、実装と証拠で示すプロジェクトです。
       </p>
     </header>
+
+    <section class="statGrid" aria-label="evidence summary">
+      <div class="stat"><strong>534</strong><span>ALPS descriptors</span></div>
+      <div class="stat"><strong>207</strong><span>ALPS transitions</span></div>
+      <div class="stat"><strong>146</strong><span>Page resources</span></div>
+      <div class="stat"><strong>150</strong><span>SQL files / DbQuery methods</span></div>
+      <div class="stat"><strong>236</strong><span>OpenAPI operations</span></div>
+      <div class="stat"><strong>140</strong><span>Web E2E screenshots</span></div>
+    </section>
 
     <section class="primarySource">
       <h2 class="groupTitle">Single Source of Truth</h2>
@@ -155,11 +233,15 @@
       <h2 class="groupTitle">まず読む順</h2>
       <ul>
         <li class="linkItem">
+          <a class="goFeatureEvidence documentationResource" href="feature-evidence.html">証拠の全体像</a>
+          <span class="linkDescription">ALPS、Resource、SQL、API、HTML、Web E2E screenshot を一箇所で見る。</span>
+        </li>
+        <li class="linkItem">
           <a class="goMigrationGoal documentationResource" href="migration-goal-review.html">プロジェクトのゴール</a>
           <span class="linkDescription">semantic overhaul としてのゴール、成果、残差、次フェーズ。</span>
         </li>
         <li class="linkItem">
-          <a class="goFinalReport documentationResource" href="FINAL-REPORT.html">実証として何を示せたか</a>
+          <a class="goProjectReport documentationResource" href="PROJECT-REPORT.html">実証として何を示せたか</a>
           <span class="linkDescription">BeMart が semantic migration の実証として到達した結果。</span>
         </li>
         <li class="linkItem">
@@ -179,6 +261,36 @@
           <span class="linkDescription">docs 配下の正典文書、生成物、補助資料の索引。</span>
         </li>
       </ul>
+    </section>
+
+    <section class="linkGroup">
+      <h2 class="groupTitle">画面証跡</h2>
+      <p class="summary">
+        最新の全件 Web E2E run は、実DB/prod context で 186 機能を検証し、
+        140 枚のスクリーンショットを保持しています。
+      </p>
+      <div class="shotGrid">
+        <a class="shot" href="web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/001-トップページ表示.png">
+          <img src="web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/001-トップページ表示.png" alt="トップページ表示">
+          <span>Storefront top</span>
+        </a>
+        <a class="shot" href="web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/012-購入確認.png">
+          <img src="web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/012-購入確認.png" alt="購入確認">
+          <span>Checkout confirm</span>
+        </a>
+        <a class="shot" href="web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/051-管理ダッシュボード表示.png">
+          <img src="web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/051-管理ダッシュボード表示.png" alt="管理ダッシュボード表示">
+          <span>Admin dashboard</span>
+        </a>
+        <a class="shot" href="web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/095-受注詳細表示.png">
+          <img src="web-e2e/screenshots/20260608-canonical-resource-routes-web-e2e/095-受注詳細表示.png" alt="受注詳細表示">
+          <span>Order detail</span>
+        </a>
+      </div>
+      <p class="summary">
+        全機能表は <a href="web-e2e/feature-implementation-matrix.html">Web機能 実装状態一覧表</a>、
+        run summary は <a href="web-e2e/20260608-canonical-resource-routes-web-e2e-report.html">Web E2E結果</a>。
+      </p>
     </section>
 
     <section class="linkGroup">
@@ -211,8 +323,8 @@
           <span class="linkDescription">EC-CUBE route/function と ALPS ID、実装状態、難易度の対応表。</span>
         </li>
         <li class="linkItem">
-          <a class="goHypermediaTestPrinciple documentationResource" href="methodology/hypermedia-test-principle.html">Hypermedia test principle</a>
-          <span class="linkDescription">link / form を辿って workflow を証明するテスト方針。</span>
+          <a class="goHypermediaTestPrinciple documentationResource" href="methodology/hypermedia-test-principle.html">Workflow evidence principle</a>
+          <span class="linkDescription">状態遷移契約を PHP Resource / HTTP / HTML affordance へ投影する考え方。</span>
         </li>
         <li class="linkItem">
           <a class="goInitialArticle documentationResource" href="archive/alps-profile-generation.html">Initial ALPS article</a>
