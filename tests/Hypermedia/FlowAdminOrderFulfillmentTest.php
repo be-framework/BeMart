@@ -59,8 +59,7 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $payment->code);
-        $this->assertIsString($payment->body['paymentId'] ?? null);
-        self::$paymentId = $payment->body['paymentId'];
+        self::$paymentId = $this->bodyString($payment, 'paymentId');
 
         $order = $this->resource->post('page://self/admin/order/create', [
             'customerId' => 'workflow-customer-' . bin2hex(random_bytes(4)),
@@ -79,8 +78,7 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $order->code);
-        $this->assertIsString($order->body['orderNo'] ?? null);
-        self::$orderNo = $order->body['orderNo'];
+        self::$orderNo = $this->bodyString($order, 'orderNo');
 
         $response = $this->resource->get('page://self/admin/order-list');
 
