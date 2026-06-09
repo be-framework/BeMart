@@ -1,3 +1,100 @@
-INSERT INTO dtb_base_info (id, shop_name, shop_kana, shop_name_eng, company_name, postal_code, pref_id, addr01, addr02, phone_number, business_hour, email01, message, update_date, discriminator_type)
-VALUES (1, JSON_VALUE(CAST(:entity AS CHAR), '$.shopName'), JSON_VALUE(CAST(:entity AS CHAR), '$.shopKana'), JSON_VALUE(CAST(:entity AS CHAR), '$.shopNameEng'), JSON_VALUE(CAST(:entity AS CHAR), '$.companyName'), JSON_VALUE(CAST(:entity AS CHAR), '$.postalCode'), CAST(JSON_VALUE(CAST(:entity AS CHAR), '$.pref') AS UNSIGNED), JSON_VALUE(CAST(:entity AS CHAR), '$.addr01'), JSON_VALUE(CAST(:entity AS CHAR), '$.addr02'), JSON_VALUE(CAST(:entity AS CHAR), '$.phoneNumber'), JSON_VALUE(CAST(:entity AS CHAR), '$.businessHour'), JSON_VALUE(CAST(:entity AS CHAR), '$.shopEmail01'), JSON_VALUE(CAST(:entity AS CHAR), '$.shopMessage'), NOW(), 'baseinfo')
-ON DUPLICATE KEY UPDATE shop_name=VALUES(shop_name), shop_kana=VALUES(shop_kana), shop_name_eng=VALUES(shop_name_eng), company_name=VALUES(company_name), postal_code=VALUES(postal_code), pref_id=VALUES(pref_id), addr01=VALUES(addr01), addr02=VALUES(addr02), phone_number=VALUES(phone_number), business_hour=VALUES(business_hour), email01=VALUES(email01), message=VALUES(message), update_date=NOW()
+INSERT INTO dtb_base_info (
+  id, shop_name, shop_kana, shop_name_eng,
+  company_name, postal_code, pref_id,
+  addr01, addr02, phone_number, business_hour,
+  email01, message, update_date, discriminator_type
+)
+VALUES
+  (
+    1,
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.shopName'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.shopKana'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.shopNameEng'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.companyName'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.postalCode'
+    ),
+    CAST(
+      JSON_VALUE(
+        CAST(:entity AS CHAR),
+        '$.pref'
+      ) AS UNSIGNED
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.addr01'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.addr02'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.phoneNumber'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.businessHour'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.shopEmail01'
+    ),
+    JSON_VALUE(
+      CAST(:entity AS CHAR),
+      '$.shopMessage'
+    ),
+    NOW(),
+    'baseinfo'
+  ) ON DUPLICATE KEY
+UPDATE
+  shop_name =
+VALUES
+  (shop_name),
+  shop_kana =
+VALUES
+  (shop_kana),
+  shop_name_eng =
+VALUES
+  (shop_name_eng),
+  company_name =
+VALUES
+  (company_name),
+  postal_code =
+VALUES
+  (postal_code),
+  pref_id =
+VALUES
+  (pref_id),
+  addr01 =
+VALUES
+  (addr01),
+  addr02 =
+VALUES
+  (addr02),
+  phone_number =
+VALUES
+  (phone_number),
+  business_hour =
+VALUES
+  (business_hour),
+  email01 =
+VALUES
+  (email01),
+  message =
+VALUES
+  (message),
+  update_date = NOW()

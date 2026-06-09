@@ -1,1 +1,4 @@
-DELETE FROM dtb_plugin WHERE code = :pluginCode
+DELETE FROM
+  dtb_plugin
+WHERE
+  code = :pluginCode
