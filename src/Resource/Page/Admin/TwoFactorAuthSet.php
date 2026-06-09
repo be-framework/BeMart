@@ -11,9 +11,14 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
+use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
 use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
 use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
+use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -29,30 +34,32 @@ use function assert;
  * member has no 2FA device yet, so — like the admin login page — it is
  * anonymous-accessible (no admin-firewall guard).
  *
- * EC-CUBE's controller generates a TOTP secret, renders it as a QR code
- * (the JS in the template builds the `otpauth://` URI) and verifies the
- * first token. There is no Be Framework 2FA transition (no such id in
- * `alps.json`, and the be/ domain layer is frozen for this wave), so
- * this resource is a THIN RENDERER: `onGet` exposes an
- * {@see AdminTwoFactorAuthForm} as `body['form']` for the HTML page.
+ * EC-CUBE's controller generates a TOTP secret server-side, binds it to
+ * the pending login identity, renders it as a QR code (the JS in the
+ * template builds the `otpauth://` URI) and verifies the first token.
+ * BeMart mirrors that boundary through a session-backed login challenge:
+ * `onGet` exposes the server-generated secret only when the password
+ * step has established pending setup state.
  *
  * Hard ActionRedirect completion: `onPut` drives the Be
  * `doSetTwoFactorAuth` transition ({@see SetTwoFactorAuthInput} →
  * {@see TwoFactorAuthConfigured}) — register the secret, then confirm by
  * verifying the first device code.
  *
- * MISSING-BODY-FIELD residual (kept for EC-CUBE render fidelity): EC-CUBE
- * generates the TOTP secret server-side and embeds it in the QR `authKey`.
- * BeMart's render-diff baseline tolerates `authKey` empty (the QR `secret=`
- * stays blank), so `onGet` keeps the empty placeholder; the real secret is
- * round-tripped from the form into `onPut`. Seeding `onGet` with a
- * generated secret would diverge the QR URI from EC-CUBE's reference.
+ * Without pending setup state `onGet` keeps the empty `authKey`
+ * placeholder for render-test fidelity, and `onPut` refuses to configure
+ * a device. Client-supplied legacy `loginId` / `authKey` fields are
+ * ignored; the trusted identity and secret come only from the challenge.
  */
 class TwoFactorAuthSet extends ResourceObject
 {
     public function __construct(
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
+        private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
+        private readonly AdminSession $adminSession,
+        private readonly AdminQueryInterface $adminQuery,
+        private readonly TwoFactorAuthInterface $twoFactorAuth,
     ) {
     }
 
@@ -67,14 +74,16 @@ class TwoFactorAuthSet extends ResourceObject
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
     {
+        $challenge = $this->setupChallenge();
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuthSet',
             'fields' => ['deviceToken', 'authKey'],
-            // MISSING-BODY-FIELD placeholders — see the class doc. The
-            // QR-code JS reads these; authKey stays empty to match the
-            // EC-CUBE render baseline (the real secret is supplied to onPut).
-            'authKey' => '',
+            // The QR-code JS reads authKey. It is present only when a
+            // password-verified setup challenge exists; otherwise the empty
+            // placeholder keeps anonymous GET render fidelity.
+            'authKey' => $challenge?->authKey ?? '',
             'memberName' => '',
             'shopName' => 'BeMart',
             // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
@@ -85,32 +94,46 @@ class TwoFactorAuthSet extends ResourceObject
         return $this;
     }
 
+    private function setupChallenge(): AdminTwoFactorChallenge|null
+    {
+        $challenge = $this->loginChallenge->setupChallenge();
+        if ($challenge !== null) {
+            return $challenge;
+        }
+
+        if ($this->adminSession->adminId === null) {
+            return null;
+        }
+
+        $admin = $this->adminQuery->item($this->adminSession->adminId);
+        if ($admin === null) {
+            return null;
+        }
+
+        $this->loginChallenge->startSetup(
+            $admin->adminId,
+            $admin->loginId,
+            $this->twoFactorAuth->generateSecret(),
+        );
+
+        return $this->loginChallenge->setupChallenge();
+    }
+
     /**
      * Registers the TOTP device after confirming the first code
      * (doSetTwoFactorAuth). ALPS marks this `idempotent` → PUT.
      *
-     * SECURITY RESIDUAL (tracked — migration-status §4 "Outstanding work"
-     * item 8, the Hard-ActionRedirect / 認証 cutover residual): this page is
-     * reached PRE-AUTH (anonymous, login-context), so `$loginId` and the
-     * candidate `$authKey` secret are taken from the request body rather than
-     * a server-side pre-auth challenge. `enable()` overwrites the secret for
-     * `$loginId` with no ownership check
-     * ({@see \MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface::enable}),
-     * so a caller who passes another admin's `$loginId` could replace that
-     * admin's 2FA device. The production cutover binds a server-generated
-     * secret + the pending login identity into a pre-auth session/challenge
-     * state at credential-verification time and consumes it here; until then
-     * the route relies on CSRF + the documented contract. Do NOT widen this
-     * surface (e.g. expose it post-auth for arbitrary `$loginId`) before the
-     * challenge state lands.
+     * The pending login identity and server-generated candidate secret are
+     * read from {@see HtmlAdminLoginChallengeAdapter}. Legacy client fields
+     * (`loginId`, `authKey`) may still arrive from old forms/tests, but are
+     * deliberately ignored and never forwarded to the Be transition.
      *
      * Failure mapping:
      *   - Invalid CSRF                  → 403 (interceptor)
+     *   - Missing pending setup         → 403
      *   - SemanticVariableException     → 400 (malformed code)
      *   - TwoFactorAuthFailedException  → 400 (first code mismatch)
      *
-     * @psalm-taint-source input $loginId
-     * @psalm-taint-source input $authKey
      * @psalm-taint-source input $deviceToken
      */
     #[Alps('doSetTwoFactorAuth')]
@@ -118,15 +141,26 @@ class TwoFactorAuthSet extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPut(string $loginId, string $authKey, string $deviceToken): static
+    public function onPut(string $deviceToken, string|null $loginId = null, string|null $authKey = null): static
     {
+        unset($loginId, $authKey);
+
+        $challenge = $this->loginChallenge->setupChallenge();
+        if ($challenge === null || $challenge->authKey === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => '二要素認証の設定チャレンジがありません。'];
+
+            return $this;
+        }
+
         $final = ($this->becoming)(new SetTwoFactorAuthInput(
-            loginId: $loginId,
-            authKey: $authKey,
+            loginId: $challenge->loginId,
+            authKey: $challenge->authKey,
             deviceToken: $deviceToken,
         ));
 
         assert($final instanceof TwoFactorAuthConfigured);
+        $this->loginChallenge->completeSetup($challenge);
 
         $this->code = Code::OK;
         $this->headers['Location'] = '/admin/index';

@@ -11,9 +11,13 @@ use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
+use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
 use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
 use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
+use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -30,10 +34,9 @@ use function assert;
  * login page — it is anonymous-accessible (no admin-firewall guard).
  *
  * EC-CUBE's controller verifies the submitted TOTP token against the
- * member's stored secret. There is no Be Framework 2FA transition (no
- * such id in `alps.json`, and the be/ domain layer is frozen for this
- * wave), so this resource is a THIN RENDERER: `onGet` exposes an
- * {@see AdminTwoFactorAuthForm} as `body['form']` for the HTML page.
+ * member's stored secret. BeMart binds the member identity to a
+ * session-backed pre-auth login challenge, so the submitted form only
+ * supplies the device token.
  *
  * Hard ActionRedirect completion: `onPost` now drives the Be
  * `doVerifyTwoFactorAuth` transition ({@see VerifyTwoFactorAuthInput} →
@@ -46,6 +49,9 @@ class TwoFactorAuth extends ResourceObject
     public function __construct(
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
+        private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
+        private readonly AdminSession $adminSession,
+        private readonly AdminQueryInterface $adminQuery,
     ) {
     }
 
@@ -62,6 +68,8 @@ class TwoFactorAuth extends ResourceObject
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
     {
+        $this->verificationChallenge();
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuth',
@@ -74,19 +82,41 @@ class TwoFactorAuth extends ResourceObject
         return $this;
     }
 
+    private function verificationChallenge(): AdminTwoFactorChallenge|null
+    {
+        $challenge = $this->loginChallenge->verificationChallenge();
+        if ($challenge !== null) {
+            return $challenge;
+        }
+
+        if ($this->adminSession->adminId === null) {
+            return null;
+        }
+
+        $admin = $this->adminQuery->item($this->adminSession->adminId);
+        if ($admin === null) {
+            return null;
+        }
+
+        $this->loginChallenge->startVerification($admin->adminId, $admin->loginId);
+
+        return $this->loginChallenge->verificationChallenge();
+    }
+
     /**
      * Verifies the submitted TOTP code (doVerifyTwoFactorAuth).
      *
-     * Login-context: no admin-firewall guard (the session is elevated by
-     * the adapter only on success). The candidate `loginId` is
-     * round-tripped from the pre-auth step.
+     * Login-context: no admin-firewall guard. The trusted `loginId` is
+     * read from the password-verified session challenge and the admin
+     * session is elevated only after the token succeeds. Legacy
+     * client-supplied `loginId` is ignored.
      *
      * Failure mapping:
      *   - Invalid CSRF                  → 403 (interceptor)
+     *   - Missing pending challenge     → 403
      *   - SemanticVariableException     → 400 (malformed code)
      *   - TwoFactorAuthFailedException  → 400 (code mismatch)
      *
-     * @psalm-taint-source input $loginId
      * @psalm-taint-source input $deviceToken
      */
     #[Alps('doVerifyTwoFactorAuth')]
@@ -94,14 +124,25 @@ class TwoFactorAuth extends ResourceObject
     #[CsrfProtected]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
-    public function onPost(string $loginId, string $deviceToken): static
+    public function onPost(string $deviceToken, string|null $loginId = null): static
     {
+        unset($loginId);
+
+        $challenge = $this->loginChallenge->verificationChallenge();
+        if ($challenge === null) {
+            $this->code = Code::FORBIDDEN;
+            $this->body = ['message' => '二要素認証のログインチャレンジがありません。'];
+
+            return $this;
+        }
+
         $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
-            loginId: $loginId,
+            loginId: $challenge->loginId,
             deviceToken: $deviceToken,
         ));
 
         assert($final instanceof TwoFactorAuthVerified);
+        $this->loginChallenge->completeVerification($challenge);
 
         $this->code = Code::OK;
         $this->headers['Location'] = '/admin/index';
