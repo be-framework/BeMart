@@ -4,17 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
-use Aura\Sql\ExtendedPdoInterface;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
-use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
-use Ray\Di\InjectorInterface;
 
 use function assert;
 use function bin2hex;
@@ -29,61 +26,32 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     private const ADMIN_PASSWORD = 'admin-test-password-2026';
     private const MEMBER_PASSWORD = 'workflow-member-password-2026';
 
-    private static InjectorInterface|null $injector = null;
-    private static ExtendedPdoInterface|null $db = null;
-    private static ResourceInterface|null $dbResource = null;
     private static string $adminLoginId;
     private static string $memberLoginId;
     private static string $twoFactorAuthSecret;
-    private static WorkflowTestSession|null $session = null;
+    private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
     {
         $suffix = bin2hex(random_bytes(4));
         self::$adminLoginId = 'workflow-admin-' . $suffix;
         self::$memberLoginId = 'workflow-member-' . $suffix;
-        self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
-
-        self::$injector = Injector::getInstance('html-prod-hal-api-app');
-        $db = self::$injector->getInstance(ExtendedPdoInterface::class);
-        assert($db instanceof ExtendedPdoInterface);
-        self::$db = $db;
-        self::$db->beginTransaction();
-
-        $resource = self::$injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        self::$dbResource = $resource;
+        self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
     public static function tearDownAfterClass(): void
     {
-        if (self::$db instanceof ExtendedPdoInterface && self::$db->inTransaction()) {
-            self::$db->rollBack();
-        }
-
-        self::$session?->restore();
-
-        self::$db = null;
-        self::$dbResource = null;
-        self::$injector = null;
-        self::$session = null;
+        self::$dbSession?->restore();
+        self::$dbSession = null;
 
         parent::tearDownAfterClass();
     }
 
     protected function newResource(): ResourceInterface
     {
-        if (self::$dbResource instanceof ResourceInterface) {
-            return self::$dbResource;
-        }
+        assert(self::$dbSession instanceof WorkflowDbSession);
 
-        assert(self::$injector instanceof InjectorInterface);
-        $resource = self::$injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        self::$dbResource = $resource;
-
-        return $resource;
+        return self::$dbSession->resource();
     }
 
     #[Alps('goAdminLogin')]
@@ -118,8 +86,8 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::OK, $loggedIn->code);
         $this->assertSame(self::$adminLoginId, $this->bodyValue($loggedIn, 'loginId'));
-        assert(self::$session instanceof WorkflowTestSession);
-        self::$session->setAdminId((string) $this->bodyValue($loggedIn, 'adminId'));
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        self::$dbSession->session()->setAdminId((string) $this->bodyValue($loggedIn, 'adminId'));
 
         return $loggedIn;
     }
@@ -239,8 +207,8 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testTwoFactorAuthSet')]
     public function testSetsTwoFactorAuth(ResourceObject $response): ResourceObject
     {
-        assert(self::$injector instanceof InjectorInterface);
-        $twoFactorAuth = self::$injector->getInstance(TwoFactorAuthInterface::class);
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        $twoFactorAuth = self::$dbSession->injector()->getInstance(TwoFactorAuthInterface::class);
         assert($twoFactorAuth instanceof TwoFactorAuthInterface);
         self::$twoFactorAuthSecret = $twoFactorAuth->generateSecret();
         $configured = $this->resource->put('page://self/admin/two-factor-auth-set', [
@@ -268,8 +236,8 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
     #[Depends('testTwoFactorAuth')]
     public function testVerifiesTwoFactorAuth(ResourceObject $response): ResourceObject
     {
-        assert(self::$injector instanceof InjectorInterface);
-        $twoFactorAuth = self::$injector->getInstance(TwoFactorAuthInterface::class);
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        $twoFactorAuth = self::$dbSession->injector()->getInstance(TwoFactorAuthInterface::class);
         assert($twoFactorAuth instanceof TwoFactorAuthInterface);
         $verified = $this->resource->post('page://self/admin/two-factor-auth', [
             'loginId' => self::$adminLoginId,
