@@ -166,9 +166,6 @@
     },
     "extra": {
         "patches": {
-            "ray/fake-query": {
-                "Support BeMart MediaQuery fake fixtures": "patches/ray-fake-query-be-bemart.patch"
-            },
             "aura/html": {
                 "Declare nullable input helper specs for PHP 8.5": "patches/aura-html-php85-nullable.patch"
             }
