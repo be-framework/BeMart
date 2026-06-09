@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b4bba70edffa12a74e6bc4fead78af8e",
+    "content-hash": "8d1794b3de1cf0d888c556d7e42b97ca",
     "packages": [
         {
             "name": "aura/cli",
@@ -609,6 +609,130 @@
                 "source": "https://github.com/bearsunday/BEAR.AppMeta/tree/1.10.0"
             },
             "time": "2025-10-27T03:43:07+00:00"
+        },
+        {
+            "name": "bear/devtools",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bearsunday/BEAR.DevTools.git",
+                "reference": "145f58ff5f980b1bb9eac6b2c23abc5d17b4f514"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/145f58ff5f980b1bb9eac6b2c23abc5d17b4f514",
+                "reference": "145f58ff5f980b1bb9eac6b2c23abc5d17b4f514",
+                "shasum": ""
+            },
+            "require": {
+                "bear/app-meta": "^1.8",
+                "bear/resource": "^1.31",
+                "ext-curl": "*",
+                "koriym/php-server": "^1.0",
+                "php": "^8.2",
+                "ray/aop": "^2.14",
+                "ray/di": "^2.14"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4",
+                "bear/package": "^1.10",
+                "madapaja/twig-module": "^2.5",
+                "phpunit/phpunit": "^9.6 || ^10.0",
+                "ray/aura-sql-module": "^1.10",
+                "xhprof/xhprof": "^2.3"
+            },
+            "suggest": {
+                "ext-xhprof": "XHprof hierarchical profiler for performance analysis"
+            },
+            "default-branch": true,
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "BEAR\\Dev\\": [
+                        "src/"
+                    ]
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "BEAR\\Dev\\": [
+                        "src-deprecated/",
+                        "tests/Fake"
+                    ],
+                    "MyVendor\\MyProject\\": [
+                        "tests/Fake/app/src"
+                    ]
+                }
+            },
+            "scripts": {
+                "post-install-cmd": [
+                    "@composer bin all install --ansi"
+                ],
+                "post-update-cmd": [
+                    "@composer bin all update --ansi"
+                ],
+                "test": [
+                    "./vendor/bin/phpunit"
+                ],
+                "tests": [
+                    "@cs",
+                    "@test",
+                    "@sa"
+                ],
+                "coverage": [
+                    "php -dzend_extension=xdebug.so ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage"
+                ],
+                "pcov": [
+                    "php -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage  --coverage-clover=coverage.xml"
+                ],
+                "cs": [
+                    "./vendor/bin/phpcs --standard=./phpcs.xml src tests"
+                ],
+                "cs-fix": [
+                    "./vendor/bin/phpcbf src tests"
+                ],
+                "clean": [
+                    "./vendor/bin/phpstan clear-result-cache",
+                    "./vendor/bin/psalm --clear-cache",
+                    "rm -rf tests/tmp/*.php"
+                ],
+                "sa": [
+                    "./vendor/bin/phpstan analyse -c phpstan.neon",
+                    "psalm --show-info=true"
+                ],
+                "metrics": [
+                    "./vendor/bin/phpmetrics --report-html=build/metrics --exclude=Exception --log-junit=build/junit.xml --junit=build/junit.xml src"
+                ],
+                "phpmd": [
+                    "./vendor/bin/phpmd src text ./phpmd.xml"
+                ],
+                "build": [
+                    "@cs",
+                    "@sa",
+                    "@pcov",
+                    "@metrics"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "support": {
+                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/master",
+                "issues": "https://github.com/bearsunday/BEAR.DevTools/issues"
+            },
+            "time": "2026-06-09T01:07:22+00:00"
         },
         {
             "name": "bear/package",
@@ -1441,6 +1565,52 @@
                 "source": "https://github.com/koriym/Koriym.NullObject/tree/1.0.4"
             },
             "time": "2023-09-29T06:40:29+00:00"
+        },
+        {
+            "name": "koriym/php-server",
+            "version": "1.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/koriym/Koriym.PhpServer.git",
+                "reference": "28133e6050f61868125828e084f15720d71d59ce"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/koriym/Koriym.PhpServer/zipball/28133e6050f61868125828e084f15720d71d59ce",
+                "reference": "28133e6050f61868125828e084f15720d71d59ce",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0",
+                "symfony/process": "^5.4"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8",
+                "ext-curl": "*",
+                "phpunit/phpunit": "^9.6.19",
+                "psalm/plugin-phpunit": "^0.18.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Koriym\\PhpServer\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Akihito Koriyama",
+                    "email": "akihito.koriyama@gmail.com"
+                }
+            ],
+            "support": {
+                "issues": "https://github.com/koriym/Koriym.PhpServer/issues",
+                "source": "https://github.com/koriym/Koriym.PhpServer/tree/1.0.1"
+            },
+            "time": "2025-01-03T00:56:16+00:00"
         },
         {
             "name": "koriym/psr4list",
@@ -3748,6 +3918,90 @@
             "time": "2026-05-26T12:51:13+00:00"
         },
         {
+            "name": "symfony/polyfill-php80",
+            "version": "v1.37.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php80.git",
+                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
+                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php80\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ion Bazan",
+                    "email": "ion.bazan@gmail.com"
+                },
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 8.0+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php80/tree/v1.37.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-04-10T16:19:22+00:00"
+        },
+        {
             "name": "symfony/polyfill-php83",
             "version": "v1.38.1",
             "source": {
@@ -3826,6 +4080,72 @@
                 }
             ],
             "time": "2026-05-26T12:51:13+00:00"
+        },
+        {
+            "name": "symfony/process",
+            "version": "v5.4.51",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/process.git",
+                "reference": "467bfc56f18f5ef6d5ccb09324d7e988c1c0a98f"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/process/zipball/467bfc56f18f5ef6d5ccb09324d7e988c1c0a98f",
+                "reference": "467bfc56f18f5ef6d5ccb09324d7e988c1c0a98f",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2.5",
+                "symfony/polyfill-php80": "^1.16"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Symfony\\Component\\Process\\": ""
+                },
+                "exclude-from-classmap": [
+                    "/Tests/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Potencier",
+                    "email": "fabien@symfony.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Executes commands in sub-processes",
+            "homepage": "https://symfony.com",
+            "support": {
+                "source": "https://github.com/symfony/process/tree/v5.4.51"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-01-26T15:53:37+00:00"
         },
         {
             "name": "symfony/service-contracts",
@@ -5109,129 +5429,6 @@
             "time": "2026-06-03T02:59:18+00:00"
         },
         {
-            "name": "bear/devtools",
-            "version": "dev-html-link-renderer-devtool",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/bearsunday/BEAR.DevTools.git",
-                "reference": "646752ce5e5eb6b1c2669786473b329668a0694b"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/646752ce5e5eb6b1c2669786473b329668a0694b",
-                "reference": "646752ce5e5eb6b1c2669786473b329668a0694b",
-                "shasum": ""
-            },
-            "require": {
-                "bear/app-meta": "^1.8",
-                "bear/resource": "^1.31",
-                "ext-curl": "*",
-                "koriym/php-server": "^1.0",
-                "php": "^8.2",
-                "ray/aop": "^2.14",
-                "ray/di": "^2.14"
-            },
-            "require-dev": {
-                "bamarni/composer-bin-plugin": "^1.4",
-                "bear/package": "^1.10",
-                "madapaja/twig-module": "^2.5",
-                "phpunit/phpunit": "^9.6",
-                "ray/aura-sql-module": "^1.10",
-                "xhprof/xhprof": "^2.3"
-            },
-            "suggest": {
-                "ext-xhprof": "XHprof hierarchical profiler for performance analysis"
-            },
-            "type": "library",
-            "extra": {
-                "bamarni-bin": {
-                    "bin-links": true,
-                    "forward-command": true
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "BEAR\\Dev\\": [
-                        "src/"
-                    ]
-                }
-            },
-            "autoload-dev": {
-                "psr-4": {
-                    "BEAR\\Dev\\": [
-                        "src-deprecated/",
-                        "tests/Fake"
-                    ],
-                    "MyVendor\\MyProject\\": [
-                        "tests/Fake/app/src"
-                    ]
-                }
-            },
-            "scripts": {
-                "post-install-cmd": [
-                    "@composer bin all install --ansi"
-                ],
-                "post-update-cmd": [
-                    "@composer bin all update --ansi"
-                ],
-                "test": [
-                    "./vendor/bin/phpunit"
-                ],
-                "tests": [
-                    "@cs",
-                    "@test",
-                    "@sa"
-                ],
-                "coverage": [
-                    "php -dzend_extension=xdebug.so ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage"
-                ],
-                "pcov": [
-                    "php -dextension=pcov.so -d pcov.enabled=1 ./vendor/bin/phpunit --coverage-text --coverage-html=build/coverage  --coverage-clover=coverage.xml"
-                ],
-                "cs": [
-                    "./vendor/bin/phpcs --standard=./phpcs.xml src tests"
-                ],
-                "cs-fix": [
-                    "./vendor/bin/phpcbf src tests"
-                ],
-                "clean": [
-                    "./vendor/bin/phpstan clear-result-cache",
-                    "./vendor/bin/psalm --clear-cache",
-                    "rm -rf tests/tmp/*.php"
-                ],
-                "sa": [
-                    "./vendor/bin/phpstan analyse -c phpstan.neon",
-                    "psalm --show-info=true"
-                ],
-                "metrics": [
-                    "./vendor/bin/phpmetrics --report-html=build/metrics --exclude=Exception --log-junit=build/junit.xml --junit=build/junit.xml src"
-                ],
-                "phpmd": [
-                    "./vendor/bin/phpmd src text ./phpmd.xml"
-                ],
-                "build": [
-                    "@cs",
-                    "@sa",
-                    "@pcov",
-                    "@metrics"
-                ]
-            },
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Akihito Koriyama",
-                    "email": "akihito.koriyama@gmail.com"
-                }
-            ],
-            "support": {
-                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/html-link-renderer-devtool",
-                "issues": "https://github.com/bearsunday/BEAR.DevTools/issues"
-            },
-            "time": "2026-06-08T11:41:11+00:00"
-        },
-        {
             "name": "composer/pcre",
             "version": "3.3.2",
             "source": {
@@ -5927,52 +6124,6 @@
                 "source": "https://github.com/koriym/Koriym.DataFile/tree/1.0.1"
             },
             "time": "2024-06-09T05:14:00+00:00"
-        },
-        {
-            "name": "koriym/php-server",
-            "version": "1.0.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/koriym/Koriym.PhpServer.git",
-                "reference": "28133e6050f61868125828e084f15720d71d59ce"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/koriym/Koriym.PhpServer/zipball/28133e6050f61868125828e084f15720d71d59ce",
-                "reference": "28133e6050f61868125828e084f15720d71d59ce",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^8.0",
-                "symfony/process": "^5.4"
-            },
-            "require-dev": {
-                "bamarni/composer-bin-plugin": "^1.8",
-                "ext-curl": "*",
-                "phpunit/phpunit": "^9.6.19",
-                "psalm/plugin-phpunit": "^0.18.4"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Koriym\\PhpServer\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Akihito Koriyama",
-                    "email": "akihito.koriyama@gmail.com"
-                }
-            ],
-            "support": {
-                "issues": "https://github.com/koriym/Koriym.PhpServer/issues",
-                "source": "https://github.com/koriym/Koriym.PhpServer/tree/1.0.1"
-            },
-            "time": "2025-01-03T00:56:16+00:00"
         },
         {
             "name": "koriym/sql-quality",
@@ -8532,90 +8683,6 @@
             "time": "2026-05-25T13:48:31+00:00"
         },
         {
-            "name": "symfony/polyfill-php80",
-            "version": "v1.37.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/polyfill-php80.git",
-                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/polyfill-php80/zipball/dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
-                "reference": "dfb55726c3a76ea3b6459fcfda1ec2d80a682411",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2"
-            },
-            "type": "library",
-            "extra": {
-                "thanks": {
-                    "url": "https://github.com/symfony/polyfill",
-                    "name": "symfony/polyfill"
-                }
-            },
-            "autoload": {
-                "files": [
-                    "bootstrap.php"
-                ],
-                "psr-4": {
-                    "Symfony\\Polyfill\\Php80\\": ""
-                },
-                "classmap": [
-                    "Resources/stubs"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Ion Bazan",
-                    "email": "ion.bazan@gmail.com"
-                },
-                {
-                    "name": "Nicolas Grekas",
-                    "email": "p@tchwork.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Symfony polyfill backporting some PHP 8.0+ features to lower PHP versions",
-            "homepage": "https://symfony.com",
-            "keywords": [
-                "compatibility",
-                "polyfill",
-                "portable",
-                "shim"
-            ],
-            "support": {
-                "source": "https://github.com/symfony/polyfill-php80/tree/v1.37.0"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/nicolas-grekas",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2026-04-10T16:19:22+00:00"
-        },
-        {
             "name": "symfony/polyfill-php84",
             "version": "v1.37.0",
             "source": {
@@ -8774,72 +8841,6 @@
                 }
             ],
             "time": "2026-05-26T02:25:22+00:00"
-        },
-        {
-            "name": "symfony/process",
-            "version": "v5.4.51",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/symfony/process.git",
-                "reference": "467bfc56f18f5ef6d5ccb09324d7e988c1c0a98f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/symfony/process/zipball/467bfc56f18f5ef6d5ccb09324d7e988c1c0a98f",
-                "reference": "467bfc56f18f5ef6d5ccb09324d7e988c1c0a98f",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=7.2.5",
-                "symfony/polyfill-php80": "^1.16"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Symfony\\Component\\Process\\": ""
-                },
-                "exclude-from-classmap": [
-                    "/Tests/"
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Fabien Potencier",
-                    "email": "fabien@symfony.com"
-                },
-                {
-                    "name": "Symfony Community",
-                    "homepage": "https://symfony.com/contributors"
-                }
-            ],
-            "description": "Executes commands in sub-processes",
-            "homepage": "https://symfony.com",
-            "support": {
-                "source": "https://github.com/symfony/process/tree/v5.4.51"
-            },
-            "funding": [
-                {
-                    "url": "https://symfony.com/sponsor",
-                    "type": "custom"
-                },
-                {
-                    "url": "https://github.com/fabpot",
-                    "type": "github"
-                },
-                {
-                    "url": "https://github.com/nicolas-grekas",
-                    "type": "github"
-                },
-                {
-                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
-                    "type": "tidelift"
-                }
-            ],
-            "time": "2026-01-26T15:53:37+00:00"
         },
         {
             "name": "symfony/string",
@@ -9108,12 +9109,6 @@
             "alias_normalized": "0.1.0.0"
         },
         {
-            "package": "bear/devtools",
-            "version": "dev-html-link-renderer-devtool",
-            "alias": "1.x-dev",
-            "alias_normalized": "1.9999999.9999999.9999999-dev"
-        },
-        {
             "package": "ray/fake-query",
             "version": "dev-codex/fake-query-release-hardening",
             "alias": "1.x-dev",
@@ -9123,8 +9118,8 @@
     "minimum-stability": "stable",
     "stability-flags": {
         "be-framework/be": 20,
-        "my-vendor/be-mart-be": 20,
         "bear/devtools": 20,
+        "my-vendor/be-mart-be": 20,
         "ray/fake-query": 20
     },
     "prefer-stable": false,
@@ -9132,6 +9127,6 @@
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.2.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
 }
