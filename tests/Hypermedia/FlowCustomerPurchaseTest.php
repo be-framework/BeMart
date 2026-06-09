@@ -63,8 +63,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $payment->code);
-        $this->assertIsString($payment->body['paymentId'] ?? null);
-        self::$paymentId = $payment->body['paymentId'];
+        self::$paymentId = $this->bodyString($payment, 'paymentId');
 
         $created = $this->resource->post('page://self/admin/product', [
             'productCode' => self::$productCode,
