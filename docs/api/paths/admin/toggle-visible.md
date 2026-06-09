@@ -46,4 +46,4 @@ ALPS `doToggleVisible` に対応する PUT 操作。
 |------|------|-------------|----------|-------------|---------|
 | masterType | string | 表示切替マスタ種別 - /admin/toggle-visible で表示状態を変更する管理マスタの種別。delivery や payment など、表示フラグを持つ管理一覧の対象を識別する。 | Required | {"minLength":1,"maxLength":64,"pattern":"^[A-Za-z][A-Za-z0-9_-]{0,63}$"} | delivery |
 | rowId | string | 表示切替対象行ID - /admin/toggle-visible で表示状態を変更する管理マスタ行のID。masterType と組み合わせて対象行を一意に指す。 | Required | {"minLength":1,"maxLength":128,"pattern":"^[A-Za-z0-9._:@/-]+$"} | del-yamato |
-| visible | bool | 表示状態 - 対象マスタ行を表示状態にするかどうかを表す真偽値。PUT はこの値へ冪等に設定する。 | Required |  | false |
+| visible | boolean | 表示状態 - 対象マスタ行を表示状態にするかどうかを表す真偽値。PUT はこの値へ冪等に設定する。 | Required |  | false |

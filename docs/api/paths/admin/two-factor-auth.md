@@ -10,10 +10,9 @@ BEFORE the admin session is fully established, so — like the admin
 login page — it is anonymous-accessible (no admin-firewall guard).
 
 EC-CUBE's controller verifies the submitted TOTP token against the
-member's stored secret. There is no Be Framework 2FA transition (no
-such id in `alps.json`, and the be/ domain layer is frozen for this
-wave), so this resource is a THIN RENDERER: `onGet` exposes an
-{@see \AdminTwoFactorAuthForm} as `body['form']` for the HTML page.
+member's stored secret. BeMart binds the member identity to a
+session-backed pre-auth login challenge, so the submitted form only
+supplies the device token.
 
 Hard ActionRedirect completion: `onPost` now drives the Be
 `doVerifyTwoFactorAuth` transition ({@see \VerifyTwoFactorAuthInput} →
@@ -58,12 +57,14 @@ _No parameters required_
 ## POST
 Verifies the submitted TOTP code (doVerifyTwoFactorAuth).
 
-Login-context: no admin-firewall guard (the session is elevated by
-the adapter only on success). The candidate `loginId` is
-round-tripped from the pre-auth step.
+Login-context: no admin-firewall guard. The trusted `loginId` is
+read from the password-verified session challenge and the admin
+session is elevated only after the token succeeds. Legacy
+client-supplied `loginId` is ignored.
 
 Failure mapping:
   - Invalid CSRF                  → 403 (interceptor)
+  - Missing pending challenge     → 403
   - SemanticVariableException     → 400 (malformed code)
   - TwoFactorAuthFailedException  → 400 (code mismatch)
 
@@ -75,8 +76,8 @@ Failure mapping:
 
 | Name | Type | Description | Default | Required | Constraints | Example |
 |------|------|-------------|---------|----------|-------------|---------|
-| loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
 | deviceToken | string | 二要素認証デバイストークン（入力） - /admin/two-factor-auth のレスポンスで扱う二要素認証デバイストークン。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
+| loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 この値は2FAログインチャレンジでは互換入力としてのみ受け取り、信頼しない。 |  | Optional | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
 
 
 ### Response
