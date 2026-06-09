@@ -22,10 +22,16 @@ final class HtmlModule extends AbstractModule
 {
     /** @param array<string, mixed> $twigOptions */
     public function __construct(
-        private readonly array $twigOptions = [],
+        AbstractModule|array|null $moduleOrTwigOptions = null,
     ) {
-        parent::__construct();
+        $this->twigOptions = $moduleOrTwigOptions instanceof AbstractModule || $moduleOrTwigOptions === null
+            ? []
+            : $moduleOrTwigOptions;
+        parent::__construct($moduleOrTwigOptions instanceof AbstractModule ? $moduleOrTwigOptions : null);
     }
+
+    /** @var array<string, mixed> */
+    private readonly array $twigOptions;
 
     #[Override]
     protected function configure(): void
