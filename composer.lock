@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d1794b3de1cf0d888c556d7e42b97ca",
+    "content-hash": "10fbdc72f9fd6bacc47d5aa5f7ddeb7f",
     "packages": [
         {
             "name": "aura/cli",
@@ -7132,16 +7132,17 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/ray-di/Ray.FakeQuery.git",
-                "reference": "77d600202396518158ac87109f40d1c7d2cb279f"
+                "reference": "57aa1fc61964d170bc0bca628d511534802d382b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ray-di/Ray.FakeQuery/zipball/77d600202396518158ac87109f40d1c7d2cb279f",
-                "reference": "77d600202396518158ac87109f40d1c7d2cb279f",
+                "url": "https://api.github.com/repos/ray-di/Ray.FakeQuery/zipball/57aa1fc61964d170bc0bca628d511534802d382b",
+                "reference": "57aa1fc61964d170bc0bca628d511534802d382b",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.2",
+                "aura/sql": "^6.0",
+                "php": "^8.4",
                 "phpdocumentor/reflection-docblock": "^6.0",
                 "ray/aop": "^2.19",
                 "ray/di": "^2.19",
@@ -7185,7 +7186,7 @@
                 "issues": "https://github.com/ray-di/Ray.FakeQuery/issues",
                 "source": "https://github.com/ray-di/Ray.FakeQuery/tree/1.x"
             },
-            "time": "2026-05-15T03:26:36+00:00"
+            "time": "2026-06-09T14:44:23+00:00"
         },
         {
             "name": "revolt/event-loop",
