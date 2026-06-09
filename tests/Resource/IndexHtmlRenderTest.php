@@ -7,7 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 use Twig\Environment;

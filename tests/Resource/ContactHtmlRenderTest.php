@@ -8,7 +8,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Form\ContactForm;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 use Ray\WebFormModule\FormFactory;

@@ -28,7 +28,7 @@ BeMart は ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery / Twig HTML を横
 | Router | Aura.Router route map、EC-CUBE route名、underscore alias、param map | EC-CUBE由来テンプレートを早く動かすため | `/admin_product_csv` 404、`/admin/order` が詳細Resourceへ誤解決、URLとResource pathの二重帳簿 | #56 で Web Router を全廃し、HTTP URL = BEAR Resource path へ寄せた |
 | Bootstrap | 423行のHTTP制御、`header()`、`http_response_code()`、`ResourceObject::toString()` | redirect/download/例外をその場で補正するため | BEAR の transfer/responder 境界が見えなくなり、標準比較が困難 | 未解消。次PR群で transfer shell へ戻す対象 |
 | Injector / context | 手書き context-to-module map、`Ray\Di\Injector` 直接構築 | `html-prod-hal-api-app` 等の複合contextを早く作るため | `BEAR\Package\Injector` の合成規約から外れ、wrapper moduleが増えた | 未解消。`BEAR\Package\Injector` 委譲へ戻す対象 |
-| Module wrapper | `HtmlProdModule` / `HtmlTestModule` / `HalApiModule` 等 | HTML/API、prod/test/fakeを組み合わせるため | AppModule重複installやcontext命名の揺れが起きやすい | 未解消。context atomへ再整理する対象 |
+| Module wrapper | `HtmlProdModule` / `HalApiModule` 等 | HTML/API、prod/test/fakeを組み合わせるため | AppModule重複installやcontext命名の揺れが起きやすい | 解消済み。production wrapperは削除し、HTML test fixtureはtests配下へ隔離 |
 | MediaQuery | `MediaQueryRuntimeModule::queryClasses()` の手書き一覧 | SQL移行中に確実に登録するため | Query追加のたびにmodule編集が必要になり、標準のdiscoverabilityを失った | 未解消。`MediaQuerySqlModule` / `Queries::fromDir()` 検討対象 |
 | CSRF/session | `RequestQueryCapturingInvoker` / `RequestQueryContext` | interceptorから入力tokenを読むため | Resource引数の明示契約ではなく、呼び出し境界の隠れ状態に依存 | 未解消。`csrfToken` 明示引数へ戻す対象 |
 | JSON Schema | 巨大な補助生成器、schema品質ゲート、作業用台帳 | Semantic-Ex品質を上げるため | 最初は生成器をPR成果物に含めすぎ、schema資産と作業道具が混ざった | #55 で schema/docs資産へ整理。補助生成器はPR成果物から除外 |

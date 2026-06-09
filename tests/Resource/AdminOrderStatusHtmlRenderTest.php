@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;

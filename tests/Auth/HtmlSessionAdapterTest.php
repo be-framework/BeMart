@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestModule;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
