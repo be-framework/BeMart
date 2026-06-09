@@ -4,17 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource;
 
-use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
-use Ray\Di\Injector;
-
-use function dirname;
 
 /**
  * Phase 3 — HTML render check for the admin 定休日カレンダー Setting/Shop Tier-2 page.
@@ -33,9 +29,8 @@ final class AdminCalendarHtmlRenderTest extends TestCase
 
     protected function setUp(): void
     {
-        $module = new HtmlTestModule(new Meta('MyVendor\\BeMart', 'html'));
         $session = new FakeAdminSession(self::TEST_ADMIN_ID);
-        $module->override(new class ($session) extends AbstractModule {
+        $injector = HtmlTestInjector::getOverrideInstance(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeAdminSession $session)
             {
                 parent::__construct();
@@ -46,7 +41,6 @@ final class AdminCalendarHtmlRenderTest extends TestCase
                 $this->bind(AdminSession::class)->toInstance($this->session);
             }
         });
-        $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 

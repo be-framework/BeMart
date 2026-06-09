@@ -10,7 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Injector;
-use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use BEAR\Dev\Http\AbstractWorkflowTest;
 use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
@@ -26,7 +26,7 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
 
     protected function newResource(): ResourceInterface
     {
-        $resource = Injector::getInstance('admin-test-hal-api-app')->getInstance(ResourceInterface::class);
+        $resource = Injector::getInstance('admin-test-hal-app')->getInstance(ResourceInterface::class);
         assert($resource instanceof ResourceInterface);
 
         return $resource;

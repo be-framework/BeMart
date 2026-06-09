@@ -11,7 +11,13 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Override;
 use Ray\Di\AbstractModule;
 
-/** PHPUnit context with a logged-in admin session. */
+/**
+ * Legacy direct-module PHPUnit context with a logged-in admin session.
+ *
+ * The standard `admin-test-hal-app` context uses AdminModule; this module is
+ * kept only for tests/Smoke/ResourceSmokeModule until that harness moves to
+ * the package Injector context path.
+ */
 final class AdminTestModule extends AbstractAppModule
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

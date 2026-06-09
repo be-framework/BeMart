@@ -14,8 +14,8 @@ use Koriym\SemanticLogger\SemanticLoggerInterface;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Injector as AppInjector;
 use MyVendor\BeMart\Module\TestModule;
-use MyVendor\BeMart\Module\ProdModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
@@ -37,10 +37,7 @@ final class ProdModuleTest extends TestCase
     {
         $this->skipWithoutDatabaseUrl();
 
-        $injector = new Injector(
-            new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
-            dirname(__DIR__, 2) . '/var/tmp/prod',
-        );
+        $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
 
         $becoming = $injector->getInstance(BecomingInterface::class);
 
@@ -51,10 +48,7 @@ final class ProdModuleTest extends TestCase
     {
         $this->skipWithoutDatabaseUrl();
 
-        $injector = new Injector(
-            new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
-            dirname(__DIR__, 2) . '/var/tmp/prod',
-        );
+        $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
 
         $logger = $injector->getInstance(SemanticLoggerInterface::class);
 
@@ -71,19 +65,16 @@ final class ProdModuleTest extends TestCase
             unlink($this->logFile);
         }
 
-        // Slice 7: ProdModule binds CustomerSession to EccubeSharedSessionAdapter,
+        // Slice 7: EccubeModule binds CustomerSession to EccubeSharedSessionAdapter,
         // which reads $_SESSION['customer_id'].
         $_SESSION['customer_id'] = 'customer-001';
 
-        // Slice 8: ProdModule also binds CsrfToken to
+        // Slice 8: EccubeModule also binds CsrfToken to
         // EccubeSharedCsrfTokenAdapter, which checks `$_SESSION['_csrf_token']`.
         // Mirror a reference token so the prod adapter accepts our submission.
         $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'prod-csrf-mirror';
 
-        $injector = new Injector(
-            new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
-            dirname(__DIR__, 2) . '/var/tmp/prod',
-        );
+        $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
 
         $resource = $injector->getInstance(ResourceInterface::class);
 
@@ -100,7 +91,7 @@ final class ProdModuleTest extends TestCase
         }
         $this->assertFileDoesNotExist(
             $this->logFile,
-            'ProdModule must NOT write var/log/bemart.json (PII leak prevention)',
+            'prod-eccube-sql-hal-app must NOT write var/log/bemart.json (PII leak prevention)',
         );
     }
 
@@ -113,10 +104,7 @@ final class ProdModuleTest extends TestCase
         $_SESSION['customer_id'] = 'customer-001';
         $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'prod-csrf-mirror';
 
-        $injector = new Injector(
-            new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
-            dirname(__DIR__, 2) . '/var/tmp/prod',
-        );
+        $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
 
         $resource = $injector->getInstance(ResourceInterface::class);
         $ro = $resource->post('page://self/shopping/checkout', [

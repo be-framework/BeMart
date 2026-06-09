@@ -7,14 +7,38 @@ namespace MyVendor\BeMart\Module;
 use BEAR\Package\AbstractAppModule;
 use BEAR\Package\Module\AppMetaModule;
 use BEAR\Package\PackageModule;
-use BEAR\Resource\InvokerInterface;
 use BEAR\Resource\Module\JsonSchemaModule;
 use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
+use MyVendor\BeMart\Be\Reason\Provider\AddressIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\AdminIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\BlockIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\CategoryIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\ClassCategoryIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\ClassNameIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\DeliveryIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\NewsIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\OrderNoProvider;
+use MyVendor\BeMart\Be\Reason\Provider\PageIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\PaymentMethodAdminIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\ResetKeyProvider;
+use MyVendor\BeMart\Be\Reason\Provider\TagIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\TaxRuleIdProvider;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistry;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
+use MyVendor\BeMart\Be\Reason\Query\Factory\AdminFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\CartFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\CustomerFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\FinalizedOrderFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\OrderFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\OrderHistoryFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\OrderItemFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\ProductClassFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\ProductFactory;
+use MyVendor\BeMart\Be\Reason\Query\Factory\TemplateFactory;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
 use MyVendor\BeMart\Be\Reason\Service\DefaultPaymentMethodFactory;
 use MyVendor\BeMart\Be\Reason\Service\DefaultPurchaseFlow;
@@ -50,8 +74,6 @@ use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
-use MyVendor\BeMart\Support\Resource\RequestQueryCapturingInvoker;
-use MyVendor\BeMart\Support\Resource\RequestQueryContext;
 use Ray\Di\Scope;
 use Ray\WebFormModule\FormFactory;
 
@@ -65,6 +87,39 @@ use Ray\WebFormModule\FormFactory;
  */
 final class AppModule extends AbstractAppModule
 {
+    /** @var list<class-string> */
+    private const REASON_PROVIDERS = [
+        AddressIdProvider::class,
+        AdminIdProvider::class,
+        BlockIdProvider::class,
+        CategoryIdProvider::class,
+        ClassCategoryIdProvider::class,
+        ClassNameIdProvider::class,
+        CustomerIdProvider::class,
+        DeliveryIdProvider::class,
+        NewsIdProvider::class,
+        OrderNoProvider::class,
+        PageIdProvider::class,
+        PaymentMethodAdminIdProvider::class,
+        ResetKeyProvider::class,
+        TagIdProvider::class,
+        TaxRuleIdProvider::class,
+    ];
+
+    /** @var list<class-string> */
+    private const MEDIA_QUERY_FACTORIES = [
+        AdminFactory::class,
+        CartFactory::class,
+        CustomerFactory::class,
+        FinalizedOrderFactory::class,
+        OrderFactory::class,
+        OrderHistoryFactory::class,
+        OrderItemFactory::class,
+        ProductClassFactory::class,
+        ProductFactory::class,
+        TemplateFactory::class,
+    ];
+
     protected function configure(): void
     {
         $this->install(new PackageModule());
@@ -83,8 +138,6 @@ final class AppModule extends AbstractAppModule
             ),
         );
 
-        $this->bind(RequestQueryContext::class)->in(Scope::SINGLETON);
-        $this->bind(InvokerInterface::class)->to(RequestQueryCapturingInvoker::class);
         $this->bindPriorityInterceptor(
             $this->matcher->subclassesOf(ResourceObject::class),
             $this->matcher->annotatedWith(CsrfProtected::class),
@@ -122,6 +175,18 @@ final class AppModule extends AbstractAppModule
         // Shared registry over master storage interfaces. The storage
         // implementations come from the active persistence module (Fake or SQL).
         $this->bind(AdminMasterRegistryInterface::class)->to(AdminMasterRegistry::class);
+
+        // Ray.Compiler requires explicit bindings for concrete classes that
+        // Be injects as Reasons and that Ray.MediaQuery instantiates as
+        // #[DbQuery] result factories. Non-compiled fake/test injectors could
+        // JIT these classes, but prod compiled SQL contexts cannot.
+        foreach (self::REASON_PROVIDERS as $provider) {
+            $this->bind($provider);
+        }
+
+        foreach (self::MEDIA_QUERY_FACTORIES as $factory) {
+            $this->bind($factory);
+        }
 
         // FormFactory builds AbstractForm instances with their Aura.Input /
         // Aura.Filter / Aura.Html dependencies self-contained. It is cheap in
