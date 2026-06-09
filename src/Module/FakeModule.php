@@ -51,7 +51,10 @@ final class FakeModule extends AbstractAppModule
     #[Override]
     protected function configure(): void
     {
-        $this->install(new AppModule($this->appMeta));
+        if ($this->lastModule === null) {
+            $this->install(new AppModule($this->appMeta));
+        }
+
         $root = dirname(__DIR__, 2);
         $this->install(new FakeQueryModule(
             $root . '/be/var/fake/query',

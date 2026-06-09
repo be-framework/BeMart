@@ -19,7 +19,10 @@ final class ProdModule extends AbstractAppModule
     #[Override]
     protected function configure(): void
     {
-        $this->install(new AppModule($this->appMeta));
+        if ($this->lastModule === null) {
+            $this->install(new AppModule($this->appMeta));
+        }
+
         $this->override(new ProdSessionOverrideModule());
         $this->override(new ProdCsrfOverrideModule());
         $this->override(new SqlModule());
