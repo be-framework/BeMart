@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
-use Aura\Sql\ExtendedPdoInterface;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
-use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowFixtureBoundary;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
 
@@ -29,59 +27,39 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-csrf-token';
 
-    private static InjectorInterface|null $injector = null;
-    private static ExtendedPdoInterface|null $db = null;
-    private static ResourceInterface|null $dbResource = null;
     private static string $suffix;
+    private static WorkflowDbSession|null $dbSession = null;
     private static WorkflowFixtureBoundary|null $fixtures = null;
-    private static WorkflowTestSession|null $session = null;
 
     public static function setUpBeforeClass(): void
     {
         self::$suffix = bin2hex(random_bytes(4));
-        self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
-
-        self::$injector = Injector::getInstance('html-prod-hal-api-app');
-        self::$fixtures = WorkflowFixtureBoundary::fromInjector(self::$injector);
-        self::$fixtures->makeLayoutVisible(new LayoutEntity('1', 'Workflow Seed Layout', 10));
-
-        $db = self::$injector->getInstance(ExtendedPdoInterface::class);
-        assert($db instanceof ExtendedPdoInterface);
-        self::$db = $db;
-        self::$db->beginTransaction();
+        self::$dbSession = WorkflowDbSession::startForAdmin(
+            self::ADMIN_ID,
+            self::CSRF_TOKEN,
+            static function (InjectorInterface $injector): void {
+                self::$fixtures = WorkflowFixtureBoundary::fromInjector($injector);
+                self::$fixtures->makeLayoutVisible(new LayoutEntity('1', 'Workflow Seed Layout', 10));
+            },
+        );
     }
 
     public static function tearDownAfterClass(): void
     {
-        if (self::$db instanceof ExtendedPdoInterface && self::$db->inTransaction()) {
-            self::$db->rollBack();
-        }
-
-        self::$fixtures?->cleanup();
-        self::$session?->restore();
-
-        self::$db = null;
-        self::$dbResource = null;
-        self::$injector = null;
+        self::$dbSession?->restore(static function (): void {
+            self::$fixtures?->cleanup();
+        });
+        self::$dbSession = null;
         self::$fixtures = null;
-        self::$session = null;
 
         parent::tearDownAfterClass();
     }
 
     protected function newResource(): ResourceInterface
     {
-        if (self::$dbResource instanceof ResourceInterface) {
-            return self::$dbResource;
-        }
+        assert(self::$dbSession instanceof WorkflowDbSession);
 
-        assert(self::$injector instanceof InjectorInterface);
-        $resource = self::$injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        self::$dbResource = $resource;
-
-        return $resource;
+        return self::$dbSession->resource();
     }
 
     #[Alps('goNewsList')]

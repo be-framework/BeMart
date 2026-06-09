@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
-use Aura\Sql\ExtendedPdoInterface;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
-use Ray\Di\InjectorInterface;
 
 use function assert;
 use function bin2hex;
@@ -26,14 +23,11 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-account-csrf-token';
     private const PASSWORD = 'workflow-account-password-2026';
-    private static InjectorInterface|null $injector = null;
-    private static ExtendedPdoInterface|null $db = null;
-    private static ResourceInterface|null $dbResource = null;
     private static string $email;
     private static string $customerId;
     private static string $productCode;
     private static string $productName;
-    private static WorkflowTestSession|null $session = null;
+    private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -41,48 +35,22 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
         self::$email = 'workflow-account-' . $suffix . '@example.com';
         self::$productCode = 'workflow-account-' . $suffix;
         self::$productName = 'Workflow Account Favorite Product ' . self::$productCode;
-        self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
-
-        self::$injector = Injector::getInstance('html-prod-hal-api-app');
-        $db = self::$injector->getInstance(ExtendedPdoInterface::class);
-        assert($db instanceof ExtendedPdoInterface);
-        self::$db = $db;
-        self::$db->beginTransaction();
-
-        $resource = self::$injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        self::$dbResource = $resource;
+        self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
     public static function tearDownAfterClass(): void
     {
-        if (self::$db instanceof ExtendedPdoInterface && self::$db->inTransaction()) {
-            self::$db->rollBack();
-        }
-
-        self::$session?->restore();
-
-        self::$db = null;
-        self::$dbResource = null;
-        self::$injector = null;
-        self::$session = null;
+        self::$dbSession?->restore();
+        self::$dbSession = null;
 
         parent::tearDownAfterClass();
     }
 
     protected function newResource(): ResourceInterface
     {
-        if (self::$dbResource instanceof ResourceInterface) {
-            return self::$dbResource;
-        }
+        assert(self::$dbSession instanceof WorkflowDbSession);
 
-        assert(self::$injector instanceof InjectorInterface);
-        $resource = self::$injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        self::$dbResource = $resource;
-
-        return $resource;
+        return self::$dbSession->resource();
     }
 
     #[Alps('goLogin')]
@@ -106,8 +74,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
         $this->assertIsString($registered->body['customerId'] ?? null);
 
         self::$customerId = (string) $registered->body['customerId'];
-        assert(self::$session instanceof WorkflowTestSession);
-        self::$session->setCustomerId(self::$customerId);
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        self::$dbSession->session()->setCustomerId(self::$customerId);
 
         $created = $this->resource->post('page://self/admin/product', [
             'productCode' => self::$productCode,
@@ -141,8 +109,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::OK, $loggedIn->code);
         $this->assertSame(self::$email, $this->bodyValue($loggedIn, 'email'));
-        assert(self::$session instanceof WorkflowTestSession);
-        self::$session->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        self::$dbSession->session()->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
 
         return $loggedIn;
     }
