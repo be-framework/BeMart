@@ -71,9 +71,8 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $registered->code);
-        $this->assertIsString($registered->body['customerId'] ?? null);
 
-        self::$customerId = (string) $registered->body['customerId'];
+        self::$customerId = $this->bodyString($registered, 'customerId');
         assert(self::$dbSession instanceof WorkflowDbSession);
         self::$dbSession->session()->setCustomerId(self::$customerId);
 

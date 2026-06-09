@@ -115,8 +115,7 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $payment->code);
-        $this->assertIsString($payment->body['paymentId'] ?? null);
-        self::$paymentId = $payment->body['paymentId'];
+        self::$paymentId = $this->bodyString($payment, 'paymentId');
 
         $order = $this->resource->post('page://self/admin/order/create', [
             'customerId' => 'workflow-mail-customer-' . $suffix,
@@ -135,8 +134,7 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $order->code);
-        $this->assertIsString($order->body['orderNo'] ?? null);
-        self::$orderNo = $order->body['orderNo'];
+        self::$orderNo = $this->bodyString($order, 'orderNo');
 
         return $this->follow($response, 'goOrderMail', ['orderNo' => self::$orderNo]);
     }
