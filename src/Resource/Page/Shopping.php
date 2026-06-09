@@ -22,13 +22,15 @@ use BEAR\Resource\Annotation\JsonSchema;
 use function assert;
 
 /**
- * EC-CUBE goShopping — 注文情報入力画面 (Pilot — checkout review).
+ * EC-CUBE checkout entry / goShopping — 注文情報入力画面.
  *
- * Safe read. No CSRF (read-only). AUTHN required — Be Final raises
- * UnauthenticatedException when the session has no customerId, which
- * we map to 401. Aggregates the customer's default shipping fields,
- * the current carts under the active sessionPrefix, and the list of
- * user-selectable payment methods into a single review projection.
+ * Safe read. No CSRF (read-only). This resource is also the HTML
+ * checkout gateway reached from the cart CTA (`goCheckoutEntry`).
+ * Anonymous / stale sessions are redirected to the checkout login page
+ * instead of exposing a raw JSON 401 in the browser. Authenticated
+ * sessions resolve the member checkout projection (`goShopping`):
+ * customer shipping fields, the current carts under the active
+ * sessionPrefix, and selectable payment methods.
  *
  * Empty-cart handling: 200 with `canCheckout = false` rather than
  * 404. The frontend renders the "カートが空です" panel in that case;
@@ -36,7 +38,7 @@ use function assert;
  *
  * Failure mapping:
  *   - SemanticVariableException → 400 (sessionPrefix malformed)
- *   - UnauthenticatedException  → 401 (no / stale session)
+ *   - UnauthenticatedException  → 303 /shopping/login (checkout entry)
  *
  * Coexists with `Resource\Page\Shopping\` directory (which holds
  * Checkout.php from Pilot 5) — the same file-plus-sibling-directory
@@ -62,12 +64,13 @@ class Shopping extends ResourceObject
     }
 
     /**
-     * ALPS `goShopping` に対応する GET 操作。
+     * ALPS `goCheckoutEntry` / `goShopping` に対応する GET 操作。
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('goCheckoutEntry')]
     #[Alps('goShopping')]
     #[JsonSchema(schema: 'get-shopping.json', params: 'get-shopping.param.json')]
-    #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
+    #[Link(rel: 'doConfirmOrder', href: 'page://self/shopping/confirm', method: 'post')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(string $sessionPrefix = 'session-prefix-1'): static
     {
@@ -81,10 +84,7 @@ class Shopping extends ResourceObject
 
             return $this;
         } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
+            return $this->redirectToShoppingLogin();
         }
 
         assert($final instanceof ShoppingFetched);
@@ -110,6 +110,29 @@ class Shopping extends ResourceObject
             // render the message textarea + delivery / payment controls.
             // JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(ShoppingOrderForm::class),
+        ];
+
+        return $this;
+    }
+
+    private function redirectToShoppingLogin(): static
+    {
+        $this->code = Code::SEE_OTHER;
+        $this->headers['Location'] = '/shopping/login';
+        $this->body = [
+            'transitionId' => 'goCheckoutEntry',
+            'message' => '購入手続きに進むにはログインまたはゲスト購入を選択してください。',
+            'links' => [
+                'goShoppingLogin' => 'page://self/shopping/login',
+                'goShoppingNonMember' => 'page://self/shopping/non-member',
+                'goCart' => 'page://self/cart',
+            ],
+            '_links' => [
+                'doConfirmOrder' => [],
+                'goShoppingLogin' => ['href' => 'page://self/shopping/login'],
+                'goShoppingNonMember' => ['href' => 'page://self/shopping/non-member'],
+                'goCart' => ['href' => 'page://self/cart'],
+            ],
         ];
 
         return $this;

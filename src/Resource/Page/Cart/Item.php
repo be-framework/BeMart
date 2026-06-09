@@ -57,7 +57,7 @@ class Item extends ResourceObject
     #[JsonSchema(schema: 'post-cart-item.json', params: 'post-cart-item.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
-    #[Link(rel: 'doCheckout', href: 'page://self/shopping', method: 'post')]
+    #[Link(rel: 'goCheckoutEntry', href: 'page://self/shopping')]
     #[CsrfProtected]
     public function onPost(
         string $productCode,
@@ -82,7 +82,7 @@ class Item extends ResourceObject
             return $this->redirectToCartOnSuccess();
         }
 
-        if ($operation !== null) {
+        if ($operation !== null && $operation !== 'add') {
             $this->code = Code::BAD_REQUEST;
             $this->body = ['message' => 'Invalid cart operation.', 'productCode' => $productCode];
 
@@ -113,6 +113,10 @@ class Item extends ResourceObject
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
             'saleTypeName' => $final->saleTypeName,
         ];
+
+        if ($operation === 'add') {
+            return $this->redirectToCartOnSuccess();
+        }
 
         return $this;
     }
@@ -202,6 +206,7 @@ class Item extends ResourceObject
     private function redirectToCartOnSuccess(): static
     {
         if ($this->code < 400) {
+            $this->code = Code::SEE_OTHER;
             $this->headers['Location'] = '/cart';
         }
 

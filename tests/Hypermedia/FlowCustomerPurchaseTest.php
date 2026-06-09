@@ -136,8 +136,19 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         return $cart;
     }
 
-    #[Alps('goShoppingNonMember')]
+    #[Alps('goCheckoutEntry')]
     #[Depends('testCart')]
+    public function testCheckoutEntryRedirectsAnonymousToShoppingLogin(ResourceObject $response): ResourceObject
+    {
+        $entry = $this->resource->get($this->linkHref($response, 'goCheckoutEntry'));
+
+        $this->assertSame(Code::SEE_OTHER, $entry->code);
+
+        return $this->followLocation($entry, '/shopping/login');
+    }
+
+    #[Alps('goShoppingNonMember')]
+    #[Depends('testCheckoutEntryRedirectsAnonymousToShoppingLogin')]
     public function testNonMemberForm(ResourceObject $response): ResourceObject
     {
         return $this->follow($response, 'goShoppingNonMember');
