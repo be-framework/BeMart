@@ -61,6 +61,11 @@ abstract class AbstractWorkflowTest extends TestCase
 
     protected function linkHref(ResourceObject $response, string $rel): string
     {
+        if ($response->view === null) {
+            // Rendering materializes representation-driven headers such as Link.
+            (string) $response;
+        }
+
         $href = $this->halHref($response, $rel) ?? $this->linkHeaderHref($response, $rel);
         $this->assertIsString($href, sprintf('Link rel `%s` should be present in the representation.', $rel));
 
