@@ -112,7 +112,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     #[Depends('testProductDetail')]
     public function testAddsCartItem(ResourceObject $response): ResourceObject
     {
-        $added = $this->resource->post('page://self/cart/item', [
+        $added = $this->resource->post($this->linkHref($response, 'doAddCartItem'), [
             'productCode' => self::$productCode,
             'quantity' => 2,
             'sessionPrefix' => self::SESSION_PREFIX,
