@@ -11,7 +11,7 @@
         "null"
       ],
       "title": "ログインID（入力）",
-      "description": "管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。",
+      "description": "管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 この値は2FAログインチャレンジでは互換入力としてのみ受け取り、信頼しない。",
       "example": "test-admin",
       "minLength": 0,
       "maxLength": 128,
@@ -249,7 +249,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape. Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
   "required": [
-    "loginId",
     "deviceToken"
   ]
 }

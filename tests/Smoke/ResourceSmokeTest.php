@@ -330,7 +330,7 @@ final class ResourceSmokeTest extends TestCase
             'PUT page://self/admin/sort-no-move?masterType=tag&rowId=tg-new&sortNo=9' => Code::OK,
             'PUT page://self/admin/template/template-list?templateId=default' => Code::OK,
             'PUT page://self/admin/toggle-visible?masterType=delivery&rowId=del-yamato&visible=0' => Code::OK,
-            'PUT page://self/admin/two-factor-auth-set?loginId=fresh-admin&authKey=JBSWY3DPEHPK3PXP&deviceToken=123456' => Code::OK,
+            'PUT page://self/admin/two-factor-auth-set?loginId=fresh-admin&authKey=JBSWY3DPEHPK3PXP&deviceToken=123456' => Code::FORBIDDEN,
             'PUT page://self/cart/item?productCode=sample-001&quantity=1' => Code::OK,
             'PUT page://self/mypage/address?addressId=addr00000000000000000000000000a1' => Code::OK,
         ]);

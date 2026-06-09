@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Auth;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\HtmlTestModule;
@@ -37,12 +38,20 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     protected function setUp(): void
     {
         $this->appContextBefore = getenv('APP_CONTEXT');
-        unset($_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY]);
+        unset(
+            $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY],
+            $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY],
+            $_SESSION[HtmlAdminLoginChallengeAdapter::SETUP_CHALLENGE_KEY],
+        );
     }
 
     protected function tearDown(): void
     {
-        unset($_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY]);
+        unset(
+            $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY],
+            $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY],
+            $_SESSION[HtmlAdminLoginChallengeAdapter::SETUP_CHALLENGE_KEY],
+        );
         if (session_status() === PHP_SESSION_ACTIVE) {
             $_SESSION = [];
             session_destroy();
@@ -95,7 +104,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
 
     #[RunInSeparateProcess]
     #[PreserveGlobalState(false)]
-    public function testHtmlContextAdminLoginWritesAdminIdToSession(): void
+    public function testHtmlContextAdminLoginStartsTwoFactorChallengeWithoutElevatingSession(): void
     {
         $this->startActiveSession();
         putenv('APP_CONTEXT=html-test-hal-api-app');
@@ -107,7 +116,15 @@ final class HtmlAdminSessionAdapterTest extends TestCase
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame('ad000000000000000000000000000001', $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] ?? null);
+        $this->assertSame('/admin/two-factor-auth', $ro->headers['Location']);
+        $this->assertArrayNotHasKey(HtmlAdminSessionAdapter::ADMIN_ID_KEY, $_SESSION);
+        $this->assertSame(
+            [
+                'adminId' => 'ad000000000000000000000000000001',
+                'loginId' => 'test-admin',
+            ],
+            $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY] ?? null,
+        );
     }
 
     #[RunInSeparateProcess]
