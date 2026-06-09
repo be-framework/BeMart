@@ -15,6 +15,7 @@ use function in_array;
 use function is_array;
 use function is_string;
 use function preg_match;
+use function preg_quote;
 use function preg_split;
 use function sprintf;
 use function str_starts_with;
@@ -60,10 +61,6 @@ abstract class AbstractWorkflowTest extends TestCase
 
     protected function linkHref(ResourceObject $response, string $rel): string
     {
-        if ($response->view === null) {
-            (string) $response;
-        }
-
         $href = $this->halHref($response, $rel) ?? $this->linkHeaderHref($response, $rel);
         $this->assertIsString($href, sprintf('Link rel `%s` should be present in the representation.', $rel));
 
@@ -170,7 +167,7 @@ abstract class AbstractWorkflowTest extends TestCase
 
     private function linkHeaderParam(string $attrs, string $name): string|null
     {
-        if (preg_match('/(?:^|;)\s*' . $name . '\s*=\s*(?:"([^"]*)"|([^;\s]+))/i', $attrs, $match) !== 1) {
+        if (preg_match('/(?:^|;)\s*' . preg_quote($name, '/') . '\s*=\s*(?:"([^"]*)"|([^;\s]+))/i', $attrs, $match) !== 1) {
             return null;
         }
 
