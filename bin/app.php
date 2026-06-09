@@ -6,4 +6,4 @@ use MyVendor\BeMart\Bootstrap;
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-exit((new Bootstrap())('cli-hal-api-app', $GLOBALS, $_SERVER));
+exit((new Bootstrap())('cli-sql-hal-app', $GLOBALS, $_SERVER));

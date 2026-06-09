@@ -8,7 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use BEAR\Dev\Http\AbstractWorkflowTest;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
 
