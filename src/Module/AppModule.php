@@ -12,6 +12,7 @@ use BEAR\Resource\Module\JsonSchemaModule;
 use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
+use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistry;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerInitialPointInterface;
@@ -96,6 +97,7 @@ final class AppModule extends AbstractAppModule
         $this->install(new BeModule('MyVendor\\BeMart\\Be\\Semantic'));
 
         $this->bind(PasswordHasherInterface::class)->to(NativePasswordHasher::class);
+        $this->bind(HtmlAdminLoginChallengeAdapter::class);
 
         // Production-safe defaults for external domain services. FakeModule
         // overrides these with deterministic recording fakes; prod keeps the
