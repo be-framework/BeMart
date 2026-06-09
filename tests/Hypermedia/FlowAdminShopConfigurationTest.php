@@ -4,16 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
-use Aura\Sql\ExtendedPdoInterface;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
-use Ray\Di\InjectorInterface;
 
 use function assert;
 use function bin2hex;
@@ -26,13 +23,10 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-csrf-token';
 
-    private static InjectorInterface|null $injector = null;
-    private static ExtendedPdoInterface|null $db = null;
-    private static ResourceInterface|null $dbResource = null;
     private static string $paymentName;
     private static string $deliveryName;
     private static string $taxApplyDate;
-    private static WorkflowTestSession|null $session = null;
+    private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
     {
@@ -40,44 +34,22 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
         self::$paymentName = 'Workflow Payment ' . $suffix;
         self::$deliveryName = 'Workflow Delivery ' . $suffix;
         self::$taxApplyDate = '2027-01-' . (string) (10 + (int) (hexdec($suffix[0]) % 9));
-        self::$session = WorkflowTestSession::fromCurrent();
-        self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
-
-        self::$injector = Injector::getInstance('html-prod-hal-api-app');
-        $db = self::$injector->getInstance(ExtendedPdoInterface::class);
-        assert($db instanceof ExtendedPdoInterface);
-        self::$db = $db;
-        self::$db->beginTransaction();
+        self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
     public static function tearDownAfterClass(): void
     {
-        if (self::$db instanceof ExtendedPdoInterface && self::$db->inTransaction()) {
-            self::$db->rollBack();
-        }
-
-        self::$session?->restore();
-
-        self::$db = null;
-        self::$dbResource = null;
-        self::$injector = null;
-        self::$session = null;
+        self::$dbSession?->restore();
+        self::$dbSession = null;
 
         parent::tearDownAfterClass();
     }
 
     protected function newResource(): ResourceInterface
     {
-        if (self::$dbResource instanceof ResourceInterface) {
-            return self::$dbResource;
-        }
+        assert(self::$dbSession instanceof WorkflowDbSession);
 
-        assert(self::$injector instanceof InjectorInterface);
-        $resource = self::$injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        self::$dbResource = $resource;
-
-        return $resource;
+        return self::$dbSession->resource();
     }
 
     #[Alps('goBaseInfo')]
