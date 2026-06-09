@@ -20,6 +20,8 @@ final class HtmlTestInjector
 
     public static function getInstance(): InjectorInterface
     {
+        // Empty override is intentional: html-test-hal-app now exercises standard context composition
+        // with HtmlModule's default Twig options, not the removed HtmlTestModule debug/cache flags.
         return AppInjector::getOverrideInstance(self::CONTEXT, new class extends AbstractModule {
             #[Override]
             protected function configure(): void
