@@ -128,6 +128,7 @@ class Shopping extends ResourceObject
                 'goCart' => 'page://self/cart',
             ],
             '_links' => [
+                // Suppress method-level doConfirmOrder for anonymous 303 HAL; entries without href are not rendered.
                 'doConfirmOrder' => [],
                 'goShoppingLogin' => ['href' => 'page://self/shopping/login'],
                 'goShoppingNonMember' => ['href' => 'page://self/shopping/non-member'],
