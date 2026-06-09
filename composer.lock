@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8d1794b3de1cf0d888c556d7e42b97ca",
+    "content-hash": "5c211b8fe3d1b6d05df0bf088f883d22",
     "packages": [
         {
             "name": "aura/cli",
@@ -612,16 +612,16 @@
         },
         {
             "name": "bear/devtools",
-            "version": "dev-master",
+            "version": "dev-html-link-renderer-dev-deps",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.DevTools.git",
-                "reference": "145f58ff5f980b1bb9eac6b2c23abc5d17b4f514"
+                "reference": "aae52aea8d6a9f7ea8ee9471fe04062289cdaf7b"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/145f58ff5f980b1bb9eac6b2c23abc5d17b4f514",
-                "reference": "145f58ff5f980b1bb9eac6b2c23abc5d17b4f514",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/aae52aea8d6a9f7ea8ee9471fe04062289cdaf7b",
+                "reference": "aae52aea8d6a9f7ea8ee9471fe04062289cdaf7b",
                 "shasum": ""
             },
             "require": {
@@ -644,7 +644,6 @@
             "suggest": {
                 "ext-xhprof": "XHprof hierarchical profiler for performance analysis"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -729,10 +728,10 @@
                 }
             ],
             "support": {
-                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/master",
+                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/html-link-renderer-dev-deps",
                 "issues": "https://github.com/bearsunday/BEAR.DevTools/issues"
             },
-            "time": "2026-06-09T01:07:22+00:00"
+            "time": "2026-06-09T00:22:34+00:00"
         },
         {
             "name": "bear/package",
@@ -9109,6 +9108,12 @@
             "alias_normalized": "0.1.0.0"
         },
         {
+            "package": "bear/devtools",
+            "version": "dev-html-link-renderer-dev-deps",
+            "alias": "1.x-dev",
+            "alias_normalized": "1.9999999.9999999.9999999-dev"
+        },
+        {
             "package": "ray/fake-query",
             "version": "dev-codex/fake-query-release-hardening",
             "alias": "1.x-dev",
@@ -9127,6 +9132,6 @@
     "platform": {
         "php": "^8.3"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.9.0"
+    "platform-dev": [],
+    "plugin-api-version": "2.2.0"
 }
