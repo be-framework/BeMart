@@ -477,6 +477,9 @@
       },
 
       {"id": "Cart", "title": "カート","tag": "cart src-template flow-customer-purchase",
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/cart.md"}
+        ],
         "descriptor": [
           {"href": "#cartKey"},
           {"href": "#preOrderId"},
@@ -492,8 +495,20 @@
           {"href": "#doUpdateCartItemQuantity"},
           {"href": "#doRemoveCartItem"},
           {"href": "#doSelectCartForCheckout"},
+          {"href": "#goCheckoutEntry"}
+        ]
+      },
+
+      {"id": "CheckoutEntry", "title": "購入手続き入口","tag": "checkout src-router flow-customer-purchase",
+        "doc": {"value": "カートから購入手続きへ入るゲートウェイ。rel の意味は状態に依存しない入口で、ログイン状態に応じて購入ログインまたは注文手続きへ進める。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/shopping.md"}
+        ],
+        "descriptor": [
+          {"href": "#goShoppingLogin"},
           {"href": "#goShoppingNonMember"},
-          {"href": "#goShopping"}
+          {"href": "#goShopping"},
+          {"href": "#goCart"}
         ]
       },
 
@@ -525,7 +540,10 @@
         ]
       },
       {"id": "Shopping", "title": "注文手続き","tag": "checkout src-router src-template flow-customer-purchase",
-        "doc": {"value": "配送先・支払方法・配送時間帯を選択し注文内容を確定する画面"},
+        "doc": {"value": "ログイン済み会員、または購入者情報が確定した購入フローの注文手続き画面。配送先・支払方法・配送時間帯を選択し注文内容を確定する。カートからの入口は CheckoutEntry が担う。"},
+        "link": [
+          {"rel": "describedby", "href": "alps-doc/shopping.md"}
+        ],
         "descriptor": [
           {"href": "#paymentMethod"},
           {"href": "#deliveryName"},
@@ -1606,14 +1624,17 @@
         "tag": "cart flow-purchase actor-customer src-router feature-purchase flow-customer-purchase",
         "doc": {"value": "カート明細を1件削除する。PurchaseFlowで送料・手数料・合計が再計算される。"},
         "descriptor": [{"href": "#productCode"}]},
-      {"id": "doSelectCartForCheckout", "title": "購入対象カートを選択する", "type": "idempotent", "rt": "#Shopping",
+      {"id": "doSelectCartForCheckout", "title": "購入対象カートを選択する", "type": "idempotent", "rt": "#CheckoutEntry",
         "tag": "cart checkout flow-purchase actor-customer src-router src-controller feature-purchase flow-customer-purchase",
-        "doc": {"value": "販売種別ごとに分かれたカートから購入手続きへ進めるカートを選択する。EC-CUBE の cart_buystep に対応。"},
+        "doc": {"value": "販売種別ごとに分かれたカートから購入手続きへ進めるカートを選択し、購入手続き入口へ進む。EC-CUBE の cart_buystep に対応。"},
         "descriptor": [{"href": "#cartKey"}]},
 
-      {"id": "goShopping", "title": "注文手続きへ進む", "type": "safe", "rt": "#Shopping",
+      {"id": "goCheckoutEntry", "title": "購入手続き入口へ進む", "type": "safe", "rt": "#CheckoutEntry",
+        "tag": "cart checkout flow-purchase actor-customer src-router src-controller feature-purchase flow-customer-purchase",
+        "doc": {"value": "カートから購入手続きへ入る。匿名カートでも利用できる安定した rel。ログイン状態に応じて購入ログインまたは注文手続きへ進める。"}},
+      {"id": "goShopping", "title": "注文手続きを見る", "type": "safe", "rt": "#Shopping",
         "tag": "checkout flow-purchase actor-customer src-router src-controller feature-purchase flow-customer-purchase",
-        "doc": {"value": "カートから注文手続きへ遷移。未ログイン時はShoppingLoginへリダイレクト。"}},
+        "doc": {"value": "ログイン済み会員、または購入者情報が確定した購入フローの注文手続き画面を表示する。カートからの入口は goCheckoutEntry を使う。"}},
       {"id": "goShoppingLogin", "title": "購入ログインを見る", "type": "safe", "rt": "#ShoppingLogin",
         "tag": "checkout flow-purchase actor-customer src-router src-template feature-purchase flow-customer-purchase",
         "doc": {"value": "未ログインで注文手続きに進んだ場合のログイン画面。会員ログイン・新規登録・非会員購入の3つの選択肢を提示。"}},

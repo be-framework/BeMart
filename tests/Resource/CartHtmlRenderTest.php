@@ -181,7 +181,8 @@ final class CartHtmlRenderTest extends TestCase
             'class="ec-cartRow__contentColumn"',
             'class="ec-cartRow__amountColumn"',
             'class="ec-cartRow__subtotalColumn"',
-            'class="ec-blockBtn--action"',
+            'ec-blockBtn--action',
+            'rel="goCheckoutEntry"',
         ] as $needle) {
             $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
         }
@@ -278,6 +279,7 @@ final class CartHtmlRenderTest extends TestCase
             '/product?productCode=sample-001',            // BeMart product code route
             '/cart/item',                             // BeMart form operation route
             '/shopping',                              // BeMart checkout route
+            'goCheckoutEntry',                        // BeMart checkout-entry rel
             'ec-cartRow__operationForm',              // BeMart form operation port
             'ec-cartRow__amountDownForm',             // BeMart quantity form port
             'ec-cartRow__amountUpForm',               // BeMart quantity form port
