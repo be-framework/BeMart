@@ -20,7 +20,7 @@ final class DownloadResponderTest extends TestCase
     {
         $ro = $this->resourceWithDownload('text/csv; charset=UTF-8', ['csv' => "id,name\n1,BeMart\n"]);
 
-        $this->assertTrue($this->isDownload($ro, ['_BEMART_CONTEXT' => 'html-hal-app']));
+        $this->assertTrue($this->isDownload($ro, ['_BEMART_CONTEXT' => 'html-eccube-sql-hal-app']));
         $output = $this->downloadOutput($ro);
 
         $this->assertSame(Code::OK, $output->code);
@@ -56,7 +56,7 @@ final class DownloadResponderTest extends TestCase
     {
         $ro = $this->resourceWithDownload('text/csv; charset=UTF-8', ['csv' => "id,name\n1,BeMart\n"]);
 
-        $this->assertFalse($this->isDownload($ro, ['_BEMART_CONTEXT' => 'http-prod-hal-api-app']));
+        $this->assertFalse($this->isDownload($ro, ['_BEMART_CONTEXT' => 'prod-eccube-sql-hal-app']));
     }
 
     public function testHalJsonIsNotDownload(): void

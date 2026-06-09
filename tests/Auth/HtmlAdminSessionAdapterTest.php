@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Auth;
 
-use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
-use Ray\Di\Injector;
 
-use function dirname;
 use function getenv;
 use function putenv;
 use function session_cache_limiter;
@@ -109,7 +106,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     {
         $this->startActiveSession();
         $sessionIdBeforeLogin = session_id();
-        putenv('APP_CONTEXT=html-test-hal-api-app');
+        putenv('APP_CONTEXT=html-test-hal-app');
 
         $ro = $this->htmlResource()->post('page://self/admin/login', [
             'loginId' => 'test-admin',
@@ -155,7 +152,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     public function testHtmlContextAdminLogoutClearsAdminIdAndRedirectsToLogin(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html-test-hal-api-app');
+        putenv('APP_CONTEXT=html-test-hal-app');
         $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = 'ad000000000000000000000000000001';
 
         $ro = $this->htmlResource()->post('page://self/admin/logout', [
@@ -169,11 +166,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
 
     private function htmlResource(): ResourceInterface
     {
-        $meta = new Meta('MyVendor\\BeMart', 'html');
-        $injector = new Injector(
-            new HtmlTestModule($meta),
-            dirname(__DIR__, 2) . '/var/tmp/html',
-        );
+        $injector = HtmlTestInjector::getInstance();
 
         return $injector->getInstance(ResourceInterface::class);
     }

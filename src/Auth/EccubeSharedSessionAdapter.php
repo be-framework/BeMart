@@ -24,8 +24,8 @@ use const PHP_SESSION_ACTIVE;
  * BEAR side of the bridge is implemented here. The matching EC-CUBE side
  * — a small Symfony EventListener that mirrors the authenticated customer
  * id to the flat session key on login and unsets it on logout — is **not
- * yet implemented**. Until that ships, every HTTP request under
- * ProdModule resolves to anonymous → AUTHZ rejects everything. The
+ * yet implemented**. Until that ships, every HTTP request under the
+ * EC-CUBE production context resolves to anonymous → AUTHZ rejects everything. The
  * adapter is therefore the BEAR-side half of the contract, not a
  * complete production auth path.
  *

@@ -35,4 +35,4 @@ if (is_string($csrfToken) && $csrfToken !== '') {
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-exit((new Bootstrap())('http-prod-hal-api-app', $GLOBALS, $_SERVER));
+exit((new Bootstrap())('prod-eccube-sql-hal-app', $GLOBALS, $_SERVER));

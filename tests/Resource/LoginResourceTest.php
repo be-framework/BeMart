@@ -55,6 +55,7 @@ final class LoginResourceTest extends TestCase
         $this->assertSame('鈴木', $ro->body['name01']);
         $this->assertSame(2, $ro->body['customerStatus']);
         $this->assertArrayHasKey('Location', $ro->headers);
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->uri->query['csrfToken']);
     }
 
     public function testOnPostWrongPasswordReturns401(): void

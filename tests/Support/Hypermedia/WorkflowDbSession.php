@@ -27,7 +27,7 @@ final class WorkflowDbSession
     public static function start(Closure|null $beforeTransaction = null): self
     {
         $session = WorkflowTestSession::fromCurrent();
-        $injector = Injector::getInstance('html-prod-hal-api-app');
+        $injector = Injector::getInstance('html-prod-eccube-sql-hal-app');
 
         // Internal hook shape: callers that only need the injector should use
         // startForAdmin() or startWithCsrfToken(), which adapt this signature.
