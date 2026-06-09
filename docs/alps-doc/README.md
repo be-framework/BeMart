@@ -5,7 +5,7 @@ title: "ALPS Linked Documentation"
 
 # ALPS Linked Documentation
 
-`alps-doc/` は、`alps.json` の descriptor から `link rel="describedby"` で参照する長文補足の置き場である。
+`docs/alps-doc/` は、`alps.json` の descriptor から `link rel="describedby"` で参照する長文補足の正本である。
 
 ALPS の `doc.value` は、descriptor を読むための短い要約に留める。意味論、境界判断、SQL / HTML / Resource との対応、実装上の根拠が長くなる場合は、無理に `doc.value` へ詰め込まず、このディレクトリ配下の Markdown へ分離する。
 
@@ -35,6 +35,6 @@ ALPS の `doc.value` は、descriptor を読むための短い要約に留める
 }
 ```
 
-既存の `docs/states/*.md` は、画面状態の補足として同じ方針で使われている。今後、新しい ALPS descriptor から直接参照する長文補足は、原則として `alps-doc/*.md` に置く。
+既存の `docs/states/*.md` は、画面状態の補足として同じ方針で使われている。今後、新しい ALPS descriptor から直接参照する長文補足は、原則として `docs/alps-doc/*.md` に置く。
 
-GitHub Pages では `docs/` が publish root になるため、公開 HTML から辿る同名ファイルは `docs/alps-doc/` にミラーする。root の `alps-doc/` を編集したら、対応する `docs/alps-doc/` の公開コピーも同期する。
+GitHub Pages では `docs/` が publish root になるため、公開 HTML から辿る同名ファイルは `docs/alps-doc/` に置く。root の `alps-doc/` は `alps.json` の既存相対リンクを保つための `docs/alps-doc/` への互換 symlink であり、編集は `docs/alps-doc/` 側で行う。
