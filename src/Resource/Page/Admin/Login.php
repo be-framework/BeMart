@@ -122,6 +122,7 @@ class Login extends ResourceObject
 
         assert($final instanceof AdminAuthenticated);
 
+        $this->loginChallenge->regenerateActiveSessionId();
         if ($this->twoFactorAuth->isEnabled($final->loginId)) {
             $this->loginChallenge->startVerification($final->adminId, $final->loginId);
             $location = '/admin/two-factor-auth';

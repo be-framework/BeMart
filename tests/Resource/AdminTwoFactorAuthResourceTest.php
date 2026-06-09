@@ -68,6 +68,19 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
+    public function testOnPostDoesNotSynthesizeChallengeFromExistingAdminSession(): void
+    {
+        $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = self::ADMIN_ID;
+
+        $ro = $this->resource->post('page://self/admin/two-factor-auth', [
+            'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertArrayNotHasKey(HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY, $_SESSION);
+    }
+
     public function testOnPostVerifiesTokenFromPendingChallenge(): void
     {
         $this->challenge->startVerification(self::ADMIN_ID, self::LOGIN_ID);

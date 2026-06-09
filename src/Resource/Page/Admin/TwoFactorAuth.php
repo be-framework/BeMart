@@ -128,7 +128,7 @@ class TwoFactorAuth extends ResourceObject
     {
         unset($loginId);
 
-        $challenge = $this->verificationChallenge();
+        $challenge = $this->loginChallenge->verificationChallenge();
         if ($challenge === null) {
             $this->code = Code::FORBIDDEN;
             $this->body = ['message' => '二要素認証のログインチャレンジがありません。'];
