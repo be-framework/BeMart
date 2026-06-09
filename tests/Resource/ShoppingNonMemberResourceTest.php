@@ -80,14 +80,13 @@ final class ShoppingNonMemberResourceTest extends TestCase
 
     public function testOnPostInvalidEmailReturns400(): void
     {
-        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
-
-        $this->resource->post('page://self/shopping/non-member', [
+        $ro = $this->resource->post('page://self/shopping/non-member', [
             'name01' => '田中',
             'name02' => '太郎',
             'kana01' => 'タナカ',
             'kana02' => 'タロウ',
             'email' => 'not-an-email',
+            'email_confirm' => 'not-an-email',
             'phoneNumber' => '0312345678',
             'postalCode' => '1500001',
             'pref' => 13,
@@ -95,6 +94,39 @@ final class ShoppingNonMemberResourceTest extends TestCase
             'addr02' => '神宮前1-2-3',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
+
+        $this->assertSame(Code::BAD_REQUEST, $ro->code);
+        $this->assertSame('goShoppingNonMember', $ro->body['transitionId']);
+        $this->assertSame(
+            'メールアドレスの形式が不正です。"@" を含み 254 文字以下で指定してください。',
+            $ro->body['errors']['email'],
+        );
+        $this->assertStringContainsString('メールアドレスの形式が不正です', $ro->body['form']->error('email'));
+    }
+
+    public function testOnPostEmptyBrowserFormReturnsInlineErrors(): void
+    {
+        $ro = $this->resource->post('page://self/shopping/non-member', [
+            'name01' => '',
+            'name02' => '',
+            'kana01' => '',
+            'kana02' => '',
+            'companyName' => '',
+            'email' => '',
+            'email_confirm' => '',
+            'phoneNumber' => '',
+            'postalCode' => '',
+            'pref' => '',
+            'addr01' => '',
+            'addr02' => '',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::BAD_REQUEST, $ro->code);
+        $this->assertSame('入力してください。', $ro->body['errors']['name01']);
+        $this->assertSame('入力してください。', $ro->body['errors']['email_confirm']);
+        $this->assertSame('入力してください。', $ro->body['form']->error('pref'));
+        $this->assertSame('', $ro->body['form']->error('companyName'));
     }
 
 }

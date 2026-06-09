@@ -19,3 +19,11 @@
 1. 新しい全件runを追加する場合は、古い全件run画像を残す必要があるかを先に判断する。
 2. 同一SHA-256のPNGは1枚だけ残し、機能表と結果JSONの参照を代表画像へ寄せる。
 3. 途中調査用の画像はローカルまたはCI artifactに置き、リポジトリへは入れない。
+
+## 最新run
+
+- 最新の全件run: `20260610-web-db-all-routes`
+- 結果JSON: `docs/web-e2e/results/20260610-web-db-all-routes.json`
+- 結果レポート: `docs/web-e2e/20260610-web-db-all-routes-report.md`
+- スクリーンショット: `docs/web-e2e/screenshots/20260610-web-db-all-routes/`
+- `20260608-canonical-resource-routes-web-e2e` は比較用ベースラインとして参照する。
