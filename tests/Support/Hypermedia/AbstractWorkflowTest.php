@@ -70,6 +70,14 @@ abstract class AbstractWorkflowTest extends TestCase
         return $body[$key];
     }
 
+    protected function bodyString(ResourceObject $response, string $key): string
+    {
+        $value = $this->bodyValue($response, $key);
+        $this->assertIsString($value, sprintf('Expected body key `%s` to be a string.', $key));
+
+        return $value;
+    }
+
     protected function header(ResourceObject $response, string $name): string|null
     {
         foreach ($response->headers as $header => $value) {
