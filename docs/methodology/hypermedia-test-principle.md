@@ -9,6 +9,18 @@ The companion essay to `docs/skills/G-23-hypermedia-test-is-migration-contract.m
 
 It was written after Phase 2a of the EC-CUBE → BeMart migration. The Steps 2-5 sequence taught the operational lesson (G-23). The conversation that followed surfaced the broader principle, recorded here so the principle survives outside the Phase 2a context.
 
+## Terminology: workflow evidence
+
+The name "hypermedia test" is useful history, but it is too narrow for what BeMart now demonstrates. The durable abstraction is a workflow/state-transition contract.
+
+One scenario pins a transition described by ALPS and is then projected across boundaries:
+
+1. PHP Resource projection: `tests/Hypermedia/Flow*.php` traverses the resource graph in process.
+2. HTTP projection: `tests/Http/Flow*.php` extends the same workflow and swaps only the `ResourceInterface` implementation to `HttpResource`, crossing the real HTTP / cookie boundary.
+3. HTML projection: render tests, HTML semantic-link lookup, and Web E2E evidence confirm that the same transition remains available as `rel` / `class` / `href` / `form action` affordance.
+
+That is why this layer is stronger than a single test category. A change that preserves the workflow across PHP, HTTP, and HTML has much better evidence than a change that only satisfies one representation.
+
 ## The underrated-ness
 
 Hypermedia (Resource-layer) tests sit between unit tests and E2E:
