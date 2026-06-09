@@ -10,9 +10,9 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Entity\LayoutEntity;
-use MyVendor\BeMart\Be\Reason\Query\LayoutStorageInterface;
 use MyVendor\BeMart\Injector;
 use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowFixtureBoundary;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowTestSession;
 use PHPUnit\Framework\Attributes\Depends;
 use Ray\Di\InjectorInterface;
@@ -33,6 +33,7 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
     private static ExtendedPdoInterface|null $db = null;
     private static ResourceInterface|null $dbResource = null;
     private static string $suffix;
+    private static WorkflowFixtureBoundary|null $fixtures = null;
     private static WorkflowTestSession|null $session = null;
 
     public static function setUpBeforeClass(): void
@@ -42,9 +43,8 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         self::$session->loginAsAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
 
         self::$injector = Injector::getInstance('html-prod-hal-api-app');
-        $layouts = self::$injector->getInstance(LayoutStorageInterface::class);
-        assert($layouts instanceof LayoutStorageInterface);
-        $layouts->put(new LayoutEntity('1', 'Workflow Seed Layout', 10));
+        self::$fixtures = WorkflowFixtureBoundary::fromInjector(self::$injector);
+        self::$fixtures->makeLayoutVisible(new LayoutEntity('1', 'Workflow Seed Layout', 10));
 
         $db = self::$injector->getInstance(ExtendedPdoInterface::class);
         assert($db instanceof ExtendedPdoInterface);
@@ -58,11 +58,13 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
             self::$db->rollBack();
         }
 
+        self::$fixtures?->cleanup();
         self::$session?->restore();
 
         self::$db = null;
         self::$dbResource = null;
         self::$injector = null;
+        self::$fixtures = null;
         self::$session = null;
 
         parent::tearDownAfterClass();
