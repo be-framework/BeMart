@@ -1,4 +1,121 @@
-UPDATE dtb_order
-SET customer_id = CASE WHEN JSON_VALUE(CAST(:order AS CHAR), '$.customerId') REGEXP '^[0-9]+$' THEN CAST(JSON_VALUE(CAST(:order AS CHAR), '$.customerId') AS UNSIGNED) ELSE NULL END,
-    payment_id = NULLIF(CAST(JSON_VALUE(CAST(:order AS CHAR), '$.paymentMethodId') AS SIGNED), 0), subtotal = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.subtotal') AS SIGNED), delivery_fee_total = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.deliveryFeeTotal') AS SIGNED), charge = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.charge') AS SIGNED), discount = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.discount') AS SIGNED), tax = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.tax') AS SIGNED), total = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.total') AS SIGNED), payment_total = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.paymentTotal') AS SIGNED), add_point = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.addPoint') AS SIGNED), use_point = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.usePoint') AS SIGNED), order_status_id = CAST(JSON_VALUE(CAST(:order AS CHAR), '$.orderStatus') AS SIGNED), order_date = NULLIF(SUBSTRING(REPLACE(JSON_VALUE(CAST(:order AS CHAR), '$.orderDate'), 'T', ' '), 1, 19), ''), payment_date = NULLIF(SUBSTRING(REPLACE(JSON_VALUE(CAST(:order AS CHAR), '$.paymentDate'), 'T', ' '), 1, 19), ''), update_date = NOW()
-WHERE order_no = JSON_VALUE(CAST(:order AS CHAR), '$.orderNo')
+UPDATE
+  dtb_order
+SET
+  customer_id = CASE WHEN JSON_VALUE(
+    CAST(:order AS CHAR),
+    '$.customerId'
+  ) REGEXP '^[0-9]+$' THEN
+    CAST(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerId'
+      ) AS UNSIGNED
+    )
+  ELSE
+    NULL
+  END,
+  payment_id = NULLIF(
+    CAST(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.paymentMethodId'
+      ) AS SIGNED
+    ),
+    0
+  ),
+  subtotal = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.subtotal'
+    ) AS SIGNED
+  ),
+  delivery_fee_total = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.deliveryFeeTotal'
+    ) AS SIGNED
+  ),
+  charge = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.charge'
+    ) AS SIGNED
+  ),
+  discount = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.discount'
+    ) AS SIGNED
+  ),
+  tax = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.tax'
+    ) AS SIGNED
+  ),
+  total = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.total'
+    ) AS SIGNED
+  ),
+  payment_total = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.paymentTotal'
+    ) AS SIGNED
+  ),
+  add_point = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.addPoint'
+    ) AS SIGNED
+  ),
+  use_point = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.usePoint'
+    ) AS SIGNED
+  ),
+  order_status_id = CAST(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.orderStatus'
+    ) AS SIGNED
+  ),
+  order_date = NULLIF(
+    SUBSTRING(
+      REPLACE(
+        JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.orderDate'
+        ),
+        'T',
+        ' '
+      ),
+      1,
+      19
+    ),
+    ''
+  ),
+  payment_date = NULLIF(
+    SUBSTRING(
+      REPLACE(
+        JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.paymentDate'
+        ),
+        'T',
+        ' '
+      ),
+      1,
+      19
+    ),
+    ''
+  ),
+  update_date = NOW()
+WHERE
+  order_no = JSON_VALUE(
+    CAST(:order AS CHAR),
+    '$.orderNo'
+  )
