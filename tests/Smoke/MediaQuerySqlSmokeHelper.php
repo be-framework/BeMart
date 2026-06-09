@@ -119,6 +119,9 @@ final class MediaQuerySqlSmokeHelper
             $sql .= ';';
         }
 
+        // This splitter is intentionally naive: current var/sql/*.sql smoke files
+        // do not contain semicolons inside string literals, so a SQL parser would
+        // add complexity without improving this prepare-only contract test.
         $statements = explode(';', trim($sql, "\\ \t\n\r\0\x0B"));
         array_pop($statements);
 
@@ -150,7 +153,7 @@ final class MediaQuerySqlSmokeHelper
 
         self::$injector = new Injector(
             new MediaQueryRuntimeModule(),
-            dirname(__DIR__, 2) . '/var/tmp/sql-smoke',
+            dirname(__DIR__, 2) . '/n/sql-smoke',
         );
 
         return self::$injector;
@@ -197,7 +200,10 @@ final class MediaQuerySqlSmokeHelper
 
     private static function valueForUnion(string $name, ReflectionUnionType $type): mixed
     {
-        $names = array_map(static fn (ReflectionNamedType $named): string => $named->getName(), $type->getTypes());
+        $names = array_map(
+            static fn (ReflectionType $unionType): string => $unionType instanceof ReflectionNamedType ? $unionType->getName() : '',
+            $type->getTypes(),
+        );
         if (in_array(DateTimeImmutable::class, $names, true) || in_array(DateTimeInterface::class, $names, true)) {
             return self::dateValue();
         }
@@ -209,7 +215,7 @@ final class MediaQuerySqlSmokeHelper
         }
 
         foreach ($type->getTypes() as $named) {
-            if (! $named->isBuiltin()) {
+            if ($named instanceof ReflectionNamedType && ! $named->isBuiltin()) {
                 return self::objectValue($named->getName());
             }
         }
