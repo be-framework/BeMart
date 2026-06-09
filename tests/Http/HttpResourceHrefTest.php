@@ -10,11 +10,13 @@ use PHPUnit\Framework\TestCase;
 
 final class HttpResourceHrefTest extends TestCase
 {
+    private const HOST = '127.0.0.1:18080';
+
     private HttpResource $resource;
 
     protected function setUp(): void
     {
-        $this->resource = new HttpResource('127.0.0.1:18080', __DIR__ . '/index.php', __DIR__ . '/log/href.log');
+        $this->resource = new HttpResource(self::HOST, __DIR__ . '/index.php', __DIR__ . '/log/href.log');
     }
 
     public function testFollowsHtmlSemanticLinkBeforeLinkHeader(): void
@@ -62,7 +64,7 @@ final class HttpResourceHrefTest extends TestCase
     private function source(string $view, array $headers): HttpResponse
     {
         $source = new HttpResponse();
-        $source->uri = new ResourceUri('http://127.0.0.1:18080/');
+        $source->uri = new ResourceUri('http://' . self::HOST . '/');
         $source->code = Code::OK;
         $source->headers = $headers;
         $source->view = $view;
