@@ -187,7 +187,7 @@
                     <div class="ec-cartRole__actions">
                         <div class="ec-cartRole__total">合計：<span class="ec-cartRole__totalAmount">{{ cart.totalPrice|price }}</span>
                         </div>
-                        <a class="ec-blockBtn--action" href="/shopping">レジに進む</a>
+                        <a class="ec-blockBtn--action goCheckoutEntry" rel="goCheckoutEntry" href="/shopping">レジに進む</a>
                         {% if loop.last %}
                             <a class="ec-blockBtn--cancel" href="/">お買い物を続ける</a>
                         {% endif %}

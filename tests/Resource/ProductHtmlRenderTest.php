@@ -181,6 +181,10 @@ final class ProductHtmlRenderTest extends TestCase
         $this->assertStringContainsString('min="1"', $html);
         // productCode — hidden input seeded with the product code.
         $this->assertStringContainsString('type="hidden" name="productCode" value="sample-001"', $html);
+        // Browser form submit redirects to the cart; Resource/HAL tests
+        // without this field still receive the pure 201 doAddCartItem
+        // response.
+        $this->assertStringContainsString('name="operation" value="add"', $html);
     }
 
     /**
@@ -256,7 +260,10 @@ final class ProductHtmlRenderTest extends TestCase
             // token as a hidden `csrfToken` input (CsrfToken
             // reference). Residual by its `csrfToken` field name.
             'name="csrfToken"',
-            'name="csrfToken"',
+            // Browser form posts use the Resource-level `operation=add`
+            // gateway so successful HTML submits redirect to /cart while
+            // pure Resource/HAL calls keep the 201 doAddCartItem response.
+            'name="operation"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
