@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Auth;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
@@ -107,6 +108,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     public function testHtmlContextAdminLoginStartsTwoFactorChallengeWithoutElevatingSession(): void
     {
         $this->startActiveSession();
+        $sessionIdBeforeLogin = session_id();
         putenv('APP_CONTEXT=html-test-hal-api-app');
 
         $ro = $this->htmlResource()->post('page://self/admin/login', [
@@ -116,6 +118,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
+        $this->assertNotSame($sessionIdBeforeLogin, session_id());
         $this->assertSame('/admin/two-factor-auth', $ro->headers['Location']);
         $this->assertArrayNotHasKey(HtmlAdminSessionAdapter::ADMIN_ID_KEY, $_SESSION);
         $this->assertSame(
@@ -125,6 +128,26 @@ final class HtmlAdminSessionAdapterTest extends TestCase
             ],
             $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY] ?? null,
         );
+    }
+
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testCompletingTwoFactorChallengeRotatesSessionIdBeforeElevation(): void
+    {
+        $this->startActiveSession();
+        $sessionIdBeforeChallenge = session_id();
+        $adapter = new HtmlAdminLoginChallengeAdapter();
+        $challenge = new AdminTwoFactorChallenge(
+            adminId: 'ad000000000000000000000000000001',
+            loginId: 'test-admin',
+        );
+
+        $adapter->startVerification($challenge->adminId, $challenge->loginId);
+        $adapter->completeVerification($challenge);
+
+        $this->assertNotSame($sessionIdBeforeChallenge, session_id());
+        $this->assertSame($challenge->adminId, $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] ?? null);
+        $this->assertArrayNotHasKey(HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY, $_SESSION);
     }
 
     #[RunInSeparateProcess]

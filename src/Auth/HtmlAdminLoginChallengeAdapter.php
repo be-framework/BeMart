@@ -5,6 +5,10 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Auth;
 
 use function is_string;
+use function session_regenerate_id;
+use function session_status;
+
+use const PHP_SESSION_ACTIVE;
 
 /**
  * Session-backed admin login challenge state for the pre-auth 2FA ladder.
@@ -55,6 +59,7 @@ final class HtmlAdminLoginChallengeAdapter
 
     public function completeVerification(AdminTwoFactorChallenge $challenge): void
     {
+        $this->regenerateActiveSessionId();
         $session = &$this->session();
         unset($session[self::VERIFY_CHALLENGE_KEY]);
         $session[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = $challenge->adminId;
@@ -62,9 +67,19 @@ final class HtmlAdminLoginChallengeAdapter
 
     public function completeSetup(AdminTwoFactorChallenge $challenge): void
     {
+        $this->regenerateActiveSessionId();
         $session = &$this->session();
         unset($session[self::SETUP_CHALLENGE_KEY]);
         $session[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = $challenge->adminId;
+    }
+
+    public function regenerateActiveSessionId(): void
+    {
+        if (session_status() !== PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        session_regenerate_id(true);
     }
 
     /** @return array<string, mixed> */
