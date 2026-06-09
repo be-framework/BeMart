@@ -20,6 +20,38 @@ Failure mapping:
 
 
 
+## GET
+Displays the shipping-notification confirmation form.
+
+**ALPS**: `doSendShippingNotifyMail`
+
+
+
+### Request
+
+| Name | Type | Description | Default | Required | Constraints | Example |
+|------|------|-------------|---------|----------|-------------|---------|
+| orderNo | string | 注文番号（入力） - 顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。 |  | Required | {"minLength":0,"maxLength":64,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.","default":""} | past0000000000000000000000000001 |
+
+
+### Response
+
+[Object: GET /admin/order/shipping-notify-mail response](../schemas/get-admin-order-shipping-notify-mail.json)
+
+| Name | Type | Description | Required | Constraints | Example |
+|------|------|-------------|----------|-------------|---------|
+| orderNo | string|null | 出荷通知対象の注文番号 - 出荷通知メールを送信する対象注文の顧客向け注文番号。画面では確認表示とPOST hidden inputに使用する。 | Required | {"minLength":0,"maxLength":64} | past0000000000000000000000000001 |
+| customerId | string|null | 出荷通知対象の会員ID - 対象注文に紐づく会員ID。ゲスト購入または退会済み境界ではnullになり、画面ではゲスト購入として表示する。 | Required | {"minLength":0,"maxLength":128,"pattern":"^[A-Za-z0-9._:@/-]*$","$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002"} | customer-001 |
+| message | string | 出荷通知メール確認メッセージ - 管理者に出荷通知メール送信の確認を促す画面メッセージ。注文時のお問い合わせ本文ではない。 | Required | {"minLength":1,"maxLength":80} | 出荷通知メールを送信します。よろしいですか？ |
+| csrfToken | string|null | 出荷通知メール送信フォームCSRFトークン - POST /admin/order/shipping-notify-mail のhidden inputで送るCSRFトークン。Resource bodyではnullでも、Twigが実フォーム用トークンを補う。 | Required | {"minLength":0,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]*$","$comment":"CSRF\u5024\u306fCsrfProtected\u5883\u754c\u306e\u8cac\u52d9\u3002GET body\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3092\u793a\u3059\u305f\u3081\u306bnull\u3092\u8a31\u5bb9\u3059\u308b\u3002"} |  |
+| submitTo | object | 出荷通知メール送信リンク - 確認画面から出荷通知メール送信Resourceへ遷移するALPS unsafe遷移。 | Required | {"required":["method","href"],"additionalProperties":false,"properties":{"method":{"type":"string","enum":["POST"],"title":"\u9001\u4fe1HTTP\u30e1\u30bd\u30c3\u30c9","description":"\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1\u306f\u526f\u4f5c\u7528\u3092\u6301\u3064\u305f\u3081POST\u306e\u307f\u8a31\u53ef\u3059\u308b\u3002"},"href":{"type":"string","format":"uri-reference","minLength":1,"maxLength":2048,"title":"\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1Resource URI","description":"POST\u5148\u306eBEAR Resource URI\u3002HTML\u3067\u306fcanonical path /admin/order/shipping-notify-mail \u306b\u5bfe\u5fdc\u3059\u308b\u3002","example":"page://self/admin/order/shipping-notify-mail"}}} |  |
+
+#### Links
+
+| Relation | URL |
+|----------|-----|
+| doSendShippingNotifyMail | [<code>page://self/admin/order/shipping-notify-mail</code>](/admin/order/shipping-notify-mail.md) |
+| goOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
 ## POST
 ALPS `doSendShippingNotifyMail` に対応する POST 操作。
 

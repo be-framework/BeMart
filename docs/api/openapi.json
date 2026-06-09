@@ -754,7 +754,7 @@
                         "schema": {
                             "type": "string"
                         },
-                        "description": "\u30ab\u30c6\u30b4\u30eaID\uff08\u5165\u529b\uff09 - dtb_category.id \u306e\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u30cf\u30f3\u30c9\u30eb\u3002BeMart \u306e CategoryEntity \u5c64\u306f\u6570\u5024\u3067\u306f\u306a\u304f\u6587\u5b57\u5217\u3068\u3057\u3066\u4fdd\u6301\u3059\u308b\u3002Fake \u5b9f\u88c5\u306f 32\u6841hex \u3092\u751f\u6210\u3057\u3001SQL \u5b9f\u88c5\u306f dtb_category.id (int unsigned AUTO_INCREMENT) \u3092\u6587\u5b57\u5217\u5316\u3057\u3066\u4f7f\u7528\uff08\u540c\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30a4\u30b9\u30fb\u7570 ID \u5f62\u72b6\uff09\u3002\u975e\u6570\u5024 ID \u306f SqlCategoryStorage \u3067\u306f miss \u3068\u3057\u3066\u6271\u308f\u308c getById / put / remove \u306e\u3044\u305a\u308c\u3082 404 \u7d4c\u8def (CategoryUpdated / CategoryDeleted / CategoryCreated \u306e\u89aa\u89e3\u6c7a) \u3092\u8e0f\u3080\u305f\u3081\u3001\u30b7\u30fc\u30c9\u30cf\u30f3\u30c9\u30eb `nonexistent-zzz` \u306f Fake / SQL \u53cc\u65b9\u3067 404 \u304c\u540c\u5f62\u3002parentId\uff08\u81ea\u5df1\u53c2\u7167 FK parent_category_id\uff09\u3082\u540c\u3058\u6587\u5b57\u5217\u30cf\u30f3\u30c9\u30eb\u3067\u8868\u73fe\u3055\u308c\u3001\u975e\u6570\u5024 parentId \u306f SQL \u3067\u306f NULL\uff08\u30eb\u30fc\u30c8\uff09\u306b\u5012\u308c\u308b\u3002blockId / pageId / tagId \u3068\u540c\u3058 Fake\u2194SQL \u4e8c\u91cd\u6027"
+                        "description": "\u30ab\u30c6\u30b4\u30eaID\uff08\u691c\u7d22\u5165\u529b\uff09 - /products \u306e\u30ab\u30c6\u30b4\u30ea\u7d5e\u308a\u8fbc\u307f\u3067HTML query string\u3068\u3057\u3066\u9001\u3089\u308c\u308b\u30ab\u30c6\u30b4\u30eaID\u3002Resource\u5883\u754c\u3067\u306f\u6587\u5b57\u5217\u3067\u53d7\u3051\u53d6\u308a\u3001\u30ab\u30c6\u30b4\u30ea\u540d\u89e3\u6c7a\u306b\u4f7f\u3046\u3002"
                     },
                     {
                         "name": "pageno",
@@ -4321,25 +4321,13 @@
             "post": {
                 "operationId": "doVerifyTwoFactorAuth",
                 "summary": "Verifies the submitted TOTP code (doVerifyTwoFactorAuth).",
-                "description": "Login-context: no admin-firewall guard (the session is elevated by\nthe adapter only on success). The candidate `loginId` is\nround-tripped from the pre-auth step.\n\nFailure mapping:\n  - Invalid CSRF                  \u2192 403 (interceptor)\n  - SemanticVariableException     \u2192 400 (malformed code)\n  - TwoFactorAuthFailedException  \u2192 400 (code mismatch)",
+                "description": "Login-context: no admin-firewall guard. The trusted `loginId` is\nread from the password-verified session challenge and the admin\nsession is elevated only after the token succeeds. Legacy\nclient-supplied `loginId` is ignored.\n\nFailure mapping:\n  - Invalid CSRF                  \u2192 403 (interceptor)\n  - Missing pending challenge     \u2192 403\n  - SemanticVariableException     \u2192 400 (malformed code)\n  - TwoFactorAuthFailedException  \u2192 400 (code mismatch)",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
-                                    "loginId": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "title": "\u30ed\u30b0\u30a4\u30f3ID\uff08\u5165\u529b\uff09",
-                                        "description": "\u7ba1\u7406\u753b\u9762\u30ed\u30b0\u30a4\u30f3\u7528\u306eID\u3002\u4e00\u610f Fake\u89b3\u5bdf\u6587\u5b57\u9577 6\u301c13; \u89b3\u5bdf\u5024 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'\u3002",
-                                        "example": "test-admin",
-                                        "minLength": 0,
-                                        "maxLength": 128,
-                                        "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
-                                    },
                                     "deviceToken": {
                                         "type": [
                                             "string",
@@ -4350,10 +4338,21 @@
                                         "title": "\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30c7\u30d0\u30a4\u30b9\u30c8\u30fc\u30af\u30f3\uff08\u5165\u529b\uff09",
                                         "description": "/admin/two-factor-auth \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u6271\u3046\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30c7\u30d0\u30a4\u30b9\u30c8\u30fc\u30af\u30f3\u3002\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u304f\u3001\u7167\u5408\u30fbURL\u30fb\u914d\u9001\u8ffd\u8de1\u306a\u3069\u306b\u4f7f\u3046\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u8b58\u5225\u5b50\u3002",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "loginId": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "title": "\u30ed\u30b0\u30a4\u30f3ID\uff08\u5165\u529b\uff09",
+                                        "description": "\u7ba1\u7406\u753b\u9762\u30ed\u30b0\u30a4\u30f3\u7528\u306eID\u3002\u4e00\u610f Fake\u89b3\u5bdf\u6587\u5b57\u9577 6\u301c13; \u89b3\u5bdf\u5024 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'\u3002 \u3053\u306e\u5024\u306f2FA\u30ed\u30b0\u30a4\u30f3\u30c1\u30e3\u30ec\u30f3\u30b8\u3067\u306f\u4e92\u63db\u5165\u529b\u3068\u3057\u3066\u306e\u307f\u53d7\u3051\u53d6\u308a\u3001\u4fe1\u983c\u3057\u306a\u3044\u3002",
+                                        "example": "test-admin",
+                                        "minLength": 0,
+                                        "maxLength": 128,
+                                        "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                     }
                                 },
                                 "required": [
-                                    "loginId",
                                     "deviceToken"
                                 ]
                             }
@@ -4417,20 +4416,31 @@
             "put": {
                 "operationId": "doSetTwoFactorAuth",
                 "summary": "Registers the TOTP device after confirming the first code\n(doSetTwoFactorAuth). ALPS marks this `idempotent` \u2192 PUT.",
-                "description": "SECURITY RESIDUAL (tracked \u2014 migration-status \u00a74 \"Outstanding work\"\nitem 8, the Hard-ActionRedirect / \u8a8d\u8a3c cutover residual): this page is\nreached PRE-AUTH (anonymous, login-context), so `$loginId` and the\ncandidate `$authKey` secret are taken from the request body rather than\na server-side pre-auth challenge. `enable()` overwrites the secret for\n`$loginId` with no ownership check\n({@see \\MyVendor\\BeMart\\Be\\Reason\\Service\\TwoFactorAuthInterface::enable}),\nso a caller who passes another admin's `$loginId` could replace that\nadmin's 2FA device. The production cutover binds a server-generated\nsecret + the pending login identity into a pre-auth session/challenge\nstate at credential-verification time and consumes it here; until then\nthe route relies on CSRF + the documented contract. Do NOT widen this\nsurface (e.g. expose it post-auth for arbitrary `$loginId`) before the\nchallenge state lands.\n\nFailure mapping:\n  - Invalid CSRF                  \u2192 403 (interceptor)\n  - SemanticVariableException     \u2192 400 (malformed code)\n  - TwoFactorAuthFailedException  \u2192 400 (first code mismatch)",
+                "description": "The pending login identity and server-generated candidate secret are\nread from {@see \\HtmlAdminLoginChallengeAdapter}. Legacy client fields\n(`loginId`, `authKey`) may still arrive from old forms/tests, but are\ndeliberately ignored and never forwarded to the Be transition.\n\nFailure mapping:\n  - Invalid CSRF                  \u2192 403 (interceptor)\n  - Missing pending setup         \u2192 403\n  - SemanticVariableException     \u2192 400 (malformed code)\n  - TwoFactorAuthFailedException  \u2192 400 (first code mismatch)",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
                                 "type": "object",
                                 "properties": {
+                                    "deviceToken": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 128,
+                                        "title": "\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30c7\u30d0\u30a4\u30b9\u30c8\u30fc\u30af\u30f3\uff08\u5165\u529b\uff09",
+                                        "description": "/admin/two-factor-auth-set \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u6271\u3046\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30c7\u30d0\u30a4\u30b9\u30c8\u30fc\u30af\u30f3\u3002\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u304f\u3001\u7167\u5408\u30fbURL\u30fb\u914d\u9001\u8ffd\u8de1\u306a\u3069\u306b\u4f7f\u3046\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u8b58\u5225\u5b50\u3002",
+                                        "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
                                     "loginId": {
                                         "type": [
                                             "string",
                                             "null"
                                         ],
                                         "title": "\u30ed\u30b0\u30a4\u30f3ID\uff08\u5165\u529b\uff09",
-                                        "description": "\u7ba1\u7406\u753b\u9762\u30ed\u30b0\u30a4\u30f3\u7528\u306eID\u3002\u4e00\u610f Fake\u89b3\u5bdf\u6587\u5b57\u9577 6\u301c13; \u89b3\u5bdf\u5024 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'\u3002",
+                                        "description": "\u7ba1\u7406\u753b\u9762\u30ed\u30b0\u30a4\u30f3\u7528\u306eID\u3002\u4e00\u610f Fake\u89b3\u5bdf\u6587\u5b57\u9577 6\u301c13; \u89b3\u5bdf\u5024 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'\u3002 \u3053\u306e\u5024\u306f2FA\u30ed\u30b0\u30a4\u30f3\u30c1\u30e3\u30ec\u30f3\u30b8\u3067\u306f\u4e92\u63db\u5165\u529b\u3068\u3057\u3066\u306e\u307f\u53d7\u3051\u53d6\u308a\u3001\u4fe1\u983c\u3057\u306a\u3044\u3002",
                                         "example": "test-admin",
                                         "minLength": 0,
                                         "maxLength": 128,
@@ -4444,24 +4454,11 @@
                                         "minLength": 0,
                                         "maxLength": 128,
                                         "title": "\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30ad\u30fc\uff08\u5165\u529b\uff09",
-                                        "description": "/admin/two-factor-auth-set \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u6271\u3046\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30ad\u30fc\u3002\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u304f\u3001\u7167\u5408\u30fbURL\u30fb\u914d\u9001\u8ffd\u8de1\u306a\u3069\u306b\u4f7f\u3046\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u8b58\u5225\u5b50\u3002",
+                                        "description": "/admin/two-factor-auth-set \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u6271\u3046\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30ad\u30fc\u3002\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u304f\u3001\u7167\u5408\u30fbURL\u30fb\u914d\u9001\u8ffd\u8de1\u306a\u3069\u306b\u4f7f\u3046\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u8b58\u5225\u5b50\u3002 \u3053\u306e\u5024\u306f2FA\u8a2d\u5b9a\u3067\u306f\u4e92\u63db\u5165\u529b\u3068\u3057\u3066\u306e\u307f\u53d7\u3051\u53d6\u308a\u3001\u4fe1\u983c\u3057\u306a\u3044\u3002",
                                         "$comment": "\u30ad\u30fc/\u8ffd\u8de1\u756a\u53f7\u306f\u7167\u5408\u7528\u306e\u4e0d\u900f\u660e\u6587\u5b57\u5217\u3067\u3001\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
-                                    },
-                                    "deviceToken": {
-                                        "type": [
-                                            "string",
-                                            "null"
-                                        ],
-                                        "minLength": 0,
-                                        "maxLength": 128,
-                                        "title": "\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30c7\u30d0\u30a4\u30b9\u30c8\u30fc\u30af\u30f3\uff08\u5165\u529b\uff09",
-                                        "description": "/admin/two-factor-auth-set \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u6271\u3046\u4e8c\u8981\u7d20\u8a8d\u8a3c\u30c7\u30d0\u30a4\u30b9\u30c8\u30fc\u30af\u30f3\u3002\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u304f\u3001\u7167\u5408\u30fbURL\u30fb\u914d\u9001\u8ffd\u8de1\u306a\u3069\u306b\u4f7f\u3046\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u8b58\u5225\u5b50\u3002",
-                                        "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                     }
                                 },
                                 "required": [
-                                    "loginId",
-                                    "authKey",
                                     "deviceToken"
                                 ]
                             }
@@ -6029,6 +6026,68 @@
                         "example": "2"
                     }
                 ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GET/shopping/confirmResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            },
+            "post": {
+                "operationId": "goShopping",
+                "summary": "HTML checkout form posts the selected payment field as `payment`.",
+                "description": "Keep GET query compatibility while accepting the real browser form.",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "preOrderId": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "title": "\u4eee\u6ce8\u6587ID\uff08\u5165\u529b\uff09",
+                                        "description": "\u8cfc\u5165\u30d5\u30ed\u30fc\u306e\u4e00\u6642\u30bb\u30c3\u30b7\u30e7\u30f3\u30c8\u30fc\u30af\u30f3\uff08SHA1\u30cf\u30c3\u30b7\u30e5\uff09\u3002\u30ab\u30fc\u30c8\u3068\u53d7\u6ce8\u3092\u7d10\u3065\u3051\u308b\u3002\u4e88\u7d04\u6ce8\u6587\uff08pre-order\uff09ID\u3067\u306f\u306a\u3044\u3002\u30c1\u30a7\u30c3\u30af\u30a2\u30a6\u30c8\u958b\u59cb\u6642\u306b\u751f\u6210\u3001\u6ce8\u6587\u78ba\u5b9a\u307e\u305f\u306f\u30ab\u30fc\u30c8\u7834\u68c4\u3067\u6d88\u53bb Fake\u89b3\u5bdf\u6587\u5b57\u9577 40\u301c40; \u89b3\u5bdf\u5024 'deadbeefcafe1234567890abcdef01234567890a', 'deadbeefcafe1234567890abcdef01234567890b', 'aaaa00000000000000000000000000000000aaaa', 'past00000000000000000000000000000000past', 'deadbeefcafe1234567890abcdef01234567890c', 'bbbb00000000000000000000000000000000bbbb', 'cccc00000000000000000000000000000000cccc', 'aceface0000000000000000000000000000a11ce'\u3002",
+                                        "default": "aceface0000000000000000000000000000a11ce",
+                                        "example": "deadbeefcafe1234567890abcdef01234567890a",
+                                        "minLength": 0,
+                                        "maxLength": 128,
+                                        "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "payment": {
+                                        "type": [
+                                            "string",
+                                            "integer",
+                                            "null"
+                                        ],
+                                        "title": "\u652f\u6255\u65b9\u6cd5ID\uff08\u78ba\u8a8d\u30d5\u30a9\u30fc\u30e0\u5165\u529b\uff09",
+                                        "description": "/shopping \u306e\u78ba\u8a8d\u30d5\u30a9\u30fc\u30e0\u3067\u9078\u629e\u3055\u308c\u305f\u652f\u6255\u65b9\u6cd5ID\u3002HTML form\u3067\u306f `payment` \u540d\u3067\u9001\u4fe1\u3055\u308c\u3001Resource\u3067 ConfirmOrderInput.paymentMethodId \u306b\u6e21\u3059\u3002",
+                                        "default": 2,
+                                        "example": 2,
+                                        "minLength": 0,
+                                        "maxLength": 128,
+                                        "$comment": "\u652f\u6255\u65b9\u6cd5ID\u306f\u696d\u52d9\u4e0aID\u3060\u304c\u3001HTTP\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u3002Resource/Semantic\u5c64\u306e\u691c\u8a3c\u3092\u901a\u3059\u305f\u3081transport schema\u3067\u306fstring|integer\u3092\u8a31\u5bb9\u3059\u308b\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    }
+                                },
+                                "required": [
+                                    "preOrderId"
+                                ]
+                            }
+                        }
+                    },
+                    "required": true
+                },
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -9358,6 +9417,37 @@
             }
         },
         "/admin/order/shipping-notify-mail": {
+            "get": {
+                "operationId": "doSendShippingNotifyMail",
+                "summary": "Displays the shipping-notification confirmation form.",
+                "parameters": [
+                    {
+                        "name": "orderNo",
+                        "in": "query",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "\u6ce8\u6587\u756a\u53f7\uff08\u5165\u529b\uff09 - \u9867\u5ba2\u5411\u3051\u306e\u6ce8\u6587\u756a\u53f7\u3002\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u306f\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u53ef\u80fd Fake\u89b3\u5bdf\u6587\u5b57\u9577 32\u301c32; \u89b3\u5bdf\u5024 'past0000000000000000000000000001'\u3002",
+                        "example": "past0000000000000000000000000001"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/GET/admin/order/shipping-notify-mailResponse"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                }
+            },
             "post": {
                 "operationId": "doSendShippingNotifyMail",
                 "summary": "ALPS `doSendShippingNotifyMail` \u306b\u5bfe\u5fdc\u3059\u308b POST \u64cd\u4f5c\u3002",
@@ -15704,13 +15794,15 @@
                             },
                             "category_id": {
                                 "type": [
-                                    "integer",
+                                    "string",
                                     "null"
                                 ],
-                                "minimum": 0,
-                                "maximum": 2147483647,
-                                "title": "\u30ab\u30c6\u30b4\u30eaID",
-                                "description": "dtb_category.id \u306e\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u30cf\u30f3\u30c9\u30eb\u3002BeMart \u306e CategoryEntity \u5c64\u306f\u6570\u5024\u3067\u306f\u306a\u304f\u6587\u5b57\u5217\u3068\u3057\u3066\u4fdd\u6301\u3059\u308b\u3002Fake \u5b9f\u88c5\u306f 32\u6841hex \u3092\u751f\u6210\u3057\u3001SQL \u5b9f\u88c5\u306f dtb_category.id (int unsigned AUTO_INCREMENT) \u3092\u6587\u5b57\u5217\u5316\u3057\u3066\u4f7f\u7528\uff08\u540c\u30a4\u30f3\u30bf\u30fc\u30d5\u30a7\u30a4\u30b9\u30fb\u7570 ID \u5f62\u72b6\uff09\u3002\u975e\u6570\u5024 ID \u306f SqlCategoryStorage \u3067\u306f miss \u3068\u3057\u3066\u6271\u308f\u308c getById / put / remove \u306e\u3044\u305a\u308c\u3082 404 \u7d4c\u8def (CategoryUpdated / CategoryDeleted / CategoryCreated \u306e\u89aa\u89e3\u6c7a) \u3092\u8e0f\u3080\u305f\u3081\u3001\u30b7\u30fc\u30c9\u30cf\u30f3\u30c9\u30eb `nonexistent-zzz` \u306f Fake / SQL \u53cc\u65b9\u3067 404 \u304c\u540c\u5f62\u3002parentId\uff08\u81ea\u5df1\u53c2\u7167 FK parent_category_id\uff09\u3082\u540c\u3058\u6587\u5b57\u5217\u30cf\u30f3\u30c9\u30eb\u3067\u8868\u73fe\u3055\u308c\u3001\u975e\u6570\u5024 parentId \u306f SQL \u3067\u306f NULL\uff08\u30eb\u30fc\u30c8\uff09\u306b\u5012\u308c\u308b\u3002blockId / pageId / tagId \u3068\u540c\u3058 Fake\u2194SQL \u4e8c\u91cd\u6027"
+                                "pattern": "^[0-9]+$",
+                                "minLength": 1,
+                                "maxLength": 10,
+                                "title": "\u9078\u629e\u4e2d\u30ab\u30c6\u30b4\u30eaID",
+                                "description": "/products \u306e\u691c\u7d22\u30d5\u30a9\u30fc\u30e0\u306b\u518d\u8868\u793a\u3059\u308b\u9078\u629e\u4e2d\u30ab\u30c6\u30b4\u30eaID\u3002HTTP query\u7531\u6765\u306e\u6587\u5b57\u5217\u5024\u3067\u3001\u30ab\u30c6\u30b4\u30ea\u7d5e\u308a\u8fbc\u307f\u6761\u4ef6\u3092\u4fdd\u6301\u3059\u308b\u3002",
+                                "$comment": "Response\u306efilters\u306f\u5165\u529b\u518d\u8868\u793a\u7528\u306etransport\u5024\u306a\u306e\u3067\u3001DB ID\u3068\u3057\u3066\u306einteger\u3067\u306f\u306a\u304fHTML query\u3068\u540c\u3058string|null\u3067\u8868\u3059\u3002"
                             }
                         },
                         "additionalProperties": false,
@@ -15734,23 +15826,23 @@
                         "properties": {
                             "previous": {
                                 "type": [
-                                    "string",
+                                    "integer",
                                     "null"
                                 ],
-                                "minLength": 0,
-                                "maxLength": 255,
-                                "title": "\u524d\u30da\u30fc\u30b8\u30ea\u30f3\u30af",
-                                "description": "/products \u306e\u4e00\u89a7\u8868\u793a\u3092\u5236\u5fa1\u3059\u308b\u30da\u30fc\u30b8\u30f3\u30b0/\u691c\u7d22\u6761\u4ef6\u3002\u4ef6\u6570\u3001\u958b\u59cb\u4f4d\u7f6e\u3001\u4e26\u3073\u9806\u3001\u524d\u5f8c\u30ea\u30f3\u30af\u3092\u30af\u30e9\u30a4\u30a2\u30f3\u30c8\u304c\u518d\u73fe\u3059\u308b\u305f\u3081\u306e\u5024\u3002"
+                                "minimum": 1,
+                                "maximum": 10000,
+                                "title": "\u524d\u30da\u30fc\u30b8\u756a\u53f7",
+                                "description": "/products \u306e\u30da\u30fc\u30b8\u30e3\u3067\u3001\u73fe\u5728\u30da\u30fc\u30b8\u306e\u76f4\u524d\u306b\u9077\u79fb\u3059\u308b\u30da\u30fc\u30b8\u756a\u53f7\u3002\u5148\u982d\u30da\u30fc\u30b8\u3067\u306f null\u3002"
                             },
                             "next": {
                                 "type": [
-                                    "string",
+                                    "integer",
                                     "null"
                                 ],
-                                "minLength": 0,
-                                "maxLength": 255,
-                                "title": "\u6b21\u30da\u30fc\u30b8\u30ea\u30f3\u30af",
-                                "description": "/products \u306e\u4e00\u89a7\u8868\u793a\u3092\u5236\u5fa1\u3059\u308b\u30da\u30fc\u30b8\u30f3\u30b0/\u691c\u7d22\u6761\u4ef6\u3002\u4ef6\u6570\u3001\u958b\u59cb\u4f4d\u7f6e\u3001\u4e26\u3073\u9806\u3001\u524d\u5f8c\u30ea\u30f3\u30af\u3092\u30af\u30e9\u30a4\u30a2\u30f3\u30c8\u304c\u518d\u73fe\u3059\u308b\u305f\u3081\u306e\u5024\u3002"
+                                "minimum": 1,
+                                "maximum": 10000,
+                                "title": "\u6b21\u30da\u30fc\u30b8\u756a\u53f7",
+                                "description": "/products \u306e\u30da\u30fc\u30b8\u30e3\u3067\u3001\u73fe\u5728\u30da\u30fc\u30b8\u306e\u76f4\u5f8c\u306b\u9077\u79fb\u3059\u308b\u30da\u30fc\u30b8\u756a\u53f7\u3002\u6700\u7d42\u30da\u30fc\u30b8\u3067\u306f null\u3002"
                             },
                             "pages": {
                                 "type": [
@@ -17016,6 +17108,19 @@
                                     "minimum": 0,
                                     "maximum": 999999999,
                                     "example": 600
+                                },
+                                "preOrderId": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "title": "\u4eee\u6ce8\u6587ID",
+                                    "description": "\u8cfc\u5165\u30d5\u30ed\u30fc\u306e\u4e00\u6642\u30bb\u30c3\u30b7\u30e7\u30f3\u30c8\u30fc\u30af\u30f3\u3002\u30ab\u30fc\u30c8\u3068\u6ce8\u6587\u78ba\u8a8d/\u6ce8\u6587\u78ba\u5b9a\u3092\u63a5\u7d9a\u3059\u308b40\u6587\u5b57\u306e\u5c0f\u6587\u5b5716\u9032ID\u3002HTML\u78ba\u8a8d\u30d5\u30a9\u30fc\u30e0\u3067\u306fhidden input\u3068\u3057\u3066\u9001\u4fe1\u3055\u308c\u308b\u3002",
+                                    "minLength": 0,
+                                    "maxLength": 128,
+                                    "pattern": "^[0-9a-f]*$",
+                                    "example": "deadbeefcafe1234567890abcdef01234567890a",
+                                    "$comment": "\u5b9fDB\u3067\u306f\u30ab\u30fc\u30c8\u4f5c\u6210\u6642\u306b\u751f\u6210\u3055\u308c\u3001/shopping \u2192 /shopping/confirm \u2192 /shopping/checkout \u306e\u5883\u754c\u5951\u7d04\u3068\u3057\u3066\u4f7f\u3046\u3002"
                                 }
                             },
                             "additionalProperties": false,
@@ -17143,6 +17248,29 @@
                         "required": [
                             "addr01"
                         ]
+                    },
+                    "preOrderId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "title": "\u4eee\u6ce8\u6587ID",
+                        "description": "\u8cfc\u5165\u30d5\u30ed\u30fc\u306e\u4e00\u6642\u30bb\u30c3\u30b7\u30e7\u30f3\u30c8\u30fc\u30af\u30f3\u3002\u30ab\u30fc\u30c8\u3068\u6ce8\u6587\u78ba\u8a8d/\u6ce8\u6587\u78ba\u5b9a\u3092\u63a5\u7d9a\u3059\u308b40\u6587\u5b57\u306e\u5c0f\u6587\u5b5716\u9032ID\u3002HTML\u78ba\u8a8d\u30d5\u30a9\u30fc\u30e0\u3067\u306fhidden input\u3068\u3057\u3066\u9001\u4fe1\u3055\u308c\u308b\u3002",
+                        "minLength": 0,
+                        "maxLength": 128,
+                        "pattern": "^[0-9a-f]*$",
+                        "example": "deadbeefcafe1234567890abcdef01234567890a",
+                        "$comment": "\u5b9fDB\u3067\u306f\u30ab\u30fc\u30c8\u4f5c\u6210\u6642\u306b\u751f\u6210\u3055\u308c\u3001/shopping \u2192 /shopping/confirm \u2192 /shopping/checkout \u306e\u5883\u754c\u5951\u7d04\u3068\u3057\u3066\u4f7f\u3046\u3002"
+                    },
+                    "csrfToken": {
+                        "title": "\u8cfc\u5165\u78ba\u8a8dCSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "/shopping \u3067\u8868\u793a\u3059\u308b\u8cfc\u5165\u78ba\u8a8d\u30d5\u30a9\u30fc\u30e0\u306e\u9001\u4fe1\u5143\u691c\u8a3c\u30c8\u30fc\u30af\u30f3\u3002/shopping/confirm \u3078\u9032\u3080POST\u3067 hidden input \u3068\u3057\u3066\u9001\u4fe1\u3055\u308c\u3001CsrfProtected \u306b\u3088\u308a\u30bb\u30c3\u30b7\u30e7\u30f3\u4e0a\u306e\u4fe1\u983c\u6e08\u307f\u30c8\u30fc\u30af\u30f3\u3068\u7167\u5408\u3055\u308c\u308b\u3002\u5b9fHTTP\u3067\u306f64\u6841hex\u3001test/fake\u6587\u8108\u3067\u306f deterministic token \u3092\u4f7f\u3046\u3002",
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]+$",
+                        "example": "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                        "$comment": "\u5b9fHTTP\u3067\u306fEccubeSharedCsrfTokenAdapter/BeMartTwigExtension\u304cPHP\u30bb\u30c3\u30b7\u30e7\u30f3\u306b\u4fdd\u5b58\u3057\u305f64\u6841hex\u3092\u8fd4\u3059\u3002test/fake context\u3067\u306fFakeCsrfToken::TOKEN\u3092\u8fd4\u3059\u305f\u3081\u3001schema\u306fCSRF\u5024\u306e\u6587\u5b57\u7a2e\u30fb\u6700\u5c0f\u9577\u306e\u307f\u5951\u7d04\u3057\u3001\u771f\u6b63\u6027\u306fCsrfProtected\u3067\u691c\u8a3c\u3059\u308b\u3002"
                     }
                 },
                 "additionalProperties": false,
@@ -17375,7 +17503,8 @@
                     "carts",
                     "email",
                     "paymentMethods",
-                    "defaultShippingAddress"
+                    "defaultShippingAddress",
+                    "csrfToken"
                 ]
             },
             "GET/unsupported-routeResponse": {
@@ -27337,7 +27466,7 @@
             },
             "PUT/admin/master-dataResponse": {
                 "title": "PUT /admin/master-data response",
-                "description": "PUT /admin/master-data response \u306e response body schema\u3002ALPS\u306e\u610f\u5473\u3001be/var/fake\u306e\u89b3\u5bdf\u5024\u3001Resource\u5883\u754c\u306e\u5b9f\u5f62\u72b6\u304b\u3089\u5c0e\u3044\u305fSemantic-Ex\u5236\u7d04\u3002",
+                "description": "PUT /admin/master-data response \u306e response body schema\u3002\u30de\u30b9\u30bf\u7a2e\u5225\u9078\u629e\u5f8c\u3082\u540c\u4e00HTML\u753b\u9762\u3092\u518d\u63cf\u753b\u3067\u304d\u308b\u3088\u3046\u3001\u9078\u629e\u7d50\u679c\u3060\u3051\u3067\u306a\u304f\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u30fb\u30de\u30b9\u30bf\u7a2e\u5225\u4e00\u89a7\u30fb\u9078\u629e\u4e2d\u30de\u30b9\u30bf\u30fb\u884c\u30c7\u30fc\u30bf\u3092\u8fd4\u3059\u3002",
                 "type": "object",
                 "properties": {
                     "message": {
@@ -27351,6 +27480,66 @@
                         "description": "/admin/master-data \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308b\u51e6\u7406\u7d50\u679c\u30e1\u30c3\u30bb\u30fc\u30b8\u3002\u6ce8\u6587\u6642\u304a\u554f\u3044\u5408\u308f\u305b\u6b04\u3067\u306f\u306a\u304f\u3001\u753b\u9762\u9077\u79fb\u3084\u5b8c\u4e86\u8868\u793a\u306e\u305f\u3081\u306e\u901a\u77e5\u6587\u3002",
                         "example": "\u914d\u9001\u306f\u5e73\u65e5\u5e0c\u671b\u3067\u3059\u3002"
                     },
+                    "form": {
+                        "type": [
+                            "object",
+                            "array",
+                            "null"
+                        ],
+                        "title": "\u5165\u529b\u30d5\u30a9\u30fc\u30e0",
+                        "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
+                        "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "masterTypes": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "title": "\u30de\u30b9\u30bf\u7a2e\u5225\u4e00\u89a7",
+                        "description": "/admin/master-data \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u6271\u3046\u30de\u30b9\u30bf\u7a2e\u5225\u4e00\u89a7\u3002\u914d\u5217\u8981\u7d20\u306fALPS\u610f\u5473\u3068Fake\u89b3\u5bdf\u306b\u57fa\u3065\u304d\u3001\u56fa\u5b9a\u3067\u304d\u306a\u3044\u52d5\u7684\u5217\u306f\u4f8b\u5916\u7406\u7531\u3092\u53f0\u5e33\u5316\u3059\u308b\u3002",
+                        "items": {
+                            "type": [
+                                "object",
+                                "null"
+                            ],
+                            "title": "\u30de\u30b9\u30bf\u7a2e\u5225",
+                            "description": "/admin/master-data \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308b\u30de\u30b9\u30bf\u7a2e\u5225\u3002\u89aa\u30b3\u30ec\u30af\u30b7\u30e7\u30f3 `masterTypes` \u306e1\u884c\u3092\u8868\u3057\u3001\u56fa\u5b9a\u3067\u304d\u308b\u696d\u52d9\u5217\u306fschema property\u3067\u660e\u793a\u3059\u308b\u3002",
+                            "properties": {
+                                "table": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "minLength": 0,
+                                    "maxLength": 255,
+                                    "title": "\u30de\u30b9\u30bf\u30c6\u30fc\u30d6\u30eb",
+                                    "description": "/admin/master-data \u306e\u753b\u9762\u8868\u793a\u306b\u4f7f\u3046\u30de\u30b9\u30bf\u30c6\u30fc\u30d6\u30eb\u3002\u696d\u52d9\u30a8\u30f3\u30c6\u30a3\u30c6\u30a3\u305d\u306e\u3082\u306e\u3067\u306f\u306a\u304f\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8/\u4e00\u89a7\u8868\u793a\u306e\u88dc\u52a9\u5024\u3002"
+                                },
+                                "label": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "minLength": 0,
+                                    "maxLength": 255,
+                                    "title": "\u8868\u793a\u30e9\u30d9\u30eb",
+                                    "description": "/admin/master-data \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u8868\u793a\u307e\u305f\u306f\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u63cf\u753b\u306b\u4f7f\u3046\u8868\u793a\u30e9\u30d9\u30eb\u3002\u540c\u540dproperty\u3067\u3082\u89aa\u6587\u8108 `root` \u306b\u3088\u3063\u3066\u610f\u5473\u3092\u5206\u3051\u308b\u3002"
+                                },
+                                "value": {
+                                    "type": [
+                                        "string",
+                                        "null"
+                                    ],
+                                    "minLength": 0,
+                                    "maxLength": 255,
+                                    "title": "\u30de\u30b9\u30bf\u5024",
+                                    "description": "/admin/master-data \u306e\u30de\u30b9\u30bf\u7a2e\u5225\u307e\u305f\u306f\u30de\u30b9\u30bf\u884c\u306b\u8868\u793a\u3055\u308c\u308b\u5024\u3002\u9078\u629e\u80a2\u306e\u8868\u793a/\u4fdd\u5b58\u5358\u4f4d\u3068\u3057\u3066\u6271\u3046\u3002"
+                                }
+                            },
+                            "$comment": "\u914d\u5217\u8981\u7d20\u306f\u30de\u30b9\u30bf/CSV/option map\u306e\u52d5\u7684\u884c\u3067\u3042\u308a\u3001\u5217\u96c6\u5408\u304c\u5bfe\u8c61\u7a2e\u5225\u306b\u3088\u308a\u5909\u308f\u308b\u305f\u3081\u56fa\u5b9ashape\u5316\u3057\u306a\u3044\u3002\u65e2\u77e5property\u306f\u5951\u7d04\u3057\u3001\u8ffd\u52a0\u5217\u306f\u8a72\u5f53\u30b5\u30fc\u30d3\u30b9\u5883\u754c\u3067\u6271\u3046\u3002"
+                        },
+                        "minItems": 0
+                    },
                     "transitionId": {
                         "title": "ALPS\u9077\u79fbID",
                         "description": "\u3053\u306e\u30ec\u30b9\u30dd\u30f3\u30b9/\u64cd\u4f5c\u304c\u5bfe\u5fdc\u3059\u308bALPS\u9077\u79fbID\u3002\u30af\u30e9\u30a4\u30a2\u30f3\u30c8\u306e\u72b6\u614b\u9077\u79fb\u8ffd\u8de1\u306b\u4f7f\u3046\u3002",
@@ -27361,18 +27550,27 @@
                         "example": "doAddCartItem"
                     },
                     "selectedMaster": {
-                        "type": "string",
-                        "minLength": 1,
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
                         "maxLength": 255,
                         "title": "\u9078\u629e\u4e2d\u30de\u30b9\u30bf",
                         "description": "/admin/master-data \u306e\u51e6\u7406\u6587\u8108\u304b\u3089\u6d3e\u751f\u3057\u305f\u9078\u629e\u4e2d\u30de\u30b9\u30bf\u3002ALPS\u57fa\u790e\u8a9e\u3060\u3051\u3067\u306f\u5358\u4f4d\u3084\u7528\u9014\u304c\u4e0d\u8db3\u3059\u308b\u305f\u3081\u3001\u3053\u306eResource\u4e0a\u306e\u610f\u5473\u3092\u660e\u793a\u3059\u308b\u3002"
                     },
                     "rows": {
-                        "type": "array",
+                        "type": [
+                            "array",
+                            "null"
+                        ],
                         "title": "\u884c\u30c7\u30fc\u30bf",
                         "description": "/admin/master-data \u306e\u30de\u30b9\u30bf/CSV\u884c\u30c7\u30fc\u30bf\u3002\u5217\u96c6\u5408\u306f\u5bfe\u8c61\u30de\u30b9\u30bf\u306b\u3088\u308a\u5909\u308f\u308b\u305f\u3081\u3001\u65e2\u77e5\u5217\u3092\u512a\u5148\u3057\u3066\u5951\u7d04\u3059\u308b\u3002",
                         "items": {
-                            "type": "object",
+                            "type": [
+                                "object",
+                                "null"
+                            ],
                             "title": "\u884c",
                             "description": "/admin/master-data \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308b\u884c\u3002\u89aa\u30b3\u30ec\u30af\u30b7\u30e7\u30f3 `rows` \u306e1\u884c\u3092\u8868\u3057\u3001\u56fa\u5b9a\u3067\u304d\u308b\u696d\u52d9\u5217\u306fschema property\u3067\u660e\u793a\u3059\u308b\u3002",
                             "properties": {
@@ -27387,35 +27585,18 @@
                                     "description": "Fake\u89b3\u5bdf\u6587\u5b57\u9577 1\u301c7; \u89b3\u5bdf\u5024 '\u30c6\u30b9\u30c8\u7ba1\u7406\u8005', '\u526f\u7ba1\u7406\u8005', '\u5e97\u8217\u30aa\u30fc\u30ca\u30fc', '\u524a\u9664\u6e08\u307f\u7ba1\u7406\u8005', 'Red', 'Blue', 'S', 'Color'\u3002",
                                     "example": "\u30c6\u30b9\u30c8\u7ba1\u7406\u8005"
                                 },
-                                "value": {
+                                "id": {
                                     "type": [
                                         "string",
-                                        "null"
-                                    ],
-                                    "minLength": 0,
-                                    "maxLength": 255,
-                                    "title": "\u30de\u30b9\u30bf\u5024",
-                                    "description": "/admin/master-data \u306e\u30de\u30b9\u30bf\u7a2e\u5225\u307e\u305f\u306f\u30de\u30b9\u30bf\u884c\u306b\u8868\u793a\u3055\u308c\u308b\u5024\u3002\u9078\u629e\u80a2\u306e\u8868\u793a/\u4fdd\u5b58\u5358\u4f4d\u3068\u3057\u3066\u6271\u3046\u3002"
-                                },
-                                "sortNo": {
-                                    "type": [
                                         "integer",
                                         "null"
                                     ],
-                                    "minimum": 0,
-                                    "maximum": 2147483647,
-                                    "title": "\u8868\u793a\u9806",
-                                    "description": "\u4e00\u89a7\u306b\u304a\u3051\u308b\u4e26\u3073\u9806 Fake\u89b3\u5bdf\u6570\u5024 1\u301c20; \u89b3\u5bdf\u5024 '1', '3', '2', '4', '10', '20'\u3002",
-                                    "example": 1
-                                },
-                                "enabled": {
-                                    "type": [
-                                        "boolean",
-                                        "null"
-                                    ],
-                                    "title": "\u51e6\u7406\u72b6\u614b\u30d5\u30e9\u30b0",
-                                    "description": "\u89b3\u5bdf\u5024 'true', 'false'\u3002",
-                                    "example": "true"
+                                    "title": "ID",
+                                    "description": "Fake\u89b3\u5bdf\u6587\u5b57\u9577 13\u301c32; \u89b3\u5bdf\u5024 'ad000000000000000000000000000001', 'ad000000000000000000000000000003', 'fedcba9876543210fedcba9876543210', '10000000aaaa1111bbbb2222cccc3333', 'ad000000000000000000000000000002', '0123456789abcdef0123456789abcdef', 'aaaaaaaa00000000bbbbbbbb11111111', '20000000dddd2222eeee3333ffff4444'\u3002",
+                                    "example": "ad000000000000000000000000000001",
+                                    "minLength": 0,
+                                    "maxLength": 128,
+                                    "$comment": "Fake\u6587\u5b57\u5217ID\u3068EC-CUBE\u6574\u6570ID\u306e\u4e21\u65b9\u304c\u89b3\u5bdf\u3055\u308c\u308b\u305f\u3081\u3001\u3053\u306e\u5883\u754c\u3060\u3051mixedBoundaryId\u3068\u3057\u3066\u6271\u3046\u3002"
                                 }
                             },
                             "$comment": "\u914d\u5217\u8981\u7d20\u306f\u30de\u30b9\u30bf/CSV/option map\u306e\u52d5\u7684\u884c\u3067\u3042\u308a\u3001\u5217\u96c6\u5408\u304c\u5bfe\u8c61\u7a2e\u5225\u306b\u3088\u308a\u5909\u308f\u308b\u305f\u3081\u56fa\u5b9ashape\u5316\u3057\u306a\u3044\u3002\u65e2\u77e5property\u306f\u5951\u7d04\u3057\u3001\u8ffd\u52a0\u5217\u306f\u8a72\u5f53\u30b5\u30fc\u30d3\u30b9\u5883\u754c\u3067\u6271\u3046\u3002"
@@ -27643,6 +27824,8 @@
                 },
                 "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
                 "required": [
+                    "form",
+                    "masterTypes",
                     "transitionId",
                     "selectedMaster",
                     "rows"
@@ -37064,16 +37247,29 @@
                 "description": "PUT /admin/toggle-visible response \u306e response body schema\u3002ALPS\u306e\u610f\u5473\u3001be/var/fake\u306e\u89b3\u5bdf\u5024\u3001Resource\u5883\u754c\u306e\u5b9f\u5f62\u72b6\u304b\u3089\u5c0e\u3044\u305fSemantic-Ex\u5236\u7d04\u3002",
                 "type": "object",
                 "properties": {
-                    "message": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
-                        "minLength": 0,
-                        "maxLength": 32,
-                        "title": "\u51e6\u7406\u30e1\u30c3\u30bb\u30fc\u30b8",
-                        "description": "/admin/toggle-visible \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308b\u51e6\u7406\u7d50\u679c\u30e1\u30c3\u30bb\u30fc\u30b8\u3002\u6ce8\u6587\u6642\u304a\u554f\u3044\u5408\u308f\u305b\u6b04\u3067\u306f\u306a\u304f\u3001\u753b\u9762\u9077\u79fb\u3084\u5b8c\u4e86\u8868\u793a\u306e\u305f\u3081\u306e\u901a\u77e5\u6587\u3002",
-                        "example": "\u914d\u9001\u306f\u5e73\u65e5\u5e0c\u671b\u3067\u3059\u3002"
+                    "masterType": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,63}$",
+                        "title": "\u8868\u793a\u5207\u66ff\u30de\u30b9\u30bf\u7a2e\u5225",
+                        "description": "/admin/toggle-visible \u3067\u8868\u793a\u72b6\u614b\u3092\u5909\u66f4\u3059\u308b\u7ba1\u7406\u30de\u30b9\u30bf\u306e\u7a2e\u5225\u3002delivery \u3084 payment \u306a\u3069\u3001\u8868\u793a\u30d5\u30e9\u30b0\u3092\u6301\u3064\u7ba1\u7406\u4e00\u89a7\u306e\u5bfe\u8c61\u3092\u8b58\u5225\u3059\u308b\u3002",
+                        "example": "delivery"
+                    },
+                    "rowId": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9._:@/-]+$",
+                        "title": "\u8868\u793a\u5207\u66ff\u5bfe\u8c61\u884cID",
+                        "description": "/admin/toggle-visible \u3067\u8868\u793a\u72b6\u614b\u3092\u5909\u66f4\u3059\u308b\u7ba1\u7406\u30de\u30b9\u30bf\u884c\u306eID\u3002masterType \u3068\u7d44\u307f\u5408\u308f\u305b\u3066\u5bfe\u8c61\u884c\u3092\u4e00\u610f\u306b\u6307\u3059\u3002",
+                        "example": "del-yamato"
+                    },
+                    "visible": {
+                        "type": "boolean",
+                        "title": "\u8868\u793a\u72b6\u614b",
+                        "description": "\u5bfe\u8c61\u30de\u30b9\u30bf\u884c\u3092\u8868\u793a\u72b6\u614b\u306b\u3059\u308b\u304b\u3069\u3046\u304b\u3092\u8868\u3059\u771f\u507d\u5024\u3002PUT \u306f\u3053\u306e\u5024\u3078\u51aa\u7b49\u306b\u8a2d\u5b9a\u3059\u308b\u3002",
+                        "example": false
                     }
                 },
                 "additionalProperties": false,
@@ -37294,7 +37490,12 @@
                         }
                     }
                 },
-                "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape."
+                "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
+                "required": [
+                    "masterType",
+                    "rowId",
+                    "visible"
+                ]
             },
             "GET/admin/trade-lawResponse": {
                 "title": "GET /admin/trade-law response",
@@ -72672,6 +72873,312 @@
                     "addr01",
                     "orderNo",
                     "name02"
+                ]
+            },
+            "GET/admin/order/shipping-notify-mailResponse": {
+                "title": "GET /admin/order/shipping-notify-mail response",
+                "description": "\u7ba1\u7406\u753b\u9762\u3067\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1\u524d\u306b\u5bfe\u8c61\u6ce8\u6587\u3092\u78ba\u8a8d\u3059\u308b\u753b\u9762\u306eresponse body schema\u3002\u5916\u90e8\u30e1\u30fc\u30eb\u9001\u4fe1\u524d\u306e\u78ba\u8a8d\u5951\u7d04\u3068\u3057\u3066\u3001\u6ce8\u6587\u756a\u53f7\u30fb\u4f1a\u54e1ID\u30fb\u78ba\u8a8d\u30e1\u30c3\u30bb\u30fc\u30b8\u30fb\u9001\u4fe1\u5148\u30ea\u30f3\u30af\u3092\u660e\u793a\u3059\u308b\u3002",
+                "type": "object",
+                "properties": {
+                    "orderNo": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 64,
+                        "title": "\u51fa\u8377\u901a\u77e5\u5bfe\u8c61\u306e\u6ce8\u6587\u756a\u53f7",
+                        "description": "\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u3092\u9001\u4fe1\u3059\u308b\u5bfe\u8c61\u6ce8\u6587\u306e\u9867\u5ba2\u5411\u3051\u6ce8\u6587\u756a\u53f7\u3002\u753b\u9762\u3067\u306f\u78ba\u8a8d\u8868\u793a\u3068POST hidden input\u306b\u4f7f\u7528\u3059\u308b\u3002",
+                        "example": "past0000000000000000000000000001"
+                    },
+                    "customerId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "title": "\u51fa\u8377\u901a\u77e5\u5bfe\u8c61\u306e\u4f1a\u54e1ID",
+                        "description": "\u5bfe\u8c61\u6ce8\u6587\u306b\u7d10\u3065\u304f\u4f1a\u54e1ID\u3002\u30b2\u30b9\u30c8\u8cfc\u5165\u307e\u305f\u306f\u9000\u4f1a\u6e08\u307f\u5883\u754c\u3067\u306fnull\u306b\u306a\u308a\u3001\u753b\u9762\u3067\u306f\u30b2\u30b9\u30c8\u8cfc\u5165\u3068\u3057\u3066\u8868\u793a\u3059\u308b\u3002",
+                        "minLength": 0,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9._:@/-]*$",
+                        "example": "customer-001",
+                        "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002"
+                    },
+                    "message": {
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 80,
+                        "title": "\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u78ba\u8a8d\u30e1\u30c3\u30bb\u30fc\u30b8",
+                        "description": "\u7ba1\u7406\u8005\u306b\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1\u306e\u78ba\u8a8d\u3092\u4fc3\u3059\u753b\u9762\u30e1\u30c3\u30bb\u30fc\u30b8\u3002\u6ce8\u6587\u6642\u306e\u304a\u554f\u3044\u5408\u308f\u305b\u672c\u6587\u3067\u306f\u306a\u3044\u3002",
+                        "example": "\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u3092\u9001\u4fe1\u3057\u307e\u3059\u3002\u3088\u308d\u3057\u3044\u3067\u3059\u304b\uff1f"
+                    },
+                    "csrfToken": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "title": "\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1\u30d5\u30a9\u30fc\u30e0CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "POST /admin/order/shipping-notify-mail \u306ehidden input\u3067\u9001\u308bCSRF\u30c8\u30fc\u30af\u30f3\u3002Resource body\u3067\u306fnull\u3067\u3082\u3001Twig\u304c\u5b9f\u30d5\u30a9\u30fc\u30e0\u7528\u30c8\u30fc\u30af\u30f3\u3092\u88dc\u3046\u3002",
+                        "minLength": 0,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]*$",
+                        "$comment": "CSRF\u5024\u306fCsrfProtected\u5883\u754c\u306e\u8cac\u52d9\u3002GET body\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3092\u793a\u3059\u305f\u3081\u306bnull\u3092\u8a31\u5bb9\u3059\u308b\u3002"
+                    },
+                    "submitTo": {
+                        "type": "object",
+                        "title": "\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1\u30ea\u30f3\u30af",
+                        "description": "\u78ba\u8a8d\u753b\u9762\u304b\u3089\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1Resource\u3078\u9077\u79fb\u3059\u308bALPS unsafe\u9077\u79fb\u3002",
+                        "required": [
+                            "method",
+                            "href"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "method": {
+                                "type": "string",
+                                "enum": [
+                                    "POST"
+                                ],
+                                "title": "\u9001\u4fe1HTTP\u30e1\u30bd\u30c3\u30c9",
+                                "description": "\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1\u306f\u526f\u4f5c\u7528\u3092\u6301\u3064\u305f\u3081POST\u306e\u307f\u8a31\u53ef\u3059\u308b\u3002"
+                            },
+                            "href": {
+                                "type": "string",
+                                "format": "uri-reference",
+                                "minLength": 1,
+                                "maxLength": 2048,
+                                "title": "\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u9001\u4fe1Resource URI",
+                                "description": "POST\u5148\u306eBEAR Resource URI\u3002HTML\u3067\u306fcanonical path /admin/order/shipping-notify-mail \u306b\u5bfe\u5fdc\u3059\u308b\u3002",
+                                "example": "page://self/admin/order/shipping-notify-mail"
+                            }
+                        }
+                    }
+                },
+                "additionalProperties": false,
+                "$defs": {
+                    "productCode": {
+                        "title": "\u5546\u54c1\u30b3\u30fc\u30c9",
+                        "description": "SKU/\u54c1\u756a\u3002\u5728\u5eab\u7ba1\u7406\u3084\u53d7\u6ce8\u660e\u7d30\u3067\u306e\u8b58\u5225\u306b\u4f7f\u7528 SKU\u3068\u3057\u3066\u5728\u5eab\u30fb\u30ab\u30fc\u30c8\u30fb\u53d7\u6ce8\u660e\u7d30\u3092\u63a5\u7d9a\u3059\u308b\u3002Fake\u89b3\u5bdf\u3067\u306fASCII\u82f1\u6570\u3068\u30cf\u30a4\u30d5\u30f3\u4e2d\u5fc3\u3002",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 64,
+                        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$",
+                        "example": "sample-001"
+                    },
+                    "email": {
+                        "title": "\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9",
+                        "description": "\u4f1a\u54e1\u306e\u30ed\u30b0\u30a4\u30f3ID\u3092\u517c\u306d\u308b\u3002\u6709\u52b9\u4f1a\u54e1\u9593\u3067\u4e00\u610f \u30ed\u30b0\u30a4\u30f3ID/\u901a\u77e5\u5148\u3068\u3057\u3066\u4f7f\u3046\u305f\u3081RFC\u6e96\u62e0\u306eemail\u5f62\u5f0f\u3002",
+                        "type": "string",
+                        "format": "email",
+                        "minLength": 3,
+                        "maxLength": 254,
+                        "example": "alice@example.com"
+                    },
+                    "postalCode": {
+                        "title": "\u90f5\u4fbf\u756a\u53f7",
+                        "description": "\u65e5\u672c\u306e\u90f5\u4fbf\u756a\u53f7\u3002\u30cf\u30a4\u30d5\u30f3\u306a\u30577\u6841\u307e\u305f\u306f\u30cf\u30a4\u30d5\u30f3\u4ed8\u304d8\u6841 \u65e5\u672c\u56fd\u5185\u4f4f\u6240\u5411\u3051\u3002\u30cf\u30a4\u30d5\u30f3\u306a\u30577\u6841\u307e\u305f\u306f\u30cf\u30a4\u30d5\u30f3\u4ed8\u304d8\u6841\u3002",
+                        "type": "string",
+                        "pattern": "^\\d{3}-?\\d{4}$",
+                        "example": "1500001"
+                    },
+                    "phoneNumber": {
+                        "title": "\u96fb\u8a71\u756a\u53f7",
+                        "description": "\u65e5\u672c\u306e\u96fb\u8a71\u756a\u53f7\u5f62\u5f0f\uff08\u30cf\u30a4\u30d5\u30f3\u533a\u5207\u308a\uff09 \u65e5\u672c\u56fd\u5185\u96fb\u8a71\u756a\u53f7\u3002Fake\u306f\u30cf\u30a4\u30d5\u30f3\u306a\u3057\u4e2d\u5fc3\u3001\u5165\u529b\u3067\u306f\u30cf\u30a4\u30d5\u30f3\u4ed8\u304d\u3082\u8a31\u5bb9\u3002",
+                        "type": "string",
+                        "pattern": "^0\\d{1,4}-?\\d{1,4}-?\\d{3,4}$",
+                        "minLength": 10,
+                        "maxLength": 13,
+                        "example": "0312345678"
+                    },
+                    "price": {
+                        "title": "\u91d1\u984d",
+                        "description": "EC-CUBE\u306e\u5546\u54c1\u4fa1\u683c\u30fb\u9001\u6599\u30fb\u624b\u6570\u6599\u30fb\u58f2\u4e0a\u91d1\u984d\u3002\u65e5\u672c\u5186\u306e\u6574\u6570\u91d1\u984d\u3068\u3057\u3066\u6271\u3046\u3002",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 999999999,
+                        "example": 1200
+                    },
+                    "quantity": {
+                        "title": "\u6570\u91cf",
+                        "description": "\u8cfc\u5165\u6570\u91cf\u3002\u30ab\u30fc\u30c8\u660e\u7d30\u3068\u53d7\u6ce8\u660e\u7d30\u3067\u5171\u901a\u4f7f\u7528 \u8cfc\u5165/\u8abf\u6574\u6570\u91cf\u3002\u5165\u529b\u306f1\u4ee5\u4e0a\u3001\u8abf\u6574\u5f8c\u3084\u96c6\u8a08\u3067\u306f0\u4ee5\u4e0a\u3092\u8a31\u5bb9\u3059\u308b\u5834\u5408\u304c\u3042\u308b\u3002",
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 999,
+                        "example": 2
+                    },
+                    "nonNegativeInteger": {
+                        "title": "\u975e\u8ca0\u6574\u6570",
+                        "description": "\u4ef6\u6570\u3001\u5728\u5eab\u3001\u30da\u30fc\u30b8\u756a\u53f7\u3001\u96c6\u8a08\u5024\u306a\u30690\u4ee5\u4e0a\u306e\u6574\u6570\u3002",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2147483647,
+                        "example": 1
+                    },
+                    "opaqueId": {
+                        "title": "\u4e0d\u900f\u660eID",
+                        "description": "BeMart/Fake/\u30a2\u30d7\u30ea\u5c64\u3067\u5916\u90e8\u306b\u516c\u958b\u3059\u308b\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002",
+                        "type": "string",
+                        "minLength": 1,
+                        "maxLength": 128,
+                        "pattern": "^[A-Za-z0-9._:@/-]+$",
+                        "example": "customer-001"
+                    },
+                    "dbId": {
+                        "title": "DB\u63a1\u756aID",
+                        "description": "EC-CUBE\u30de\u30b9\u30bf\u3084\u5185\u90e8\u884c\u3092\u6307\u3059\u975e\u8ca0\u6574\u6570ID\u3002\u8868\u793a\u3084\u30d5\u30a9\u30fc\u30e0\u5883\u754c\u3067\u306f\u6587\u5b57\u5217\u5316\u3055\u308c\u308b\u5834\u5408\u304c\u3042\u308b\u304c\u3001\u610f\u5473\u306f\u63a1\u756aID\u3002",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 2147483647,
+                        "example": 1
+                    },
+                    "mixedBoundaryId": {
+                        "title": "\u4e92\u63db\u5883\u754cID",
+                        "description": "\u540c\u4e00Resource\u3067Fake\u6587\u5b57\u5217ID\u3068EC-CUBE\u6574\u6570ID\u306e\u4e21\u65b9\u304c\u89b3\u5bdf\u3055\u308c\u308b\u4e92\u63db\u5883\u754c\u5c02\u7528ID\u3002\u6052\u4e45\u7684\u306a\u30c9\u30e1\u30a4\u30f3\u578b\u3067\u306f\u306a\u3044\u3002",
+                        "type": [
+                            "string",
+                            "integer"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 128,
+                        "example": "pay-cod",
+                        "$comment": "mixedBoundaryId\u306f\u79fb\u884c\u4e92\u63db\u306e\u305f\u3081\u306e\u4f8b\u5916\u3002\u53ef\u80fd\u306a\u3089opaqueId\u307e\u305f\u306fdbId\u3078\u5206\u89e3\u3059\u308b\u3002"
+                    },
+                    "pref": {
+                        "title": "\u90fd\u9053\u5e9c\u770cID",
+                        "description": "\u65e5\u672c\u306e\u90fd\u9053\u5e9c\u770c\uff081=\u5317\u6d77\u9053\u301c47=\u6c96\u7e04\u770c\uff09\u3002\u4f4f\u6240\u306e\u6700\u4e0a\u4f4d\u533a\u5206\u3068\u3057\u3066\u9867\u5ba2\u30fb\u53d7\u6ce8\u30fb\u914d\u9001\u5148\u3067\u4f7f\u7528\u3002\u914d\u9001\u6599\u306e\u5730\u57df\u533a\u5206\uff08DeliveryFee\uff09\u3084\u7a0e\u7387\u306e\u5730\u57df\u8a2d\u5b9a\uff08TaxRule\uff09\u306b\u3082\u4f7f\u7528 \u78ba\u5b9a\u4f4f\u6240\u306f1\u301c47\u3002\u5165\u529b\u30d5\u30a9\u30fc\u30e0\u306e\u672a\u9078\u629e\u521d\u671f\u5024\u3068\u3057\u30660\u3092\u8a31\u5bb9\u3059\u308b\u3002",
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 47,
+                        "example": 13
+                    },
+                    "productStatus": {
+                        "title": "\u5546\u54c1\u30b9\u30c6\u30fc\u30bf\u30b9",
+                        "description": "1=\u516c\u958b\uff08\u30d5\u30ed\u30f3\u30c8\u8868\u793a\uff09, 2=\u975e\u516c\u958b\uff08\u30d5\u30ed\u30f3\u30c8\u975e\u8868\u793a\uff09, 3=\u5ec3\u6b62\uff08\u8ad6\u7406\u524a\u9664\u3001\u7ba1\u7406\u753b\u9762\u3067\u3082\u30c7\u30d5\u30a9\u30eb\u30c8\u975e\u8868\u793a\uff09",
+                        "type": "integer",
+                        "enum": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "example": 1
+                    },
+                    "customerStatus": {
+                        "title": "\u4f1a\u54e1\u30b9\u30c6\u30fc\u30bf\u30b9",
+                        "description": "1=\u4eee\u4f1a\u54e1\uff08\u30e1\u30fc\u30eb\u672a\u8a8d\u8a3c\uff09, 2=\u672c\u4f1a\u54e1\uff08\u8a8d\u8a3c\u6e08\u307f\uff09, 3=\u9000\u4f1a\u3002\u9000\u4f1a\u6642\u306f\u30e1\u30fc\u30eb\u30a2\u30c9\u30ec\u30b9\u304c\u7121\u52b9\u5316\u3055\u308c\u308b",
+                        "type": "integer",
+                        "enum": [
+                            1,
+                            2,
+                            3
+                        ],
+                        "example": 2
+                    },
+                    "orderStatus": {
+                        "title": "\u6ce8\u6587\u30b9\u30c6\u30fc\u30bf\u30b9",
+                        "description": "1=\u65b0\u898f\u53d7\u4ed8, 3=\u6ce8\u6587\u53d6\u6d88, 4=\u5bfe\u5fdc\u4e2d, 5=\u767a\u9001\u6e08\u307f, 6=\u5165\u91d1\u6e08\u307f, 7=\u6c7a\u6e08\u51e6\u7406\u4e2d, 8=\u8cfc\u5165\u51e6\u7406\u4e2d, 9=\u8fd4\u54c1\u3002Symfony Workflow\u30b9\u30c6\u30fc\u30c8\u30de\u30b7\u30f3\u3067\u9077\u79fb\u3092\u5236\u5fa1\u3002\u8a31\u53ef\u3055\u308c\u308b\u9077\u79fb: pay(1->6), packing(1,6->4), cancel(1,4,6->3), back_to_in_progress(3->4), ship(1,6,4->5), return(5->9), cancel_return(9->5)\u30027\u30688\u306fPurchaseFlow\u5185\u3067\u76f4\u63a5\u30bb\u30c3\u30c8\u3055\u308c\u30b9\u30c6\u30fc\u30c8\u30de\u30b7\u30f3\u9077\u79fb\u306e\u5bfe\u8c61\u5916 EC-CUBE\u53d7\u6ce8\u72b6\u614b\u3002Fake/\u7ba1\u7406\u753b\u9762\u3067\u6271\u3046\u72b6\u614bID\u3002",
+                        "type": "integer",
+                        "minimum": 1,
+                        "maximum": 9,
+                        "example": 1
+                    },
+                    "cartKey": {
+                        "title": "\u30ab\u30fc\u30c8\u30ad\u30fc",
+                        "description": "\u30ab\u30fc\u30c8\u5206\u96e2\u30ad\u30fc\u3002\u5f62\u5f0f: {\u30bb\u30c3\u30b7\u30e7\u30f3\u30d7\u30ec\u30d5\u30a3\u30c3\u30af\u30b9}_{\u8ca9\u58f2\u7a2e\u5225ID}\u3002EC-CUBE\u306f\u8ca9\u58f2\u7a2e\u5225\u3054\u3068\u306b\u30ab\u30fc\u30c8\u3092\u5206\u96e2\u3059\u308b\u305f\u3081\u3001\u7570\u306a\u308b\u8ca9\u58f2\u7a2e\u5225\u306e\u5546\u54c1\u306f\u5225\u30ab\u30fc\u30c8\u306b\u306a\u308b",
+                        "type": "string",
+                        "minLength": 3,
+                        "maxLength": 128,
+                        "pattern": "^.+_[0-9]+$",
+                        "example": "session-prefix-1_1"
+                    },
+                    "csrfToken": {
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u5143\u3092\u691c\u8a3c\u3059\u308b\u30c8\u30fc\u30af\u30f3\u3002Fake\u74b0\u5883\u3067\u306f deterministic \u306a\u5024\u3092\u4f7f\u3046\u3002",
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]+$",
+                        "example": "fake-csrf-token-bemart-2026"
+                    },
+                    "uriReference": {
+                        "title": "URI\u53c2\u7167",
+                        "description": "\u753b\u9762\u9077\u79fb\u30fb\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u30fb\u30ea\u30f3\u30af\u5148\u3092\u8868\u3059\u76f8\u5bfe\u307e\u305f\u306f\u7d76\u5bfeURI\u3002",
+                        "type": "string",
+                        "format": "uri-reference",
+                        "minLength": 1,
+                        "maxLength": 2048,
+                        "example": "/products"
+                    },
+                    "transitionId": {
+                        "title": "ALPS\u9077\u79fbID",
+                        "description": "alps.json \u306b\u5b9a\u7fa9\u3055\u308c\u305f safe/unsafe descriptor \u306eID\u3002",
+                        "type": "string",
+                        "minLength": 2,
+                        "maxLength": 96,
+                        "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
+                        "example": "doAddCartItem"
+                    },
+                    "date": {
+                        "title": "\u65e5\u4ed8",
+                        "description": "\u696d\u52d9\u4e0a\u306e\u65e5\u4ed8\u3002",
+                        "type": "string",
+                        "format": "date",
+                        "example": "2026-01-01"
+                    },
+                    "dateTime": {
+                        "title": "\u65e5\u6642",
+                        "description": "\u696d\u52d9\u30a4\u30d9\u30f3\u30c8\u767a\u751f\u65e5\u6642\u3002",
+                        "type": "string",
+                        "format": "date-time",
+                        "example": "2026-01-01T00:00:00+09:00"
+                    },
+                    "link": {
+                        "title": "\u30cf\u30a4\u30d1\u30fc\u30e1\u30c7\u30a3\u30a2\u30ea\u30f3\u30af",
+                        "description": "ALPS\u9077\u79fb\u306b\u5bfe\u5fdc\u3059\u308b\u30ea\u30f3\u30af\u3002href\u306fURI\u53c2\u7167\u3002",
+                        "type": "object",
+                        "required": [
+                            "href"
+                        ],
+                        "additionalProperties": false,
+                        "properties": {
+                            "href": {
+                                "title": "URI\u53c2\u7167",
+                                "description": "\u753b\u9762\u9077\u79fb\u30fb\u30ea\u30c0\u30a4\u30ec\u30af\u30c8\u30fb\u30ea\u30f3\u30af\u5148\u3092\u8868\u3059\u76f8\u5bfe\u307e\u305f\u306f\u7d76\u5bfeURI\u3002",
+                                "type": "string",
+                                "format": "uri-reference",
+                                "minLength": 1,
+                                "maxLength": 2048,
+                                "example": "/products"
+                            },
+                            "rel": {
+                                "type": "string",
+                                "minLength": 1,
+                                "maxLength": 96
+                            },
+                            "method": {
+                                "type": "string",
+                                "enum": [
+                                    "get",
+                                    "post",
+                                    "put",
+                                    "patch",
+                                    "delete",
+                                    "GET",
+                                    "POST",
+                                    "PUT",
+                                    "PATCH",
+                                    "DELETE"
+                                ]
+                            }
+                        }
+                    }
+                },
+                "$comment": "\u51fa\u8377\u901a\u77e5\u30e1\u30fc\u30eb\u306e\u5b9f\u9001\u4fe1\u524d\u78ba\u8a8d\u753b\u9762\u3002\u5916\u90e8SMTP\u3067\u306f\u306a\u304fBeMart Mailer\u5883\u754c\u3078POST\u3059\u308b\u305f\u3081\u306eResource\u5951\u7d04\u3002",
+                "required": [
+                    "orderNo",
+                    "customerId",
+                    "message",
+                    "csrfToken",
+                    "submitTo"
                 ]
             },
             "POST/admin/order/shipping-notify-mailResponse": {

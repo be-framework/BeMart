@@ -19,12 +19,11 @@ but for the admin firewall — distinct namespace under `Page\Admin\`
 body carries admin shape (adminId / loginId / name / authority)
 rather than customer shape.
 
-In the html context, public/index.php starts a PHP session before
-dispatch and this resource mirrors `adminId` into the flat session
-key read by HtmlAdminSessionAdapter. The write is guarded by
-an html APP_CONTEXT and PHP_SESSION_ACTIVE so app/test/prod contexts
-keep their existing session behaviour and are not polluted by direct
-`$_SESSION` writes.
+Password verification now establishes only a pre-auth 2FA login
+challenge. The flat admin session key read by
+{@see \HtmlAdminSessionAdapter} is written after the existing-device
+challenge or first-device setup succeeds, so login-context 2FA
+resources never need to trust client-supplied identity.
 
 Source-of-truth gap: alps.json does not currently carry a
 `doAdminLogin` transition id (only customer `doLogin`). Using the
