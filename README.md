@@ -4,22 +4,55 @@
 
 # BeMart — EC-CUBE 4.3 Application Overhaul
 
-BeMart は、EC-CUBE 4.3 を意味論と境界へ分解し、ALPS / Be Framework /
-BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ再構成する
+BeMart は、EC-CUBE 4.3 の実装に埋もれた業務制約を抽出し、
+ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ整理し、再配置する
 アプリケーション・オーバーホールの実証プロジェクトです。
 
 Symfony 版 EC-CUBE の単なる書き直しではありません。EC-CUBE が持つ業務語彙、
-状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装から取り出して読める契約
-として配置し直すことが目的です。外から見える振る舞いは残したまま、各要素を分解して
-境界と責任を確かめ、一つずつ組み直す——いわば意味論のオーバーホールです。
+状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装に埋もれた暗黙の制約から
+読める契約へ変えることが目的です。外から見える振る舞いは残したまま、各要素を分解して
+境界と責任を確かめ、一つずつ組み直す——いわば制約の抽出と整理、再配置です。
 
-機械のオーバーホールのように、分解、点検、再配置を通じて、元のプロジェクトをより高品質で持続性の高いものにすることを目標としました。
+機械のオーバーホールのように、分解、点検、再配置を通じて、制約を読める構造として取り出します。品質や持続性の向上は目標ではなく、その結果として現れるものです。
+
+## このプロジェクトが示すもの
+
+BeMart の価値は、EC-CUBE を別の PHP フレームワークへ移したことだけではありません。
+重要なのは、既存アプリケーションに埋め込まれていた業務意味、状態遷移、入力制約、
+永続化境界、画面上の affordance を取り出し、次の実装が参照できる構造として
+再配置したことです。
+
+言語やフレームワークは変わります。一方で、「商品を探す」「カートへ入れる」
+「注文を確定する」「受注を管理する」「配送を更新する」といった業務の意味は長く残ります。
+BeMart は、その長寿命な意味を [`alps.json`](docs/api/)、Be domain、BEAR Resource、
+Ray.MediaQuery SQL、Twig HTML、workflow evidence へ分解し、同じ契約の複数の投影として
+扱えることを示します。
+
+## Evidence Snapshot
+
+最新の証拠は、説明文ではなくリポジトリ内の生成物・テスト・スクリーンショットで確認できます。
+
+| 証拠 | 現在の規模 |
+|---|---:|
+| ALPS descriptor | 534 descriptor / 207 transition descriptor |
+| Be domain | 147 Input / 148 Final / 157 Semantic / 14 Being |
+| BEAR Page Resource | 146 page resource |
+| Ray.MediaQuery | 54 interface / 150 `#[DbQuery]` / 150 SQL file |
+| API contract | 236 OpenAPI operations / 235 JSON Schema |
+| HTML | 133 Twig templates |
+| Web E2E evidence | 186 features, 181 pass / 2 fail / 3 out-of-scope, 140 screenshots |
+
+証拠の入口は [`docs/feature-evidence.md`](docs/feature-evidence.md) です。画面単位の証跡は
+[`docs/web-e2e/feature-implementation-matrix.md`](docs/web-e2e/feature-implementation-matrix.md)、
+EC-CUBE route と ALPS / 実装状態の対応は
+[`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html)、
+API surface は [`docs/api/`](docs/api/) にあります。
 
 ## 2パスマイグレーション
 
 移植は 2 つの動きでできています。最初に EC-CUBE の Entity、Route、Controller、Twig から
-語彙と状態遷移を逆算し、`alps.json` という意味構造の契約へ束ねます。次に、その契約を Be domain、
-BEAR Resource、Ray.MediaQuery SQL、Twig HTML、Hypermedia test へ投影します。
+語彙と状態遷移を逆算し、[`alps.json`](docs/api/) という意味構造の契約へ束ねます。次に、その契約を Be domain、
+BEAR Resource、Ray.MediaQuery SQL、Twig HTML、workflow/state-transition evidence へ投影します。
 
 ```text
 EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
@@ -27,6 +60,10 @@ EC-CUBE source → ALPS contract → Be / Resource / SQL / HTML / Test
 
 Fake は後付けの mock ではなく、最初の契約実装です。SQL 実装はあとから同じ Resource 契約を
 満たすものとして差し替えられ、Context / DI がどちらを使うかを選びます。
+
+ここでいう workflow evidence は、「ハイパーメディアテスト」という単独のテスト種別ではありません。
+1 つの状態遷移契約を PHP Resource、実 HTTP、HTML の link / form affordance、browser evidence へ
+投影し、境界を越えて同じ遷移が保たれていることを確認する仕組みです。
 
 ## アーキテクチャの境界線
 
@@ -39,7 +76,7 @@ Fake は後付けの mock ではなく、最初の契約実装です。SQL 実�
 | Ray.MediaQuery | ドメイン ↔ インフラ境界。PHP interface ↔ SQL file、SQL row/result ↔ domain object |
 | BEAR.Sunday | HTTP request ↔ リソース境界（URI / HTTP method / `on*` method parameter / `ResourceObject`） |
 | OpenAPI / API schema | PHP の `on*` method から生成される公開 HTTP 契約（parameter / status / representation shape） |
-| Hypermedia | リソース ↔ クライアント遷移境界（`#[Link]` / `href` / `form action`） |
+| Workflow / Hypermedia evidence | 同じ状態遷移契約を PHP Resource / HTTP / HTML affordance へ投影する境界（`#[Link]` / `href` / `form action`） |
 | Cache / freshness | Resource 表現 ↔ browser / proxy / CDN の鮮度境界（`CacheableResponse` / `Cache-Control` / `ETag` / `Vary` / invalidation） |
 | Context / DI | 実装選択境界（Fake ↔ SQL、HTML ↔ JSON、test ↔ prod） |
 | SQL schema | 永続化境界（table / column / FK / nullable / id shape） |
@@ -49,7 +86,9 @@ Fake は後付けの mock ではなく、最初の契約実装です。SQL 実�
 Ray.MediaQuery は SQL を interface 境界に閉じ込め、Context / DI が Fake / SQL、HTML / JSON、
 test / prod の実装選択を担います。Fake は最初の契約実装であり、SQL 実装は同じ Resource 契約を
 満たすものとして検証されます。Twig HTML は EC-CUBE の affordance をできるだけ保持し、
-Hypermedia test は controller 内部ではなく、link / form を辿って workflow を証明します。
+workflow test は controller 内部ではなく、link / form を辿って状態遷移を証明します。
+HTTP workflow は同じシナリオを実 HTTP / cookie 境界へ持ち出し、HTML render と Web E2E は
+その遷移が実際の画面 affordance として残っていることを確認します。
 
 Taint tracking、DIP / ADP も境界制約として扱いますが、
 README では詳細化しません。背景は [`docs/methodology/`](docs/methodology/) と
@@ -59,13 +98,17 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 
 - 仕様は実装より長く生きる。Framework が変わっても「商品」「注文」「顧客」の語彙は残る。
 - 移植は境界の宣言である。残作業は未知の不足ではなく、既知の境界として分類できる。
-- Hypermedia は UI 補助ではなく契約である。link / form が次状態への affordance になる。
+- 状態遷移は UI 補助ではなく契約である。link / form が次状態への affordance になり、同じ契約を PHP / HTTP / HTML の各境界で検証できる。
 - ALPS、Be、Resource、SQL file は、AI エージェントによる並列作業でも drift を抑える制約になる。
 
 ## ドキュメント
 
 詳細なドキュメントは [`docs/`](docs/) にまとめています。
 公開版は [GitHub Pages](https://be-framework.github.io/BeMart/) で確認できます。
+
+最初に読むなら、[`docs/feature-evidence.md`](docs/feature-evidence.md) で証拠の全体像を見てから、
+[`docs/migration-goal-review.md`](docs/migration-goal-review.md) と
+[`docs/PROJECT-REPORT.md`](docs/PROJECT-REPORT.md) を読むのが最短です。
 
 ## ディレクトリ
 

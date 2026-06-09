@@ -115,7 +115,7 @@ Status: initial ALPS tagging complete. Executable flow fixtures and tests are st
 
 - Update Feature matrix to use `feature-*`.
 - Add flow verification matrix based on `flow-*`.
-- Implement corresponding Hypermedia / HTTP / Browser checks.
+- Implement corresponding workflow evidence (PHP Resource / HTTP) / Browser checks.
 
 ### Phase 5 — 非推奨整理（Deprecation cleanup）
 

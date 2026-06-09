@@ -6,7 +6,7 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 ## Summary
 
 - 作成日: 2026-06-07
-- 母集団: `docs/api/openapi.json` の 234 operations、`src/Resource/Page/**`、`var/templates/Page/**`、`tests/Http/log/*.log`、既存 browser verification docs
+- 母集団: `docs/api/openapi.json` の 236 operations、`src/Resource/Page/**`、`var/templates/Page/**`、`tests/Http/log/*.log`、既存 browser verification docs
 - 総機能数: 186
 - 実装済み: 159
 - 部分実装: 24
@@ -226,4 +226,3 @@ BeMart の web 操作対象を **1機能=1行** で整理した実装状態台�
 - ブラウザで確認した行は `Web操作結果` を `✔ pass` / `✘ fail` / `— 対象外` に更新する。
 - スクリーンショットは最終runの `docs/web-e2e/screenshots/<run-id>/` に保存し、相対パスを `Screenshot` に記録する。途中runや同一内容のPNGは重複証跡として追加しない。
 - 問題を見つけてもこの台帳では修正しない。`実装見落とし` または `要調査` に分類し、根拠へ再現情報を書く。
-

@@ -23,6 +23,21 @@
         "title": "Short project summary"
       },
       {
+        "id": "thesis",
+        "type": "semantic",
+        "title": "Project thesis"
+      },
+      {
+        "id": "statGrid",
+        "type": "semantic",
+        "title": "Evidence summary metric group"
+      },
+      {
+        "id": "stat",
+        "type": "semantic",
+        "title": "Evidence summary metric"
+      },
+      {
         "id": "primarySource",
         "type": "semantic",
         "title": "Primary source of truth link"
@@ -53,11 +68,28 @@
         "title": "Linked documentation resource"
       },
       {
+        "id": "shotGrid",
+        "type": "semantic",
+        "title": "Screenshot evidence group"
+      },
+      {
+        "id": "shot",
+        "type": "semantic",
+        "title": "Screenshot evidence link"
+      },
+      {
         "id": "goAlpsDocs",
         "type": "safe",
         "rt": "#documentationResource",
         "title": "Open the generated ALPS documentation",
         "doc": {"value": "Open the generated ALPS documentation as the semantic source of truth for BeMart."}
+      },
+      {
+        "id": "goFeatureEvidence",
+        "type": "safe",
+        "rt": "#documentationResource",
+        "title": "Open the feature evidence overview",
+        "doc": {"value": "Open the evidence overview connecting ALPS, Resource, SQL, API, HTML, and Web E2E screenshots."}
       },
       {
         "id": "goApiDoc",
@@ -95,11 +127,11 @@
         "doc": {"value": "Open the document that defines BeMart as a semantic overhaul experiment."}
       },
       {
-        "id": "goFinalReport",
+        "id": "goProjectReport",
         "type": "safe",
         "rt": "#documentationResource",
-        "title": "Open the final report",
-        "doc": {"value": "Open the final report describing what the BeMart experiment demonstrated."}
+        "title": "Open the project report",
+        "doc": {"value": "Open the project report describing what the BeMart experiment currently demonstrates."}
       },
       {
         "id": "goMigrationStatus",
@@ -140,8 +172,8 @@
         "id": "goHypermediaTestPrinciple",
         "type": "safe",
         "rt": "#documentationResource",
-        "title": "Open the hypermedia test principle",
-        "doc": {"value": "Open the methodology note for proving workflows by following links and forms."}
+        "title": "Open the workflow evidence principle",
+        "doc": {"value": "Open the methodology note for projecting workflow/state-transition contracts across PHP Resource, HTTP, and HTML affordances."}
       },
       {
         "id": "goInitialArticle",
