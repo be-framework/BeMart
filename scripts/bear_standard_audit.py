@@ -61,6 +61,10 @@ def audit(root: Path) -> list[dict[str, str]]:
         if (root / rel).is_file():
             add(issues, "resource.request_capture", "warning", rel, "Custom request capture at Resource invocation boundary should be justified or removed.")
 
+    for rel in ("src/Exception/CsrfTokenInvalidException.php", "src/AppContextModuleNotFoundException.php"):
+        if (root / rel).is_file():
+            add(issues, "dead_boundary_compat_file", "warning", rel, "Dead framework-boundary compatibility file should be removed.")
+
     for rel in ("config/aura-routes.php", "src/Module/AuraRouterModule.php", "src/Support/Router/AuraRouter.php"):
         if (root / rel).is_file():
             add(issues, "router.aura_compat", "error", rel, "Aura/compat router file exists; prefer canonical Resource paths unless explicitly justified.")

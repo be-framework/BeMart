@@ -5,9 +5,16 @@ title: "Context composition plan"
 
 # Context composition plan
 
-BeMart の `src/Injector.php` は現在、`APP_CONTEXT` 文字列を `match` で個別 Module に変換している。BEAR.Package 標準の `BEAR\Package\Injector` / `BEAR\Package\Module` へ戻すには、context 名を `-` 区切りの token として読み、右から左へ `*Module` を合成する形へ寄せる。
+この文書は、BeMart の Injector / context composition を BEAR.Package 標準へ戻すための調査メモである。PR #76 時点では、主要な計画項目は実装済みであり、ここでは現在の構成と残作業を記録する。
 
-この文書は調査メモであり、PHP 実装は変更しない。CSRF は今回の対象外とする。特に CSRF token を Resource 引数へ出す案は採用しない。
+## 現在の方針
+
+- `src/Injector.php` は `BEAR\Package\Injector` へ委譲する薄い wrapper に戻す。
+- context 名は `-` 区切り token として扱い、`BEAR\Package\Module` の標準 composition に任せる。
+- `api` segment は外す。BeMart は Page resource 前提で、HAL 表現は `hal` token で表す。
+- アプリ固有の production session / CSRF binding は `EccubeModule` に集約する。
+- SQL persistence は `SqlModule` を context segment として使う。
+- BEAR.Package 標準 `prod` token を shadow しない。アプリ固有の旧 `ProdModule` は削除済み。
 
 ## 参照した標準構成
 
@@ -17,142 +24,58 @@ BeMart の `src/Injector.php` は現在、`APP_CONTEXT` 文字列を `match` で
 | `/Users/akihito/git/BEAR.Skeleton/src/Module/AppModule.php` | `AppModule` は `PackageModule` を install するアプリ共通 composition root。 |
 | `/Users/akihito/git/MyVendor.Cms/src/Injector.php` | Skeleton と同じ委譲形。 |
 | `/Users/akihito/git/MyVendor.Cms/src/Module/AppModule.php` | 実 DB / MediaQuery / JSON Schema / 認証などの production default を `AppModule` に置き、`fake-` / `test-` token で差し替える。 |
-| `/Users/akihito/git/MyVendor.Cms/docs/conventions.md` | `hal-api-app`, `cli-hal-api-app`, `fake-hal-api-app`, `test-hal-api-app` を標準 context として扱い、`fake-` と `test-` は canonical prefix とする。 |
+| `/Users/akihito/git/MyVendor.Cms/docs/conventions.md` | `fake-` と `test-` は canonical prefix として扱う。 |
 | `/Users/akihito/git/BeMart/vendor/bear/package/src/Injector.php` | `Meta` と cache を作り、`PackageInjector` へ渡す。 |
-| `/Users/akihito/git/BeMart/vendor/bear/package/src/Module.php` | `explode('-', $context)` を `array_reverse()` し、`AppModule` → `ApiModule` → `HalModule` → `CliModule` / `ProdModule` のように token module を合成する。 |
-| `/Users/akihito/git/BeMart/vendor/bear/package/src/Context/*.php` | 標準 token は `app`, `api`, `hal`, `cli`, `prod`。`api` は scheme、`hal` は HAL renderer、`cli` は CLI router/responder、`prod` は prod error/cache/compile を担う。 |
+| `/Users/akihito/git/BeMart/vendor/bear/package/src/Module.php` | `explode('-', $context)` を `array_reverse()` し、`AppModule` から token module を合成する。 |
+| `/Users/akihito/git/BeMart/vendor/bear/package/src/Context/*.php` | 標準 token は `app`, `hal`, `cli`, `prod` など。 |
 
-注: この作業ツリーには `vendor/` が無かったため、BEAR.Package の vendor 参照は `/Users/akihito/git/BeMart/vendor/bear/package/` で確認した。
+## 現在使う context
 
-## 1. 現在使われる APP_CONTEXT 一覧
-
-`composer.json` scripts、`bin/*.php`、`public/*.php`、`tests/Http/*.php`、`tests/*` の `APP_CONTEXT` 参照と `Bootstrap::normalizeContext()` から抽出した。
-
-| Context / alias | 主な出所 | 現在の意味 |
+| Context | 主な出所 | 意味 |
 |---|---|---|
-| `app` | `Bootstrap::normalizeContext()` escape hatch | `hal-api-app` へ正規化。 |
-| `fake` | `Bootstrap::normalizeContext()` / `composer fake` entry | `fake-hal-api-app` へ正規化。 |
-| `dev` | `Bootstrap::normalizeContext()` / `composer dev` entry | `dev-fake-hal-api-app` へ正規化。 |
-| `test` | `Bootstrap::normalizeContext()` | `test-hal-api-app` へ正規化。 |
-| `html` | `Bootstrap::normalizeContext()` | `html-hal-app` へ正規化。 |
-| `html-test` | `Bootstrap::normalizeContext()` / entrypoint tests | `html-test-hal-api-app` へ正規化。 |
-| `prod` | `Bootstrap::normalizeContext()` / `composer prod` entry | `prod-hal-api-app` へ正規化。 |
-| `html-prod` | `Bootstrap::normalizeContext()` | `html-prod-hal-api-app` へ正規化。 |
-| `hal-api-app` | `public/index.php` の cli-server default | SQL-backed JSON/HAL API。 |
-| `cli-hal-api-app` | `bin/app.php`, `composer app` | CLI 版 SQL-backed API。 |
-| `fake-hal-api-app` | `bin/fake.php`, `composer fake` | FakeQuery + fake service。 |
-| `cli-fake-hal-api-app` | `bin/fake.php` default | CLI 版 fake context。 |
-| `dev-fake-hal-api-app` | `Bootstrap` alias | Fake + dev logging。 |
-| `cli-dev-fake-hal-api-app` | `bin/dev.php`, `composer dev` | CLI 版 Fake + dev logging。 |
-| `test-hal-api-app` | PHPUnit resource/module tests | Fake + dev diagnostics。 |
-| `cli-test-hal-api-app` | `src/Injector.php` match | CLI 版 test context。現 grep では直接使用は少ない。 |
-| `admin-test-hal-api-app` | `tests/Http/admin-json-index.php` | Test + HAL + logged-in admin session。 |
-| `cli-admin-test-hal-api-app` | `src/Injector.php` match | CLI 版 admin test。現 grep では直接使用は少ない。 |
-| `http-test-hal-api-app` | `tests/Http/json-index.php` | HTTP workflow 用 Test + HAL。 |
-| `cli-http-test-hal-api-app` | `src/Injector.php` match | CLI 版 http test。現 grep では直接使用は少ない。 |
-| `http-prod-hal-api-app` | `tests/Http/prod-json-index.php` | HTTP workflow 用 Prod + HAL + PHP session auth。 |
-| `cli-http-prod-hal-api-app` | `src/Injector.php` match | CLI 版 http prod test。現 grep では直接使用は少ない。 |
-| `html-hal-app` | `public/page.php`, `bin/page.php`, `composer page` | SQL-backed HTML/Page。 |
-| `cli-html-hal-app` | `bin/page.php` default | CLI 版 HTML/Page。 |
-| `html-test-hal-api-app` | `tests/Http/index.php`, Auth tests | Test + HTML presentation。 |
-| `cli-html-test-hal-api-app` | `src/Injector.php` match | CLI 版 html test。現 grep では直接使用は少ない。 |
-| `prod-hal-api-app` | `bin/prod.php`, `composer prod` | Prod session/CSRF + SQL。 |
-| `cli-prod-hal-api-app` | `bin/prod.php` default | CLI 版 prod API。 |
-| `html-prod-hal-api-app` | `Bootstrap` alias | Prod + HTML presentation。 |
-| `cli-html-prod-hal-api-app` | `src/Injector.php` match | CLI 版 html prod。現 grep では直接使用は少ない。 |
-| `nope` | entrypoint negative tests | unknown context の異常系確認。 |
+| `sql-hal-app` | `public/index.php` cli-server default | SQL-backed HAL/Page resource。 |
+| `cli-sql-hal-app` | `bin/app.php` | CLI 版 SQL-backed HAL/Page resource。 |
+| `prod-eccube-sql-hal-app` | `public/index.php`, `tests/Http/prod-json-index.php` | BEAR prod token + EC-CUBE session/CSRF + SQL + HAL。 |
+| `cli-prod-eccube-sql-hal-app` | `bin/prod.php` | CLI 版 prod/eccube/sql/hal。 |
+| `html-eccube-sql-hal-app` | `public/page.php` | HTML + EC-CUBE session/CSRF + SQL + HAL。 |
+| `cli-html-eccube-sql-hal-app` | `bin/page.php` | CLI 版 HTML/Page。 |
+| `fake-hal-app` | `bin/fake.php` | FakeQuery + fake external services + HAL。 |
+| `cli-fake-hal-app` | `bin/fake.php` | CLI 版 fake context。 |
+| `dev-fake-hal-app` | alias / direct test use | Fake + dev logging。 |
+| `cli-dev-fake-hal-app` | `bin/dev.php` | CLI 版 Fake + dev logging。 |
+| `test-hal-app` | PHPUnit / `tests/Http/json-index.php` | Test + Fake + dev diagnostics + HAL。 |
+| `admin-test-hal-app` | `tests/Http/admin-json-index.php` | Test + HAL + logged-in admin session。 |
+| `html-test-hal-app` | `tests/Http/index.php` | Test + HTML presentation。 |
 
-## 2. 現在の context → Module 対応
+## 削除済みの旧 wrapper / boundary
 
-`src/Injector.php` の `match` は次の対応を持つ。
+次の複合 wrapper module は BEAR.Package の token composition へ置き換え済みである。
 
-| Context | Module | Composition 実体 |
-|---|---|---|
-| `hal-api-app`, `cli-hal-api-app` | `HalApiModule` | `AppModule` + `SqlModule`。 |
-| `fake-hal-api-app`, `cli-fake-hal-api-app` | `FakeModule` | `AppModule` + `FakeQueryModule` + fake service bindings。 |
-| `dev-fake-hal-api-app`, `cli-dev-fake-hal-api-app` | `DevFakeHalApiModule` | `FakeModule` + `DevModule`。 |
-| `admin-test-hal-api-app`, `cli-admin-test-hal-api-app` | `AdminTestModule` | `TestModule` + BEAR Package `HalModule` + admin session override。 |
-| `http-prod-hal-api-app`, `cli-http-prod-hal-api-app` | `HttpProdHalTestModule` | `ProdModule` + BEAR Package `HalModule` + HTTP session adapters。 |
-| `http-test-hal-api-app`, `cli-http-test-hal-api-app` | `HttpTestModule` | `TestModule` + BEAR Package `HalModule`。 |
-| `test-hal-api-app`, `cli-test-hal-api-app` | `TestModule` | `FakeModule` + `DevModule`。 |
-| `html-hal-app`, `cli-html-hal-app` | `HtmlHalModule` | `HalApiModule` + `HtmlModule`。 |
-| `html-test-hal-api-app`, `cli-html-test-hal-api-app` | `HtmlTestModule` | `TestModule` + `HtmlModule(debug/cache off)`。 |
-| `prod-hal-api-app`, `cli-prod-hal-api-app` | `ProdModule` | `AppModule` + prod session override + prod CSRF override + `SqlModule`。 |
-| `html-prod-hal-api-app`, `cli-html-prod-hal-api-app` | `HtmlProdModule` | `ProdModule` + `HtmlModule`。 |
+- `HalApiModule`
+- `HtmlHalModule`
+- `HtmlProdModule`
+- `HtmlTestModule`
+- `HttpTestModule`
+- `HttpProdHalTestModule`
+- `DevFakeHalApiModule`
+- 旧アプリ固有 `ProdModule`
+- `ProdSessionOverrideModule`
+- `ProdCsrfOverrideModule`
 
-## 3. BEAR.Package 標準 composition で置換可能なもの
+また、CSRF のために Resource invocation を横取りしていた `RequestQueryCapturingInvoker` / `RequestQueryContext` も削除済みである。現在の CSRF interceptor は `ResourceObject->uri->query` から token を読む。
 
-BEAR.Package の `Module` は context token を次の順で合成する。
-
-- `hal-api-app` → `AppModule` → `ApiModule` → `HalModule`
-- `cli-hal-api-app` → `AppModule` → `ApiModule` → `HalModule` → `CliModule`
-- `prod-hal-api-app` → `AppModule` → `ApiModule` → `HalModule` → `ProdModule`
-
-そのまま置換できる、または置換しやすい領域は次の通り。
-
-| 現在 | 標準 composition での候補 | 理由 |
-|---|---|---|
-| `src/Injector.php` の手書き `match` | `BEAR\Package\Injector::getInstance(__NAMESPACE__, $context, dirname(__DIR__))` | Skeleton / MyVendor.Cms と同じ薄い委譲形に戻せる。 |
-| `HalApiModule` の `Hal` / `Api` 意味 | package `ApiModule` + `HalModule` token | context 名に含まれる `api` / `hal` は BEAR.Package が既に提供する。 |
-| `cli-*` context | package `CliModule` token | CLI router/responder/http-cache は標準 token にある。 |
-| `AppMetaModule` の明示 override | package `Module` の最後の `AppMetaModule` override | `new Injector(new *Module(...))` を直接使うテストを整理すれば、標準 factory 側に寄せられる。 |
-| `HttpTestModule` の HAL override | `http-test-hal-api-app` を token module 化したうえで `HalModule` を標準に任せる | `hal` token は package 標準で十分。 |
-
-注意点: BeMart の現在の `ProdModule` はアプリ固有の「prod session/CSRF/SQL」module であり、BEAR.Package の `Context\ProdModule` と同名 token で衝突する。標準 `prod` token を使うなら、アプリ固有の production 差し替えは別 token へ退避する必要がある。
-
-## 4. token module へ分解すべきもの
-
-手書き `match` を消すために、現在の複合 Module を token 単位へ分ける。
-
-| token 候補 | Module 候補 | 移す内容 |
-|---|---|---|
-| `app` | `AppModule` | `PackageModule`、Be Framework、JSON Schema、router/error、domain default service。SQL/Fake/Dev/HTML/HTTP test 固有は置かない。 |
-| `sql` または production default in `AppModule` | `SqlModule` | `MediaQueryRuntimeModule`。MyVendor.Cms と同じ方針なら production default として `AppModule` へ寄せ、fake/test で override する案もある。 |
-| `fake` | `FakeModule` | Ray.FakeQuery と fake external services。MyVendor.Cms 同様 canonical prefix として維持。 |
-| `test` | `TestModule` | `FakeModule` + `DevModule`、または test-only override。 |
-| `dev` | `DevModule` | dev logging / semantic logger wrapper。 |
-| `html` | `HtmlModule` | Twig / WebForm / HTML session adapter。 |
-| `admin` | `AdminModule` or `AdminTestModule` split | logged-in admin test session。今の `AdminTestModule` は `test` + `hal` + admin を内包しているため token 化対象。 |
-| `http` | `HttpModule` / `HttpProdModule` / `HttpTestModule` split | HTTP workflow fixture 用 session adapter・server bootstrap 前提。`http` が本当に DI token か、test entrypoint の env だけで足りるかは要整理。 |
-| `eccube-session` / `session` | new module | `ProdSessionOverrideModule` と HTML/admin session adapter の境界。prod token 名衝突を避けるため、BEAR.Package `prod` とは分ける。 |
-| `eccube-csrf` / `csrf` | existing `ProdCsrfOverrideModule` | 今回は対象外。将来 token 化する場合も Resource 引数へ出さず、DI/interceptor 境界に留める。 |
-
-## 5. まだ残すべき / 要調査のもの
+## 現在残すもの
 
 | 項目 | 判断 |
 |---|---|
-| `CanonicalResourceRouterModule` | AppModule 内に残すか、標準 router へ戻せるか要調査。BEAR.Package 標準へ戻す目的からは red flag なので、別 PR で router 差分の必要性を監査する。 |
-| `RequestQueryCapturingInvoker` | Resource invoker override は framework boundary。標準で代替できるか要調査。 |
-| `AppErrorModule` | アプリ固有 error handler として残す余地はあるが、BEAR.Package prod error handling と重なる部分を確認する。 |
-| `MediaQueryRuntimeModule::queryClasses()` | 手動 class list。MyVendor.Cms は `MediaQuerySqlModule` の directory scan を使う。BeMart 側も convention scan へ寄せられるか別調査。 |
-| `ProdModule` というクラス名 | BEAR.Package `Context\ProdModule` を shadow するため、標準 `prod` token 復帰時の最大の衝突点。アプリ固有 production binding を `SqlModule` / session token へ逃がす計画が必要。 |
-| `HtmlProdModule` / `HttpProdHalTestModule` | prod token と HTML/HTTP test token の責務が混ざっている。小 PR で分解してから context 名を再定義する。 |
-| direct `new Injector(new *Module(...))` tests | 標準 `PackageInjector` へ寄せると `AppMetaModule` 明示 override が不要になる可能性がある。先に該当テストを棚卸しする。 |
-| CSRF | 今回対象外。Resource 引数化は採用しない。現在の DI/interceptor 境界のまま別論点として扱う。 |
+| `CanonicalResourceRouterModule` | `_method` / CLI / legacy form 互換が残るため、template 側の整理後に別 PR で削る。 |
+| `DownloadResponder` | CSV/PDF/ZIP の標準 streaming 化後に別 PR で削る。 |
+| `MediaQueryRuntimeModule` / `MediaQueryProxyModule` | Query discovery は `MediaQueryQueries::fromAppRoot()` に寄せ済み。runtime DB 接続 module として残す。 |
+| `AppErrorModule` | アプリ固有 error handler として残す。BEAR.Package prod error handling との重複は別途確認する。 |
 
-## 6. 次の小 PR 単位
+## 残作業
 
-1. **Injector 委譲の足場 PR**
-   `src/Injector.php` を Skeleton / MyVendor.Cms 型へ戻す前提で、現在の context と token module の対応表をテスト化する。まだ実装切替はしない。
-
-2. **Prod token 衝突解消 PR**
-   アプリ固有 `ProdModule` の責務を `SqlModule`、session module、対象外の CSRF module へ分解し、BEAR.Package `prod` token を使える名前空間に戻す。
-
-3. **HAL/API/CLI 標準 token 採用 PR**
-   `HalApiModule` / `HttpTestModule` などが内包する `HalModule` 相当を package `hal` token に任せる。`cli-*` も package `CliModule` に任せる。
-
-4. **Fake/Test/Dev prefix 整理 PR**
-   MyVendor.Cms の convention と同じく `fake-` / `test-` を canonical prefix とし、`dev-fake-` が本当に必要か、`test-` に含めるべきかを決める。
-
-5. **HTML token PR**
-   `HtmlModule` を `html` token として独立させ、`html-hal-app` / `html-test-hal-api-app` / `html-prod-hal-api-app` が BEAR.Package composition で読めることを確認する。
-
-6. **HTTP workflow fixture PR**
-   `http-*` context が DI token として必要か、`tests/Http/*-index.php` の session/bootstrap fixture だけで表現できるかを切り分ける。
-
-7. **framework-boundary 監査 PR**
-   router / invoker / MediaQuery manual list / error handler を標準参照と比較し、残す理由を ADR または methodology 文書へ記録する。
-
-## 7. CSRF の扱い
-
-CSRF は今回の context composition 調査の対象外とする。将来扱う場合も、token module や interceptor/adapter の DI 境界で扱い、Resource メソッド引数へ token を露出する案は採用しない。
+1. `CanonicalResourceRouter` を不要にするため、template / form 側の legacy compatibility を削る。
+2. `DownloadResponder` を標準 streaming responder へ寄せる。
+3. ActionRedirect 互換層を Resource / schema / smoke fixture / apidoc と同時に整理する。
+4. BEAR.DevTools の workflow-test contract がタグリリースされたら、`bear/devtools` の dev branch 依存をタグへ戻す。
