@@ -31,6 +31,8 @@ use function sprintf;
  */
 final class WorkflowFixtureBoundary
 {
+    private const CUSTOMER_STATUS_WITHDRAWN = 3;
+
     /** @var list<Closure(): void> */
     private array $cleanupCallbacks = [];
 
@@ -60,6 +62,10 @@ final class WorkflowFixtureBoundary
         $layouts->put($layout);
 
         if (! $previous instanceof LayoutEntity) {
+            // NOTE: LayoutStorageInterface has no delete transition. The first
+            // run against a DB without layoutId creates an explicit reusable
+            // baseline; later cleanup/reset can replace this when a dedicated
+            // fixture purge contract exists.
             return;
         }
 
@@ -154,7 +160,7 @@ final class WorkflowFixtureBoundary
             sex: $customer->sex,
             job: $customer->job,
             initialPoint: $customer->initialPoint,
-            customerStatus: 3,
+            customerStatus: self::CUSTOMER_STATUS_WITHDRAWN,
             secretKey: $customer->secretKey,
         );
     }
