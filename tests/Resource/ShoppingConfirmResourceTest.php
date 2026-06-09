@@ -92,6 +92,7 @@ final class ShoppingConfirmResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->assertSame('Pre-order not found.', $ro->body['message']);
     }
 
     public function testOnGetMalformedPreOrderIdReturns400(): void
@@ -102,6 +103,8 @@ final class ShoppingConfirmResourceTest extends TestCase
         ]);
 
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
+        $this->assertIsArray($ro->body);
+        $this->assertArrayHasKey('message', $ro->body);
     }
 
     public function testOnGetVerifyFailureRedirectsToShoppingError(): void

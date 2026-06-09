@@ -7,8 +7,8 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
-use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\HtmlTestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -23,7 +23,7 @@ use function dirname;
  *
  * Render-smoke standard: each page renders a full admin-frame HTML
  * document through {@see HtmlModule} with the body shape supplied by
- * the {@see \MyVendor\BeMart\Resource\Page\Admin\Product\AbstractCsvUpload}
+ * the {@see \MyVendor\BeMart\Support\Resource\AbstractCsvUpload}
  * subclasses. The EC-CUBE residual-diff fidelity check is a follow-up
  * gated on the EC-CUBE 4.3 reference clone (`tools/ec-cube-source/`).
  */

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Input\GetAdminProductInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminProductEditForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -51,8 +53,11 @@ class Edit extends ResourceObject
     }
 
     /**
+     * ALPS `goProduct` に対応する GET 操作。
      * @psalm-taint-source input $productCode
      */
+    #[Alps('goProduct')]
+    #[JsonSchema(schema: 'get-admin-product-edit.json', params: 'get-admin-product-edit.param.json')]
     #[Link(rel: 'doCreateProduct', href: 'page://self/admin/product', method: 'post')]
     #[Link(rel: 'doUpdateProduct', href: 'page://self/admin/product', method: 'put')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
@@ -70,9 +75,9 @@ class Edit extends ResourceObject
 
         if ($productCode === '') {
             $form->fillValues([
-                'name' => '', 'product_code' => '', 'price02' => '',
-                'stock' => '', 'status' => '1', 'description_detail' => '',
-                'search_word' => '', 'note' => '',
+                'productName' => '', 'productCode' => '', 'price02' => '',
+                'stock' => '', 'productStatus' => '1', 'description' => '',
+                'searchWord' => '', 'note' => '',
             ]);
 
             $this->code = Code::OK;
@@ -85,35 +90,18 @@ class Edit extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetAdminProductInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された商品が見つかりません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminProductInput(productCode: $productCode));
 
         assert($final instanceof AdminProductFetched);
 
         $form->fillValues([
-            'name' => $final->productName,
-            'product_code' => $final->productCode,
+            'productName' => $final->productName,
+            'productCode' => $final->productCode,
             'price02' => (string) $final->price02,
             'stock' => $final->stock === null ? '' : (string) $final->stock,
-            'status' => (string) $final->productStatus,
-            'description_detail' => $final->description ?? '',
-            'search_word' => $final->searchWord ?? '',
+            'productStatus' => (string) $final->productStatus,
+            'description' => $final->description ?? '',
+            'searchWord' => $final->searchWord ?? '',
             'note' => $final->note ?? '',
         ]);
 

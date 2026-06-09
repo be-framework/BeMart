@@ -21,6 +21,9 @@ interface TwoFactorAuthInterface
     /** Generate a fresh base32 TOTP secret (device-setup screen). */
     public function generateSecret(): string;
 
+    /** Generate the current 6-digit device token for a candidate secret. */
+    public function generateDeviceToken(string $secret): string;
+
     /**
      * Register/replace the TOTP secret for an admin (device setup).
      *

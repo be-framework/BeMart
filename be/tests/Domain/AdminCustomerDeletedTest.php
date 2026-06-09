@@ -90,6 +90,7 @@ final class AdminCustomerDeletedTest extends TestCase
         $this->assertSame('アリス', $last['name02']);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
     public function testIdempotentReDeleteIsNoOp(): void
     {
         $this->markTestSkipped('Idempotent re-delete needs mutable persistence; covered by the SQL suite.');

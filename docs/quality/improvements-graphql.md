@@ -1,3 +1,8 @@
+---
+layout: default
+title: "eccube-api4 GraphQLスキーマ調査結果とALPS改善案"
+---
+
 # eccube-api4 GraphQLスキーマ調査結果とALPS改善案
 
 ## GraphQLスキーマの概要

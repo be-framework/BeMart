@@ -1,9 +1,12 @@
 /vendor/
 /.phpunit.cache/
+/build/
 /var/log/*.json
 /var/tmp/
 /tests/Http/log/*.log
 .DS_Store
+*.swp
+*.swo
 /.claude/worktrees/
 
 # Malt local runtime state
@@ -12,5 +15,5 @@
 /malt/var/
 /malt/conf/*.tmp
 
-# EC-CUBE source clone for schema extraction (Phase 2a)
+# EC-CUBE source clone for schema extraction and HTML parity tests
 /tools/ec-cube-source/

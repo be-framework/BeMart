@@ -35,6 +35,7 @@ use function dirname;
  * the Be Final layer. The Resource tests cover HTTP semantics; these
  * focus on AUTHN / AUTHZ branching and partial-update merging.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class CustomerAddressBookTest extends TestCase
 {
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';

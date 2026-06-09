@@ -4,30 +4,41 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Be\Exception\ProductCodeAlreadyInUseException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\AdminProductCreated;
 use MyVendor\BeMart\Be\Final\AdminProductCsvExported;
+use MyVendor\BeMart\Be\Input\AdminCreateProductInput;
 use MyVendor\BeMart\Be\Input\AdminExportProductInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_flip;
 use function assert;
+use function fclose;
+use function fgetcsv;
+use function fopen;
+use function fwrite;
+use function is_string;
+use function rewind;
+use function trim;
 
 /**
  * EC-CUBE goExportProduct — 商品CSVをエクスポートする (Wave 8 admin).
  *
  * onGet only — safe download. Admin-only.
  *
- * ALPS counterpart `doImportProductCsv` is INTENTIONALLY NOT
- * implemented in Wave 8: the EC-CUBE importer parses dtb_product
- * shaped CSV rows with insert-or-update semantics + multi-column
- * uniqueness contracts + extended PurchaseFlow orchestration. That
- * depth doesn't fit a single-day migration and would force the
- * JSON-backed fake product handler to grow a bulk-upsert surface that contradicts
- * the CQRS split. Phase 2 will land it as a dedicated Cascade Diamond
- * pattern (`insurance-claim` demo). The ALPS id remains documented;
- * no Be Input or BEAR resource is shipped for it yet.
+ * POST imports rows using the same default columns as the export
+ * projection: productCode, productName, price02, stock, productStatus,
+ * description, searchWord, note. Each row is handed to the existing
+ * doCreateProduct Be chain so AUTHZ, semantic validation and duplicate
+ * detection stay in the same place as the form flow.
  *
  * Failure mapping:
  *   - UnauthorizedAdminAccessException → 403
@@ -46,17 +57,15 @@ class ProductCsv extends ResourceObject
     ) {
     }
 
+    /** ALPS `goExportProduct` に対応する GET 操作。 */
+    #[Alps('goExportProduct')]
+    #[JsonSchema(schema: 'get-admin-product-csv.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    #[Link(rel: 'doImportProductCsv', href: 'page://self/admin/product-csv', method: 'post')]
+    #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new AdminExportProductInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminExportProductInput());
 
         assert($final instanceof AdminProductCsvExported);
 
@@ -66,6 +75,96 @@ class ProductCsv extends ResourceObject
         $this->body = [
             'csv' => $final->csv,
             'count' => $final->count,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * ALPS `doCreateProduct` に対応する POST 操作。
+     * @psalm-taint-source input $csv
+     */
+    #[Alps('doCreateProduct')]
+    #[JsonSchema(schema: 'post-admin-product-csv.json', params: 'post-admin-product-csv.param.json')]
+    #[Link(rel: 'goExportCategory', href: 'page://self/admin/category/csv')]
+    #[CsrfProtected]
+    public function onPost(string $csv): static
+    {
+        $handle = fopen('php://memory', 'w+');
+        if ($handle === false) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => 'CSVを読み込めませんでした。'];
+
+            return $this;
+        }
+
+        fwrite($handle, $csv);
+        rewind($handle);
+
+        $header = fgetcsv($handle, 0, ',', '"', '\\');
+        if (! is_array($header)) {
+            fclose($handle);
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => 'CSVヘッダーがありません。'];
+
+            return $this;
+        }
+
+        $columns = array_flip($header);
+        if (! isset($columns['productCode'], $columns['productName'], $columns['price02'])) {
+            fclose($handle);
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => '商品CSVの必須列がありません。'];
+
+            return $this;
+        }
+
+        $count = 0;
+        $productCodes = [];
+        while (true) {
+            $row = fgetcsv($handle, 0, ',', '"', '\\');
+            if ($row === false || $row === null) {
+                break;
+            }
+
+            $productCode = trim((string) ($row[$columns['productCode']] ?? ''));
+            if ($productCode === '') {
+                continue;
+            }
+
+            $stockCell = isset($columns['stock'], $row[$columns['stock']]) ? trim((string) $row[$columns['stock']]) : '';
+            $statusCell = isset($columns['productStatus'], $row[$columns['productStatus']]) ? trim((string) $row[$columns['productStatus']]) : '';
+            $descriptionColumn = $columns['description'] ?? null;
+            $searchWordColumn = $columns['searchWord'] ?? null;
+            $noteColumn = $columns['note'] ?? null;
+            $description = $descriptionColumn !== null && isset($row[$descriptionColumn]) ? trim($row[$descriptionColumn]) : null;
+            $searchWord = $searchWordColumn !== null && isset($row[$searchWordColumn]) ? trim($row[$searchWordColumn]) : null;
+            $note = $noteColumn !== null && isset($row[$noteColumn]) ? trim($row[$noteColumn]) : null;
+
+            $final = ($this->becoming)(new AdminCreateProductInput(
+                productCode: $productCode,
+                productName: trim((string) ($row[$columns['productName']] ?? '')),
+                price02: (int) trim((string) ($row[$columns['price02']] ?? '0')),
+                stock: $stockCell === '' ? null : (int) $stockCell,
+                productStatus: $statusCell === '' ? null : (int) $statusCell,
+                description: $description,
+                searchWord: $searchWord,
+                note: $note,
+            ));
+
+            assert($final instanceof AdminProductCreated);
+            $count++;
+            $productCodes[] = $final->productCode;
+        }
+
+        fclose($handle);
+
+        $this->code = Code::OK;
+        $this->headers['Location'] = '/admin/product-list';
+        $this->body = [
+            'transitionId' => 'doImportProductCsv',
+            'count' => $count,
+            'productCodes' => $productCodes,
         ];
 
         return $this;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Delivery;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
 use MyVendor\BeMart\Be\Input\UpdateDeliveryInput;
 use MyVendor\BeMart\Form\AdminDeliveryForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -49,17 +51,12 @@ class Delivery extends ResourceObject
      *
      * @psalm-taint-source input $deliveryId
      */
+    #[Alps('doUpdateDelivery')]
+    #[JsonSchema(schema: 'get-admin-delivery-delivery.json', params: 'get-admin-delivery-delivery.param.json')]
     #[Link(rel: 'doUpdateDelivery', href: 'page://self/admin/delivery/delivery', method: 'put')]
     public function onGet(string $deliveryId = ''): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminDeliveryListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminDeliveryListInput());
 
         assert($final instanceof AdminDeliveryListFetched);
 
@@ -99,10 +96,13 @@ class Delivery extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateDelivery` に対応する PUT 操作。
      * @psalm-taint-source input $deliveryId
      * @psalm-taint-source input $deliveryName
      * @psalm-taint-source input $visible
      */
+    #[Alps('doUpdateDelivery')]
+    #[JsonSchema(schema: 'put-admin-delivery-delivery.json', params: 'put-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[CsrfProtected]
     public function onPut(
@@ -110,28 +110,11 @@ class Delivery extends ResourceObject
         string|null $deliveryName = null,
         bool|null $visible = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateDeliveryInput(
-                deliveryId: $deliveryId,
-                deliveryName: $deliveryName,
-                visible: $visible,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (DeliveryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された配送方法は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateDeliveryInput(
+            deliveryId: $deliveryId,
+            deliveryName: $deliveryName,
+            visible: $visible,
+        ));
 
         assert($final instanceof DeliveryUpdated);
 
@@ -146,25 +129,17 @@ class Delivery extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateDelivery` に対応する DELETE 操作。
      * @psalm-taint-source input $deliveryId
      */
+    #[Alps('doUpdateDelivery')]
+    #[JsonSchema(schema: 'delete-admin-delivery-delivery.json', params: 'delete-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
+    #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[CsrfProtected]
     public function onDelete(string $deliveryId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteDeliveryInput(deliveryId: $deliveryId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (DeliveryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された配送方法は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteDeliveryInput(deliveryId: $deliveryId));
 
         assert($final instanceof DeliveryDeleted);
 

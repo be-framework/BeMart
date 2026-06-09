@@ -41,12 +41,12 @@ final class AdminMemberListResourceSqlTest extends AbstractResourceSqlTestCase
 
         // The same three-admin roster as the Fake fixture.
         $testAdminId = (string) $this->insertAdmin([
-            'login_id' => 'test-admin',
+            'loginId' => 'test-admin',
             'name' => 'テスト管理者',
             'authority_id' => 0,
         ]);
-        $this->insertAdmin(['login_id' => 'shop-owner', 'name' => '店舗オーナー', 'authority_id' => 1]);
-        $this->insertAdmin(['login_id' => 'deputy', 'name' => '副管理者', 'authority_id' => 1]);
+        $this->insertAdmin(['loginId' => 'shop-owner', 'name' => '店舗オーナー', 'authority_id' => 1]);
+        $this->insertAdmin(['loginId' => 'deputy', 'name' => '副管理者', 'authority_id' => 1]);
 
         $this->rebindAdminSession($testAdminId);
     }

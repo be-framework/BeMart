@@ -66,7 +66,8 @@ final readonly class CheckoutPrepared
             throw new PreOrderNotFoundException();
         }
 
-        if ($session->customerId !== $order->customerId) {
+        $guestPreOrder = $session->customerId === null && $order->customerId === '';
+        if (! $guestPreOrder && $session->customerId !== $order->customerId) {
             throw new UnauthorizedPreOrderAccessException();
         }
 

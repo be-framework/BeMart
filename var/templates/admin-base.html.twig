@@ -27,7 +27,7 @@
      KEPT: BeMartTwigExtension::asset() ports EC-CUBE's `assets.packages`
      map (framework.yaml) — `admin` -> `/template/admin/`, `bundle` ->
      `/bundle/`. The admin theme and the default storefront theme ship
-     byte-different files at the same `assets/...` path (e.g.
+     byte-different files at the same `assets/...` asset path example
      `assets/js/function.js`); the package keeps them on separate served
      URLs so the deployed `public/` tree resolves each to the right file.
    - `csrf_token(...)` -> EC-CUBE per-request CSRF widget. The
@@ -69,14 +69,14 @@
     <script src="{{ asset('admin.bundle.js', 'bundle') }}"></script>
     {% block stylesheet %}{% endblock %}
 </head>
-<body id="page_{{ route|default('admin_homepage') }}">
+<body id="page_{{ route|default('admin-index') }}">
 <header class="c-headerBar">
     <div class="c-headerBar__container">
         <div class="c-headerBar__logo">
-            <h1><img src="{{ asset('assets/img/logo@2x.png', 'admin') }}"></h1>
+            <h1><img src="{{ asset('assets/img/logo@2x.png', 'admin') }}" alt="BeMart"></h1>
         </div>
         <a class="c-headerBar__toggleBtn"><i class="fa fa-bars" aria-hidden="true"></i></a>
-        <a class="c-headerBar__shopTitle" href="{{ url('homepage') }}" target="_blank"><span>{{ shop_name|default('BeMart') }}</span><i class="fa fa-angle-right" aria-hidden="true"></i></a>
+        <a class="c-headerBar__shopTitle" href="/" target="_blank"><span>{{ shop_name|default('BeMart') }}</span><i class="fa fa-angle-right" aria-hidden="true"></i></a>
         <a class="c-headerBar__userMenu"
            data-bs-container="body"
            data-bs-toggle="popover"
@@ -91,7 +91,7 @@
             <ul class="c-mainNavArea__nav">
                 <!-- ホーム -->
                 <li class="c-mainNavArea__navItem">
-                    <a class="c-mainNavArea__navItemTitle" href="{{ url('admin_homepage') }}">
+                    <a class="c-mainNavArea__navItemTitle" href="/admin/index">
                         <i class="fa fa-home fa-fw" aria-hidden="true"></i>
                         <span>ホーム</span>
                     </a>
@@ -103,12 +103,12 @@
                         <span>商品管理</span>
                     </a>
                     <ul class="collapse" id="nav-product">
-                        <li><a href="{{ url('admin_product') }}"><span>商品一覧</span></a></li>
-                        <li><a href="{{ url('admin_product_product_new') }}"><span>商品登録</span></a></li>
-                        <li><a href="{{ url('admin_product_class_name') }}"><span>規格管理</span></a></li>
-                        <li><a href="{{ url('admin_product_class_category') }}"><span>規格分類管理</span></a></li>
-                        <li><a href="{{ url('admin_product_category') }}"><span>カテゴリ管理</span></a></li>
-                        <li><a href="{{ url('admin_product_tag') }}"><span>タグ管理</span></a></li>
+                        <li><a href="/admin/product-list"><span>商品一覧</span></a></li>
+                        <li><a href="/admin/product-new"><span>商品登録</span></a></li>
+                        <li><a href="/admin/class-name/class-name-list"><span>規格管理</span></a></li>
+                        <li><a href="/admin/class-category/class-category-list"><span>規格分類管理</span></a></li>
+                        <li><a href="/admin/category/category-list"><span>カテゴリ管理</span></a></li>
+                        <li><a href="/admin/tag/tag-list"><span>タグ管理</span></a></li>
                     </ul>
                 </li>
                 <li class="c-mainNavArea__navItem">
@@ -117,10 +117,10 @@
                         <span>受注管理</span>
                     </a>
                     <ul class="collapse" id="nav-order">
-                        <li><a href="{{ url('admin_order') }}"><span>受注一覧</span></a></li>
-                        <li><a href="{{ url('admin_setting_shop_order_status') }}"><span>対応状況管理</span></a></li>
-                        <li><a href="{{ url('admin_order_export_order') }}"><span>受注CSV出力</span></a></li>
-                        <li><a href="{{ url('admin_order_export_shipping') }}"><span>出荷CSV出力</span></a></li>
+                        <li><a href="/admin/order-list"><span>受注一覧</span></a></li>
+                        <li><a href="/admin/order-status"><span>対応状況管理</span></a></li>
+                        <li><a href="/admin/order/export-order"><span>受注CSV出力</span></a></li>
+                        <li><a href="/admin/order/export-shipping"><span>出荷CSV出力</span></a></li>
                     </ul>
                 </li>
                 <li class="c-mainNavArea__navItem">
@@ -129,8 +129,8 @@
                         <span>会員管理</span>
                     </a>
                     <ul class="collapse" id="nav-customer">
-                        <li><a href="{{ url('admin_customer') }}"><span>会員一覧</span></a></li>
-                        <li><a href="{{ url('admin_customer_export') }}"><span>会員CSV出力</span></a></li>
+                        <li><a href="/admin/customer-list"><span>会員一覧</span></a></li>
+                        <li><a href="/admin/customer-csv"><span>会員CSV出力</span></a></li>
                     </ul>
                 </li>
                 <li class="c-mainNavArea__navItem">
@@ -139,13 +139,13 @@
                         <span>コンテンツ管理</span>
                     </a>
                     <ul class="collapse" id="nav-content">
-                        <li><a href="{{ url('admin_content_news') }}"><span>新着情報管理</span></a></li>
-                        <li><a href="{{ url('admin_content_page') }}"><span>ページ管理</span></a></li>
-                        <li><a href="{{ url('admin_content_layout') }}"><span>レイアウト管理</span></a></li>
-                        <li><a href="{{ url('admin_content_block') }}"><span>ブロック管理</span></a></li>
-                        <li><a href="{{ url('admin_content_css') }}"><span>CSS管理</span></a></li>
-                        <li><a href="{{ url('admin_content_js') }}"><span>JavaScript管理</span></a></li>
-                        <li><a href="{{ url('admin_content_cache') }}"><span>キャッシュ管理</span></a></li>
+                        <li><a href="/admin/news/news-list"><span>新着情報管理</span></a></li>
+                        <li><a href="/admin/page/page-list"><span>ページ管理</span></a></li>
+                        <li><a href="/admin/layout/layout-list"><span>レイアウト管理</span></a></li>
+                        <li><a href="/admin/block/block-list"><span>ブロック管理</span></a></li>
+                        <li><a href="/admin/content/css"><span>CSS管理</span></a></li>
+                        <li><a href="/admin/content/js"><span>JavaScript管理</span></a></li>
+                        <li><a href="/admin/content/cache"><span>キャッシュ管理</span></a></li>
                     </ul>
                 </li>
                 <li class="c-mainNavArea__navItem">
@@ -154,14 +154,14 @@
                         <span>設定</span>
                     </a>
                     <ul class="collapse" id="nav-setting">
-                        <li><a href="{{ url('admin_setting_shop') }}"><span>基本設定</span></a></li>
-                        <li><a href="{{ url('admin_setting_shop_delivery') }}"><span>配送方法設定</span></a></li>
-                        <li><a href="{{ url('admin_setting_shop_payment') }}"><span>支払方法設定</span></a></li>
-                        <li><a href="{{ url('admin_setting_shop_tax') }}"><span>税率設定</span></a></li>
-                        <li><a href="{{ url('admin_setting_shop_csv') }}"><span>CSV出力項目設定</span></a></li>
-                        <li><a href="{{ url('admin_setting_system_member') }}"><span>メンバー管理</span></a></li>
-                        <li><a href="{{ url('admin_setting_system_authority') }}"><span>権限管理</span></a></li>
-                        <li><a href="{{ url('admin_setting_system_security') }}"><span>セキュリティ管理</span></a></li>
+                        <li><a href="/admin/base-info"><span>基本設定</span></a></li>
+                        <li><a href="/admin/delivery/delivery-list"><span>配送方法設定</span></a></li>
+                        <li><a href="/admin/payment/payment-list"><span>支払方法設定</span></a></li>
+                        <li><a href="/admin/tax-rule/tax-rule-list"><span>税率設定</span></a></li>
+                        <li><a href="/admin/csv-config"><span>CSV出力項目設定</span></a></li>
+                        <li><a href="/admin/member-list"><span>メンバー管理</span></a></li>
+                        <li><a href="/admin/authority-role"><span>権限管理</span></a></li>
+                        <li><a href="/admin/security"><span>セキュリティ管理</span></a></li>
                     </ul>
                 </li>
                 <li class="c-mainNavArea__navItem">
@@ -170,9 +170,9 @@
                         <span>オーナーズストア</span>
                     </a>
                     <ul class="collapse" id="nav-store">
-                        <li><a href="{{ url('admin_store_plugin_owners_search_page') }}"><span>プラグイン一覧</span></a></li>
-                        <li><a href="{{ url('admin_store_template') }}"><span>テンプレート一覧</span></a></li>
-                        <li><a href="{{ url('admin_store_template_install') }}"><span>テンプレートアップロード</span></a></li>
+                        <li><a href="/admin/plugin-list"><span>プラグイン一覧</span></a></li>
+                        <li><a href="/admin/template/template-list"><span>テンプレート一覧</span></a></li>
+                        <li><a href="/admin/template/template-add"><span>テンプレートアップロード</span></a></li>
                     </ul>
                 </li>
                 <!-- 情報 -->
@@ -184,23 +184,23 @@
                     </a>
                     <ul class="collapse" id="others">
                         <li>
-                            <a href="https://www.ec-cube.net/" target="_blank">
-                                <span>公式サイト</span>
+                            <a href="https://github.com/be-framework/BeMart" target="_blank">
+                                <span>BeMart</span>
                             </a>
                         </li>
                         <li>
-                            <a href="https://xoo.ps/eccube/" target="_blank">
-                                <span>開発コミュニティ</span>
+                            <a href="https://be-framework.github.io/BeMart/" target="_blank">
+                                <span>公開ドキュメント</span>
                             </a>
                         </li>
                         <li>
-                            <a href="https://doc4.ec-cube.net/" target="_blank">
-                                <span>ドキュメント</span>
+                            <a href="https://bearsunday.github.io/" target="_blank">
+                                <span>BEAR.Sunday</span>
                             </a>
                         </li>
                         <li>
-                            <a href="https://www.ec-cube.net/product/" target="_blank">
-                                <span>管理・運用マニュアル</span>
+                            <a href="https://github.com/be-framework/BeMart/issues" target="_blank">
+                                <span>Issue tracker</span>
                             </a>
                         </li>
                     </ul>

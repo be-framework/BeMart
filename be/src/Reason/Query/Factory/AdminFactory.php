@@ -13,8 +13,8 @@ final class AdminFactory
         string $loginId,
         string $password,
         string $name,
-        int|string $authorityId,
-        int|string $workId,
+        int|string|null $authorityId = 1,
+        int|string|null $workId = AdminEntity::WORK_ACTIVE,
         int|string|null $sortNo = 0,
     ): AdminEntity {
         return new AdminEntity(
@@ -22,8 +22,8 @@ final class AdminFactory
             $loginId,
             $password,
             $name,
-            (int) $authorityId,
-            (int) $workId,
+            (int) ($authorityId ?? 1),
+            (int) ($workId ?? AdminEntity::WORK_ACTIVE),
             (int) ($sortNo ?? 0),
         );
     }

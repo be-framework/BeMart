@@ -73,7 +73,7 @@ final class ShoppingShippingMultipleEditHtmlRenderTest extends TestCase
         '<title>EC-CUBE / お届け先の追加</title>',
         '<meta name="author" content="">',
         // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -131,6 +131,7 @@ final class ShoppingShippingMultipleEditHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="phoneNumber"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShippingMultipleEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/shipping-multiple-edit')->toString();
@@ -211,7 +212,7 @@ final class ShoppingShippingMultipleEditHtmlRenderTest extends TestCase
                     'pref' => 'pref', 'addr01' => 'addr01', 'addr02' => 'addr02',
                 ]),
                 'phone_number' => 'phoneNumber',
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
             ]),
             'eccube_config' => ['locale' => 'ja'],
             'Page' => new EcCubeStub([
@@ -258,15 +259,15 @@ final class ShoppingShippingMultipleEditHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
         $form = (new FormFactory())->newInstance(ShoppingShippingEditForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($form instanceof ShoppingShippingEditForm && is_string($field) && $field !== '') {

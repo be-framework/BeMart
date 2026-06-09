@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
 use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -54,13 +56,16 @@ class TwoFactorAuth extends ResourceObject
      * session state — the admin firewall guard is downstream of a
      * successful challenge.
      */
+    #[Alps('doVerifyTwoFactorAuth')]
+    #[JsonSchema(schema: 'get-admin-two-factor-auth.json')]
+    #[Link(rel: 'doVerifyTwoFactorAuth', href: 'page://self/admin/two-factor-auth', method: 'post')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
     {
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuth',
-            'fields' => ['device_token'],
+            'fields' => ['deviceToken'],
             // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
             'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
         ];
@@ -84,26 +89,22 @@ class TwoFactorAuth extends ResourceObject
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $deviceToken
      */
+    #[Alps('doVerifyTwoFactorAuth')]
+    #[JsonSchema(schema: 'post-admin-two-factor-auth.json', params: 'post-admin-two-factor-auth.param.json')]
     #[CsrfProtected]
+    #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(string $loginId, string $deviceToken): static
     {
-        try {
-            $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
-                loginId: $loginId,
-                deviceToken: $deviceToken,
-            ));
-        } catch (SemanticVariableException | TwoFactorAuthFailedException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '認証コードが正しくありません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new VerifyTwoFactorAuthInput(
+            loginId: $loginId,
+            deviceToken: $deviceToken,
+        ));
 
         assert($final instanceof TwoFactorAuthVerified);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin';
+        $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doVerifyTwoFactorAuth',
             'loginId' => $final->loginId,

@@ -93,18 +93,17 @@ final class AdminCategoryEditResourceTest extends TestCase
 
     public function testOnGetUnknownCategoryReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/category/edit', ['categoryId' => 'nonexistent-zzz']);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\CategoryNotFoundException::class);
 
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->resource->get('page://self/admin/category/edit', ['categoryId' => 'nonexistent-zzz']);
     }
 
     public function testOnGetRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->get('page://self/admin/category/edit');
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
 
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('管理者', $ro->body['message']);
+        $this->resource->get('page://self/admin/category/edit');
     }
 }

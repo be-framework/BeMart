@@ -45,7 +45,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_delivery_edit' %}
+{% set route = 'mypage-address' %}
 {% set title = 'マイページ' %}
 
 {% block javascript %}
@@ -67,7 +67,7 @@
                         <div class="ec-off1Grid__cell">
 
                             <span class="p-country-name" style="display:none;">Japan</span>
-                            <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                             <div class="ec-borderedDefs">
                                 <dl>
                                     <dt>

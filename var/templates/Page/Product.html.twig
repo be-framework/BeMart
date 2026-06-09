@@ -15,7 +15,7 @@
   BeMart renders it through a real `AddCartForm` (an AbstractForm),
   exposed by the Product resource as `body.form`:
 
-    {{ form.input('product_id')|raw }}  <- hidden, seeded w/ productCode
+    {{ form.input('productCode')|raw }}  <- hidden, seeded w/ productCode
     {{ form.input('quantity')|raw }}    <- real number <input>, min=1
 
   Validation authority stays with the Be Framework Becoming chain (the
@@ -63,13 +63,13 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `asset('x')` -> `/x`; `url(route, params)` -> `/{route}?{query}`.
+   - `asset('x')` -> `/x`; `canonical-url route, params)` -> `/{route}?{query}`.
    - `price` filter -> JPY NumberFormatter.
 #}
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'product_page' %}
-{% set route = 'product_detail' %}
+{% set route = 'product' %}
 {% set title = productName %}
 
 {% block stylesheet %}
@@ -201,8 +201,8 @@
                             規格：{{ classNames|join(' / ') }}
                         </div>
                     {% endif %}
-                    <form action="{{ url('product_add_cart', {id: productCode}) }}" method="post" id="form1" name="form1">
-                        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <form action="/cart/item" method="post" id="form1" name="form1">
+                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                         {% if stockFind %}
                             <div class="ec-productRole__actions">
                                 <div class="ec-numberInput"><span>数量</span>
@@ -223,7 +223,7 @@
                             </div>
                         {% endif %}
 
-                        {{ form.input('product_id')|raw }}
+                        {{ form.input('productCode')|raw }}
                         {{ form.input('csrfToken')|raw }}
                     </form>
                     <div class="ec-modal">
@@ -234,7 +234,7 @@
                                 <div class="ec-modal-box">
                                     <div class="ec-role">
                                         <span class="ec-inlineBtn--cancel">お買い物を続ける</span>
-                                        <a href="{{ url('cart') }}" class="ec-inlineBtn--action">カートへ進む</a>
+                                        <a href="/cart" class="ec-inlineBtn--action">カートへ進む</a>
                                     </div>
                                 </div>
                             </div>

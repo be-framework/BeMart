@@ -73,7 +73,7 @@ final readonly class AdminShippingCsvImported
                 continue;
             }
 
-            $fields = str_getcsv($line);
+            $fields = str_getcsv($line, ',', '"', '\\');
             $orderNo = trim((string) ($fields[0] ?? ''));
             $trackingNumber = trim((string) ($fields[1] ?? ''));
 

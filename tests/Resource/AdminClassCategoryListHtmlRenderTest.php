@@ -143,6 +143,7 @@ final class AdminClassCategoryListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="admin_class_category_backend_name"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testClassCategoryListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/class-category/class-category-list')->toString();
@@ -196,8 +197,8 @@ final class AdminClassCategoryListHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // ClassCategory list: EC-CUBE's hidden `_token` CSRF input.
-            'name="_token"',
+            // ClassCategory list: EC-CUBE's hidden `csrfToken` CSRF input.
+            'name="csrfToken"',
             // ClassCategory list: EC-CUBE's CSV-setting link passes the
             // `CsvType::CSV_TYPE_CLASS_CATEGORY` constant as the `id`
             // query param; BeMart's port links to the bare route.
@@ -239,7 +240,7 @@ final class AdminClassCategoryListHtmlRenderTest extends TestCase
         // reference is fed the matching empty-label parent so the header
         // card diffs to zero apart from the (residual) id token.
         return $twig->render('Product/class_category.twig', [
-            'form' => new EcCubeStub(['_token' => '_token', 'name' => 'name', 'backend_name' => 'backend_name']),
+            'form' => new EcCubeStub(['csrfToken' => 'csrfToken', 'name' => 'name', 'backend_name' => 'backend_name']),
             'forms' => [],
             'ClassName' => new EcCubeStub(['id' => '', 'name' => '', 'backend_name' => '']),
             'ClassCategories' => [],
@@ -288,8 +289,8 @@ final class AdminClassCategoryListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 

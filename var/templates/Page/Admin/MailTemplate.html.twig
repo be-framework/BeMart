@@ -3,7 +3,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_setting_shop_mail' %}
+{% set route = 'admin-mail-template' %}
 {% set title = 'メール設定' %}
 {% set sub_title = '店舗設定' %}
 
@@ -22,9 +22,9 @@
             $('#mail_template').on('change', function() {
                 var id = $(this).val();
                 if (id) {
-                    location.href = '{{ url('admin_setting_shop_mail') }}/' + id;
+                    location.href = '/admin/mail-template/' + id;
                 } else {
-                    location.href = '{{ url('admin_setting_shop_mail') }}';
+                    location.href = '/admin/mail-template';
                 }
             });
 
@@ -38,7 +38,7 @@
 
 {% block main %}
     <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="">
-        <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -170,7 +170,7 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                        <a class="btn btn-ec-delete" href="{{ url('admin_setting_shop_mail_delete', {id: Mail.id}) }}" data-confirm="false">削除</a>
+                        <a class="btn btn-ec-delete" href="/admin/mail-template?mailTemplateId={{ Mail.id }}&_method=delete" data-confirm="false">削除</a>
                     </div>
                 </div>
             </div>

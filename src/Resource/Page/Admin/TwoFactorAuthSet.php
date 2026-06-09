@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -15,6 +16,7 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
 use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -60,13 +62,15 @@ class TwoFactorAuthSet extends ResourceObject
      * Anonymous-accessible (login-context): returns 200 regardless of
      * session state.
      */
+    #[Alps('doSetTwoFactorAuth')]
+    #[JsonSchema(schema: 'get-admin-two-factor-auth-set.json')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
     {
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuthSet',
-            'fields' => ['device_token', 'auth_key'],
+            'fields' => ['deviceToken', 'authKey'],
             // MISSING-BODY-FIELD placeholders — see the class doc. The
             // QR-code JS reads these; authKey stays empty to match the
             // EC-CUBE render baseline (the real secret is supplied to onPut).
@@ -109,27 +113,23 @@ class TwoFactorAuthSet extends ResourceObject
      * @psalm-taint-source input $authKey
      * @psalm-taint-source input $deviceToken
      */
+    #[Alps('doSetTwoFactorAuth')]
+    #[JsonSchema(schema: 'put-admin-two-factor-auth-set.json', params: 'put-admin-two-factor-auth-set.param.json')]
     #[CsrfProtected]
+    #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPut(string $loginId, string $authKey, string $deviceToken): static
     {
-        try {
-            $final = ($this->becoming)(new SetTwoFactorAuthInput(
-                loginId: $loginId,
-                authKey: $authKey,
-                deviceToken: $deviceToken,
-            ));
-        } catch (SemanticVariableException | TwoFactorAuthFailedException) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => '認証コードが正しくありません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SetTwoFactorAuthInput(
+            loginId: $loginId,
+            authKey: $authKey,
+            deviceToken: $deviceToken,
+        ));
 
         assert($final instanceof TwoFactorAuthConfigured);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin';
+        $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doSetTwoFactorAuth',
             'loginId' => $final->loginId,

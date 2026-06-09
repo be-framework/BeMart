@@ -20,8 +20,8 @@ use Ray\WebFormModule\AbstractForm;
  *  - **Field definition** — `init()` declares the two inputs with the
  *    EC-CUBE field names / ids / attributes so the rendered `<input>`
  *    markup reproduces EC-CUBE's `ec-*` form.
- *  - **HTML rendering** — `{{ form.input('login_email') }}` /
- *    `{{ form.error('login_email') }}` in `Login.html.twig`.
+ *  - **HTML rendering** — `{{ form.input('email') }}` /
+ *    `{{ form.error('email') }}` in `Login.html.twig`.
  *  - **Repopulation** — after a failed POST the resource calls
  *    {@see fillValues()} so the page re-renders with the entered email
  *    (EC-CUBE's `getLastUsername()` UX).
@@ -49,7 +49,7 @@ final class LoginForm extends AbstractForm
     /**
      * Domain errors bridged in from the Be Becoming chain, keyed by
      * field name. Populated by {@see setDomainError()}; consulted by
-     * {@see error()} so `{{ form.error('login_email') }}` shows the
+     * {@see error()} so `{{ form.error('email') }}` shows the
      * Be-domain message, not an Aura.Filter message.
      *
      * @var array<string, string>
@@ -60,26 +60,26 @@ final class LoginForm extends AbstractForm
      * Declares the login form fields.
      *
      * Field names / ids / attributes are ported verbatim from EC-CUBE's
-     * `Mypage/login.twig` `form_widget(form.login_email / login_pass)`
+     * `Mypage/login.twig` `form_widget(form.email / password)`
      * calls so the rendered markup carries EC-CUBE's `ec-*` form shape.
      * EC-CUBE's controller builds the form with `createNamedBuilder('')`
      * — an empty form name — so the children render with the bare field
-     * name as both `id` and `name` (`login_email`, `login_pass`).
+     * name as both `id` and `name` (`email`, `password`).
      */
     #[Override]
     public function init(): void
     {
-        $this->setField('login_email', 'text')
+        $this->setField('email', 'text')
             ->setAttribs([
-                'id' => 'login_email',
+                'id' => 'email',
                 'style' => 'ime-mode: disabled;',
                 'placeholder' => 'メールアドレス',
                 'autofocus' => 'autofocus',
             ]);
 
-        $this->setField('login_pass', 'password')
+        $this->setField('password', 'password')
             ->setAttribs([
-                'id' => 'login_pass',
+                'id' => 'password',
                 'placeholder' => 'パスワード',
             ]);
 
@@ -89,8 +89,8 @@ final class LoginForm extends AbstractForm
         // resource does not consult this filter; it is wired so a future
         // client-side / pre-submit UX could reuse it without re-deriving
         // the structural shape.
-        $this->filter->validate('login_email')->isNotBlank();
-        $this->filter->validate('login_pass')->isNotBlank();
+        $this->filter->validate('email')->isNotBlank();
+        $this->filter->validate('password')->isNotBlank();
     }
 
     /**

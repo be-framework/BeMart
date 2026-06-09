@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -22,6 +23,7 @@ use MyVendor\BeMart\Be\Input\AdminDeleteProductInput;
 use MyVendor\BeMart\Be\Input\AdminUpdateProductInput;
 use MyVendor\BeMart\Be\Input\GetAdminProductInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -61,30 +63,15 @@ class Product extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Alps('goProduct')]
+    #[JsonSchema(schema: 'get-admin-product.json', params: 'get-admin-product.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
     #[Link(rel: 'doUpdateProduct', href: 'page://self/admin/product', method: 'put')]
     #[Link(rel: 'doDeleteProduct', href: 'page://self/admin/product', method: 'delete')]
     #[Link(rel: 'doCopyProduct', href: 'page://self/admin/product-copy', method: 'post')]
     public function onGet(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminProductInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された商品が見つかりません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminProductInput(productCode: $productCode));
 
         assert($final instanceof AdminProductFetched);
 
@@ -125,6 +112,8 @@ class Product extends ResourceObject
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
      */
+    #[Alps('doCreateProduct')]
+    #[JsonSchema(schema: 'post-admin-product.json', params: 'post-admin-product.param.json')]
     #[CsrfProtected]
     public function onPost(
         string $productCode,
@@ -136,38 +125,16 @@ class Product extends ResourceObject
         string|null $searchWord = null,
         string|null $note = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminCreateProductInput(
-                productCode: $productCode,
-                productName: $productName,
-                price02: $price02,
-                stock: $stock,
-                productStatus: $productStatus,
-                description: $description,
-                searchWord: $searchWord,
-                note: $note,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'productCode' => $productCode,
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductCodeAlreadyInUseException) {
-            // BEAR\Resource\Code lacks CONFLICT; same integer-literal
-            // convention as Pilot 4 Entry / Wave 5O AdminCreateCustomer.
-            $this->code = 409;
-            $this->body = ['message' => 'この商品コードは既に使用されています。', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminCreateProductInput(
+            productCode: $productCode,
+            productName: $productName,
+            price02: $price02,
+            stock: $stock,
+            productStatus: $productStatus,
+            description: $description,
+            searchWord: $searchWord,
+            note: $note,
+        ));
 
         assert($final instanceof AdminProductCreated);
 
@@ -197,6 +164,9 @@ class Product extends ResourceObject
      * @psalm-taint-source input $searchWord
      * @psalm-taint-source input $note
      */
+    #[Alps('doUpdateProduct')]
+    #[JsonSchema(schema: 'put-admin-product.json', params: 'put-admin-product.param.json')]
+    #[Link(rel: 'goProductList', href: 'page://self/products')]
     #[CsrfProtected]
     public function onPut(
         string $productCode,
@@ -208,33 +178,16 @@ class Product extends ResourceObject
         string|null $searchWord = null,
         string|null $note = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminUpdateProductInput(
-                productCode: $productCode,
-                productName: $productName,
-                price02: $price02,
-                stock: $stock,
-                productStatus: $productStatus,
-                description: $description,
-                searchWord: $searchWord,
-                note: $note,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された商品が見つかりません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminUpdateProductInput(
+            productCode: $productCode,
+            productName: $productName,
+            price02: $price02,
+            stock: $stock,
+            productStatus: $productStatus,
+            description: $description,
+            searchWord: $searchWord,
+            note: $note,
+        ));
 
         assert($final instanceof AdminProductUpdated);
 
@@ -258,28 +211,13 @@ class Product extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Alps('doDeleteProduct')]
+    #[JsonSchema(schema: 'delete-admin-product.json', params: 'delete-admin-product.param.json')]
     #[CsrfProtected]
     public function onDelete(
         string $productCode,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminDeleteProductInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された商品が見つかりません。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminDeleteProductInput(productCode: $productCode));
 
         assert($final instanceof AdminProductDeleted);
 

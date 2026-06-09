@@ -12,17 +12,15 @@ tests/
 ├── Resource/      resource-unit tests (page://*, app://*)
 ├── Auth/          session-adapter tests
 ├── Module/        Ray.Di wiring tests
-├── Router/        Aura.Router route-map tests
-├── EntryPoint/    bin/app.php CLI entry-point tests
+├── Router/        canonical resource router tests
 ├── Hypermedia/    in-process workflow tests
-│   ├── WorkflowTest.php      storefront purchase-spine workflow (base class)
-│   └── RoutedResource.php    ResourceInterface over Aura.Router
+│   ├── FlowCustomerInquiryTest.php  semantic inquiry workflow
 ├── Http/          real-HTTP workflow tests
-│   ├── WorkflowTest.php      extends Hypermedia\WorkflowTest, swaps the transport
+│   ├── FlowCustomerInquiryTest.php  extends Hypermedia\FlowCustomerInquiryTest
 │   ├── HttpResource.php      ResourceInterface over a koriym/php-server + curl
-│   ├── index.php             server entry — sets APP_CONTEXT=html, requires public/index.php
+│   ├── index.php             server entry — dispatches the html-test context directly
 │   └── log/                  per-run request/response log (git-ignored)
-└── Support/       shared test exceptions
+└── Support/       shared workflow base and test exceptions
 ```
 
 `be/tests/` holds the Be-domain layer tests and runs in the `resource`
@@ -34,17 +32,42 @@ suite.
 
 | Suite | Directories | What it proves |
 |---|---|---|
-| `resource` | `tests/Resource`, `tests/Auth`, `tests/Module`, `tests/Router`, `tests/EntryPoint`, `be/tests` | units behave in isolation |
+| `fake` | `tests/Resource`, `tests/Auth`, `tests/Module`, `tests/Router`, `be/tests` | units behave in isolation |
 | `hypermedia` | `tests/Hypermedia` | a full user workflow holds **in-process** |
 | `http` | `tests/Http` | the same workflow holds over a **real HTTP / cookie boundary** |
 
+## Workflow postconditions
+
+A workflow test is not just "no exception while clicking through".
+It should prove the semantic postcondition of the flow whenever that
+postcondition is visible through public affordances.
+
+Default patterns:
+
+- CRUD: create, read back, update, read back, delete, then read none.
+- Registration: register, complete, then behave as the registered
+  customer through sign-in, signed-in Top, or MyPage.
+- Publish/edit flows: write in the admin surface, then read the result
+  from the customer-facing or management surface.
+- Notification/send flows: the workflow closes through complete,
+  receipt/ticket evidence, and a public closure link; mail body, storage,
+  and hidden side effects are asserted in Be / Resource / SQL contract
+  tests. `flow-customer-inquiry` intentionally shows this shape with a
+  public `ticketId` because there is no inquiry body readback resource.
+
+Do not add DB reads to a workflow test only to prove persistence. If the
+saved state is not observable through a public resource, put that proof
+in the command/storage/SQL contract layer and keep the workflow focused
+on the hypermedia journey.
+
 ## Write once, run at two transports
 
-`tests/Http/WorkflowTest` **extends** `tests/Hypermedia/WorkflowTest` and
-overrides only `setUp()` — it swaps `$this->resource` for an
-`HttpResource`. Every workflow assertion in the base class therefore runs
-again, unchanged, over real HTTP. A new workflow added to the hypermedia
-base is automatically covered at the HTTP tier too.
+Workflow tests extend `tests/Support/Hypermedia/AbstractWorkflowTest`.
+The PHP projection implements `newResource()` with an in-process
+`ResourceInterface`; the HTTP projection extends the same workflow class
+and swaps only `newResource()` for `HttpResource`. Every workflow
+assertion in the base class therefore runs again, unchanged, over real
+HTTP.
 
 The two tiers are not redundant. The `hypermedia` tier runs the whole
 workflow in one process against one injector — its DI singletons live
@@ -54,6 +77,21 @@ request and only the session cookie is carried between calls — exactly
 as in production. Bugs where state lives in a request-scoped singleton
 instead of the session — e.g. an in-memory cart — are invisible to the
 `hypermedia` tier and caught only by the `http` tier.
+
+## HAL follow contract
+
+`follow()` is a GET navigation DSL. It follows a rel from the current
+resource response and asserts the next response is `200 OK`.
+
+For the in-process tier, `follow()` delegates to `ResourceInterface::href()`
+and BEAR.Resource resolves the rel declared by `#[Link]`. For the HTTP tier,
+`HttpResource::href()` reads the rendered HAL representation and follows
+`_links.<rel>.href` with GET. HAL links do not carry an HTTP method.
+
+Unsafe or idempotent action transitions such as `do*` therefore do not use
+`follow()`. The workflow step calls `post()`, `put()`, `patch()`, or
+`delete()` directly with the request payload it knows from the ALPS/profile
+contract.
 
 ## Running
 
@@ -85,12 +123,5 @@ targets stateless JSON APIs and omits cookie handling.
 
 These work today but are candidates for future consolidation:
 
-- **`RoutedResource` is a shim.** The hypermedia tier follows links
-  through Aura.Router, not BEAR's native `#[Link]` / `crawl`
-  hypermedia.
-- **`canonicalizeFormFields` maps field names.** The workflow test
-  translates HTML wire field names (`_token`, `product_id`) into resource
-  argument names (`csrfToken`, `productCode`). The form and the resource
-  should eventually agree on names so this mapping is unnecessary.
-- **Coverage is one workflow.** Only the storefront purchase spine is
-  covered so far; the structure is in place for more.
+- **Coverage is expanding flow by flow.** `flow-*` tests are the canonical
+  workflow coverage; older routed HTML shims are not part of this layer.

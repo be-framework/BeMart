@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\JsonSchema;
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -12,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassCategoryCsvImported;
 use MyVendor\BeMart\Be\Input\ImportClassCategoryCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Support\Resource\AbstractCsvUpload;
 use Override;
 use Ray\WebFormModule\FormFactory;
 
@@ -39,32 +43,34 @@ class CsvClassCategory extends AbstractCsvUpload
         parent::__construct($adminSession, $formFactory);
     }
 
+    /** ALPS `goExportClassCategory` に対応する GET 操作。 */
+    #[Override]
+    #[Alps('goExportClassCategory')]
+    #[JsonSchema(schema: 'get-admin-product-csv-class-category.json')]
+    #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    public function onGet(): static
+    {
+        parent::onGet();
+
+        return $this;
+    }
+
     /**
      * Imports the 規格分類 CSV (doImportClassCategoryCsv).
      *
      * @psalm-taint-source input $csv
      */
+    #[Alps('doImportClassCategoryCsv')]
+    #[JsonSchema(schema: 'post-admin-product-csv-class-category.json', params: 'post-admin-product-csv-class-category.param.json')]
     #[CsrfProtected]
     public function onPost(string $csv = ''): static
     {
-        try {
-            $final = ($this->becoming)(new ImportClassCategoryCsvInput(csv: $csv));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid CSV.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ImportClassCategoryCsvInput(csv: $csv));
 
         assert($final instanceof ClassCategoryCsvImported);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/product/class_name';
+        $this->headers['Location'] = '/admin/class-category/class-category-list';
         $this->body = [
             'transitionId' => 'doImportClassCategoryCsv',
             'accepted' => $final->accepted,

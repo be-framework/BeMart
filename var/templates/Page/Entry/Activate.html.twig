@@ -18,7 +18,7 @@
      `front.entry.complete_message__activated` value is a multi-line YAML
      literal; EC-CUBE prints it through `nl2br`, so the port substitutes
      the literal verbatim and applies the same `nl2br`.
-   - `url('homepage')` / `url('cart')` -> deterministic paths
+   - `canonical-url 'homepage')` / `canonical-url 'cart')` -> deterministic paths
      (BeMartTwigExtension).
    - `qtyInCart` — EC-CUBE checks for a pending cart to offer a
      "カートへ進む" shortcut button. The Activate resource is a thin pure
@@ -29,7 +29,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'registration_page' %}
-{% set route = 'entry_activate' %}
+{% set route = 'entry-activate' %}
 {% set title = '新規会員登録(完了)' %}
 
 {% block main %}
@@ -51,9 +51,9 @@
         <div class="ec-off4Grid">
             <div class="ec-off4Grid__cell">
                 {% if qtyInCart|default(false) %}
-                    <a class="ec-blockBtn--action" style="margin-bottom: 3px" href="{{ url('cart') }}">カートへ進む</a>
+                    <a class="ec-blockBtn--action" style="margin-bottom: 3px" href="/cart">カートへ進む</a>
                 {% endif %}
-                <a class="ec-blockBtn--cancel" href="{{ url('homepage') }}">トップページへ</a>
+                <a class="ec-blockBtn--cancel" href="/">トップページへ</a>
             </div>
         </div>
     </div>

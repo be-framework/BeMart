@@ -170,6 +170,7 @@ final class AdminProductListHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering. Every difference must be in the residual
      * allowlist or a residual family.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testProductListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/product-list')->toString();
@@ -256,7 +257,7 @@ final class AdminProductListHtmlRenderTest extends TestCase
             'data-class-load',
             'data-class-url',
             // Product list: EC-CUBE's bulk-status buttons carry a
-            // `csrf_token_for_anchor()` widget + a master-data
+            // `csrfcsrfToken_for_anchor()` widget + a master-data
             // ProductStatus constant in the `id` query param. BeMart's
             // port links to the bare route. Same buttons, same labels.
             'admin_product_bulk_product_status',
@@ -270,7 +271,7 @@ final class AdminProductListHtmlRenderTest extends TestCase
             // input named by the `Constant::TOKEN_NAME` PHP constant
             // (via the `constant()` Twig fn). BeMart has no `constant`
             // helper and no per-request CSRF widget; the port names the
-            // input `_token` literally. The EC-CUBE render stub returns
+            // input `csrfToken` literally. The EC-CUBE render stub returns
             // the constant NAME, so the `.attr('name', ...)` line differs.
             "attr('name',",
             'Constant::TOKEN_NAME',
@@ -341,7 +342,7 @@ final class AdminProductListHtmlRenderTest extends TestCase
 
         return $twig->render('Product/index.twig', [
             'searchForm' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'id' => 'id',
                 'category_id' => 'category_id',
                 'status' => 'status',
@@ -412,8 +413,8 @@ final class AdminProductListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 

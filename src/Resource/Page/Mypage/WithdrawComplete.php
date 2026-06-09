@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goMypageWithdrawComplete — 退会手続き(完了)
@@ -33,6 +35,9 @@ use BEAR\Resource\ResourceObject;
  */
 class WithdrawComplete extends ResourceObject
 {
+    /** ALPS `goMypageWithdrawComplete` に対応する GET 操作。 */
+    #[Alps('goMypageWithdrawComplete')]
+    #[JsonSchema(schema: 'get-mypage-withdraw-complete.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static
     {

@@ -20,13 +20,13 @@ final class AdminSecurityForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('admin_route_dir', 'text')
+        $this->setField('adminRouteDir', 'text')
             ->setAttribs([
                 'id' => 'admin_security_admin_route_dir',
                 'class' => 'form-control',
             ]);
 
-        $this->setField('admin_allow_hosts', 'textarea')
+        $this->setField('adminAllowHosts', 'textarea')
             ->setAttribs([
                 'id' => 'admin_security_admin_allow_hosts',
                 'class' => 'form-control',
@@ -34,7 +34,7 @@ final class AdminSecurityForm extends AbstractForm
                 'placeholder' => "192.0.2.0/24\n203.0.113.10",
             ]);
 
-        $this->setField('admin_deny_hosts', 'textarea')
+        $this->setField('adminDenyHosts', 'textarea')
             ->setAttribs([
                 'id' => 'admin_security_admin_deny_hosts',
                 'class' => 'form-control',
@@ -42,7 +42,7 @@ final class AdminSecurityForm extends AbstractForm
                 'placeholder' => "192.0.2.0/24\n203.0.113.10",
             ]);
 
-        $this->setField('front_allow_hosts', 'textarea')
+        $this->setField('frontAllowHosts', 'textarea')
             ->setAttribs([
                 'id' => 'admin_security_front_allow_hosts',
                 'class' => 'form-control',
@@ -50,7 +50,7 @@ final class AdminSecurityForm extends AbstractForm
                 'placeholder' => "192.0.2.0/24\n203.0.113.10",
             ]);
 
-        $this->setField('front_deny_hosts', 'textarea')
+        $this->setField('frontDenyHosts', 'textarea')
             ->setAttribs([
                 'id' => 'admin_security_front_deny_hosts',
                 'class' => 'form-control',
@@ -58,21 +58,21 @@ final class AdminSecurityForm extends AbstractForm
                 'placeholder' => "192.0.2.0/24\n203.0.113.10",
             ]);
 
-        $this->setField('force_ssl', 'checkbox')
+        $this->setField('forceSsl', 'checkbox')
             ->setAttribs([
                 'id' => 'admin_security_force_ssl',
             ])
             ->setOptions(['1' => 'SSLを強制']);
 
-        $this->setField('trusted_hosts', 'text')
+        $this->setField('trustedHosts', 'text')
             ->setAttribs([
                 'id' => 'admin_security_trusted_hosts',
                 'class' => 'form-control',
                 'placeholder' => '^www\\.example\\.com$',
             ]);
 
-        $this->filter->validate('admin_route_dir')->isNotBlank();
-        $this->filter->validate('trusted_hosts')->isNotBlank();
+        $this->filter->validate('adminRouteDir')->isNotBlank();
+        $this->filter->validate('trustedHosts')->isNotBlank();
     }
 
     /**

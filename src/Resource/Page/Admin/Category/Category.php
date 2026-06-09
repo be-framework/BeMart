@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Final\CategoryUpdated;
 use MyVendor\BeMart\Be\Input\DeleteCategoryInput;
 use MyVendor\BeMart\Be\Input\GetAdminCategoryInput;
 use MyVendor\BeMart\Be\Input\UpdateCategoryInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -40,24 +42,15 @@ class Category extends ResourceObject
     }
 
     /**
+     * ALPS `goCategory` に対応する GET 操作。
      * @psalm-taint-source input $categoryId
      */
+    #[Alps('goCategory')]
+    #[JsonSchema(schema: 'get-admin-category-category.json', params: 'get-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     public function onGet(string $categoryId): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminCategoryInput(categoryId: $categoryId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (CategoryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたカテゴリは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminCategoryInput(categoryId: $categoryId));
 
         assert($final instanceof AdminCategoryFetched);
 
@@ -73,11 +66,14 @@ class Category extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateCategory` に対応する PUT 操作。
      * @psalm-taint-source input $categoryId
      * @psalm-taint-source input $categoryName
      * @psalm-taint-source input $sortNo
      * @psalm-taint-source input $parentId
      */
+    #[Alps('doUpdateCategory')]
+    #[JsonSchema(schema: 'put-admin-category-category.json', params: 'put-admin-category-category.param.json')]
     #[Link(rel: 'goCategory', href: 'page://self/admin/category/category')]
     #[CsrfProtected]
     public function onPut(
@@ -86,29 +82,12 @@ class Category extends ResourceObject
         int|null $sortNo = null,
         string|null $parentId = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateCategoryInput(
-                categoryId: $categoryId,
-                categoryName: $categoryName,
-                sortNo: $sortNo,
-                parentId: $parentId,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (CategoryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたカテゴリは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateCategoryInput(
+            categoryId: $categoryId,
+            categoryName: $categoryName,
+            sortNo: $sortNo,
+            parentId: $parentId,
+        ));
 
         assert($final instanceof CategoryUpdated);
 
@@ -124,25 +103,16 @@ class Category extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateCategory` に対応する DELETE 操作。
      * @psalm-taint-source input $categoryId
      */
+    #[Alps('doUpdateCategory')]
+    #[JsonSchema(schema: 'delete-admin-category-category.json', params: 'delete-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[CsrfProtected]
     public function onDelete(string $categoryId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteCategoryInput(categoryId: $categoryId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (CategoryNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたカテゴリは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteCategoryInput(categoryId: $categoryId));
 
         assert($final instanceof CategoryDeleted);
 

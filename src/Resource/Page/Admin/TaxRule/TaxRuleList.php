@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\CreateTaxRuleInput;
 use MyVendor\BeMart\Be\Input\GetAdminTaxRuleListInput;
 use MyVendor\BeMart\Form\AdminTaxRuleForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -42,18 +44,14 @@ class TaxRuleList extends ResourceObject
     ) {
     }
 
+    /** ALPS `goTaxRuleList` に対応する GET 操作。 */
+    #[Alps('goTaxRuleList')]
+    #[JsonSchema(schema: 'get-admin-tax-rule-tax-rule-list.json')]
     #[Link(rel: 'doCreateTaxRule', href: 'page://self/admin/tax-rule/tax-rule-list', method: 'post')]
     #[Link(rel: 'doDeleteTaxRule', href: 'page://self/admin/tax-rule/tax-rule', method: 'delete')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminTaxRuleListInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminTaxRuleListInput());
 
         assert($final instanceof AdminTaxRuleListFetched);
 
@@ -75,10 +73,13 @@ class TaxRuleList extends ResourceObject
     }
 
     /**
+     * ALPS `doCreateTaxRule` に対応する POST 操作。
      * @psalm-taint-source input $taxRate
      * @psalm-taint-source input $applyDate
      * @psalm-taint-source input $roundingType
      */
+    #[Alps('doCreateTaxRule')]
+    #[JsonSchema(schema: 'post-admin-tax-rule-tax-rule-list.json', params: 'post-admin-tax-rule-tax-rule-list.param.json')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
     #[CsrfProtected]
     public function onPost(
@@ -86,23 +87,11 @@ class TaxRuleList extends ResourceObject
         string $applyDate,
         int $roundingType = 1,
     ): static {
-        try {
-            $final = ($this->becoming)(new CreateTaxRuleInput(
-                taxRate: $taxRate,
-                applyDate: $applyDate,
-                roundingType: $roundingType,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new CreateTaxRuleInput(
+            taxRate: $taxRate,
+            applyDate: $applyDate,
+            roundingType: $roundingType,
+        ));
 
         assert($final instanceof TaxRuleCreated);
 

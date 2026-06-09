@@ -34,7 +34,7 @@ into `var/templates/<resource-path>.html.twig`:
      and diffable). `%placeholder%` interpolation is done inline in Twig.
    - `asset('x')` → `/x` passthrough (`BeMartTwigExtension`). BeMart has
      no asset-hash pipeline; the path keeps the `<link>/<script>` markup.
-   - `url(route, params)` / `path(route, params)` → deterministic
+   - canonical URL literals → deterministic
      `/{route}?{query}` (`BeMartTwigExtension`). No Symfony router.
    - `price` filter → JPY `NumberFormatter` (`BeMartTwigExtension`),
      identical to EC-CUBE's `EccubeExtension::getPriceFilter` (`￥1,200`).

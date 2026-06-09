@@ -4,20 +4,23 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use BEAR\ApiDoc\Annotation\Alps;
+use Be\Framework\BecomingInterface;
+use Be\Framework\Exception\SemanticVariableException;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use Be\Framework\BecomingInterface;
-use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Final\ContactSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitContactInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\ContactForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function assert;
+use function rawurlencode;
 
 /**
  * EC-CUBE doSubmitContact — お問い合わせ送信 (Pilot 15).
@@ -50,6 +53,8 @@ class Contact extends ResourceObject
      * renders it into the form's hidden `_token` input so the
      * subsequent POST passes CSRF validation.
      */
+    #[Alps('goContactForm')]
+    #[JsonSchema(schema: 'get-contact.json')]
     #[Link(rel: 'doSubmitContact', href: 'page://self/contact', method: 'post')]
     public function onGet(): static
     {
@@ -64,6 +69,7 @@ class Contact extends ResourceObject
                 'csrfToken',
             ],
             'submitTo' => [
+                'rel' => 'doSubmitContact',
                 'method' => 'POST',
                 'href' => 'page://self/contact',
             ],
@@ -77,11 +83,14 @@ class Contact extends ResourceObject
     }
 
     /**
+     * ALPS `doSubmitContact` に対応する POST 操作。
      * @psalm-taint-source input $contactName01
      * @psalm-taint-source input $contactName02
      * @psalm-taint-source input $contactEmail
      * @psalm-taint-source input $contactContents
      */
+    #[Alps('doSubmitContact')]
+    #[JsonSchema(schema: 'post-contact.json', params: 'post-contact.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfProtected]
     public function onPost(
@@ -90,29 +99,12 @@ class Contact extends ResourceObject
         string $contactEmail,
         string $contactContents,
     ): static {
-        try {
-            $final = ($this->becoming)(new SubmitContactInput(
-                contactName01: $contactName01,
-                contactName02: $contactName02,
-                contactEmail: $contactEmail,
-                contactContents: $contactContents,
-            ));
-        } catch (SemanticVariableException $e) {
-            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $message,
-                'form' => $this->failedForm(
-                    $contactName01,
-                    $contactName02,
-                    $contactEmail,
-                    $contactContents,
-                    $message,
-                ),
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SubmitContactInput(
+            contactName01: $contactName01,
+            contactName02: $contactName02,
+            contactEmail: $contactEmail,
+            contactContents: $contactContents,
+        ));
 
         assert($final instanceof ContactSubmitted);
 
@@ -123,11 +115,12 @@ class Contact extends ResourceObject
         // projected body. Rendering Contact.html.twig against this body
         // is never attempted: the redirect supersedes it.
         $this->code = Code::OK;
-        $this->headers['Location'] = '/contact/complete';
+        $this->headers['Location'] = '/contact/complete?ticketId=' . rawurlencode($final->ticketId);
         $this->body = [
             'contactName01' => $final->contactName01,
             'contactName02' => $final->contactName02,
             'contactEmail' => $final->contactEmail,
+            'ticketId' => $final->ticketId,
         ];
 
         return $this;

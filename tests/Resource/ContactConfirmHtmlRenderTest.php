@@ -89,9 +89,9 @@ final class ContactConfirmHtmlRenderTest extends TestCase
         '<meta name="author" content="">',
 
         // --- confirm form: CSRF hidden input ----------------------------
-        // EC-CUBE's hidden _token carries a live form CSRF token; BeMart's
+        // EC-CUBE's hidden csrfToken carries a live form CSRF token; BeMart's
         // html context has no CSRF widget, so the value is empty.
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     /**
@@ -175,6 +175,7 @@ final class ContactConfirmHtmlRenderTest extends TestCase
         $this->assertStringContainsString('<input type="hidden" name="contactContents"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testContactConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/contact/confirm')->toString();
@@ -288,7 +289,7 @@ final class ContactConfirmHtmlRenderTest extends TestCase
                     'addr02' => self::emptyLeaf(),
                 ]),
                 'phone_number' => self::emptyLeaf(),
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
             ]),
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
             'eccube_config' => ['locale' => 'ja'],
@@ -351,8 +352,8 @@ final class ContactConfirmHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
@@ -363,8 +364,8 @@ final class ContactConfirmHtmlRenderTest extends TestCase
         // no `__fieldName` — the stub emits nothing for them.
         $confirmForm = (new FormFactory())->newInstance(ContactConfirmForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($confirmForm): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($field instanceof EcCubeStub) {

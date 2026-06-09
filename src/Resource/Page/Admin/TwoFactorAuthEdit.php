@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -26,6 +28,9 @@ class TwoFactorAuthEdit extends ResourceObject
         private readonly FormFactory $formFactory,
     ) {
     }
+    /** ALPS `goAdminTwoFactorAuthEdit` に対応する GET 操作。 */
+    #[Alps('goAdminTwoFactorAuthEdit')]
+    #[JsonSchema(schema: 'get-admin-two-factor-auth-edit.json')]
 
     public function onGet(): static
     {

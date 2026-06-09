@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Cart;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Final\CartItemRemoved;
 use MyVendor\BeMart\Be\Input\AddCartItemInput;
 use MyVendor\BeMart\Be\Input\RemoveCartItemInput;
 use MyVendor\BeMart\Be\Input\UpdateCartItemQuantityInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -51,6 +53,8 @@ class Item extends ResourceObject
      * @psalm-taint-source input $quantity
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('doAddCartItem')]
+    #[JsonSchema(schema: 'post-cart-item.json', params: 'post-cart-item.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping', method: 'post')]
@@ -89,33 +93,11 @@ class Item extends ResourceObject
             return $this->missingQuantity($productCode);
         }
 
-        try {
-            $final = ($this->becoming)(new AddCartItemInput(
-                $productCode,
-                $quantity,
-                HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'productCode' => $productCode,
-                'quantity' => $quantity,
-            ];
-
-            return $this;
-        } catch (ProductClassNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
-
-            return $this;
-        } catch (OutOfStockException) {
-            // BEAR\Resource\Code lacks CONFLICT; use the integer literal.
-            $this->code = 409;
-            $this->body = ['message' => 'The product is out of stock.', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AddCartItemInput(
+            $productCode,
+            $quantity,
+            HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+        ));
 
         assert($final instanceof CartItemAdded);
 
@@ -143,6 +125,8 @@ class Item extends ResourceObject
      * @psalm-taint-source input $quantity
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('doUpdateCartItemQuantity')]
+    #[JsonSchema(schema: 'put-cart-item.json', params: 'put-cart-item.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfProtected]
     public function onPut(
@@ -150,37 +134,11 @@ class Item extends ResourceObject
         int $quantity,
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateCartItemQuantityInput(
-                productCode: $productCode,
-                quantity: $quantity,
-                sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'productCode' => $productCode,
-                'quantity' => $quantity,
-            ];
-
-            return $this;
-        } catch (ProductClassNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
-
-            return $this;
-        } catch (CartItemNotInCartException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'The product is not in the cart.', 'productCode' => $productCode];
-
-            return $this;
-        } catch (OutOfStockException) {
-            $this->code = 409;
-            $this->body = ['message' => 'The product is out of stock.', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateCartItemQuantityInput(
+            productCode: $productCode,
+            quantity: $quantity,
+            sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+        ));
 
         assert($final instanceof CartItemQuantityUpdated);
 
@@ -206,6 +164,8 @@ class Item extends ResourceObject
      * @psalm-taint-source input $productCode
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('doRemoveCartItem')]
+    #[JsonSchema(schema: 'delete-cart-item.json', params: 'delete-cart-item.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfProtected]
     public function onDelete(
@@ -213,25 +173,10 @@ class Item extends ResourceObject
         string $sessionPrefix = self::DEFAULT_SESSION_PREFIX,
     ): static
     {
-        try {
-            $final = ($this->becoming)(new RemoveCartItemInput(
-                productCode: $productCode,
-                sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'productCode' => $productCode,
-            ];
-
-            return $this;
-        } catch (CartItemNotInCartException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'The product is not in the cart.', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new RemoveCartItemInput(
+            productCode: $productCode,
+            sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+        ));
 
         assert($final instanceof CartItemRemoved);
 

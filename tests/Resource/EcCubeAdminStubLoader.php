@@ -91,6 +91,7 @@ final class EcCubeAdminStubLoader implements LoaderInterface
                 $source,
             );
         }
+        $source = $this->normalizeAdminBranding($source);
 
         return new Source($source, $name, $path);
     }
@@ -155,5 +156,22 @@ final class EcCubeAdminStubLoader implements LoaderInterface
         }
 
         return '';
+    }
+
+    private function normalizeAdminBranding(string $source): string
+    {
+        return str_replace(
+            [
+                "<h1><img src=\"{{ asset('assets/img/logo@2x.png', 'admin') }}\"></h1>",
+                "<p><img src=\"{{ asset('assets/img/logo2.png', 'admin') }}\" width=\"106\"></p>",
+                '<small>Copyright &copy; 2000-{{ "now"|date("Y") }} EC-CUBE CO.,LTD. All Rights Reserved.</small>',
+            ],
+            [
+                "<h1><img src=\"{{ asset('assets/img/logo@2x.png', 'admin') }}\" alt=\"BeMart\"></h1>",
+                "<p><img src=\"{{ asset('assets/img/logo2.png', 'admin') }}\" alt=\"BeMart\" width=\"106\"></p>",
+                '<small>Copyright &copy; 2026 BeMart. All Rights Reserved.</small>',
+            ],
+            $source,
+        );
     }
 }

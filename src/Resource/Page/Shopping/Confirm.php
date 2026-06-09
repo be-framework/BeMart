@@ -4,15 +4,18 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -47,15 +50,42 @@ class Confirm extends ResourceObject
     }
 
     /**
+     * ALPS `goShopping` に対応する GET 操作。
      * @psalm-taint-source input $preOrderId
      * @psalm-taint-source input $paymentMethodId
      */
+    #[Alps('goShopping')]
+    #[JsonSchema(schema: 'get-shopping-confirm.json', params: 'get-shopping-confirm.param.json')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
     #[Link(rel: 'goShoppingError', href: 'page://self/shopping/error')]
     public function onGet(
         string $preOrderId = 'aceface0000000000000000000000000000a11ce',
         int $paymentMethodId = 2,
     ): static {
+        return $this->confirmOrder($preOrderId, $paymentMethodId);
+    }
+
+    /**
+     * HTML checkout form posts the selected payment field as `payment`.
+     * Keep GET query compatibility while accepting the real browser form.
+     *
+     * @psalm-taint-source input $preOrderId
+     * @psalm-taint-source input $payment
+     */
+    #[Alps('goShopping')]
+    #[JsonSchema(schema: 'get-shopping-confirm.json', params: 'post-shopping-confirm.param.json')]
+    #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
+    #[Link(rel: 'goShoppingError', href: 'page://self/shopping/error')]
+    #[CsrfProtected]
+    public function onPost(
+        string $preOrderId,
+        int $payment = 2,
+    ): static {
+        return $this->confirmOrder($preOrderId, $payment);
+    }
+
+    private function confirmOrder(string $preOrderId, int $paymentMethodId): static
+    {
         try {
             $final = ($this->becoming)(new ConfirmOrderInput(
                 preOrderId: $preOrderId,
@@ -72,6 +102,7 @@ class Confirm extends ResourceObject
 
             return $this;
         }
+
 
         if ($final instanceof OrderConfirmFailed) {
             // verify() rejected the pre-order — bounce to ShoppingError.

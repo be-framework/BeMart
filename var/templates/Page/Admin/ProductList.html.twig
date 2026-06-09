@@ -16,7 +16,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` / `path(...)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` / `canonical-path ...)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `form_widget(searchForm.id)` -> `searchForm.input('id')` — the real
      AdminProductSearchForm keyword box (Ray.WebFormModule).
@@ -57,7 +57,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_product' %}
+{% set route = 'admin-product' %}
 {% set title = '商品一覧' %}
 {% set sub_title = '商品管理' %}
 
@@ -81,7 +81,7 @@
                     return $.ajax({
                         'url': $(this).data('delete-url'),
                         'type': 'delete',
-                        'data': {'_token': $(this).attr('token-for-anchor')}
+                        'data': {'csrfToken': $(this).attr('token-for-anchor')}
                     }).always(function() {
                         $('.progress-bar', modal).css('width', (++currentCount / totalCount * 100) + '%');
                     });
@@ -144,7 +144,7 @@
                     return false;
                 }
 
-                $('<input />').attr('type', 'hidden').attr('name', '_token')
+                $('<input />').attr('type', 'hidden').attr('name', 'csrfToken')
                     .val($(this).attr('token-for-anchor'))
                     .appendTo(form);
                 form.attr('action', $(this).data('action')).submit();
@@ -188,14 +188,14 @@
 
 {% block main %}
     <div class="c-outsideBlock">
-        <form id='search_form' method="post" action="{{ url('admin_product') }}">
+        <form id='search_form' method="get" action="/admin/product-list">
             <div class="c-outsideBlock__contents">
                 <div class="row justify-content-start">
 
                     <div class="col-6">
                         <div class="mb-2">
                             <label class="col-form-label" data-bs-toggle="tooltip" data-bs-placement="top" title="情報を入力して一覧の絞り込み検索ができます。より詳細な条件を指定するには［詳細検索］を開いてください。">商品名・商品ID・商品コード<i class="fa fa-question-circle fa-lg ms-1"></i></label>
-                            {{ searchForm.input('id')|raw }}
+                            {{ searchForm.input('nameKeyword')|raw }}
                         </div>
                         <div class="d-inline-block mb-3" data-bs-toggle="collapse" href="#searchDetail"
                              aria-expanded="false" aria-controls="searchDetail"><a><i
@@ -267,7 +267,7 @@
             <div class="c-primaryCol">
                 <div class="row justify-content-end mb-3">
                     <div class="col-auto">
-                        <a class="btn btn-ec-conversion" href="{{ url('admin_product_product_new') }}">
+                        <a class="btn btn-ec-conversion" href="/admin/product-new">
                             <i class="fa fa-plus me-1" aria-hidden="true"></i>
                             <span>商品登録</span>
                         </a>
@@ -280,14 +280,14 @@
                                 <div id="btn_bulk" class="d-none">
                                     <label class="me-2">一括操作</label>
                                     <div class="btn-group me-2" role="group">
-                                        <button data-action="{{ url('admin_product_bulk_product_status') }}" class="btn btn-ec-regular action-submit" type="button">
+                                        <button data-action="/admin/product-list" class="btn btn-ec-regular action-submit" type="button">
                                             <span>公開</span>
                                         </button>
-                                        <button data-action="{{ url('admin_product_bulk_product_status') }}" class="btn btn-ec-regular action-submit" type="button">
+                                        <button data-action="/admin/product-list" class="btn btn-ec-regular action-submit" type="button">
                                             <span>非公開</span>
                                         </button>
                                     </div>
-                                    <button data-action="{{ url('admin_product_bulk_product_status') }}" class="btn btn-ec-regular me-2 action-submit">
+                                    <button data-action="/admin/product-list" class="btn btn-ec-regular me-2 action-submit">
                                         廃止
                                     </button>
                                     <button type="button" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal" class="btn btn-ec-delete">削除</button>
@@ -296,10 +296,10 @@
                             <div class="col-5 text-end">
                                 <div class="d-inline-block">
                                     <div class="btn-group" role="group">
-                                        <a class="btn btn-ec-regular" href="{{ url('admin_product_export') }}">
+                                        <a class="btn btn-ec-regular" href="/admin/product-csv">
                                             <i class="fa fa-cloud-download me-1 text-secondary"></i><span>CSVダウンロード</span>
                                         </a>
-                                        <a class="btn btn-ec-regular" href="{{ url('admin_setting_shop_csv') }}">
+                                        <a class="btn btn-ec-regular" href="/admin/csv-config">
                                             <i class="fa fa-cog me-1 text-secondary"></i><span>CSV出力項目設定</span>
                                         </a>
                                     </div>
@@ -330,17 +330,17 @@
                                     {% for Product in products %}
                                         <tr id="ex-product-{{ Product.productCode }}">
                                             <td class="align-middle ps-3">
-                                                <input type="checkbox" name="ids[]" value="{{ Product.productCode }}" id="check_{{ Product.productCode }}" data-delete-url="{{ url('admin_product_product_delete', { id: Product.productCode }) }}">
+                                                <input type="checkbox" name="ids[]" value="{{ Product.productCode }}" id="check_{{ Product.productCode }}" data-delete-url="/admin/product?productCode={{ Product.productCode }}&_method=delete">
                                             </td>
                                             <td class="align-middle">{{ Product.productCode }}</td>
                                             <td class="align-middle">
-                                                <a href="{{ url('admin_product_product_edit', { id : Product.productCode }) }}">
+                                                <a href="/admin/product/edit?productCode={{ Product.productCode }}">
                                                     <img src="{{ asset(Product.imagePath|default('assets/img/common/no_image_product.png'), 'save_image') }}"
                                                          alt="{{ Product.productName }}" style="width: 64px; height: 64px; object-fit: cover;">
                                                 </a>
                                             </td>
                                             <td class="align-middle"><a
-                                                        href="{{ url('admin_product_product_edit', { id : Product.productCode }) }}">{{ Product.productName }}</a>
+                                                        href="/admin/product/edit?productCode={{ Product.productCode }}">{{ Product.productName }}</a>
                                             </td>
                                             <td class="align-middle">
                                                 {{ Product.productCode }}
@@ -367,7 +367,7 @@
                                                     <div class="px-1 d-inline-block text-center" data-bs-toggle="tooltip"
                                                          data-bs-placement="top"
                                                          title="表示"><a class="btn btn-ec-actionIcon"
-                                                                                                       href="{{ url('product_detail', {id:Product.productCode}) }}"
+                                                                                                       href="/product?productCode={{ Product.productCode }}"
                                                                                                        target="_blank"><i
                                                                     class="fa fa-eye fa-lg text-secondary"
                                                                     aria-hidden="true"></i></a></div>
@@ -401,7 +401,7 @@
                                                                                 data-bs-dismiss="modal">キャンセル
                                                                         </button>
                                                                         <a
-                                                                                href="{{ url('admin_product_product_copy', {'id' : Product.productCode}) }}"
+                                                                                href="/admin/product-copy?productCode={{ Product.productCode }}"
                                                                                 class="btn btn-ec-conversion"
                                                                                 data-confirm="false"
                                                                                 data-method="post">

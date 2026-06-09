@@ -4,51 +4,59 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Http;
 
-use BEAR\Dev\Http\Exception\HalLinkNotFoundException;
+use BEAR\Resource\AbstractUri;
 use BEAR\Resource\Method;
 use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use BEAR\Resource\Uri as ResourceUri;
 use Koriym\PhpServer\PhpServer;
+use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Auth\HtmlSessionAdapter;
+use MyVendor\BeMart\Tests\Http\Exception\HalLinkNotFoundException;
 use MyVendor\BeMart\Tests\Support\UnsupportedResourceOperationException;
 use Override;
 
 use function array_key_exists;
+use function debug_backtrace;
 use function escapeshellarg;
 use function explode;
 use function file_exists;
 use function file_put_contents;
+use function getenv;
 use function html_entity_decode;
 use function http_build_query;
 use function implode;
 use function in_array;
 use function is_array;
-use function is_object;
+use function is_dir;
 use function is_string;
 use function json_decode;
 use function json_encode;
-use function parse_url;
+use function mkdir;
 use function preg_match;
-use function preg_match_all;
+use function preg_replace;
 use function preg_split;
 use function shell_exec;
 use function sprintf;
 use function str_contains;
+use function str_ends_with;
 use function str_starts_with;
+use function strlen;
 use function strtolower;
+use function substr;
 use function sys_get_temp_dir;
 use function tempnam;
 use function trim;
 
-use const FILE_APPEND;
+use const DEBUG_BACKTRACE_IGNORE_ARGS;
+use const DIRECTORY_SEPARATOR;
 use const ENT_HTML5;
 use const ENT_QUOTES;
+use const FILE_APPEND;
 use const JSON_THROW_ON_ERROR;
 use const PHP_EOL;
-use const PHP_URL_PATH;
-use const PHP_URL_QUERY;
-use const PREG_SET_ORDER;
 
 /**
  * ResourceInterface backed by a real HTTP round-trip.
@@ -56,38 +64,37 @@ use const PREG_SET_ORDER;
  * The PHP built-in server is managed by koriym/php-server (the maintained
  * component BEAR itself uses); requests are issued with curl against a
  * per-instance cookie jar so the session survives across the workflow.
- *
- * @phpstan-type SemanticLink array{href: string, method: string}
  */
 final class HttpResource implements ResourceInterface
 {
-    private static PhpServer|null $server = null;
-
+    /** @var array<string, PhpServer> */
+    private static array $servers = [];
     private readonly string $baseUri;
     private readonly string $cookieJar;
 
     public function __construct(
         string $host,
         string $index,
-        private readonly string $logFile = 'php://stderr',
+        private readonly string $logPath = 'php://stderr',
     ) {
         $this->baseUri = sprintf('http://%s', $host);
         $this->cookieJar = (string) tempnam(sys_get_temp_dir(), 'bemart-http-cookie-');
         $this->startServer($host, $index);
-        $this->resetLog();
     }
 
     private function startServer(string $host, string $index): void
     {
-        if (self::$server instanceof PhpServer) {
+        $serverKey = $host . ' ' . $index;
+        if (array_key_exists($serverKey, self::$servers)) {
             return;
         }
 
         $server = new PhpServer($host, $index);
         $server->start();
-        self::$server = $server;
+        self::$servers[$serverKey] = $server;
     }
 
+    /** @param AbstractUri|string $uri */
     #[Override]
     public function newInstance($uri): ResourceObject
     {
@@ -100,119 +107,118 @@ final class HttpResource implements ResourceInterface
         throw new UnsupportedResourceOperationException('object is not used by workflow tests.');
     }
 
+    /** @param AbstractUri|string $uri */
     #[Override]
     public function uri($uri): RequestInterface
     {
         throw new UnsupportedResourceOperationException('uri is not used by workflow tests.');
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function newRequest(Method $method, string $uri, array $query = []): RequestInterface
     {
         throw new UnsupportedResourceOperationException('newRequest is not used by workflow tests.');
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function crawl(string $uri, string $linkKey, array $query = []): ResourceObject
     {
         throw new UnsupportedResourceOperationException('crawl is not used by workflow tests.');
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function href(string $rel, array $query = [], ResourceObject|null $ro = null): ResourceObject
     {
         if ($ro === null) {
-            throw new HalLinkNotFoundException('A source ResourceObject is required.');
+            throw new UnsupportedResourceOperationException('href requires a source response.');
         }
 
-        $link = $this->halLink($rel, $ro)
-            ?? $this->htmlSemanticLink($rel, $ro)
-            ?? $this->linkHeaderLink($rel, $ro);
-        if ($link === null) {
-            throw new HalLinkNotFoundException(sprintf('Link rel `%s` is not available.', $rel));
+        $href = $this->halHref($rel, $ro)
+            ?? $this->semanticHtmlHref($rel, $ro->view)
+            ?? $this->linkHeaderHref($rel, $ro->headers);
+        if ($href === null) {
+            throw new HalLinkNotFoundException(sprintf('HAL/HTML link rel `%s` is not available.', $rel));
         }
 
-        return $this->requestLink($link, $query);
+        return $this->get($href, $query);
     }
 
-    /** @return SemanticLink|null */
-    private function halLink(string $rel, ResourceObject $ro): array|null
+    private function halHref(string $rel, ResourceObject $ro): string|null
     {
-        if (! is_array($ro->body)) {
+        $body = $ro->body;
+        if (! is_array($body)) {
             return null;
         }
 
-        $links = $ro->body['_links'] ?? null;
-        if (is_object($links)) {
-            $links = (array) $links;
-        }
-
+        $links = $body['_links'] ?? null;
         if (! is_array($links) || ! array_key_exists($rel, $links)) {
             return null;
         }
 
-        $link = $this->halLinkData($links[$rel]);
-        if ($link === null) {
-            return null;
+        $link = $links[$rel];
+        if (! is_array($link)) {
+            throw new HalLinkNotFoundException(sprintf('HAL link rel `%s` does not contain an href.', $rel));
         }
 
         $href = $link['href'] ?? null;
         if (! is_string($href)) {
-            return null;
+            throw new HalLinkNotFoundException(sprintf('HAL link rel `%s` does not contain an href.', $rel));
         }
 
-        $method = is_string($link['method'] ?? null) ? $link['method'] : 'get';
-
-        return ['href' => $href, 'method' => strtolower($method)];
+        return $href;
     }
 
-    /** @return array<string, mixed>|null */
-    private function halLinkData(mixed $link): array|null
+    private function semanticHtmlHref(string $rel, string|null $view): string|null
     {
-        if (is_object($link)) {
-            $link = (array) $link;
-        }
-
-        if (! is_array($link)) {
+        if (! is_string($view) || $view === '') {
             return null;
         }
 
-        $data = [];
-        foreach ($link as $key => $value) {
-            if (is_string($key)) {
-                $data[$key] = $value;
-            }
-        }
-
-        return $data;
-    }
-
-    /** @return SemanticLink|null */
-    private function htmlSemanticLink(string $rel, ResourceObject $ro): array|null
-    {
-        if (! is_string($ro->view) || $ro->view === '') {
+        if (preg_match_all('/<(?:a|area|link)\b(?P<attrs>[^>]*)>/i', $view, $matches) !== 1) {
             return null;
         }
 
-        if (preg_match_all('/<(a|area|link|form)\b(?P<attrs>[^>]*)>/i', $ro->view, $matches, PREG_SET_ORDER) !== 1) {
-            return null;
-        }
-
-        foreach ($matches as $match) {
-            $attrs = $match['attrs'];
-            if (! $this->hasLinkToken($attrs, $rel)) {
+        foreach ($matches['attrs'] as $attrs) {
+            if (! is_string($attrs) || ! $this->hasLinkToken($attrs, $rel)) {
                 continue;
             }
 
-            $tag = strtolower($match[1]);
-            $href = $tag === 'form' ? $this->attribute($attrs, 'action') : $this->attribute($attrs, 'href');
-            if ($href === null || $href === '') {
+            $href = $this->attribute($attrs, 'href');
+            if ($href !== null && $href !== '') {
+                return $href;
+            }
+        }
+
+        return null;
+    }
+
+    /** @param array<string, mixed> $headers */
+    private function linkHeaderHref(string $rel, array $headers): string|null
+    {
+        $header = $this->headerValue($headers, 'Link');
+        if ($header === null) {
+            return null;
+        }
+
+        $links = preg_split('/,\s*(?=<)/', $header);
+        if (! is_array($links)) {
+            return null;
+        }
+
+        foreach ($links as $link) {
+            if (preg_match('/^\s*<([^>]*)>\s*(.*)$/', $link, $match) !== 1) {
                 continue;
             }
 
-            $method = $tag === 'form' ? strtolower($this->attribute($attrs, 'method') ?? 'get') : 'get';
+            $linkRel = $this->linkHeaderParam($match[2], 'rel');
+            if ($linkRel === null || ! $this->containsToken($linkRel, $rel)) {
+                continue;
+            }
 
-            return ['href' => $href, 'method' => $method];
+            return html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5);
         }
 
         return null;
@@ -241,6 +247,15 @@ final class HttpResource implements ResourceInterface
         return html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
     }
 
+    private function linkHeaderParam(string $attrs, string $name): string|null
+    {
+        if (preg_match('/(?:^|;)\s*' . $name . '\s*=\s*(?:"([^"]*)"|([^;\s]+))/i', $attrs, $match) !== 1) {
+            return null;
+        }
+
+        return $match[1] ?? $match[2] ?? null;
+    }
+
     private function containsToken(string $value, string $token): bool
     {
         $tokens = preg_split('/\s+/', trim($value));
@@ -251,57 +266,15 @@ final class HttpResource implements ResourceInterface
         return in_array($token, $tokens, true);
     }
 
-    /** @return SemanticLink|null */
-    private function linkHeaderLink(string $rel, ResourceObject $ro): array|null
+    /** @param array<string, mixed> $headers */
+    private function headerValue(array $headers, string $name): string|null
     {
-        $header = $this->headerValue($ro, 'Link');
-        if ($header === null) {
-            return null;
-        }
-
-        foreach (preg_split('/,\s*(?=<)/', $header) ?: [] as $entry) {
-            if (preg_match('/^\s*<([^>]+)>(.*)$/', $entry, $matched) !== 1) {
+        foreach ($headers as $header => $value) {
+            if (! is_string($header) || ! is_string($value)) {
                 continue;
             }
 
-            $params = $this->linkHeaderParams($matched[2]);
-            if (($params['rel'] ?? '') !== $rel) {
-                continue;
-            }
-
-            return [
-                'href' => $matched[1],
-                'method' => strtolower($params['method'] ?? 'get'),
-            ];
-        }
-
-        return null;
-    }
-
-    /** @return array<string, string> */
-    private function linkHeaderParams(string $params): array
-    {
-        preg_match_all(
-            '/;\s*([A-Za-z][A-Za-z0-9_-]*)\s*=\s*(?:"([^"]*)"|([^;\s]+))/',
-            $params,
-            $matches,
-            PREG_SET_ORDER,
-        );
-
-        $result = [];
-        foreach ($matches as $match) {
-            $quoted = $match[2] ?? '';
-            $bare = $match[3] ?? '';
-            $result[$match[1]] = $quoted !== '' ? $quoted : $bare;
-        }
-
-        return $result;
-    }
-
-    private function headerValue(ResourceObject $ro, string $name): string|null
-    {
-        foreach ($ro->headers as $header => $value) {
-            if (is_string($header) && is_string($value) && strtolower($header) === strtolower($name)) {
+            if (strtolower($header) === strtolower($name)) {
                 return $value;
             }
         }
@@ -309,75 +282,49 @@ final class HttpResource implements ResourceInterface
         return null;
     }
 
-    /**
-     * @param SemanticLink $link
-     * @param array<string, mixed> $query
-     */
-    private function requestLink(array $link, array $query): ResourceObject
-    {
-        $href = $this->resourcePath($link['href']);
-
-        return match ($link['method']) {
-            'get', 'head' => $this->get($href, $query),
-            'post' => $this->post($href, $query),
-            'put' => $this->put($href, $query),
-            'patch' => $this->patch($href, $query),
-            'delete' => $this->delete($href, $query),
-            default => throw new HalLinkNotFoundException(
-                sprintf('Link method `%s` is not supported.', $link['method']),
-            ),
-        };
-    }
-
-    private function resourcePath(string $href): string
-    {
-        if (! str_starts_with($href, 'http://') && ! str_starts_with($href, 'https://')) {
-            return $href;
-        }
-
-        $path = parse_url($href, PHP_URL_PATH);
-        $query = parse_url($href, PHP_URL_QUERY);
-        $resourcePath = is_string($path) && $path !== '' ? $path : '/';
-
-        return is_string($query) && $query !== '' ? $resourcePath . '?' . $query : $resourcePath;
-    }
-
+    /** @param array<string, mixed> $query */
     #[Override]
     public function get(string $uri, array $query = []): ResourceObject
     {
         return $this->request('GET', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function post(string $uri, array $query = []): ResourceObject
     {
         return $this->request('POST', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function put(string $uri, array $query = []): ResourceObject
     {
         return $this->request('PUT', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function patch(string $uri, array $query = []): ResourceObject
     {
         return $this->request('PATCH', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function delete(string $uri, array $query = []): ResourceObject
     {
         return $this->request('DELETE', $uri, $query);
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function head(string $uri, array $query = []): ResourceObject
     {
         throw new UnsupportedResourceOperationException('head is not used by workflow tests.');
     }
 
+    /** @param array<string, mixed> $query */
     #[Override]
     public function options(string $uri, array $query = []): ResourceObject
     {
@@ -407,6 +354,21 @@ final class HttpResource implements ResourceInterface
     /** @param array<string, mixed> $query */
     private function url(string $method, string $uri, array $query): string
     {
+        if (str_starts_with($uri, 'http://') || str_starts_with($uri, 'https://')) {
+            if ($method !== 'GET' || $query === []) {
+                return $uri;
+            }
+
+            $separator = str_contains($uri, '?') ? '&' : '?';
+
+            return $uri . $separator . http_build_query($query);
+        }
+
+        $uri = self::httpPath($uri);
+        if (! str_starts_with($uri, '/')) {
+            $uri = '/' . $uri;
+        }
+
         if ($method !== 'GET' || $query === []) {
             return $this->baseUri . $uri;
         }
@@ -416,11 +378,26 @@ final class HttpResource implements ResourceInterface
         return $this->baseUri . $uri . $separator . http_build_query($query);
     }
 
+    private static function httpPath(string $uri): string
+    {
+        if (! str_starts_with($uri, 'page://self')) {
+            return $uri;
+        }
+
+        $path = substr($uri, strlen('page://self'));
+
+        return $path === '' ? '/' : $path;
+    }
+
     /** @param array<string, mixed> $query */
     private function runHttp(string $method, string $url, array $query): string
     {
         $jar = escapeshellarg($this->cookieJar);
         $curl = sprintf('curl -s -i -b %s -c %s', $jar, $jar);
+        foreach ($this->testHeaders() as $header => $value) {
+            $curl .= ' -H ' . escapeshellarg($header . ': ' . $value);
+        }
+
         if ($method !== 'GET') {
             $body = escapeshellarg(json_encode($query, JSON_THROW_ON_ERROR));
             $curl .= sprintf(" -H 'Content-Type: application/json' -X %s -d %s", $method, $body);
@@ -433,6 +410,38 @@ final class HttpResource implements ResourceInterface
         }
 
         return $raw;
+    }
+
+    /** @return array<string, string> */
+    private function testHeaders(): array
+    {
+        $headers = [];
+        /** @var mixed $adminId */
+        $adminId = $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] ?? null;
+        if (is_string($adminId) && $adminId !== '') {
+            $headers['X-BeMart-Test-Admin-Id'] = $adminId;
+        }
+
+        /** @var mixed $customerId */
+        $customerId = $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] ?? null;
+        if (is_string($customerId) && $customerId !== '') {
+            $headers['X-BeMart-Test-Customer-Id'] = $customerId;
+        }
+
+        /** @var mixed $csrfToken */
+        $csrfToken = $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] ?? null;
+        if (is_string($csrfToken) && $csrfToken !== '') {
+            $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
+
+            return $headers;
+        }
+
+        $csrfToken = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
+        if ($csrfToken !== false && $csrfToken !== '') {
+            $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
+        }
+
+        return $headers;
     }
 
     /** @return array{0: list<string>, 1: string} */
@@ -469,6 +478,7 @@ final class HttpResource implements ResourceInterface
 
     /**
      * @param list<string> $responseHeaders
+     *
      * @return array<string, string>
      */
     private function headers(array $responseHeaders): array
@@ -498,9 +508,14 @@ final class HttpResource implements ResourceInterface
         return [];
     }
 
-    /** @param array<string, mixed> $query */
+    /**
+     * @param array<string, mixed> $query
+     * @param array<int, string>   $headers
+     */
     private function log(string $method, string $url, array $query, array $headers, string $view): void
     {
+        $logFile = $this->logFile();
+        $this->resetLog($logFile);
         $log = sprintf(
             "%s %s\nquery=%s\n%s\n\n%s\n\n",
             $method,
@@ -509,15 +524,58 @@ final class HttpResource implements ResourceInterface
             implode(PHP_EOL, $headers),
             $view,
         );
-        file_put_contents($this->logFile, $log, FILE_APPEND);
+        file_put_contents($logFile, $log, FILE_APPEND);
     }
 
-    private function resetLog(): void
+    private function logFile(): string
     {
-        if ($this->logFile === 'php://stderr' || ! file_exists($this->logFile)) {
+        if ($this->logPath === 'php://stderr' || str_ends_with($this->logPath, '.log')) {
+            return $this->logPath;
+        }
+
+        if (! is_dir($this->logPath)) {
+            mkdir($this->logPath, 0777, true);
+        }
+
+        return $this->logPath . DIRECTORY_SEPARATOR . $this->currentTestLogName();
+    }
+
+    private function currentTestLogName(): string
+    {
+        foreach (debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS) as $frame) {
+            $function = $frame['function'] ?? null;
+            if (! is_string($function) || ! str_starts_with($function, 'test')) {
+                continue;
+            }
+
+            return self::kebabCase($function) . '.log';
+        }
+
+        return 'http-resource.log';
+    }
+
+    private static function kebabCase(string $name): string
+    {
+        $kebab = preg_replace('/(?<!^)[A-Z]/', '-$0', $name);
+        if (! is_string($kebab)) {
+            return strtolower($name);
+        }
+
+        return strtolower($kebab);
+    }
+
+    private function resetLog(string $logFile): void
+    {
+        static $reset = [];
+
+        if ($logFile === 'php://stderr' || array_key_exists($logFile, $reset)) {
             return;
         }
 
-        file_put_contents($this->logFile, '');
+        if (file_exists($logFile)) {
+            file_put_contents($logFile, '');
+        }
+
+        $reset[$logFile] = true;
     }
 }

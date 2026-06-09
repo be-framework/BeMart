@@ -1,3 +1,8 @@
+---
+layout: default
+title: "alps.json セマンティックID 分析レポート — 未解決の問題"
+---
+
 # alps.json セマンティックID 分析レポート — 未解決の問題
 
 EC-CUBE 4.3 のソースコードを検証した結果、以下の点が未解決。

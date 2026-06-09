@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -16,6 +18,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Form\AdminSecurityForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -39,6 +42,10 @@ class Security extends ResourceObject
     ) {
     }
 
+    /** ALPS `doUpdateSecurity` に対応する GET 操作。 */
+    #[Alps('doUpdateSecurity')]
+    #[JsonSchema(schema: 'get-admin-security.json')]
+    #[Link(rel: 'doUpdateSecurity', href: 'page://self/admin/security', method: 'put')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -52,12 +59,12 @@ class Security extends ResourceObject
         $form = $this->formFactory->newInstance(AdminSecurityForm::class);
         assert($form instanceof AdminSecurityForm);
         $form->fillValues([
-            'admin_route_dir' => 'admin',
-            'admin_allow_hosts' => $settings['admin_allow_hosts'] ?? '',
-            'admin_deny_hosts' => $settings['admin_deny_hosts'] ?? '',
-            'front_allow_hosts' => $settings['front_allow_hosts'] ?? '',
-            'front_deny_hosts' => $settings['front_deny_hosts'] ?? '',
-            'trusted_hosts' => $settings['trusted_hosts'] ?? '^localhost$',
+            'adminRouteDir' => 'admin',
+            'adminAllowHosts' => $settings['admin_allow_hosts'] ?? '',
+            'adminDenyHosts' => $settings['admin_deny_hosts'] ?? '',
+            'frontAllowHosts' => $settings['front_allow_hosts'] ?? '',
+            'frontDenyHosts' => $settings['front_deny_hosts'] ?? '',
+            'trustedHosts' => $settings['trusted_hosts'] ?? '^localhost$',
         ]);
 
         $this->code = Code::OK;
@@ -84,6 +91,9 @@ class Security extends ResourceObject
      * @psalm-taint-source input $frontDenyHosts
      * @psalm-taint-source input $trustedHosts
      */
+    #[Alps('doUpdateSecurity')]
+    #[JsonSchema(schema: 'put-admin-security.json', params: 'put-admin-security.param.json')]
+    #[Link(rel: 'goTwoFactorAuthSet', href: 'page://self/admin/two-factor-auth-set')]
     #[CsrfProtected]
     public function onPut(
         string $adminAllowHosts = '',
@@ -92,30 +102,18 @@ class Security extends ResourceObject
         string $frontDenyHosts = '',
         string $trustedHosts = '',
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateSecurityInput(
-                adminAllowHosts: $adminAllowHosts,
-                adminDenyHosts: $adminDenyHosts,
-                frontAllowHosts: $frontAllowHosts,
-                frontDenyHosts: $frontDenyHosts,
-                trustedHosts: $trustedHosts,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateSecurityInput(
+            adminAllowHosts: $adminAllowHosts,
+            adminDenyHosts: $adminDenyHosts,
+            frontAllowHosts: $frontAllowHosts,
+            frontDenyHosts: $frontDenyHosts,
+            trustedHosts: $trustedHosts,
+        ));
 
         assert($final instanceof SecuritySettingsUpdated);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin_setting_system_security';
+        $this->headers['Location'] = '/admin/security';
         $this->body = [
             'transitionId' => 'doUpdateSecurity',
             'trustedHosts' => $final->trustedHosts,

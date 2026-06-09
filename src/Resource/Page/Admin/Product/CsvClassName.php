@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Product;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\JsonSchema;
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -12,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ClassNameCsvImported;
 use MyVendor\BeMart\Be\Input\ImportClassNameCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Support\Resource\AbstractCsvUpload;
 use Override;
 use Ray\WebFormModule\FormFactory;
 
@@ -39,32 +43,35 @@ class CsvClassName extends AbstractCsvUpload
         parent::__construct($adminSession, $formFactory);
     }
 
+    /** ALPS `goExportClassName` に対応する GET 操作。 */
+    #[Override]
+    #[Alps('goExportClassName')]
+    #[JsonSchema(schema: 'get-admin-product-csv-class-name.json')]
+    #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    public function onGet(): static
+    {
+        parent::onGet();
+
+        return $this;
+    }
+
     /**
      * Imports the 規格名 CSV (doImportClassNameCsv).
      *
      * @psalm-taint-source input $csv
      */
+    #[Alps('doImportClassNameCsv')]
+    #[JsonSchema(schema: 'post-admin-product-csv-class-name.json', params: 'post-admin-product-csv-class-name.param.json')]
+    #[Link(rel: 'goExportClassCategory', href: 'page://self/admin/class-category/class-category-export')]
     #[CsrfProtected]
     public function onPost(string $csv = ''): static
     {
-        try {
-            $final = ($this->becoming)(new ImportClassNameCsvInput(csv: $csv));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid CSV.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ImportClassNameCsvInput(csv: $csv));
 
         assert($final instanceof ClassNameCsvImported);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/product/class_name';
+        $this->headers['Location'] = '/admin/class-name/class-name-list';
         $this->body = [
             'transitionId' => 'doImportClassNameCsv',
             'accepted' => $final->accepted,

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Final\AdminOrderUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderInput;
 use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -65,29 +67,14 @@ class Order extends ResourceObject
      *
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('goOrder')]
+    #[JsonSchema(schema: 'get-admin-order.json', params: 'get-admin-order.param.json')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'doUpdateOrder', href: 'page://self/admin/order', method: 'put')]
     #[Link(rel: 'doUpdateOrderStatus', href: 'page://self/admin/order-status', method: 'post')]
     public function onGet(string $orderNo): static
     {
-        try {
-            $final = ($this->becoming)(new GetAdminOrderInput(orderNo: $orderNo));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminOrderInput(orderNo: $orderNo));
 
         assert($final instanceof AdminOrderFetched);
 
@@ -136,6 +123,8 @@ class Order extends ResourceObject
      * @psalm-taint-source input $charge
      * @psalm-taint-source input $usePoint
      */
+    #[Alps('doUpdateOrder')]
+    #[JsonSchema(schema: 'put-admin-order.json', params: 'put-admin-order.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     #[CsrfProtected]
     public function onPut(
@@ -144,32 +133,12 @@ class Order extends ResourceObject
         int|null $charge = null,
         int|null $usePoint = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminUpdateOrderInput(
-                orderNo: $orderNo,
-                discount: $discount,
-                charge: $charge,
-                usePoint: $usePoint,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.',
-                'orderNo' => $orderNo,
-            ];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminUpdateOrderInput(
+            orderNo: $orderNo,
+            discount: $discount,
+            charge: $charge,
+            usePoint: $usePoint,
+        ));
 
         assert($final instanceof AdminOrderUpdated);
 
