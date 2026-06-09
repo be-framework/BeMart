@@ -26,11 +26,11 @@ BeMart は ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery / Twig HTML を横
 | 領域 | 典型的な独自実装 | なぜ作ったか | 問題化したこと | 標準回帰/整理 |
 |---|---|---|---|---|
 | Router | Aura.Router route map、EC-CUBE route名、underscore alias、param map | EC-CUBE由来テンプレートを早く動かすため | `/admin_product_csv` 404、`/admin/order` が詳細Resourceへ誤解決、URLとResource pathの二重帳簿 | #56 で Web Router を全廃し、HTTP URL = BEAR Resource path へ寄せた |
-| Bootstrap | 423行のHTTP制御、`header()`、`http_response_code()`、`ResourceObject::toString()` | redirect/download/例外をその場で補正するため | BEAR の transfer/responder 境界が見えなくなり、標準比較が困難 | 未解消。次PR群で transfer shell へ戻す対象 |
-| Injector / context | 手書き context-to-module map、`Ray\Di\Injector` 直接構築 | `html-prod-hal-api-app` 等の複合contextを早く作るため | `BEAR\Package\Injector` の合成規約から外れ、wrapper moduleが増えた | 未解消。`BEAR\Package\Injector` 委譲へ戻す対象 |
-| Module wrapper | `HtmlProdModule` / `HtmlTestModule` / `HalApiModule` 等 | HTML/API、prod/test/fakeを組み合わせるため | AppModule重複installやcontext命名の揺れが起きやすい | 未解消。context atomへ再整理する対象 |
-| MediaQuery | `MediaQueryRuntimeModule::queryClasses()` の手書き一覧 | SQL移行中に確実に登録するため | Query追加のたびにmodule編集が必要になり、標準のdiscoverabilityを失った | 未解消。`MediaQuerySqlModule` / `Queries::fromDir()` 検討対象 |
-| CSRF/session | `RequestQueryCapturingInvoker` / `RequestQueryContext` | interceptorから入力tokenを読むため | Resource引数の明示契約ではなく、呼び出し境界の隠れ状態に依存 | 未解消。`csrfToken` 明示引数へ戻す対象 |
+| Bootstrap | 423行のHTTP制御、`header()`、`http_response_code()`、`ResourceObject::toString()` | redirect/download/例外をその場で補正するため | BEAR の transfer/responder 境界が見えなくなり、標準比較が困難 | #76 で小さな BEAR transfer shell へ回帰 |
+| Injector / context | 手書き context-to-module map、`Ray\Di\Injector` 直接構築 | `html-prod-hal-api-app` 等の複合contextを早く作るため | `BEAR\Package\Injector` の合成規約から外れ、wrapper moduleが増えた | #76 で `BEAR\Package\Injector` 委譲へ回帰 |
+| Module wrapper | `HtmlProdModule` / `HtmlTestModule` / `HalApiModule` 等 | HTML/API、prod/test/fakeを組み合わせるため | AppModule重複installやcontext命名の揺れが起きやすい | #76 で削除し、BEAR.Package の token composition へ置換 |
+| MediaQuery | `MediaQueryRuntimeModule::queryClasses()` の手書き一覧 | SQL移行中に確実に登録するため | Query追加のたびにmodule編集が必要になり、標準のdiscoverabilityを失った | #76 で `MediaQueryQueries::fromAppRoot()` による discovery へ整理 |
+| CSRF/session | `RequestQueryCapturingInvoker` / `RequestQueryContext` | interceptorから入力tokenを読むため | Resource invocation 境界の隠れ状態に依存 | #76 で request capture を削除し、interceptor が `ResourceObject->uri->query` を読む形へ整理 |
 | JSON Schema | 巨大な補助生成器、schema品質ゲート、作業用台帳 | Semantic-Ex品質を上げるため | 最初は生成器をPR成果物に含めすぎ、schema資産と作業道具が混ざった | #55 で schema/docs資産へ整理。補助生成器はPR成果物から除外 |
 | Web E2E証跡 | 大量スクリーンショット、重複画像、途中run混在 | 全機能ブラウザ検証を証明するため | 証拠量が増えすぎ、重複・誤リンク・pass/fail矛盾がレビュー負債化 | #57 で最終runへ一本化、重複削除、誤証跡を訂正 |
 
@@ -65,17 +65,19 @@ BeMart は ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery / Twig HTML を横
 
 ## 現在の標準逸脱監査
 
-`bear-standard-guard` の監査では、2026-06-08時点で以下が残っている。
+PR #76 時点で `python3 scripts/bear_standard_audit.py . --json` は `count: 0` である。
 
-| ID | 件数 | 状態 |
-|---|---:|---|
-| `bootstrap.too_large` / `bootstrap.manual_transfer` | 4 | 未解消。Bootstrap標準化PRで対応する。 |
-| `injector.custom_context_map` / `injector.manual_context_match` / `injector.direct_ray_injector` | 3 | 未解消。Injector/context合成PRで対応する。 |
-| `module.context_wrapper` | 7 | 未解消。context atom整理PRで対応する。 |
-| `media_query.manual_class_list` | 1 | 未解消。MediaQuery discovery PRで対応する。 |
-| `resource.request_capture` | 2 | 未解消。CSRF明示引数PRで対応する。 |
+主な解消内容は次の通り。
 
-この数は「責めるため」ではなく、今後のPRを小さく切るための入口である。
+| 領域 | 状態 |
+|---|---|
+| Bootstrap | 小さな BEAR transfer shell へ回帰。 |
+| Injector / context | `BEAR\Package\Injector` 委譲へ回帰。 |
+| Module wrapper | 旧 wrapper module を削除し、BEAR.Package token composition へ置換。 |
+| MediaQuery | 手書き class list をやめ、`MediaQueryQueries::fromAppRoot()` へ整理。 |
+| CSRF request capture | `RequestQueryCapturingInvoker` / `RequestQueryContext` を削除。 |
+
+監査が green でも、`CanonicalResourceRouter` や `DownloadResponder` のような互換層は残っている。これらは業務互換や streaming 化と同時に、別 PR で小さく削る。
 
 ## 再発防止のルール
 
@@ -87,9 +89,8 @@ BeMart は ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery / Twig HTML を横
 
 ## 次に解消する順序
 
-1. `composer architecture:audit` / `bear-standard-guard` 相当の監査をBeMartに入れる。
-2. Injector/context合成を `BEAR\Package\Injector` へ戻す。
-3. Bootstrapを小さな BEAR transfer shell へ戻す。
-4. MediaQuery手書き一覧を削除する。
-5. CSRF request captureを削除し、Resource引数へ戻す。
-6. Web E2Eを再実行し、標準回帰で壊れていないことを証明する。
+1. `CanonicalResourceRouter` を不要にするため、template / form 側の legacy compatibility を削る。
+2. `DownloadResponder` を CSV/PDF/ZIP の標準 streaming へ寄せる。
+3. ActionRedirect 互換層を Resource / schema / smoke fixture / apidoc と同時に整理する。
+4. `bear/devtools` の workflow-test contract がタグリリースされたら、dev branch 依存をタグへ戻す。
+5. Web E2Eを再実行し、標準回帰で壊れていないことを証明する。
