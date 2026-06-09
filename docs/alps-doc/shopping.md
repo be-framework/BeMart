@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Shopping / CheckoutEntry"
+---
+
 # Shopping / CheckoutEntry
 
 購入フローでは、カートからの入口と注文手続き画面を分けて扱う。

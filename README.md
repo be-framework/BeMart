@@ -115,7 +115,7 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 ```text
 .
 ├── alps.json        # SSOT: ALPS profile
-├── alps-doc/        # descriptor ごとの補足ドキュメント
+├── alps-doc@       # -> docs/alps-doc (descriptor 補足ドキュメント互換リンク)
 ├── be/src/          # Be Framework domain
 ├── src/Resource/    # BEAR.Sunday Resource
 ├── var/sql/         # Ray.MediaQuery SQL files
@@ -123,7 +123,7 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 ├── var/templates/   # Twig HTML ports
 ├── public/          # HTTP entrypoints
 ├── tests/           # Resource / SQL / HTML / HTTP / workflow tests
-└── docs/            # Project documentation
+└── docs/            # Project documentation / ALPS 補足ドキュメント正本
 ```
 
 生成 HTML / SVG / API docs は生成物です。生成元がある場合は手で編集しません。
