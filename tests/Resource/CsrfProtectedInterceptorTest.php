@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource;
 
 use ArrayObject;
+use BEAR\Resource\Code;
+use BEAR\Resource\NullUri;
+use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Exception\CsrfTokenInvalidException;
 use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
-use MyVendor\BeMart\Support\Resource\RequestQueryContext;
 use PHPUnit\Framework\TestCase;
 use Ray\Aop\MethodInvocation;
 use Ray\Aop\ReflectionMethod;
@@ -18,50 +19,53 @@ final class CsrfProtectedInterceptorTest extends TestCase
 {
     public function testValidTokenProceeds(): void
     {
-        $context = new RequestQueryContext();
-        $context->push(['csrfToken' => FakeCsrfToken::TOKEN]);
-        $invocation = new CsrfProtectedMethodInvocation();
+        $invocation = new CsrfProtectedMethodInvocation(query: ['csrfToken' => FakeCsrfToken::TOKEN]);
 
-        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken(), $context))->invoke($invocation);
+        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken()))->invoke($invocation);
 
         $this->assertSame('proceeded', $result);
         $this->assertTrue($invocation->proceeded);
     }
 
-    public function testInvalidTokenThrowsForbiddenException(): void
+    public function testInvalidTokenReturnsForbiddenResourceObject(): void
     {
-        $context = new RequestQueryContext();
-        $context->push(['csrfToken' => 'attacker-token']);
+        $invocation = new CsrfProtectedMethodInvocation(query: ['csrfToken' => 'attacker-token']);
 
-        $this->expectException(CsrfTokenInvalidException::class);
+        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken()))->invoke($invocation);
 
-        (new CsrfProtectedInterceptor(new FakeCsrfToken(), $context))->invoke(new CsrfProtectedMethodInvocation());
+        $this->assertInstanceOf(ResourceObject::class, $result);
+        $this->assertSame(Code::FORBIDDEN, $result->code);
+        $this->assertSame(['message' => 'Invalid or missing CSRF token.'], $result->body);
+        $this->assertFalse($invocation->proceeded);
     }
 
-    public function testMissingTokenThrowsForbiddenException(): void
+    public function testMissingTokenReturnsForbiddenResourceObject(): void
     {
-        $context = new RequestQueryContext();
-        $context->push([]);
+        $invocation = new CsrfProtectedMethodInvocation(query: []);
 
-        $this->expectException(CsrfTokenInvalidException::class);
+        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken()))->invoke($invocation);
 
-        (new CsrfProtectedInterceptor(new FakeCsrfToken(), $context))->invoke(new CsrfProtectedMethodInvocation());
+        $this->assertInstanceOf(ResourceObject::class, $result);
+        $this->assertSame(Code::FORBIDDEN, $result->code);
+        $this->assertSame(['message' => 'Invalid or missing CSRF token.'], $result->body);
+        $this->assertFalse($invocation->proceeded);
     }
 
     public function testCustomBodyFieldIsUsed(): void
     {
-        $context = new RequestQueryContext();
-        $context->push(['_csrf' => FakeCsrfToken::TOKEN]);
-        $invocation = new CsrfProtectedMethodInvocation('onPostWithCustomBodyField');
+        $invocation = new CsrfProtectedMethodInvocation(
+            methodName: 'onPostWithCustomBodyField',
+            query: ['_csrf' => FakeCsrfToken::TOKEN],
+        );
 
-        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken(), $context))->invoke($invocation);
+        $result = (new CsrfProtectedInterceptor(new FakeCsrfToken()))->invoke($invocation);
 
         $this->assertSame('proceeded', $result);
         $this->assertTrue($invocation->proceeded);
     }
 }
 
-final class CsrfProtectedFixture
+final class CsrfProtectedFixture extends ResourceObject
 {
     #[CsrfProtected]
     public function onPost(): void
@@ -78,10 +82,16 @@ final class CsrfProtectedFixture
 final class CsrfProtectedMethodInvocation implements MethodInvocation
 {
     public bool $proceeded = false;
+    private readonly CsrfProtectedFixture $resourceObject;
 
     public function __construct(
         private readonly string $methodName = 'onPost',
+        array $query = [],
     ) {
+        $uri = new NullUri();
+        $uri->query = $query;
+        $this->resourceObject = new CsrfProtectedFixture();
+        $this->resourceObject->uri = $uri;
     }
 
     public function getMethod(): ReflectionMethod
@@ -108,6 +118,6 @@ final class CsrfProtectedMethodInvocation implements MethodInvocation
 
     public function getThis(): object
     {
-        return new CsrfProtectedFixture();
+        return $this->resourceObject;
     }
 }

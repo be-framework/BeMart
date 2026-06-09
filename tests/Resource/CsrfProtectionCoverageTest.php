@@ -89,7 +89,7 @@ final class CsrfProtectionCoverageTest extends TestCase
         $this->assertSame(
             [],
             $violations,
-            "CSRF is supplied through RequestQueryContext, not Resource signatures:\n" . implode("\n", $violations),
+            "CSRF is supplied through ResourceObject uri query, not Resource signatures:\n" . implode("\n", $violations),
         );
     }
 

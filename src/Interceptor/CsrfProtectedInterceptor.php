@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Interceptor;
 
+use BEAR\Resource\Code;
+use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
-use MyVendor\BeMart\Exception\CsrfTokenInvalidException;
-use MyVendor\BeMart\Support\Resource\RequestQueryContext;
 use Override;
 use Ray\Aop\MethodInterceptor;
 use Ray\Aop\MethodInvocation;
@@ -18,7 +18,6 @@ final readonly class CsrfProtectedInterceptor implements MethodInterceptor
 {
     public function __construct(
         private CsrfToken $csrf,
-        private RequestQueryContext $queryContext,
     ) {
     }
 
@@ -27,10 +26,20 @@ final readonly class CsrfProtectedInterceptor implements MethodInterceptor
     {
         $attributes = $invocation->getMethod()->getAttributes(CsrfProtected::class);
         $attribute = $attributes[0]->newInstance();
-        $token = $this->queryContext->get($attribute->bodyField);
+        $resourceObject = $invocation->getThis();
+        $token = $resourceObject instanceof ResourceObject
+            ? ($resourceObject->uri->query[$attribute->bodyField] ?? null)
+            : null;
 
         if (! $this->csrf->isValid(is_string($token) ? $token : null)) {
-            throw new CsrfTokenInvalidException();
+            if ($resourceObject instanceof ResourceObject) {
+                $resourceObject->code = Code::FORBIDDEN;
+                $resourceObject->body = ['message' => 'Invalid or missing CSRF token.'];
+
+                return $resourceObject;
+            }
+
+            return null;
         }
 
         return $invocation->proceed();

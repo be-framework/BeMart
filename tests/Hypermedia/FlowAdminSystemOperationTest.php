@@ -9,7 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
-use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use BEAR\Dev\Http\AbstractWorkflowTest;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
 
