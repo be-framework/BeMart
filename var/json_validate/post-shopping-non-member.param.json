@@ -53,6 +53,18 @@
       "example": "アリス",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
+    "companyName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 80,
+      "title": "会社名（入力）",
+      "description": "非会員購入フォームの任意会社名。HTMLフォーム境界では送信されるが、現行の非会員購入ドメイン入力には渡さない。",
+      "example": "株式会社サンプル",
+      "$comment": "HTML form compatibility field. Business persistence is intentionally out of scope for SubmitNonMemberInput."
+    },
     "email": {
       "title": "メールアドレス（入力）",
       "description": "会員のログインIDを兼ねる。有効会員間で一意 ログインIDを兼ねるメールアドレス。会員登録・ログイン・通知で共通に使う。 Fake観察文字長 15〜58; 観察値 'bob@example.com', 'login-test@example.com', 'alice@example.com', 'carol@example.com', 'provisional@example.com', 'withdrawn-30000000aaaa3333bbbb4444cccc5555@example.invalid'。",
@@ -64,6 +76,18 @@
       "maxLength": 254,
       "example": "alice@example.com",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "email_confirm": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 254,
+      "title": "メールアドレス確認（入力）",
+      "description": "非会員購入フォームのメールアドレス確認欄。HTMLフォーム境界でのみ使い、Resourceで一致確認する。",
+      "example": "alice@example.com",
+      "$comment": "HTML form compatibility field. Business persistence is intentionally out of scope for SubmitNonMemberInput."
     },
     "phoneNumber": {
       "title": "電話番号（入力）",
@@ -92,6 +116,7 @@
       "description": "日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用 都道府県ID。住所フォームの未選択状態では0、確定住所では1〜47を使う。 Fake観察数値 13〜27; 観察値 '13', '27'; null 3/9。",
       "type": [
         "integer",
+        "string",
         "null"
       ],
       "example": 13,

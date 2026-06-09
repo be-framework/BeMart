@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\NonMemberForm;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
@@ -121,6 +122,33 @@ final class ShoppingNonMemberHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="email"', $html);
         $this->assertStringContainsString('name="email_confirm"', $html);
         $this->assertStringContainsString('name="postalCode"', $html);
+    }
+
+    public function testRejectedPostRendersInlineErrorsAsHtml(): void
+    {
+        $ro = $this->resource->post('page://self/shopping/non-member', [
+            'name01' => '',
+            'name02' => '',
+            'kana01' => '',
+            'kana02' => '',
+            'companyName' => '',
+            'email' => '',
+            'email_confirm' => '',
+            'phoneNumber' => '',
+            'postalCode' => '',
+            'pref' => '',
+            'addr01' => '',
+            'addr02' => '',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::BAD_REQUEST, $ro->code);
+
+        $html = $ro->toString();
+        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $html);
+        $this->assertStringContainsString('入力してください。', $html);
+        $this->assertStringContainsString('name="email_confirm"', $html);
+        $this->assertStringNotContainsString('Invalid parameter type', $html);
     }
 
     #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
