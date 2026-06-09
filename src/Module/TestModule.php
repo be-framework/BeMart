@@ -13,7 +13,7 @@ final class TestModule extends AbstractAppModule
     #[Override]
     protected function configure(): void
     {
-        $this->install(new FakeModule($this->appMeta));
+        $this->install(new FakeModule($this->appMeta, $this->lastModule));
         $this->override(new DevModule());
     }
 }
