@@ -44,6 +44,21 @@ final class CartItemResourceTest extends TestCase
         $this->assertSame('/cart', $ro->headers['Location']);
     }
 
+    public function testOnPostOperationAddUsesBrowserFormAndRedirectsToCart(): void
+    {
+        $ro = $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'operation' => 'add',
+            'quantity' => 1,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/cart', $ro->headers['Location']);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(1, $ro->body['adjustedQuantity']);
+    }
+
     public function testOnPostMissingProductReturns404(): void
     {
         $this->expectException(\MyVendor\BeMart\Be\Exception\ProductClassNotFoundException::class);
@@ -75,6 +90,67 @@ final class CartItemResourceTest extends TestCase
         $this->assertSame(5, $ro->body['adjustedQuantity']);
         // sample-001 unitPrice is 1200; 5 * 1200 = 6000.
         $this->assertSame(6000, $ro->body['totalPrice']);
+    }
+
+    public function testOnPostOperationUpUsesBrowserFormAndRedirectsToCart(): void
+    {
+        $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 2,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $ro = $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'operation' => 'up',
+            'quantity' => 4,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/cart', $ro->headers['Location']);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(4, $ro->body['adjustedQuantity']);
+    }
+
+    public function testOnPostOperationDownUsesBrowserFormAndRedirectsToCart(): void
+    {
+        $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 3,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $ro = $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'operation' => 'down',
+            'quantity' => 2,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/cart', $ro->headers['Location']);
+        $this->assertSame('sample-001', $ro->body['productCode']);
+        $this->assertSame(2, $ro->body['adjustedQuantity']);
+    }
+
+    public function testOnPostOperationRemoveUsesBrowserFormAndRedirectsToCart(): void
+    {
+        $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'quantity' => 1,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $ro = $this->resource->post('page://self/cart/item', [
+            'productCode' => 'sample-001',
+            'operation' => 'remove',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/cart', $ro->headers['Location']);
+        $this->assertSame('sample-001', $ro->body['productCode']);
     }
 
     public function testOnPutMissingItemReturns404(): void

@@ -203,6 +203,7 @@
                     {% endif %}
                     <form action="/cart/item" method="post" id="form1" name="form1">
                         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                        <input type="hidden" name="operation" value="add">
                         {% if stockFind %}
                             <div class="ec-productRole__actions">
                                 <div class="ec-numberInput"><span>数量</span>

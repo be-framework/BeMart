@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource;
 
-use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Form\EntryConfirmForm;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
-use Ray\Di\Injector;
 use Ray\WebFormModule\FormFactory;
 use Twig\Environment;
 use Twig\Markup;
@@ -93,11 +91,7 @@ final class EntryConfirmHtmlRenderTest extends TestCase
 
     protected function setUp(): void
     {
-        $meta = new Meta('MyVendor\\BeMart', 'html');
-        $injector = new Injector(
-            new HtmlTestModule($meta),
-            dirname(__DIR__, 2) . '/var/tmp/html',
-        );
+        $injector = HtmlTestInjector::getInstance();
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 

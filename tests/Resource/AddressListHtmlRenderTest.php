@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource;
 
-use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
-use Ray\Di\Injector;
 use Twig\Environment;
 use Twig\TwigFilter;
 use Twig\TwigFunction;
@@ -71,10 +69,8 @@ final class AddressListHtmlRenderTest extends TestCase
 
     protected function setUp(): void
     {
-        $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlTestModule($meta);
         $session = new FakeSession(self::ALICE_ID);
-        $module->override(new class ($session) extends AbstractModule {
+        $injector = HtmlTestInjector::getOverrideInstance(new class ($session) extends AbstractModule {
             public function __construct(private readonly FakeSession $session)
             {
                 parent::__construct();
@@ -85,7 +81,6 @@ final class AddressListHtmlRenderTest extends TestCase
                 $this->bind(CustomerSession::class)->toInstance($this->session);
             }
         });
-        $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');
 
         // The address row is supplied by the Ray.FakeQuery fixture
         // `address_list_by_customer.jsonl`; fake context does not mutate

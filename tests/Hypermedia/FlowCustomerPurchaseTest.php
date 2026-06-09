@@ -8,7 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use BEAR\Dev\Http\AbstractWorkflowTest;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
 
@@ -136,8 +136,19 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         return $cart;
     }
 
-    #[Alps('goShoppingNonMember')]
+    #[Alps('goCheckoutEntry')]
     #[Depends('testCart')]
+    public function testCheckoutEntryRedirectsAnonymousToShoppingLogin(ResourceObject $response): ResourceObject
+    {
+        $entry = $this->resource->get($this->linkHref($response, 'goCheckoutEntry'));
+
+        $this->assertSame(Code::SEE_OTHER, $entry->code);
+
+        return $this->followLocation($entry, '/shopping/login');
+    }
+
+    #[Alps('goShoppingNonMember')]
+    #[Depends('testCheckoutEntryRedirectsAnonymousToShoppingLogin')]
     public function testNonMemberForm(ResourceObject $response): ResourceObject
     {
         return $this->follow($response, 'goShoppingNonMember');

@@ -4,13 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource;
 
-use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Form\AddCartForm;
-use MyVendor\BeMart\Module\HtmlTestModule;
+use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
-use Ray\Di\Injector;
 use Ray\WebFormModule\FormFactory;
 use Twig\Environment;
 use Twig\Markup;
@@ -117,11 +115,7 @@ final class ProductHtmlRenderTest extends TestCase
 
     protected function setUp(): void
     {
-        $meta = new Meta('MyVendor\\BeMart', 'html');
-        $injector = new Injector(
-            new HtmlTestModule($meta),
-            dirname(__DIR__, 2) . '/var/tmp/html',
-        );
+        $injector = HtmlTestInjector::getInstance();
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
@@ -187,6 +181,10 @@ final class ProductHtmlRenderTest extends TestCase
         $this->assertStringContainsString('min="1"', $html);
         // productCode — hidden input seeded with the product code.
         $this->assertStringContainsString('type="hidden" name="productCode" value="sample-001"', $html);
+        // Browser form submit redirects to the cart; Resource/HAL tests
+        // without this field still receive the pure 201 doAddCartItem
+        // response.
+        $this->assertStringContainsString('name="operation" value="add"', $html);
     }
 
     /**
@@ -262,7 +260,10 @@ final class ProductHtmlRenderTest extends TestCase
             // token as a hidden `csrfToken` input (CsrfToken
             // reference). Residual by its `csrfToken` field name.
             'name="csrfToken"',
-            'name="csrfToken"',
+            // Browser form posts use the Resource-level `operation=add`
+            // gateway so successful HTML submits redirect to /cart while
+            // pure Resource/HAL calls keep the 201 doAddCartItem response.
+            'name="operation"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;

@@ -9,7 +9,7 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerIdQueryInterface;
-use MyVendor\BeMart\Module\ProdModule;
+use MyVendor\BeMart\Injector as AppInjector;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
@@ -23,7 +23,7 @@ use function getenv;
  * Proves that prod uses the real SQL-backed MediaQuery runtime, while
  * dev/test use the same public #[DbQuery] proxies over Ray.FakeQuery fixture JSONs.
  *
- *   ProdModule = AppModule + session/csrf adapters + SqlModule
+ *   prod-eccube-sql-hal-app = AppModule + BEAR prod + EccubeModule + SqlModule
  *   TestModule = AppModule + dev logging + FakeModule
  *
  * The important invariant is that public query interfaces are direct
@@ -41,10 +41,7 @@ final class ProdModuleSqlWiringTest extends TestCase
     {
         $this->skipWithoutDatabaseUrl();
 
-        $injector = new Injector(
-            new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
-            dirname(__DIR__, 2) . '/var/tmp/prod',
-        );
+        $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
 
         // Building the Resource client proves the whole prod injector
         // (App graph + every overridden binding) wires without error.
@@ -58,7 +55,7 @@ final class ProdModuleSqlWiringTest extends TestCase
         $this->assertStringContainsString(
             CustomerQueryInterface::class,
             $customerQuery::class,
-            'ProdModule must bind CustomerQueryInterface directly as a MediaQuery proxy.',
+            'prod-eccube-sql-hal-app must bind CustomerQueryInterface directly as a MediaQuery proxy.',
         );
 
         // IdQueries are also part of the cutover — production customer
@@ -68,7 +65,7 @@ final class ProdModuleSqlWiringTest extends TestCase
         $this->assertStringContainsString(
             CustomerIdQueryInterface::class,
             $customerIdProvider::class,
-            'ProdModule must override CustomerIdQueryInterface Fake -> MediaQuery proxy.',
+            'prod-eccube-sql-hal-app must override CustomerIdQueryInterface Fake -> MediaQuery proxy.',
         );
 
         // MediaQuery runtime builds a real connection from DATABASE_URL.
@@ -85,10 +82,7 @@ final class ProdModuleSqlWiringTest extends TestCase
     {
         $this->skipWithoutDatabaseUrl();
 
-        $injector = new Injector(
-            new ProdModule(new Meta('MyVendor\\BeMart', 'prod')),
-            dirname(__DIR__, 2) . '/var/tmp/prod',
-        );
+        $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
 
         // SqlModule shares one connection per request lifecycle.
         $this->assertSame(

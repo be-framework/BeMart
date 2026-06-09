@@ -99,24 +99,33 @@ final class ShoppingResourceTest extends TestCase
         $this->assertCount(2, $ro->body['paymentMethods']);
     }
 
-    public function testOnGetUnauthenticatedReturns401(): void
+    public function testOnGetUnauthenticatedRedirectsToShoppingLogin(): void
     {
         $this->rebindSession(null);
 
         $ro = $this->resource->get('page://self/shopping');
 
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertSame('この操作を行うにはログインが必要です。', $ro->body['message']);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/shopping/login', $ro->headers['Location']);
+        $this->assertSame('goCheckoutEntry', $ro->body['transitionId']);
+        $this->assertSame('page://self/shopping/login', $ro->body['links']['goShoppingLogin']);
+        $this->assertSame('page://self/shopping/non-member', $ro->body['links']['goShoppingNonMember']);
+        $this->assertSame('page://self/cart', $ro->body['links']['goCart']);
+        $this->assertArrayNotHasKey('doConfirmOrder', $ro->body['links']);
+        $this->assertArrayNotHasKey('doCheckout', $ro->body['links']);
+        $this->assertArrayNotHasKey('href', $ro->body['_links']['doConfirmOrder']);
+        $this->assertArrayNotHasKey('doCheckout', $ro->body['_links']);
     }
 
-    public function testOnGetUnknownCustomerSessionReturns401(): void
+    public function testOnGetUnknownCustomerSessionRedirectsToShoppingLogin(): void
     {
-        // Session points to a non-existent customerId — same 401 as anonymous.
+        // Session points to a non-existent customerId — same checkout
+        // gateway redirect as anonymous.
         $this->rebindSession('ghost-customer-no-such-row');
 
         $ro = $this->resource->get('page://self/shopping');
 
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertSame('この操作を行うにはログインが必要です。', $ro->body['message']);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/shopping/login', $ro->headers['Location']);
     }
 }
