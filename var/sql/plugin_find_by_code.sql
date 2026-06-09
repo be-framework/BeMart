@@ -1,4 +1,4 @@
 SELECT code, name, version, initialized, enabled
 FROM dtb_plugin
-WHERE code = :code
+WHERE code = :pluginCode
 LIMIT 1
