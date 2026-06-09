@@ -10,6 +10,6 @@ final class WorkflowTest extends Workflow
 {
     protected function setUp(): void
     {
-        $this->resource = new HttpResource('127.0.0.1:8080', __DIR__ . '/index.php', __DIR__ . '/log/workflow.log');
+        $this->resource = new HttpResource('127.0.0.1:18080', __DIR__ . '/index.php', __DIR__ . '/log/workflow.log');
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Http;
 
+use BEAR\Dev\Http\Exception\HalLinkNotFoundException;
 use BEAR\Resource\Method;
 use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceInterface;
@@ -18,25 +19,36 @@ use function escapeshellarg;
 use function explode;
 use function file_exists;
 use function file_put_contents;
+use function html_entity_decode;
 use function http_build_query;
 use function implode;
+use function in_array;
 use function is_array;
+use function is_object;
 use function is_string;
 use function json_decode;
 use function json_encode;
+use function parse_url;
 use function preg_match;
+use function preg_match_all;
 use function preg_split;
 use function shell_exec;
 use function sprintf;
 use function str_contains;
+use function str_starts_with;
 use function strtolower;
 use function sys_get_temp_dir;
 use function tempnam;
 use function trim;
 
 use const FILE_APPEND;
+use const ENT_HTML5;
+use const ENT_QUOTES;
 use const JSON_THROW_ON_ERROR;
 use const PHP_EOL;
+use const PHP_URL_PATH;
+use const PHP_URL_QUERY;
+use const PREG_SET_ORDER;
 
 /**
  * ResourceInterface backed by a real HTTP round-trip.
@@ -44,6 +56,8 @@ use const PHP_EOL;
  * The PHP built-in server is managed by koriym/php-server (the maintained
  * component BEAR itself uses); requests are issued with curl against a
  * per-instance cookie jar so the session survives across the workflow.
+ *
+ * @phpstan-type SemanticLink array{href: string, method: string}
  */
 final class HttpResource implements ResourceInterface
 {
@@ -107,7 +121,225 @@ final class HttpResource implements ResourceInterface
     #[Override]
     public function href(string $rel, array $query = [], ResourceObject|null $ro = null): ResourceObject
     {
-        throw new UnsupportedResourceOperationException('href is not used by workflow tests.');
+        if ($ro === null) {
+            throw new HalLinkNotFoundException('A source ResourceObject is required.');
+        }
+
+        $link = $this->halLink($rel, $ro)
+            ?? $this->htmlSemanticLink($rel, $ro)
+            ?? $this->linkHeaderLink($rel, $ro);
+        if ($link === null) {
+            throw new HalLinkNotFoundException(sprintf('Link rel `%s` is not available.', $rel));
+        }
+
+        return $this->requestLink($link, $query);
+    }
+
+    /** @return SemanticLink|null */
+    private function halLink(string $rel, ResourceObject $ro): array|null
+    {
+        if (! is_array($ro->body)) {
+            return null;
+        }
+
+        $links = $ro->body['_links'] ?? null;
+        if (is_object($links)) {
+            $links = (array) $links;
+        }
+
+        if (! is_array($links) || ! array_key_exists($rel, $links)) {
+            return null;
+        }
+
+        $link = $this->halLinkData($links[$rel]);
+        if ($link === null) {
+            return null;
+        }
+
+        $href = $link['href'] ?? null;
+        if (! is_string($href)) {
+            return null;
+        }
+
+        $method = is_string($link['method'] ?? null) ? $link['method'] : 'get';
+
+        return ['href' => $href, 'method' => strtolower($method)];
+    }
+
+    /** @return array<string, mixed>|null */
+    private function halLinkData(mixed $link): array|null
+    {
+        if (is_object($link)) {
+            $link = (array) $link;
+        }
+
+        if (! is_array($link)) {
+            return null;
+        }
+
+        $data = [];
+        foreach ($link as $key => $value) {
+            if (is_string($key)) {
+                $data[$key] = $value;
+            }
+        }
+
+        return $data;
+    }
+
+    /** @return SemanticLink|null */
+    private function htmlSemanticLink(string $rel, ResourceObject $ro): array|null
+    {
+        if (! is_string($ro->view) || $ro->view === '') {
+            return null;
+        }
+
+        if (preg_match_all('/<(a|area|link|form)\b(?P<attrs>[^>]*)>/i', $ro->view, $matches, PREG_SET_ORDER) !== 1) {
+            return null;
+        }
+
+        foreach ($matches as $match) {
+            $attrs = $match['attrs'];
+            if (! $this->hasLinkToken($attrs, $rel)) {
+                continue;
+            }
+
+            $tag = strtolower($match[1]);
+            $href = $tag === 'form' ? $this->attribute($attrs, 'action') : $this->attribute($attrs, 'href');
+            if ($href === null || $href === '') {
+                continue;
+            }
+
+            $method = $tag === 'form' ? strtolower($this->attribute($attrs, 'method') ?? 'get') : 'get';
+
+            return ['href' => $href, 'method' => $method];
+        }
+
+        return null;
+    }
+
+    private function hasLinkToken(string $attrs, string $rel): bool
+    {
+        $relAttr = $this->attribute($attrs, 'rel');
+        if ($relAttr !== null && $this->containsToken($relAttr, $rel)) {
+            return true;
+        }
+
+        $classAttr = $this->attribute($attrs, 'class');
+
+        return $classAttr !== null && $this->containsToken($classAttr, $rel);
+    }
+
+    private function attribute(string $attrs, string $name): string|null
+    {
+        if (preg_match('/\b' . $name . '\s*=\s*(?:"([^"]*)"|\'([^\']*)\'|([^\s>]+))/i', $attrs, $match) !== 1) {
+            return null;
+        }
+
+        $value = $match[1] ?? $match[2] ?? $match[3] ?? '';
+
+        return html_entity_decode($value, ENT_QUOTES | ENT_HTML5);
+    }
+
+    private function containsToken(string $value, string $token): bool
+    {
+        $tokens = preg_split('/\s+/', trim($value));
+        if (! is_array($tokens)) {
+            return false;
+        }
+
+        return in_array($token, $tokens, true);
+    }
+
+    /** @return SemanticLink|null */
+    private function linkHeaderLink(string $rel, ResourceObject $ro): array|null
+    {
+        $header = $this->headerValue($ro, 'Link');
+        if ($header === null) {
+            return null;
+        }
+
+        foreach (preg_split('/,\s*(?=<)/', $header) ?: [] as $entry) {
+            if (preg_match('/^\s*<([^>]+)>(.*)$/', $entry, $matched) !== 1) {
+                continue;
+            }
+
+            $params = $this->linkHeaderParams($matched[2]);
+            if (($params['rel'] ?? '') !== $rel) {
+                continue;
+            }
+
+            return [
+                'href' => $matched[1],
+                'method' => strtolower($params['method'] ?? 'get'),
+            ];
+        }
+
+        return null;
+    }
+
+    /** @return array<string, string> */
+    private function linkHeaderParams(string $params): array
+    {
+        preg_match_all(
+            '/;\s*([A-Za-z][A-Za-z0-9_-]*)\s*=\s*(?:"([^"]*)"|([^;\s]+))/',
+            $params,
+            $matches,
+            PREG_SET_ORDER,
+        );
+
+        $result = [];
+        foreach ($matches as $match) {
+            $quoted = $match[2] ?? '';
+            $bare = $match[3] ?? '';
+            $result[$match[1]] = $quoted !== '' ? $quoted : $bare;
+        }
+
+        return $result;
+    }
+
+    private function headerValue(ResourceObject $ro, string $name): string|null
+    {
+        foreach ($ro->headers as $header => $value) {
+            if (is_string($header) && is_string($value) && strtolower($header) === strtolower($name)) {
+                return $value;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param SemanticLink $link
+     * @param array<string, mixed> $query
+     */
+    private function requestLink(array $link, array $query): ResourceObject
+    {
+        $href = $this->resourcePath($link['href']);
+
+        return match ($link['method']) {
+            'get', 'head' => $this->get($href, $query),
+            'post' => $this->post($href, $query),
+            'put' => $this->put($href, $query),
+            'patch' => $this->patch($href, $query),
+            'delete' => $this->delete($href, $query),
+            default => throw new HalLinkNotFoundException(
+                sprintf('Link method `%s` is not supported.', $link['method']),
+            ),
+        };
+    }
+
+    private function resourcePath(string $href): string
+    {
+        if (! str_starts_with($href, 'http://') && ! str_starts_with($href, 'https://')) {
+            return $href;
+        }
+
+        $path = parse_url($href, PHP_URL_PATH);
+        $query = parse_url($href, PHP_URL_QUERY);
+        $resourcePath = is_string($path) && $path !== '' ? $path : '/';
+
+        return is_string($query) && $query !== '' ? $resourcePath . '?' . $query : $resourcePath;
     }
 
     #[Override]
