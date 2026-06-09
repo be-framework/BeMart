@@ -11,7 +11,7 @@
         "null"
       ],
       "title": "ログインID（入力）",
-      "description": "管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。",
+      "description": "管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 この値は2FAログインチャレンジでは互換入力としてのみ受け取り、信頼しない。",
       "example": "test-admin",
       "minLength": 0,
       "maxLength": 128,
@@ -25,7 +25,7 @@
       "minLength": 0,
       "maxLength": 128,
       "title": "二要素認証キー（入力）",
-      "description": "/admin/two-factor-auth-set のレスポンスで扱う二要素認証キー。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。",
+      "description": "/admin/two-factor-auth-set のレスポンスで扱う二要素認証キー。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 この値は2FA設定では互換入力としてのみ受け取り、信頼しない。",
       "$comment": "キー/追跡番号は照合用の不透明文字列で、数値演算対象ではない。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
     "deviceToken": {
@@ -260,7 +260,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape. Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
   "required": [
-    "loginId",
     "deviceToken"
   ]
 }

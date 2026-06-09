@@ -210,7 +210,8 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         assert(self::$dbSession instanceof WorkflowDbSession);
         $twoFactorAuth = self::$dbSession->injector()->getInstance(TwoFactorAuthInterface::class);
         assert($twoFactorAuth instanceof TwoFactorAuthInterface);
-        self::$twoFactorAuthSecret = $twoFactorAuth->generateSecret();
+        self::$twoFactorAuthSecret = (string) $this->bodyValue($response, 'authKey');
+        $this->assertNotSame('', self::$twoFactorAuthSecret);
         $configured = $this->resource->put('page://self/admin/two-factor-auth-set', [
             'loginId' => self::$adminLoginId,
             'authKey' => self::$twoFactorAuthSecret,
