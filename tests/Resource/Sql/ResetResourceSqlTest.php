@@ -15,7 +15,7 @@ use function is_string;
  * endpoints — mirror of {@see \MyVendor\BeMart\Tests\Resource\ResetResourceTest}
  * (Phase 2b, G-23 storage migration contract).
  *
- * Same URIs (`page://self/forgot-password`, `page://self/reset`), same
+ * Same URIs (`page://self/forgot-password-password`, `page://self/reset`), same
  * POST verbs, same body-shape + CSRF assertions. The differences from
  * the Fake-backed sibling:
  *
@@ -97,7 +97,7 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
      */
     private function issueResetKey(): string
     {
-        $ro = $this->resource->post('page://self/forgot-password', [
+        $ro = $this->resource->post('page://self/forgot-password-password', [
             'email' => self::ALICE_EMAIL,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
@@ -255,7 +255,7 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         // unregistered email succeeds with no token issued — the
         // caller cannot tell the email is unknown. No reset_key is
         // written anywhere.
-        $ro = $this->resource->post('page://self/forgot-password', [
+        $ro = $this->resource->post('page://self/forgot-password-password', [
             'email' => 'nobody-here@example.com',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);

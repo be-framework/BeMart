@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
+use DateTimeImmutable;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
+use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
@@ -39,6 +42,13 @@ use function count;
  * too. Guest-checkout support is Phase 2 and would extend the session
  * model (Pilot 8 lesson — never leak existence signal across the AAA
  * boundary, treat unknown-customer the same as not-logged-in).
+ *
+ * EC-CUBE creates/refreshes a PROCESSING pre-order row when the customer
+ * enters the shopping page; confirm()/checkout() then operate on that
+ * pre-order id. BeMart mirrors that boundary by idempotently materialising
+ * the current cart into dtb_order with orderStatus=PROCESSING(8) before the
+ * projection is returned. This is intentionally not a direct DB seed: it is
+ * the web checkout transition itself.
  *
  * Empty-cart handling: if the session has no cart entries we return the
  * usual projection with `canCheckout = false`. The Resource still emits
@@ -71,6 +81,7 @@ final readonly class ShoppingFetched
     /**
      * @var list<array{
      *     cartKey: string,
+     *     preOrderId: string,
      *     saleTypeName: string,
      *     totalPrice: int,
      *     deliveryFeeTotal: int,
@@ -93,6 +104,7 @@ final readonly class ShoppingFetched
         #[Inject] CustomerSession $session,
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CartQueryInterface $cartQuery,
+        #[Inject] OrderCommandInterface $orderCommand,
         #[Inject] PaymentMethodFactoryInterface $paymentMethodFactory,
     ) {
         $sessionCustomerId = $session->customerId;
@@ -109,6 +121,10 @@ final readonly class ShoppingFetched
         }
 
         $carts = $cartQuery->listBySessionPrefix($sessionPrefix);
+        $primaryCart = $carts[0] ?? null;
+        if ($primaryCart instanceof CartEntity && $primaryCart->preOrderId !== '') {
+            $this->registerProcessingOrder($primaryCart, $customer->customerId, $orderCommand);
+        }
 
         $this->customerId = $customer->customerId;
         $this->email = $customer->email;
@@ -125,6 +141,7 @@ final readonly class ShoppingFetched
         $this->carts = array_map(
             static fn (CartEntity $cart): array => [
                 'cartKey' => $cart->cartKey,
+                'preOrderId' => $cart->preOrderId,
                 'saleTypeName' => $cart->saleTypeName,
                 'totalPrice' => $cart->totalPrice,
                 'deliveryFeeTotal' => $cart->deliveryFeeTotal,
@@ -144,5 +161,31 @@ final readonly class ShoppingFetched
         $this->deliveryFeeTotal = array_sum(array_map(static fn (CartEntity $c) => $c->deliveryFeeTotal, $carts));
         $this->paymentMethods = $paymentMethodFactory->available();
         $this->canCheckout = $this->cartCount > 0;
+    }
+
+    private function registerProcessingOrder(
+        CartEntity $cart,
+        string $customerId,
+        OrderCommandInterface $orderCommand,
+    ): void {
+        $now = (new DateTimeImmutable())->format('Y-m-d H:i:s');
+        $orderCommand->register(new FinalizedOrderEntity(
+            orderNo: $cart->preOrderId,
+            preOrderId: $cart->preOrderId,
+            customerId: $customerId,
+            paymentMethodId: 2,
+            subtotal: $cart->totalPrice,
+            deliveryFeeTotal: $cart->deliveryFeeTotal,
+            charge: 0,
+            discount: 0,
+            tax: 0,
+            total: $cart->totalPrice + $cart->deliveryFeeTotal,
+            paymentTotal: $cart->totalPrice + $cart->deliveryFeeTotal,
+            addPoint: 0,
+            usePoint: 0,
+            orderStatus: FinalizedOrderEntity::STATUS_PROCESSING,
+            orderDate: $now,
+            paymentDate: '',
+        ));
     }
 }

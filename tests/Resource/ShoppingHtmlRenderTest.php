@@ -170,7 +170,7 @@ final class ShoppingHtmlRenderTest extends TestCase
         foreach ([
             '<h1>ご注文手続き</h1>',
             '<ul class="ec-progress">',
-            // Slice 9: url('shopping_confirm') now resolves through Aura route map.
+            // Slice 9: url('shopping_confirm') now resolves through canonical Resource path.
             '<form id="shopping-form" method="post" action="/shopping/confirm">',
             '<div class="ec-orderRole">',
             '<div class="ec-orderAccount">',
@@ -195,6 +195,7 @@ final class ShoppingHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="payment"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShoppingHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping')->toString();
@@ -317,7 +318,7 @@ final class ShoppingHtmlRenderTest extends TestCase
         return $twig->render('Shopping/index.twig', [
             'Order' => $order,
             'form' => new EcCubeStub([
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
                 'redirect_to' => '__redirect__',
                 'Shippings' => [new EcCubeStub([
                     'Delivery' => 'delivery',
@@ -379,8 +380,8 @@ final class ShoppingHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => true));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
         $twig->addFunction(new TwigFunction('is_reduced_tax_rate', static fn ($x = null): bool => false));
@@ -391,8 +392,8 @@ final class ShoppingHtmlRenderTest extends TestCase
         // selects diff to ZERO.
         $form = (new FormFactory())->newInstance(ShoppingOrderForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($field === '__redirect__') {

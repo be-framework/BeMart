@@ -16,7 +16,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md):
    - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `url('homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
+   - `canonical-url 'homepage')` -> deterministic `/homepage` (BeMartTwigExtension).
    - The Mypage navi welcome line reads `name01`/`name02`; the
      ChangeComplete resource is a thin pure renderer with no
      session-bound customer context, so the name is a MISSING BODY FIELD
@@ -26,7 +26,7 @@
 {% extends 'base.html.twig' %}
 
 {% set body_class = 'mypage' %}
-{% set route = 'mypage_change_complete' %}
+{% set route = 'mypage-change-complete' %}
 {% set title = 'マイページ' %}
 
 {% block main %}
@@ -48,7 +48,7 @@
             </div>
             <div class="ec-off4Grid">
                 <div class="ec-off4Grid__cell">
-                    <a class="ec-blockBtn--cancel" href="{{ url('homepage') }}">戻る</a>
+                    <a class="ec-blockBtn--cancel" href="/">戻る</a>
                 </div>
             </div>
         </div>

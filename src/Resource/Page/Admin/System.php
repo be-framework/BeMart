@@ -4,9 +4,12 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function php_uname;
 
@@ -25,6 +28,10 @@ class System extends ResourceObject
     ) {
     }
 
+    /** ALPS `goSystemInfo` に対応する GET 操作。 */
+    #[Alps('goSystemInfo')]
+    #[JsonSchema(schema: 'get-admin-system.json')]
+    #[Link(rel: 'doAdminLogout', href: 'page://self/admin/logout', method: 'post')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

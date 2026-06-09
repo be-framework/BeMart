@@ -1,3 +1,8 @@
+---
+layout: default
+title: "HOW_TO_CONTINUE.md"
+---
+
 # HOW_TO_CONTINUE.md
 
 別マシン / 別セッションでこの **BeMart** プロジェクト（EC-CUBE 4.3 → BEAR.Sunday +
@@ -9,7 +14,7 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 ## 0. 現状サマリ
 
 - **ブランチ**: セッションごとに異なる。まず `git branch --show-current` と `git status --short` を確認する。
-- **リモート**: `https://github.com/koriym/ec-cube-alps.git`
+- **リモート**: `https://github.com/be-framework/BeMart.git`
 - **テスト**: `docs/migration-status.md` の現行ベースライン参照。HTTP workflow は `tests/Hypermedia/WorkflowTest.php` と `tests/Http/WorkflowTest.php` で同一シナリオを in-process / 実HTTP の2トランスポートで検証。
 
 移植は ALPS を契約として進行している:
@@ -32,8 +37,8 @@ Be Framework 移植）の作業を再開するための引き継ぎガイド。
 ### 1.1 取得
 
 ```bash
-git clone https://github.com/koriym/ec-cube-alps.git
-cd ec-cube-alps
+git clone https://github.com/be-framework/BeMart.git
+cd BeMart
 git checkout <work-branch>
 ```
 
@@ -166,7 +171,7 @@ commit 済み分は失われない（バッチ 1 で 2 agent がカットオフ�
 ## 4. リポジトリ構造の要点
 
 ```text
-ec-cube-alps/
+BeMart/
 ├── alps.json                 # source of truth（EC-CUBE 4.3 ALPS）
 ├── CLAUDE.md                 # プロジェクト規約
 ├── README.md                 # エントリポイント

@@ -21,7 +21,7 @@
   (`form_widget(form.name.name01)`); Ray.WebFormModule is BeMart's
   BEAR-idiomatic equivalent. `AdminCustomerForm::init()` ports the field
   names / ids / attributes from EC-CUBE's `CustomerType` (block prefix
-  `admin_customer`).
+  `/admin/customer`).
 
   VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
   form is a field-definition + renderer.
@@ -33,7 +33,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
@@ -58,7 +58,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_customer_edit' %}
+{% set route = 'admin-customer' %}
 {% set title = '会員登録' %}
 {% set sub_title = '会員管理' %}
 
@@ -68,10 +68,10 @@
 
 {% block main %}
     <form name="customer_form" role="form" id="customer_form" method="post" class="h-adr"
-          action="{{ url('admin_customer_edit', { id : customerId }) }}"
+          action="/admin/customer?customerId={{ customerId }}"
           novalidate>
         <span class="p-country-name" style="display:none;">Japan</span>
-        <input type="hidden" id="customer__token" name="_token" value="{{ csrfToken|default('') }}">
+        <input type="hidden" id="customer__token" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -286,7 +286,7 @@
                                 </div>
 
                                 <div class="d-block text-center">
-                                    <a href="{{ url('admin_customer_delivery_new', { id: customerId }) }}"
+                                    <a href="/admin/customer-delivery-edit?customerId={{ customerId }}"
                                        class="btn btn-ec-regular">お届け先住所を追加</a>
                                 </div>
 
@@ -359,7 +359,7 @@
                     <div class="col-6">
                         <div class="c-conversionArea__leftBlockItem">
                             <a class="c-baseLink"
-                               href="{{ url('admin_customer') }}">
+                               href="/admin/customer-list">
                                 <i class="fa fa-backward" aria-hidden="true"></i>
                                 <span>会員一覧</span>
                             </a>

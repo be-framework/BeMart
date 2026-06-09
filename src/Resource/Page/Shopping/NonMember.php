@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -14,6 +15,7 @@ use MyVendor\BeMart\Be\Final\NonMemberSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitNonMemberInput;
 use MyVendor\BeMart\Form\NonMemberForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -67,6 +69,8 @@ class NonMember extends ResourceObject
      * — EventListener mirrors the Symfony token into the session for
      * the subsequent POST.
      */
+    #[Alps('goShoppingNonMember')]
+    #[JsonSchema(schema: 'get-shopping-non-member.json')]
     #[Link(rel: 'doSubmitNonMember', href: 'page://self/shopping/non-member', method: 'post')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(): static
@@ -120,7 +124,10 @@ class NonMember extends ResourceObject
      * @psalm-taint-source input $pref
      * @psalm-taint-source input $addr01
      * @psalm-taint-source input $addr02
+     * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('doSubmitNonMember')]
+    #[JsonSchema(schema: 'post-shopping-non-member.json', params: 'post-shopping-non-member.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
     public function onPost(
@@ -134,50 +141,21 @@ class NonMember extends ResourceObject
         int $pref,
         string $addr01,
         string $addr02,
+        string $sessionPrefix = 'session-prefix-1',
     ): static {
-        try {
-            $final = ($this->becoming)(new SubmitNonMemberInput(
-                name01: $name01,
-                name02: $name02,
-                kana01: $kana01,
-                kana02: $kana02,
-                email: $email,
-                phoneNumber: $phoneNumber,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-            ));
-        } catch (SemanticVariableException $e) {
-            // Be Framework Semantics rejected a guest field. Bridge the
-            // domain verdict onto a repopulated NonMemberForm so the HTML
-            // page re-renders with the entered values + the inline error.
-            $message = $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
-            $form = $this->formFactory->newInstance(NonMemberForm::class);
-            assert($form instanceof NonMemberForm);
-            $form->fillValues([
-                'name01' => $name01,
-                'name02' => $name02,
-                'kana01' => $kana01,
-                'kana02' => $kana02,
-                'email' => $email,
-                'phoneNumber' => $phoneNumber,
-                'postalCode' => $postalCode,
-                'pref' => $pref,
-                'addr01' => $addr01,
-                'addr02' => $addr02,
-            ]);
-            $form->setDomainError('email', $message);
-
-            $this->code = Code::BAD_REQUEST;
-            $this->body = [
-                'message' => $message,
-                'email' => $email,
-                'form' => $form,
-            ];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new SubmitNonMemberInput(
+            name01: $name01,
+            name02: $name02,
+            kana01: $kana01,
+            kana02: $kana02,
+            email: $email,
+            phoneNumber: $phoneNumber,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            sessionPrefix: $sessionPrefix,
+        ));
 
         assert($final instanceof NonMemberSubmitted);
 

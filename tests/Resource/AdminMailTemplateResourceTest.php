@@ -92,24 +92,24 @@ final class AdminMailTemplateResourceTest extends TestCase
 
     public function testOnPostUnknownIdReturns404(): void
     {
-        $ro = $this->resource->post('page://self/admin/mail-template', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\MailTemplateNotFoundException::class);
+
+        $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 999,
             'mailSubject' => 'whatever',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
     public function testOnPostEmptySubjectReturns400(): void
     {
-        $ro = $this->resource->post('page://self/admin/mail-template', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 1,
             'mailSubject' => '   ',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void
@@ -127,13 +127,13 @@ final class AdminMailTemplateResourceTest extends TestCase
     {
         $this->rebindAdminSession(null);
 
-        $ro = $this->resource->post('page://self/admin/mail-template', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/mail-template', [
             'mailTemplateId' => 1,
             'mailSubject' => 'whatever',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testOnDeleteSurfaceReturnsTemplateIdentity(): void

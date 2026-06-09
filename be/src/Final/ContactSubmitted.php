@@ -9,6 +9,8 @@ use MyVendor\BeMart\Be\Reason\Service\MailerInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
+use function uniqid;
+
 /**
  * Contact submitted — Final, proof the contact mails were dispatched.
  *
@@ -25,13 +27,19 @@ final readonly class ContactSubmitted
     public string $contactName01;
     public string $contactName02;
     public string $contactEmail;
+    public string $ticketId;
 
     public function __construct(
-        #[Input] string $contactName01,
-        #[Input] string $contactName02,
-        #[Input] string $contactEmail,
-        #[Input] string $contactContents,
-        #[Inject] MailerInterface $mailer,
+        #[Input]
+        string $contactName01,
+        #[Input]
+        string $contactName02,
+        #[Input]
+        string $contactEmail,
+        #[Input]
+        string $contactContents,
+        #[Inject]
+        MailerInterface $mailer,
     ) {
         $mailer->sendContactInquiry(new ContactEntity(
             contactName01: $contactName01,
@@ -43,5 +51,6 @@ final readonly class ContactSubmitted
         $this->contactName01 = $contactName01;
         $this->contactName02 = $contactName02;
         $this->contactEmail = $contactEmail;
+        $this->ticketId = uniqid('INQ-', true);
     }
 }

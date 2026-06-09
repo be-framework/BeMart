@@ -77,10 +77,9 @@ final class AdminMasterDataResourceTest extends TestCase
     {
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
 
-        $ro = $this->resource->get('page://self/admin/master-data', ['masterType' => 'no-such-master']);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\MasterTypeFormatException::class);
 
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
-        $this->assertArrayHasKey('message', $ro->body);
+        $this->resource->get('page://self/admin/master-data', ['masterType' => 'no-such-master']);
     }
 
     public function testOnGetAnonymousAdminReturns403(): void

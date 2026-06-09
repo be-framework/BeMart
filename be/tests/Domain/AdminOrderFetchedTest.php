@@ -29,6 +29,7 @@ use function dirname;
  * from Ray.FakeQuery fixture JSON covers the orphan-customer branch
  * (customerId='customer-001' has no row in customers.json).
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderFetchedTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

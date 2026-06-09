@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Block;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Be\Input\DeleteBlockInput;
 use MyVendor\BeMart\Be\Input\UpdateBlockInput;
 use MyVendor\BeMart\Form\AdminBlockForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -52,6 +54,8 @@ class Block extends ResourceObject
      *
      * The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
      */
+    #[Alps('goBlock')]
+    #[JsonSchema(schema: 'get-admin-block-block.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     public function onGet(): static
     {
@@ -65,10 +69,13 @@ class Block extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateBlock` に対応する PUT 操作。
      * @psalm-taint-source input $blockId
      * @psalm-taint-source input $blockName
      * @psalm-taint-source input $blockFileName
      */
+    #[Alps('doUpdateBlock')]
+    #[JsonSchema(schema: 'put-admin-block-block.json', params: 'put-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[CsrfProtected]
     public function onPut(
@@ -76,28 +83,11 @@ class Block extends ResourceObject
         string|null $blockName = null,
         string|null $blockFileName = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateBlockInput(
-                blockId: $blockId,
-                blockName: $blockName,
-                blockFileName: $blockFileName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (BlockNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたブロックは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateBlockInput(
+            blockId: $blockId,
+            blockName: $blockName,
+            blockFileName: $blockFileName,
+        ));
 
         assert($final instanceof BlockUpdated);
 
@@ -113,25 +103,17 @@ class Block extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdateBlock` に対応する DELETE 操作。
      * @psalm-taint-source input $blockId
      */
+    #[Alps('doUpdateBlock')]
+    #[JsonSchema(schema: 'delete-admin-block-block.json', params: 'delete-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
+    #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
     #[CsrfProtected]
     public function onDelete(string $blockId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (BlockNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたブロックは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));
 
         assert($final instanceof BlockDeleted);
 

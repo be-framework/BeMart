@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
+use BEAR\Resource\Annotation\JsonSchema;
 
 /**
  * EC-CUBE goShoppingShippingMultiple — 複数配送先設定画面 (Wave 3H pure renderer).
  *
  * Pure form-info endpoint: no Be Framework, no domain logic, no Reasons.
- * Maps to `page://self/shopping/shipping/multiple`.
+ * Maps to `page://self/shopping/shipping-multiple`.
  *
  * Production EC-CUBE distributes cart items across multiple shipping
  * addresses (per-item address selection). Wave 3H exposes the shape
@@ -34,6 +36,9 @@ class ShippingMultiple extends ResourceObject
     // BEAR URL routing: `Resource\Page\Shopping\ShippingMultiple` ↔
     // `page://self/shopping/shipping-multiple` (kebab-case, same
     // convention as Mypage\OrderHistory ↔ /mypage/order-history).
+    /** ALPS `goShoppingShippingMultiple` に対応する GET 操作。 */
+    #[Alps('goShoppingShippingMultiple')]
+    #[JsonSchema(schema: 'get-shopping-shipping-multiple.json')]
     public function onGet(): static
     {
         $this->code = Code::OK;
@@ -62,6 +67,8 @@ class ShippingMultiple extends ResourceObject
      *
      * @param array<mixed> $allocations
      */
+    #[Alps('doSelectShippingAddress')]
+    #[JsonSchema(schema: 'post-shopping-shipping-multiple.json', params: 'post-shopping-shipping-multiple.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
     public function onPost(array $allocations = []): static

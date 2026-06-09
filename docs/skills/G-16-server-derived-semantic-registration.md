@@ -1,3 +1,8 @@
+---
+layout: default
+title: "G-16: Server-derived Semantic registration omission (NOTICE-level)"
+---
+
 # G-16: Server-derived Semantic registration omission (NOTICE-level)
 
 ## Context

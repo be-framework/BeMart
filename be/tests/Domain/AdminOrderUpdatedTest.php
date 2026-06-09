@@ -26,6 +26,7 @@ use function dirname;
  * fields (discount / charge / usePoint), with mass-assignment safety
  * for non-editable fields verified via the persisted entity.
  */
+#[\PHPUnit\Framework\Attributes\Group('stateful-sql-covered')]
 final class AdminOrderUpdatedTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';

@@ -72,11 +72,11 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
         '</script>',
         '<title>税率設定 店舗設定 - BeMart</title>',
         '<title>店舗設定 税率設定 - EC-CUBE</title>',
-        // Form: EC-CUBE's `_token` hidden CSRF input is rendered by the
+        // Form: EC-CUBE's `csrfToken` hidden CSRF input is rendered by the
         // Symfony FormView; BeMart's port keeps the hidden input
         // (structure) with an empty value — the html context has no
         // per-request CSRF widget.
-        '<input type="hidden" id="tax_rule__token" name="_token" value="">',
+        '<input type="hidden" id="tax_rule_csrfToken" name="csrfToken" value="">',
         // Tax-rule fake rows expose the current percentage/range controls;
         // the EC-CUBE reference fixture is sparse, so these row fragments are
         // page-specific residuals rather than common admin markup.
@@ -149,6 +149,7 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="tax_rule_apply_date"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testTaxRuleListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/tax-rule/tax-rule-list')->toString();
@@ -208,8 +209,8 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            'name="_token"',
-            'csrf_token',
+            'name="csrfToken"',
+            'csrfcsrfToken',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -243,7 +244,7 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
             'forms' => [],
             'errors' => [],
             'form' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'tax_rate' => 'tax_rate',
                 'rounding_type' => 'rounding_type',
                 'apply_date' => 'apply_date',
@@ -294,14 +295,14 @@ final class AdminTaxRuleListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 
         // EC-CUBE's `form_widget(form.<field>)` renders through BeMart's
         // real AdminTaxRuleForm so the inline-create inputs are
-        // byte-identical to BeMart's port. `_token` (CSRF runtime) and
+        // byte-identical to BeMart's port. `csrfToken` (CSRF runtime) and
         // `rounding_type` (mtb_rounding_type master select, no option set
         // in the projection) are NOT declared by AdminTaxRuleForm — they
         // render empty here, mirroring BeMart's port.

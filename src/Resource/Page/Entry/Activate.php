@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Entry;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\SecretKeyNotFoundException;
 use MyVendor\BeMart\Be\Final\CustomerActivated;
 use MyVendor\BeMart\Be\Input\ActivateCustomerInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function sprintf;
@@ -58,6 +60,8 @@ class Activate extends ResourceObject
      * screen. Pure renderer: the body surfaces only the screen shape + the
      * outbound `goTop` transition (ALPS `#CustomerActivationComplete`).
      */
+    #[Alps('goTop')]
+    #[JsonSchema(schema: 'get-entry-activate.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     public function onGet(): static
     {
@@ -79,30 +83,21 @@ class Activate extends ResourceObject
     }
 
     /**
+     * ALPS `doActivateCustomer` に対応する POST 操作。
      * @psalm-taint-source input $secretKey
      */
+    #[Alps('doActivateCustomer')]
+    #[JsonSchema(schema: 'post-entry-activate.json', params: 'post-entry-activate.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfProtected]
     public function onPost(string $secretKey): static
     {
-        try {
-            $final = ($this->becoming)(new ActivateCustomerInput(secretKey: $secretKey));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (SecretKeyNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '本登録リンクが無効か、既に使用済みです。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new ActivateCustomerInput(secretKey: $secretKey));
 
         assert($final instanceof CustomerActivated);
 
         $this->code = Code::SEE_OTHER;
-        $this->headers['Location'] = sprintf('/customer/%s', $final->customerId);
+        $this->headers['Location'] = sprintf('/login?customerId=%s', $final->customerId);
         $this->body = [
             'customerId' => $final->customerId,
             'email' => $final->email,

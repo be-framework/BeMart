@@ -71,7 +71,7 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
         '<title>EC-CUBE / 商品購入/お届け先の変更</title>',
         '<meta name="author" content="">',
         // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
         // --- form action: the shippingId route param --------------------
         // EC-CUBE's `url('shopping_shipping_edit', {'id': shippingId})`
         // appends the editing shipping's id (`?id=1`). The ShippingEdit
@@ -79,8 +79,8 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
         // context — `shippingId` is a MISSING BODY FIELD follow-up — so
         // the port posts to the bare route. Same route, the id param
         // absent. Identical for the back-link below.
-        '<form method="post" action="/shopping/shipping/edit?id=1" class="h-adr">',
-        '<form method="post" action="/shopping/shipping/edit" class="h-adr">',
+        '<form method="post" action="/shopping/shipping-edit?id=1" class="h-adr">',
+        '<form method="post" action="/shopping/shipping-edit" class="h-adr">',
     ];
 
     private ResourceInterface $resource;
@@ -138,6 +138,7 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
         $this->assertStringContainsString('name="phoneNumber"', $html);
     }
 
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testShippingEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/shopping/shipping-edit')->toString();
@@ -218,7 +219,7 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
                     'pref' => 'pref', 'addr01' => 'addr01', 'addr02' => 'addr02',
                 ]),
                 'phone_number' => 'phoneNumber',
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
             ]),
             'shippingId' => 1,
             'eccube_config' => ['locale' => 'ja'],
@@ -267,15 +268,15 @@ final class ShoppingShippingEditHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
         $form = (new FormFactory())->newInstance(ShoppingShippingEditForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form): Markup {
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($form instanceof ShoppingShippingEditForm && is_string($field) && $field !== '') {

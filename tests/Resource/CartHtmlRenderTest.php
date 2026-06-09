@@ -198,6 +198,7 @@ final class CartHtmlRenderTest extends TestCase
      * rendering of the same logical cart. Every difference must be in the
      * enumerated residual allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testCartHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         // Same logical cart on both sides: one normal-sale cart with one
@@ -264,10 +265,10 @@ final class CartHtmlRenderTest extends TestCase
 
         // Genuinely-unmatched families (EC-CUBE runtime artefacts only).
         foreach ([
-            // EC-CUBE adds csrf_token_for_anchor() to the up/down/remove
+            // EC-CUBE adds csrfcsrfToken_for_anchor() to the up/down/remove
             // <a> tags. BeMart's html context has no per-request CSRF
             // widget, so the attribute is absent. EC-CUBE-runtime only.
-            'csrf_token',                            // CSRF anchor token
+            'csrfcsrfToken',                            // CSRF anchor token
             'eccube-csrf-token',                     // <head> CSRF meta
             '<title>',                               // shop title composition
             'meta name="author"',                    // meta.twig include
@@ -279,8 +280,8 @@ final class CartHtmlRenderTest extends TestCase
             'cart_handle_item',                       // EC-CUBE anchor operation route
             'cart_buystep',                           // EC-CUBE checkout route
             'productClassId=0',                       // EC-CUBE anchor operation key
-            '/products/detail/0',                     // EC-CUBE numeric product id
-            '/products/detail/sample-001',            // BeMart product code route
+            '/product?productCode=0',                     // EC-CUBE numeric product id
+            '/product?productCode=sample-001',            // BeMart product code route
             '/cart/item',                             // BeMart form operation route
             '/shopping',                              // BeMart checkout route
             'ec-cartRow__operationForm',              // BeMart form operation port
@@ -431,8 +432,8 @@ final class CartHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         // Symfony's twig/string-extra helper, used by default_frame.twig
         // for Page.meta_tags. Page has no meta tags here so it never runs,

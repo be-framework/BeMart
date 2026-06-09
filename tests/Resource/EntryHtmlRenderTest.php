@@ -99,10 +99,10 @@ final class EntryHtmlRenderTest extends TestCase
         '<meta name="author" content="">',
 
         // --- entry form: CSRF hidden input ------------------------------
-        // EC-CUBE's hidden _token carries a live form CSRF token; BeMart's
+        // EC-CUBE's hidden csrfToken carries a live form CSRF token; BeMart's
         // html context has no CSRF widget, so the value is empty. Same
         // hidden input, different (empty) value.
-        '<input type="hidden" name="_token" value="">',
+        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -195,6 +195,7 @@ final class EntryHtmlRenderTest extends TestCase
      * EC-CUBE's own rendering. Every difference must be in the residual
      * allowlist.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testEntryHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/entry')->toString();
@@ -246,7 +247,7 @@ final class EntryHtmlRenderTest extends TestCase
             'eccube-csrf-token',
             '<title>',
             'meta name="author"',
-            'name="_token"',
+            'name="csrfToken"',
             // EC-CUBE renders每 field label through the Symfony FormView
             // `form_label` helper (a <label> element); BeMart authors the
             // `<label class="ec-label">` plainly. Same label text, FormView
@@ -323,7 +324,7 @@ final class EntryHtmlRenderTest extends TestCase
                 'sex' => 'sex',
                 'job' => 'job',
                 'user_policy_check' => 'user_policy_check',
-                '_token' => '__token__',
+                'csrfToken' => '_csrfToken__',
             ]),
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
             'eccube_config' => [
@@ -379,8 +380,8 @@ final class EntryHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
 
@@ -388,9 +389,9 @@ final class EntryHtmlRenderTest extends TestCase
         // delegate to BeMart's real EntryForm so the inputs are
         // byte-identical to BeMart's port. The first arg the stub receives
         // is the EntryForm leaf field name (resolved by the `form` stub's
-        // nested compound children). `__token__` is the hidden CSRF
+        // nested compound children). `_csrfToken__` is the hidden CSRF
         // widget — BeMart's port authors `<input type="hidden"
-        // name="_token" value="">` plainly, so the stub renders the same.
+        // name="csrfToken" value="">` plainly, so the stub renders the same.
         // Returns a Twig\Markup so the markup is NOT double-escaped.
         $entryForm = (new FormFactory())->newInstance(EntryForm::class);
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($entryForm): Markup {
@@ -398,8 +399,8 @@ final class EntryHtmlRenderTest extends TestCase
                 return new Markup('', 'UTF-8');
             }
 
-            if ($field === '__token__') {
-                return new Markup('<input type="hidden" name="_token" value="">', 'UTF-8');
+            if ($field === '_csrfToken__') {
+                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
             }
 
             if ($entryForm instanceof EntryForm) {

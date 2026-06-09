@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -22,6 +23,7 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminPageForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -46,8 +48,11 @@ class Page extends ResourceObject
     }
 
     /**
+     * ALPS `goPage` に対応する GET 操作。
      * @psalm-taint-source input $pageId
      */
+    #[Alps('goPage')]
+    #[JsonSchema(schema: 'get-admin-page-page.json', params: 'get-admin-page-page.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     public function onGet(string|null $pageId = null): static
     {
@@ -76,19 +81,7 @@ class Page extends ResourceObject
             return $this;
         }
 
-        try {
-            $final = ($this->becoming)(new GetAdminPageInput(pageId: $pageId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (PageNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetAdminPageInput(pageId: $pageId));
 
         assert($final instanceof AdminPageFetched);
 
@@ -111,11 +104,14 @@ class Page extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdatePage` に対応する PUT 操作。
      * @psalm-taint-source input $pageId
      * @psalm-taint-source input $pageName
      * @psalm-taint-source input $pageUrl
      * @psalm-taint-source input $pageFileName
      */
+    #[Alps('doUpdatePage')]
+    #[JsonSchema(schema: 'put-admin-page-page.json', params: 'put-admin-page-page.param.json')]
     #[Link(rel: 'goPage', href: 'page://self/admin/page/page')]
     #[CsrfProtected]
     public function onPut(
@@ -124,29 +120,12 @@ class Page extends ResourceObject
         string|null $pageUrl = null,
         string|null $pageFileName = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdatePageInput(
-                pageId: $pageId,
-                pageName: $pageName,
-                pageUrl: $pageUrl,
-                pageFileName: $pageFileName,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (PageNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdatePageInput(
+            pageId: $pageId,
+            pageName: $pageName,
+            pageUrl: $pageUrl,
+            pageFileName: $pageFileName,
+        ));
 
         assert($final instanceof PageUpdated);
 
@@ -163,25 +142,17 @@ class Page extends ResourceObject
     }
 
     /**
+     * ALPS `doUpdatePage` に対応する DELETE 操作。
      * @psalm-taint-source input $pageId
      */
+    #[Alps('doUpdatePage')]
+    #[JsonSchema(schema: 'delete-admin-page-page.json', params: 'delete-admin-page-page.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
+    #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[CsrfProtected]
     public function onDelete(string $pageId): static
     {
-        try {
-            $final = ($this->becoming)(new DeletePageInput(pageId: $pageId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (PageNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定されたページは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeletePageInput(pageId: $pageId));
 
         assert($final instanceof PageDeleted);
 

@@ -106,7 +106,7 @@ final class ShoppingResourceTest extends TestCase
         $ro = $this->resource->get('page://self/shopping');
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('ログイン', $ro->body['message']);
+        $this->assertSame('この操作を行うにはログインが必要です。', $ro->body['message']);
     }
 
     public function testOnGetUnknownCustomerSessionReturns401(): void
@@ -117,5 +117,6 @@ final class ShoppingResourceTest extends TestCase
         $ro = $this->resource->get('page://self/shopping');
 
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);
+        $this->assertSame('この操作を行うにはログインが必要です。', $ro->body['message']);
     }
 }

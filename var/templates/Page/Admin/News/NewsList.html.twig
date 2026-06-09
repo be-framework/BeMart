@@ -15,7 +15,7 @@
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `url(route, params)` -> deterministic `/{route}?{query}`
+   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
    - `{% for News in pagination %}` -> the resource body's `news` list.
      EC-CUBE's `pagination` is a KnpPaginator object; BeMart's list
@@ -36,7 +36,7 @@
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin_content_news' %}
+{% set route = 'admin-news-news-list' %}
 {% set title = '新着情報管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
@@ -54,7 +54,7 @@
             <div class="c-primaryCol">
                 <div class="d-block mb-3">
                     <a id="addNew" class="btn btn-ec-regular"
-                       href="{{ url('admin_content_news_new') }}">新規作成</a>
+                       href="/admin/news/news">新規作成</a>
                 </div>
                 <div class="card rounded border-0 mb-4">
                     <div class="card-body p-0">
@@ -72,13 +72,13 @@
                                         <div class="col-2 d-flex align-items-center">
                                             <span>{{ News.publishDate }}</span></div>
                                         <div class="col d-flex align-items-center"><a
-                                                    href="{{ url('admin_content_news_edit', {id: News.newsId}) }}">{{ News.newsTitle }}</a>
+                                                    href="/admin/news/news?newsId={{ News.newsId }}">{{ News.newsTitle }}</a>
                                         </div>
                                         <div class="col-2">
                                             <div class="row">
                                                 <div class="col px-0 text-center">
                                                     <a class="btn btn-ec-actionIcon"
-                                                       href="{{ url('admin_content_news_edit', {id: News.newsId}) }}"
+                                                       href="/admin/news/news?newsId={{ News.newsId }}"
                                                        data-bs-toggle="tooltip" data-bs-placement="top"
                                                        title="編集">
                                                         <i class="fa fa-pencil fa-lg text-secondary"></i>
@@ -110,7 +110,7 @@
                                                                     <button class="btn btn-ec-sub" type="button"
                                                                             data-bs-dismiss="modal">キャンセル</button>
                                                                     <a class="btn btn-ec-delete"
-                                                                       href="{{ url('admin_content_news_delete', {id: News.newsId}) }}"
+                                                                       href="/admin/news/news?newsId={{ News.newsId }}&_method=delete"
 
                                                                        data-confirm="false">削除</a>
                                                                 </div>

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "ALPS Phase 3 監査 — back-form 検出 & ハイパーメディア反映ギャップ"
+---
+
 # ALPS Phase 3 監査 — back-form 検出 & ハイパーメディア反映ギャップ
 
 Phase 3（HTML プレゼンテーション層）の準備として、`alps.json`（~420 ディスクリプタ）が

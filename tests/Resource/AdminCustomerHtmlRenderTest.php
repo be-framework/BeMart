@@ -76,7 +76,7 @@ final class AdminCustomerHtmlRenderTest extends TestCase
      * acceptable. The form inputs are rendered by a real AdminCustomerForm
      * on BOTH sides so they diff to zero; the residual is the admin-frame
      * baseline (same families as {@see AdminCustomerListHtmlRenderTest})
-     * plus the form `_token` hidden input and the omitted `status` select.
+     * plus the form `csrfToken` hidden input and the omitted `status` select.
      *
      * @var list<string>
      */
@@ -97,12 +97,12 @@ final class AdminCustomerHtmlRenderTest extends TestCase
         // it "<title> <sub_title> - <shop_name>". Caught by `<title>`.
         '<title>会員登録 会員管理 - BeMart</title>',
         '<title>会員管理 会員登録 - EC-CUBE</title>',
-        // Form: EC-CUBE's `_token` hidden CSRF input is rendered by the
+        // Form: EC-CUBE's `csrfToken` hidden CSRF input is rendered by the
         // Symfony FormView; BeMart's port keeps the hidden input
         // (structure) with an empty value — the html context has no
         // per-request CSRF widget. The two inputs carry different
         // ids/attrs, so both lines are enumerated.
-        '<input type="hidden" id="customer__token" name="_token" value="">',
+        '<input type="hidden" id="customer_csrfToken" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -190,6 +190,7 @@ final class AdminCustomerHtmlRenderTest extends TestCase
      * against EC-CUBE's own rendering. Every difference must be in the
      * residual allowlist or a residual family.
      */
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testCustomerEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
         $beMart = $this->resource->get('page://self/admin/customer', [
@@ -220,7 +221,7 @@ final class AdminCustomerHtmlRenderTest extends TestCase
 
         // With the inputs rendered by a real AdminCustomerForm on both
         // sides, the residual is the admin-frame baseline + the form
-        // _token hidden input + the omitted `status` select + the
+        // csrfToken hidden input + the omitted `status` select + the
         // back-to-list link. If this balloons, the port has drifted.
         $this->assertLessThanOrEqual(
             40,
@@ -248,11 +249,11 @@ final class AdminCustomerHtmlRenderTest extends TestCase
             'nav-',
             'data-bs-toggle="collapse"',
             'fa-fw',
-            // Form: EC-CUBE's hidden `_token` CSRF input. BeMart keeps the
+            // Form: EC-CUBE's hidden `csrfToken` CSRF input. BeMart keeps the
             // hidden input (structure) with an empty value — the html
             // context has no per-request CSRF widget.
-            'name="_token"',
-            'csrf_token',
+            'name="csrfToken"',
+            'csrfcsrfToken',
             // Conversion area: EC-CUBE's `form.status` display-status
             // select (mtb_customer_status master data). The
             // AdminCustomerFetched projection carries `customerStatus` as
@@ -266,11 +267,11 @@ final class AdminCustomerHtmlRenderTest extends TestCase
             // (`?page_no=...&resume=1`); BeMart's port links to the bare
             // `admin_customer` list route (no server-side paging /
             // session resume in scope). Both names now resolve through the
-            // shared Aura route map, so BeMart's href is the real `/admin/customer`
+            // canonical Resource path, so BeMart's href is the real `/admin/customer`
             // list path. Same `c-baseLink` anchor + 会員一覧 label, different
             // href.
             'admin_customer_page',
-            'href="/admin/customer"',
+            'href="/admin/customer-list"',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
@@ -312,7 +313,7 @@ final class AdminCustomerHtmlRenderTest extends TestCase
             // `form`'s children are the (possibly nested) field NAMES; the
             // stubbed form_widget renders each leaf through the form.
             'form' => new EcCubeStub([
-                '_token' => '_token',
+                'csrfToken' => 'csrfToken',
                 'name' => new EcCubeStub(['name01' => 'name01', 'name02' => 'name02']),
                 'kana' => new EcCubeStub(['kana01' => 'kana01', 'kana02' => 'kana02']),
                 'company_name' => 'company_name',
@@ -395,8 +396,8 @@ final class AdminCustomerHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
         EcCubeAssetStub::register($twig);
         EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrf_token', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrf_token_for_anchor', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
+        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 
@@ -404,7 +405,7 @@ final class AdminCustomerHtmlRenderTest extends TestCase
         // real AdminCustomerForm so the inputs are byte-identical to
         // BeMart's port. The first arg is the field name (flat leaf name —
         // the `form` stub maps each nested leaf to its flat AdminCustomerForm
-        // field name). Fields the form does NOT declare — `_token` (CSRF
+        // field name). Fields the form does NOT declare — `csrfToken` (CSRF
         // is EC-CUBE-runtime) and `status` (mtb_customer_status is out of
         // the Wave 5 slice) — render empty here, mirroring BeMart's port
         // which omits them; both are kept as residual families.

@@ -4,16 +4,20 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
+use MyVendor\BeMart\Auth\HtmlCartSession;
 use MyVendor\BeMart\Be\Final\ShoppingFetched;
 use MyVendor\BeMart\Be\Input\GetShoppingInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\ShoppingOrderForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -53,18 +57,24 @@ class Shopping extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
     /**
+     * ALPS `goShopping` に対応する GET 操作。
      * @psalm-taint-source input $sessionPrefix
      */
+    #[Alps('goShopping')]
+    #[JsonSchema(schema: 'get-shopping.json', params: 'get-shopping.param.json')]
     #[Link(rel: 'doCheckout', href: 'page://self/shopping/checkout', method: 'post')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(string $sessionPrefix = 'session-prefix-1'): static
     {
         try {
-            $final = ($this->becoming)(new GetShoppingInput(sessionPrefix: $sessionPrefix));
+            $final = ($this->becoming)(new GetShoppingInput(
+                sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+            ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;
             $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
@@ -79,6 +89,8 @@ class Shopping extends ResourceObject
 
         assert($final instanceof ShoppingFetched);
 
+        $firstCart = $final->carts[0] ?? null;
+
         $this->code = Code::OK;
         $this->body = [
             'customerId' => $final->customerId,
@@ -86,12 +98,14 @@ class Shopping extends ResourceObject
             'name01' => $final->name01,
             'name02' => $final->name02,
             'defaultShippingAddress' => $final->defaultShippingAddress,
+            'preOrderId' => is_array($firstCart) ? ($firstCart['preOrderId'] ?? null) : null,
             'carts' => $final->carts,
             'cartCount' => $final->cartCount,
             'totalPrice' => $final->totalPrice,
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
             'paymentMethods' => $final->paymentMethods,
             'canCheckout' => $final->canCheckout,
+            'csrfToken' => $this->csrf->token,
             // Phase 3: an empty ShoppingOrderForm for the HTML port to
             // render the message textarea + delivery / payment controls.
             // JSON contexts ignore it.

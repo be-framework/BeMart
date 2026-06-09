@@ -14,6 +14,7 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\Injector;
 
 use function dirname;
+use function rawurlencode;
 
 final class ContactResourceTest extends TestCase
 {
@@ -40,6 +41,7 @@ final class ContactResourceTest extends TestCase
             ['contactName01', 'contactName02', 'contactEmail', 'contactContents', 'csrfToken'],
             $ro->body['fields'],
         );
+        $this->assertSame('doSubmitContact', $ro->body['submitTo']['rel']);
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/contact', $ro->body['submitTo']['href']);
         // `csrfToken` carries the trusted reference the HTML form must
@@ -61,7 +63,10 @@ final class ContactResourceTest extends TestCase
         // Location header to the completion page (the HTTP layer turns
         // that into a browser redirect).
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame('/contact/complete', $ro->headers['Location']);
+        $ticketId = $ro->body['ticketId'];
+        $this->assertIsString($ticketId);
+        $this->assertNotSame('', $ticketId);
+        $this->assertSame('/contact/complete?ticketId=' . rawurlencode($ticketId), $ro->headers['Location']);
         $this->assertSame('yamada@example.com', $ro->body['contactEmail']);
 
         $sent = $this->mailer->contactInquiries;
@@ -71,28 +76,28 @@ final class ContactResourceTest extends TestCase
 
     public function testOnPostInvalidEmailReturns400(): void
     {
-        $ro = $this->resource->post('page://self/contact', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/contact', [
             'contactName01' => '山田',
             'contactName02' => '太郎',
             'contactEmail' => 'not-an-email',
             'contactContents' => 'body text',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostEmptyContentsReturns400(): void
     {
-        $ro = $this->resource->post('page://self/contact', [
+        $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);
+
+        $this->resource->post('page://self/contact', [
             'contactName01' => '山田',
             'contactName02' => '太郎',
             'contactEmail' => 'yamada@example.com',
             'contactContents' => '',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
     public function testOnPostMissingCsrfReturns403(): void

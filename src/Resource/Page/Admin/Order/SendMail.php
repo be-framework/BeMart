@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\AdminSendOrderMailInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderMailForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -59,7 +61,10 @@ class SendMail extends ResourceObject
      *
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('doSendOrderMail')]
+    #[JsonSchema(schema: 'get-admin-order-send-mail.json', params: 'get-admin-order-send-mail.param.json')]
     #[Link(rel: 'doSendOrderMail', href: 'page://self/admin/order/send-mail', method: 'post')]
+    #[Link(rel: 'goOrderMailConfirm', href: 'page://self/admin/order/mail-confirm', method: 'get')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
     public function onGet(string $orderNo = ''): static
     {
@@ -86,31 +91,19 @@ class SendMail extends ResourceObject
     }
 
     /**
+     * ALPS `doSendOrderMail` に対応する POST 操作。
      * @psalm-taint-source input $orderNo
      */
+    #[Alps('doSendOrderMail')]
+    #[JsonSchema(schema: 'post-admin-order-send-mail.json', params: 'post-admin-order-send-mail.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
+    #[Link(rel: 'goExportOrderPdf', href: 'page://self/admin/order/export-order-pdf', method: 'get')]
+    #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     #[CsrfProtected]
     public function onPost(
         string $orderNo,
     ): static {
-        try {
-            $final = ($this->becoming)(new AdminSendOrderMailInput(orderNo: $orderNo));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (OrderNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された注文は見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AdminSendOrderMailInput(orderNo: $orderNo));
 
         assert($final instanceof AdminOrderMailSent);
 
@@ -118,6 +111,9 @@ class SendMail extends ResourceObject
         $this->body = [
             'orderNo' => $final->orderNo,
             'customerId' => $final->customerId,
+            'sendDate' => $final->sendDate,
+            'mailSubject' => $final->mailSubject,
+            'mailBody' => $final->mailBody,
             'message' => '注文確認メールを再送しました。',
         ];
 

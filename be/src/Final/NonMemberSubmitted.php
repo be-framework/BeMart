@@ -4,9 +4,17 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Final;
 
-use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
+use DateTimeImmutable;
+use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
+use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
+use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
+
+use function bin2hex;
+use function random_bytes;
 
 /**
  * Non-member checkout entry — Final, proof the guest fields validated.
@@ -60,13 +68,53 @@ final readonly class NonMemberSubmitted
         #[Input] int $pref,
         #[Input] string $addr01,
         #[Input] string $addr02,
-        #[Inject] CustomerIdProvider $ids,
+        #[Input] string $sessionPrefix,
+        #[Inject] CartQueryInterface $cartQuery,
+        #[Inject] CartCommandInterface $cartCommand,
+        #[Inject] OrderCommandInterface $orderCommand,
     ) {
-        // Wave 7W: synthesise a preOrderId. Persistence is deliberately
-        // omitted — see the class-level docblock's "Phase 2 gap" note.
-        $this->preOrderId = $ids->get();
+        $this->preOrderId = bin2hex(random_bytes(20));
         $this->name01 = $name01;
         $this->name02 = $name02;
         $this->email = $email;
+
+        $subtotal = 0;
+        $deliveryFeeTotal = 0;
+        foreach ($cartQuery->listBySessionPrefix($sessionPrefix) as $cart) {
+            $deliveryFeeTotal += $cart->deliveryFeeTotal;
+            foreach ($cart->items as $item) {
+                $subtotal += $item->price * $item->quantity;
+            }
+
+            $cartCommand->save(new CartEntity(
+                cartKey: $cart->cartKey,
+                saleTypeId: $cart->saleTypeId,
+                saleTypeName: $cart->saleTypeName,
+                items: $cart->items,
+                totalPrice: $cart->totalPrice,
+                deliveryFeeTotal: $cart->deliveryFeeTotal,
+                preOrderId: $this->preOrderId,
+            ));
+        }
+
+        $total = $subtotal + $deliveryFeeTotal;
+        $orderCommand->register(new FinalizedOrderEntity(
+            orderNo: $this->preOrderId,
+            preOrderId: $this->preOrderId,
+            customerId: '',
+            paymentMethodId: 1,
+            subtotal: $subtotal,
+            deliveryFeeTotal: $deliveryFeeTotal,
+            charge: 0,
+            discount: 0,
+            tax: 0,
+            total: $total,
+            paymentTotal: $total,
+            addPoint: 0,
+            usePoint: 0,
+            orderStatus: FinalizedOrderEntity::STATUS_PROCESSING,
+            orderDate: (new DateTimeImmutable())->format('Y-m-d H:i:s'),
+            paymentDate: '',
+        ));
     }
 }

@@ -18,9 +18,12 @@ final readonly class ClassNameEntity implements \Ray\MediaQuery\ToScalarInterfac
 {
     use MediaQueryJsonEntityTrait;
 
+    public string $classNameId;
+
     public function __construct(
-        public string $classNameId,
+        int|string $classNameId,
         public string $name,
     ) {
+        $this->classNameId = (string) $classNameId;
     }
 }

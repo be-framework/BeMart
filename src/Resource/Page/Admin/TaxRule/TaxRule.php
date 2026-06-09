@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -13,6 +14,7 @@ use MyVendor\BeMart\Be\Exception\TaxRuleNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\TaxRuleDeleted;
 use MyVendor\BeMart\Be\Input\DeleteTaxRuleInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -33,25 +35,17 @@ class TaxRule extends ResourceObject
     }
 
     /**
+     * ALPS `doDeleteTaxRule` に対応する DELETE 操作。
      * @psalm-taint-source input $taxRuleId
      */
+    #[Alps('doDeleteTaxRule')]
+    #[JsonSchema(schema: 'delete-admin-tax-rule-tax-rule.json', params: 'delete-admin-tax-rule-tax-rule.param.json')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
+    #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
     public function onDelete(string $taxRuleId): static
     {
-        try {
-            $final = ($this->becoming)(new DeleteTaxRuleInput(taxRuleId: $taxRuleId));
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        } catch (TaxRuleNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => '指定された税率ルールは見つかりませんでした。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new DeleteTaxRuleInput(taxRuleId: $taxRuleId));
 
         assert($final instanceof TaxRuleDeleted);
 

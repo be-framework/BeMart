@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -16,6 +17,7 @@ use MyVendor\BeMart\Be\Final\FavoriteAdded;
 use MyVendor\BeMart\Be\Final\FavoriteRemoved;
 use MyVendor\BeMart\Be\Input\AddFavoriteInput;
 use MyVendor\BeMart\Be\Input\RemoveFavoriteInput;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -34,30 +36,17 @@ class Favorite extends ResourceObject
     }
 
     /**
+     * ALPS `doAddFavorite` に対応する POST 操作。
      * @psalm-taint-source input $productCode
      */
+    #[Alps('doAddFavorite')]
+    #[JsonSchema(schema: 'post-mypage-favorite.json', params: 'post-mypage-favorite.param.json')]
+    #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     #[Link(rel: 'goProduct', href: 'page://self/product')]
     #[CsrfProtected]
     public function onPost(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new AddFavoriteInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        } catch (ProductNotFoundException) {
-            $this->code = Code::NOT_FOUND;
-            $this->body = ['message' => 'Product not found.', 'productCode' => $productCode];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new AddFavoriteInput(productCode: $productCode));
 
         assert($final instanceof FavoriteAdded);
 
@@ -86,23 +75,14 @@ class Favorite extends ResourceObject
      *
      * @psalm-taint-source input $productCode
      */
+    #[Alps('doRemoveFavorite')]
+    #[JsonSchema(schema: 'delete-mypage-favorite.json', params: 'delete-mypage-favorite.param.json')]
+    #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
     public function onDelete(string $productCode): static
     {
-        try {
-            $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthenticatedException) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new RemoveFavoriteInput(productCode: $productCode));
 
         assert($final instanceof FavoriteRemoved);
 

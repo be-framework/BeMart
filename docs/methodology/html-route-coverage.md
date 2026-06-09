@@ -1,4 +1,12 @@
+---
+layout: default
+title: "HTML Route Coverage Baseline"
+---
+
 # HTML Route Coverage Baseline
+
+> **Historical note (2026-06-08):** この文書は Aura.Router / EC-CUBE route名互換を前提にした過去のbaselineである。現在の方針は [`standard-first-rule.md`](standard-first-rule.md) と Web Router全廃後の canonical Resource path を正とする。新規実装で Aura.Router、`url()` / `path()`、EC-CUBE route名互換を復活させない。
+
 
 作成日: 2026-05-26
 対象: BeMart HTML front controller / Twig route helpers / admin route coverage
@@ -36,19 +44,19 @@ EC-CUBE 由来テンプレートは route 名でリンクを生成するため�
 
 ## 主要実装ポイント
 
-- `~/git/be-bemart/src/Support/Router/AuraRouter.php`
+- `~/git/BeMart/src/Support/Router/AuraRouter.php`
   - Aura.Router の match/generate を BEAR.Sunday `RouterInterface` に接続する
   - route metadata の `dispatchMethod` と alias を `RouterMatch` に正規化し、未登録 method は BEAR\Resource に委譲して 405 を返す
-- `~/git/be-bemart/src/Bootstrap.php`
+- `~/git/BeMart/src/Bootstrap.php`
   - `AppInterface` の router/resource を使って `RouterMatch` を dispatch する
   - `BadRequestException` を HTTP response に変換し、HTML 上の raw Fatal を避ける
   - CSV/PDF 等の download response は Twig render せず body を返す
-- `~/git/be-bemart/config/aura-routes.php`
+- `~/git/BeMart/config/aura-routes.php`
   - Aura.Router の route map と BeMart 固有 metadata を定義
   - admin alias route を補完
   - HTML 公開 method を GET/POST に限定
-- `~/git/be-bemart/src/Resource/Page/ActionRedirect.php`
-- `~/git/be-bemart/src/Resource/Page/Admin/ActionRedirect.php`
+- `~/git/BeMart/src/Resource/Page/ActionRedirect.php`
+- `~/git/BeMart/src/Resource/Page/Admin/ActionRedirect.php`
   - GET で来た action route や no-op POST の安全な戻り先
 
 ## 検証コマンド

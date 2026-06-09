@@ -7,6 +7,10 @@ namespace MyVendor\BeMart\Module;
 use BEAR\Package\AbstractAppModule;
 use BEAR\Package\Module\AppMetaModule;
 use BEAR\Package\PackageModule;
+use BEAR\Resource\InvokerInterface;
+use BEAR\Resource\Module\JsonSchemaModule;
+use BEAR\Resource\ResourceObject;
+use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistry;
 use MyVendor\BeMart\Be\Reason\Query\AdminMasterRegistryInterface;
@@ -42,10 +46,9 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
-use BEAR\Resource\InvokerInterface;
-use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
+use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
 use MyVendor\BeMart\Support\Resource\RequestQueryCapturingInvoker;
 use MyVendor\BeMart\Support\Resource\RequestQueryContext;
 use Ray\Di\Scope;
@@ -64,11 +67,20 @@ final class AppModule extends AbstractAppModule
     protected function configure(): void
     {
         $this->install(new PackageModule());
-        $this->override(new AuraRouterModule($this->appMeta->appDir . '/config/aura-routes.php'));
+        $this->override(new AppErrorModule());
+        $this->override(new CanonicalResourceRouterModule());
+        $this->bind(TransferInterface::class)->to(DownloadResponder::class);
         // PackageModule does not bind @AppName by itself; BEAR\Package\Module
         // factory normally overrides it. Install explicitly so tests can use
         // `new Injector(new *Module(...))` without the factory.
         $this->override(new AppMetaModule($this->appMeta));
+
+        $this->install(
+            new JsonSchemaModule(
+                $this->appMeta->appDir . '/var/json_schema',
+                $this->appMeta->appDir . '/var/json_validate',
+            ),
+        );
 
         $this->bind(RequestQueryContext::class)->in(Scope::SINGLETON);
         $this->bind(InvokerInterface::class)->to(RequestQueryCapturingInvoker::class);

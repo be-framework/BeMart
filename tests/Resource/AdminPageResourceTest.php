@@ -74,8 +74,9 @@ final class AdminPageResourceTest extends TestCase
     public function testListRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->get('page://self/admin/page/page-list');
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->get('page://self/admin/page/page-list');
     }
 
     public function testCreateHappyPathReturns201(): void
@@ -96,14 +97,14 @@ final class AdminPageResourceTest extends TestCase
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
-        $ro = $this->resource->post('page://self/admin/page/page-list', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/page/page-list', [
             'pageName' => '会社案内',
             'pageUrl' => 'company',
             'pageFileName' => 'company',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testCreateRejectsMissingCsrf(): void
@@ -127,8 +128,9 @@ final class AdminPageResourceTest extends TestCase
 
     public function testGetUnknownIdReturns404(): void
     {
-        $ro = $this->resource->get('page://self/admin/page/page', ['pageId' => 'nonexistent-zzz']);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\PageNotFoundException::class);
+
+        $this->resource->get('page://self/admin/page/page', ['pageId' => 'nonexistent-zzz']);
     }
 
     public function testUpdateMerges(): void
@@ -157,10 +159,11 @@ final class AdminPageResourceTest extends TestCase
 
     public function testDeleteSystemPageIsRefused(): void
     {
-        $ro = $this->resource->delete('page://self/admin/page/page', [
+        $this->expectException(\MyVendor\BeMart\Be\Exception\PageNotFoundException::class);
+
+        $this->resource->delete('page://self/admin/page/page', [
             'pageId' => 'pg-homepage',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 }

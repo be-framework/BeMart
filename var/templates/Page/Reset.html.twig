@@ -22,10 +22,10 @@
   inputs diff to ZERO. Validation authority stays with the Be Framework
   Becoming chain (ResetPasswordInput Semantics + ResetKeyInvalid).
 
-  MISSING-FIELD NOTE — EC-CUBE's `PasswordResetType` has a `login_email`
+  MISSING-FIELD NOTE — EC-CUBE's `PasswordResetType` has a `email`
   field (the confirmation email the user re-enters). BeMart's
   `ResetPasswordInput` models `resetKey` + `password`, NOT email — the
-  reset is keyed by `resetKey`. The `login_email` <dl> row is rendered
+  reset is keyed by `resetKey`. The `email` <dl> row is rendered
   for fidelity (ResetForm declares the field as a renderer field) but has
   no BeMart body field; flagged as a missing-body-field residual.
 
@@ -46,7 +46,7 @@
    default_frame.twig default `other_page` applies. #}
 {% extends 'base.html.twig' %}
 
-{% set route = 'forgot_reset' %}
+{% set route = 'reset' %}
 {% set title = 'パスワード再発行(再設定)' %}
 
 {% block main %}
@@ -57,7 +57,7 @@
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
                 <form id="form1" method="post" novalidate>
-                    <input type="hidden" name="_token" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                     <input type="hidden" name="resetKey" value="{{ resetKey|default('') }}">
                     <div class="ec-borderedDefs">
                         <dl>
@@ -66,8 +66,8 @@
                             </dt>
                             <dd>
                                 <div class="ec-input">
-                                    {{ form.input('login_email')|raw }}
-                                    {{ form.error('login_email') }}
+                                    {{ form.input('email')|raw }}
+                                    {{ form.error('email') }}
                                     {% if message is defined and message %}
                                         <p class="ec-errorMessage">{{ message }}</p>
                                     {% endif %}

@@ -1,3 +1,8 @@
+---
+layout: default
+title: "Migration Status — EC-CUBE 4.3 → BEAR.Sunday + Be Framework"
+---
+
 # Migration Status — EC-CUBE 4.3 → BEAR.Sunday + Be Framework
 
 > **Living document.** Update the relevant row/cell whenever a layer's status changes.

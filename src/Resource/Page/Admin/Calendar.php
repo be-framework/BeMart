@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
+use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminCalendarForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -29,6 +32,12 @@ class Calendar extends ResourceObject
     ) {
     }
 
+    /** ALPS `goCalendar` に対応する GET 操作。 */
+    #[Alps('goCalendar')]
+    #[JsonSchema(schema: 'get-admin-calendar.json')]
+    #[Link(rel: 'doCreateCalendarHoliday', href: 'page://self/admin/calendar', method: 'post')]
+    #[Link(rel: 'doUpdateCalendar', href: 'page://self/admin/calendar', method: 'post')]
+    #[Link(rel: 'doDeleteCalendarHoliday', href: 'page://self/admin/calendar', method: 'delete')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
@@ -72,6 +81,9 @@ class Calendar extends ResourceObject
      * @psalm-taint-source input $holiday
      * @psalm-taint-source input $calendarId
      */
+    #[Alps('doUpdateCalendar')]
+    #[JsonSchema(schema: 'post-admin-calendar.json', params: 'post-admin-calendar.param.json')]
+    #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
     public function onPost(
         string $operation = 'update',
@@ -104,6 +116,9 @@ class Calendar extends ResourceObject
      *
      * @psalm-taint-source input $calendarId
      */
+    #[Alps('doDeleteCalendarHoliday')]
+    #[JsonSchema(schema: 'delete-admin-calendar.json', params: 'delete-admin-calendar.param.json')]
+    #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
     public function onDelete(int|null $calendarId = null): static
     {

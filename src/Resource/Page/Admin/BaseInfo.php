@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
+use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\GetBaseInfoInput;
 use MyVendor\BeMart\Be\Input\UpdateBaseInfoInput;
 use MyVendor\BeMart\Form\AdminShopMasterForm;
 use Ray\WebFormModule\FormFactory;
+use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -57,17 +59,12 @@ class BaseInfo extends ResourceObject
      * the `form` key carries an {@see AdminShopMasterForm} pre-filled
      * with the dtb_base_info row for the HTML editor.
      */
+    #[Alps('goBaseInfo')]
+    #[JsonSchema(schema: 'get-admin-base-info.json')]
     #[Link(rel: 'doUpdateBaseInfo', href: 'page://self/admin/base-info', method: 'post')]
     public function onGet(): static
     {
-        try {
-            $final = ($this->becoming)(new GetBaseInfoInput());
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new GetBaseInfoInput());
 
         assert($final instanceof BaseInfoFetched);
 
@@ -124,7 +121,10 @@ class BaseInfo extends ResourceObject
      * @psalm-taint-source input $shopEmail01
      * @psalm-taint-source input $shopMessage
      */
+    #[Alps('doUpdateBaseInfo')]
+    #[JsonSchema(schema: 'post-admin-base-info.json', params: 'post-admin-base-info.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
+    #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[CsrfProtected]
     public function onPost(
         string $shopName,
@@ -140,32 +140,20 @@ class BaseInfo extends ResourceObject
         string|null $shopEmail01 = null,
         string|null $shopMessage = null,
     ): static {
-        try {
-            $final = ($this->becoming)(new UpdateBaseInfoInput(
-                shopName: $shopName,
-                shopKana: $shopKana,
-                shopNameEng: $shopNameEng,
-                companyName: $companyName,
-                postalCode: $postalCode,
-                pref: $pref,
-                addr01: $addr01,
-                addr02: $addr02,
-                phoneNumber: $phoneNumber,
-                businessHour: $businessHour,
-                shopEmail01: $shopEmail01,
-                shopMessage: $shopMessage,
-            ));
-        } catch (SemanticVariableException $e) {
-            $this->code = Code::BAD_REQUEST;
-            $this->body = ['message' => $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.'];
-
-            return $this;
-        } catch (UnauthorizedAdminAccessException) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
-        }
+        $final = ($this->becoming)(new UpdateBaseInfoInput(
+            shopName: $shopName,
+            shopKana: $shopKana,
+            shopNameEng: $shopNameEng,
+            companyName: $companyName,
+            postalCode: $postalCode,
+            pref: $pref,
+            addr01: $addr01,
+            addr02: $addr02,
+            phoneNumber: $phoneNumber,
+            businessHour: $businessHour,
+            shopEmail01: $shopEmail01,
+            shopMessage: $shopMessage,
+        ));
 
         assert($final instanceof BaseInfoUpdated);
 
