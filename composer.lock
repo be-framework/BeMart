@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "be613d1083440b4115f2f9ea1f6d4068",
+    "content-hash": "46c3f118faac57c928bfd2cff298105e",
     "packages": [
         {
             "name": "aura/cli",
@@ -665,16 +665,16 @@
         },
         {
             "name": "bear/devtools",
-            "version": "dev-html-link-renderer-dev-deps",
+            "version": "dev-master",
             "source": {
                 "type": "git",
                 "url": "https://github.com/bearsunday/BEAR.DevTools.git",
-                "reference": "aae52aea8d6a9f7ea8ee9471fe04062289cdaf7b"
+                "reference": "145f58ff5f980b1bb9eac6b2c23abc5d17b4f514"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/aae52aea8d6a9f7ea8ee9471fe04062289cdaf7b",
-                "reference": "aae52aea8d6a9f7ea8ee9471fe04062289cdaf7b",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.DevTools/zipball/145f58ff5f980b1bb9eac6b2c23abc5d17b4f514",
+                "reference": "145f58ff5f980b1bb9eac6b2c23abc5d17b4f514",
                 "shasum": ""
             },
             "require": {
@@ -697,6 +697,7 @@
             "suggest": {
                 "ext-xhprof": "XHprof hierarchical profiler for performance analysis"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "bamarni-bin": {
@@ -781,10 +782,10 @@
                 }
             ],
             "support": {
-                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/html-link-renderer-dev-deps",
+                "source": "https://github.com/bearsunday/BEAR.DevTools/tree/master",
                 "issues": "https://github.com/bearsunday/BEAR.DevTools/issues"
             },
-            "time": "2026-06-09T00:22:34+00:00"
+            "time": "2026-06-09T01:07:22+00:00"
         },
         {
             "name": "bear/package",

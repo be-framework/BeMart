@@ -20,7 +20,7 @@
         "php": "^8.3",
         "aura/router": "^3.4",
         "be-framework/be": "0.x-dev as 0.1.0",
-        "bear/devtools": "dev-html-link-renderer-dev-deps",
+        "bear/devtools": "dev-master",
         "bear/package": "^1.14",
         "bear/sunday": "^1.6",
         "madapaja/twig-module": "^2.7",
