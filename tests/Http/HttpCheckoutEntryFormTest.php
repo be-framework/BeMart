@@ -95,6 +95,38 @@ final class HttpCheckoutEntryFormTest extends TestCase
         $this->assertStringNotContainsString('doConfirmOrder', $entry['body']);
     }
 
+    public function testNonMemberEmptyBrowserFormRendersValidationErrors(): void
+    {
+        $form = $this->form('GET', '/shopping/non-member');
+        $this->assertSame(200, $form['status']);
+        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $form['body']);
+        $this->assertStringContainsString('name="pref"', $form['body']);
+        $this->assertStringContainsString('<option value="13">東京都</option>', $form['body']);
+
+        $rejected = $this->form('POST', '/shopping/non-member', [
+            'name01' => '',
+            'name02' => '',
+            'kana01' => '',
+            'kana02' => '',
+            'companyName' => '',
+            'email' => '',
+            'email_confirm' => '',
+            'phoneNumber' => '',
+            'postalCode' => '',
+            'pref' => '',
+            'addr01' => '',
+            'addr02' => '',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(400, $rejected['status']);
+        $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
+        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $rejected['body']);
+        $this->assertStringContainsString('入力してください。', $rejected['body']);
+        $this->assertStringNotContainsString('Invalid parameter type', $rejected['body']);
+        $this->assertStringNotContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
+    }
+
     /**
      * @param array<string, string> $fields
      * @return array{status: int, headers: array<string, string>, body: string}
