@@ -93,7 +93,7 @@ abstract class AbstractWorkflowTest extends TestCase
     protected function bodyString(ResourceObject $response, string $key): string
     {
         $value = $this->bodyValue($response, $key);
-        $this->assertIsString($value);
+        $this->assertIsString($value, sprintf('Expected body key `%s` to be a string.', $key));
 
         return $value;
     }
