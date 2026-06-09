@@ -358,6 +358,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 - [GET /admin/order/shipping-address response](schemas/get-admin-order-shipping-address.json)
 - [POST /admin/order/shipping-address response](schemas/post-admin-order-shipping-address.json)
 - [PUT /admin/order/shipping-address response](schemas/put-admin-order-shipping-address.json)
+- [GET /admin/order/shipping-notify-mail response](schemas/get-admin-order-shipping-notify-mail.json)
 - [POST /admin/order/shipping-notify-mail response](schemas/post-admin-order-shipping-notify-mail.json)
 - [PUT /admin/order/tracking-number response](schemas/put-admin-order-tracking-number.json)
 - [GET /admin/page/page response](schemas/get-admin-page-page.json)

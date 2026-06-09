@@ -2,10 +2,10 @@
 
 ## Summary
 - Resources: 146
-- Operations: 234
-- Operations with response schema: 234
-- Operations with request schema: 154
-- Operations with ALPS attributes: 234
+- Operations: 236
+- Operations with response schema: 236
+- Operations with request schema: 156
+- Operations with ALPS attributes: 236
 
 ## Findings
 No documentation gaps found.

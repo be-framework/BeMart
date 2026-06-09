@@ -9,24 +9,22 @@ is a LOGIN-CONTEXT page reached after correct credentials when the
 member has no 2FA device yet, so — like the admin login page — it is
 anonymous-accessible (no admin-firewall guard).
 
-EC-CUBE's controller generates a TOTP secret, renders it as a QR code
-(the JS in the template builds the `otpauth://` URI) and verifies the
-first token. There is no Be Framework 2FA transition (no such id in
-`alps.json`, and the be/ domain layer is frozen for this wave), so
-this resource is a THIN RENDERER: `onGet` exposes an
-{@see \AdminTwoFactorAuthForm} as `body['form']` for the HTML page.
+EC-CUBE's controller generates a TOTP secret server-side, binds it to
+the pending login identity, renders it as a QR code (the JS in the
+template builds the `otpauth://` URI) and verifies the first token.
+BeMart mirrors that boundary through a session-backed login challenge:
+`onGet` exposes the server-generated secret only when the password
+step has established pending setup state.
 
 Hard ActionRedirect completion: `onPut` drives the Be
 `doSetTwoFactorAuth` transition ({@see \SetTwoFactorAuthInput} →
 {@see \TwoFactorAuthConfigured}) — register the secret, then confirm by
 verifying the first device code.
 
-MISSING-BODY-FIELD residual (kept for EC-CUBE render fidelity): EC-CUBE
-generates the TOTP secret server-side and embeds it in the QR `authKey`.
-BeMart's render-diff baseline tolerates `authKey` empty (the QR `secret=`
-stays blank), so `onGet` keeps the empty placeholder; the real secret is
-round-tripped from the form into `onPut`. Seeding `onGet` with a
-generated secret would diverge the QR URI from EC-CUBE's reference.
+Without pending setup state `onGet` keeps the empty `authKey`
+placeholder for render-test fidelity, and `onPut` refuses to configure
+a device. Client-supplied legacy `loginId` / `authKey` fields are
+ignored; the trusted identity and secret come only from the challenge.
 
 
 
@@ -67,23 +65,14 @@ _No parameters required_
 Registers the TOTP device after confirming the first code
 (doSetTwoFactorAuth). ALPS marks this `idempotent` → PUT.
 
-SECURITY RESIDUAL (tracked — migration-status §4 "Outstanding work"
-item 8, the Hard-ActionRedirect / 認証 cutover residual): this page is
-reached PRE-AUTH (anonymous, login-context), so `$loginId` and the
-candidate `$authKey` secret are taken from the request body rather than
-a server-side pre-auth challenge. `enable()` overwrites the secret for
-`$loginId` with no ownership check
-({@see \MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface::enable}),
-so a caller who passes another admin's `$loginId` could replace that
-admin's 2FA device. The production cutover binds a server-generated
-secret + the pending login identity into a pre-auth session/challenge
-state at credential-verification time and consumes it here; until then
-the route relies on CSRF + the documented contract. Do NOT widen this
-surface (e.g. expose it post-auth for arbitrary `$loginId`) before the
-challenge state lands.
+The pending login identity and server-generated candidate secret are
+read from {@see \HtmlAdminLoginChallengeAdapter}. Legacy client fields
+(`loginId`, `authKey`) may still arrive from old forms/tests, but are
+deliberately ignored and never forwarded to the Be transition.
 
 Failure mapping:
   - Invalid CSRF                  → 403 (interceptor)
+  - Missing pending setup         → 403
   - SemanticVariableException     → 400 (malformed code)
   - TwoFactorAuthFailedException  → 400 (first code mismatch)
 
@@ -95,9 +84,9 @@ Failure mapping:
 
 | Name | Type | Description | Default | Required | Constraints | Example |
 |------|------|-------------|---------|----------|-------------|---------|
-| loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
-| authKey | string | 二要素認証キー（入力） - /admin/two-factor-auth-set のレスポンスで扱う二要素認証キー。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"\u30ad\u30fc/\u8ffd\u8de1\u756a\u53f7\u306f\u7167\u5408\u7528\u306e\u4e0d\u900f\u660e\u6587\u5b57\u5217\u3067\u3001\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
 | deviceToken | string | 二要素認証デバイストークン（入力） - /admin/two-factor-auth-set のレスポンスで扱う二要素認証デバイストークン。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 |  | Required | {"minLength":0,"maxLength":128,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
+| loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 この値は2FAログインチャレンジでは互換入力としてのみ受け取り、信頼しない。 |  | Optional | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
+| authKey | string | 二要素認証キー（入力） - /admin/two-factor-auth-set のレスポンスで扱う二要素認証キー。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 この値は2FA設定では互換入力としてのみ受け取り、信頼しない。 |  | Optional | {"minLength":0,"maxLength":128,"$comment":"\u30ad\u30fc/\u8ffd\u8de1\u756a\u53f7\u306f\u7167\u5408\u7528\u306e\u4e0d\u900f\u660e\u6587\u5b57\u5217\u3067\u3001\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
 
 
 ### Response

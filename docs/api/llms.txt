@@ -91,7 +91,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | /mypage/withdraw-confirm | GET | Page/Mypage/WithdrawConfirm |
 | /shopping/checkout | POST | Page/Shopping/Checkout |
 | /shopping/complete | GET | Page/Shopping/Complete |
-| /shopping/confirm | GET | Page/Shopping/Confirm |
+| /shopping/confirm | GET, POST | Page/Shopping/Confirm |
 | /shopping/error | GET | Page/Shopping/Error |
 | /shopping/login | GET | Page/Shopping/Login |
 | /shopping/non-member | GET, POST | Page/Shopping/NonMember |
@@ -134,7 +134,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | /admin/order/order-pdf | GET | Page/Admin/Order/OrderPdf |
 | /admin/order/send-mail | GET, POST | Page/Admin/Order/SendMail |
 | /admin/order/shipping-address | GET, POST, PUT | Page/Admin/Order/ShippingAddress |
-| /admin/order/shipping-notify-mail | POST | Page/Admin/Order/ShippingNotifyMail |
+| /admin/order/shipping-notify-mail | GET, POST | Page/Admin/Order/ShippingNotifyMail |
 | /admin/order/tracking-number | PUT | Page/Admin/Order/TrackingNumber |
 | /admin/page/page | GET, PUT, DELETE | Page/Admin/Page/Page |
 | /admin/page/page-list | GET, POST | Page/Admin/Page/PageList |
@@ -584,7 +584,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doVerifyTwoFactorAuth), href(goAdminLogin) |
-| POST | loginId*, deviceToken* | href(goContentCache), href(goAdminHome) |
+| POST | deviceToken*, loginId | href(goContentCache), href(goAdminHome) |
 
 ### Page/Admin/TwoFactorAuthEdit
 `/admin/two-factor-auth-edit`
@@ -599,7 +599,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(goAdminLogin) |
-| PUT | loginId*, authKey*, deviceToken* | href(goTwoFactorAuth), href(goAdminHome) |
+| PUT | deviceToken*, loginId, authKey | href(goTwoFactorAuth), href(goAdminHome) |
 
 ### Page/Admin/UnsupportedRoute
 `/admin/unsupported-route`
@@ -799,6 +799,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | preOrderId, paymentMethodId | href(doCheckout), href(goShoppingError) |
+| POST | preOrderId*, payment | href(doCheckout), href(goShoppingError) |
 
 ### Page/Shopping/Error
 `/shopping/error`
@@ -1130,6 +1131,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
+| GET | orderNo* | href(doSendShippingNotifyMail), href(goOrder) |
 | POST | orderNo* | href(goOrder) |
 
 ### Page/Admin/Order/TrackingNumber
@@ -1265,7 +1267,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | DELETE | templateId* | href(goTemplateList) |
 | POST | templateId* | href(doDeleteTemplate) |
 
-## Responses (234)
+## Responses (235)
 
 | Response | Schema | Properties |
 |----------|--------|------------|
@@ -1288,7 +1290,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-products | get-products.json | filters, pager, transitionId, csrfToken, totalItemCount, products, links |
 | Get-reset | get-reset.json | form, fields, resetKey, submitTo, transitionId, csrfToken |
 | Post-reset | post-reset.json | customerId |
-| Get-shopping | get-shopping.json | form, cartCount, totalPrice, canCheckout, name02, customerId, deliveryFeeTotal, name01, carts, email, paymentMethods, defaultShippingAddress |
+| Get-shopping | get-shopping.json | form, cartCount, totalPrice, canCheckout, name02, customerId, deliveryFeeTotal, name01, carts, email, paymentMethods, defaultShippingAddress, preOrderId, csrfToken |
 | Get-unsupported-route | get-unsupported-route.json | message, routeName |
 | Post-unsupported-route | post-unsupported-route.json | message, routeName |
 | Get-admin-action-redirect | get-admin-action-redirect.json | message |
@@ -1321,7 +1323,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-admin-mail-template | post-admin-mail-template.json | mailTemplateId, mailTemplateName, fileName, changed, mailSubject |
 | Delete-admin-mail-template | delete-admin-mail-template.json | mailTemplateId, mailTemplateName, fileName, message, transitionId |
 | Get-admin-master-data | get-admin-master-data.json | form, masterTypes, selectedMaster, rows |
-| Put-admin-master-data | put-admin-master-data.json | message, transitionId, selectedMaster, rows |
+| Put-admin-master-data | put-admin-master-data.json | message, form, masterTypes, transitionId, selectedMaster, rows |
 | Put-admin-master-data-edit | put-admin-master-data-edit.json | message, transitionId, masterType, count |
 | Get-admin-member | get-admin-member.json | form, name, loginId, csrfToken, sortNo, authority, work, adminId |
 | Post-admin-member | post-admin-member.json | name, sortNo, loginId, authority, work, adminId |
@@ -1353,7 +1355,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Put-admin-security | put-admin-security.json | message, transitionId, trustedHosts |
 | Put-admin-sort-no-move | put-admin-sort-no-move.json | message, masterType, rowId, sortNo |
 | Get-admin-system | get-admin-system.json | info, phpinfoEnabled |
-| Put-admin-toggle-visible | put-admin-toggle-visible.json | message |
+| Put-admin-toggle-visible | put-admin-toggle-visible.json | masterType, rowId, visible |
 | Get-admin-trade-law | get-admin-trade-law.json | tradeLawBody, form, tradeLawRows |
 | Post-admin-trade-law | post-admin-trade-law.json | tradeLawBody, changed |
 | Get-admin-two-factor-auth | get-admin-two-factor-auth.json | form, transitionId, fields |
@@ -1471,6 +1473,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-order-shipping-address | get-admin-order-shipping-address.json | form, orderNo |
 | Post-admin-order-shipping-address | post-admin-order-shipping-address.json | message |
 | Put-admin-order-shipping-address | put-admin-order-shipping-address.json | name01, addr02, postalCode, pref, addr01, phoneNumber, orderNo, name02 |
+| Get-admin-order-shipping-notify-mail | get-admin-order-shipping-notify-mail.json | orderNo, customerId, message, csrfToken, submitTo |
 | Post-admin-order-shipping-notify-mail | post-admin-order-shipping-notify-mail.json | trackingNumber, message, orderNo, customerId |
 | Put-admin-order-tracking-number | put-admin-order-tracking-number.json | message, trackingNumber, orderNo |
 | Get-admin-page-page | get-admin-page-page.json | form, pageFileName, pageUrl, pageId, pageName, csrfToken, pageEditType |
@@ -1518,15 +1521,15 @@ WHERE :addressId REGEXP '^[0-9]+$' AND id = ...` |
 | admin_delete.sql | `UPDATE dtb_member
 SET work_id = 0, update_date = NOW()
 WHERE :adminId REGEXP ...` |
-| admin_find_by_id.sql | `SELECT id, login_id, password, name, COALESCE(authority_id, 0) AS authority_i...` |
-| admin_find_by_login.sql | `SELECT id, login_id, password, name, COALESCE(authority_id, 0) AS authority_i...` |
-| admin_list.sql | `SELECT id, login_id, password, name, COALESCE(authority_id, 0) AS authority_i...` |
+| admin_find_by_id.sql | `SELECT CAST(id AS CHAR) AS id, login_id, password, COALESCE(name, '') AS name...` |
+| admin_find_by_login.sql | `SELECT CAST(id AS CHAR) AS id, login_id, password, COALESCE(name, '') AS name...` |
+| admin_list.sql | `SELECT CAST(id AS CHAR) AS id, login_id, password, COALESCE(name, '') AS name...` |
 | admin_next_id.sql | `SELECT IFNULL(MAX(id), 0) + 1 AS next_id FROM dtb_member` |
 | admin_reorder.sql | `UPDATE dtb_member
 SET sort_no = :sortNo,
     update_date = NOW()
 WHERE :admin...` |
-| admin_search.sql | `SELECT id, login_id, password, name, COALESCE(authority_id, 0) AS authority_i...` |
+| admin_search.sql | `SELECT CAST(id AS CHAR) AS id, login_id, password, COALESCE(name, '') AS name...` |
 | admin_two_factor_enable.sql | `UPDATE dtb_member
 SET two_factor_auth_key = :secret,
     two_factor_auth_enab...` |
@@ -1535,7 +1538,7 @@ FROM dtb_member
 WHERE login_id = :loginId
   AND tw...` |
 | admin_update.sql | `UPDATE dtb_member
-SET login_id = JSON_VALUE(CAST(:admin AS JSON), '$.loginId'...` |
+SET login_id = JSON_VALUE(CAST(:admin AS CHAR), '$.loginId'...` |
 | admin_update_authority.sql | `UPDATE dtb_member
 SET authority_id = :newAuthority, update_date = NOW()
 WHERE...` |
@@ -1575,7 +1578,7 @@ INSERT INTO dtb_csv (csv_ty...` |
 | customer_register.sql | `INSERT INTO dtb_customer (id, customer_status_id, sex_id, job_id, pref_id, na...` |
 | customer_search.sql | `SELECT id, email, password, name01, name02, kana01, kana02, company_name, pho...` |
 | customer_update.sql | `UPDATE dtb_customer
-SET email=JSON_VALUE(CAST(:customer AS JSON), '$.email'),...` |
+SET email=JSON_VALUE(CAST(:customer AS CHAR), '$.email'),...` |
 | customer_update_password.sql | `UPDATE dtb_customer SET password = :passwordHash, update_date = NOW() WHERE :...` |
 | delivery_next_id.sql | `SELECT IFNULL(MAX(id), 0) + 1 AS next_id FROM dtb_delivery` |
 | favorite_add.sql | `INSERT IGNORE INTO dtb_customer_favorite_product (customer_id, product_id, cr...` |
@@ -1611,13 +1614,13 @@ FR...` |
     pre_order_id,
   ...` |
 | order_update.sql | `UPDATE dtb_order
-SET customer_id = CASE WHEN JSON_VALUE(CAST(:order AS JSON),...` |
+SET customer_id = CASE WHEN JSON_VALUE(CAST(:order AS CHAR),...` |
 | order_update_status.sql | `UPDATE dtb_order SET order_status_id = :newStatus, update_date = NOW() WHERE ...` |
 | page_next_id.sql | `SELECT IFNULL(MAX(id), 0) + 1 AS next_id FROM dtb_page` |
 | password_reset_delete.sql | `UPDATE dtb_customer SET reset_key = NULL, reset_expire = NULL WHERE reset_key...` |
 | password_reset_get.sql | `SELECT id, reset_key, COALESCE(reset_expire, DATE_SUB(NOW(), INTERVAL 1 SECON...` |
 | password_reset_put.sql | `UPDATE dtb_customer
-SET reset_key = JSON_VALUE(:token, '$.resetKey'), reset_e...` |
+SET reset_key = JSON_VALUE(CAST(:token AS CHAR), '$.reset...` |
 | paymentMethodAdmin_next_id.sql | `SELECT IFNULL(MAX(id), 0) + 1 AS next_id FROM dtb_payment` |
 | plugin_find_by_code.sql | `SELECT code, name, version, initialized, enabled
 FROM dtb_plugin
@@ -1628,26 +1631,29 @@ FROM dtb_plugin
 ORDER BY cod...` |
 | plugin_set_enabled.sql | `SELECT COUNT(*) INTO @bemart_plugin_found FROM dtb_plugin WHERE code = :plugi...` |
 | plugin_uninstall.sql | `DELETE FROM dtb_plugin WHERE code = :pluginCode` |
-| product_class_get.sql | `SELECT pc.product_code, p.name AS product_name, pc.stock, pc.stock_unlimited,...` |
+| product_class_get.sql | `SELECT pc.product_code,
+       p.name AS product_name,
+       pc.stock,
+     ...` |
 | product_copy.sql | `SET @bemart_product_copy_id = 0;
 INSERT INTO dtb_product (product_status_id, ...` |
 | product_create.sql | `INSERT INTO dtb_product (product_status_id, name, note, description_detail, s...` |
-| product_export.sql | `SELECT pc.product_code,
-       p.name AS product_name,
-       pc.price02,
-   ...` |
+| product_export.sql | `SELECT b.product_code,
+       b.product_name,
+       b.price02,
+       b.stoc...` |
 | product_get.sql | `SELECT pc.product_code,
        p.name AS product_name,
        pc.price02,
    ...` |
-| product_list.sql | `SELECT pc.product_code,
-       p.name AS product_name,
-       pc.price02,
-   ...` |
-| product_search.sql | `SELECT pc.product_code,
-       p.name AS product_name,
-       pc.price02,
-   ...` |
+| product_list.sql | `SELECT b.product_code,
+       b.product_name,
+       b.price02,
+       b.stoc...` |
+| product_search.sql | `SELECT b.product_code,
+       b.product_name,
+       b.price02,
+       b.stoc...` |
 | product_soft_delete.sql | `UPDATE dtb_product p
 INNER JOIN dtb_product_class pc ON pc.product_id = p.id ...` |
 | product_status_bulk_update.sql | `UPDATE dtb_product p
@@ -1667,13 +1673,14 @@ INNER JOIN dtb_shipping s ON s.orde...` |
 INNER JOIN dtb_order o ON o.id = s.order_id
 SET s.track...` |
 | tag_delete.sql | `DELETE FROM dtb_tag WHERE :tagId REGEXP '^[0-9]+$' AND id = CAST(:tagId AS UN...` |
-| tag_get.sql | `SELECT id, name FROM dtb_tag WHERE :tagId REGEXP '^[0-9]+$' AND id = CAST(:ta...` |
-| tag_list.sql | `SELECT id, name FROM dtb_tag ORDER BY id ASC` |
+| tag_get.sql | `SELECT CAST(id AS CHAR) AS tagId, name AS tagName FROM dtb_tag WHERE :tagId R...` |
+| tag_list.sql | `SELECT CAST(id AS CHAR) AS tagId, name AS tagName FROM dtb_tag ORDER BY id ASC` |
 | tag_next_id.sql | `SELECT IFNULL(MAX(id), 0) + 1 AS next_id FROM dtb_tag` |
-| tag_put.sql | `INSERT INTO dtb_tag (id, name, sort_no, create_date, update_date, discriminat...` |
-| tag_reorder.sql | `UPDATE dtb_tag SET sort_no = :sortNo, update_date = NOW() WHERE :tagId REGEXP...` |
+| tag_put.sql | `INSERT INTO dtb_tag (id, name, sort_no, discriminator_type)
+SELECT CAST(JSON_...` |
+| tag_reorder.sql | `UPDATE dtb_tag SET sort_no = :sortNo WHERE :tagId REGEXP '^[0-9]+$' AND id = ...` |
 | taxRule_next_id.sql | `SELECT IFNULL(MAX(id), 0) + 1 AS next_id FROM dtb_tax_rule` |
-| tbase_info_get.sql | `SELECT shop_name, shop_kana, shop_name_eng, company_name, postal_code, pref_i...` |
+| tbase_info_get.sql | `SELECT shop_name, shop_kana, shop_name_eng, company_name, postal_code, CAST(p...` |
 | tbase_info_put.sql | `INSERT INTO dtb_base_info (id, shop_name, shop_kana, shop_name_eng, company_n...` |
 | tblock_get.sql | `SELECT CAST(id AS CHAR), block_name, file_name, deletable FROM dtb_block WHER...` |
 | tblock_list.sql | `SELECT CAST(id AS CHAR), block_name, file_name, deletable FROM dtb_block ORDE...` |
