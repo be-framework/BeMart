@@ -8,6 +8,7 @@ use Aura\Router\Map;
 use Aura\Router\RouterContainer;
 use BEAR\Sunday\Extension\Router\NullMatch;
 use MyVendor\BeMart\Support\Router\AuraRouter;
+use MyVendor\BeMart\Support\Router\ResourceUriReverseLinker;
 use PHPUnit\Framework\TestCase;
 
 final class AuraRouterAdapterTest extends TestCase
@@ -78,6 +79,18 @@ final class AuraRouterAdapterTest extends TestCase
     {
         $this->assertSame('/products/detail/99', $this->router->generate('product_detail', ['id' => 99]));
         $this->assertFalse($this->router->generate('missing_route', []));
+    }
+
+    public function testGeneratesWithBearResourceUri(): void
+    {
+        $reverseLinker = new ResourceUriReverseLinker(self::routerContainer());
+
+        $this->assertSame('/products/list', $reverseLinker('page://self/products', []));
+        $this->assertSame('/products/detail/sample-001', $reverseLinker('page://self/product', ['productCode' => 'sample-001']));
+        $this->assertSame('/products/detail/sample-001', $reverseLinker('page://self/product?productCode=sample-001', []));
+        $this->assertSame('/products/add_cart/sample-001', $reverseLinker('page://self/cart/item', ['productCode' => 'sample-001']));
+        $this->assertSame('/guide', $reverseLinker('page://self/help/guide', []));
+        $this->assertSame('page://self/missing', $reverseLinker('page://self/missing', []));
     }
 
     public function testMypageDeleteGetRoutesToConcreteListResources(): void
