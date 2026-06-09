@@ -13,4 +13,4 @@ if (PHP_SAPI === 'cli-server') {
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
-exit((new Bootstrap())('html-hal-app', $GLOBALS, $_SERVER));
+exit((new Bootstrap())('html-eccube-sql-hal-app', $GLOBALS, $_SERVER));

@@ -20,4 +20,4 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-exit((new Bootstrap())('html-test-hal-api-app', $GLOBALS, $_SERVER));
+exit((new Bootstrap())('html-test-hal-app', $GLOBALS, $_SERVER));

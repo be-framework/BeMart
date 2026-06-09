@@ -9,9 +9,9 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
-use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
+use MyVendor\BeMart\Be\Reason\Query\CustomerIdQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\PasswordHasherInterface;
-use MyVendor\BeMart\Tests\Support\Hypermedia\AbstractWorkflowTest;
+use BEAR\Dev\Http\AbstractWorkflowTest;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowFixtureBoundary;
 use PHPUnit\Framework\Attributes\Depends;
@@ -41,15 +41,15 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
             self::CSRF_TOKEN,
             static function (InjectorInterface $injector): void {
                 self::$fixtures = WorkflowFixtureBoundary::fromInjector($injector);
-                $customerIds = $injector->getInstance(CustomerIdProvider::class);
-                assert($customerIds instanceof CustomerIdProvider);
+                $customerIds = $injector->getInstance(CustomerIdQueryInterface::class);
+                assert($customerIds instanceof CustomerIdQueryInterface);
                 $passwordHasher = $injector->getInstance(PasswordHasherInterface::class);
                 assert($passwordHasher instanceof PasswordHasherInterface);
 
                 self::$activationEmail = 'workflow-activation-' . bin2hex(random_bytes(4)) . '@example.com';
                 self::$activationSecretKey = 'workflow-activation-' . bin2hex(random_bytes(8));
                 self::$fixtures->registerActivationCustomer(new CustomerEntity(
-                    customerId: $customerIds->get(),
+                    customerId: $customerIds->next()->value,
                     email: self::$activationEmail,
                     passwordHash: $passwordHasher->hash(self::PASSWORD),
                     name01: 'Workflow',

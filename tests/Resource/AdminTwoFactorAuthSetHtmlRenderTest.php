@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Resource;
 
-use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
-use MyVendor\BeMart\Module\HtmlTestModule;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
 use MyVendor\BeMart\Tests\Resource\Admin\TopJaMessages;
+use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
-use Ray\Di\Injector;
 use Ray\WebFormModule\FormFactory;
 use Twig\Environment;
 use Twig\Markup;
@@ -64,9 +62,7 @@ final class AdminTwoFactorAuthSetHtmlRenderTest extends TestCase
 
     protected function setUp(): void
     {
-        $meta = new Meta('MyVendor\\BeMart', 'html');
-        $module = new HtmlTestModule($meta);
-        $injector = new Injector($module, dirname(__DIR__, 2) . '/var/tmp/html');
+        $injector = HtmlTestInjector::getInstance();
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
