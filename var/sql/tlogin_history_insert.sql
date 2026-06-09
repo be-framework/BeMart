@@ -1,2 +1,36 @@
-INSERT INTO dtb_login_history (login_history_status_id, user_name, client_ip, create_date, update_date, discriminator_type)
-VALUES (CASE WHEN CAST(JSON_VALUE(CAST(:entry AS CHAR), '$.success') AS UNSIGNED) = 1 THEN 1 ELSE 2 END, JSON_VALUE(CAST(:entry AS CHAR), '$.loginId'), JSON_VALUE(CAST(:entry AS CHAR), '$.clientIp'), REPLACE(JSON_VALUE(CAST(:entry AS CHAR), '$.timestamp'), 'T', ' '), NOW(), 'loginhistory')
+INSERT INTO dtb_login_history (
+  login_history_status_id, user_name,
+  client_ip, create_date, update_date,
+  discriminator_type
+)
+VALUES
+  (
+    CASE WHEN CAST(
+      JSON_VALUE(
+        CAST(:entry AS CHAR),
+        '$.success'
+      ) AS UNSIGNED
+    ) = 1 THEN
+      1
+    ELSE
+      2
+    END,
+    JSON_VALUE(
+      CAST(:entry AS CHAR),
+      '$.loginId'
+    ),
+    JSON_VALUE(
+      CAST(:entry AS CHAR),
+      '$.clientIp'
+    ),
+    REPLACE(
+      JSON_VALUE(
+        CAST(:entry AS CHAR),
+        '$.timestamp'
+      ),
+      'T',
+      ' '
+    ),
+    NOW(),
+    'loginhistory'
+  )
