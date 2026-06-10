@@ -40,6 +40,7 @@
         "koriym/sql-quality": "^0.2.0",
         "phpunit/phpunit": "^10.0",
         "ray/fake-query": "dev-codex/fake-query-release-hardening as 1.x-dev",
+        "squizlabs/php_codesniffer": "^3.10",
         "vimeo/psalm": "^6.16"
     },
     "autoload": {
@@ -74,9 +75,11 @@
             "@psalm"
         ],
         "cs": [
-            "@cs:alps"
+            "@cs:alps",
+            "@cs:php"
         ],
         "cs:alps": "PATH=${PATH#$PWD/vendor/bin:} asd --validate alps.json",
+        "cs:php": "./vendor/bin/phpcs",
         "psalm": "./vendor/bin/psalm --no-cache --no-progress",
         "psalm-taint": "./vendor/bin/psalm --taint-analysis --ignore-baseline --no-cache --no-progress",
         "sql:quality": "vendor/bin/sql-quality analyze --sql-dir=var/sql --params=var/sql-quality/sql_params.php --dsn=\"mysql:host=127.0.0.1;port=3306;dbname=eccubedb_test;charset=utf8mb4\" --user=root --password= --format=markdown --output=build/sql-quality --lang=ja",
