@@ -6,7 +6,7 @@ namespace MyVendor\BeMart\Module;
 
 use BEAR\ToolUse\Llm\LlmClientInterface;
 use BEAR\ToolUse\Module\ToolUseModule;
-use MyVendor\BeMart\ToolUse\DemoLlmClient;
+use MyVendor\BeMart\ToolUse\FakeLlmClient;
 use Override;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
@@ -18,6 +18,6 @@ final class ToolUseAgentModule extends AbstractModule
     protected function configure(): void
     {
         $this->install(new ToolUseModule());
-        $this->bind(LlmClientInterface::class)->to(DemoLlmClient::class)->in(Scope::SINGLETON);
+        $this->bind(LlmClientInterface::class)->to(FakeLlmClient::class)->in(Scope::SINGLETON);
     }
 }
