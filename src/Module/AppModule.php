@@ -11,7 +11,13 @@ use BEAR\Resource\Module\JsonSchemaModule;
 use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
+use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
+use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
+use MyVendor\BeMart\Auth\NoopAdminSessionWriter;
+use MyVendor\BeMart\Auth\NoopCartSessionPrefix;
+use MyVendor\BeMart\Auth\NoopCustomerSessionWriter;
 use MyVendor\BeMart\Be\Reason\Provider\AddressIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\AdminIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\BlockIdProvider;
@@ -151,6 +157,9 @@ final class AppModule extends AbstractAppModule
 
         $this->bind(PasswordHasherInterface::class)->to(NativePasswordHasher::class);
         $this->bind(HtmlAdminLoginChallengeAdapter::class);
+        $this->bind(CustomerSessionWriterInterface::class)->to(NoopCustomerSessionWriter::class)->in(Scope::SINGLETON);
+        $this->bind(AdminSessionWriterInterface::class)->to(NoopAdminSessionWriter::class)->in(Scope::SINGLETON);
+        $this->bind(CartSessionPrefixInterface::class)->to(NoopCartSessionPrefix::class)->in(Scope::SINGLETON);
 
         // Production-safe defaults for external domain services. FakeModule
         // overrides these with deterministic recording fakes; prod keeps the

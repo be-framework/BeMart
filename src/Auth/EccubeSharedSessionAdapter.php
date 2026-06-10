@@ -6,14 +6,12 @@ namespace MyVendor\BeMart\Auth;
 
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 
-use function getenv;
 use function headers_sent;
 use function is_string;
 use function session_name;
 use function session_start;
 use function session_status;
 
-use const PHP_SAPI;
 use const PHP_SESSION_ACTIVE;
 
 /**
@@ -47,13 +45,9 @@ use const PHP_SESSION_ACTIVE;
  *      starts the session under the same cookie name and reads the flat
  *      key. No Symfony deps required on the BEAR side.
  *
- * CLI safety: in `bin/app.php` we have no HTTP context. `PHP_SAPI === 'cli'`
- * → session machinery is not started. For ad-hoc operator invocations
- * the adapter honors a single env var, {@see CLI_ENV_VAR}, as the
- * authenticated customerId. If unset, CLI requests are anonymous and
- * domain code applies the same AUTHZ rules as for logged-out HTTP. The
- * env var path is intentionally narrow — it bypasses authentication
- * entirely and must never be set in production HTTP context.
+     * CLI safety: in `bin/app.php` we have no HTTP context. CLI requests are
+     * anonymous unless a context module binds a different CustomerSession.
+     * Application code must not inspect process environment to decide auth.
  *
  * Headers-sent safety: if `session_start()` cannot run (output already
  * flushed), we treat the request as anonymous. Domain code already
@@ -75,14 +69,6 @@ final readonly class EccubeSharedSessionAdapter extends CustomerSession
      */
     public const CUSTOMER_ID_KEY = 'customer_id';
 
-    /**
-     * CLI-only override: when running under php-cli (e.g. bin/app.php) the
-     * adapter consults this env var as the authenticated customerId. Used
-     * for operator scripts and the entry-point subprocess tests. NEVER set
-     * this in HTTP context — it bypasses authentication entirely.
-     */
-    public const CLI_ENV_VAR = 'BEMART_CLI_CUSTOMER_ID';
-
     public function __construct(
         private string $cookieName = self::COOKIE_NAME,
         private string $sessionKey = self::CUSTOMER_ID_KEY,
@@ -102,16 +88,6 @@ final readonly class EccubeSharedSessionAdapter extends CustomerSession
         $raw = $session[$this->sessionKey] ?? null;
         if (is_string($raw) && $raw !== '') {
             return $raw;
-        }
-
-        // CLI fallback: operator scripts and subprocess tests may supply
-        // an authenticated customerId via env var. Skipped in HTTP context
-        // — the adapter never trusts env in that path.
-        if (PHP_SAPI === 'cli') {
-            $env = getenv(self::CLI_ENV_VAR);
-            if ($env !== false && $env !== '') {
-                return $env;
-            }
         }
 
         return null;

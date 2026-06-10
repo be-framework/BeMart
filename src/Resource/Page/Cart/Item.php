@@ -11,7 +11,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Auth\HtmlCartSession;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Be\Exception\CartItemNotInCartException;
 use MyVendor\BeMart\Be\Exception\OutOfStockException;
 use MyVendor\BeMart\Be\Exception\ProductClassNotFoundException;
@@ -39,6 +39,7 @@ class Item extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
     }
 
@@ -96,7 +97,7 @@ class Item extends ResourceObject
         $final = ($this->becoming)(new AddCartItemInput(
             $productCode,
             $quantity,
-            HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+            $this->cartSessionPrefix->prefix() ?? $sessionPrefix,
         ));
 
         assert($final instanceof CartItemAdded);
@@ -141,7 +142,7 @@ class Item extends ResourceObject
         $final = ($this->becoming)(new UpdateCartItemQuantityInput(
             productCode: $productCode,
             quantity: $quantity,
-            sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+            sessionPrefix: $this->cartSessionPrefix->prefix() ?? $sessionPrefix,
         ));
 
         assert($final instanceof CartItemQuantityUpdated);
@@ -179,7 +180,7 @@ class Item extends ResourceObject
     {
         $final = ($this->becoming)(new RemoveCartItemInput(
             productCode: $productCode,
-            sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+            sessionPrefix: $this->cartSessionPrefix->prefix() ?? $sessionPrefix,
         ));
 
         assert($final instanceof CartItemRemoved);
