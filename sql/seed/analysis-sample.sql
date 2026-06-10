@@ -17,7 +17,7 @@
 -- (which loads schema + mtb_* master). Safe only against a scratch/test database.
 --
 -- Usage:
---   mysql --host 127.0.0.1 --port 3306 -u dbuser -psecret eccubedb_test < sql/seed/analysis-sample.sql
+--   mysql --host 127.0.0.1 --port 3306 -u root eccubedb_test < sql/seed/analysis-sample.sql
 
 SET FOREIGN_KEY_CHECKS = 0;
 SET SESSION cte_max_recursion_depth = 100000;

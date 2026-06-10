@@ -83,17 +83,12 @@ SQL テストスイートと本番 context は `malt` の DB を使う。
 ```bash
 malt start
 source <(malt env)
-mysql --protocol=TCP -h127.0.0.1 -P3306 -uroot <<'SQL'
-CREATE USER IF NOT EXISTS 'dbuser'@'localhost' IDENTIFIED BY 'secret';
-CREATE USER IF NOT EXISTS 'dbuser'@'127.0.0.1' IDENTIFIED BY 'secret';
-GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'localhost';
-GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'127.0.0.1';
-FLUSH PRIVILEGES;
-SQL
+export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14'
+sql/setup-db.sh "$DATABASE_URL"
 ```
 
 本番 DB の再現可能なセットアップ手順・seed は `sql/README.md` と `sql/setup-db.sh` を参照。
-デフォルト接続は host `127.0.0.1` / port `3306` / user `dbuser` / pass `secret`。
+開発用 DB 接続の基本は host `127.0.0.1` / port `3306` / user `root` / pass なし。
 
 ### 1.4 動作確認
 
@@ -255,7 +250,7 @@ composer psalm / composer psalm-taint       # 型 / taint 解析
 ### SQL スイートが skip / fail する
 
 `DATABASE_URL` 未設定なら clean skip（正常）。設定済みでサーバ不達なら fail-fast。
-まず `malt status` と `dbuser` のグラント（§1.3）を確認。malt が MySQL 8.0 の場合、MariaDB target mismatch として全 skip される。
+まず `malt status` と `root` / パスワードなし接続（§1.3）を確認。malt が MySQL 8.0 の場合、MariaDB target mismatch として全 skip される。
 
 ### テンプレート編集が反映されない
 
