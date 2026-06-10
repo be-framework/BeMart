@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "919609c5c7baa01228744a1b056a5c0b",
+    "content-hash": "d0fc69b99061ed9d9c204eb73e90feb5",
     "packages": [
         {
             "name": "aura/cli",
@@ -1099,6 +1099,109 @@
                 "source": "https://github.com/bearsunday/BEAR.Sunday/tree/1.8.0"
             },
             "time": "2025-11-11T14:54:25+00:00"
+        },
+        {
+            "name": "bear/tool-use",
+            "version": "dev-codex/review-hardening",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/bearsunday/BEAR.ToolUse.git",
+                "reference": "fa69ae7ec3b211a29e053b1d27d941ac62950a60"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/bearsunday/BEAR.ToolUse/zipball/fa69ae7ec3b211a29e053b1d27d941ac62950a60",
+                "reference": "fa69ae7ec3b211a29e053b1d27d941ac62950a60",
+                "shasum": ""
+            },
+            "require": {
+                "bear/resource": "^1.10",
+                "ext-json": "*",
+                "ext-libxml": "*",
+                "ext-simplexml": "*",
+                "php": "^8.2",
+                "phpdocumentor/reflection-docblock": "^5.2 || ^6.0",
+                "ray/di": "^2.18"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.8",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "library",
+            "extra": {
+                "bamarni-bin": {
+                    "bin-links": true,
+                    "forward-command": true
+                }
+            },
+            "autoload": {
+                "files": [
+                    "src-polyfill/Override.php"
+                ],
+                "psr-4": {
+                    "BEAR\\ToolUse\\": "src/"
+                }
+            },
+            "autoload-dev": {
+                "psr-4": {
+                    "BEAR\\ToolUse\\": "tests/"
+                }
+            },
+            "scripts": {
+                "setup": [
+                    "composer bin tools install"
+                ],
+                "test": [
+                    "phpunit"
+                ],
+                "cs": [
+                    "vendor/bin/phpcs"
+                ],
+                "cs-fix": [
+                    "vendor/bin/phpcbf"
+                ],
+                "phpstan": [
+                    "vendor/bin/phpstan analyse -c phpstan.neon --no-progress --no-interaction --memory-limit=512M"
+                ],
+                "psalm": [
+                    "php -d memory_limit=512M vendor/bin/psalm --show-info=true"
+                ],
+                "sa": [
+                    "@phpstan",
+                    "@psalm"
+                ],
+                "phpmd": [
+                    "vendor/bin/phpmd src text phpmd.xml"
+                ],
+                "tests": [
+                    "@cs",
+                    "@phpmd",
+                    "@sa",
+                    "@test"
+                ]
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Yoshitaka Jingu",
+                    "email": "yoshitaka.jingu@gmail.com"
+                }
+            ],
+            "description": "LLM Tool Use support for BEAR.Sunday applications",
+            "keywords": [
+                "AI",
+                "Agent",
+                "BEAR.Sunday",
+                "LLM",
+                "Tool Use"
+            ],
+            "support": {
+                "source": "https://github.com/bearsunday/BEAR.ToolUse/tree/codex/review-hardening",
+                "issues": "https://github.com/bearsunday/BEAR.ToolUse/issues"
+            },
+            "time": "2026-05-13T02:41:07+00:00"
         },
         {
             "name": "doctrine/deprecations",
