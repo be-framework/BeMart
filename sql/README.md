@@ -27,11 +27,11 @@ reproducibly:
 
 ```bash
 # from a DATABASE_URL (Symfony/Doctrine style)
-sql/setup-db.sh 'mysql://dbuser:secret@127.0.0.1:3306/eccubedb?charset=utf8mb4'
+sql/setup-db.sh 'mysql://root@127.0.0.1:3306/eccubedb?charset=utf8mb4'
 
 # or from explicit args
 sql/setup-db.sh --host 127.0.0.1 --port 3306 \
-                --user dbuser --pass secret --db eccubedb
+                --user root --pass '' --db eccubedb
 
 # or from the DATABASE_URL environment variable
 DATABASE_URL='mysql://...' sql/setup-db.sh
@@ -120,7 +120,7 @@ target baseline is MariaDB 10.11.
 The top-level `phpunit.xml` wires the default `DATABASE_URL`:
 
 ```text
-mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14
+mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14
 ```
 
 ## Setting up the local DB with malt
@@ -129,24 +129,19 @@ The dev environment uses `malt` for the local DB. The checked-in
 `malt.json` currently starts MySQL 8.0 on port 3306; this is useful for DB
 reachability and smoke wiring, while MariaDB-target SQL verification is
 kept separate.
+The local development connection is `root` with no password; do not create
+or grant a separate `dbuser` account for normal local runs.
 
 ```bash
 malt start
 source <(malt env)
-
-# One-time grant for the test DB:
-mysql --protocol=TCP -h127.0.0.1 -P3306 -uroot <<'SQL'
-CREATE USER IF NOT EXISTS 'dbuser'@'localhost' IDENTIFIED BY 'secret';
-CREATE USER IF NOT EXISTS 'dbuser'@'127.0.0.1' IDENTIFIED BY 'secret';
-GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'localhost';
-GRANT ALL PRIVILEGES ON `eccubedb_test`.* TO 'dbuser'@'127.0.0.1';
-FLUSH PRIVILEGES;
-SQL
+export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14'
+sql/setup-db.sh "$DATABASE_URL"
 
 /opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never
 ```
 
-Defaults: host `127.0.0.1`, port `3306`, user `dbuser`, password `secret`.
+Defaults: host `127.0.0.1`, port `3306`, user `root`, password `(none)`.
 
 ## SQL implementations landed so far
 
@@ -223,8 +218,8 @@ also supplies each query's bind values.
 
    ```bash
    malt start
-   sql/setup-db.sh "mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4"
-   mysql -h127.0.0.1 -P3306 -udbuser -psecret eccubedb_test < sql/seed/analysis-sample.sql
+   sql/setup-db.sh "mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4"
+   mysql -h127.0.0.1 -P3306 -uroot eccubedb_test < sql/seed/analysis-sample.sql
    ```
 
    `sql/seed/analysis-sample.sql` bulk-generates a representative catalog
