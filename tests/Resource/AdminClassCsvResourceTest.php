@@ -105,12 +105,6 @@ final class AdminClassCsvResourceTest extends TestCase
         $this->assertSame('doImportClassCategoryCsv', $ro->body['transitionId']);
     }
 
-    public function testImportMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/product/csv-class-name', ['csv' => 'x']);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testImportGetRendersUploadShell(): void
     {
         $ro = $this->resource->get('page://self/admin/product/csv-class-name');

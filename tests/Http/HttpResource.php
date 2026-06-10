@@ -24,7 +24,6 @@ use function escapeshellarg;
 use function explode;
 use function file_exists;
 use function file_put_contents;
-use function getenv;
 use function html_entity_decode;
 use function http_build_query;
 use function implode;
@@ -434,11 +433,6 @@ final class HttpResource implements ResourceInterface
             $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
 
             return $headers;
-        }
-
-        $csrfToken = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        if ($csrfToken !== false && $csrfToken !== '') {
-            $headers['X-BeMart-Test-Csrf-Token'] = $csrfToken;
         }
 
         return $headers;

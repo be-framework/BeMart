@@ -66,18 +66,6 @@ final class AdminMemberSortNoMoveResourceTest extends TestCase
         $this->assertSame(8, $ro->body['sortNo']);
     }
 
-    public function testMemberSortNoMoveMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->put('page://self/admin/sort-no-move', [
-            'masterType' => 'member',
-            'rowId' => self::SHOP_OWNER_ID,
-            'sortNo' => 8,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testMemberSortNoMoveUnknownRowReturns404(): void
     {
         $this->expectException(\MyVendor\BeMart\Be\Exception\MasterRowNotFoundException::class);

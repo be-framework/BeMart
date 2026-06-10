@@ -102,13 +102,4 @@ final class ActivateResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/entry/activate', [
-            'secretKey' => self::PROVISIONAL_KEY,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

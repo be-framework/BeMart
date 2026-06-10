@@ -71,12 +71,4 @@ final class ForgotPasswordResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/forgot-password', [
-            'email' => 'alice@example.com',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
 }

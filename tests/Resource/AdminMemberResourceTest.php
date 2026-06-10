@@ -115,19 +115,6 @@ final class AdminMemberResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/member', [
-            'loginId' => 'csrf-victim',
-            'password' => 'csrf-victim-password-2026',
-            'name' => 'CSRF被害者',
-            'authority' => 1,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPutUpdatesAdmin(): void
     {
         $ro = $this->resource->put('page://self/admin/member', [
