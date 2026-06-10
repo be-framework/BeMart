@@ -14,17 +14,22 @@
       "options": {
         "symlink": true
       }
+    },
+    {
+      "type": "vcs",
+      "url": "https://github.com/bearsunday/BEAR.ToolUse.git"
     }
   ],
   "require": {
-    "php": "^8.3",
     "be-framework/be": "0.x-dev as 0.1.0",
     "bear/devtools": "dev-abstract-workflow-test-contract",
     "bear/package": "^1.14",
     "bear/sunday": "^1.6",
+    "bear/tool-use": "dev-codex/review-hardening as 1.x-dev",
     "madapaja/twig-module": "^2.7",
     "my-vendor/be-mart-be": "@dev",
     "nyholm/psr7": "^1.8",
+    "php": "^8.3",
     "ray/di": "^2.18",
     "ray/input-query": "^1.0",
     "ray/media-query": "^1.1",
@@ -127,7 +132,8 @@
     "serve": "@serve:api",
     "serve:api": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8080 -t public public/index.php",
     "serve:page": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php",
-    "architecture:audit": "python3 scripts/bear_standard_audit.py ."
+    "architecture:audit": "python3 scripts/bear_standard_audit.py .",
+    "agent": "php bin/agent.php"
   },
   "scripts-descriptions": {
     "test": "Run the default PHPUnit suite.",
@@ -161,7 +167,8 @@
     "serve": "Serve the API entrypoint.",
     "serve:api": "Serve the API entrypoint on 127.0.0.1:8080.",
     "serve:page": "Serve the page entrypoint on 127.0.0.1:8081.",
-    "architecture:audit": "Audit BEAR.Sunday framework-boundary standard drift. This currently reports known debt and is used to guide standardization PRs."
+    "architecture:audit": "Audit BEAR.Sunday framework-boundary standard drift. This currently reports known debt and is used to guide standardization PRs.",
+    "agent": "Run the BEAR.ToolUse agent demo."
   },
   "config": {
     "sort-packages": true,
