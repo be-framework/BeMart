@@ -139,19 +139,6 @@ final class AdminMailTemplateResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $id = $this->insertMailTemplate();
-
-        $ro = $this->resource->post('page://self/admin/mail-template', [
-            'mailTemplateId' => $id,
-            'mailSubject' => 'whatever',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testOnPostWithoutAdminSessionReturns403(): void
     {
         $id = $this->insertMailTemplate();

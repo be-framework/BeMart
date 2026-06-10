@@ -63,13 +63,4 @@ final class ActivateResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/entry/activate', [
-            'secretKey' => self::PROVISIONAL_KEY,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

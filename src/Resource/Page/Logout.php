@@ -11,17 +11,12 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Auth\HtmlSessionAdapter;
+use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Final\LoggedOut;
 use MyVendor\BeMart\Be\Input\LogoutInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function session_status;
-use function str_contains;
-
-use const PHP_SESSION_ACTIVE;
 
 /**
  * EC-CUBE doLogout — 会員ログアウト (Pilot — Direct, idempotent).
@@ -45,14 +40,14 @@ use const PHP_SESSION_ACTIVE;
  * of a session as an error.
  *
  * In the html context this resource clears the flat customer session key
- * read by HtmlSessionAdapter. The clear is guarded by an html APP_CONTEXT
- * and PHP_SESSION_ACTIVE so app/test/prod contexts keep their existing
- * session behaviour.
+ * through the session-writer port. Non-html contexts bind a no-op writer,
+ * so Resource code does not branch on environment or touch PHP session storage.
  */
 class Logout extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CustomerSessionWriterInterface $sessionWriter,
     ) {
     }
 
@@ -70,9 +65,7 @@ class Logout extends ResourceObject
 
         assert($final instanceof LoggedOut);
 
-        if (str_contains((string) getenv('APP_CONTEXT'), 'html') && session_status() === PHP_SESSION_ACTIVE) {
-            unset($_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY]);
-        }
+        $this->sessionWriter->clear();
 
         // Post/Redirect/Get: EC-CUBE's doLogout redirects to the storefront
         // top page (the `goTop` transition declared above).

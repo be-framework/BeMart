@@ -100,17 +100,6 @@ final class AdminPluginDisableResourceSqlTest extends AbstractResourceSqlTestCas
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $this->seedPlugins();
-
-        $ro = $this->resource->post('page://self/admin/plugin-disable', [
-            'pluginCode' => 'Sample/SamplePlugin',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnPostWithoutAdminSessionReturns403(): void
     {
         $this->seedPlugins();

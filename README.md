@@ -144,11 +144,13 @@ malt install
 # SQL-backed local site
 malt start
 source <(malt env)
-export DATABASE_URL='mysql://dbuser:secret@127.0.0.1:3306/eccubedb?charset=utf8mb4'
+export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb?charset=utf8mb4'
 sql/setup-db.sh "$DATABASE_URL"  # drops + recreates the target DB
 composer serve                   # http://127.0.0.1:8080 JSON/API
 composer serve:page              # http://127.0.0.1:8081 HTML
 ```
+
+開発用 DB 接続の基本は `127.0.0.1:3306` の `root` / パスワードなしです。
 
 ## その他のコマンド
 

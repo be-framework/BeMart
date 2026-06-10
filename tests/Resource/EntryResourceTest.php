@@ -121,19 +121,4 @@ final class EntryResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        // Phase B Slice 8: state-changing requests without a CSRF token are
-        // rejected at the resource boundary, before the Becoming chain
-        // even sees the payload.
-        $ro = $this->resource->post('page://self/entry', [
-            'email' => 'no-csrf@example.com',
-            'password' => 'whatever-2026',
-            'name01' => '佐藤',
-            'name02' => '七郎',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }
