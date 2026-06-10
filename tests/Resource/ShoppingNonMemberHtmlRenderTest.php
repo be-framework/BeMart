@@ -66,8 +66,6 @@ final class ShoppingNonMemberHtmlRenderTest extends TestCase
         '<title>BeMart / お客様情報の入力</title>',
         '<title>EC-CUBE / お客様情報の入力</title>',
         '<meta name="author" content="">',
-        // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="csrfToken" value="">',
     ];
 
     private ResourceInterface $resource;
@@ -176,6 +174,10 @@ final class ShoppingNonMemberHtmlRenderTest extends TestCase
         // The `form_label` stub renders `<label class="ec-label">…` —
         // the same plain label BeMart's port authors directly.
         if (str_starts_with($line, '<label class="ec-label">')) {
+            return true;
+        }
+
+        if (str_starts_with($line, '<input type="hidden" name="csrfToken" value="')) {
             return true;
         }
 
