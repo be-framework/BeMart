@@ -13,12 +13,18 @@ use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Final\NonMemberSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitNonMemberInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\NonMemberForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_filter;
 use function assert;
+use function ctype_digit;
+use function is_int;
+use function is_string;
 use function sprintf;
+use function trim;
 
 /**
  * EC-CUBE goShoppingNonMember / doSubmitNonMember —非会員購入 (Wave 7W).
@@ -53,8 +59,26 @@ use function sprintf;
  */
 class NonMember extends ResourceObject
 {
+    private const REQUIRED_MESSAGE = '入力してください。';
+    private const INVALID_MESSAGE = '正しく入力してください。';
+
+    /** @var list<string> */
+    private const REQUIRED_FIELDS = [
+        'name01',
+        'name02',
+        'kana01',
+        'kana02',
+        'email',
+        'phoneNumber',
+        'postalCode',
+        'pref',
+        'addr01',
+        'addr02',
+    ];
+
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -64,10 +88,8 @@ class NonMember extends ResourceObject
      *
      * Pure form-info endpoint: no Be Framework involved, no domain
      * logic. Anonymous-accessible (returns 200 regardless of session
-     * state). Fields mirror SubmitNonMemberInput. `csrfToken` body
-     * field stays `null` for the same reason described on Login::onGet
-     * — EventListener mirrors the Symfony token into the session for
-     * the subsequent POST.
+     * state). Fields mirror SubmitNonMemberInput. `csrfToken` carries
+     * the trusted reference the HTML form echoes back on POST.
      */
     #[Alps('goShoppingNonMember')]
     #[JsonSchema(schema: 'get-shopping-non-member.json')]
@@ -95,7 +117,7 @@ class NonMember extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/shopping/non-member',
             ],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->token,
             // Phase 3: an empty NonMemberForm for the HTML port to render
             // the guest-info inputs. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(NonMemberForm::class),
@@ -131,18 +153,46 @@ class NonMember extends ResourceObject
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
     public function onPost(
-        string $name01,
-        string $name02,
-        string $kana01,
-        string $kana02,
-        string $email,
-        string $phoneNumber,
-        string $postalCode,
-        int $pref,
-        string $addr01,
-        string $addr02,
+        string|null $name01 = null,
+        string|null $name02 = null,
+        string|null $kana01 = null,
+        string|null $kana02 = null,
+        string|null $email = null,
+        string|null $phoneNumber = null,
+        string|null $postalCode = null,
+        int|string|null $pref = null,
+        string|null $addr01 = null,
+        string|null $addr02 = null,
         string $sessionPrefix = 'session-prefix-1',
     ): static {
+        $values = [
+            'name01' => $name01,
+            'name02' => $name02,
+            'kana01' => $kana01,
+            'kana02' => $kana02,
+            'email' => $email,
+            'phoneNumber' => $phoneNumber,
+            'postalCode' => $postalCode,
+            'pref' => $pref,
+            'addr01' => $addr01,
+            'addr02' => $addr02,
+        ];
+        $messages = $this->requiredMessages($values);
+        $prefId = $this->prefId($pref);
+        if ($pref !== null && ! $this->isBlank((string) $pref) && $prefId === null) {
+            $messages['pref'] = self::INVALID_MESSAGE;
+        }
+
+        if ($messages !== []) {
+            return $this->badRequestForm($values, $messages);
+        }
+
+        assert($name01 !== null && $name02 !== null);
+        assert($kana01 !== null && $kana02 !== null);
+        assert($email !== null && $phoneNumber !== null);
+        assert($postalCode !== null && $addr01 !== null && $addr02 !== null);
+        assert($prefId !== null);
+
         $final = ($this->becoming)(new SubmitNonMemberInput(
             name01: $name01,
             name02: $name02,
@@ -151,7 +201,7 @@ class NonMember extends ResourceObject
             email: $email,
             phoneNumber: $phoneNumber,
             postalCode: $postalCode,
-            pref: $pref,
+            pref: $prefId,
             addr01: $addr01,
             addr02: $addr02,
             sessionPrefix: $sessionPrefix,
@@ -169,5 +219,89 @@ class NonMember extends ResourceObject
         ];
 
         return $this;
+    }
+
+    /**
+     * @param array<string, string|int|null> $values
+     * @return array<string, string>
+     */
+    private function requiredMessages(array $values): array
+    {
+        $messages = [];
+        foreach (self::REQUIRED_FIELDS as $field) {
+            /** @var string|int|null $value */
+            $value = $values[$field] ?? null;
+            if ($this->isBlank((string) $value)) {
+                $messages[$field] = self::REQUIRED_MESSAGE;
+            }
+        }
+
+        return $messages;
+    }
+
+    private function prefId(int|string|null $pref): int|null
+    {
+        if (is_int($pref)) {
+            return $pref;
+        }
+
+        if (! is_string($pref)) {
+            return null;
+        }
+
+        $pref = trim($pref);
+        if ($pref === '' || ! ctype_digit($pref)) {
+            return null;
+        }
+
+        return (int) $pref;
+    }
+
+    private function isBlank(string $value): bool
+    {
+        return trim($value) === '';
+    }
+
+    /**
+     * @param array<string, string|int|null> $values
+     * @param array<string, string>          $messages
+     */
+    private function badRequestForm(array $values, array $messages): static
+    {
+        $this->code = Code::BAD_REQUEST;
+        $this->body = [
+            'transitionId' => 'goShoppingNonMember',
+            'fields' => self::REQUIRED_FIELDS,
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/shopping/non-member',
+            ],
+            'csrfToken' => $this->csrf->token,
+            'message' => self::REQUIRED_MESSAGE,
+            'form' => $this->failedForm($values, $messages),
+        ];
+
+        return $this;
+    }
+
+    /**
+     * @param array<string, string|int|null> $values
+     * @param array<string, string>          $messages
+     */
+    private function failedForm(array $values, array $messages): NonMemberForm
+    {
+        $form = $this->formFactory->newInstance(NonMemberForm::class);
+        assert($form instanceof NonMemberForm);
+
+        $form->fillValues(array_filter(
+            $values,
+            static fn (string|int|null $value): bool => $value !== null,
+        ));
+
+        foreach ($messages as $field => $message) {
+            $form->setDomainError($field, $message);
+        }
+
+        return $form;
     }
 }
