@@ -11,7 +11,7 @@ namespace MyVendor\BeMart\Be\Reason\Service;
  * admin/customer firewalls. Domain code reads the adminId value directly for
  * admin-side AUTHZ checks; session storage remains an adapter concern.
  */
-abstract readonly class AdminSession
+abstract class AdminSession
 {
     /**
      * @var non-empty-string|null adminId, or null if no admin is logged in

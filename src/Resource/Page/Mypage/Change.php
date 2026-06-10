@@ -62,6 +62,7 @@ class Change extends ResourceObject
      */
     #[Alps('goMypageChange')]
     #[JsonSchema(schema: 'get-mypage-change.json')]
+    #[Link(rel: 'doUpdateCustomer', href: 'page://self/mypage/change', method: 'post')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(): static
     {

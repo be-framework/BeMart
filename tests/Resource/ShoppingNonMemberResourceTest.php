@@ -72,6 +72,7 @@ final class ShoppingNonMemberResourceTest extends TestCase
 
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertMatchesRegularExpression('/\A[0-9a-f]{40}\z/', $ro->body['preOrderId']);
+        $this->assertSame(1, $ro->body['paymentMethodId']);
         $this->assertSame('田中', $ro->body['name01']);
         $this->assertSame('太郎', $ro->body['name02']);
         $this->assertSame('guest@example.com', $ro->body['email']);

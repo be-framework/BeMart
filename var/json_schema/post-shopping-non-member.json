@@ -25,6 +25,11 @@
       "maxLength": 254,
       "example": "alice@example.com"
     },
+    "paymentMethodId": {
+      "$ref": "#/$defs/dbId",
+      "title": "支払方法ID",
+      "description": "非会員購入で作成した仮注文に紐づく支払方法ID。次の注文確認遷移 doConfirmOrder へ渡す。"
+    },
     "preOrderId": {
       "type": [
         "string",

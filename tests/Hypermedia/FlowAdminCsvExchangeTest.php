@@ -59,7 +59,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testCsvConfig')]
     public function testUpdatesCsvConfig(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->post('page://self/admin/csv-config', [
+        $updated = $this->resource->post($this->linkHref($response, 'doUpdateCsv'), [
             'csvType' => 3,
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
@@ -88,7 +88,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     public function testImportsProductCsv(ResourceObject $response): ResourceObject
     {
         $productCode = 'workflow-csv-product-' . bin2hex(random_bytes(4));
-        $imported = $this->resource->post('page://self/admin/product-csv', [
+        $imported = $this->resource->post($this->linkHref($response, 'doImportProductCsv'), [
             'csv' => "productCode,productName,price02,stock,productStatus,description,searchWord,note\n{$productCode},Workflow CSV Product,1200,5,1,CSV import product,workflow csv,Imported by workflow\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -111,7 +111,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testExportsCategoryCsv')]
     public function testImportsCategoryCsv(ResourceObject $response): ResourceObject
     {
-        $imported = $this->resource->post('page://self/admin/category/csv', [
+        $imported = $this->resource->post($this->linkHref($response, 'doImportCategoryCsv'), [
             'csv' => "category_id,category_name,parent_category_id\n,Workflow Category,\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -140,7 +140,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testExportsShippingCsv')]
     public function testImportsShippingCsv(ResourceObject $response): ResourceObject
     {
-        $imported = $this->resource->post('page://self/admin/order/import-shipping', [
+        $imported = $this->resource->post($this->linkHref($response, 'doImportShippingCsv'), [
             'csv' => "shipping_id,tracking_number,ship_date\n1,TRACK-WORKFLOW,2026-06-05\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -169,7 +169,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testExportsClassNameCsv')]
     public function testImportsClassNameCsv(ResourceObject $response): ResourceObject
     {
-        $imported = $this->resource->post('page://self/admin/product/csv-class-name', [
+        $imported = $this->resource->post($this->linkHref($response, 'doImportClassNameCsv'), [
             'csv' => "class_name_id,class_name,backend_name\n,Workflow Class,Workflow Class\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -191,7 +191,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testExportsClassCategoryCsv')]
     public function testImportsClassCategoryCsv(ResourceObject $response): void
     {
-        $imported = $this->resource->post('page://self/admin/product/csv-class-category', [
+        $imported = $this->resource->post($this->linkHref($response, 'doImportClassCategoryCsv'), [
             'csv' => "class_category_id,class_name_id,class_category_name,backend_name\n,1,Workflow Size,Workflow Size\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);

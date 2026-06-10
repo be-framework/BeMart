@@ -64,6 +64,7 @@ _No parameters required_
 
 | Relation | URL |
 |----------|-----|
+| doUpdateCustomer | [<code>page://self/mypage/change</code>](/mypage/change.md) |
 | goMypage | [<code>page://self/mypage</code>](/mypage.md) |
 ## POST
 ALPS `doUpdateCustomer` に対応する POST 操作。

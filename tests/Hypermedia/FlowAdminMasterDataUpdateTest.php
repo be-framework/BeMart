@@ -8,9 +8,8 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Injector;
 use BEAR\Dev\Http\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
@@ -19,15 +18,32 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
 {
     public const FLOW_ID = 'flow-admin-master-data-update';
 
+    private const ADMIN_ID = 'ad000000000000000000000000000001';
+    private const CSRF_TOKEN = 'workflow-master-data-csrf-token';
     private const MASTER_TYPE = 'tag';
     private const UPDATED_ROWS = [
         ['id' => 'workflow-tag-1', 'name' => 'Workflow Tag', 'sortNo' => 1],
     ];
 
+    private static WorkflowDbSession|null $dbSession = null;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        self::$dbSession?->restore();
+        self::$dbSession = null;
+
+        parent::tearDownAfterClass();
+    }
+
     protected function newResource(): ResourceInterface
     {
-        $resource = Injector::getInstance('admin-test-hal-app')->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        $resource = self::$dbSession->resource();
 
         return $resource;
     }
@@ -47,9 +63,15 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
     #[Depends('testMasterData')]
     public function testSelectsMasterData(ResourceObject $response): ResourceObject
     {
-        $selected = $this->resource->put('page://self/admin/master-data', [
+        $submitTo = $this->bodyValue($response, 'submitTo');
+        $this->assertIsArray($submitTo);
+        $this->assertSame('doSelectMasterData', $submitTo['rel'] ?? null);
+        $this->assertSame('PUT', $submitTo['method'] ?? null);
+        $this->assertIsString($submitTo['href'] ?? null);
+
+        $selected = $this->resource->put((string) $submitTo['href'], [
             'masterType' => self::MASTER_TYPE,
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $selected->code);
@@ -63,10 +85,16 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
     #[Depends('testSelectsMasterData')]
     public function testUpdatesMasterData(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->put('page://self/admin/master-data-edit', [
+        $submitTo = $this->bodyValue($response, 'submitTo');
+        $this->assertIsArray($submitTo);
+        $this->assertSame('doUpdateMasterData', $submitTo['rel'] ?? null);
+        $this->assertSame('PUT', $submitTo['method'] ?? null);
+        $this->assertIsString($submitTo['href'] ?? null);
+
+        $updated = $this->resource->put((string) $submitTo['href'], [
             'masterType' => self::MASTER_TYPE,
             'rows' => self::UPDATED_ROWS,
-            'csrfToken' => FakeCsrfToken::TOKEN,
+            'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $updated->code);

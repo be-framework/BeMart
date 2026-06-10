@@ -49,8 +49,11 @@ _No parameters required_
 
 | Relation | URL |
 |----------|-----|
+| doCreateMailTemplate | [<code>page://self/admin/mail-template/create</code>](/admin/mail-template/create.md) |
 | doUpdateMailTemplate | [<code>page://self/admin/mail-template</code>](/admin/mail-template.md) |
 | goOrderMail | [<code>page://self/admin/order/send-mail</code>](/admin/order/send-mail.md) |
+| goPaymentList | [<code>page://self/admin/payment/payment-list</code>](/admin/payment/payment-list.md) |
+| goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |
 ## POST
 ALPS `doUpdateMailTemplate` に対応する POST 操作。
 

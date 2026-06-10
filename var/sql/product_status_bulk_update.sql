@@ -16,4 +16,4 @@ WHERE
   p.product_status_id <> :newStatus;
 
 SELECT
-  ROW_COUNT() AS changed_count
+  ROW_COUNT() AS changed_count;

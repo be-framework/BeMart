@@ -70,7 +70,7 @@
   <td rowspan="1"><a href="#GET/cartresponse" class="schema-link">GET /cart response</a></td>
 </tr>
 <tr>
-  <td rowspan="5" class="path-cell" id="path-contact">/contact</td>
+  <td rowspan="6" class="path-cell" id="path-contact">/contact</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goContactForm — show the contact form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state). `csrfToken` carries the trusted reference
@@ -84,8 +84,8 @@ subsequent POST passes CSRF validation.</div><div class="method-alps"><a href=".
 </tr>
 <tr>
 
-  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">ALPS `doSubmitContact` に対応する POST 操作。</div><div class="method-alps"><a href="../alps.json.html#doSubmitContact" class="alps-link">doSubmitContact</a></div></td>
-  <td><a href="../alps.json.html#contactName01" class="param alps-param" title="お問い合わせ姓">contactName01</a><span class="req">*</span></td>
+  <td rowspan="5" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">ALPS `doSubmitContact` に対応する POST 操作。</div><div class="method-alps"><a href="../alps.json.html#doSubmitContact" class="alps-link">doSubmitContact</a></div></td>
+  <td><a href="../alps.json.html#contactName01" class="param alps-param" title="お問い合わせ姓">contactName01</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">お問い合わせ姓（入力） - お問い合わせフォームの姓。内部的にはNameTypeのname01と同じ仕組み</td>
   <td><div class="extra-info">
@@ -93,12 +93,12 @@ subsequent POST passes CSRF validation.</div><div class="method-alps"><a href=".
       <span class="badge constraint">maxLength: 255</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
     </div></td>
-  <td rowspan="4"><a href="#POST/contactresponse" class="schema-link">POST /contact response</a></td>
+  <td rowspan="5"><a href="#POST/contactresponse" class="schema-link">POST /contact response</a></td>
 </tr>
 <tr>
 
 
-  <td><a href="../alps.json.html#contactName02" class="param alps-param" title="お問い合わせ名">contactName02</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#contactName02" class="param alps-param" title="お問い合わせ名">contactName02</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">お問い合わせ名（入力） - お問い合わせフォームの名。内部的にはNameTypeのname02と同じ仕組み</td>
   <td><div class="extra-info">
@@ -111,7 +111,7 @@ subsequent POST passes CSRF validation.</div><div class="method-alps"><a href=".
 <tr>
 
 
-  <td><a href="../alps.json.html#contactEmail" class="param alps-param" title="お問い合わせメール">contactEmail</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#contactEmail" class="param alps-param" title="お問い合わせメール">contactEmail</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">お問い合わせメール（入力） - お問い合わせフォームのメールアドレス</td>
   <td><div class="extra-info">
@@ -125,7 +125,7 @@ subsequent POST passes CSRF validation.</div><div class="method-alps"><a href=".
 <tr>
 
 
-  <td><a href="../alps.json.html#contactContents" class="param alps-param" title="お問い合わせ内容">contactContents</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#contactContents" class="param alps-param" title="お問い合わせ内容">contactContents</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">お問い合わせ内容（入力） - お問い合わせフォームの本文</td>
   <td><div class="extra-info">
@@ -136,7 +136,20 @@ subsequent POST passes CSRF validation.</div><div class="method-alps"><a href=".
 
 </tr>
 <tr>
-  <td rowspan="16" class="path-cell" id="path-entry">/entry</td>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム操作モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: EC-CUBE compatible HTML form submit mode.</span>
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="23" class="path-cell" id="path-entry">/entry</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goCustomerRegistration — show the customer registration
 form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
@@ -151,11 +164,11 @@ can exercise the POST path instead of failing at the boundary.</div><div class="
 </tr>
 <tr>
 
-  <td rowspan="15" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: every form field is user-controlled input. Declared
+  <td rowspan="22" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: every form field is user-controlled input. Declared
 as taint sources so Psalm can trace them. Semantic value objects
 format-validate but do not universally escape — sinks downstream
 still need their own defense (bound params, HTML escape on render).</div><div class="method-alps"><a href="../alps.json.html#doRegisterCustomer" class="alps-link">doRegisterCustomer</a></div></td>
-  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">メールアドレス（入力） - 会員のログインIDを兼ねる。有効会員間で一意 ログインIDを兼ねるメールアドレス。会員登録・ログイン・通知で共通に使う。 Fake観察文字長 15〜58; 観察値 &#039;bob@example.com&#039;, &#039;login-test@example.com&#039;, &#039;alice@example.com&#039;, &#039;carol@example.com&#039;, &#039;provisional@example.com&#039;, &#039;withdrawn-30000000aaaa3333bbbb4444cccc5555@example.invalid&#039;。</td>
   <td><div class="extra-info">
@@ -164,12 +177,12 @@ still need their own defense (bound params, HTML escape on render).</div><div cl
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: alice@example.com</span>
     </div></td>
-  <td rowspan="15"><a href="#POST/entryresponse" class="schema-link">POST /entry response</a></td>
+  <td rowspan="22"><a href="#POST/entryresponse" class="schema-link">POST /entry response</a></td>
 </tr>
 <tr>
 
 
-  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">パスワード（入力） - 書き込み専用（ハッシュ化して保存） Fake観察文字長 50〜63; 観察値 &#039;$2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi&#039;, &#039;$2y$10$deputyplaceholder.hash.never.verified.0123456789abcdef&#039;, &#039;$2y$10$zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876&#039;, &#039;$2y$12$lbpzHVyv.ytzJju.4xk9Au5tPePdQe1WFH6sLWeWwcvIKbn0vMnE.&#039;, &#039;$2y$10$shopownerplaceholder.hash.never.verified.0123456789ab&#039;, &#039;$2y$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123&#039;, &#039;$2y$10$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS&#039;, &#039;$2y$12$placeholder.hash.never.verified.never.0123456789abcde&#039;。</td>
   <td><div class="extra-info">
@@ -183,7 +196,7 @@ still need their own defense (bound params, HTML escape on render).</div><div cl
 <tr>
 
 
-  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">姓（入力） - 顧客・受注・配送先・お問い合わせで共通使用される姓 Fake観察文字長 2〜2; 観察値 &#039;鈴木&#039;, &#039;山田&#039;, &#039;佐藤&#039;, &#039;高橋&#039;, &#039;退会&#039;。</td>
   <td><div class="extra-info">
@@ -197,7 +210,7 @@ still need their own defense (bound params, HTML escape on render).</div><div cl
 <tr>
 
 
-  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">名（入力） - 顧客・受注・配送先・お問い合わせで共通使用される名 Fake観察文字長 1〜3; 観察値 &#039;アリス&#039;, &#039;太郎&#039;, &#039;次郎&#039;, &#039;花子&#039;, &#039;三郎&#039;, &#039;済&#039;。</td>
   <td><div class="extra-info">
@@ -280,7 +293,7 @@ still need their own defense (bound params, HTML escape on render).</div><div cl
 
 
   <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">都道府県（入力） - 日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用 都道府県ID。住所フォームの未選択状態では0、確定住所では1〜47を使う。 Fake観察数値 13〜27; 観察値 &#039;13&#039;, &#039;27&#039;; null 3/9。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
@@ -332,7 +345,7 @@ still need their own defense (bound params, HTML escape on render).</div><div cl
 
 
   <td><a href="../alps.json.html#sex" class="param alps-param" title="性別">sex</a></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">性別（入力） - 1=男性, 2=女性, 3=その他, 4=回答しない Fake観察数値 2〜2; 観察値 &#039;2&#039;; null 3/5。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
@@ -344,11 +357,102 @@ still need their own defense (bound params, HTML escape on render).</div><div cl
 
 
   <td><a href="../alps.json.html#job" class="param alps-param" title="職業">job</a></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">職業（入力） - 1=公務員〜18=その他の18区分 Fake観察数値 7〜18; 観察値 &#039;7&#039;, &#039;18&#039;; null 3/5。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: 7</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">email_confirm</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メールアドレス確認（入力） - HTML会員登録フォームの確認用メールアドレス。Resource境界でemailと照合する。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 254</span>
+      <span class="badge constraint">$comment: Browser-form boundary field; not persisted.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">password_confirm</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">パスワード確認（入力） - HTML会員登録フォームの確認用パスワード。Resource境界でpasswordと照合し、失敗時も再表示しない。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 128</span>
+      <span class="badge constraint">$comment: Browser-form boundary field; not persisted.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">birth_year</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">生年月日 年（入力）</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 4</span>
+      <span class="badge constraint">$comment: Browser-form boundary field; combined into birth.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">birth_month</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">生年月日 月（入力）</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 2</span>
+      <span class="badge constraint">$comment: Browser-form boundary field; combined into birth.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">birth_day</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">生年月日 日（入力）</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 2</span>
+      <span class="badge constraint">$comment: Browser-form boundary field; combined into birth.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">user_policy_check</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">利用規約同意（入力）</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 16</span>
+      <span class="badge constraint">$comment: Browser-form boundary field; required only for HTML registration submissions.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム操作モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: EC-CUBE compatible HTML form submit mode.</span>
     </div></td>
 
 </tr>
@@ -630,7 +734,7 @@ token into the session for the POST (same as Login).</div><div class="method-alp
 </tr>
 <tr>
   <td rowspan="1" class="path-cell" id="path-shopping">/shopping</td>
-  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">ALPS `goShopping` に対応する GET 操作。</div><div class="method-alps"><a href="../alps.json.html#goShopping" class="alps-link">goShopping</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">ALPS `goCheckoutEntry` / `goShopping` に対応する GET 操作。</div><div class="method-alps"><a href="../alps.json.html#goCheckoutEntry" class="alps-link">goCheckoutEntry</a>, <a href="../alps.json.html#goShopping" class="alps-link">goShopping</a></div></td>
   <td><a href="../alps.json.html#sessionPrefix" class="param alps-param" title="セッション接頭辞">sessionPrefix</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">セッション接頭辞（入力） - 購入フローのカートキーを構成するセッションスコープの接頭辞。saleTypeId と組み合わせて販売種別ごとのカートを分離する。 Fake観察文字長 16〜23; 観察値 &#039;session-prefix-1&#039;, &#039;session-checkout-pilot5&#039;。</td>
@@ -3747,10 +3851,9 @@ the CsrfProtected attribute.</div><div class="method-alps"><a href="../alps.json
   <td rowspan="12" class="path-cell" id="path-shopping/non-member">/shopping/non-member</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goShoppingNonMember — show the guest-info entry form.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
-state). Fields mirror SubmitNonMemberInput. `csrfToken` body
-field stays `null` for the same reason described on Login::onGet
-— EventListener mirrors the Symfony token into the session for
-the subsequent POST.</div><div class="method-alps"><a href="../alps.json.html#goShoppingNonMember" class="alps-link">goShoppingNonMember</a></div></td>
+state). Fields mirror SubmitNonMemberInput. `csrfToken` carries
+the trusted reference token so the HTML form can pass the
+subsequent POST&#039;s CSRF boundary.</div><div class="method-alps"><a href="../alps.json.html#goShoppingNonMember" class="alps-link">goShoppingNonMember</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -3764,7 +3867,7 @@ Declared as taint sources so Psalm can trace them downstream.
 Semantic value objects format-validate but do not universally
 escape — sinks downstream remain responsible for their own
 defence (bound params, HTML escape on render).</div><div class="method-alps"><a href="../alps.json.html#doSubmitNonMember" class="alps-link">doSubmitNonMember</a></div></td>
-  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#name01" class="param alps-param" title="姓">name01</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">姓（入力） - 顧客・受注・配送先・お問い合わせで共通使用される姓 Fake観察文字長 2〜2; 観察値 &#039;鈴木&#039;, &#039;山田&#039;, &#039;佐藤&#039;, &#039;高橋&#039;, &#039;退会&#039;。</td>
   <td><div class="extra-info">
@@ -3778,7 +3881,7 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#name02" class="param alps-param" title="名">name02</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">名（入力） - 顧客・受注・配送先・お問い合わせで共通使用される名 Fake観察文字長 1〜3; 観察値 &#039;アリス&#039;, &#039;太郎&#039;, &#039;次郎&#039;, &#039;花子&#039;, &#039;三郎&#039;, &#039;済&#039;。</td>
   <td><div class="extra-info">
@@ -3792,7 +3895,7 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#kana01" class="param alps-param" title="セイ">kana01</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">セイ（入力） - 姓のカタカナ読み。全角カタカナのみ許可（ひらがな入力時は自動変換）。日本の氏名入力に特有の読み仮名 Fake観察文字長 3〜3; 観察値 &#039;ヤマダ&#039;, &#039;サトウ&#039;; null 18/31。</td>
   <td><div class="extra-info">
@@ -3806,7 +3909,7 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#kana02" class="param alps-param" title="メイ">kana02</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">メイ（入力） - 名のカタカナ読み。全角カタカナのみ許可（ひらがな入力時は自動変換）。日本の氏名入力に特有の読み仮名 Fake観察文字長 3〜3; 観察値 &#039;アリス&#039;, &#039;ハナコ&#039;, &#039;タロウ&#039;; null 18/31。</td>
   <td><div class="extra-info">
@@ -3820,7 +3923,7 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">メールアドレス（入力） - 会員のログインIDを兼ねる。有効会員間で一意 ログインIDを兼ねるメールアドレス。会員登録・ログイン・通知で共通に使う。 Fake観察文字長 15〜58; 観察値 &#039;bob@example.com&#039;, &#039;login-test@example.com&#039;, &#039;alice@example.com&#039;, &#039;carol@example.com&#039;, &#039;provisional@example.com&#039;, &#039;withdrawn-30000000aaaa3333bbbb4444cccc5555@example.invalid&#039;。</td>
   <td><div class="extra-info">
@@ -3834,7 +3937,7 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#phoneNumber" class="param alps-param" title="電話番号">phoneNumber</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">電話番号（入力） - 日本の電話番号形式（ハイフン区切り） 日本の電話番号。Fake corpusはハイフンなし中心だが、入力ではハイフン付きも許容する。 Fake観察文字長 10〜10; 観察値 &#039;0312345678&#039;, &#039;0901234567&#039;, &#039;0612345678&#039;; null 18/33。</td>
   <td><div class="extra-info">
@@ -3848,7 +3951,7 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#postalCode" class="param alps-param" title="郵便番号">postalCode</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">郵便番号（入力） - 日本の郵便番号。ハイフンなし7桁またはハイフン付き8桁 日本の郵便番号。入力フォームではハイフン有無をどちらも受け入れる。 Fake観察文字長 7〜8; 観察値 &#039;1500001&#039;, &#039;1000005&#039;, &#039;5300001&#039;, &#039;530-0001&#039;; null 18/33。</td>
   <td><div class="extra-info">
@@ -3860,8 +3963,8 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a><span class="req">*</span></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><a href="../alps.json.html#pref" class="param alps-param" title="都道府県">pref</a></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">都道府県（入力） - 日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用 都道府県ID。住所フォームの未選択状態では0、確定住所では1〜47を使う。 Fake観察数値 13〜27; 観察値 &#039;13&#039;, &#039;27&#039;; null 3/9。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
@@ -3872,7 +3975,7 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#addr01" class="param alps-param" title="市区町村">addr01</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">市区町村（入力） - 都道府県より下位の市区町村名 Fake観察文字長 3〜7; 観察値 &#039;渋谷区&#039;, &#039;千代田区&#039;, &#039;大阪市北区&#039;, &#039;大阪市北区梅田&#039;; null 18/33。</td>
   <td><div class="extra-info">
@@ -3886,7 +3989,7 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
 <tr>
 
 
-  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#addr02" class="param alps-param" title="番地・建物名">addr02</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">番地・建物名（入力） - 番地・ビル名・部屋番号等の詳細住所 Fake観察文字長 5〜8; 観察値 &#039;神宮前1-1-1&#039;, &#039;丸の内2-2-2&#039;, &#039;梅田1-1-1&#039;, &#039;1-2-3&#039;; null 18/33。</td>
   <td><div class="extra-info">
@@ -4949,6 +5052,42 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
   <td></td>
   <td></td>
   <td><a href="#GET/admin/layout/layout-listresponse" class="schema-link">GET /admin/layout/layout-list response</a></td>
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/mail-template/create">/admin/mail-template/create</td>
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Creates an admin mail template database row for workflow verification.</div><div class="method-alps"><a href="../alps.json.html#doCreateMailTemplate" class="alps-link">doCreateMailTemplate</a></div></td>
+  <td><a href="../alps.json.html#mailTemplateName" class="param alps-param" title="テンプレート名">mailTemplateName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">Admin-visible mail template name.</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 1</span>
+      <span class="badge constraint">maxLength: 255</span>
+    </div></td>
+  <td rowspan="3"><a href="#POST/admin/mail-template/createresponse" class="schema-link">POST /admin/mail-template/create response</a></td>
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#fileName" class="param alps-param" title="ファイル名">fileName</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">Twig template file path stored in dtb_mail_template.file_name.</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 1</span>
+      <span class="badge constraint">maxLength: 255</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><a href="../alps.json.html#mailSubject" class="param alps-param" title="メール件名">mailSubject</a><span class="req">*</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">Mail subject stored with the template row.</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 1</span>
+      <span class="badge constraint">maxLength: 255</span>
+    </div></td>
+
 </tr>
 <tr>
   <td rowspan="8" class="path-cell" id="path-admin/news/news">/admin/news/news</td>
@@ -6279,17 +6418,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   </td>
 </tr>
 <tr class="link-row">
-  <td class="prop-name"><span class="ti safe"></span>goShoppingNonMember</td>
-  <td><span class="badge link">link</span></td>
-  <td class="param-desc"></td>
-  <td>
-    <div class="extra-info">
-      <span class="badge href">href: page://self/shopping/non-member</span>
-    </div>
-  </td>
-</tr>
-<tr class="link-row">
-  <td class="prop-name"><span class="ti safe"></span>goShopping</td>
+  <td class="prop-name"><span class="ti safe"></span>goCheckoutEntry</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
   <td>
@@ -7225,6 +7354,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goOrderHistory</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/mypage/order-history</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goMypageHistory</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
@@ -7281,6 +7420,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/cart</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goProductList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/products</span>
     </div>
   </td>
 </tr>
@@ -7846,12 +7995,12 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr class="link-row">
-  <td class="prop-name"><span class="ti unsafe"></span>doCheckout</td>
+  <td class="prop-name"><span class="ti unsafe"></span>doConfirmOrder</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
   <td>
     <div class="extra-info">
-      <span class="badge href">href: page://self/shopping/checkout</span>
+      <span class="badge href">href: page://self/shopping/confirm</span>
     </div>
   </td>
 </tr>
@@ -8252,6 +8401,36 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/base-info</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goPaymentList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/payment/payment-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goProductList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/product-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goOrderList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order-list</span>
     </div>
   </td>
 </tr>
@@ -9319,7 +9498,27 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc"></td>
   <td>
     <div class="extra-info">
-      <span class="badge href">href: page://self/admin/customer</span>
+      <span class="badge href">href: page://self/admin/create-customer</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteCustomer</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/delete-customer</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doResendActivationMail</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/customer/resend-activation-mail</span>
     </div>
   </td>
 </tr>
@@ -9844,6 +10043,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doCreateMailTemplate</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/mail-template/create</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateMailTemplate</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
@@ -9860,6 +10069,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/order/send-mail</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goPaymentList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/payment/payment-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goOrderList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order-list</span>
     </div>
   </td>
 </tr>
@@ -10046,6 +10275,15 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
+  <td><span class="prop-name">submitTo</span></td>
+  <td><span class="badge type-objectnull">object|null</span></td>
+  <td class="param-desc">送信先 - /admin/master-data のフォーム送信先。unsafe 操作はこの action から辿る。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">additionalProperties: </span>
+      <span class="badge constraint">required: [&quot;rel&quot;,&quot;method&quot;,&quot;href&quot;]</span>
+    </div></td>
+</tr>
+<tr>
   <td><span class="prop-name">masterTypes</span></td>
   <td><span class="badge type-arraynull">array|null</span></td>
   <td class="param-desc">マスタ種別一覧 - /admin/master-data のレスポンスで扱うマスタ種別一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
@@ -10107,6 +10345,15 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">submitTo</span></td>
+  <td><span class="badge type-objectnull">object|null</span></td>
+  <td class="param-desc">送信先 - /admin/master-data の選択後に編集内容を送信するフォーム action。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">additionalProperties: </span>
+      <span class="badge constraint">required: [&quot;rel&quot;,&quot;method&quot;,&quot;href&quot;]</span>
     </div></td>
 </tr>
 <tr>
@@ -10314,6 +10561,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/member-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateMember</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/member</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteMember</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/member</span>
     </div>
   </td>
 </tr>
@@ -10604,6 +10871,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   </td>
 </tr>
 <tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateMember</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/member</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteMember</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/member</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateAuthorityRole</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
@@ -10863,6 +11150,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goOrderShippingAddress</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/shipping-address</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -10996,6 +11293,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateOrderStatus</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order-status</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -11066,7 +11373,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc"></td>
   <td>
     <div class="extra-info">
-      <span class="badge href">href: page://self/admin/order</span>
+      <span class="badge href">href: page://self/admin/order/create</span>
     </div>
   </td>
 </tr>
@@ -12616,6 +12923,14 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 
     </div></td>
 </tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doVerifyTwoFactorAuth</td>
   <td><span class="badge link">link</span></td>
@@ -12814,6 +13129,24 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 128</span>
       <span class="badge constraint">$comment: キー/追跡番号は照合用の不透明文字列で、数値演算対象ではない。</span>
     </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSetTwoFactorAuth</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/two-factor-auth-set</span>
+    </div>
+  </td>
 </tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goAdminLogin</td>
@@ -13062,7 +13395,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   </td>
 </tr>
 <tr class="link-row">
-  <td class="prop-name"><span class="ti unsafe"></span>doCheckout</td>
+  <td class="prop-name"><span class="ti safe"></span>goCheckoutEntry</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
   <td>
@@ -14658,6 +14991,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateCustomer</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/mypage/change</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goMypage</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
@@ -15181,10 +15524,10 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr>
   <td><span class="prop-name">paymentMethod</span></td>
   <td><span class="badge type-stringnull">string|null</span></td>
-  <td class="param-desc">支払方法 - 注文時点の支払方法名称（スナップショット） Fake観察文字長 4〜4; 観察値 &#039;銀行振込&#039;。</td>
+  <td class="param-desc">支払方法 - 注文時点の支払方法名称（スナップショット）。dtb_order.payment_method / dtb_payment.payment_method と同じ EC-CUBE 境界で varchar(255) を許容する Fake観察文字長 4〜4; 観察値 &#039;銀行振込&#039;。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">maxLength: 255</span>
       <span class="badge example">example: 銀行振込</span>
     </div></td>
 </tr>
@@ -15899,7 +16242,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">ALPS遷移リンク集合 - /shopping/complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
   <td><div class="extra-info">
       <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;,&quot;goCart&quot;]</span>
+      <span class="badge constraint">required: [&quot;goTop&quot;,&quot;goCart&quot;,&quot;goMypage&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -15919,6 +16262,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/cart</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goMypage</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/mypage</span>
     </div>
   </td>
 </tr>
@@ -16425,6 +16778,14 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
+  <td><span class="prop-name">paymentMethodId</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">支払方法ID - 非会員購入で作成した仮注文に紐づく支払方法ID。次の注文確認遷移 doConfirmOrder へ渡す。</td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
+<tr>
   <td><span class="prop-name">preOrderId</span></td>
   <td><span class="badge type-stringnull">string|null</span></td>
   <td class="param-desc">仮注文ID - 購入フローの一時セッショントークン（SHA1ハッシュ）。カートと受注を紐づける。予約注文（pre-order）IDではない。チェックアウト開始時に生成、注文確定またはカート破棄で消去 Fake観察文字長 40〜40; 観察値 &#039;deadbeefcafe1234567890abcdef01234567890a&#039;, &#039;deadbeefcafe1234567890abcdef01234567890b&#039;, &#039;aaaa00000000000000000000000000000000aaaa&#039;, &#039;past00000000000000000000000000000000past&#039;, &#039;deadbeefcafe1234567890abcdef01234567890c&#039;, &#039;bbbb00000000000000000000000000000000bbbb&#039;, &#039;cccc00000000000000000000000000000000cccc&#039;, &#039;aceface0000000000000000000000000000a11ce&#039;。</td>
@@ -16445,6 +16806,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 80</span>
       <span class="badge example">example: アリス</span>
     </div></td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doConfirmOrder</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping/confirm</span>
+    </div>
+  </td>
 </tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goShopping</td>
@@ -19306,6 +19677,83 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 </tbody>
 </table>
 </div>
+<div class="object-section" id="POST/admin/mail-template/createresponse">
+<h3 class="object-name"><a href="schemas/post-admin-mail-template-create.json" class="schema-file-link" title="JSON Schema">📄</a>POST /admin/mail-template/create response</h3>
+<table>
+<thead>
+<tr><th>Name</th><th>Type</th><th>Description</th><th>Meta</th></tr>
+</thead>
+<tbody>
+<tr>
+  <td><span class="prop-name">mailTemplateId</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">メールテンプレートID</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minimum: 1</span>
+      <span class="badge constraint">maximum: 2147483647</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">mailTemplateName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレート名</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 1</span>
+      <span class="badge constraint">maxLength: 255</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">fileName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ファイル名</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 1</span>
+      <span class="badge constraint">maxLength: 255</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">mailSubject</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メール件名</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 255</span>
+    </div></td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goMailTemplateList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/mail-template</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateMailTemplate</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/mail-template</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteMailTemplate</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/mail-template</span>
+    </div>
+  </td>
+</tr>
+
+</tbody>
+</table>
+</div>
 <div class="object-section" id="GET/admin/news/newsresponse">
 <h3 class="object-name"><a href="schemas/get-admin-news-news.json" class="schema-file-link" title="JSON Schema">📄</a>GET /admin/news/news response</h3>
 <table>
@@ -21600,6 +22048,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/payment/payment</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goProductList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/product-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goOrderList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order-list</span>
     </div>
   </td>
 </tr>

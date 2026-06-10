@@ -55,11 +55,13 @@ _No parameters required_
 | shopName | string|null | ショップ名 - ショップの表示名。フロント画面のヘッダやメールに表示 Fake観察文字長 12〜12; 観察値 'EC-CUBE SHOP'。 | Required | {"minLength":0,"maxLength":32} | EC-CUBE SHOP |
 | transitionId | string | ALPS遷移ID - このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。 | Required | {"minLength":2,"maxLength":96,"pattern":"^(go|do)[A-Z][A-Za-z0-9]*$"} | doAddCartItem |
 | authKey | string|null | 二要素認証キー - /admin/two-factor-auth-set のレスポンスで扱う二要素認証キー。数値演算対象ではなく、照合・URL・配送追跡などに使う不透明な文字列識別子。 | Optional | {"minLength":0,"maxLength":128,"$comment":"\u30ad\u30fc/\u8ffd\u8de1\u756a\u53f7\u306f\u7167\u5408\u7528\u306e\u4e0d\u900f\u660e\u6587\u5b57\u5217\u3067\u3001\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u3044\u3002"} |  |
+| csrfToken | string |  | Optional | {"$ref":"#/$defs/csrfToken"} |  |
 
 #### Links
 
 | Relation | URL |
 |----------|-----|
+| doSetTwoFactorAuth | [<code>page://self/admin/two-factor-auth-set</code>](/admin/two-factor-auth-set.md) |
 | goAdminLogin | [<code>page://self/admin/login</code>](/admin/login.md) |
 ## PUT
 Registers the TOTP device after confirming the first code

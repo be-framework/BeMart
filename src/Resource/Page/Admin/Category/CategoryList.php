@@ -20,7 +20,9 @@ use MyVendor\BeMart\Be\Input\GetAdminCategoryListInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
 use function sprintf;
+use function str_contains;
 use function urlencode;
 
 /**
@@ -95,7 +97,7 @@ class CategoryList extends ResourceObject
 
         assert($final instanceof CategoryCreated);
 
-        $this->code = Code::CREATED;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = sprintf('/admin/category/category?categoryId=%s', urlencode($final->categoryId));
         $this->body = [
             'categoryId' => $final->categoryId,
