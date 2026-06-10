@@ -14,6 +14,10 @@
             "options": {
                 "symlink": true
             }
+        },
+        {
+            "type": "vcs",
+            "url": "https://github.com/bearsunday/BEAR.ToolUse.git"
         }
     ],
     "require": {
@@ -22,6 +26,7 @@
         "bear/devtools": "dev-abstract-workflow-test-contract",
         "bear/package": "^1.14",
         "bear/sunday": "^1.6",
+        "bear/tool-use": "dev-codex/review-hardening as 1.x-dev",
         "madapaja/twig-module": "^2.7",
         "my-vendor/be-mart-be": "@dev",
         "nyholm/psr7": "^1.8",
@@ -124,7 +129,8 @@
         "serve": "@serve:api",
         "serve:api": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8080 -t public public/index.php",
         "serve:page": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php",
-        "architecture:audit": "python3 scripts/bear_standard_audit.py ."
+        "architecture:audit": "python3 scripts/bear_standard_audit.py .",
+        "agent": "php bin/agent.php"
     },
     "scripts-descriptions": {
         "test": "Run the default PHPUnit suite.",
