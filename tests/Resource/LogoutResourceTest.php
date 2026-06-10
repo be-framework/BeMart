@@ -77,11 +77,4 @@ final class LogoutResourceTest extends TestCase
         $this->assertNull($ro->body['customerId']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/logout', []);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

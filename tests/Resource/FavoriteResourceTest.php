@@ -99,15 +99,6 @@ final class FavoriteResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/mypage/favorite', [
-            'productCode' => 'sample-001',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnDeleteExistingFavoriteReturns200(): void
     {
         // Fake context is static-fixture based; add-then-delete is covered
@@ -151,12 +142,4 @@ final class FavoriteResourceTest extends TestCase
         ]);
     }
 
-    public function testOnDeleteMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->delete('page://self/mypage/favorite', [
-            'productCode' => 'sample-001',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
 }

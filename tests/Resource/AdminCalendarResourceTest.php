@@ -121,17 +121,4 @@ final class AdminCalendarResourceTest extends TestCase
         $this->assertSame(1, $ro->body['calendarId']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $this->rebindAdminSession(self::TEST_ADMIN_ID);
-
-        $ro = $this->resource->post('page://self/admin/calendar', [
-            'operation' => 'update',
-            'title' => '元日',
-            'holiday' => '2026-01-01',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

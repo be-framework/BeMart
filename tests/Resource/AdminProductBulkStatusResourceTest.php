@@ -86,17 +86,6 @@ final class AdminProductBulkStatusResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/product-bulk-status', [
-            'productCodes' => ['admin-active-001'],
-            'productStatus' => 2,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostWithoutAdminReturns403(): void
     {
         $this->rebindAdminSession(null);

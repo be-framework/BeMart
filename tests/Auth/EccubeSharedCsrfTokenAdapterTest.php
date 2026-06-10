@@ -7,44 +7,24 @@ namespace MyVendor\BeMart\Tests\Auth;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use PHPUnit\Framework\TestCase;
 
-use function getenv;
-use function putenv;
-
 /**
  * Unit tests for the Slice 8 production CSRF adapter.
  *
- * The adapter has three resolution paths, in order:
+ * The adapter has two resolution paths:
  *   1. $_SESSION[_csrf_token] matches submitted token (HTTP context, or
  *      test fixture)
- *   2. CLI + BEMART_CLI_CSRF_TOKEN env var matches submitted token
- *      (operator scripts, subprocess tests)
- *   3. Otherwise reject (false)
- *
- * These tests run under PHP_SAPI=cli (PHPUnit), so the CLI fallback is
- * exercised directly. The HTTP path is covered transitively by
- * ProdModuleTest and subprocess entrypoint coverage.
+ *   2. Otherwise reject (false)
  */
 final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 {
-    private string|false $envBefore;
-
     protected function setUp(): void
     {
-        $this->envBefore = getenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
         unset($_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY]);
     }
 
     protected function tearDown(): void
     {
         unset($_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY]);
-        if ($this->envBefore === false) {
-            putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR);
-
-            return;
-        }
-
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=' . $this->envBefore);
     }
 
     public function testReturnsTrueWhenSubmittedTokenMatchesSession(): void
@@ -65,7 +45,7 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
         $this->assertFalse($adapter->isValid('different-token'));
     }
 
-    public function testReturnsFalseWhenSessionAndEnvUnset(): void
+    public function testReturnsFalseWhenSubmittedTokenDoesNotMatchGeneratedSessionReference(): void
     {
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
@@ -88,24 +68,6 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
         $adapter = new EccubeSharedCsrfTokenAdapter();
 
         $this->assertFalse($adapter->isValid(''));
-    }
-
-    public function testCliEnvFallbackAcceptsMatchingToken(): void
-    {
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=cli-trusted-token');
-
-        $adapter = new EccubeSharedCsrfTokenAdapter();
-
-        $this->assertTrue($adapter->isValid('cli-trusted-token'));
-    }
-
-    public function testCliEnvFallbackRejectsMismatchingToken(): void
-    {
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=cli-trusted-token');
-
-        $adapter = new EccubeSharedCsrfTokenAdapter();
-
-        $this->assertFalse($adapter->isValid('not-the-cli-token'));
     }
 
     public function testEmptyStringSessionTreatedAsNoReference(): void
@@ -138,20 +100,6 @@ final class EccubeSharedCsrfTokenAdapterTest extends TestCase
 
         $this->assertTrue($adapter->isValid('alt-token-value'));
         $this->assertFalse($adapter->isValid('session-token-abc'));
-    }
-
-    public function testSessionMatchPreferredOverCliEnvMatch(): void
-    {
-        // If both stores hold the submitted value, the session match wins
-        // (no fallthrough to env). The observable behaviour is the same —
-        // true either way — but the test pins down the intended order in
-        // case future changes add side effects to one branch.
-        $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY] = 'shared-token';
-        putenv(EccubeSharedCsrfTokenAdapter::CLI_ENV_VAR . '=shared-token');
-
-        $adapter = new EccubeSharedCsrfTokenAdapter();
-
-        $this->assertTrue($adapter->isValid('shared-token'));
     }
 
     public function testTokenReturnsStoredSessionReference(): void

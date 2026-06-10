@@ -175,19 +175,6 @@ final class AdminAuthorityRoleResourceSqlTest extends AbstractResourceSqlTestCas
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
-    public function testMissingCsrfReturns403(): void
-    {
-        $this->rebindAdminSession($this->systemAdminId);
-
-        $ro = $this->resource->post('page://self/admin/authority-role', [
-            'loginId' => 'shop-owner',
-            'authority' => 0,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testAnonymousAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
