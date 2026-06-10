@@ -19,6 +19,8 @@ use MyVendor\BeMart\Be\Input\GetCustomerAddressListInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE 配送先住所一覧 — collection endpoint (Pilot 16).
@@ -128,6 +130,16 @@ class AddressList extends ResourceObject
             'addr01' => $final->addr01,
             'addr02' => $final->addr02,
         ];
+
+        return $this->redirectToAddressListOnHtmlSuccess();
+    }
+
+    private function redirectToAddressListOnHtmlSuccess(): static
+    {
+        if ($this->code < 400 && str_contains((string) getenv('APP_CONTEXT'), 'html')) {
+            $this->code = Code::SEE_OTHER;
+            $this->headers['Location'] = '/mypage/address-list';
+        }
 
         return $this;
     }

@@ -26,7 +26,9 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
 use function sprintf;
+use function str_contains;
 use function urlencode;
 
 /**
@@ -221,7 +223,10 @@ class Product extends ResourceObject
 
         assert($final instanceof AdminProductDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        if ($this->code === Code::SEE_OTHER) {
+            $this->headers['Location'] = '/admin/product-list';
+        }
         $this->body = [
             'productCode' => $final->productCode,
             'productName' => $final->productName,

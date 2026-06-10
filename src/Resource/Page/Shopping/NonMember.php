@@ -139,6 +139,7 @@ class NonMember extends ResourceObject
      */
     #[Alps('doSubmitNonMember')]
     #[JsonSchema(schema: 'post-shopping-non-member.json', params: 'post-shopping-non-member.param.json')]
+    #[Link(rel: 'doConfirmOrder', href: 'page://self/shopping/confirm', method: 'post')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
     #[CsrfProtected]
     public function onPost(
@@ -201,6 +202,7 @@ class NonMember extends ResourceObject
         $this->headers['Location'] = sprintf('/shopping?preOrderId=%s', $final->preOrderId);
         $this->body = [
             'preOrderId' => $final->preOrderId,
+            'paymentMethodId' => $final->paymentMethodId,
             'name01' => $final->name01,
             'name02' => $final->name02,
             'email' => $final->email,

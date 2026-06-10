@@ -23,6 +23,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-csrf-token';
     private static string $productCode;
+    private static string $copiedProductCode;
     private static string $productName;
     private static string $updatedProductName;
     private static WorkflowDbSession|null $dbSession = null;
@@ -30,6 +31,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     public static function setUpBeforeClass(): void
     {
         self::$productCode = 'workflow-product-' . bin2hex(random_bytes(4));
+        self::$copiedProductCode = self::$productCode . '-copy';
         self::$productName = 'Workflow Product Publish ' . self::$productCode;
         self::$updatedProductName = 'Workflow Product Published ' . self::$productCode;
         self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
@@ -64,7 +66,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     #[Depends('testOpensAdminProductList')]
     public function testCreatesProduct(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/product', [
+        $created = $this->resource->post($this->linkHref($response, 'doCreateProduct'), [
             'productCode' => self::$productCode,
             'productName' => self::$productName,
             'price02' => 2468,
@@ -98,7 +100,7 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
     #[Depends('testReadsCreatedProductInAdmin')]
     public function testUpdatesProduct(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->put('page://self/admin/product', [
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateProduct'), [
             'productCode' => self::$productCode,
             'productName' => self::$updatedProductName,
             'price02' => 3579,
@@ -117,13 +119,112 @@ class FlowAdminProductPublishTest extends AbstractWorkflowTest
         return $updated;
     }
 
+    #[Alps('goProduct')]
+    #[Depends('testUpdatesProduct')]
+    public function testReadsUpdatedProductInAdmin(ResourceObject $response): ResourceObject
+    {
+        $read = $this->followLocation($response);
+
+        $this->assertSame(self::$productCode, $this->bodyValue($read, 'productCode'));
+        $this->assertSame(self::$updatedProductName, $this->bodyValue($read, 'productName'));
+        $this->assertSame(1, $this->bodyValue($read, 'productStatus'));
+
+        return $read;
+    }
+
+    #[Alps('doCopyProduct')]
+    #[Depends('testReadsUpdatedProductInAdmin')]
+    public function testCopiesProduct(ResourceObject $response): ResourceObject
+    {
+        $copied = $this->resource->post($this->linkHref($response, 'doCopyProduct'), [
+            'productCode' => self::$productCode,
+            'newProductCode' => self::$copiedProductCode,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $copied->code);
+        $this->assertSame(self::$productCode, $this->bodyValue($copied, 'productCode'));
+        $this->assertSame(self::$copiedProductCode, $this->bodyValue($copied, 'newProductCode'));
+
+        return $copied;
+    }
+
+    #[Alps('goProduct')]
+    #[Depends('testCopiesProduct')]
+    public function testReadsCopiedProductInAdmin(ResourceObject $response): ResourceObject
+    {
+        $read = $this->followLocation($response);
+
+        $this->assertSame(self::$copiedProductCode, $this->bodyValue($read, 'productCode'));
+        $this->assertSame('(コピー) ' . self::$updatedProductName, $this->bodyValue($read, 'productName'));
+        $this->assertSame(1, $this->bodyValue($read, 'productStatus'));
+
+        return $read;
+    }
+
+    #[Alps('doBulkUpdateProductStatus')]
+    #[Depends('testReadsCopiedProductInAdmin')]
+    public function testBulkUnpublishesCopiedProduct(ResourceObject $response): ResourceObject
+    {
+        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$copiedProductCode]);
+
+        $updated = $this->resource->post($this->linkHref($list, 'doBulkUpdateProductStatus'), [
+            'productCodes' => [self::$copiedProductCode],
+            'productStatus' => 2,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame([self::$copiedProductCode], $this->bodyValue($updated, 'productCodes'));
+        $this->assertSame(2, $this->bodyValue($updated, 'productStatus'));
+        $this->assertSame(1, $this->bodyValue($updated, 'requestedCount'));
+        $this->assertSame(1, $this->bodyValue($updated, 'changedCount'));
+
+        return $updated;
+    }
+
+    #[Alps('goProduct')]
+    #[Depends('testBulkUnpublishesCopiedProduct')]
+    public function testReadsUnpublishedCopiedProductInAdmin(ResourceObject $response): ResourceObject
+    {
+        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$copiedProductCode]);
+        $read = $this->follow($list, 'goProduct', ['productCode' => self::$copiedProductCode]);
+
+        $this->assertSame(self::$copiedProductCode, $this->bodyValue($read, 'productCode'));
+        $this->assertSame(2, $this->bodyValue($read, 'productStatus'));
+
+        return $read;
+    }
+
+    #[Alps('doDeleteProduct')]
+    #[Depends('testReadsUnpublishedCopiedProductInAdmin')]
+    public function testDeletesCopiedProduct(ResourceObject $response): ResourceObject
+    {
+        $deleted = $this->resource->delete($this->linkHref($response, 'doDeleteProduct'), [
+            'productCode' => self::$copiedProductCode,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(self::$copiedProductCode, $this->bodyValue($deleted, 'productCode'));
+        $this->assertFalse($this->bodyValue($deleted, 'alreadyDeleted'));
+
+        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$copiedProductCode]);
+        $read = $this->follow($list, 'goProduct', ['productCode' => self::$copiedProductCode]);
+        $this->assertSame(3, $this->bodyValue($read, 'productStatus'));
+
+        return $read;
+    }
+
     #[Alps('goProductList')]
     #[Depends('testUpdatesProduct')]
     public function testFindsProductInStorefrontList(ResourceObject $response): ResourceObject
     {
         $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$updatedProductName]);
 
-        $this->assertSame(1, $this->bodyValue($list, 'totalItemCount'));
+        $products = $this->bodyValue($list, 'products');
+        $this->assertIsArray($products);
+        $this->assertContains(self::$productCode, array_column($products, 'productCode'));
 
         return $list;
     }

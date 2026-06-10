@@ -199,7 +199,7 @@
                                             <a class="btn btn-ec-actionIcon me-2 action-down{{ loop.last ? ' disabled' }}" data-bs-toggle="tooltip" data-bs-placement="top" title="下へ">
                                                 <i class="fa fa-arrow-down fa-lg text-secondary"></i>
                                             </a>
-                                            <a class="btn btn-ec-actionIcon me-2 action-visible" href="/admin/toggle-visible?masterType=payment&rowId={{ Payment.paymentId }}&_method=put"
+                                            <a class="btn btn-ec-actionIcon me-2 action-visible" href="/admin/toggle-visible?masterType=payment&amp;rowId={{ Payment.paymentId }}&amp;_method=put"
                                                data-bs-toggle="tooltip" data-bs-placement="top" title="{{ Payment.visible ? '非表示にする' : '表示する' }}"
                                                data-confirm="false" >
                                                 <i class="fa fa-toggle-{{ Payment.visible ? 'on' : 'off' }} fa-lg text-secondary" aria-hidden="true"></i>
@@ -207,7 +207,7 @@
                                             <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top"
                                                  title="削除">
                                                 <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
-                                                   data-url="/admin/payment/payment?paymentId={{ Payment.paymentId }}&_method=delete"
+                                                   data-url="/admin/payment/payment?paymentId={{ Payment.paymentId }}&amp;_method=delete"
                                                    data-message="この操作はあとから取り消すことができません。「{{ Payment.paymentMethodName }}」を削除してよろしいですか？">
                                                     <i class="fa fa-close fa-lg text-secondary"></i>
                                                 </a>
@@ -238,6 +238,9 @@
                                             キャンセル
                                         </button>
                                         <a class="btn btn-ec-delete" href="#"
+                                           data-post-action="delete"
+                                           token-for-anchor="{{ csrf_token_for_anchor('admin_payment_delete') }}"
+                                           data-method="delete"
                                            data-confirm="false">
                                             削除
                                         </a>

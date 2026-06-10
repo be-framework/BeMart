@@ -19,6 +19,8 @@ use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doWithdrawCustomer — マイページから自分の会員アカウントを退会する.
@@ -117,7 +119,10 @@ class Withdraw extends ResourceObject
 
         assert($final instanceof CustomerWithdrawn);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        if ($this->code === Code::SEE_OTHER) {
+            $this->headers['Location'] = '/mypage/withdraw-complete';
+        }
         $this->body = [
             'customerId' => $final->customerId,
             'dummyEmail' => $final->dummyEmail,

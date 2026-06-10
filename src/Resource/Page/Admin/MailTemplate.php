@@ -59,8 +59,11 @@ class MailTemplate extends ResourceObject
      */
     #[Alps('goMailTemplateList')]
     #[JsonSchema(schema: 'get-admin-mail-template.json')]
+    #[Link(rel: 'doCreateMailTemplate', href: 'page://self/admin/mail-template/create', method: 'post')]
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
+    #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
+    #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

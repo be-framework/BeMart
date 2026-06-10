@@ -22,17 +22,26 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
 
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-csrf-token';
-    private const SESSION_PREFIX = 'session-prefix-1_1';
+    private const SESSION_PREFIX = 'workflow-purchase-session';
+    private const MEMBER_SESSION_PREFIX = 'workflow-member-purchase-session';
+    private const PASSWORD = 'workflow-password-2026';
 
+    private static string $email;
+    private static string $paymentName;
     private static string $productCode;
     private static string $productName;
-    private static string $paymentId;
+    private static string $updatedProductName;
+    private static string $memberOrderNo;
     private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
     {
-        self::$productCode = 'workflow-purchase-' . bin2hex(random_bytes(4));
-        self::$productName = 'Workflow Purchase Product ' . self::$productCode;
+        $suffix = bin2hex(random_bytes(4));
+        self::$paymentName = 'Workflow Purchase Payment ' . $suffix;
+        self::$productCode = 'workflow-purchase-' . $suffix;
+        self::$productName = 'Workflow Purchase Product ' . $suffix;
+        self::$updatedProductName = 'Workflow Purchase Published ' . $suffix;
+        self::$email = 'workflow-purchase-' . $suffix . '@example.com';
         self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
@@ -51,45 +60,116 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         return self::$dbSession->resource();
     }
 
-    #[Alps('Top')]
-    public function testIndex(): ResourceObject
+    #[Alps('goBaseInfo')]
+    public function testShopConfigurationEntry(): ResourceObject
     {
-        $payment = $this->resource->post('page://self/admin/payment/payment-list', [
-            'paymentMethodName' => 'Workflow Purchase Payment ' . bin2hex(random_bytes(4)),
-            'charge' => 0,
-            'ruleMin' => null,
-            'ruleMax' => null,
-            'visible' => true,
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        $this->assertSame(Code::CREATED, $payment->code);
-        self::$paymentId = $this->bodyString($payment, 'paymentId');
-
-        $created = $this->resource->post('page://self/admin/product', [
-            'productCode' => self::$productCode,
-            'productName' => self::$productName,
-            'price02' => 1234,
-            'stock' => 9,
-            'productStatus' => 1,
-            'description' => 'DB-backed workflow purchase product.',
-            'searchWord' => 'workflow purchase product',
-            'note' => 'Created as flow-customer-purchase precondition.',
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-        $this->assertSame(Code::CREATED, $created->code);
-
-        $response = $this->resource->get('page://self/');
+        $response = $this->resource->get('page://self/admin/base-info');
 
         $this->assertSame(Code::OK, $response->code);
 
         return $response;
     }
 
+    #[Alps('goPaymentList')]
+    #[Depends('testShopConfigurationEntry')]
+    public function testPaymentList(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goPaymentList');
+    }
+
+    #[Alps('doCreatePayment')]
+    #[Depends('testPaymentList')]
+    public function testCreatesPayment(ResourceObject $response): ResourceObject
+    {
+        $created = $this->resource->post($this->linkHref($response, 'doCreatePayment'), [
+            'paymentMethodName' => self::$paymentName,
+            'charge' => 0,
+            'ruleMin' => 0,
+            'ruleMax' => 999999,
+            'visible' => true,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $created->code);
+        $this->assertSame(self::$paymentName, $this->bodyValue($created, 'paymentMethodName'));
+
+        return $created;
+    }
+
+    #[Alps('goPaymentList')]
+    #[Depends('testCreatesPayment')]
+    public function testReturnsToPaymentList(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goPaymentList');
+    }
+
     #[Alps('goProductList')]
-    #[Depends('testIndex')]
+    #[Depends('testReturnsToPaymentList')]
+    public function testAdminProductList(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goProductList');
+    }
+
+    #[Alps('doCreateProduct')]
+    #[Depends('testAdminProductList')]
+    public function testCreatesProduct(ResourceObject $response): ResourceObject
+    {
+        $created = $this->resource->post($this->linkHref($response, 'doCreateProduct'), [
+            'productCode' => self::$productCode,
+            'productName' => self::$productName,
+            'price02' => 2468,
+            'stock' => 9,
+            'productStatus' => 1,
+            'description' => 'Created by flow-customer-purchase so checkout has a real product.',
+            'searchWord' => 'workflow purchase product',
+            'note' => 'Created through admin hypermedia before customer checkout.',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $created->code);
+        $this->assertSame(self::$productCode, $this->bodyValue($created, 'productCode'));
+
+        return $created;
+    }
+
+    #[Alps('goProduct')]
+    #[Depends('testCreatesProduct')]
+    public function testReadsCreatedProductInAdmin(ResourceObject $response): ResourceObject
+    {
+        $read = $this->followLocation($response);
+
+        $this->assertSame(self::$productCode, $this->bodyValue($read, 'productCode'));
+
+        return $read;
+    }
+
+    #[Alps('doUpdateProduct')]
+    #[Depends('testReadsCreatedProductInAdmin')]
+    public function testPublishesProductToStorefront(ResourceObject $response): ResourceObject
+    {
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateProduct'), [
+            'productCode' => self::$productCode,
+            'productName' => self::$updatedProductName,
+            'price02' => 2468,
+            'stock' => 9,
+            'productStatus' => 1,
+            'description' => 'Published by flow-customer-purchase.',
+            'searchWord' => 'workflow purchase published',
+            'note' => 'Updated through admin hypermedia before customer checkout.',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$updatedProductName, $this->bodyValue($updated, 'productName'));
+
+        return $updated;
+    }
+
+    #[Alps('goProductList')]
+    #[Depends('testPublishesProductToStorefront')]
     public function testProductList(ResourceObject $response): ResourceObject
     {
-        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$productName]);
+        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$updatedProductName]);
 
         $this->assertSame(1, $this->bodyValue($list, 'totalItemCount'));
 
@@ -103,7 +183,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         $product = $this->follow($response, 'goProduct', ['productCode' => self::$productCode]);
 
         $this->assertSame(self::$productCode, $this->bodyValue($product, 'productCode'));
-        $this->assertSame(self::$productName, $this->bodyValue($product, 'productName'));
+        $this->assertSame(self::$updatedProductName, $this->bodyValue($product, 'productName'));
 
         return $product;
     }
@@ -158,7 +238,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     #[Depends('testNonMemberForm')]
     public function testSubmitsNonMember(ResourceObject $response): ResourceObject
     {
-        $submitted = $this->resource->post('page://self/shopping/non-member', [
+        $submitted = $this->resource->post($this->linkHref($response, 'doSubmitNonMember'), [
             'name01' => '非会員',
             'name02' => '太郎',
             'kana01' => 'ヒカイイン',
@@ -183,9 +263,10 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     #[Depends('testSubmitsNonMember')]
     public function testConfirmsOrder(ResourceObject $response): ResourceObject
     {
-        $confirmed = $this->resource->get('page://self/shopping/confirm', [
+        $confirmed = $this->resource->post($this->linkHref($response, 'doConfirmOrder'), [
             'preOrderId' => $this->bodyValue($response, 'preOrderId'),
-            'paymentMethodId' => (int) self::$paymentId,
+            'payment' => $this->bodyValue($response, 'paymentMethodId'),
+            'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $confirmed->code);
@@ -198,7 +279,7 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     #[Depends('testConfirmsOrder')]
     public function testChecksOut(ResourceObject $response): ResourceObject
     {
-        $checkedOut = $this->resource->post('page://self/shopping/checkout', [
+        $checkedOut = $this->resource->post($this->linkHref($response, 'doCheckout'), [
             'preOrderId' => $this->bodyValue($response, 'preOrderId'),
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -211,10 +292,267 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
 
     #[Alps('ShoppingComplete')]
     #[Depends('testChecksOut')]
-    public function testShoppingComplete(ResourceObject $response): void
+    public function testShoppingComplete(ResourceObject $response): ResourceObject
     {
         $complete = $this->followLocation($response);
 
         $this->assertSame($this->bodyValue($response, 'orderNo'), $this->bodyValue($complete, 'orderNo'));
+
+        return $complete;
+    }
+
+    #[Alps('goTop')]
+    #[Depends('testShoppingComplete')]
+    public function testReturnsTopForMemberRegistration(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goTop');
+    }
+
+    #[Alps('goCustomerRegistration')]
+    #[Depends('testReturnsTopForMemberRegistration')]
+    public function testMemberRegistrationForm(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goCustomerRegistration');
+    }
+
+    #[Alps('goCustomerRegistrationConfirm')]
+    #[Depends('testMemberRegistrationForm')]
+    public function testMemberRegistrationConfirm(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goCustomerRegistrationConfirm');
+    }
+
+    #[Alps('doRegisterCustomer')]
+    #[Depends('testMemberRegistrationConfirm')]
+    public function testRegistersMember(ResourceObject $response): ResourceObject
+    {
+        $registered = $this->resource->post($this->linkHref($response, 'doRegisterCustomer'), [
+            'email' => self::$email,
+            'password' => self::PASSWORD,
+            'name01' => 'Workflow',
+            'name02' => 'Member',
+            'kana01' => 'ワークフロー',
+            'kana02' => 'メンバー',
+            'phoneNumber' => '0312345678',
+            'postalCode' => '1000001',
+            'pref' => 13,
+            'addr01' => '千代田区',
+            'addr02' => '千代田1-1',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $registered->code);
+        $this->assertSame(self::$email, $this->bodyValue($registered, 'email'));
+
+        return $registered;
+    }
+
+    #[Alps('CustomerRegistrationComplete')]
+    #[Depends('testRegistersMember')]
+    public function testMemberRegistrationComplete(ResourceObject $response): ResourceObject
+    {
+        return $this->followLocation($response);
+    }
+
+    #[Alps('goTop')]
+    #[Depends('testMemberRegistrationComplete')]
+    public function testReturnsTopForMemberLogin(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goTop');
+    }
+
+    #[Alps('goLogin')]
+    #[Depends('testReturnsTopForMemberLogin')]
+    public function testMemberLoginForm(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goLogin');
+    }
+
+    #[Alps('doLogin')]
+    #[Depends('testMemberLoginForm')]
+    public function testLogsInMember(ResourceObject $response): ResourceObject
+    {
+        $loggedIn = $this->resource->post($this->linkHref($response, 'doLogin'), [
+            'email' => self::$email,
+            'password' => self::PASSWORD,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $loggedIn->code);
+        $this->assertSame(self::$email, $this->bodyValue($loggedIn, 'email'));
+
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        self::$dbSession->session()->setCustomerId((string) $this->bodyValue($loggedIn, 'customerId'));
+
+        return $loggedIn;
+    }
+
+    #[Alps('goMypage')]
+    #[Depends('testLogsInMember')]
+    public function testMemberMypage(ResourceObject $response): ResourceObject
+    {
+        $mypage = $this->follow($response, 'goMypage');
+
+        $this->assertSame(self::$email, $this->bodyValue($mypage, 'email'));
+
+        return $mypage;
+    }
+
+    #[Alps('goProductList')]
+    #[Depends('testMemberMypage')]
+    public function testMemberProductList(ResourceObject $response): ResourceObject
+    {
+        $list = $this->follow($response, 'goProductList', ['nameKeyword' => self::$updatedProductName]);
+
+        $this->assertSame(1, $this->bodyValue($list, 'totalItemCount'));
+
+        return $list;
+    }
+
+    #[Alps('goProduct')]
+    #[Depends('testMemberProductList')]
+    public function testMemberProductDetail(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goProduct', ['productCode' => self::$productCode]);
+    }
+
+    #[Alps('doAddCartItem')]
+    #[Depends('testMemberProductDetail')]
+    public function testAddsMemberCartItem(ResourceObject $response): ResourceObject
+    {
+        $added = $this->resource->post($this->linkHref($response, 'doAddCartItem'), [
+            'productCode' => self::$productCode,
+            'quantity' => 1,
+            'sessionPrefix' => self::MEMBER_SESSION_PREFIX,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $added->code);
+
+        return $added;
+    }
+
+    #[Alps('goCart')]
+    #[Depends('testAddsMemberCartItem')]
+    public function testMemberCart(ResourceObject $response): ResourceObject
+    {
+        $cart = $this->follow($response, 'goCart', ['sessionPrefix' => self::MEMBER_SESSION_PREFIX]);
+
+        $this->assertSame(1, $this->bodyValue($cart, 'cartCount'));
+
+        return $cart;
+    }
+
+    #[Alps('goCheckoutEntry')]
+    #[Depends('testMemberCart')]
+    public function testMemberCheckoutEntry(ResourceObject $response): ResourceObject
+    {
+        $entry = $this->resource->get($this->linkHref($response, 'goCheckoutEntry'), [
+            'sessionPrefix' => self::MEMBER_SESSION_PREFIX,
+        ]);
+
+        $this->assertSame(Code::OK, $entry->code);
+        $this->assertTrue((bool) $this->bodyValue($entry, 'canCheckout'));
+
+        return $entry;
+    }
+
+    #[Alps('doConfirmOrder')]
+    #[Depends('testMemberCheckoutEntry')]
+    public function testConfirmsMemberOrder(ResourceObject $response): ResourceObject
+    {
+        $paymentMethods = $this->bodyValue($response, 'paymentMethods');
+        $this->assertIsArray($paymentMethods);
+        $paymentMethod = $paymentMethods[0] ?? null;
+        $this->assertIsArray($paymentMethod);
+
+        $confirmed = $this->resource->post($this->linkHref($response, 'doConfirmOrder'), [
+            'preOrderId' => $this->bodyValue($response, 'preOrderId'),
+            'payment' => $paymentMethod['paymentMethodId'],
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $confirmed->code);
+
+        return $confirmed;
+    }
+
+    #[Alps('doCheckout')]
+    #[Depends('testConfirmsMemberOrder')]
+    public function testChecksOutMemberOrder(ResourceObject $response): ResourceObject
+    {
+        $checkedOut = $this->resource->post($this->linkHref($response, 'doCheckout'), [
+            'preOrderId' => $this->bodyValue($response, 'preOrderId'),
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $checkedOut->code);
+        self::$memberOrderNo = $this->bodyString($checkedOut, 'orderNo');
+
+        return $checkedOut;
+    }
+
+    #[Alps('ShoppingComplete')]
+    #[Depends('testChecksOutMemberOrder')]
+    public function testMemberShoppingComplete(ResourceObject $response): ResourceObject
+    {
+        $complete = $this->followLocation($response);
+
+        $this->assertSame(self::$memberOrderNo, $this->bodyValue($complete, 'orderNo'));
+
+        return $complete;
+    }
+
+    #[Alps('goMypage')]
+    #[Depends('testMemberShoppingComplete')]
+    public function testMemberMypageAfterCheckout(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goMypage');
+    }
+
+    #[Alps('goOrderHistory')]
+    #[Depends('testMemberMypageAfterCheckout')]
+    public function testMemberOrderHistory(ResourceObject $response): ResourceObject
+    {
+        $history = $this->follow($response, 'goOrderHistory');
+
+        $this->assertGreaterThan(0, $this->bodyValue($history, 'orderCount'));
+
+        return $history;
+    }
+
+    #[Alps('goMypageHistory')]
+    #[Depends('testMemberOrderHistory')]
+    public function testMemberOrderHistoryDetail(ResourceObject $response): ResourceObject
+    {
+        $detail = $this->follow($response, 'goMypageHistory', ['orderNo' => self::$memberOrderNo]);
+
+        $this->assertSame(self::$memberOrderNo, $this->bodyValue($detail, 'orderNo'));
+
+        return $detail;
+    }
+
+    #[Alps('doReorder')]
+    #[Depends('testMemberOrderHistoryDetail')]
+    public function testReordersMemberOrder(ResourceObject $response): ResourceObject
+    {
+        $reordered = $this->resource->post($this->linkHref($response, 'doReorder'), [
+            'orderNo' => self::$memberOrderNo,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $reordered->code);
+        $this->assertGreaterThan(0, $this->bodyValue($reordered, 'addedCount'));
+
+        return $reordered;
+    }
+
+    #[Alps('goCart')]
+    #[Depends('testReordersMemberOrder')]
+    public function testCartContainsReorderedItems(ResourceObject $response): void
+    {
+        $cart = $this->followLocation($response, '/cart');
+
+        $this->assertGreaterThan(0, $this->bodyValue($cart, 'cartCount'));
     }
 }

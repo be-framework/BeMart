@@ -7,6 +7,8 @@ namespace MyVendor\BeMart;
 use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Application\AppInterface;
 use BEAR\Sunday\Extension\Router\RouterInterface;
+use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\App;
 use Throwable;
 
@@ -39,6 +41,11 @@ final class Bootstrap
 
         $request = $app->router->match($globals, $server);
         try {
+            $adminSession = Injector::getInstance($context)->getInstance(AdminSession::class);
+            if ($adminSession instanceof HtmlAdminSessionAdapter) {
+                $adminSession->refresh();
+            }
+
             $response = $app->resource->{$request->method}->uri($request->path)($request->query);
             assert($response instanceof ResourceObject);
             $server['_BEMART_CONTEXT'] = $context;
