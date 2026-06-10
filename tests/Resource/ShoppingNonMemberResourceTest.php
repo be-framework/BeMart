@@ -51,7 +51,7 @@ final class ShoppingNonMemberResourceTest extends TestCase
         );
         $this->assertSame('POST', $ro->body['submitTo']['method']);
         $this->assertSame('page://self/shopping/non-member', $ro->body['submitTo']['href']);
-        $this->assertNull($ro->body['csrfToken']);
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnPostValidatesAndReturnsPreOrderId(): void
