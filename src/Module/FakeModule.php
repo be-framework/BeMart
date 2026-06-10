@@ -22,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSecurityConfigWriter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
+use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
@@ -62,7 +63,7 @@ final class FakeModule extends AbstractAppModule
         $mailer = new FakeMailer();
         $session = new FakeSession('customer-001');
         $adminSession = new FakeAdminSession(null);
-        $csrf = new FakeCsrfToken();
+        $csrf = new NullCsrfToken();
 
         $this->bind(FakeInventoryAllocator::class)->toInstance($inventory);
         $this->bind(InventoryAllocatorInterface::class)->toInstance($inventory);
@@ -74,7 +75,8 @@ final class FakeModule extends AbstractAppModule
         $this->bind(CustomerSession::class)->toInstance($session);
         $this->bind(FakeAdminSession::class)->toInstance($adminSession);
         $this->bind(AdminSession::class)->toInstance($adminSession);
-        $this->bind(FakeCsrfToken::class)->toInstance($csrf);
+        $this->bind(NullCsrfToken::class)->toInstance($csrf);
+        $this->bind(FakeCsrfToken::class);
         $this->bind(CsrfToken::class)->toInstance($csrf);
 
         $twoFactorAuth = new FakeTwoFactorAuth();

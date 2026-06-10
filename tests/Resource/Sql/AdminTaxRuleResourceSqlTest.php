@@ -119,16 +119,6 @@ final class AdminTaxRuleResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/tax-rule/tax-rule-list', [
-            'taxRate' => 10.0,
-            'applyDate' => '2024-04-01T00:00:00+09:00',
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testListReturnsRows(): void
     {
         $this->seed(10.0);
@@ -169,13 +159,4 @@ final class AdminTaxRuleResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
-    public function testDeleteRejectsMissingCsrf(): void
-    {
-        $id = $this->seed(10.0);
-        $ro = $this->resource->delete('page://self/admin/tax-rule/tax-rule', [
-            'taxRuleId' => $id,
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
 }

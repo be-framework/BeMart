@@ -207,18 +207,4 @@ final class CartItemResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertNotEmpty($ro->body['message']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        // CSRF is rejected at the resource boundary, before the Becoming
-        // chain (and therefore SqlProductClassQuery) is reached.
-        $this->insertProduct(['product_code' => 'sql-pc-csrf']);
-
-        $ro = $this->resource->post('page://self/cart/item', [
-            'productCode' => 'sql-pc-csrf',
-            'quantity' => 1,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

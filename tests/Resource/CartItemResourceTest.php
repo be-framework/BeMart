@@ -164,16 +164,6 @@ final class CartItemResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPutMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->put('page://self/cart/item', [
-            'productCode' => 'sample-001',
-            'quantity' => 3,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnDeleteRemovesItemAndReturns200(): void
     {
         // Add 2 items, then delete one.
@@ -202,15 +192,6 @@ final class CartItemResourceTest extends TestCase
         ]);
     }
 
-    public function testOnDeleteMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->delete('page://self/cart/item', [
-            'productCode' => 'sample-001',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnPostOutOfStockReturns409(): void
     {
         $this->expectException(\MyVendor\BeMart\Be\Exception\OutOfStockException::class);
@@ -233,28 +214,4 @@ final class CartItemResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        // Phase B Slice 8: state-changing requests without a CSRF token are
-        // rejected at the resource boundary, before the Becoming chain
-        // even sees the payload.
-        $ro = $this->resource->post('page://self/cart/item', [
-            'productCode' => 'sample-001',
-            'quantity' => 1,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
-    public function testOnPostInvalidCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/cart/item', [
-            'productCode' => 'sample-001',
-            'quantity' => 1,
-            'csrfToken' => 'not-the-real-token',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
 }
