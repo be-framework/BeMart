@@ -1550,7 +1550,7 @@ Wave 2 net: +29 tests (159 → 188)、新 transition 4 件。
 
 #### doWithdrawCustomer (Agent G)
 - **Multi-side-effect Final** (Pilot 5 convention): capture-original-email → replace-record → clear-carts → send-mail の strict order
-- **Dummy email**: `withdrawn-{customerId}@example.invalid` (RFC 2606 reserved `.invalid` TLD)
+- **Dummy email**: `withdrawn-{customerId}@example.test` (RFC 2606 reserved `.test` TLD)
 - **`customerStatus=3` = withdrawn** を const として publish — `FinalizedOrderEntity::STATUS_NEW` パターン踏襲
 - Idempotency short-circuit: 既に status=3 なら mail 再送なし。`cleared=true` は idempotent replay 時も維持 (UI 区別なし)
 

@@ -1,11 +1,11 @@
 # API Documentation Audit
 
 ## Summary
-- Resources: 146
-- Operations: 236
-- Operations with response schema: 236
-- Operations with request schema: 156
-- Operations with ALPS attributes: 236
+- Resources: 147
+- Operations: 237
+- Operations with response schema: 237
+- Operations with request schema: 157
+- Operations with ALPS attributes: 237
 
 ## Findings
 No documentation gaps found.

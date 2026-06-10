@@ -16,6 +16,8 @@ use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
+use function getenv;
+use function putenv;
 
 /**
  * Wave 9 — resource-layer coverage for the admin Tag endpoints.
@@ -85,6 +87,23 @@ final class AdminTagResourceTest extends TestCase
         $this->assertSame('限定', $ro->body['tagName']);
     }
 
+    public function testCreateHtmlContextRedirectsToTagList(): void
+    {
+        $previousContext = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        try {
+            $ro = $this->resource->post('page://self/admin/tag/tag-list', [
+                'tagName' => '限定',
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
+        }
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/tag/tag-list', $ro->headers['Location']);
+    }
+
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
@@ -104,6 +123,24 @@ final class AdminTagResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
         $this->assertSame(Code::OK, $ro->code);
+    }
+
+    public function testDeleteHtmlContextRedirectsToTagList(): void
+    {
+        $id = $this->seed('Tmp');
+        $previousContext = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        try {
+            $ro = $this->resource->delete('page://self/admin/tag/tag', [
+                'tagId' => $id,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
+        }
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/tag/tag-list', $ro->headers['Location']);
     }
 
     public function testDeleteUnknownReturns404(): void

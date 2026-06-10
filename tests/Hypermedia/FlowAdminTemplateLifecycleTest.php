@@ -69,7 +69,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
     #[Depends('testTemplateInstall')]
     public function testInstallsTemplate(ResourceObject $response): ResourceObject
     {
-        $installed = $this->resource->post('page://self/admin/template/template-add', [
+        $installed = $this->resource->post($this->linkHref($response, 'doInstallTemplate'), [
             'templateCode' => self::$templateCode,
             'templateName' => 'Workflow Template',
             'csrfToken' => self::CSRF_TOKEN,
@@ -90,7 +90,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $templateId = self::$templateId;
         $this->assertIsString($templateId);
 
-        $selected = $this->resource->put('page://self/admin/template/template-list', [
+        $selected = $this->resource->put($this->linkHref($response, 'doSelectTemplate'), [
             'templateId' => $templateId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -98,7 +98,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $this->assertSame(Code::OK, $selected->code);
         $this->assertSame($templateId, $this->bodyValue($selected, 'templateId'));
 
-        return $selected;
+        return $this->followLocation($selected);
     }
 
     #[Alps('doDownloadTemplate')]
@@ -108,7 +108,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $templateId = self::$templateId;
         $this->assertIsString($templateId);
 
-        $downloaded = $this->resource->post('page://self/admin/template/template-list', [
+        $downloaded = $this->resource->post($this->linkHref($response, 'doDownloadTemplate'), [
             'templateId' => $templateId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -116,7 +116,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $this->assertSame(Code::OK, $downloaded->code);
         $this->assertSame('application/zip', $this->header($downloaded, 'Content-Type'));
 
-        return $downloaded;
+        return $response;
     }
 
     #[Alps('doDeleteTemplate')]
@@ -126,7 +126,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $templateId = self::$templateId;
         $this->assertIsString($templateId);
 
-        $deleted = $this->resource->delete('page://self/admin/template/template-list', [
+        $deleted = $this->resource->delete($this->linkHref($response, 'doDeleteTemplate'), [
             'templateId' => $templateId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);

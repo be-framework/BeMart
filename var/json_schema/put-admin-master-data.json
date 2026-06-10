@@ -26,6 +26,39 @@
       "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
       "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
     },
+    "submitTo": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "title": "送信先",
+      "description": "/admin/master-data の選択後に編集内容を送信するフォーム action。",
+      "additionalProperties": false,
+      "properties": {
+        "rel": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 96
+        },
+        "method": {
+          "type": "string",
+          "enum": [
+            "PUT"
+          ]
+        },
+        "href": {
+          "type": "string",
+          "format": "uri-reference",
+          "minLength": 1,
+          "maxLength": 2048
+        }
+      },
+      "required": [
+        "rel",
+        "method",
+        "href"
+      ]
+    },
     "masterTypes": {
       "type": [
         "array",

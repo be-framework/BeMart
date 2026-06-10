@@ -59,6 +59,8 @@ class MemberList extends ResourceObject
     #[JsonSchema(schema: 'get-admin-member-list.json', params: 'get-admin-member-list.param.json')]
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
     #[Link(rel: 'doCreateMember', href: 'page://self/admin/member', method: 'post')]
+    #[Link(rel: 'doUpdateMember', href: 'page://self/admin/member', method: 'put')]
+    #[Link(rel: 'doDeleteMember', href: 'page://self/admin/member', method: 'delete')]
     #[Link(rel: 'doUpdateAuthorityRole', href: 'page://self/admin/authority-role', method: 'post')]
     public function onGet(
         string|null $nameKeyword = null,

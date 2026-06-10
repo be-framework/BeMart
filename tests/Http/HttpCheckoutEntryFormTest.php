@@ -127,6 +127,123 @@ final class HttpCheckoutEntryFormTest extends TestCase
         $this->assertStringNotContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
     }
 
+    public function testEntryEmptyBrowserFormRendersValidationErrorsWithoutPasswordEcho(): void
+    {
+        $form = $this->form('GET', '/entry');
+        $this->assertSame(200, $form['status']);
+        $this->assertStringContainsString('<h1>新規会員登録</h1>', $form['body']);
+        $this->assertStringContainsString('name="email_confirm"', $form['body']);
+        $this->assertStringContainsString('name="password_confirm"', $form['body']);
+
+        $rejected = $this->form('POST', '/entry', [
+            'name01' => '',
+            'name02' => '',
+            'kana01' => '',
+            'kana02' => '',
+            'companyName' => '',
+            'postalCode' => '',
+            'pref' => '',
+            'addr01' => '',
+            'addr02' => '',
+            'phoneNumber' => '',
+            'email' => 'broken',
+            'email_confirm' => 'different@example.test',
+            'password' => 'short',
+            'password_confirm' => 'different-password',
+            'birth_year' => '1991',
+            'birth_month' => '8',
+            'birth_day' => '1',
+            'sex' => '1',
+            'job' => '',
+            'mode' => 'confirm',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(400, $rejected['status']);
+        $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
+        $this->assertStringContainsString('<h1>新規会員登録</h1>', $rejected['body']);
+        $this->assertStringContainsString('メールアドレスが一致しません。', $rejected['body']);
+        $this->assertStringContainsString('パスワードが一致しません。', $rejected['body']);
+        $this->assertStringContainsString('value="broken"', $rejected['body']);
+        $this->assertStringNotContainsString('short', $rejected['body']);
+        $this->assertStringNotContainsString('different-password', $rejected['body']);
+        $this->assertStringNotContainsString('Invalid parameter type', $rejected['body']);
+    }
+
+    public function testEntryBrowserFormRegistersWithConfirmFields(): void
+    {
+        $email = 'http-entry-' . str_replace('.', '-', uniqid('', true)) . '@example.test';
+
+        $registered = $this->form('POST', '/entry', [
+            'name01' => '山田',
+            'name02' => '太郎',
+            'kana01' => 'ヤマダ',
+            'kana02' => 'タロウ',
+            'companyName' => '',
+            'postalCode' => '1000001',
+            'pref' => '13',
+            'addr01' => '千代田区',
+            'addr02' => '1-1',
+            'phoneNumber' => '0312345678',
+            'email' => $email,
+            'email_confirm' => $email,
+            'password' => 'entry-browser-password-2026',
+            'password_confirm' => 'entry-browser-password-2026',
+            'birth_year' => '1991',
+            'birth_month' => '8',
+            'birth_day' => '1',
+            'sex' => '1',
+            'job' => '18',
+            'user_policy_check' => '1',
+            'mode' => 'confirm',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(303, $registered['status']);
+        $this->assertSame('/entry/complete', $registered['headers']['Location'] ?? null);
+        $this->assertStringNotContainsString('Invalid parameter type', $registered['body']);
+    }
+
+    public function testContactEmptyBrowserFormRendersValidationErrors(): void
+    {
+        $form = $this->form('GET', '/contact');
+        $this->assertSame(200, $form['status']);
+        $this->assertStringContainsString('<h1>お問い合わせ</h1>', $form['body']);
+
+        $rejected = $this->form('POST', '/contact', [
+            'contactName01' => '',
+            'contactName02' => '',
+            'contactEmail' => '',
+            'contactContents' => '',
+            'mode' => 'confirm',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(400, $rejected['status']);
+        $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
+        $this->assertStringContainsString('<h1>お問い合わせ</h1>', $rejected['body']);
+        $this->assertStringContainsString('入力してください。', $rejected['body']);
+        $this->assertStringNotContainsString('Invalid parameter type', $rejected['body']);
+        $this->assertStringNotContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
+    }
+
+    public function testContactTransportSchemaRejectionIsBadRequestNotServerError(): void
+    {
+        $rejected = $this->form('POST', '/contact', [
+            'contactName01' => '山田',
+            'contactName02' => '太郎',
+            'contactEmail' => 'broken',
+            'contactContents' => str_repeat('x', 5000),
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(400, $rejected['status']);
+        $this->assertStringContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
+        $this->assertStringContainsString('Invalid input.', $rejected['body']);
+        $this->assertStringContainsString('[contactContents]', $rejected['body']);
+        $this->assertStringNotContainsString('Internal Server Error', $rejected['body']);
+    }
+
     /**
      * @param array<string, string> $fields
      * @return array{status: int, headers: array<string, string>, body: string}

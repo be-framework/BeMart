@@ -8,17 +8,13 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
 use BEAR\Dev\Http\AbstractWorkflowTest;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
-use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowFixtureBoundary;
 use PHPUnit\Framework\Attributes\Depends;
-use Ray\Di\InjectorInterface;
 
 use function array_column;
 use function assert;
 use function bin2hex;
-use function is_array;
 use function random_bytes;
 
 class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
@@ -27,36 +23,31 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
 
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-mail-template-csrf-token';
+    private const SESSION_PREFIX = 'workflow-mail-template-session';
 
     private static string $orderNo;
-    private static string $paymentId;
+    private static string $email;
+    private static string $mailTemplateName;
+    private static string $productCode;
+    private static string $productName;
+    private static string $updatedProductName;
     private static WorkflowDbSession|null $dbSession = null;
-    private static WorkflowFixtureBoundary|null $fixtures = null;
 
     public static function setUpBeforeClass(): void
     {
-        self::$dbSession = WorkflowDbSession::startForAdmin(
-            self::ADMIN_ID,
-            self::CSRF_TOKEN,
-            static function (InjectorInterface $injector): void {
-                self::$fixtures = WorkflowFixtureBoundary::fromInjector($injector);
-                self::$fixtures->ensureMailTemplateListVisible(new MailTemplateEntity(
-                    mailTemplateId: 1,
-                    mailTemplateName: 'Workflow mail template',
-                    fileName: 'Mail/workflow.twig',
-                    subject: 'Workflow mail template subject',
-                ));
-            },
-        );
+        $suffix = bin2hex(random_bytes(4));
+        self::$email = 'workflow-mail-' . $suffix . '@example.com';
+        self::$mailTemplateName = 'Workflow mail template ' . $suffix;
+        self::$productCode = 'workflow-mail-product-' . $suffix;
+        self::$productName = 'Workflow Mail Product ' . $suffix;
+        self::$updatedProductName = 'Workflow Mail Published ' . $suffix;
+        self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
     public static function tearDownAfterClass(): void
     {
-        self::$dbSession?->restore(static function (): void {
-            self::$fixtures?->cleanup();
-        });
+        self::$dbSession?->restore();
         self::$dbSession = null;
-        self::$fixtures = null;
 
         parent::tearDownAfterClass();
     }
@@ -78,19 +69,29 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
         return $response;
     }
 
-    #[Alps('doUpdateMailTemplate')]
+    #[Alps('doCreateMailTemplate')]
     #[Depends('testMailTemplateList')]
+    public function testCreatesMailTemplate(ResourceObject $response): ResourceObject
+    {
+        $created = $this->resource->post($this->linkHref($response, 'doCreateMailTemplate'), [
+            'mailTemplateName' => self::$mailTemplateName,
+            'fileName' => 'Mail/workflow-' . bin2hex(random_bytes(4)) . '.twig',
+            'mailSubject' => 'Workflow mail template subject',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $created->code);
+        $this->assertSame(self::$mailTemplateName, $this->bodyValue($created, 'mailTemplateName'));
+
+        return $created;
+    }
+
+    #[Alps('doUpdateMailTemplate')]
+    #[Depends('testCreatesMailTemplate')]
     public function testUpdatesMailTemplate(ResourceObject $response): ResourceObject
     {
-        $templates = $this->bodyValue($response, 'mailTemplates');
-        $this->assertIsArray($templates);
-        $this->assertNotSame([], $templates);
-
-        $template = $templates[0] ?? null;
-        $this->assertTrue(is_array($template));
-
-        $updated = $this->resource->post('page://self/admin/mail-template', [
-            'mailTemplateId' => $template['mailTemplateId'],
+        $updated = $this->resource->post($this->linkHref($response, 'doUpdateMailTemplate'), [
+            'mailTemplateId' => $this->bodyValue($response, 'mailTemplateId'),
             'mailSubject' => 'Workflow mail template subject',
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -105,9 +106,9 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
     #[Depends('testMailTemplateList')]
     public function testOrderMail(ResourceObject $response): ResourceObject
     {
-        $suffix = bin2hex(random_bytes(4));
-        $payment = $this->resource->post('page://self/admin/payment/payment-list', [
-            'paymentMethodName' => 'Workflow Mail Payment ' . $suffix,
+        $paymentList = $this->follow($response, 'goPaymentList');
+        $payment = $this->resource->post($this->linkHref($paymentList, 'doCreatePayment'), [
+            'paymentMethodName' => 'Workflow Mail Payment ' . self::$productCode,
             'charge' => 0,
             'ruleMin' => 0,
             'ruleMax' => 999999,
@@ -115,26 +116,88 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
             'csrfToken' => self::CSRF_TOKEN,
         ]);
         $this->assertSame(Code::CREATED, $payment->code);
-        self::$paymentId = $this->bodyString($payment, 'paymentId');
 
-        $order = $this->resource->post('page://self/admin/order/create', [
-            'customerId' => 'workflow-mail-customer-' . $suffix,
-            'paymentMethodId' => (int) self::$paymentId,
-            'orderItems' => [
-                [
-                    'productCode' => 'workflow-mail-' . $suffix,
-                    'productName' => 'Workflow Mail Item',
-                    'unitPrice' => 1200,
-                    'quantity' => 1,
-                ],
-            ],
-            'deliveryFeeTotal' => 0,
-            'charge' => 0,
-            'discount' => 0,
+        $paymentList = $this->follow($payment, 'goPaymentList');
+        $productList = $this->follow($paymentList, 'goProductList', ['nameKeyword' => self::$productName]);
+        $createdProduct = $this->resource->post($this->linkHref($productList, 'doCreateProduct'), [
+            'productCode' => self::$productCode,
+            'productName' => self::$productName,
+            'price02' => 1200,
+            'stock' => 5,
+            'productStatus' => 1,
+            'description' => 'Created by flow-admin-mail-template-maintenance for order mail verification.',
+            'searchWord' => 'workflow mail template product',
+            'note' => 'Created through admin hypermedia before storefront checkout.',
             'csrfToken' => self::CSRF_TOKEN,
         ]);
-        $this->assertSame(Code::CREATED, $order->code);
-        self::$orderNo = $this->bodyString($order, 'orderNo');
+        $this->assertSame(Code::CREATED, $createdProduct->code);
+
+        $adminProduct = $this->followLocation($createdProduct);
+        $publishedProduct = $this->resource->put($this->linkHref($adminProduct, 'doUpdateProduct'), [
+            'productCode' => self::$productCode,
+            'productName' => self::$updatedProductName,
+            'price02' => 1200,
+            'stock' => 5,
+            'productStatus' => 1,
+            'description' => 'Published by flow-admin-mail-template-maintenance.',
+            'searchWord' => 'workflow mail template published',
+            'note' => 'Updated through admin hypermedia before storefront checkout.',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::OK, $publishedProduct->code);
+
+        $storefrontList = $this->follow($publishedProduct, 'goProductList', ['nameKeyword' => self::$updatedProductName]);
+        $this->assertSame(1, $this->bodyValue($storefrontList, 'totalItemCount'));
+
+        $storefrontProduct = $this->follow($storefrontList, 'goProduct', ['productCode' => self::$productCode]);
+        $added = $this->resource->post($this->linkHref($storefrontProduct, 'doAddCartItem'), [
+            'productCode' => self::$productCode,
+            'quantity' => 1,
+            'sessionPrefix' => self::SESSION_PREFIX,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $added->code);
+
+        $cart = $this->follow($added, 'goCart', ['sessionPrefix' => self::SESSION_PREFIX]);
+        $this->assertSame(1, $this->bodyValue($cart, 'cartCount'));
+
+        $entry = $this->resource->get($this->linkHref($cart, 'goCheckoutEntry'));
+        $this->assertSame(Code::SEE_OTHER, $entry->code);
+
+        $shoppingLogin = $this->followLocation($entry, '/shopping/login');
+        $nonMemberForm = $this->follow($shoppingLogin, 'goShoppingNonMember');
+        $submitted = $this->resource->post($this->linkHref($nonMemberForm, 'doSubmitNonMember'), [
+            'name01' => 'メール',
+            'name02' => '購入者',
+            'kana01' => 'メール',
+            'kana02' => 'コウニュウシャ',
+            'email' => self::$email,
+            'phoneNumber' => '0312345678',
+            'postalCode' => '1500001',
+            'pref' => 13,
+            'addr01' => '渋谷区',
+            'addr02' => 'ワークフロー1-1-1',
+            'sessionPrefix' => self::SESSION_PREFIX,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $submitted->code);
+
+        $confirmed = $this->resource->post($this->linkHref($submitted, 'doConfirmOrder'), [
+            'preOrderId' => $this->bodyValue($submitted, 'preOrderId'),
+            'payment' => $this->bodyValue($submitted, 'paymentMethodId'),
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::OK, $confirmed->code);
+
+        $checkedOut = $this->resource->post($this->linkHref($confirmed, 'doCheckout'), [
+            'preOrderId' => $this->bodyValue($confirmed, 'preOrderId'),
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $checkedOut->code);
+        self::$orderNo = $this->bodyString($checkedOut, 'orderNo');
+
+        $complete = $this->followLocation($checkedOut);
+        $this->assertSame(self::$orderNo, $this->bodyValue($complete, 'orderNo'));
 
         return $this->follow($response, 'goOrderMail', ['orderNo' => self::$orderNo]);
     }
@@ -150,7 +213,7 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
     #[Depends('testOrderMailConfirm')]
     public function testSendsOrderMail(ResourceObject $response): ResourceObject
     {
-        $sent = $this->resource->post('page://self/admin/order/send-mail', [
+        $sent = $this->resource->post($this->linkHref($response, 'doSendOrderMail'), [
             'orderNo' => self::$orderNo,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -176,7 +239,7 @@ class FlowAdminMailTemplateMaintenanceTest extends AbstractWorkflowTest
     #[Depends('testUpdatesMailTemplate')]
     public function testDeletesMailTemplate(ResourceObject $response): ResourceObject
     {
-        $deleted = $this->resource->delete('page://self/admin/mail-template', [
+        $deleted = $this->resource->delete($this->linkHref($response, 'doDeleteMailTemplate'), [
             'mailTemplateId' => $this->bodyValue($response, 'mailTemplateId'),
             'csrfToken' => self::CSRF_TOKEN,
         ]);

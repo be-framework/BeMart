@@ -59,4 +59,6 @@ discipline as the customer-list and order-list variants.
 |----------|-----|
 | goMember | [<code>page://self/admin/member</code>](/admin/member.md) |
 | doCreateMember | [<code>page://self/admin/member</code>](/admin/member.md) |
+| doUpdateMember | [<code>page://self/admin/member</code>](/admin/member.md) |
+| doDeleteMember | [<code>page://self/admin/member</code>](/admin/member.md) |
 | doUpdateAuthorityRole | [<code>page://self/admin/authority-role</code>](/admin/authority-role.md) |

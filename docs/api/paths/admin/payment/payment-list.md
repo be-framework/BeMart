@@ -41,6 +41,8 @@ _No parameters required_
 | goPayment | [<code>page://self/admin/payment/payment</code>](/admin/payment/payment.md) |
 | doUpdatePayment | [<code>page://self/admin/payment/payment</code>](/admin/payment/payment.md) |
 | doDeletePayment | [<code>page://self/admin/payment/payment</code>](/admin/payment/payment.md) |
+| goProductList | [<code>page://self/admin/product-list</code>](/admin/product-list.md) |
+| goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |
 ## POST
 ALPS `doCreatePayment` に対応する POST 操作。
 
