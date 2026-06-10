@@ -30,7 +30,7 @@ use function trim;
  * client keeps BeMart usable without external credentials and exercises the
  * Agent-as-Tool loop added in BEAR.ToolUse PR #22.
  */
-final class DemoLlmClient implements LlmClientInterface
+final class FakeLlmClient implements LlmClientInterface
 {
     /**
      * @param list<Message> $messages
