@@ -13,8 +13,6 @@ use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
-use function getenv;
-use function putenv;
 use function session_cache_limiter;
 use function session_destroy;
 use function session_id;
@@ -29,11 +27,8 @@ use const PHP_SESSION_ACTIVE;
 
 final class HtmlSessionAdapterTest extends TestCase
 {
-    private string|false $appContextBefore;
-
     protected function setUp(): void
     {
-        $this->appContextBefore = getenv('APP_CONTEXT');
         unset($_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY]);
     }
 
@@ -46,14 +41,6 @@ final class HtmlSessionAdapterTest extends TestCase
             session_write_close();
             session_id('');
         }
-
-        if ($this->appContextBefore === false) {
-            putenv('APP_CONTEXT');
-
-            return;
-        }
-
-        putenv('APP_CONTEXT=' . $this->appContextBefore);
     }
 
     public function testReturnsCustomerIdFromSession(): void
@@ -95,7 +82,6 @@ final class HtmlSessionAdapterTest extends TestCase
     public function testHtmlContextLoginWritesCustomerIdToSession(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html-test-hal-app');
 
         $ro = $this->htmlResource()->post('page://self/login', [
             'email' => 'login-test@example.com',
@@ -112,7 +98,6 @@ final class HtmlSessionAdapterTest extends TestCase
     public function testHtmlContextLogoutClearsCustomerIdAndRedirectsHome(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html-test-hal-app');
         $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = '10000000aaaa1111bbbb2222cccc3333';
 
         $ro = $this->htmlResource()->post('page://self/logout', [

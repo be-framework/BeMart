@@ -11,7 +11,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Auth\HtmlSessionAdapter;
+use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Exception\LoginFailedException;
 use MyVendor\BeMart\Be\Final\CustomerAuthenticated;
 use MyVendor\BeMart\Be\Input\LoginInput;
@@ -21,11 +21,6 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function session_status;
-use function str_contains;
-
-use const PHP_SESSION_ACTIVE;
 
 /**
  * EC-CUBE doLogin — 会員ログイン (Pilot 6).
@@ -39,12 +34,10 @@ use const PHP_SESSION_ACTIVE;
  *   - LoginFailedException      → 401 (no such email OR wrong password
  *                                       — combined, no user enumeration)
  *
- * In the html context, public/index.php starts a PHP session before
- * dispatch and this resource mirrors `customerId` into the flat session
- * key read by HtmlSessionAdapter. The write is guarded by
- * an html APP_CONTEXT and PHP_SESSION_ACTIVE so app/test/prod contexts
- * keep their existing session behaviour and are not polluted by direct
- * `$_SESSION` writes.
+ * In the html context, the context module binds a session writer that
+ * mirrors `customerId` into the flat session key read by the HTML session
+ * adapter. Non-html contexts bind a no-op writer, so Resource code does
+ * not branch on environment or touch PHP session storage directly.
  *
  * Phase 3 — HTML FORM page. The resource builds a {@see LoginForm}
  * (Ray.WebFormModule AbstractForm) and exposes it as `body['form']` so
@@ -71,6 +64,7 @@ class Login extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
+        private readonly CustomerSessionWriterInterface $sessionWriter,
     ) {
     }
 
@@ -127,9 +121,7 @@ class Login extends ResourceObject
 
         assert($final instanceof CustomerAuthenticated);
 
-        if (str_contains((string) getenv('APP_CONTEXT'), 'html') && session_status() === PHP_SESSION_ACTIVE) {
-            $_SESSION[HtmlSessionAdapter::CUSTOMER_ID_KEY] = $final->customerId;
-        }
+        $this->sessionWriter->authenticate($final->customerId);
 
         // Post/Redirect/Get: a successful login redirects to My Page.
         // EC-CUBE's doLogin redirects to the `mypage` route (`/mypage`) —
