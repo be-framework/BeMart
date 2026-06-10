@@ -11,8 +11,10 @@ use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
+use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
@@ -24,8 +26,16 @@ final class AdminLoginResourceTest extends TestCase
 
     protected function setUp(): void
     {
+        $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
+        $base->override(new class extends AbstractModule {
+            protected function configure(): void
+            {
+                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
+            }
+        });
+
         $injector = new Injector(
-            new TestModule(new Meta('MyVendor\\BeMart', 'test')),
+            $base,
             dirname(__DIR__, 2) . '/var/tmp/test',
         );
         $this->resource = $injector->getInstance(ResourceInterface::class);

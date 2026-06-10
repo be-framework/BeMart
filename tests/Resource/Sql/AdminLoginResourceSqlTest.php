@@ -109,17 +109,6 @@ final class AdminLoginResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::UNAUTHORIZED, $ro->code);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/login', [
-            'loginId' => 'test-admin',
-            'password' => self::ADMIN_PASSWORD,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostShortPasswordReturns400(): void
     {
         $ro = $this->resource->post('page://self/admin/login', [

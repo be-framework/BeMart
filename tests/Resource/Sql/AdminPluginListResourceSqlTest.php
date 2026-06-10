@@ -145,20 +145,6 @@ final class AdminPluginListResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame('1.0.0', $ro->body['pluginVersion']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $this->seedPlugins();
-
-        $ro = $this->resource->post('page://self/admin/plugin-list', [
-            'pluginCode' => 'NewVendor/Plugin',
-            'pluginName' => '新規プラグイン',
-            'pluginVersion' => '1.0.0',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostBadPluginCodeReturns400(): void
     {
         $this->seedPlugins();

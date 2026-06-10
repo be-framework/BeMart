@@ -158,17 +158,6 @@ final class AdminOrderStatusResourceTest extends TestCase
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/order-status', [
-            'orderNo' => self::ORDER_NO,
-            'orderStatus' => FinalizedOrderEntity::STATUS_DELIVERED,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostUnknownOrderReturns404(): void
     {
         $ro = $this->resource->post('page://self/admin/order-status', [

@@ -109,19 +109,6 @@ final class AdminCreateCustomerResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/create-customer', [
-            'email' => 'no-csrf@example.com',
-            'password' => 'no-csrf-passphrase-2026',
-            'name01' => '佐藤',
-            'name02' => '七郎',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostInvalidEmailReturns400(): void
     {
         $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);

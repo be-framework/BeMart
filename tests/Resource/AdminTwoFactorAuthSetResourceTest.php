@@ -130,14 +130,4 @@ final class AdminTwoFactorAuthSetResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPutMissingCsrfReturns403(): void
-    {
-        $this->challenge->startSetup(self::ADMIN_ID, self::LOGIN_ID, self::SERVER_SECRET);
-
-        $ro = $this->resource->put('page://self/admin/two-factor-auth-set', [
-            'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
 }

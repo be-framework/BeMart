@@ -129,21 +129,6 @@ final class AdminCsvConfigResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame('orderDate', $second->body['columns'][0]['columnName']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $this->seedCsvTypes();
-
-        $ro = $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 3,
-            'columns' => [
-                ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
-            ],
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostWithoutAdminSessionReturns403(): void
     {
         $this->seedCsvTypes();

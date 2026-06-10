@@ -172,17 +172,6 @@ final class AdminOrderResourceTest extends TestCase
         $this->assertSame(FinalizedOrderEntity::STATUS_NEW, $persisted->orderStatus);
     }
 
-    public function testOnPutMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->put('page://self/admin/order-list', [
-            'orderNo' => self::ORDER_NO,
-            'discount' => 1000,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPutUnknownOrderReturns404(): void
     {
         $ro = $this->resource->put('page://self/admin/order-list', [

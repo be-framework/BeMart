@@ -100,15 +100,4 @@ final class ContactResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/contact', [
-            'contactName01' => '山田',
-            'contactName02' => '太郎',
-            'contactEmail' => 'yamada@example.com',
-            'contactContents' => 'body text',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
 }

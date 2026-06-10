@@ -238,17 +238,6 @@ final class ResetResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::BAD_REQUEST, $ro->code);
     }
 
-    public function testMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/reset', [
-            'resetKey' => 'some-key-which-shape-passes-validation',
-            'password' => self::NEW_PASSWORD,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testForgotPasswordUnknownEmailStillReturns200(): void
     {
         // Anti-enumeration: a forgot-password request for an

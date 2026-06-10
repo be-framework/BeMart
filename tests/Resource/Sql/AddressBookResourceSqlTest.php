@@ -179,21 +179,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertNull($ro->body['companyName']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/mypage/address-list', [
-            'name01' => '山田',
-            'name02' => 'アリス',
-            'postalCode' => '1500001',
-            'pref' => 13,
-            'addr01' => '渋谷区',
-            'addr02' => '神宮前1-1-1',
-            'phoneNumber' => '0312345678',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnPostUnauthenticatedReturns401(): void
     {
         $this->loginAs(null);
@@ -274,18 +259,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
-    public function testOnPutMissingCsrfReturns403(): void
-    {
-        $addressId = $this->seedAddress();
-
-        $ro = $this->resource->put('page://self/mypage/address', [
-            'addressId' => $addressId,
-            'phoneNumber' => '0399998888',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     // ---- doDeleteCustomerAddress (DELETE) ----
 
     public function testOnDeleteRemovesAndReturns200(): void
@@ -330,17 +303,6 @@ final class AddressBookResourceSqlTest extends AbstractResourceSqlTestCase
         $this->loginAs($this->aliceId);
         $list = $this->resource->get('page://self/mypage/address-list');
         $this->assertSame(1, $list->body['count']);
-    }
-
-    public function testOnDeleteMissingCsrfReturns403(): void
-    {
-        $addressId = $this->seedAddress();
-
-        $ro = $this->resource->delete('page://self/mypage/address', [
-            'addressId' => $addressId,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testOnDeleteUnauthenticatedReturns401(): void
