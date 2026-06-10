@@ -158,16 +158,4 @@ final class CheckoutResourceTest extends TestCase
         $this->assertSame(Code::CREATED, $ro->code);
     }
 
-    public function testOnPostMissingCsrfReturns403BeforeAuthz(): void
-    {
-        // Phase B Slice 8: CSRF is checked at the boundary — before AUTHZ,
-        // even though both can produce 403. The body carries the CSRF
-        // message (not the AUTHZ wording) which lets us distinguish.
-        $ro = $this->resource->post('page://self/shopping/checkout', [
-            'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

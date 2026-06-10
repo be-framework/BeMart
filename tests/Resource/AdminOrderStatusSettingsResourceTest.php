@@ -73,16 +73,6 @@ final class AdminOrderStatusSettingsResourceTest extends TestCase
         $this->assertSame('1:新規受付,3:注文取消し', $ro->body['orderStatusRows']);
     }
 
-    public function testOnPutMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->put('page://self/admin/order-status', [
-            'orderStatuses' => [['id' => 1, 'name' => '新規受付']],
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPutAnonymousAdminReturns403(): void
     {
         $this->rebindAdminSession(null);

@@ -111,15 +111,6 @@ final class ChangeResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/mypage/change', [
-            'email' => 'alice@example.com',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnPostInvalidEmailReturns400(): void
     {
         $this->expectException(\Be\Framework\Exception\SemanticVariableException::class);

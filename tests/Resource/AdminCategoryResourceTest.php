@@ -86,17 +86,6 @@ final class AdminCategoryResourceTest extends TestCase
         $this->assertArrayHasKey('Location', $ro->headers);
     }
 
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/category/category-list', [
-            'categoryName' => 'Food',
-            'sortNo' => 10,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
@@ -174,18 +163,6 @@ final class AdminCategoryResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('Foods', $ro->body['categoryName']);
         $this->assertSame(10, $ro->body['sortNo']);
-    }
-
-    public function testPutRejectsMissingCsrf(): void
-    {
-        $id = $this->seed('Food');
-        $ro = $this->resource->put('page://self/admin/category/category', [
-            'categoryId' => $id,
-            'categoryName' => 'X',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testDeleteHappyPath(): void

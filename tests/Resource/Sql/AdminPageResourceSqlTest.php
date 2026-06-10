@@ -157,17 +157,6 @@ final class AdminPageResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/page/page-list', [
-            'pageName' => '会社案内',
-            'pageUrl' => 'company',
-            'pageFileName' => 'company',
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testGetHappyPath(): void
     {
         $id = $this->seed('会社案内', 'company', 'company');

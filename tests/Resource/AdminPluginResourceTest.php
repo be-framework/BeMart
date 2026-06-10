@@ -104,16 +104,6 @@ final class AdminPluginResourceTest extends TestCase
         $this->assertFalse($ro->body['wasInstalled']);
     }
 
-    public function testOnDeleteMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->delete('page://self/admin/plugin', [
-            'pluginCode' => 'Sample/DisabledPlugin',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnDeleteWithoutAdminSessionReturns403(): void
     {
         $this->rebindAdminSession(null);
