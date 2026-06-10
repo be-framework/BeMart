@@ -92,8 +92,12 @@
       "description": "日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用 都道府県ID。住所フォームの未選択状態では0、確定住所では1〜47を使う。 Fake観察数値 13〜27; 観察値 '13', '27'; null 3/9。",
       "type": [
         "integer",
+        "string",
         "null"
       ],
+      "minLength": 0,
+      "maxLength": 2,
+      "pattern": "^\\d*$",
       "example": 13,
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
