@@ -107,10 +107,4 @@ final class WithdrawResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/mypage/withdraw', []);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
 }

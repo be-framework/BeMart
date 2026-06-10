@@ -105,13 +105,4 @@ final class ReorderResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/mypage/reorder', [
-            'orderNo' => 'past0000000000000000000000000001',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

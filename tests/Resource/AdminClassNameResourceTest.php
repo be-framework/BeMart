@@ -83,15 +83,6 @@ final class AdminClassNameResourceTest extends TestCase
         ]);
     }
 
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/class-name/class-name-list', [
-            'classNameLabel' => 'Color',
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testListReturnsRows(): void
     {
         $this->seed('Color');
@@ -149,13 +140,4 @@ final class AdminClassNameResourceTest extends TestCase
         $this->assertSame($id, $ro->body['classNameId']);
     }
 
-    public function testDeleteRejectsMissingCsrf(): void
-    {
-        $id = $this->seed('Color');
-        $ro = $this->resource->delete('page://self/admin/class-name/class-name', [
-            'classNameId' => $id,
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
 }

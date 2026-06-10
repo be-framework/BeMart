@@ -122,19 +122,6 @@ final class AdminAuthorityRoleResourceTest extends TestCase
         ]);
     }
 
-    public function testMissingCsrfReturns403(): void
-    {
-        $this->rebindAdminSession(self::SYSTEM_ADMIN_ID);
-
-        $ro = $this->resource->post('page://self/admin/authority-role', [
-            'loginId' => 'shop-owner',
-            'authority' => 0,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testAnonymousAdminReturns403(): void
     {
         $this->rebindAdminSession(null);

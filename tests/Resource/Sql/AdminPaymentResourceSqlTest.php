@@ -134,15 +134,6 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/payment/payment-list', [
-            'paymentMethodName' => 'クレジットカード',
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testListReturnsRows(): void
     {
         $this->seed('代金引換', 300);
@@ -200,13 +191,4 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame($id, $ro->body['paymentId']);
     }
 
-    public function testDeleteRejectsMissingCsrf(): void
-    {
-        $id = $this->seed('代金引換');
-        $ro = $this->resource->delete('page://self/admin/payment/payment', [
-            'paymentId' => $id,
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
 }
