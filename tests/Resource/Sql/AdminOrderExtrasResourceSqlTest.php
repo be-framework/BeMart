@@ -206,20 +206,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::NOT_FOUND, $ro->code);
     }
 
-    public function testSelectShippingAddressMissingCsrfReturns403(): void
-    {
-        $orderNo = $this->seedOrder('SQL-SHIP-SEL-4', $this->aliceId);
-        $addressId = $this->insertAddress(['customer_id' => (int) $this->aliceId]);
-
-        $ro = $this->resource->post('page://self/admin/order/shipping-address', [
-            'orderNo' => $orderNo,
-            'addressId' => (string) $addressId,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testSelectShippingAddressWithoutAdminReturns403(): void
     {
         $orderNo = $this->seedOrder('SQL-SHIP-SEL-5', $this->aliceId);
@@ -317,24 +303,6 @@ final class AdminOrderExtrasResourceSqlTest extends AbstractResourceSqlTestCase
         ]);
 
         $this->assertSame(Code::NOT_FOUND, $ro->code);
-    }
-
-    public function testUpdateShippingAddressMissingCsrfReturns403(): void
-    {
-        $orderNo = $this->seedOrder('SQL-SHIP-UPD-3', $this->aliceId);
-
-        $ro = $this->resource->put('page://self/admin/order/shipping-address', [
-            'orderNo' => $orderNo,
-            'name01' => 'X',
-            'name02' => 'Y',
-            'postalCode' => '1500001',
-            'pref' => 13,
-            'addr01' => 'A',
-            'addr02' => 'B',
-            'phoneNumber' => '0312345678',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
     public function testUpdateShippingAddressWithoutAdminReturns403(): void

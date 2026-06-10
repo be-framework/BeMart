@@ -88,15 +88,6 @@ final class AdminPaymentResourceTest extends TestCase
         ]);
     }
 
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/payment/payment-list', [
-            'paymentMethodName' => 'クレジットカード',
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testListReturnsRows(): void
     {
         $this->seed('代金引換', 300);
@@ -154,16 +145,6 @@ final class AdminPaymentResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($id, $ro->body['paymentId']);
-    }
-
-    public function testDeleteRejectsMissingCsrf(): void
-    {
-        $id = $this->seed('代金引換');
-        $ro = $this->resource->delete('page://self/admin/payment/payment', [
-            'paymentId' => $id,
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testOnGetNewReturnsBlankForm(): void

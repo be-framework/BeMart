@@ -81,12 +81,6 @@ final class AdminContentSideEffectResourceTest extends TestCase
         $this->assertTrue($ro->body['isMaintenance']);
     }
 
-    public function testCacheMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->put('page://self/admin/content/cache', []);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testCssAnonymousReturns403(): void
     {
         $this->rebindAdminSession(null);

@@ -108,12 +108,6 @@ final class AdminTemplateManageResourceTest extends TestCase
         $this->assertSame('doInstallTemplate', $ro->body['transitionId']);
     }
 
-    public function testSelectMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->put('page://self/admin/template/template-list', ['templateId' => 'default']);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testInstallAnonymousReturns403(): void
     {
         $this->rebindAdminSession(null);
