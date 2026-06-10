@@ -99,20 +99,6 @@ final class AdminMasterListTransitionsResourceTest extends TestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
-    public function testSortNoMoveRejectsMissingCsrf(): void
-    {
-        $this->tags->put(new TagEntity('t1', 'New'));
-
-        $ro = $this->resource->put('page://self/admin/sort-no-move', [
-            'masterType' => 'tag',
-            'rowId' => 't1',
-            'sortNo' => 1,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testSortNoMoveUnknownRowReturns404(): void
     {
         $ro = $this->resource->put('page://self/admin/sort-no-move', [

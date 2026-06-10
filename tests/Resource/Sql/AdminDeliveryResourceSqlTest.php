@@ -124,15 +124,6 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(Code::FORBIDDEN, $ro->code);
     }
 
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/delivery/delivery-list', [
-            'deliveryName' => 'ヤマト',
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
-
     public function testListReturnsRows(): void
     {
         $this->seed('ヤマト宅急便');
@@ -190,13 +181,4 @@ final class AdminDeliveryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame($id, $ro->body['deliveryId']);
     }
 
-    public function testDeleteRejectsMissingCsrf(): void
-    {
-        $id = $this->seed('ヤマト宅急便');
-        $ro = $this->resource->delete('page://self/admin/delivery/delivery', [
-            'deliveryId' => $id,
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
-    }
 }

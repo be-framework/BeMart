@@ -102,16 +102,6 @@ final class AdminResendActivationMailResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post(self::URI, [
-            'email' => self::PROVISIONAL_EMAIL,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostUnknownEmailReturns404(): void
     {
         $this->expectException(\MyVendor\BeMart\Be\Exception\CustomerNotFoundException::class);

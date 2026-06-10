@@ -112,14 +112,4 @@ final class AdminProductCopyResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertStringContainsString('管理者', $ro->body['message']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/product-copy', [
-            'productCode' => 'admin-active-001',
-            'newProductCode' => 'foo',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

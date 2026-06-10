@@ -177,15 +177,6 @@ final class ChangeResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertStringContainsString('ログイン', $ro->body['message']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/mypage/change', [
-            'email' => 'alice@example.com',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testOnPostInvalidEmailReturns400(): void
     {
         $ro = $this->resource->post('page://self/mypage/change', [

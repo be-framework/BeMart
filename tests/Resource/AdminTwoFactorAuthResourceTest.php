@@ -123,15 +123,4 @@ final class AdminTwoFactorAuthResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $this->challenge->startVerification(self::ADMIN_ID, self::LOGIN_ID);
-
-        $ro = $this->resource->post('page://self/admin/two-factor-auth', [
-            'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

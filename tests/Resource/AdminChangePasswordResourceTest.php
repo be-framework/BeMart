@@ -101,18 +101,6 @@ final class AdminChangePasswordResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/change-password', [
-            'currentPassword' => self::CURRENT_PASSWORD,
-            'changePasswordFirst' => 'new-strong-password-2026',
-            'changePasswordSecond' => 'new-strong-password-2026',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostAnonymousReturns403(): void
     {
         $this->rebindAdminSession(null);

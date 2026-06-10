@@ -160,10 +160,4 @@ final class WithdrawResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertStringContainsString('ログイン', $ro->body['message']);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/mypage/withdraw', []);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
 }

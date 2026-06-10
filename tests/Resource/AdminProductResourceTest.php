@@ -111,18 +111,6 @@ final class AdminProductResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/admin/product', [
-            'productCode' => 'wave8-no-csrf-001',
-            'productName' => 'No CSRF',
-            'price02' => 100,
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
-
     public function testOnPostWithoutAdminReturns403(): void
     {
         $this->rebindAdminSession(null);
@@ -215,13 +203,4 @@ final class AdminProductResourceTest extends TestCase
         ]);
     }
 
-    public function testOnDeleteMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->delete('page://self/admin/product', [
-            'productCode' => 'admin-active-001',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }

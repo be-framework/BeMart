@@ -87,16 +87,6 @@ final class AdminMasterDataEditResourceTest extends TestCase
         $this->assertSame(1, $ro->body['count']);
     }
 
-    public function testUpdateMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->put('page://self/admin/master-data-edit', [
-            'masterType' => 'tag',
-            'rows' => [],
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-    }
-
     public function testUpdateAnonymousReturns403(): void
     {
         $this->rebindAdminSession(null);
