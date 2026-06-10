@@ -11,11 +11,11 @@
 # Usage:
 #   sql/setup-db.sh DATABASE_URL
 #   sql/setup-db.sh --url 'mysql://user:pass@host:port/dbname?...'
-#   sql/setup-db.sh --host 127.0.0.1 --port 3306 --user dbuser \
-#                   --pass secret --db eccubedb
+#   sql/setup-db.sh --host 127.0.0.1 --port 3306 --user root \
+#                   --pass '' --db eccubedb
 #
 # DATABASE_URL form (Symfony/Doctrine style, query string optional):
-#   mysql://dbuser:secret@127.0.0.1:3306/eccubedb?charset=utf8mb4
+#   mysql://root@127.0.0.1:3306/eccubedb?charset=utf8mb4
 #
 # Environment:
 #   If no arguments are given, DATABASE_URL is read from the environment.
