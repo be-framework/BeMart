@@ -112,7 +112,7 @@ BeMart の目標は、EC-CUBE 4.3 を別フレームワークへ単純に移す�
 
 - `docs/api/index.html` / `docs/api/openapi.json` / `docs/api/terms.html` / `docs/api/llms.txt` は BEAR.ApiDoc 由来の公開成果物である。
 - `docs/api/paths/**/*.md` は詳細生成Markdownであり、Twig / JSON の literal を含むため GitHub Pages の Liquid 処理対象にしない。
-- `alps.json.html` / `alps.svg` / `docs/alps-doc/` も生成元から同期する。生成元がある場合は手で直さない。
+- `alps.json.html` / `alps.svg` は生成元から同期する。`docs/alps-doc/` は ALPS descriptor 補足ドキュメントの正本であり、root の `alps-doc` は既存相対リンクを保つための互換 symlink として扱う。
 
 これは実装の欠落ではなく、公開ドキュメントを安定して提供するための境界である。
 
