@@ -13,4 +13,12 @@ if (PHP_SAPI === 'cli-server') {
 
 require dirname(__DIR__) . '/vendor/autoload.php';
 
+if (session_status() !== PHP_SESSION_ACTIVE && ! headers_sent()) {
+    session_start([
+        'use_strict_mode' => true,
+        'cookie_httponly' => true,
+        'cookie_samesite' => 'Lax',
+    ]);
+}
+
 exit((new Bootstrap())('html-eccube-sql-hal-app', $GLOBALS, $_SERVER));
