@@ -59,7 +59,7 @@ source <(malt env)
 MariaDB を用意し、`DATABASE_URL` を MariaDB に向ける。
 
 ```bash
-export DATABASE_URL='mysql://dbuser:secret@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14'
+export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14'
 composer test:sql -- --colors=never
 ```
 
