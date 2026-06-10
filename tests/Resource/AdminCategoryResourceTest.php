@@ -16,7 +16,9 @@ use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
+use function getenv;
 use function str_contains;
+use function putenv;
 
 /**
  * Wave 7 — resource-layer coverage for the admin Category endpoints.
@@ -84,6 +86,24 @@ final class AdminCategoryResourceTest extends TestCase
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('Food', $ro->body['categoryName']);
         $this->assertArrayHasKey('Location', $ro->headers);
+    }
+
+    public function testCreateHtmlContextRedirectsToCategoryDetail(): void
+    {
+        $previousContext = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        try {
+            $ro = $this->resource->post('page://self/admin/category/category-list', [
+                'categoryName' => 'Food',
+                'sortNo' => 10,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
+        }
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertStringContainsString('/admin/category/category?categoryId=', $ro->headers['Location']);
     }
 
     public function testCreateRejectsMissingCsrf(): void
@@ -176,6 +196,25 @@ final class AdminCategoryResourceTest extends TestCase
         $this->assertSame(10, $ro->body['sortNo']);
     }
 
+    public function testPutHtmlContextRedirectsToCategoryDetail(): void
+    {
+        $id = $this->seed('Food', 10);
+        $previousContext = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        try {
+            $ro = $this->resource->put('page://self/admin/category/category', [
+                'categoryId' => $id,
+                'categoryName' => 'Foods',
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
+        }
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/category/category?categoryId=' . $id, $ro->headers['Location']);
+    }
+
     public function testPutRejectsMissingCsrf(): void
     {
         $id = $this->seed('Food');
@@ -199,6 +238,24 @@ final class AdminCategoryResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($id, $ro->body['categoryId']);
+    }
+
+    public function testDeleteHtmlContextRedirectsToCategoryList(): void
+    {
+        $id = $this->seed('Food');
+        $previousContext = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        try {
+            $ro = $this->resource->delete('page://self/admin/category/category', [
+                'categoryId' => $id,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
+        }
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/category/category-list', $ro->headers['Location']);
     }
 
     public function testDeleteUnknownIdReturns404(): void

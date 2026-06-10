@@ -17,6 +17,8 @@ use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
+use function getenv;
+use function putenv;
 use function str_contains;
 
 /**
@@ -77,6 +79,24 @@ final class AdminPaymentResourceTest extends TestCase
         $this->assertTrue($ro->body['visible']);
     }
 
+    public function testCreateHtmlContextRedirectsToPaymentDetail(): void
+    {
+        $previousContext = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        try {
+            $ro = $this->resource->post('page://self/admin/payment/payment-list', [
+                'paymentMethodName' => 'クレジットカード',
+                'charge' => 0,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
+        }
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertStringContainsString('/admin/payment/payment?paymentId=', $ro->headers['Location']);
+    }
+
     public function testCreateRejectsAnonymousAdmin(): void
     {
         $this->rebindAdminSession(null);
@@ -132,6 +152,26 @@ final class AdminPaymentResourceTest extends TestCase
         $this->assertSame(200, $ro->body['charge']);
     }
 
+    public function testPutHtmlContextRedirectsToPaymentDetail(): void
+    {
+        $id = $this->seed('クレジットカード');
+        $previousContext = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        try {
+            $ro = $this->resource->put('page://self/admin/payment/payment', [
+                'paymentId' => $id,
+                'paymentMethodName' => 'クレジット',
+                'charge' => 200,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
+        }
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/payment/payment?paymentId=' . $id, $ro->headers['Location']);
+    }
+
     public function testPutUnknownIdReturns404(): void
     {
         $this->expectException(\MyVendor\BeMart\Be\Exception\PaymentMethodAdminNotFoundException::class);
@@ -154,6 +194,24 @@ final class AdminPaymentResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($id, $ro->body['paymentId']);
+    }
+
+    public function testDeleteHtmlContextRedirectsToPaymentList(): void
+    {
+        $id = $this->seed('代金引換');
+        $previousContext = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        try {
+            $ro = $this->resource->delete('page://self/admin/payment/payment', [
+                'paymentId' => $id,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
+        }
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/payment/payment-list', $ro->headers['Location']);
     }
 
     public function testDeleteRejectsMissingCsrf(): void

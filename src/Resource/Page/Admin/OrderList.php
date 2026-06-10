@@ -60,7 +60,7 @@ class OrderList extends ResourceObject
     #[Alps('goOrderList')]
     #[JsonSchema(schema: 'get-admin-order-list.json', params: 'get-admin-order-list.param.json')]
     #[Link(rel: 'goOrder', href: 'page://self/admin/order', method: 'get')]
-    #[Link(rel: 'doCreateOrder', href: 'page://self/admin/order', method: 'post')]
+    #[Link(rel: 'doCreateOrder', href: 'page://self/admin/order/create', method: 'post')]
     public function onGet(int $limit = 50, int $offset = 0): static
     {
         $final = ($this->becoming)(new GetAdminOrderListInput(

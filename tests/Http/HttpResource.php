@@ -20,6 +20,7 @@ use Override;
 
 use function array_key_exists;
 use function debug_backtrace;
+use function dirname;
 use function escapeshellarg;
 use function explode;
 use function file_exists;
@@ -530,6 +531,11 @@ final class HttpResource implements ResourceInterface
     private function logFile(): string
     {
         if ($this->logPath === 'php://stderr' || str_ends_with($this->logPath, '.log')) {
+            $directory = dirname($this->logPath);
+            if ($directory !== '' && $directory !== '.' && ! is_dir($directory)) {
+                mkdir($directory, 0777, true);
+            }
+
             return $this->logPath;
         }
 

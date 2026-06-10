@@ -119,7 +119,7 @@ final class HtmlSessionAdapterTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertArrayNotHasKey(HtmlSessionAdapter::CUSTOMER_ID_KEY, $_SESSION);
         $this->assertSame('/', $ro->headers['Location']);
     }

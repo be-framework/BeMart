@@ -173,9 +173,9 @@
         "null"
       ],
       "minLength": 0,
-      "maxLength": 32,
+      "maxLength": 255,
       "title": "支払方法",
-      "description": "注文時点の支払方法名称（スナップショット） Fake観察文字長 4〜4; 観察値 '銀行振込'。",
+      "description": "注文時点の支払方法名称（スナップショット）。dtb_order.payment_method / dtb_payment.payment_method と同じ EC-CUBE 境界で varchar(255) を許容する Fake観察文字長 4〜4; 観察値 '銀行振込'。",
       "example": "銀行振込"
     },
     "subtotal": {

@@ -26,6 +26,8 @@ use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE 配送先住所 — single-resource endpoint (Pilot 16).
@@ -146,7 +148,7 @@ class Address extends ResourceObject
             'form' => $form,
         ];
 
-        return $this;
+        return $this->redirectToAddressListOnHtmlSuccess();
     }
 
     /**
@@ -212,7 +214,7 @@ class Address extends ResourceObject
             'addr02' => $final->addr02,
         ];
 
-        return $this;
+        return $this->redirectToAddressListOnHtmlSuccess();
     }
 
     /**
@@ -235,6 +237,16 @@ class Address extends ResourceObject
             'addressId' => $final->addressId,
             'customerId' => $final->customerId,
         ];
+
+        return $this->redirectToAddressListOnHtmlSuccess();
+    }
+
+    private function redirectToAddressListOnHtmlSuccess(): static
+    {
+        if ($this->code < 400 && str_contains((string) getenv('APP_CONTEXT'), 'html')) {
+            $this->code = Code::SEE_OTHER;
+            $this->headers['Location'] = '/mypage/address-list';
+        }
 
         return $this;
     }

@@ -19,7 +19,9 @@ use MyVendor\BeMart\Be\Input\GetAdminPaymentListInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
 use function sprintf;
+use function str_contains;
 use function urlencode;
 
 /**
@@ -46,6 +48,8 @@ class PaymentList extends ResourceObject
     #[Link(rel: 'goPayment', href: 'page://self/admin/payment/payment', method: 'get')]
     #[Link(rel: 'doUpdatePayment', href: 'page://self/admin/payment/payment', method: 'put')]
     #[Link(rel: 'doDeletePayment', href: 'page://self/admin/payment/payment', method: 'delete')]
+    #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminPaymentListInput());
@@ -90,7 +94,7 @@ class PaymentList extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminCreated);
 
-        $this->code = Code::CREATED;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = sprintf('/admin/payment/payment?paymentId=%s', urlencode($final->paymentId));
         $this->body = [
             'paymentId' => $final->paymentId,

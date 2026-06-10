@@ -69,6 +69,8 @@ query string) — user-controlled.
 | Relation | URL |
 |----------|-----|
 | goMemberList | [<code>page://self/admin/member-list</code>](/admin/member-list.md) |
+| doUpdateMember | [<code>page://self/admin/member</code>](/admin/member.md) |
+| doDeleteMember | [<code>page://self/admin/member</code>](/admin/member.md) |
 ## POST
 Wave 8: all form fields are user-controlled. The admin AUTHZ
 check lives inside the first Being (MemberCreating), so this

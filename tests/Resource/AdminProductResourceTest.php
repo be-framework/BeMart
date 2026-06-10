@@ -15,7 +15,10 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
+use function assert;
 use function dirname;
+use function getenv;
+use function putenv;
 
 final class AdminProductResourceTest extends TestCase
 {
@@ -189,6 +192,27 @@ final class AdminProductResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('admin-active-001', $ro->body['productCode']);
         $this->assertFalse($ro->body['alreadyDeleted']);
+    }
+
+    public function testOnDeleteHtmlContextRedirectsToProductList(): void
+    {
+        $context = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        $ro = null;
+
+        try {
+            $ro = $this->resource->delete('page://self/admin/product', [
+                'productCode' => 'admin-active-001',
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            $context === false ? putenv('APP_CONTEXT') : putenv('APP_CONTEXT=' . $context);
+        }
+
+        assert($ro !== null);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/product-list', $ro->headers['Location']);
+        $this->assertSame('admin-active-001', $ro->body['productCode']);
     }
 
     public function testOnDeleteAlreadyDeletedReturnsAlreadyDeleted(): void

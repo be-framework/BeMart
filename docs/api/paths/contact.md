@@ -61,10 +61,11 @@ ALPS `doSubmitContact` に対応する POST 操作。
 
 | Name | Type | Description | Default | Required | Constraints | Example |
 |------|------|-------------|---------|----------|-------------|---------|
-| contactName01 | string | お問い合わせ姓（入力） - お問い合わせフォームの姓。内部的にはNameTypeのname01と同じ仕組み |  | Required | {"minLength":0,"maxLength":255,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
-| contactName02 | string | お問い合わせ名（入力） - お問い合わせフォームの名。内部的にはNameTypeのname02と同じ仕組み |  | Required | {"minLength":0,"maxLength":255,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
-| contactEmail | string | お問い合わせメール（入力） - お問い合わせフォームのメールアドレス |  | Required | {"minLength":0,"maxLength":254,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | alice@example.com |
-| contactContents | string | お問い合わせ内容（入力） - お問い合わせフォームの本文 |  | Required | {"minLength":0,"maxLength":2000,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
+| contactName01 | string | お問い合わせ姓（入力） - お問い合わせフォームの姓。内部的にはNameTypeのname01と同じ仕組み |  | Optional | {"minLength":0,"maxLength":255,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
+| contactName02 | string | お問い合わせ名（入力） - お問い合わせフォームの名。内部的にはNameTypeのname02と同じ仕組み |  | Optional | {"minLength":0,"maxLength":255,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
+| contactEmail | string | お問い合わせメール（入力） - お問い合わせフォームのメールアドレス |  | Optional | {"minLength":0,"maxLength":254,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | alice@example.com |
+| contactContents | string | お問い合わせ内容（入力） - お問い合わせフォームの本文 |  | Optional | {"minLength":0,"maxLength":2000,"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} |  |
+| mode | string | フォーム操作モード |  | Optional | {"minLength":0,"maxLength":32,"$comment":"EC-CUBE compatible HTML form submit mode."} |  |
 
 
 ### Response

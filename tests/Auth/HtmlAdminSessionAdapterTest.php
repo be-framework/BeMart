@@ -159,7 +159,7 @@ final class HtmlAdminSessionAdapterTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertArrayNotHasKey(HtmlAdminSessionAdapter::ADMIN_ID_KEY, $_SESSION);
         $this->assertSame('/admin/login', $ro->headers['Location']);
     }

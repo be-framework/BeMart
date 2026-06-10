@@ -10,10 +10,13 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
+use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
 use function bin2hex;
+use function ctype_digit;
 use function random_bytes;
 
 /**
@@ -28,7 +31,7 @@ use function random_bytes;
  *   This Final proves the form transition exists: every guest field
  *   passes its Semantic validation (Email, Name01, Name02, Kana01,
  *   Kana02, PhoneNumber, PostalCode, Pref, Addr01, Addr02) and the
- *   server synthesises a preOrderId from CustomerIdProvider.
+ *   server synthesises a 40-hex preOrderId for the checkout handle.
  *
  * PHASE 2 GAP — what this Final intentionally does NOT do:
  *
@@ -41,10 +44,9 @@ use function random_bytes;
  *     POST using the preOrderId returned here will therefore 403.
  *     Closing that gap is Phase 2's job (a dedicated GuestProfile and
  *     a non-member PreOrder branch in CheckoutPrepared).
- *   - It reuses CustomerIdProvider to mint the preOrderId;
- *     Phase 2 should introduce a dedicated PreOrderIdProvider (and
- *     align with PreOrderId Semantic's 40-hex format, which the
- *     reused provider does NOT satisfy — it produces 32 hex chars).
+ *   - It does not expose a reusable PreOrderIdProvider yet. This Final
+ *     mints the 40-hex handle locally because the current scope has only
+ *     this one non-member pre-order creation point.
  *
  * The Final's public surface mirrors the doSubmitNonMember ALPS
  * descriptor (#name01, #name02, #email) plus the synthesised
@@ -53,6 +55,7 @@ use function random_bytes;
 final readonly class NonMemberSubmitted
 {
     public string $preOrderId;
+    public int $paymentMethodId;
     public string $name01;
     public string $name02;
     public string $email;
@@ -72,8 +75,11 @@ final readonly class NonMemberSubmitted
         #[Inject] CartQueryInterface $cartQuery,
         #[Inject] CartCommandInterface $cartCommand,
         #[Inject] OrderCommandInterface $orderCommand,
+        #[Inject] PaymentMethodAdminStorageInterface $paymentMethods,
+        #[Inject] PaymentMethodFactoryInterface $paymentMethodFactory,
     ) {
         $this->preOrderId = bin2hex(random_bytes(20));
+        $this->paymentMethodId = $this->selectPaymentMethodId($paymentMethods, $paymentMethodFactory);
         $this->name01 = $name01;
         $this->name02 = $name02;
         $this->email = $email;
@@ -102,7 +108,7 @@ final readonly class NonMemberSubmitted
             orderNo: $this->preOrderId,
             preOrderId: $this->preOrderId,
             customerId: '',
-            paymentMethodId: 1,
+            paymentMethodId: $this->paymentMethodId,
             subtotal: $subtotal,
             deliveryFeeTotal: $deliveryFeeTotal,
             charge: 0,
@@ -116,5 +122,23 @@ final readonly class NonMemberSubmitted
             orderDate: (new DateTimeImmutable())->format('Y-m-d H:i:s'),
             paymentDate: '',
         ));
+    }
+
+    private function selectPaymentMethodId(
+        PaymentMethodAdminStorageInterface $paymentMethods,
+        PaymentMethodFactoryInterface $paymentMethodFactory,
+    ): int {
+        foreach ($paymentMethods->list() as $paymentMethod) {
+            if (! $paymentMethod->visible || ! ctype_digit($paymentMethod->paymentId)) {
+                continue;
+            }
+
+            return (int) $paymentMethod->paymentId;
+        }
+
+        $available = $paymentMethodFactory->available();
+        $first = $available[0]['paymentMethodId'] ?? 1;
+
+        return (int) $first;
     }
 }

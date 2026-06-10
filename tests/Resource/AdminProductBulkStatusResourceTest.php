@@ -15,7 +15,10 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
+use function assert;
 use function dirname;
+use function getenv;
+use function putenv;
 
 final class AdminProductBulkStatusResourceTest extends TestCase
 {
@@ -60,6 +63,28 @@ final class AdminProductBulkStatusResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame(2, $ro->body['requestedCount']);
         $this->assertSame(2, $ro->body['changedCount']);
+    }
+
+    public function testOnPostHtmlContextRedirectsToProductList(): void
+    {
+        $context = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-test-hal-app');
+        $ro = null;
+
+        try {
+            $ro = $this->resource->post('page://self/admin/product-bulk-status', [
+                'productCodes' => ['admin-active-001', 'admin-hidden-001'],
+                'productStatus' => 3,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+        } finally {
+            $context === false ? putenv('APP_CONTEXT') : putenv('APP_CONTEXT=' . $context);
+        }
+
+        assert($ro !== null);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/product-list', $ro->headers['Location']);
+        $this->assertSame(2, $ro->body['requestedCount']);
     }
 
     public function testOnPostWithUnknownCodesReportsPartialCount(): void

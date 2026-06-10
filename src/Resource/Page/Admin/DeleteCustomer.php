@@ -18,6 +18,8 @@ use MyVendor\BeMart\Be\Input\AdminDeleteCustomerInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doDeleteCustomer — 会員を削除する (管理画面).
@@ -46,10 +48,13 @@ use function assert;
  *   - UnauthorizedAdminAccessException   → 403 (no admin session)
  *   - CustomerNotFoundException          → 404 (no such customerId)
  *
- * Success (200): `{customerId, originalEmail, alreadyDeleted, message}`.
- * The `alreadyDeleted` flag distinguishes a fresh delete (false, mail
- * sent) from an idempotent replay (true, no mail) — same shape as the
- * pilot's idempotent re-add convention.
+ * Success: JSON/HAL contexts return 200 with `{customerId,
+ * originalEmail, alreadyDeleted, message}`. HTML contexts use
+ * Post/Redirect/Get and return 303 to the customer list, matching the
+ * admin list-row delete affordance. The `alreadyDeleted` flag
+ * distinguishes a fresh delete (false, mail sent) from an idempotent
+ * replay (true, no mail) — same shape as the pilot's idempotent re-add
+ * convention.
  *
  * Anti-enumeration: the 403 / 404 ordering matches the Be Final's
  * check sequence (AUTHZ first, existence second). An admin-anonymous
@@ -83,7 +88,10 @@ class DeleteCustomer extends ResourceObject
 
         assert($final instanceof AdminCustomerDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        if ($this->code === Code::SEE_OTHER) {
+            $this->headers['Location'] = '/admin/customer-list';
+        }
         $this->body = [
             'customerId' => $final->customerId,
             'originalEmail' => $final->originalEmail,

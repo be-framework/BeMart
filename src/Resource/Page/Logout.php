@@ -76,7 +76,7 @@ class Logout extends ResourceObject
 
         // Post/Redirect/Get: EC-CUBE's doLogout redirects to the storefront
         // top page (the `goTop` transition declared above).
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/';
         $this->body = [
             'wasLoggedIn' => $final->wasLoggedIn,

@@ -22,6 +22,10 @@ use MyVendor\BeMart\Be\Input\UpdateCategoryInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function sprintf;
+use function str_contains;
+use function urlencode;
 
 /**
  * EC-CUBE goCategory + doUpdateCategory + doDeleteCategory —
@@ -48,6 +52,8 @@ class Category extends ResourceObject
     #[Alps('goCategory')]
     #[JsonSchema(schema: 'get-admin-category-category.json', params: 'get-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
+    #[Link(rel: 'doUpdateCategory', href: 'page://self/admin/category/category', method: 'put')]
+    #[Link(rel: 'doDeleteCategory', href: 'page://self/admin/category/category', method: 'delete')]
     public function onGet(string $categoryId): static
     {
         $final = ($this->becoming)(new GetAdminCategoryInput(categoryId: $categoryId));
@@ -91,7 +97,8 @@ class Category extends ResourceObject
 
         assert($final instanceof CategoryUpdated);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = sprintf('/admin/category/category?categoryId=%s', urlencode($final->categoryId));
         $this->body = [
             'categoryId' => $final->categoryId,
             'categoryName' => $final->categoryName,
@@ -103,10 +110,10 @@ class Category extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateCategory` に対応する DELETE 操作。
+     * ALPS `doDeleteCategory` に対応する DELETE 操作。
      * @psalm-taint-source input $categoryId
      */
-    #[Alps('doUpdateCategory')]
+    #[Alps('doDeleteCategory')]
     #[JsonSchema(schema: 'delete-admin-category-category.json', params: 'delete-admin-category-category.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[CsrfProtected]
@@ -116,7 +123,8 @@ class Category extends ResourceObject
 
         assert($final instanceof CategoryDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/category/category-list';
         $this->body = [
             'categoryId' => $final->categoryId,
         ];

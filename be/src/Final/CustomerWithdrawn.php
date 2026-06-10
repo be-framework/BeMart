@@ -30,8 +30,8 @@ use function sprintf;
  *      that goes to the human who still owns the address — must run
  *      before step 2 overwrites the record).
  *   2. Replace the customer record:
- *        - email → `withdrawn-{customerId}@example.invalid` (the
- *          `.invalid` TLD is reserved by RFC 2606 and can never
+ *        - email → `withdrawn-{customerId}@example.test` (the
+ *          `.test` TLD is reserved by RFC 2606 and can never
  *          collide with a real address, freeing the original email
  *          slot so the human can re-register later)
  *        - customerStatus → STATUS_WITHDRAWN (3)
@@ -108,7 +108,7 @@ final readonly class CustomerWithdrawn
             return;
         }
 
-        $dummyEmail = sprintf('withdrawn-%s@example.invalid', $current->customerId);
+        $dummyEmail = sprintf('withdrawn-%s@example.test', $current->customerId);
 
         // Step 2: persist the withdrawn shape (record of truth FIRST,
         // mirroring CheckoutCompleted's order convention).

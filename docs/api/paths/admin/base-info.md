@@ -65,6 +65,9 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | doUpdateBaseInfo | [<code>page://self/admin/base-info</code>](/admin/base-info.md) |
+| goPaymentList | [<code>page://self/admin/payment/payment-list</code>](/admin/payment/payment-list.md) |
+| goProductList | [<code>page://self/admin/product-list</code>](/admin/product-list.md) |
+| goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |
 ## POST
 Wave 8: every shop-info field is admin-form input.
 

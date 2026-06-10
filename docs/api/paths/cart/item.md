@@ -53,7 +53,7 @@ implementations).
 |----------|-----|
 | goCart | [<code>page://self/cart</code>](/cart.md) |
 | doRemoveCartItem | [<code>page://self/cart/item</code>](/cart/item.md) |
-| doCheckout | [<code>page://self/shopping</code>](/shopping.md) |
+| goCheckoutEntry | [<code>page://self/shopping</code>](/shopping.md) |
 ## PUT
 EC-CUBE doUpdateCartItemQuantity — replace an item's quantity
 (Pilot 10). Idempotent (PUT semantics), CSRF-guarded.
