@@ -1,0 +1,8 @@
+{
+  "scripts": {
+    "web-e2e:all-routes": "node scripts/web-e2e-all-routes.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}
