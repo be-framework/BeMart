@@ -15,8 +15,6 @@ use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
 use PHPUnit\Framework\TestCase;
 
-use function getenv;
-use function putenv;
 use function session_cache_limiter;
 use function session_destroy;
 use function session_id;
@@ -31,11 +29,8 @@ use const PHP_SESSION_ACTIVE;
 
 final class HtmlAdminSessionAdapterTest extends TestCase
 {
-    private string|false $appContextBefore;
-
     protected function setUp(): void
     {
-        $this->appContextBefore = getenv('APP_CONTEXT');
         unset(
             $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY],
             $_SESSION[HtmlAdminLoginChallengeAdapter::VERIFY_CHALLENGE_KEY],
@@ -56,14 +51,6 @@ final class HtmlAdminSessionAdapterTest extends TestCase
             session_write_close();
             session_id('');
         }
-
-        if ($this->appContextBefore === false) {
-            putenv('APP_CONTEXT');
-
-            return;
-        }
-
-        putenv('APP_CONTEXT=' . $this->appContextBefore);
     }
 
     public function testReturnsAdminIdFromSession(): void
@@ -106,7 +93,6 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     {
         $this->startActiveSession();
         $sessionIdBeforeLogin = session_id();
-        putenv('APP_CONTEXT=html-test-hal-app');
 
         $ro = $this->htmlResource()->post('page://self/admin/login', [
             'loginId' => 'test-admin',
@@ -152,7 +138,6 @@ final class HtmlAdminSessionAdapterTest extends TestCase
     public function testHtmlContextAdminLogoutClearsAdminIdAndRedirectsToLogin(): void
     {
         $this->startActiveSession();
-        putenv('APP_CONTEXT=html-test-hal-app');
         $_SESSION[HtmlAdminSessionAdapter::ADMIN_ID_KEY] = 'ad000000000000000000000000000001';
 
         $ro = $this->htmlResource()->post('page://self/admin/logout', [
