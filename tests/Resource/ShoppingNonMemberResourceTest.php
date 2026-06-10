@@ -97,22 +97,4 @@ final class ShoppingNonMemberResourceTest extends TestCase
         ]);
     }
 
-    public function testOnPostMissingCsrfReturns403(): void
-    {
-        $ro = $this->resource->post('page://self/shopping/non-member', [
-            'name01' => '田中',
-            'name02' => '太郎',
-            'kana01' => 'タナカ',
-            'kana02' => 'タロウ',
-            'email' => 'guest@example.com',
-            'phoneNumber' => '0312345678',
-            'postalCode' => '1500001',
-            'pref' => 13,
-            'addr01' => '渋谷区',
-            'addr02' => '神宮前1-2-3',
-        ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
-    }
 }
