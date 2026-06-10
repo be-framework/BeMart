@@ -18,6 +18,11 @@ if (session_status() !== PHP_SESSION_ACTIVE) {
     ]);
 }
 
+// HTTP tests run the HTML adapter but still use the deterministic FakeQuery
+// corpus. Pin the cart session to the fake fixture prefix; real HTML entry
+// points keep using the session-derived prefix.
+$_SESSION['cart_session_prefix'] ??= 'session-prefix-1';
+
 require __DIR__ . '/../../vendor/autoload.php';
 
 exit((new Bootstrap())('html-test-hal-app', $GLOBALS, $_SERVER));

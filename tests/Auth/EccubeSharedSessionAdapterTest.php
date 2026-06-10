@@ -7,42 +7,23 @@ namespace MyVendor\BeMart\Tests\Auth;
 use MyVendor\BeMart\Auth\EccubeSharedSessionAdapter;
 use PHPUnit\Framework\TestCase;
 
-use function getenv;
-use function putenv;
-
 /**
  * Unit tests for the Slice 7 production session adapter.
  *
- * The adapter has three resolution paths:
+ * The adapter has two resolution paths:
  *   1. $_SESSION[customer_id] populated (HTTP context, or test fixture)
- *   2. CLI + BEMART_CLI_CUSTOMER_ID env var (operator scripts)
- *   3. Otherwise anonymous (null)
- *
- * These tests run under PHP_SAPI=cli (PHPUnit), so the CLI fallback is
- * exercised directly. The HTTP path is covered transitively by
- * ProdModuleTest and subprocess entrypoint coverage.
+ *   2. Otherwise anonymous (null)
  */
 final class EccubeSharedSessionAdapterTest extends TestCase
 {
-    private string|false $envBefore;
-
     protected function setUp(): void
     {
-        $this->envBefore = getenv(EccubeSharedSessionAdapter::CLI_ENV_VAR);
-        putenv(EccubeSharedSessionAdapter::CLI_ENV_VAR);
         unset($_SESSION[EccubeSharedSessionAdapter::CUSTOMER_ID_KEY]);
     }
 
     protected function tearDown(): void
     {
         unset($_SESSION[EccubeSharedSessionAdapter::CUSTOMER_ID_KEY]);
-        if ($this->envBefore === false) {
-            putenv(EccubeSharedSessionAdapter::CLI_ENV_VAR);
-
-            return;
-        }
-
-        putenv(EccubeSharedSessionAdapter::CLI_ENV_VAR . '=' . $this->envBefore);
     }
 
     public function testReturnsCustomerIdFromSession(): void
@@ -54,34 +35,11 @@ final class EccubeSharedSessionAdapterTest extends TestCase
         $this->assertSame('customer-001', $adapter->customerId);
     }
 
-    public function testReturnsNullWhenSessionAndEnvUnset(): void
+    public function testReturnsNullWhenSessionKeyAbsent(): void
     {
         $adapter = new EccubeSharedSessionAdapter();
 
         $this->assertNull($adapter->customerId);
-    }
-
-    public function testCliEnvFallbackUsedWhenSessionEmpty(): void
-    {
-        putenv(EccubeSharedSessionAdapter::CLI_ENV_VAR . '=customer-042');
-
-        $adapter = new EccubeSharedSessionAdapter();
-
-        $this->assertSame('customer-042', $adapter->customerId);
-    }
-
-    public function testSessionTakesPriorityOverCliEnv(): void
-    {
-        // If both are set (operator runs CLI but the test harness also
-        // pre-populates $_SESSION), the session value wins. This keeps
-        // ProdModuleTest deterministic regardless of the developer's
-        // local env.
-        $_SESSION[EccubeSharedSessionAdapter::CUSTOMER_ID_KEY] = 'from-session';
-        putenv(EccubeSharedSessionAdapter::CLI_ENV_VAR . '=from-env');
-
-        $adapter = new EccubeSharedSessionAdapter();
-
-        $this->assertSame('from-session', $adapter->customerId);
     }
 
     public function testEmptyStringSessionTreatedAsAnonymous(): void

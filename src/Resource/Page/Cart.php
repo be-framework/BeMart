@@ -9,7 +9,7 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
-use MyVendor\BeMart\Auth\HtmlCartSession;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use MyVendor\BeMart\Be\Final\CartsFetched;
 use MyVendor\BeMart\Be\Input\GetCartsInput;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
@@ -34,6 +34,7 @@ class Cart extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrf,
+        private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
     }
 
@@ -48,7 +49,7 @@ class Cart extends ResourceObject
     public function onGet(string $sessionPrefix = self::DEFAULT_SESSION_PREFIX): static
     {
         $final = ($this->becoming)(new GetCartsInput(
-            sessionPrefix: HtmlCartSession::cartSessionPrefix() ?? $sessionPrefix,
+            sessionPrefix: $this->cartSessionPrefix->prefix() ?? $sessionPrefix,
         ));
         assert($final instanceof CartsFetched);
 
