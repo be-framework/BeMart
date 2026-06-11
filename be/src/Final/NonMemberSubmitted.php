@@ -24,29 +24,14 @@ use function random_bytes;
  *
  *   SubmitNonMemberInput → NonMemberSubmitted
  *
- * Wave 7W SCOPE — FORM ENTRY ONLY.
+ * EC-CUBE allows anonymous customers to submit shipping info and
+ * subsequently confirm a checkout without registering an account. This
+ * Final validates every guest field, materialises the current anonymous
+ * cart as a PROCESSING order, and stores the guest customer snapshot on
+ * that order so the confirm/checkout screens do not need a customer row.
  *
- *   EC-CUBE allows anonymous customers to submit shipping info and
- *   subsequently confirm a checkout without registering an account.
- *   This Final proves the form transition exists: every guest field
- *   passes its Semantic validation (Email, Name01, Name02, Kana01,
- *   Kana02, PhoneNumber, PostalCode, Pref, Addr01, Addr02) and the
- *   server synthesises a 40-hex preOrderId for the checkout handle.
- *
- * PHASE 2 GAP — what this Final intentionally does NOT do:
- *
- *   - It does not persist a CartEntity / PreOrder under the guest's
- *     identity. Pilot 9 wired `bySessionPrefix` for member carts; the
- *     equivalent "anonymous PreOrder" entity is out of Wave 7W's scope.
- *   - It does not relax Pilot 5's AUTHZ on doCheckout. Today's
- *     CheckoutPrepared still raises UnauthorizedPreOrderAccessException
- *     when the session has no customerId; a downstream `doCheckout`
- *     POST using the preOrderId returned here will therefore 403.
- *     Closing that gap is Phase 2's job (a dedicated GuestProfile and
- *     a non-member PreOrder branch in CheckoutPrepared).
- *   - It does not expose a reusable PreOrderIdProvider yet. This Final
- *     mints the 40-hex handle locally because the current scope has only
- *     this one non-member pre-order creation point.
+ * It still mints the 40-hex handle locally because the current scope has
+ * only this one non-member pre-order creation point.
  *
  * The Final's public surface mirrors the doSubmitNonMember ALPS
  * descriptor (#name01, #name02, #email) plus the synthesised
@@ -83,6 +68,19 @@ final readonly class NonMemberSubmitted
         $this->name01 = $name01;
         $this->name02 = $name02;
         $this->email = $email;
+        $customerSnapshot = [
+            'name01' => $name01,
+            'name02' => $name02,
+            'kana01' => $kana01,
+            'kana02' => $kana02,
+            'companyName' => null,
+            'email' => $email,
+            'phoneNumber' => $phoneNumber,
+            'postalCode' => $postalCode,
+            'pref' => $pref,
+            'addr01' => $addr01,
+            'addr02' => $addr02,
+        ];
 
         $subtotal = 0;
         $deliveryFeeTotal = 0;
@@ -121,6 +119,7 @@ final readonly class NonMemberSubmitted
             orderStatus: FinalizedOrderEntity::STATUS_PROCESSING,
             orderDate: (new DateTimeImmutable())->format('Y-m-d H:i:s'),
             paymentDate: '',
+            customerSnapshot: $customerSnapshot,
         ));
     }
 

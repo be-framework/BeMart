@@ -81,6 +81,93 @@ final class WorkflowBackdoorStateCoverageTest extends TestCase
         );
     }
 
+    #[DataProvider('workflowFiles')]
+    public function testCustomerPurchaseUsesInstallerPaymentMasters(string $file): void
+    {
+        if (! str_contains($file, 'FlowCustomerPurchaseTest.php')) {
+            $this->addToAssertionCount(1);
+
+            return;
+        }
+
+        $source = $this->source($file);
+
+        self::assertStringNotContainsString(
+            'doCreatePayment',
+            $source,
+            'flow-customer-purchase must not create payment methods as setup. It must prove checkout works from the installer payment masters loaded by setup-db.',
+        );
+    }
+
+    public function testWebE2ERunnerDoesNotCreatePaymentAsPurchaseSetup(): void
+    {
+        $source = $this->source(__DIR__ . '/../../scripts/web-e2e-runner.mjs');
+
+        self::assertStringNotContainsString(
+            "step('admin-payment-create'",
+            $source,
+            'Web+DB runner must not create a purchase-only payment method before checkout; checkout must work from setup-db installer payment masters.',
+        );
+    }
+
+    public function testWebE2ERunnerReadsBackNonMemberConfirmBeforeCheckout(): void
+    {
+        $source = $this->source(__DIR__ . '/../../scripts/web-e2e-runner.mjs');
+
+        self::assertStringContainsString(
+            'non-member submit did not redirect to confirm',
+            $source,
+            'Web+DB runner must require the browser-form 303 Location to /shopping/confirm.',
+        );
+        self::assertStringContainsString(
+            'shopping-non-member-confirm',
+            $source,
+            'Web+DB runner must save screenshot evidence from the non-member confirm page, not only the POST Location.',
+        );
+        self::assertStringContainsString(
+            'confirm page includes non-member email and installer payment name',
+            $source,
+            'Web+DB runner must read back non-member customer/payment data before checkout.',
+        );
+    }
+
+    public function testWebE2ERunnerRequiresScreenshotEvidenceForUnsafeOperationPass(): void
+    {
+        $source = $this->source(__DIR__ . '/../../scripts/web-e2e-runner.mjs');
+
+        self::assertStringContainsString(
+            'if (unsafeCoveredBySetup && operationScreenshot)',
+            $source,
+            'Web+DB runner must not mark unsafe operations pass without screenshot-backed setup operation evidence.',
+        );
+        self::assertStringContainsString(
+            'unsafe operation not executed',
+            $source,
+            'Web+DB runner must fail browser-reached unsafe rows when the unsafe operation was not actually executed.',
+        );
+        self::assertStringContainsString(
+            'Browser navigation reached the page, but',
+            $source,
+            'Web+DB runner must record why page navigation alone is not enough evidence for unsafe operations.',
+        );
+    }
+
+    public function testWebE2ERunnerRecordsNetworkBoundary(): void
+    {
+        $source = $this->source(__DIR__ . '/../../scripts/web-e2e-runner.mjs');
+
+        self::assertStringContainsString(
+            'baseUrl is resolved from the runner process',
+            $source,
+            'Web+DB runner reports must state that localhost/127.0.0.1 are resolved from the runner process.',
+        );
+        self::assertStringContainsString(
+            'ローカルChrome/in-app browserが別マシンで動く場合',
+            $source,
+            'Web+DB reports must keep runner evidence separate from local browser evidence.',
+        );
+    }
+
     private function source(string $file): string
     {
         $source = file_get_contents($file);

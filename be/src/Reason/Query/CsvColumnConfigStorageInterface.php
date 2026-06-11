@@ -12,7 +12,8 @@ use Ray\MediaQuery\Annotation\DbQuery;
  * CSV column configuration storage — unified Query + Command (Wave 9).
  *
  *   - listByType(int $csvType)                     → every column row for a type
- *   - replaceType(int $csvType, list $entries)     → atomic per-type vector replace
+ *   - deleteType(int $csvType)                     → clear the old vector for a type
+ *   - insertType(int $csvType, list $entries)      → insert the new vector for a type
  *
  * The EC-CUBE admin form posts the entire column vector for one csvType
  * at once; modeled as `replaceType` so the storage cannot drift into a
@@ -27,6 +28,12 @@ interface CsvColumnConfigStorageInterface
     /** @return list<CsvColumnConfigEntity> sorted by sortNo */
     #[DbQuery('csv_column_list_by_type')]
     public function listByType(int $csvType): array;
+
+    #[DbQuery('csv_column_delete_type')]
+    public function deleteType(int $csvType): void;
+
+    #[DbQuery('csv_column_insert_type')]
+    public function insertType(int $csvType, CsvColumnConfigList $entries): void;
 
     #[DbQuery('csv_column_replace_type')]
     public function replaceType(int $csvType, CsvColumnConfigList $entries): void;

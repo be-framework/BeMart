@@ -20,6 +20,7 @@ use function strtolower;
 
 use const PHP_URL_PATH;
 use const PHP_URL_QUERY;
+use const UPLOAD_ERR_OK;
 
 /**
  * Canonical BEAR resource router.
@@ -75,8 +76,49 @@ final class CanonicalResourceRouter implements RouterInterface
         }
 
         $body = $post !== [] ? $post : $this->jsonBody($server);
+        if (! isset($body['csv'])) {
+            $body += $this->uploadedCsv($globals);
+        }
 
         return $body + $get;
+    }
+
+    /**
+     * @param array<string, mixed> $globals
+     * @return array{csv?: string}
+     */
+    private function uploadedCsv(array $globals): array
+    {
+        /** @var mixed $files */
+        $files = $globals['_FILES'] ?? [];
+        if (! is_array($files)) {
+            return [];
+        }
+
+        /** @var mixed $file */
+        $file = $files['import_file'] ?? null;
+        if (! is_array($file)) {
+            return [];
+        }
+
+        /** @var mixed $error */
+        $error = $file['error'] ?? null;
+        if ((int) $error !== UPLOAD_ERR_OK) {
+            return [];
+        }
+
+        /** @var mixed $tmpName */
+        $tmpName = $file['tmp_name'] ?? null;
+        if (! is_string($tmpName) || $tmpName === '') {
+            return [];
+        }
+
+        $csv = file_get_contents($tmpName);
+        if (! is_string($csv) || $csv === '') {
+            return [];
+        }
+
+        return ['csv' => $csv];
     }
 
     /**

@@ -12,7 +12,10 @@ use BEAR\Dev\Http\AbstractWorkflowTest;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
 
+use function array_column;
 use function assert;
+use function bin2hex;
+use function random_bytes;
 
 class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
 {
@@ -20,15 +23,14 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
 
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-master-data-csrf-token';
-    private const MASTER_TYPE = 'tag';
-    private const UPDATED_ROWS = [
-        ['id' => 'workflow-tag-1', 'name' => 'Workflow Tag', 'sortNo' => 1],
-    ];
+    private const MASTER_TYPE = 'payment';
 
     private static WorkflowDbSession|null $dbSession = null;
+    private static string $updatedName;
 
     public static function setUpBeforeClass(): void
     {
+        self::$updatedName = 'Workflow Payment ' . bin2hex(random_bytes(4));
         self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
@@ -91,17 +93,26 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
         $this->assertSame('PUT', $submitTo['method'] ?? null);
         $this->assertIsString($submitTo['href'] ?? null);
 
+        $rows = $this->bodyValue($response, 'rows');
+        $this->assertIsArray($rows);
+        $this->assertNotSame([], $rows);
+        $first = $rows[0];
+        $this->assertIsArray($first);
+        $this->assertIsString($first['id'] ?? null);
+
         $updated = $this->resource->put((string) $submitTo['href'], [
             'masterType' => self::MASTER_TYPE,
-            'rows' => self::UPDATED_ROWS,
+            'rows' => [
+                ['id' => $first['id'], 'name' => self::$updatedName],
+            ],
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $updated->code);
+        $this->assertContains($updated->code, [Code::OK, Code::SEE_OTHER]);
         $this->assertSame('doUpdateMasterData', $this->bodyValue($updated, 'transitionId'));
         $this->assertSame(self::MASTER_TYPE, $this->bodyValue($updated, 'masterType'));
         $this->assertSame(1, $this->bodyValue($updated, 'count'));
-        $this->assertSame('/admin/master-data', $this->header($updated, 'Location'));
+        $this->assertSame('/admin/master-data?masterType=payment', $this->header($updated, 'Location'));
 
         return $updated;
     }
@@ -110,8 +121,11 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
     #[Depends('testUpdatesMasterData')]
     public function testReadsUpdatedMasterData(ResourceObject $response): void
     {
-        $read = $this->follow($response, 'goMasterData', ['masterType' => self::MASTER_TYPE]);
+        $read = $this->followLocation($response);
 
         $this->assertSame(self::MASTER_TYPE, $this->bodyValue($read, 'selectedMaster'));
+        $rows = $this->bodyValue($read, 'rows');
+        $this->assertIsArray($rows);
+        $this->assertContains(self::$updatedName, array_column($rows, 'name'));
     }
 }

@@ -11,9 +11,11 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
+use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
@@ -22,7 +24,11 @@ use MyVendor\BeMart\Form\AdminLoginForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_values;
 use function assert;
+use function getenv;
+use function str_contains;
+use function trim;
 
 /**
  * EC-CUBE doAdminLogin — 管理者ログイン (Wave 4).
@@ -113,12 +119,44 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-admin-login.json', params: 'post-admin-login.param.json')]
     #[Link(rel: 'goAdminTop', href: 'page://self/admin/index')]
     #[CsrfProtected]
-    public function onPost(string $loginId, string $password): static
+    public function onPost(string|null $loginId = null, string|null $password = null, string|null $mode = null): static
     {
-        $final = ($this->becoming)(new AdminLoginInput(
-            loginId: $loginId,
-            password: $password,
-        ));
+        $values = [
+            'loginId' => $loginId ?? '',
+            'password' => $password ?? '',
+        ];
+        $browserForm = $mode !== null || str_contains((string) getenv('APP_CONTEXT'), 'html');
+        if ($browserForm) {
+            $errors = $this->formErrors($values);
+            if ($errors !== []) {
+                return $this->rejectForm($values, $errors);
+            }
+        }
+
+        try {
+            $final = ($this->becoming)(new AdminLoginInput(
+                loginId: $values['loginId'],
+                password: $values['password'],
+            ));
+        } catch (SemanticVariableException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            [$field, $message] = self::semanticError($e);
+
+            return $this->rejectForm($values, [$field => $message]);
+        } catch (AdminLoginFailedException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            return $this->rejectForm(
+                $values,
+                ['loginId' => self::domainMessage($e)],
+                Code::UNAUTHORIZED,
+            );
+        }
 
         assert($final instanceof AdminAuthenticated);
 
@@ -149,6 +187,76 @@ class Login extends ResourceObject
         ];
 
         return $this;
+    }
+
+    /** @param array{loginId: string, password: string} $values */
+    private function formErrors(array $values): array
+    {
+        $errors = [];
+        foreach ([
+            'loginId' => '入力してください。',
+            'password' => '入力してください。',
+        ] as $field => $message) {
+            if (trim($values[$field]) === '') {
+                $errors[$field] = $message;
+            }
+        }
+
+        return $errors;
+    }
+
+    /** @param array{loginId: string, password: string} $values */
+    private function rejectForm(array $values, array $errors, int $code = Code::BAD_REQUEST): static
+    {
+        $this->code = $code;
+        $this->body = [
+            'transitionId' => 'goAdminLogin',
+            'fields' => ['loginId', 'password', 'csrfToken'],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/admin/login',
+            ],
+            'csrfToken' => $this->csrf->token,
+            'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
+            'errors' => $errors,
+            'form' => $this->failedForm($values, $errors),
+        ];
+
+        return $this;
+    }
+
+    /** @param array{loginId: string, password: string} $values */
+    private function failedForm(array $values, array $errors): AdminLoginForm
+    {
+        $form = $this->formFactory->newInstance(AdminLoginForm::class);
+        assert($form instanceof AdminLoginForm);
+
+        $form->fillValues(['loginId' => $values['loginId']]);
+        foreach ($errors as $field => $message) {
+            $form->setDomainError($field, $message);
+        }
+
+        return $form;
+    }
+
+    /** @return array{0: string, 1: string} */
+    private static function semanticError(SemanticVariableException $e): array
+    {
+        $exception = $e->getErrors()->exceptions[0] ?? null;
+        $message = $e->getErrors()->getMessages('ja')[0] ?? '入力内容を確認してください。';
+
+        $field = $exception instanceof PasswordFormatException ? 'password' : 'loginId';
+
+        return [$field, $message];
+    }
+
+    private static function domainMessage(AdminLoginFailedException $e): string
+    {
+        $message = (new ValidationMessageHandler())->getMessage($e, 'ja');
+
+        return $message !== '' && $message !== 'Validation error'
+            ? $message
+            : 'ログインIDまたはパスワードが正しくありません。';
     }
 
     private function prefilledLoginForm(): AdminLoginForm

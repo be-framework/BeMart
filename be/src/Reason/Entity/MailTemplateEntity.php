@@ -33,6 +33,7 @@ final readonly class MailTemplateEntity implements \Ray\MediaQuery\ToScalarInter
         public string $mailTemplateName,
         public string $fileName,
         public string $subject,
+        public int $deletable = 0,
     ) {
     }
 }

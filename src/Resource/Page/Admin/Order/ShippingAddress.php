@@ -93,8 +93,8 @@ class ShippingAddress extends ResourceObject
         $form = $this->formFactory->newInstance(AdminOrderShippingForm::class);
         assert($form instanceof AdminOrderShippingForm);
         $form->fillValues([
-            'name01' => '', 'name02' => '', 'postal_code' => '', 'pref' => '',
-            'addr01' => '', 'addr02' => '', 'phone_number' => '',
+            'name01' => '', 'name02' => '', 'postalCode' => '', 'pref' => '',
+            'addr01' => '', 'addr02' => '', 'phoneNumber' => '',
         ]);
 
         $this->code = Code::OK;

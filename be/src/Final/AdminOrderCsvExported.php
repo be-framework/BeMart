@@ -42,7 +42,7 @@ use function stream_get_contents;
 final readonly class AdminOrderCsvExported
 {
     /** dtb_csv csv_type_id for the order export. */
-    private const CSV_TYPE = 1;
+    private const CSV_TYPE = 3;
 
     /** @var list<string> */
     private const DEFAULT_COLUMNS = [

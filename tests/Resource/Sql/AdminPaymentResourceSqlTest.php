@@ -38,13 +38,14 @@ use function str_contains;
  *    on both backends (SqlPaymentMethodAdminStorage rejects a
  *    non-numeric id as a miss, the same 404 path as any unknown id).
  *
- *  - the Fake-backed sibling starts with an empty PaymentMethodAdminStorageInterface
- *    and seeds every row through the resource layer's POST affordance;
- *    dtb_payment is likewise empty on each test, so this sibling seeds
- *    the same way — the POST drives the full Becoming chain
- *    (Input → PaymentMethodAdminCreated → direct MediaQuery payment id proxy
- *    → SqlPaymentMethodAdminStorage). No direct fixture seeding is
- *    needed since the Payment resource exposes a create affordance.
+ *  - the Fake-backed sibling starts with an empty
+ *    PaymentMethodAdminStorageInterface. The SQL side starts from the
+ *    installer payment masters loaded by sql/setup-db.sh, then creates
+ *    maintenance rows through the resource layer's POST affordance — the
+ *    POST drives the full Becoming chain (Input → PaymentMethodAdminCreated
+ *    → direct MediaQuery payment id proxy → SqlPaymentMethodAdminStorage).
+ *    No direct fixture seeding is needed since the Payment resource exposes
+ *    a create affordance.
  *
  * Why mirror exactly: per G-23 the Resource-layer contract MUST stay
  * green for both Fake and SQL backings. If the SQL side passes but the
@@ -142,7 +143,7 @@ final class AdminPaymentResourceSqlTest extends AbstractResourceSqlTestCase
         $ro = $this->resource->get('page://self/admin/payment/payment-list');
 
         $this->assertSame(Code::OK, $ro->code);
-        $this->assertSame(2, $ro->body['count']);
+        $this->assertGreaterThanOrEqual(2, $ro->body['count']);
     }
 
     public function testListRejectsAnonymousAdmin(): void

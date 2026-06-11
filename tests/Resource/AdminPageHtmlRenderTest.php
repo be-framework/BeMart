@@ -111,12 +111,28 @@ final class AdminPageHtmlRenderTest extends TestCase
             'pageId' => 'pg-homepage',
         ])->toString();
 
+        $this->assertStringContainsString('action="/admin/page/page?pageId=pg-homepage&_method=put"', $html);
         $this->assertStringContainsString('id="main_edit_name"', $html);
+        $this->assertStringContainsString('name="pageName"', $html);
         // The seed page name is repopulated from the resource body.
         $this->assertStringContainsString('value="ホームページ"', $html);
         $this->assertStringContainsString('id="main_edit_url"', $html);
+        $this->assertStringContainsString('name="pageUrl"', $html);
         $this->assertStringContainsString('id="main_edit_file_name"', $html);
+        $this->assertStringContainsString('name="pageFileName"', $html);
+        $this->assertStringContainsString('id="main_edit_tpl_data"', $html);
+        $this->assertStringContainsString('disabled="disabled"', $html);
         $this->assertStringContainsString('class="c-conversionArea"', $html);
+    }
+
+    public function testNewPageFormPostsToCollectionCreateAction(): void
+    {
+        $html = $this->resource->get('page://self/admin/page/page')->toString();
+
+        $this->assertStringContainsString('action="/admin/page/page-list"', $html);
+        $this->assertStringContainsString('name="pageName"', $html);
+        $this->assertStringContainsString('name="pageUrl"', $html);
+        $this->assertStringContainsString('name="pageFileName"', $html);
     }
 
     #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
@@ -298,10 +314,20 @@ final class AdminPageHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 
-        $formFields = ['name', 'url', 'file_name', 'tpl_data', 'author', 'description', 'keyword', 'meta_robots', 'meta_tags'];
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
-            if ($form instanceof AdminPageForm && is_string($field) && in_array($field, $formFields, true)) {
-                return new Markup($form->input($field), 'UTF-8');
+        $formFieldMap = [
+            'name' => 'pageName',
+            'url' => 'pageUrl',
+            'file_name' => 'pageFileName',
+            'tpl_data' => 'tpl_data',
+            'author' => 'author',
+            'description' => 'description',
+            'keyword' => 'keyword',
+            'meta_robots' => 'meta_robots',
+            'meta_tags' => 'meta_tags',
+        ];
+        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFieldMap): Markup {
+            if ($form instanceof AdminPageForm && is_string($field) && isset($formFieldMap[$field])) {
+                return new Markup($form->input($formFieldMap[$field]), 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

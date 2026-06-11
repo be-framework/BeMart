@@ -102,6 +102,7 @@ final readonly class AdminOrderUpdated
             orderStatus: $current->orderStatus,
             orderDate: $current->orderDate,
             paymentDate: $current->paymentDate,
+            customerSnapshot: $current->customerSnapshot,
         );
 
         $orderCommand->update($merged);

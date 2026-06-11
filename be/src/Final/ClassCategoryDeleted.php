@@ -26,6 +26,7 @@ use Ray\InputQuery\Attribute\Input;
 final readonly class ClassCategoryDeleted
 {
     public string $classCategoryId;
+    public string $classNameId;
 
     public function __construct(
         #[Input] string $classCategoryId,
@@ -36,12 +37,14 @@ final readonly class ClassCategoryDeleted
             throw new UnauthorizedAdminAccessException();
         }
 
-        if ($classCategories->item($classCategoryId) === null) {
+        $classCategory = $classCategories->item($classCategoryId);
+        if ($classCategory === null) {
             throw new ClassCategoryNotFoundException();
         }
 
         $classCategories->delete($classCategoryId);
 
         $this->classCategoryId = $classCategoryId;
+        $this->classNameId = $classCategory->classNameId;
     }
 }

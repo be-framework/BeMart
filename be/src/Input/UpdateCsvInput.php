@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Final\CsvConfigUpdated;
  *   UpdateCsvInput → CsvConfigUpdated  (Direct, idempotent)
  *
  * The EC-CUBE admin form posts the whole column vector for ONE csvType
- * at a time (order=1, customer=2, product=3, shipping=4); the storage
+ * at a time (product=1, customer=2, order=3, shipping=4); the storage
  * does a per-type atomic replace so the table cannot drift into a
  * mixed-old-and-new row set.
  *

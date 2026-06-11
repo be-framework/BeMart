@@ -45,7 +45,7 @@ use function stream_get_contents;
  *   productCode, productName, price02, stock, productStatus,
  *   description, searchWord, note
  *
- * The admin's saved doUpdateCsv configuration (dtb_csv, csvType=3)
+ * The admin's saved doUpdateCsv configuration (dtb_csv, csvType=1)
  * narrows / reorders this set via {@see CsvColumnLayout}; with no saved
  * configuration the full default vector is emitted (Wave 9 behaviour).
  *
@@ -54,7 +54,7 @@ use function stream_get_contents;
 final readonly class AdminProductCsvExported
 {
     /** dtb_csv csv_type_id for the product export. */
-    private const CSV_TYPE = 3;
+    private const CSV_TYPE = 1;
 
     /** Number of products fetched per SQL query during export. */
     private const EXPORT_BATCH_SIZE = 100;

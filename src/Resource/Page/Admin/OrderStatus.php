@@ -16,12 +16,15 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderStatusUpdated;
 use MyVendor\BeMart\Be\Input\AdminUpdateOrderStatusInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminOrderStatusForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function count;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doUpdateOrderStatus — 受注ステータス変更 (Wave 7).
@@ -61,6 +64,7 @@ class OrderStatus extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
+        private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -90,6 +94,7 @@ class OrderStatus extends ResourceObject
         $this->body = [
             'form' => $form,
             'orderStatuses' => AdminOrderStatusForm::rows(),
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;
@@ -123,7 +128,8 @@ class OrderStatus extends ResourceObject
             return $this;
         }
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/order-status';
         $this->body = [
             'transitionId' => 'doUpdateOrderStatusList',
             'count' => count($orderStatuses),

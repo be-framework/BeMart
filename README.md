@@ -38,12 +38,16 @@ Ray.MediaQuery SQL、Twig HTML、workflow evidence へ分解し、同じ契約�
 | Be domain | 147 Input / 148 Final / 157 Semantic / 14 Being |
 | BEAR Page Resource | 146 page resource |
 | Ray.MediaQuery | 54 interface / 150 `#[DbQuery]` / 150 SQL file |
-| API contract | 236 OpenAPI operations / 235 JSON Schema |
+| API contract | 237 OpenAPI operations / 237 response schema / 160 request schema |
 | HTML | 133 Twig templates |
-| Web E2E evidence | 186 features, 181 pass / 2 fail / 3 out-of-scope, 140 screenshots |
+| Web E2E evidence | 186 features, 175 pass / 2 fail / 9 out-of-scope, latest screenshots under `docs/web-e2e/screenshots/` |
 
 証拠の入口は [`docs/feature-evidence.md`](docs/feature-evidence.md) です。画面単位の証跡は
 [`docs/web-e2e/feature-implementation-matrix.md`](docs/web-e2e/feature-implementation-matrix.md)、
+Web+DB 完成判定のルールは
+[`docs/web-e2e/completion-evidence-rules.md`](docs/web-e2e/completion-evidence-rules.md)、
+再発防止メモは
+[`docs/web-e2e/repeated-failure-patterns.md`](docs/web-e2e/repeated-failure-patterns.md)、
 EC-CUBE route と ALPS / 実装状態の対応は
 [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html)、
 API surface は [`docs/api/`](docs/api/) にあります。

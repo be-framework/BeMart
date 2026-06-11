@@ -21,8 +21,8 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function sprintf;
-use function urlencode;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE goClassNameList + doCreateClassName — collection endpoint
@@ -49,6 +49,7 @@ class ClassNameList extends ResourceObject
     #[Link(rel: 'doCreateClassName', href: 'page://self/admin/class-name/class-name-list', method: 'post')]
     #[Link(rel: 'doUpdateClassName', href: 'page://self/admin/class-name/class-name', method: 'put')]
     #[Link(rel: 'doDeleteClassName', href: 'page://self/admin/class-name/class-name', method: 'delete')]
+    #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list{?classNameId}')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetAdminClassNameListInput());
@@ -82,8 +83,8 @@ class ClassNameList extends ResourceObject
 
         assert($final instanceof ClassNameCreated);
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/admin/class-name/class-name?classNameId=%s', urlencode($final->classNameId));
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
+        $this->headers['Location'] = '/admin/class-name/class-name-list';
         $this->body = [
             'classNameId' => $final->classNameId,
             'name' => $final->name,

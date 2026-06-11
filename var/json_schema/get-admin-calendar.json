@@ -104,6 +104,9 @@
         "maxLength": 1000,
         "description": "/admin/calendar のレスポンスに含まれる処理行。親コレクション `errors` の1行を表し、固定できる業務列はschema propertyで明示する。"
       }
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,

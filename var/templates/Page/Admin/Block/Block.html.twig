@@ -12,10 +12,11 @@
   Block resource (src/Resource/Page/Admin/Block/Block.php) exposes an
   {@see \MyVendor\BeMart\Form\AdminBlockForm} as `body['form']`. The
   inputs render through that real form object:
-    {{ form.input('name')|raw }}      <- real <input> w/ id/attrs/value
-    {{ form.error('name') }}          <- inline Be-domain error, if any
-  `AdminBlockForm::init()` ports the field names / ids from EC-CUBE's
-  `BlockType` (block prefix `block`).
+    {{ form.input('blockName')|raw }} <- real <input> w/ EC-CUBE id and canonical name
+    {{ form.error('blockName') }}     <- inline Be-domain error, if any
+  `AdminBlockForm::init()` ports the EC-CUBE ids from `BlockType`
+  (block prefix `block`) while posting BeMart's canonical Resource
+  request names (`blockName`, `blockFileName`).
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
@@ -26,7 +27,7 @@
    - `form_widget(form.id)` / `form_widget(form.DeviceType)` -> hidden
      bookkeeping inputs EC-CUBE's BlockType carries (the row id + device
      type). The Block resource body does not carry them as form fields
-     (the AdminBlockForm declares only name/file_name/block_html); the
+     (the AdminBlockForm declares only blockName/blockFileName/block_html); the
      hidden inputs are omitted. Enumerated as residual.
    - `{% form_theme %}` and the `auto_render` entity-extension loop ->
      Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
@@ -81,7 +82,7 @@
 
 {% block main %}
     <form name="content_block_form" id="content_block_form" method="post"
-          action="/admin/block/block">
+          action="{% if blockId is defined and blockId %}/admin/block/block?blockId={{ blockId }}&_method=put{% else %}/admin/block/block-list{% endif %}">
         <input type="hidden" id="block__token" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
@@ -107,8 +108,8 @@
                                         <span class="badge bg-primary ms-1">必須</span>
                                     </div>
                                     <div class="col-10">
-                                        {{ form.input('name')|raw }}
-                                        {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                        {{ form.input('blockName')|raw }}
+                                        {% if form.error('blockName') %}<span class="invalid-feedback d-block">{{ form.error('blockName') }}</span>{% endif %}
                                     </div>
                                 </div>
                                 <div class="row mb-2">
@@ -120,9 +121,9 @@
                                     </div>
                                     <div class="col-10">
                                         <div class="row align-items-center">
-                                            <span class="col-3">{{ form.input('file_name')|raw }}</span><span class="col-auto ps-0">.twig</span>
+                                            <span class="col-3">{{ form.input('blockFileName')|raw }}</span><span class="col-auto ps-0">.twig</span>
                                         </div>
-                                        {% if form.error('file_name') %}<span class="invalid-feedback d-block">{{ form.error('file_name') }}</span>{% endif %}
+                                        {% if form.error('blockFileName') %}<span class="invalid-feedback d-block">{{ form.error('blockFileName') }}</span>{% endif %}
                                     </div>
                                 </div>
                                 <div class="row mb-2">

@@ -114,6 +114,31 @@ final class OrderConfirmedTest extends TestCase
         $this->assertSame(13500, $final->items[1]['totalPrice']);
     }
 
+    public function testGuestConfirmScreenProjectionUsesOrderCustomerSnapshot(): void
+    {
+        // feedface… carries no customerId. Non-member checkout must render the
+        // order-time buyer snapshot instead of requiring a customer row.
+        $final = ($this->becoming)(new ConfirmOrderInput(
+            preOrderId: 'feedfacefeedfacefeedfacefeedfacefeedface',
+            paymentMethodId: 2,
+        ));
+
+        $this->assertInstanceOf(OrderConfirmed::class, $final);
+        $this->assertSame(1200, $final->subtotal);
+        $this->assertSame(120, $final->tax);
+        $this->assertSame(500, $final->deliveryFeeTotal);
+        $this->assertSame(1820, $final->total);
+        $this->assertSame('クレジットカード', $final->paymentMethodName);
+        $this->assertSame('非会員', $final->customer['name01']);
+        $this->assertSame('花子', $final->customer['name02']);
+        $this->assertSame('guest-confirm@example.com', $final->customer['email']);
+        $this->assertSame('1000001', $final->customer['postalCode']);
+        $this->assertSame(13, $final->customer['pref']);
+        $this->assertCount(1, $final->items);
+        $this->assertSame('サンプル商品 A', $final->items[0]['productName']);
+        $this->assertSame(1200, $final->items[0]['totalPrice']);
+    }
+
     public function testVerifyFailureBranchesToOrderConfirmFailed(): void
     {
         // paymentMethodId=9 routes to the fake payment failure handler.

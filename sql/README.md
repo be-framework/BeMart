@@ -10,7 +10,8 @@ sql/
 │   └── ec-cube-4.3-mysql-mysqldump.sql  # 65 tables, structure only, utf8mb4_bin
 ├── migrations/                          # BeMart schema deltas applied after the EC-CUBE dump
 ├── seed/                                # committed reference/master data
-│   └── mtb-master.sql                   # 22 mtb_* tables, 395 reference rows
+│   ├── mtb-master.sql                   # 22 mtb_* tables, 395 reference rows
+│   └── dtb-system-master.sql            # installer-level dtb_* system rows
 ├── diff/                                # planning docs
 │   └── entity-vs-eccube.md              # BeMart Entity ↔ EC-CUBE table diff (Phase 2b)
 ├── setup-db.sh                          # reproducible prod DB bring-up
@@ -19,9 +20,10 @@ sql/
 
 ## Production database bring-up
 
-A live production database needs three committed artefact sets: the **schema**
+A live production database needs four committed artefact sets: the **schema**
 (`schema/ec-cube-4.3-mysql-mysqldump.sql`), BeMart **migrations**
-(`migrations/*.sql`), and the **mtb_\* master seed** (`seed/mtb-master.sql`).
+(`migrations/*.sql`), the **mtb_\* master seed** (`seed/mtb-master.sql`),
+and the **dtb_\* system master seed** (`seed/dtb-system-master.sql`).
 `setup-db.sh` stitches them together so a prod DB can be stood up
 reproducibly:
 
@@ -51,13 +53,32 @@ The script:
    mirrors the workaround in `be/tests/Sql/bootstrap.php` (Phase 2a Step 2).
 3. Applies BeMart schema deltas under `migrations/*.sql` in filename order.
 4. Loads `seed/mtb-master.sql`.
-5. Prints exact `COUNT(*)` per `mtb_*` table as a sanity check
+5. Loads `seed/dtb-system-master.sql`: installer-level rows such as the
+   default admin member, layout, mail template, and initial payment methods.
+6. Prints exact `COUNT(*)` per `mtb_*` table as a sanity check
    (e.g. `mtb_pref = 47`).
 
-After this, the database has the full schema + all reference data and is
-ready for `dtb_*` operational data. Migrating `dtb_*` customer/order/product
-data from a live EC-CUBE instance is a **separate operational concern** and
-is **not** performed by this script.
+After this, the database has the full schema, reference data, and the small
+set of installer system rows required for a fresh shop to run. Migrating or
+seeding `dtb_*` customer/order/product/cart/favorite business data from a live
+EC-CUBE instance is a **separate operational concern** and is **not** performed
+by this script.
+
+## The dtb_* system master seed (`seed/dtb-system-master.sql`)
+
+These rows are application configuration masters, not business fixtures. They
+exist so a freshly installed shop has the same minimum affordances the web
+workflow expects:
+
+- `dtb_member`: the test/admin bootstrap account.
+- `dtb_payment`: initial visible payment methods (`代金引換`,
+  `クレジットカード`) referenced by checkout `dtb_order.payment_id`.
+- `dtb_layout`: the default PC layout.
+- `dtb_mail_template`: the default order mail template.
+
+Do not add products, customers, carts, orders, shippings, favorites, or other
+workflow-created business state here. Those must be created through Web/HTTP
+affordances in workflow tests.
 
 ## The mtb_* master seed (`seed/mtb-master.sql`)
 
