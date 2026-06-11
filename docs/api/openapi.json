@@ -669,16 +669,22 @@
                                         "description": "\u66f8\u304d\u8fbc\u307f\u5c02\u7528\uff08\u30cf\u30c3\u30b7\u30e5\u5316\u3057\u3066\u4fdd\u5b58\uff09 Fake\u89b3\u5bdf\u6587\u5b57\u9577 50\u301c63; \u89b3\u5bdf\u5024 '$2y$12$Vl/YKSI0DjUOxYJWH9ytAeVk3Z7l21e.6UM7gh46gpdsbvT4OQ4eG', '$2y$10$deputyplaceholder.hash.never.verified.0123456789abcdef', '$2y$10$zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876', '$2y$12$dC7U8xCHBGmNT2TjlWbv6.ho4y.Lcezn5PT0ywpUsaxk0x49tUune', '$2y$10$shopownerplaceholder.hash.never.verified.0123456789ab', '$2y$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123', '$2y$10$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS', '$2y$12$placeholder.hash.never.verified.never.0123456789abcde'\u3002",
                                         "example": "$2y$12$Vl/YKSI0DjUOxYJWH9ytAeVk3Z7l21e.6UM7gh46gpdsbvT4OQ4eG",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "description": "HTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u3092Resource/JSON\u5883\u754c\u3068\u533a\u5225\u3059\u308b\u305f\u3081\u306e\u4efb\u610f\u30d1\u30e9\u30e1\u30fc\u30bf\u3002\u30ed\u30b0\u30a4\u30f3\u753b\u9762\u3067\u306f browser form re-render \u5224\u5b9a\u306b\u3060\u3051\u4f7f\u3046\u3002",
+                                        "example": "login"
                                     }
-                                },
-                                "required": [
-                                    "email",
-                                    "password"
-                                ]
+                                }
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "responses": {
                     "200": {
@@ -1168,7 +1174,7 @@
         "/admin/authority-role": {
             "get": {
                 "operationId": "doUpdateAuthorityRole",
-                "summary": "Phase 3 admin HTML Tier-2: render the authority-rule management\nscreen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE\nalso has a GET page for editing URL-deny rules. No persisted\n`dtb_authority_role` storage exists in BeMart yet, so this GET\nexposes the stable form body shape the HTML needs and flags the\nrule rows as static placeholders.",
+                "summary": "Phase 3 admin HTML Tier-2: render the authority-rule management\nscreen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE\nuses the same resource to edit URL-deny rules stored in\n`dtb_authority_role`.",
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -1184,7 +1190,7 @@
             },
             "post": {
                 "operationId": "doUpdateAuthorityRole",
-                "summary": "Wave 8: both `loginId` and `authority` are admin-form input\n(loginId from the row selection, authority from a dropdown of\nmtb_authority values).",
+                "summary": "Wave 8: browser form input for URL deny rules. The primary HTML\nshape is `csrfToken` plus `AuthorityRoles[*][Authority]` /\n`AuthorityRoles[*][deny_url]`. The legacy member role-flip shape\n(`loginId`, `authority`) remains supported for member workflow.",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1212,16 +1218,62 @@
                                         "description": "\u7ba1\u7406\u8005\u6a29\u9650\u30ec\u30d9\u30eb\u30020=\u30b7\u30b9\u30c6\u30e0\u7ba1\u7406\u8005\uff08\u6700\u9ad8\u6a29\u9650\u3001\u5168\u6a5f\u80fd\u30a2\u30af\u30bb\u30b9\u53ef\u80fd\uff09, 1=\u5e97\u8217\u30aa\u30fc\u30ca\u30fc\uff08\u5236\u9650\u3042\u308a\u3001denyUrl\u3067\u5236\u9650\u3055\u308c\u305fURL\u306b\u30a2\u30af\u30bb\u30b9\u4e0d\u53ef\uff09\u3002\u6570\u5024\u304c\u5c0f\u3055\u3044\u307b\u3069\u6a29\u9650\u304c\u9ad8\u3044\u3002AuthorityRole\u306eURL\u62d2\u5426\u30d1\u30bf\u30fc\u30f3\u3067\u30a2\u30af\u30bb\u30b9\u5236\u5fa1 Fake\u89b3\u5bdf\u6570\u5024 0\u301c1; \u89b3\u5bdf\u5024 '1', '0'\u3002",
                                         "example": 1,
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "AuthorityRoles": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "title": "\u6a29\u9650\u30eb\u30fc\u30eb\u5165\u529b\u4e00\u89a7",
+                                        "description": "\u6a29\u9650\u7ba1\u7406\u753b\u9762\u306eURL\u62d2\u5426\u30eb\u30fc\u30eb\u884c\u3002HTML form \u306e AuthorityRoles[*][Authority] / deny_url \u3092\u53d7\u3051\u53d6\u308b\u3002",
+                                        "items": {
+                                            "type": [
+                                                "object",
+                                                "null"
+                                            ],
+                                            "properties": {
+                                                "Authority": {
+                                                    "type": [
+                                                        "integer",
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "title": "\u6a29\u9650"
+                                                },
+                                                "authority": {
+                                                    "type": [
+                                                        "integer",
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "title": "\u6a29\u9650"
+                                                },
+                                                "deny_url": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "title": "\u62d2\u5426URL"
+                                                },
+                                                "denyUrl": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "title": "\u62d2\u5426URL"
+                                                }
+                                            },
+                                            "additionalProperties": true
+                                        },
+                                        "minItems": 0
+                                    },
+                                    "csrfToken": {
+                                        "$ref": "#/$defs/csrfToken"
                                     }
-                                },
-                                "required": [
-                                    "loginId",
-                                    "authority"
-                                ]
+                                }
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "responses": {
                     "200": {
@@ -1543,7 +1595,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "integer"
+                            "type": "string"
                         },
                         "description": "\u30ab\u30ec\u30f3\u30c0\u30fcID\uff08\u5165\u529b\uff09 - /admin/calendar \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u5bfe\u8c61\u3092\u8b58\u5225\u3059\u308b\u30ab\u30ec\u30f3\u30c0\u30fcID\u3002DB\u63a1\u756aID\u3001Fake\u6587\u5b57\u5217ID\u3001\u4e92\u63db\u5883\u754cID\u306e\u3069\u308c\u306b\u8a72\u5f53\u3059\u308b\u304b\u3092schema\u306e\u578b\u3068\u30b3\u30e1\u30f3\u30c8\u3067\u5206\u3051\u308b\u3002"
                     }
@@ -1876,7 +1928,7 @@
                         "schema": {
                             "type": "integer"
                         },
-                        "description": "CSV\u7a2e\u5225\uff08\u5165\u529b\uff09 - CSV\u51fa\u529b\u9805\u76ee\u8a2d\u5b9a\u3067\u7de8\u96c6\u5bfe\u8c61\u306b\u3059\u308bCSV\u7a2e\u5225\u30021=\u53d7\u6ce8CSV, 2=\u4f1a\u54e1CSV, 3=\u5546\u54c1CSV, 4=\u914d\u9001CSV\u3002HTTP query\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u5834\u5408\u304c\u3042\u308b\u305f\u3081transport schema\u3067\u306fstring|integer|null\u3092\u8a31\u5bb9\u3057\u3001\u610f\u5473\u691c\u8a3c\u306fResource/Semantic\u5c64\u3078\u59d4\u306d\u308b\u3002"
+                        "description": "CSV\u7a2e\u5225\uff08\u5165\u529b\uff09 - CSV\u51fa\u529b\u9805\u76ee\u8a2d\u5b9a\u3067\u7de8\u96c6\u5bfe\u8c61\u306b\u3059\u308bCSV\u7a2e\u5225\u30021=\u5546\u54c1CSV, 2=\u4f1a\u54e1CSV, 3=\u53d7\u6ce8CSV, 4=\u914d\u9001CSV\u3002HTTP query\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u5834\u5408\u304c\u3042\u308b\u305f\u3081transport schema\u3067\u306fstring|integer|null\u3092\u8a31\u5bb9\u3057\u3001\u610f\u5473\u691c\u8a3c\u306fResource/Semantic\u5c64\u3078\u59d4\u306d\u308b\u3002"
                     }
                 ],
                 "responses": {
@@ -1910,7 +1962,7 @@
                                             "null"
                                         ],
                                         "title": "CSV\u7a2e\u5225\uff08\u5165\u529b\uff09",
-                                        "description": "dtb_csv.csv_type_id \u2014 mtb_csv_type \u3078\u306e FK\uff081=\u6ce8\u6587CSV, 2=\u4f1a\u54e1CSV, 3=\u5546\u54c1CSV, 4=\u51fa\u8377CSV\uff09\u30021\u3064\u306e csvType \u304c\u8907\u6570\u306e\u5217\u8a2d\u5b9a\u884c\uff08dtb_csv \u884c\uff09\u3092\u6240\u6709\u3059\u308b\u3002doUpdateCsv \u306f1\u3064\u306e csvType \u306e\u5217\u30d9\u30af\u30bf\u5168\u4f53\u3092\u4e00\u62ec POST \u3057\u3001SqlCsvColumnConfigStorage::replaceType \u304c\u305d\u306e csvType \u306e\u884c\u96c6\u5408\u3092\u30a2\u30c8\u30df\u30c3\u30af\u306b\u7f6e\u63db\u3059\u308b\u3002mtb_csv_type \u306f structure-only \u30c0\u30f3\u30d7\u3067\u7a7a\u306e\u305f\u3081 SQL \u30c6\u30b9\u30c8\u306f seedCsvTypes \u3067\u30b7\u30fc\u30c9\uff08seedAdminMasters \u3068\u540c\u3058\u7a7a\u30de\u30b9\u30bf FK \u30b7\u30fc\u30c9\u898f\u7d04\uff09",
+                                        "description": "dtb_csv.csv_type_id \u2014 mtb_csv_type \u3078\u306e FK\uff081=\u5546\u54c1CSV, 2=\u4f1a\u54e1CSV, 3=\u53d7\u6ce8CSV, 4=\u51fa\u8377CSV\uff09\u30021\u3064\u306e csvType \u304c\u8907\u6570\u306e\u5217\u8a2d\u5b9a\u884c\uff08dtb_csv \u884c\uff09\u3092\u6240\u6709\u3059\u308b\u3002doUpdateCsv \u306f1\u3064\u306e csvType \u306e\u5217\u30d9\u30af\u30bf\u5168\u4f53\u3092\u4e00\u62ec POST \u3057\u3001SqlCsvColumnConfigStorage::replaceType \u304c\u305d\u306e csvType \u306e\u884c\u96c6\u5408\u3092\u30a2\u30c8\u30df\u30c3\u30af\u306b\u7f6e\u63db\u3059\u308b\u3002mtb_csv_type \u306f structure-only \u30c0\u30f3\u30d7\u3067\u7a7a\u306e\u305f\u3081 SQL \u30c6\u30b9\u30c8\u306f seedCsvTypes \u3067\u30b7\u30fc\u30c9\uff08seedAdminMasters \u3068\u540c\u3058\u7a7a\u30de\u30b9\u30bf FK \u30b7\u30fc\u30c9\u898f\u7d04\uff09",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                     },
                                     "columns": {
@@ -1925,6 +1977,17 @@
                                             "title": "CSV\u5217\uff08\u5165\u529b\uff09",
                                             "description": "/admin/csv-config \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308bCSV\u5217\u3002\u89aa\u30b3\u30ec\u30af\u30b7\u30e7\u30f3 `columns` \u306e1\u884c\u3092\u8868\u3057\u3001\u56fa\u5b9a\u3067\u304d\u308b\u696d\u52d9\u5217\u306fschema property\u3067\u660e\u793a\u3059\u308b\u3002",
                                             "properties": {
+                                                "columnName": {
+                                                    "type": [
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "minLength": 0,
+                                                    "maxLength": 255,
+                                                    "title": "CSV\u5217\u540d\uff08\u5165\u529b\uff09",
+                                                    "description": "doUpdateCsv \u304c\u4fdd\u5b58\u3059\u308bCSV\u5217\u306e\u5185\u90e8\u540d\u3002HTML\u30d5\u30a9\u30fc\u30e0\u3067\u306f columns[n][columnName] \u3068\u3057\u3066\u9001\u4fe1\u3055\u308c\u308b\u3002",
+                                                    "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                                },
                                                 "name": {
                                                     "type": [
                                                         "string",
@@ -1962,11 +2025,23 @@
                                                 "enabled": {
                                                     "type": [
                                                         "boolean",
+                                                        "integer",
+                                                        "string",
                                                         "null"
                                                     ],
                                                     "title": "\u51e6\u7406\u72b6\u614b\u30d5\u30e9\u30b0\uff08\u5165\u529b\uff09",
                                                     "description": "\u89b3\u5bdf\u5024 'true', 'false'\u3002",
                                                     "example": "true",
+                                                    "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                                },
+                                                "sortNo": {
+                                                    "type": [
+                                                        "integer",
+                                                        "string",
+                                                        "null"
+                                                    ],
+                                                    "title": "CSV\u5217\u9806\uff08\u5165\u529b\uff09",
+                                                    "description": "doUpdateCsv \u306e\u5217\u9806\u3002HTML\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u9001\u4fe1\u3055\u308c\u308b\u3002",
                                                     "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                                 }
                                             },
@@ -1974,11 +2049,46 @@
                                         },
                                         "minItems": 0,
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "csvOutput": {
+                                        "type": [
+                                            "array",
+                                            "string",
+                                            "null"
+                                        ],
+                                        "title": "CSV\u51fa\u529b\u5bfe\u8c61\u5217\uff08HTML\u5165\u529b\uff09",
+                                        "description": "CSV\u8a2d\u5b9a\u753b\u9762\u306e multi-select `csvOutput[]` \u304c\u9001\u308b\u51fa\u529b\u5bfe\u8c61\u5217\u3002JavaScript \u304c\u751f\u6210\u3059\u308b columns[n] \u3068\u540c\u3058\u5217\u30d9\u30af\u30bf\u3078 Resource \u5883\u754c\u3067\u6b63\u898f\u5316\u3055\u308c\u308b\u3002",
+                                        "items": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ],
+                                            "minLength": 0,
+                                            "maxLength": 255
+                                        },
+                                        "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "csvNotOutput": {
+                                        "type": [
+                                            "array",
+                                            "string",
+                                            "null"
+                                        ],
+                                        "title": "CSV\u975e\u51fa\u529b\u5bfe\u8c61\u5217\uff08HTML\u5165\u529b\uff09",
+                                        "description": "CSV\u8a2d\u5b9a\u753b\u9762\u306e multi-select `csvNotOutput[]` \u304c\u9001\u308b\u975e\u51fa\u529b\u5bfe\u8c61\u5217\u3002JavaScript \u304c\u751f\u6210\u3059\u308b columns[n] \u3068\u540c\u3058\u5217\u30d9\u30af\u30bf\u3078 Resource \u5883\u754c\u3067\u6b63\u898f\u5316\u3055\u308c\u308b\u3002",
+                                        "items": {
+                                            "type": [
+                                                "string",
+                                                "null"
+                                            ],
+                                            "minLength": 0,
+                                            "maxLength": 255
+                                        },
+                                        "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                     }
                                 },
                                 "required": [
-                                    "csvType",
-                                    "columns"
+                                    "csvType"
                                 ]
                             }
                         }
@@ -2322,16 +2432,22 @@
                                         "description": "\u66f8\u304d\u8fbc\u307f\u5c02\u7528\uff08\u30cf\u30c3\u30b7\u30e5\u5316\u3057\u3066\u4fdd\u5b58\uff09 Fake\u89b3\u5bdf\u6587\u5b57\u9577 50\u301c63; \u89b3\u5bdf\u5024 '$2y$12$Vl/YKSI0DjUOxYJWH9ytAeVk3Z7l21e.6UM7gh46gpdsbvT4OQ4eG', '$2y$10$deputyplaceholder.hash.never.verified.0123456789abcdef', '$2y$10$zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876', '$2y$12$dC7U8xCHBGmNT2TjlWbv6.ho4y.Lcezn5PT0ywpUsaxk0x49tUune', '$2y$10$shopownerplaceholder.hash.never.verified.0123456789ab', '$2y$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123', '$2y$10$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS', '$2y$12$placeholder.hash.never.verified.never.0123456789abcde'\u3002",
                                         "example": "$2y$12$Vl/YKSI0DjUOxYJWH9ytAeVk3Z7l21e.6UM7gh46gpdsbvT4OQ4eG",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "description": "HTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u3092Resource/JSON\u5883\u754c\u3068\u533a\u5225\u3059\u308b\u305f\u3081\u306e\u4efb\u610f\u30d1\u30e9\u30e1\u30fc\u30bf\u3002\u7ba1\u7406\u30ed\u30b0\u30a4\u30f3\u753b\u9762\u3067\u306f browser form re-render \u5224\u5b9a\u306b\u3060\u3051\u4f7f\u3046\u3002",
+                                        "example": "login"
                                     }
-                                },
-                                "required": [
-                                    "loginId",
-                                    "password"
-                                ]
+                                }
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "responses": {
                     "200": {
@@ -2404,6 +2520,16 @@
             "get": {
                 "operationId": "goMailTemplateList",
                 "summary": "Wave 9\u03b9: goMailTemplateList \u2014 admin lists every mail template.",
+                "parameters": [
+                    {
+                        "name": "mailTemplateId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -2450,11 +2576,22 @@
                                         "description": "\u30e1\u30fc\u30eb\u306e\u4ef6\u540d\u3002\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u5909\u6570\u3092\u542b\u3080\u5834\u5408\u3042\u308a Fake\u89b3\u5bdf\u6587\u5b57\u9577 13\u301c13; \u89b3\u5bdf\u5024 '\u3054\u6ce8\u6587\u3042\u308a\u304c\u3068\u3046\u3054\u3056\u3044\u307e\u3059'\u3002",
                                         "example": "\u3054\u6ce8\u6587\u3042\u308a\u304c\u3068\u3046\u3054\u3056\u3044\u307e\u3059",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mail_subject": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30e1\u30fc\u30eb\u4ef6\u540d\uff08HTML\u30d5\u30a9\u30fc\u30e0\u5165\u529b\uff09",
+                                        "description": "\u7ba1\u7406\u753b\u9762HTML\u30d5\u30a9\u30fc\u30e0\u306e `mail_subject` field\u3002Resource\u3067\u306f `mailSubject` \u3068\u540c\u3058 doUpdateMailTemplate \u306e\u4ef6\u540d\u5165\u529b\u3068\u3057\u3066\u6271\u3046\u3002",
+                                        "example": "\u3054\u6ce8\u6587\u3042\u308a\u304c\u3068\u3046\u3054\u3056\u3044\u307e\u3059",
+                                        "$comment": "HTTP form boundary uses snake_case field names; Resource normalizes this to the ALPS mailSubject input."
                                     }
                                 },
                                 "required": [
-                                    "mailTemplateId",
-                                    "mailSubject"
+                                    "mailTemplateId"
                                 ]
                             }
                         }
@@ -2778,6 +2915,28 @@
                                         "description": "\u7ba1\u7406\u8005\u6a29\u9650\u30ec\u30d9\u30eb\u30020=\u30b7\u30b9\u30c6\u30e0\u7ba1\u7406\u8005\uff08\u6700\u9ad8\u6a29\u9650\u3001\u5168\u6a5f\u80fd\u30a2\u30af\u30bb\u30b9\u53ef\u80fd\uff09, 1=\u5e97\u8217\u30aa\u30fc\u30ca\u30fc\uff08\u5236\u9650\u3042\u308a\u3001denyUrl\u3067\u5236\u9650\u3055\u308c\u305fURL\u306b\u30a2\u30af\u30bb\u30b9\u4e0d\u53ef\uff09\u3002\u6570\u5024\u304c\u5c0f\u3055\u3044\u307b\u3069\u6a29\u9650\u304c\u9ad8\u3044\u3002AuthorityRole\u306eURL\u62d2\u5426\u30d1\u30bf\u30fc\u30f3\u3067\u30a2\u30af\u30bb\u30b9\u5236\u5fa1 Fake\u89b3\u5bdf\u6570\u5024 0\u301c1; \u89b3\u5bdf\u5024 '1', '0'\u3002",
                                         "example": 1,
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "passwordConfirm": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 128,
+                                        "title": "\u30d1\u30b9\u30ef\u30fc\u30c9\u78ba\u8a8d\uff08\u5165\u529b\uff09",
+                                        "$comment": "Browser-form boundary field; compared with password before CreateMemberInput.",
+                                        "description": "\u30d1\u30b9\u30ef\u30fc\u30c9\u78ba\u8a8d\uff08\u5165\u529b\uff09"
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "$comment": "HTML form submit marker; Resource workflow calls omit it.",
+                                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9"
                                     }
                                 },
                                 "required": [
@@ -2839,6 +2998,17 @@
                                         "description": "Fake\u89b3\u5bdf\u6587\u5b57\u9577 1\u301c7; \u89b3\u5bdf\u5024 '\u30c6\u30b9\u30c8\u7ba1\u7406\u8005', '\u526f\u7ba1\u7406\u8005', '\u5e97\u8217\u30aa\u30fc\u30ca\u30fc', '\u524a\u9664\u6e08\u307f\u7ba1\u7406\u8005', 'Red', 'Blue', 'S', 'Color'\u3002",
                                         "example": "\u30c6\u30b9\u30c8\u7ba1\u7406\u8005",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "$comment": "HTML form submit marker; Resource workflow calls omit it.",
+                                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9"
                                     }
                                 },
                                 "required": [
@@ -2878,6 +3048,15 @@
                         },
                         "description": "\u30ed\u30b0\u30a4\u30f3ID\uff08\u5165\u529b\uff09 - \u7ba1\u7406\u753b\u9762\u30ed\u30b0\u30a4\u30f3\u7528\u306eID\u3002\u4e00\u610f Fake\u89b3\u5bdf\u6587\u5b57\u9577 6\u301c13; \u89b3\u5bdf\u5024 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'\u3002",
                         "example": "test-admin"
+                    },
+                    {
+                        "name": "mode",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9"
                     }
                 ],
                 "responses": {
@@ -4346,19 +4525,80 @@
                                             "null"
                                         ],
                                         "minLength": 0,
-                                        "maxLength": 255,
+                                        "maxLength": 65535,
                                         "title": "\u7279\u5b9a\u5546\u53d6\u5f15\u6cd5\u672c\u6587\uff08\u5165\u529b\uff09",
                                         "description": "\u7279\u5b9a\u5546\u53d6\u5f15\u6cd5\u30da\u30fc\u30b8\u672c\u6587\u306e\u5358\u4e00\u30d6\u30ed\u30d6\u6295\u5f71\u3002\u9805\u76ee\u5225\u884c\u3067\u306f\u306a\u304f\u3001\u30da\u30fc\u30b8\u5168\u4f53\u30921\u672c\u306e\u672c\u6587\u3068\u3057\u3066\u6271\u3046\u3002",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "enum": [
+                                            "trade_law_form",
+                                            null
+                                        ],
+                                        "description": "HTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u6642\u306ePRG mode\u3002"
+                                    },
+                                    "trade_law_1_name": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_1_description": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_1_displayOrderScreen": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_2_name": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_2_description": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_2_displayOrderScreen": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_3_name": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_3_description": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_3_displayOrderScreen": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_4_name": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_4_description": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_4_displayOrderScreen": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_5_name": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_5_description": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_5_displayOrderScreen": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_6_name": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_6_description": {
+                                        "type": "string"
+                                    },
+                                    "trade_law_6_displayOrderScreen": {
+                                        "type": "string"
                                     }
-                                },
-                                "required": [
-                                    "tradeLawBody"
-                                ]
+                                }
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "responses": {
                     "200": {
@@ -6933,8 +7173,20 @@
         "/admin/block/block": {
             "get": {
                 "operationId": "goBlock",
-                "summary": "Renders the block edit form (new-block case).",
+                "summary": "Renders the block edit form.",
                 "description": "The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.",
+                "parameters": [
+                    {
+                        "name": "blockId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "\u30d6\u30ed\u30c3\u30afID\uff08\u5165\u529b\uff09 - dtb_block.id \u306e\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u30cf\u30f3\u30c9\u30eb\u3002SQL \u5b9f\u88c5\u3067\u306f dtb_block.id \u3092\u6587\u5b57\u5217\u5316\u3057\u3066\u4f7f\u7528\u3057\u3001Fake \u5b9f\u88c5\u3067\u306f bk-* seed handle \u3092\u4f7f\u7528\u3059\u308b\u3002",
+                        "example": "1"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -6945,6 +7197,9 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request"
                     }
                 }
             },
@@ -7019,8 +7274,8 @@
                 }
             },
             "delete": {
-                "operationId": "doUpdateBlock",
-                "summary": "ALPS `doUpdateBlock` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
+                "operationId": "doDeleteBlock",
+                "summary": "ALPS `doDeleteBlock` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "blockId",
@@ -7239,8 +7494,8 @@
                 }
             },
             "delete": {
-                "operationId": "doUpdateCategory",
-                "summary": "ALPS `doUpdateCategory` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
+                "operationId": "doDeleteCategory",
+                "summary": "ALPS `doDeleteCategory` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "categoryId",
@@ -7511,8 +7766,8 @@
                 }
             },
             "delete": {
-                "operationId": "doUpdateClassCategory",
-                "summary": "ALPS `doUpdateClassCategory` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
+                "operationId": "doDeleteClassCategory",
+                "summary": "ALPS `doDeleteClassCategory` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "classCategoryId",
@@ -7725,8 +7980,8 @@
                 }
             },
             "delete": {
-                "operationId": "doUpdateClassName",
-                "summary": "ALPS `doUpdateClassName` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
+                "operationId": "doDeleteClassName",
+                "summary": "ALPS `doDeleteClassName` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "classNameId",
@@ -7856,7 +8111,29 @@
             },
             "put": {
                 "operationId": "doClearCache",
-                "summary": "ALPS `doClearCache` \u306b\u5bfe\u5fdc\u3059\u308b PUT \u64cd\u4f5c\u3002",
+                "summary": "Clears the application cache (doClearCache).",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "type": "object",
+                                "properties": {
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "$comment": "HTML form submit marker; Resource workflow calls omit it.",
+                                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -7867,6 +8144,9 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request"
                     }
                 }
             }
@@ -7908,6 +8188,17 @@
                                         "description": "/admin/content/css \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u904b\u3076\u51e6\u7406\u4e00\u89a7\u3002CSV/PDF/\u30ed\u30b0\u7b49\u306e\u5185\u90e8\u5f62\u5f0f\u306f\u5c02\u7528\u5883\u754c\u3067\u6271\u3044\u3001JSON Schema\u3067\u306f\u8f38\u9001\u4e0a\u306e\u578b\u3068\u30b5\u30a4\u30ba\u3092\u5951\u7d04\u3059\u308b\u3002",
                                         "default": "",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "$comment": "HTML form submit marker; Resource workflow calls omit it.",
+                                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9"
                                     }
                                 }
                             }
@@ -7986,6 +8277,17 @@
                                         "description": "/admin/content/js \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u904b\u3076\u51e6\u7406\u4e00\u89a7\u3002CSV/PDF/\u30ed\u30b0\u7b49\u306e\u5185\u90e8\u5f62\u5f0f\u306f\u5c02\u7528\u5883\u754c\u3067\u6271\u3044\u3001JSON Schema\u3067\u306f\u8f38\u9001\u4e0a\u306e\u578b\u3068\u30b5\u30a4\u30ba\u3092\u5951\u7d04\u3059\u308b\u3002",
                                         "default": "",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "$comment": "HTML form submit marker; Resource workflow calls omit it.",
+                                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9"
                                     }
                                 }
                             }
@@ -8045,6 +8347,17 @@
                                         "description": "\u89b3\u5bdf\u5024 'true', 'false'\u3002",
                                         "example": "true",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 32,
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9",
+                                        "$comment": "HTML form submit marker; Resource workflow calls omit it.",
+                                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u30e2\u30fc\u30c9"
                                     }
                                 },
                                 "required": [
@@ -8222,8 +8535,8 @@
                 }
             },
             "delete": {
-                "operationId": "doUpdateDelivery",
-                "summary": "ALPS `doUpdateDelivery` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
+                "operationId": "doDeleteDelivery",
+                "summary": "ALPS `doDeleteDelivery` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "deliveryId",
@@ -8330,9 +8643,21 @@
         },
         "/admin/layout/layout": {
             "get": {
-                "operationId": "doUpdateLayout",
+                "operationId": "goLayout",
                 "summary": "Renders the layout editor form (new-layout case).",
                 "description": "The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.",
+                "parameters": [
+                    {
+                        "name": "layoutId",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        },
+                        "description": "\u30ec\u30a4\u30a2\u30a6\u30c8ID\uff08\u5165\u529b\uff09 - dtb_layout.id \u306e\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u30cf\u30f3\u30c9\u30eb\u3002SQL \u5b9f\u88c5\u3067\u306f dtb_layout.id \u3092\u6587\u5b57\u5217\u5316\u3057\u3066\u4f7f\u7528\u3057\u3001Fake \u5b9f\u88c5\u3067\u306f seed handle \u3092\u4f7f\u7528\u3059\u308b\u3002",
+                        "example": "1"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful response",
@@ -8343,6 +8668,9 @@
                                 }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Bad Request"
                     }
                 }
             },
@@ -8378,6 +8706,18 @@
                                         "description": "\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 4\u301c5; \u89b3\u5bdf\u5024 'PC\u6a19\u6e96', '\u30b9\u30de\u30db\u6a19\u6e96'\u3002",
                                         "example": "PC\u6a19\u6e96",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "name": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "minLength": 0,
+                                        "maxLength": 255,
+                                        "title": "\u30ec\u30a4\u30a2\u30a6\u30c8\u540d\uff08HTML\u30d5\u30a9\u30fc\u30e0\u5165\u529b\uff09",
+                                        "description": "EC-CUBE\u7531\u6765\u306e HTML form field name\u3002Resource \u3067\u306f layoutName \u3068\u540c\u3058\u610f\u5473\u3068\u3057\u3066\u6271\u3046\u3002",
+                                        "example": "PC\u6a19\u6e96",
+                                        "$comment": "HTML form compatibility field. API clients should prefer layoutName."
                                     }
                                 },
                                 "required": [
@@ -8614,8 +8954,8 @@
                 }
             },
             "delete": {
-                "operationId": "doUpdateNews",
-                "summary": "ALPS `doUpdateNews` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
+                "operationId": "doDeleteNews",
+                "summary": "ALPS `doDeleteNews` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "newsId",
@@ -8782,15 +9122,41 @@
                                         },
                                         "minItems": 0,
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "ids": {
+                                        "type": [
+                                            "array",
+                                            "null"
+                                        ],
+                                        "title": "\u6ce8\u6587\u756a\u53f7\u4e00\u89a7\uff08HTML form alias\uff09",
+                                        "description": "EC-CUBE\u4e92\u63db\u306e\u53d7\u6ce8\u4e00\u89a7\u4e00\u62ec\u30d5\u30a9\u30fc\u30e0\u304c `ids[]` \u3068\u3057\u3066\u9001\u308b\u6ce8\u6587\u756a\u53f7\u4e00\u89a7\u3002Resource\u5883\u754c\u3067\u306f `orderNos` \u306b\u6b63\u898f\u5316\u3059\u308b\u3002",
+                                        "items": {
+                                            "type": "string",
+                                            "title": "\u6ce8\u6587\u756a\u53f7",
+                                            "minLength": 0,
+                                            "maxLength": 64,
+                                            "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+                                            "description": "/admin/order/bulk-delete \u306eHTML\u30d5\u30a9\u30fc\u30e0\u5165\u529b\u306b\u542b\u307e\u308c\u308b\u6ce8\u6587\u884c\u3002"
+                                        },
+                                        "minItems": 0,
+                                        "$comment": "Transport alias only; business contract remains orderNos."
+                                    },
+                                    "mode": {
+                                        "type": [
+                                            "string",
+                                            "null"
+                                        ],
+                                        "title": "\u30d5\u30a9\u30fc\u30e0\u30e2\u30fc\u30c9",
+                                        "description": "HTML form submit \u304b\u3089\u306ePOST\u3092\u8b58\u5225\u3057\u3001PRG\u5fdc\u7b54\u306b\u3059\u308b\u305f\u3081\u306e\u30d5\u30a9\u30fc\u30e0\u5883\u754c\u5024\u3002",
+                                        "enum": [
+                                            "order_bulk_delete_form",
+                                            null
+                                        ]
                                     }
-                                },
-                                "required": [
-                                    "orderNos"
-                                ]
+                                }
                             }
                         }
-                    },
-                    "required": true
+                    }
                 },
                 "responses": {
                     "200": {
@@ -8906,10 +9272,11 @@
                                                     "description": "\u660e\u7d301\u4ef6\u3042\u305f\u308a\u306e\u5358\u4fa1\u3002\u53d7\u6ce8/\u30ab\u30fc\u30c8\u660e\u7d30\u30fb\u304a\u6c17\u306b\u5165\u308a\u30b9\u30ca\u30c3\u30d7\u30b7\u30e7\u30c3\u30c8\u3067\u306f\u8ffd\u52a0\u6642\u70b9\u306e price02 \u3092\u30b9\u30ca\u30c3\u30d7\u30b7\u30e7\u30c3\u30c8\u3057\u3066\u4fdd\u6301\u3059\u308b\uff08\u5f8c\u306e\u5024\u5f15\u304d\u3084\u30de\u30b9\u30bf\u6539\u5b9a\u306b\u5f71\u97ff\u3055\u308c\u306a\u3044\uff09\u3002BeMart \u5074\u3067\u306f `int` \u5186\u6574\u6570 Fake\u89b3\u5bdf\u6570\u5024 1200\u301c9800; \u89b3\u5bdf\u5024 '1200', '9800'\u3002",
                                                     "type": [
                                                         "integer",
+                                                        "string",
                                                         "null"
                                                     ],
-                                                    "example": 1200,
-                                                    "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                                    "example": "1200",
+                                                    "$comment": "\u5358\u4fa1\uff08\u5165\u529b\uff09\u306f\u672c\u6765\u6570\u5024\u306e\u696d\u52d9\u5024\u3060\u304c\u3001HTTP\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u3002Resource/Semantic\u5c64\u306e400\u5fdc\u7b54\u3092\u596a\u308f\u306a\u3044\u305f\u3081transport schema\u3067\u306f\u6587\u5b57\u5217\u5165\u529b\u3092\u8a31\u5bb9\u3059\u308b\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                                 },
                                                 "tax": {
                                                     "type": [
@@ -8933,11 +9300,12 @@
                                         "description": "\u5168\u914d\u9001\u5148\u306e\u9001\u6599\u5408\u8a08\uff08\u30b9\u30ca\u30c3\u30d7\u30b7\u30e7\u30c3\u30c8\uff09\u3002deliveryFeeAmount\uff08\u5730\u57df\u5225\u9001\u6599\uff09+ deliveryFee\uff08\u5546\u54c1\u5225\u9001\u6599\uff09\u00d7\u6570\u91cf \u306e\u5408\u8a08\u3002DeliveryFeePreprocessor\u3067\u8a08\u7b97\u3002\u30ab\u30fc\u30c8\u3068\u53d7\u6ce8\u306e\u4e21\u65b9\u3067\u4f7f\u7528 Fake\u89b3\u5bdf\u6570\u5024 0\u301c800; \u89b3\u5bdf\u5024 '600', '0', '500', '800', '700'\u3002",
                                         "type": [
                                             "integer",
+                                            "string",
                                             "null"
                                         ],
-                                        "example": 600,
+                                        "example": "600",
                                         "default": 0,
-                                        "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                        "$comment": "\u9001\u6599\u5408\u8a08\uff08\u5165\u529b\uff09\u306f\u672c\u6765\u6570\u5024\u306e\u696d\u52d9\u5024\u3060\u304c\u3001HTTP\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u3002Resource/Semantic\u5c64\u306e400\u5fdc\u7b54\u3092\u596a\u308f\u306a\u3044\u305f\u3081transport schema\u3067\u306f\u6587\u5b57\u5217\u5165\u529b\u3092\u8a31\u5bb9\u3059\u308b\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                     },
                                     "charge": {
                                         "title": "\u624b\u6570\u6599\uff08\u5165\u529b\uff09",
@@ -8956,11 +9324,12 @@
                                         "description": "\u53d7\u6ce8\u5168\u4f53\u306e\u5024\u5f15\u304d\u5408\u8a08\u984d\u3002\u30af\u30fc\u30dd\u30f3\u7b49\u306b\u3088\u308b\u5024\u5f15\u304d Fake\u89b3\u5bdf\u6570\u5024 0\u301c0; \u89b3\u5bdf\u5024 '0'\u3002",
                                         "type": [
                                             "integer",
+                                            "string",
                                             "null"
                                         ],
-                                        "example": 0,
+                                        "example": "0",
                                         "default": 0,
-                                        "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                        "$comment": "\u5024\u5f15\u304d\u984d\uff08\u5165\u529b\uff09\u306f\u672c\u6765\u6570\u5024\u306e\u696d\u52d9\u5024\u3060\u304c\u3001HTTP\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u6587\u5b57\u5217\u3068\u3057\u3066\u5c4a\u304f\u3002Resource/Semantic\u5c64\u306e400\u5fdc\u7b54\u3092\u596a\u308f\u306a\u3044\u305f\u3081transport schema\u3067\u306f\u6587\u5b57\u5217\u5165\u529b\u3092\u8a31\u5bb9\u3059\u308b\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                     }
                                 },
                                 "required": [
@@ -9791,8 +10160,8 @@
                 }
             },
             "delete": {
-                "operationId": "doUpdatePage",
-                "summary": "ALPS `doUpdatePage` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
+                "operationId": "doDeletePage",
+                "summary": "ALPS `doDeletePage` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "pageId",
@@ -10044,8 +10413,8 @@
                 }
             },
             "delete": {
-                "operationId": "doUpdatePayment",
-                "summary": "ALPS `doUpdatePayment` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
+                "operationId": "doDeletePayment",
+                "summary": "ALPS `doDeletePayment` \u306b\u5bfe\u5fdc\u3059\u308b DELETE \u64cd\u4f5c\u3002",
                 "parameters": [
                     {
                         "name": "paymentId",
@@ -10662,6 +11031,15 @@
                                         "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 10\u301c11; \u89b3\u5bdf\u5024 '\u30c7\u30d5\u30a9\u30eb\u30c8 (PC)', '\u30c7\u30d5\u30a9\u30eb\u30c8 (\u30b9\u30de\u30db)'\u3002",
                                         "example": "\u30c7\u30d5\u30a9\u30eb\u30c8 (PC)",
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+                                    },
+                                    "file": {
+                                        "type": [
+                                            "object",
+                                            "null"
+                                        ],
+                                        "title": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u30d5\u30a1\u30a4\u30eb",
+                                        "description": "multipart/form-data \u306e `file` \u307e\u305f\u306f Resource \u30c6\u30b9\u30c8\u3067\u6e21\u3055\u308c\u308b FileUpload \u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u8a73\u7d30\u691c\u8a3c\u306f `#[InputFile]` \u304c\u62c5\u3046\u3002",
+                                        "$comment": "Koriym\\FileUpload\\FileUpload / ErrorFileUpload \u306f schema \u3067\u306f\u4e0d\u900f\u660e\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3068\u3057\u3066\u6271\u3046\u3002"
                                     }
                                 },
                                 "required": [
@@ -18728,6 +19106,9 @@
                             "$comment": "\u914d\u5217\u8981\u7d20\u306f\u30de\u30b9\u30bf/CSV/option map\u306e\u52d5\u7684\u884c\u3067\u3042\u308a\u3001\u5217\u96c6\u5408\u304c\u5bfe\u8c61\u7a2e\u5225\u306b\u3088\u308a\u5909\u308f\u308b\u305f\u3081\u56fa\u5b9ashape\u5316\u3057\u306a\u3044\u3002\u65e2\u77e5property\u306f\u5951\u7d04\u3057\u3001\u8ffd\u52a0\u5217\u306f\u8a72\u5f53\u30b5\u30fc\u30d3\u30b9\u5883\u754c\u3067\u6271\u3046\u3002"
                         },
                         "minItems": 0
+                    },
+                    "csrfToken": {
+                        "$ref": "#/$defs/csrfToken"
                     }
                 },
                 "additionalProperties": false,
@@ -18951,7 +19332,8 @@
                 "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
                 "required": [
                     "authorityOptions",
-                    "rules"
+                    "rules",
+                    "csrfToken"
                 ]
             },
             "POST/admin/authority-roleResponse": {
@@ -19021,6 +19403,36 @@
                         "title": "\u51e6\u7406\u72b6\u614b\u30d5\u30e9\u30b0",
                         "description": "Fake\u89b3\u5bdf\u6570\u5024 1\u301c1; \u89b3\u5bdf\u5024 '1'\u3002",
                         "example": "1"
+                    },
+                    "transitionId": {
+                        "$ref": "#/$defs/transitionId"
+                    },
+                    "count": {
+                        "$ref": "#/$defs/nonNegativeInteger"
+                    },
+                    "rules": {
+                        "type": [
+                            "array",
+                            "null"
+                        ],
+                        "title": "\u6a29\u9650\u30eb\u30fc\u30eb\u4e00\u89a7",
+                        "description": "\u66f4\u65b0\u5f8c\u306e\u6a29\u9650URL\u62d2\u5426\u30eb\u30fc\u30eb\u4e00\u89a7\u3002",
+                        "items": {
+                            "type": [
+                                "object",
+                                "null"
+                            ],
+                            "properties": {
+                                "authority": {
+                                    "$ref": "#/properties/authority"
+                                },
+                                "denyUrl": {
+                                    "$ref": "#/$defs/uriReference"
+                                }
+                            },
+                            "additionalProperties": false
+                        },
+                        "minItems": 0
                     }
                 },
                 "additionalProperties": false,
@@ -19242,13 +19654,7 @@
                     }
                 },
                 "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
-                "required": [
-                    "adminId",
-                    "loginId",
-                    "previousAuthority",
-                    "authority",
-                    "changed"
-                ]
+                "required": []
             },
             "GET/admin/base-infoResponse": {
                 "title": "GET /admin/base-info response",
@@ -20110,6 +20516,9 @@
                             "maxLength": 1000,
                             "description": "/admin/calendar \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u306b\u542b\u307e\u308c\u308b\u51e6\u7406\u884c\u3002\u89aa\u30b3\u30ec\u30af\u30b7\u30e7\u30f3 `errors` \u306e1\u884c\u3092\u8868\u3057\u3001\u56fa\u5b9a\u3067\u304d\u308b\u696d\u52d9\u5217\u306fschema property\u3067\u660e\u793a\u3059\u308b\u3002"
                         }
+                    },
+                    "csrfToken": {
+                        "$ref": "#/$defs/csrfToken"
                     }
                 },
                 "additionalProperties": false,
@@ -21854,7 +22263,7 @@
                     "csvType": {
                         "type": "integer",
                         "title": "CSV\u7a2e\u5225",
-                        "description": "CSV\u51fa\u529b\u9805\u76ee\u8a2d\u5b9a\u3067\u73fe\u5728\u9078\u629e\u3057\u3066\u3044\u308bCSV\u7a2e\u5225\u30021=\u53d7\u6ce8CSV, 2=\u4f1a\u54e1CSV, 3=\u5546\u54c1CSV, 4=\u914d\u9001CSV\u3002\u753b\u9762\u306e\u9078\u629e\u72b6\u614b\u3068POST\u5bfe\u8c61\u306e\u5217\u8a2d\u5b9a\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3092\u793a\u3059\u3002",
+                        "description": "CSV\u51fa\u529b\u9805\u76ee\u8a2d\u5b9a\u3067\u73fe\u5728\u9078\u629e\u3057\u3066\u3044\u308bCSV\u7a2e\u5225\u30021=\u5546\u54c1CSV, 2=\u4f1a\u54e1CSV, 3=\u53d7\u6ce8CSV, 4=\u914d\u9001CSV\u3002\u753b\u9762\u306e\u9078\u629e\u72b6\u614b\u3068POST\u5bfe\u8c61\u306e\u5217\u8a2d\u5b9a\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3092\u793a\u3059\u3002",
                         "enum": [
                             1,
                             2,
@@ -21862,6 +22271,9 @@
                             4
                         ],
                         "example": 1
+                    },
+                    "csrfToken": {
+                        "$ref": "#/$defs/csrfToken"
                     }
                 },
                 "additionalProperties": false,
@@ -22086,7 +22498,8 @@
                 "required": [
                     "notOutputColumns",
                     "outputColumns",
-                    "csvType"
+                    "csvType",
+                    "csrfToken"
                 ]
             },
             "POST/admin/csv-configResponse": {
@@ -22111,7 +22524,7 @@
                             "null"
                         ],
                         "title": "CSV\u7a2e\u5225",
-                        "description": "dtb_csv.csv_type_id \u2014 mtb_csv_type \u3078\u306e FK\uff081=\u6ce8\u6587CSV, 2=\u4f1a\u54e1CSV, 3=\u5546\u54c1CSV, 4=\u51fa\u8377CSV\uff09\u30021\u3064\u306e csvType \u304c\u8907\u6570\u306e\u5217\u8a2d\u5b9a\u884c\uff08dtb_csv \u884c\uff09\u3092\u6240\u6709\u3059\u308b\u3002doUpdateCsv \u306f1\u3064\u306e csvType \u306e\u5217\u30d9\u30af\u30bf\u5168\u4f53\u3092\u4e00\u62ec POST \u3057\u3001SqlCsvColumnConfigStorage::replaceType \u304c\u305d\u306e csvType \u306e\u884c\u96c6\u5408\u3092\u30a2\u30c8\u30df\u30c3\u30af\u306b\u7f6e\u63db\u3059\u308b\u3002mtb_csv_type \u306f structure-only \u30c0\u30f3\u30d7\u3067\u7a7a\u306e\u305f\u3081 SQL \u30c6\u30b9\u30c8\u306f seedCsvTypes \u3067\u30b7\u30fc\u30c9\uff08seedAdminMasters \u3068\u540c\u3058\u7a7a\u30de\u30b9\u30bf FK \u30b7\u30fc\u30c9\u898f\u7d04\uff09",
+                        "description": "dtb_csv.csv_type_id \u2014 mtb_csv_type \u3078\u306e FK\uff081=\u5546\u54c1CSV, 2=\u4f1a\u54e1CSV, 3=\u53d7\u6ce8CSV, 4=\u51fa\u8377CSV\uff09\u30021\u3064\u306e csvType \u304c\u8907\u6570\u306e\u5217\u8a2d\u5b9a\u884c\uff08dtb_csv \u884c\uff09\u3092\u6240\u6709\u3059\u308b\u3002doUpdateCsv \u306f1\u3064\u306e csvType \u306e\u5217\u30d9\u30af\u30bf\u5168\u4f53\u3092\u4e00\u62ec POST \u3057\u3001SqlCsvColumnConfigStorage::replaceType \u304c\u305d\u306e csvType \u306e\u884c\u96c6\u5408\u3092\u30a2\u30c8\u30df\u30c3\u30af\u306b\u7f6e\u63db\u3059\u308b\u3002mtb_csv_type \u306f structure-only \u30c0\u30f3\u30d7\u3067\u7a7a\u306e\u305f\u3081 SQL \u30c6\u30b9\u30c8\u306f seedCsvTypes \u3067\u30b7\u30fc\u30c9\uff08seedAdminMasters \u3068\u540c\u3058\u7a7a\u30de\u30b9\u30bf FK \u30b7\u30fc\u30c9\u898f\u7d04\uff09",
                         "minimum": 0
                     },
                     "columns": {
@@ -26403,6 +26816,14 @@
                                     "title": "\u30e1\u30fc\u30eb\u4ef6\u540d",
                                     "description": "\u30e1\u30fc\u30eb\u306e\u4ef6\u540d\u3002\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u5909\u6570\u3092\u542b\u3080\u5834\u5408\u3042\u308a Fake\u89b3\u5bdf\u6587\u5b57\u9577 13\u301c13; \u89b3\u5bdf\u5024 '\u3054\u6ce8\u6587\u3042\u308a\u304c\u3068\u3046\u3054\u3056\u3044\u307e\u3059'\u3002",
                                     "example": "\u3054\u6ce8\u6587\u3042\u308a\u304c\u3068\u3046\u3054\u3056\u3044\u307e\u3059"
+                                },
+                                "isDeletable": {
+                                    "type": [
+                                        "boolean",
+                                        "null"
+                                    ],
+                                    "title": "\u524a\u9664\u53ef\u80fd\u30d5\u30e9\u30b0",
+                                    "description": "dtb_mail_template.deletable \u7531\u6765\u306e\u524a\u9664\u53ef\u80fd\u30d5\u30e9\u30b0\u3002\u7ba1\u7406\u753b\u9762\u306e\u524a\u9664 affordance \u8868\u793a\u306b\u4f7f\u3046\u3002"
                                 }
                             },
                             "additionalProperties": false,
@@ -26432,6 +26853,9 @@
                         "maximum": 2147483647,
                         "title": "\u4ef6\u6570",
                         "description": "/admin/mail-template \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u8fd4\u3059\u4ef6\u6570\u3002\u4e00\u89a7\u30fb\u96c6\u8a08\u30fb\u51e6\u7406\u7d50\u679c\u306e\u898f\u6a21\u3092\u8868\u3059\u975e\u8ca0\u6574\u6570\u3002"
+                    },
+                    "csrfToken": {
+                        "$ref": "#/$defs/csrfToken"
                     },
                     "Mail": {
                         "type": [
@@ -26703,7 +27127,8 @@
                 "required": [
                     "mailTemplates",
                     "id",
-                    "count"
+                    "count",
+                    "csrfToken"
                 ]
             },
             "POST/admin/mail-templateResponse": {
@@ -27408,9 +27833,9 @@
                                         "null"
                                     ],
                                     "minLength": 0,
-                                    "maxLength": 32,
+                                    "maxLength": 255,
                                     "title": "\u51e6\u7406\u8868\u793a\u540d",
-                                    "description": "Fake\u89b3\u5bdf\u6587\u5b57\u9577 1\u301c7; \u89b3\u5bdf\u5024 '\u30c6\u30b9\u30c8\u7ba1\u7406\u8005', '\u526f\u7ba1\u7406\u8005', '\u5e97\u8217\u30aa\u30fc\u30ca\u30fc', '\u524a\u9664\u6e08\u307f\u7ba1\u7406\u8005', 'Red', 'Blue', 'S', 'Color'\u3002",
+                                    "description": "\u30de\u30b9\u30bf\u884c\u306e\u8868\u793a\u540d\u3002\u652f\u6255\u65b9\u6cd5\u3001\u914d\u9001\u65b9\u6cd5\u3001\u30cb\u30e5\u30fc\u30b9\u3001\u898f\u683c\u306a\u3069\u8907\u6570\u306eSQL-backed master\u3092\u4ee3\u8868\u3059\u308b\u305f\u3081\u3001Fake\u89b3\u5bdf\u5024\u3060\u3051\u3067\u306a\u304fEC-CUBE\u5074\u306e\u8868\u793a\u540d\u4e0a\u9650\u306b\u5408\u308f\u305b\u308b\u3002",
                                     "example": "\u30c6\u30b9\u30c8\u7ba1\u7406\u8005"
                                 },
                                 "id": {
@@ -27806,9 +28231,9 @@
                                         "null"
                                     ],
                                     "minLength": 0,
-                                    "maxLength": 32,
+                                    "maxLength": 255,
                                     "title": "\u51e6\u7406\u8868\u793a\u540d",
-                                    "description": "Fake\u89b3\u5bdf\u6587\u5b57\u9577 1\u301c7; \u89b3\u5bdf\u5024 '\u30c6\u30b9\u30c8\u7ba1\u7406\u8005', '\u526f\u7ba1\u7406\u8005', '\u5e97\u8217\u30aa\u30fc\u30ca\u30fc', '\u524a\u9664\u6e08\u307f\u7ba1\u7406\u8005', 'Red', 'Blue', 'S', 'Color'\u3002",
+                                    "description": "\u30de\u30b9\u30bf\u884c\u306e\u8868\u793a\u540d\u3002\u652f\u6255\u65b9\u6cd5\u3001\u914d\u9001\u65b9\u6cd5\u3001\u30cb\u30e5\u30fc\u30b9\u3001\u898f\u683c\u306a\u3069\u8907\u6570\u306eSQL-backed master\u3092\u4ee3\u8868\u3059\u308b\u305f\u3081\u3001Fake\u89b3\u5bdf\u5024\u3060\u3051\u3067\u306a\u304fEC-CUBE\u5074\u306e\u8868\u793a\u540d\u4e0a\u9650\u306b\u5408\u308f\u305b\u308b\u3002",
                                     "example": "\u30c6\u30b9\u30c8\u7ba1\u7406\u8005"
                                 },
                                 "id": {
@@ -29589,6 +30014,17 @@
                         "title": "\u4ef6\u6570",
                         "description": "/admin/member-list \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u3067\u8fd4\u3059\u4ef6\u6570\u3002\u4e00\u89a7\u30fb\u96c6\u8a08\u30fb\u51e6\u7406\u7d50\u679c\u306e\u898f\u6a21\u3092\u8868\u3059\u975e\u8ca0\u6574\u6570\u3002"
                     },
+                    "csrfToken": {
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "\u4e00\u89a7\u753b\u9762\u304b\u3089\u9001\u4fe1\u3059\u308b\u524a\u9664\u30d5\u30a9\u30fc\u30e0\u7528\u306eCSRF\u30c8\u30fc\u30af\u30f3\u3002",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]*$"
+                    },
                     "members": {
                         "type": [
                             "array",
@@ -29901,6 +30337,7 @@
                 "required": [
                     "filters",
                     "count",
+                    "csrfToken",
                     "members"
                 ]
             },
@@ -31229,6 +31666,17 @@
                             "$comment": "\u914d\u5217\u8981\u7d20\u306f\u30de\u30b9\u30bf/CSV/option map\u306e\u52d5\u7684\u884c\u3067\u3042\u308a\u3001\u5217\u96c6\u5408\u304c\u5bfe\u8c61\u7a2e\u5225\u306b\u3088\u308a\u5909\u308f\u308b\u305f\u3081\u56fa\u5b9ashape\u5316\u3057\u306a\u3044\u3002\u65e2\u77e5property\u306f\u5951\u7d04\u3057\u3001\u8ffd\u52a0\u5217\u306f\u8a72\u5f53\u30b5\u30fc\u30d3\u30b9\u5883\u754c\u3067\u6271\u3046\u3002"
                         },
                         "minItems": 0
+                    },
+                    "csrfToken": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]*$",
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "POST /admin/order-status \u306ehidden input\u3067\u9001\u308bCSRF\u30c8\u30fc\u30af\u30f3\u3002"
                     }
                 },
                 "additionalProperties": false,
@@ -31451,7 +31899,8 @@
                 },
                 "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
                 "required": [
-                    "orderStatuses"
+                    "orderStatuses",
+                    "csrfToken"
                 ]
             },
             "PUT/admin/order-statusResponse": {
@@ -36434,6 +36883,9 @@
                         "title": "\u5165\u529b\u30d5\u30a9\u30fc\u30e0",
                         "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "csrfToken": {
+                        "$ref": "#/$defs/csrfToken"
                     }
                 },
                 "additionalProperties": false,
@@ -37734,7 +38186,7 @@
                             "null"
                         ],
                         "minLength": 0,
-                        "maxLength": 255,
+                        "maxLength": 65535,
                         "title": "\u7279\u5b9a\u5546\u53d6\u5f15\u6cd5\u672c\u6587",
                         "description": "\u7279\u5b9a\u5546\u53d6\u5f15\u6cd5\u30da\u30fc\u30b8\u672c\u6587\u306e\u5358\u4e00\u30d6\u30ed\u30d6\u6295\u5f71\u3002\u9805\u76ee\u5225\u884c\u3067\u306f\u306a\u304f\u3001\u30da\u30fc\u30b8\u5168\u4f53\u30921\u672c\u306e\u672c\u6587\u3068\u3057\u3066\u6271\u3046\u3002"
                     },
@@ -37747,6 +38199,15 @@
                         "title": "\u5165\u529b\u30d5\u30a9\u30fc\u30e0",
                         "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "csrfToken": {
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u5143\u3092\u691c\u8a3c\u3059\u308b\u30c8\u30fc\u30af\u30f3\u3002Fake\u74b0\u5883\u3067\u306f deterministic \u306a\u5024\u3092\u4f7f\u3046\u3002",
+                        "type": "string",
+                        "minLength": 8,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]+$",
+                        "example": "fake-csrf-token-bemart-2026"
                     },
                     "tradeLawRows": {
                         "type": [
@@ -38066,6 +38527,7 @@
                 "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
                 "required": [
                     "tradeLawBody",
+                    "csrfToken",
                     "tradeLawRows"
                 ]
             },
@@ -38080,7 +38542,7 @@
                             "null"
                         ],
                         "minLength": 0,
-                        "maxLength": 255,
+                        "maxLength": 65535,
                         "title": "\u7279\u5b9a\u5546\u53d6\u5f15\u6cd5\u672c\u6587",
                         "description": "\u7279\u5b9a\u5546\u53d6\u5f15\u6cd5\u30da\u30fc\u30b8\u672c\u6587\u306e\u5358\u4e00\u30d6\u30ed\u30d6\u6295\u5f71\u3002\u9805\u76ee\u5225\u884c\u3067\u306f\u306a\u304f\u3001\u30da\u30fc\u30b8\u5168\u4f53\u30921\u672c\u306e\u672c\u6587\u3068\u3057\u3066\u6271\u3046\u3002"
                     },
@@ -56563,6 +57025,33 @@
                 "description": "GET /admin/block/block response \u306e response body schema\u3002ALPS\u306e\u610f\u5473\u3001be/var/fake\u306e\u89b3\u5bdf\u5024\u3001Resource\u5883\u754c\u306e\u5b9f\u5f62\u72b6\u304b\u3089\u5c0e\u3044\u305fSemantic-Ex\u5236\u7d04\u3002",
                 "type": "object",
                 "properties": {
+                    "blockId": {
+                        "type": "string",
+                        "title": "\u30d6\u30ed\u30c3\u30afID",
+                        "description": "dtb_block.id \u306e\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u30cf\u30f3\u30c9\u30eb\u3002\u65b0\u898f\u4f5c\u6210\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u7a7a\u6587\u5b57\u3001\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u65e2\u5b58\u30d6\u30ed\u30c3\u30afID\u3002",
+                        "minLength": 0,
+                        "maxLength": 128,
+                        "example": "1"
+                    },
+                    "blockName": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 32,
+                        "title": "\u30d6\u30ed\u30c3\u30af\u540d",
+                        "description": "\u30d6\u30ed\u30c3\u30af\u306e\u8868\u793a\u540d\u3002\u65b0\u898f\u4f5c\u6210\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u7a7a\u6587\u5b57\u3001\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u4fdd\u5b58\u6e08\u307f\u5024\u3002"
+                    },
+                    "blockFileName": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 32,
+                        "title": "\u30d6\u30ed\u30c3\u30af\u30d5\u30a1\u30a4\u30eb\u540d",
+                        "description": "\u30d6\u30ed\u30c3\u30af\u306e\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u30d5\u30a1\u30a4\u30eb\u540d\u3002\u65b0\u898f\u4f5c\u6210\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u7a7a\u6587\u5b57\u3001\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u4fdd\u5b58\u6e08\u307f\u5024\u3002"
+                    },
+                    "blockDeletable": {
+                        "type": "boolean",
+                        "title": "\u524a\u9664\u53ef\u5426",
+                        "description": "\u7ba1\u7406\u753b\u9762\u3067\u524a\u9664\u53ef\u80fd\u306a\u30e6\u30fc\u30b6\u30fc\u5b9a\u7fa9\u30d6\u30ed\u30c3\u30af\u304b\u3069\u3046\u304b\u3002"
+                    },
                     "form": {
                         "type": [
                             "object",
@@ -56572,6 +57061,18 @@
                         "title": "\u5165\u529b\u30d5\u30a9\u30fc\u30e0",
                         "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "csrfToken": {
+                        "title": "\u51e6\u7406\u8b58\u5225\u5b50",
+                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u306e\u507d\u9020\u3092\u9632\u3050\u305f\u3081\u306b\u9001\u4fe1\u5143\u753b\u9762\u3067\u767a\u884c\u3055\u308c\u308b\u30c8\u30fc\u30af\u30f3\u3002Fake\u74b0\u5883\u3067\u306f deterministic \u306a\u5024\u3092\u4f7f\u3046\u3002",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 8,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]+$",
+                        "example": "fake-csrf-token-bemart-2026"
                     }
                 },
                 "additionalProperties": false,
@@ -62807,7 +63308,18 @@
                 "title": "GET /admin/content/cache response",
                 "description": "GET /admin/content/cache response \u306e response body schema\u3002ALPS\u306e\u610f\u5473\u3001be/var/fake\u306e\u89b3\u5bdf\u5024\u3001Resource\u5883\u754c\u306e\u5b9f\u5f62\u72b6\u304b\u3089\u5c0e\u3044\u305fSemantic-Ex\u5236\u7d04\u3002",
                 "type": "object",
-                "properties": [],
+                "properties": {
+                    "csrfToken": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 160,
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "/admin/content/cache \u306eHTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u7528CSRF\u30c8\u30fc\u30af\u30f3\u3002"
+                    }
+                },
                 "additionalProperties": false,
                 "$defs": {
                     "productCode": {
@@ -63291,6 +63803,16 @@
                         "title": "\u5165\u529b\u30d5\u30a9\u30fc\u30e0",
                         "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "csrfToken": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 160,
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "/admin/content/css \u306eHTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u7528CSRF\u30c8\u30fc\u30af\u30f3\u3002"
                     }
                 },
                 "additionalProperties": false,
@@ -64087,6 +64609,16 @@
                         "title": "\u5165\u529b\u30d5\u30a9\u30fc\u30e0",
                         "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "csrfToken": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 160,
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "/admin/content/js \u306eHTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u7528CSRF\u30c8\u30fc\u30af\u30f3\u3002"
                     }
                 },
                 "additionalProperties": false,
@@ -64581,6 +65113,16 @@
                         ],
                         "title": "\u30e1\u30f3\u30c6\u30ca\u30f3\u30b9\u4e2d\u30d5\u30e9\u30b0",
                         "description": "/admin/content/maintenance \u306e\u51e6\u7406\u72b6\u614b\u3092\u793a\u3059\u30e1\u30f3\u30c6\u30ca\u30f3\u30b9\u4e2d\u30d5\u30e9\u30b0\u3002\u753b\u9762\u8868\u793a\u3084\u51aa\u7b49\u51e6\u7406\u7d50\u679c\u306e\u5206\u5c90\u306b\u4f7f\u3046\u771f\u507d\u5024\u3002"
+                    },
+                    "csrfToken": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 160,
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "/admin/content/maintenance \u306eHTML\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u7528CSRF\u30c8\u30fc\u30af\u30f3\u3002"
                     }
                 },
                 "additionalProperties": false,
@@ -66669,6 +67211,46 @@
                 "description": "GET /admin/layout/layout response \u306e response body schema\u3002ALPS\u306e\u610f\u5473\u3001be/var/fake\u306e\u89b3\u5bdf\u5024\u3001Resource\u5883\u754c\u306e\u5b9f\u5f62\u72b6\u304b\u3089\u5c0e\u3044\u305fSemantic-Ex\u5236\u7d04\u3002",
                 "type": "object",
                 "properties": {
+                    "layoutId": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "title": "\u30ec\u30a4\u30a2\u30a6\u30c8ID",
+                        "description": "dtb_layout.id \u306e\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217\u30cf\u30f3\u30c9\u30eb\u3002\u65b0\u898f\u4f5c\u6210\u30d5\u30a9\u30fc\u30e0\u3067\u306f null\u3001\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u65e2\u5b58\u30ec\u30a4\u30a2\u30a6\u30c8ID\u3002",
+                        "minLength": 0,
+                        "maxLength": 128,
+                        "example": "1"
+                    },
+                    "layoutName": {
+                        "type": "string",
+                        "minLength": 0,
+                        "maxLength": 255,
+                        "title": "\u30ec\u30a4\u30a2\u30a6\u30c8\u540d",
+                        "description": "\u30ec\u30a4\u30a2\u30a6\u30c8\u306e\u8868\u793a\u540d\u3002\u65b0\u898f\u4f5c\u6210\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u7a7a\u6587\u5b57\u3001\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u4fdd\u5b58\u6e08\u307f\u5024\u3002"
+                    },
+                    "deviceType": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "title": "\u30c7\u30d0\u30a4\u30b9\u7a2e\u5225",
+                        "description": "\u30c7\u30d0\u30a4\u30b9\u7a2e\u5225\u30de\u30b9\u30bf\u3002\u65b0\u898f\u4f5c\u6210\u30d5\u30a9\u30fc\u30e0\u3067\u306f null\u3001\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u3067\u306f\u4fdd\u5b58\u6e08\u307f\u5024\u3002",
+                        "minimum": 0,
+                        "example": 10
+                    },
+                    "csrfToken": {
+                        "title": "\u51e6\u7406\u8b58\u5225\u5b50",
+                        "description": "\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u306e\u507d\u9020\u3092\u9632\u3050\u305f\u3081\u306b\u9001\u4fe1\u5143\u753b\u9762\u3067\u767a\u884c\u3055\u308c\u308b\u30c8\u30fc\u30af\u30f3\u3002",
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 8,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]+$",
+                        "example": "fake-csrf-token-bemart-2026"
+                    },
                     "form": {
                         "type": [
                             "object",
@@ -69764,6 +70346,18 @@
                         "title": "\u6ce8\u6587\u756a\u53f7",
                         "description": "\u9867\u5ba2\u5411\u3051\u306e\u6ce8\u6587\u756a\u53f7\u3002\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u306f\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u53ef\u80fd Fake\u89b3\u5bdf\u6587\u5b57\u9577 32\u301c32; \u89b3\u5bdf\u5024 'past0000000000000000000000000001'\u3002",
                         "example": "past0000000000000000000000000001"
+                    },
+                    "csrfToken": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "title": "CSRF\u30c8\u30fc\u30af\u30f3",
+                        "description": "\u53d7\u6ce8\u767b\u9332/\u7de8\u96c6\u30d5\u30a9\u30fc\u30e0\u9001\u4fe1\u7528\u306eCSRF\u30c8\u30fc\u30af\u30f3\u3002Resource body\u304b\u3089Twig hidden input\u3078\u6e21\u3055\u308c\u308b\u3002",
+                        "minLength": 0,
+                        "maxLength": 160,
+                        "pattern": "^[A-Za-z0-9_.:-]*$",
+                        "$comment": "CSRF\u5024\u306fCsrfProtected\u5883\u754c\u306e\u8cac\u52d9\u3002GET body\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u6587\u8108\u3092\u793a\u3059\u305f\u3081\u306bnull\u3092\u8a31\u5bb9\u3059\u308b\u3002"
                     }
                 },
                 "additionalProperties": false,
@@ -73740,6 +74334,14 @@
                 "description": "PUT /admin/order/tracking-number response \u306e response body schema\u3002ALPS\u306e\u610f\u5473\u3001be/var/fake\u306e\u89b3\u5bdf\u5024\u3001Resource\u5883\u754c\u306e\u5b9f\u5f62\u72b6\u304b\u3089\u5c0e\u3044\u305fSemantic-Ex\u5236\u7d04\u3002",
                 "type": "object",
                 "properties": {
+                    "status": {
+                        "type": "string",
+                        "enum": [
+                            "OK"
+                        ],
+                        "title": "Ajax\u51e6\u7406\u30b9\u30c6\u30fc\u30bf\u30b9",
+                        "description": "\u7ba1\u7406\u753b\u9762\u306e\u4f1d\u7968\u756a\u53f7\u66f4\u65b0Ajax\u304c\u6210\u529f\u5224\u5b9a\u306b\u4f7f\u7528\u3059\u308b\u30b9\u30c6\u30fc\u30bf\u30b9\u3002"
+                    },
                     "message": {
                         "type": [
                             "string",
@@ -73994,6 +74596,7 @@
                 },
                 "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
                 "required": [
+                    "status",
                     "trackingNumber",
                     "orderNo"
                 ]
@@ -80869,6 +81472,9 @@
                         "title": "\u5165\u529b\u30d5\u30a9\u30fc\u30e0",
                         "description": "Aura/WebForm\u7531\u6765\u306e\u30d5\u30a9\u30fc\u30e0\u30aa\u30d6\u30b8\u30a7\u30af\u30c8\u3002\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5185\u90e8\u69cb\u9020\u306e\u305f\u3081schema\u3067\u306f\u5b58\u5728\u3068\u578b\u306e\u307f\u3092\u5951\u7d04\u3059\u308b\u3002",
                         "$comment": "Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"
+                    },
+                    "csrfToken": {
+                        "$ref": "#/$defs/csrfToken"
                     }
                 },
                 "additionalProperties": false,
@@ -81119,6 +81725,26 @@
                         "maxLength": 128,
                         "pattern": "^[A-Za-z0-9._:@/-]*$",
                         "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002"
+                    },
+                    "archiveName": {
+                        "type": [
+                            "string",
+                            "null"
+                        ],
+                        "minLength": 0,
+                        "maxLength": 255,
+                        "title": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u30a2\u30fc\u30ab\u30a4\u30d6\u540d",
+                        "description": "\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3055\u308c\u305f\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8zip\u306e\u30d5\u30a1\u30a4\u30eb\u540d\u3002"
+                    },
+                    "archiveSize": {
+                        "type": [
+                            "integer",
+                            "null"
+                        ],
+                        "minimum": 0,
+                        "maximum": 10485760,
+                        "title": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u30a2\u30fc\u30ab\u30a4\u30d6\u30b5\u30a4\u30ba",
+                        "description": "\u30a2\u30c3\u30d7\u30ed\u30fc\u30c9\u3055\u308c\u305f\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8zip\u306e\u30d0\u30a4\u30c8\u30b5\u30a4\u30ba\u3002"
                     },
                     "transitionId": {
                         "title": "ALPS\u9077\u79fbID",
@@ -81417,12 +82043,24 @@
                                     "title": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u540d",
                                     "description": "\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 10\u301c11; \u89b3\u5bdf\u5024 '\u30c7\u30d5\u30a9\u30eb\u30c8 (PC)', '\u30c7\u30d5\u30a9\u30eb\u30c8 (\u30b9\u30de\u30db)'\u3002",
                                     "example": "\u30c7\u30d5\u30a9\u30eb\u30c8 (PC)"
+                                },
+                                "active": {
+                                    "type": [
+                                        "boolean",
+                                        "null"
+                                    ],
+                                    "title": "\u9069\u7528\u4e2d\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8",
+                                    "description": "\u73fe\u5728\u9069\u7528\u3055\u308c\u3066\u3044\u308b\u30c6\u30f3\u30d7\u30ec\u30fc\u30c8\u304b\u3069\u3046\u304b\u3002TemplateCompatibility \u306e runtime readback \u5883\u754c\u304b\u3089\u5c0e\u51fa\u3055\u308c\u3001HTML radio \u306e checked \u72b6\u614b\u306b\u5bfe\u5fdc\u3059\u308b\u3002",
+                                    "example": true
                                 }
                             },
                             "additionalProperties": false,
                             "$comment": "\u914d\u5217\u8981\u7d20\u306fFake/Resource\u3067\u89b3\u5bdf\u3055\u308c\u305f\u65e2\u77e5property\u306b\u56fa\u5b9a\u3059\u308b\u3002\u65b0\u3057\u3044\u5217\u304c\u5fc5\u8981\u306b\u306a\u3063\u305f\u5834\u5408\u306fSemantic-Ex\u89b3\u5bdf\u306b\u8ffd\u52a0\u3057\u3066schema\u3092\u66f4\u65b0\u3059\u308b\u3002"
                         },
                         "minItems": 0
+                    },
+                    "csrfToken": {
+                        "$ref": "#/$defs/csrfToken"
                     },
                     "links": {
                         "type": [

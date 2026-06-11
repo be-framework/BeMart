@@ -40,6 +40,7 @@ ALPS `doUpdateTrackingNumber` に対応する PUT 操作。
 
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
+| status | string | Ajax処理ステータス - 管理画面の伝票番号更新Ajaxが成功判定に使用するステータス。 | Required | {"enum":["OK"]} |  |
 | message | string|null | 注文メッセージ - /admin/order/tracking-number のレスポンスに含まれる処理結果メッセージ。注文時お問い合わせ欄ではなく、画面遷移や完了表示のための通知文。 | Optional | {"minLength":0,"maxLength":32} | 配送は平日希望です。 |
 | trackingNumber | string|null | 荷物追跡番号 - 配送業者の荷物追跡番号。confirmUrlと組み合わせて追跡URLを構成 | Required | {"minLength":0,"maxLength":128,"$comment":"\u30ad\u30fc/\u8ffd\u8de1\u756a\u53f7\u306f\u7167\u5408\u7528\u306e\u4e0d\u900f\u660e\u6587\u5b57\u5217\u3067\u3001\u6570\u5024\u6f14\u7b97\u5bfe\u8c61\u3067\u306f\u306a\u3044\u3002"} |  |
 | orderNo | string|null | 注文番号 - 顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。 | Required | {"minLength":0,"maxLength":64} | past0000000000000000000000000001 |

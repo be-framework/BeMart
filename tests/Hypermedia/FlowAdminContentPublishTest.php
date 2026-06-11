@@ -106,6 +106,10 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         $this->assertSame($newsId, $this->bodyValue($updated, 'newsId'));
         $this->assertSame('Workflow News Updated ' . self::$suffix, $this->bodyValue($updated, 'newsTitle'));
 
+        $readback = $this->follow($updated, 'goNews', ['newsId' => $newsId]);
+        $this->assertSame('Workflow News Updated ' . self::$suffix, $this->bodyValue($readback, 'newsTitle'));
+        $this->assertSame('Updated by flow-admin-content-publish.', $this->bodyValue($readback, 'newsDescription'));
+
         return $updated;
     }
 
@@ -125,6 +129,12 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::OK, $deleted->code);
         $this->assertSame($newsId, $this->bodyValue($deleted, 'newsId'));
+
+        $readbackList = $this->follow($deleted, 'goNewsList');
+        foreach ((array) ($readbackList->body['news'] ?? []) as $newsItem) {
+            $news = (array) $newsItem;
+            $this->assertNotSame($newsId, (string) ($news['newsId'] ?? ''));
+        }
 
         return $deleted;
     }
@@ -173,6 +183,10 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         $this->assertSame($pageId, $this->bodyValue($updated, 'pageId'));
         $this->assertSame('Workflow Page Updated ' . self::$suffix, $this->bodyValue($updated, 'pageName'));
 
+        $readback = $this->follow($updated, 'goPage', ['pageId' => $pageId]);
+        $this->assertSame('Workflow Page Updated ' . self::$suffix, $this->bodyValue($readback, 'pageName'));
+        $this->assertSame('workflow-page-updated-' . self::$suffix, $this->bodyValue($readback, 'pageUrl'));
+
         return $updated;
     }
 
@@ -192,6 +206,12 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::OK, $deleted->code);
         $this->assertSame($pageId, $this->bodyValue($deleted, 'pageId'));
+
+        $readbackList = $this->follow($deleted, 'goPageList');
+        foreach ((array) ($readbackList->body['pages'] ?? []) as $pageItem) {
+            $page = (array) $pageItem;
+            $this->assertNotSame($pageId, (string) ($page['pageId'] ?? ''));
+        }
 
         return $deleted;
     }
@@ -219,8 +239,19 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         return $created;
     }
 
-    #[Alps('doUpdateBlock')]
+    #[Alps('goBlock')]
     #[Depends('testCreatesBlock')]
+    public function testOpensCreatedBlock(ResourceObject $response): ResourceObject
+    {
+        $opened = $this->followLocation($response);
+        $this->assertSame($this->bodyValue($response, 'blockId'), $this->bodyValue($opened, 'blockId'));
+        $this->assertSame('Workflow Block ' . self::$suffix, $this->bodyValue($opened, 'blockName'));
+
+        return $opened;
+    }
+
+    #[Alps('doUpdateBlock')]
+    #[Depends('testOpensCreatedBlock')]
     public function testUpdatesBlock(ResourceObject $response): ResourceObject
     {
         $blockId = $this->bodyValue($response, 'blockId');
@@ -267,9 +298,9 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         return $this->follow($response, 'goLayoutList');
     }
 
-    #[Alps('doUpdateLayout')]
+    #[Alps('goLayout')]
     #[Depends('testLayoutList')]
-    public function testUpdatesLayout(ResourceObject $response): ResourceObject
+    public function testOpensLayout(ResourceObject $response): ResourceObject
     {
         $layouts = $this->bodyValue($response, 'layouts');
         $this->assertIsArray($layouts);
@@ -279,14 +310,27 @@ class FlowAdminContentPublishTest extends AbstractWorkflowTest
         $this->assertArrayHasKey('layoutId', $layout);
         $this->assertIsString($layout['layoutId']);
 
+        $layoutForm = $this->follow($response, 'goLayout', ['layoutId' => $layout['layoutId']]);
+        $this->assertSame($layout['layoutId'], $this->bodyValue($layoutForm, 'layoutId'));
+
+        return $layoutForm;
+    }
+
+    #[Alps('doUpdateLayout')]
+    #[Depends('testOpensLayout')]
+    public function testUpdatesLayout(ResourceObject $response): ResourceObject
+    {
+        $layoutId = $this->bodyValue($response, 'layoutId');
+        $this->assertIsString($layoutId);
+
         $updated = $this->resource->put($this->linkHref($response, 'doUpdateLayout'), [
-            'layoutId' => $layout['layoutId'],
+            'layoutId' => $layoutId,
             'layoutName' => 'Workflow Layout ' . self::$suffix,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $updated->code);
-        $this->assertSame($layout['layoutId'], $this->bodyValue($updated, 'layoutId'));
+        $this->assertSame($layoutId, $this->bodyValue($updated, 'layoutId'));
         $this->assertSame('Workflow Layout ' . self::$suffix, $this->bodyValue($updated, 'layoutName'));
 
         return $updated;

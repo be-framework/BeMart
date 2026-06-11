@@ -13,6 +13,7 @@ use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MemberListFetched;
 use MyVendor\BeMart\Be\Input\GetMemberListInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -44,6 +45,7 @@ class MemberList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -80,6 +82,7 @@ class MemberList extends ResourceObject
             'members' => $final->members,
             'count' => $final->count,
             'filters' => $final->filters,
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;

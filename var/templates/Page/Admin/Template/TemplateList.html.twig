@@ -10,8 +10,8 @@
   / Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
   bindings are rebound to the TemplateList resource body
   (src/Resource/Page/Admin/Template/TemplateList.php — body carries
-  `count` + `templates`, a list of {templateId, templateName,
-  deviceType}).
+	  `count` + `templates`, a list of {templateId, templateName,
+	  deviceType, active}).
 
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
@@ -28,10 +28,9 @@
    - `Template.default_template` (the "デフォルトテンプレートは削除でき
      ません" delete-disable guard) -> NOT carried by the projection; the
      delete `<a>` is never `disabled`. FLAGGED missing-body-field.
-   - `eccube_config.eccube_theme_code` (the currently-active template,
-     used for the `checked` radio + the delete-disable guard) -> BeMart's
-     html context exposes no `eccube_config`; the radio is never
-     pre-checked. Enumerated as residual.
+	   - `eccube_config.eccube_theme_code` (the currently-active template)
+	     -> `Template.active`, backed by the TemplateCompatibility runtime
+	     readback boundary. The delete-disable guard remains residual.
    - `template.twig` is technically a Symfony form page — it wraps the
      table in a `<form>` with `form_widget(form._token)` (CSRF) and
      `form_widget(form.selected)` (a hidden field carrying the chosen
@@ -65,6 +64,8 @@
 
 {% block main %}
     <form name="form1" id="form1" method="post" action="/admin/template/template-list?_method=put">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" id="form_selected" name="templateId" value="">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -87,7 +88,7 @@
                                 {% for Template in templates %}
                                     <tr>
                                         <td class="align-middle text-center">
-                                            <input type="radio" name="template" value="{{ Template.templateId }}"/>
+	                                            <input type="radio" name="template" value="{{ Template.templateId }}"{% if Template.active|default(false) %} checked="checked"{% endif %}/>
                                         </td>
                                         <td class="align-middle text-center">{{ Template.templateName }}</td>
                                         <td class="align-middle text-center">

@@ -61,7 +61,9 @@
                         <div class="ec-login__input">
                             <div class="ec-input">
                                 {{ form.input('email')|raw }}
+                                {{ form.error('email') }}
                                 {{ form.input('password')|raw }}
+                                {{ form.error('password') }}
                             </div>
                             {% if message is defined and message %}
                                 <p class="ec-errorMessage">{{ message }}</p>
@@ -84,6 +86,7 @@
                             </div>
                         </div>
                     </div>
+                    <input type="hidden" name="mode" value="login">
                     <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                 </form>
             </div>

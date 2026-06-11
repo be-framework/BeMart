@@ -5,6 +5,14 @@
   "description": "PUT /admin/order/tracking-number response の response body schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
   "type": "object",
   "properties": {
+    "status": {
+      "type": "string",
+      "enum": [
+        "OK"
+      ],
+      "title": "Ajax処理ステータス",
+      "description": "管理画面の伝票番号更新Ajaxが成功判定に使用するステータス。"
+    },
     "message": {
       "type": [
         "string",
@@ -259,6 +267,7 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
+    "status",
     "trackingNumber",
     "orderNo"
   ]

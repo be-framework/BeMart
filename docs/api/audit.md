@@ -4,7 +4,7 @@
 - Resources: 147
 - Operations: 237
 - Operations with response schema: 237
-- Operations with request schema: 157
+- Operations with request schema: 160
 - Operations with ALPS attributes: 237
 
 ## Findings

@@ -28,7 +28,31 @@ SELECT
       INNER JOIN dtb_product p ON p.id = pc.product_id
     WHERE
       c.pre_order_id = o.pre_order_id
-  ) AS items_json
+  ) AS items_json,
+  JSON_OBJECT(
+    'name01',
+    o.name01,
+    'name02',
+    o.name02,
+    'kana01',
+    o.kana01,
+    'kana02',
+    o.kana02,
+    'companyName',
+    o.company_name,
+    'email',
+    o.email,
+    'phoneNumber',
+    o.phone_number,
+    'postalCode',
+    o.postal_code,
+    'pref',
+    o.pref_id,
+    'addr01',
+    o.addr01,
+    'addr02',
+    o.addr02
+  ) AS customer_snapshot_json
 FROM
   dtb_order o
 WHERE

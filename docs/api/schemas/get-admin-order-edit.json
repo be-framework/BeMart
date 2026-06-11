@@ -99,6 +99,18 @@
       "title": "注文番号",
       "description": "顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。",
       "example": "past0000000000000000000000000001"
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "CSRFトークン",
+      "description": "受注登録/編集フォーム送信用のCSRFトークン。Resource bodyからTwig hidden inputへ渡される。",
+      "minLength": 0,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]*$",
+      "$comment": "CSRF値はCsrfProtected境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。"
     }
   },
   "additionalProperties": false,

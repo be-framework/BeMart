@@ -29,12 +29,13 @@
 {% set route = 'admin-order-edit' %}
 {% set title = orderNo ? '受注編集' : '受注登録' %}
 {% set sub_title = '受注管理' %}
+{% set isNew = orderNo is empty %}
 
 {% block main %}
-    <form role="form" method="post" action="/admin/order" id="order_form" name="form1" novalidate>
-        <input type="hidden" name="_method" value="put">
+    <form role="form" method="post" action="{{ isNew ? '/admin/order/create' : '/admin/order' }}" id="order_form" name="form1" novalidate>
+        {% if not isNew %}<input type="hidden" name="_method" value="put">{% endif %}
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
+        {% if not isNew %}<input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">{% endif %}
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -54,6 +55,20 @@
                                     {% if form.error('name01') %}<span class="invalid-feedback d-block">{{ form.error('name01') }}</span>{% endif %}
                                 </div>
                             </div>
+                            {% if isNew %}
+                                <div class="row mb-2">
+                                    <div class="col-3"><span>会員ID</span><span class="badge bg-primary ms-1">必須</span></div>
+                                    <div class="col">
+                                        <input class="form-control" type="text" id="order_customer_id" name="customerId" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="row mb-2">
+                                    <div class="col-3"><span>支払方法ID</span><span class="badge bg-primary ms-1">必須</span></div>
+                                    <div class="col">
+                                        <input class="form-control" type="number" min="1" step="1" id="order_payment_method_id" name="paymentMethodId" value="1">
+                                    </div>
+                                </div>
+                            {% endif %}
                             <div class="row mb-2">
                                 <div class="col-3"><span>メールアドレス</span></div>
                                 <div class="col">{{ form.input('email')|raw }}</div>
@@ -77,19 +92,37 @@
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {% for item in items %}
+                                {% if isNew %}
                                     <tr>
-                                        <td class="align-middle ps-3">{{ item.productCode }}</td>
-                                        <td class="align-middle">{{ item.productName }}</td>
-                                        <td class="align-middle text-end">{{ item.unitPrice|price }}</td>
-                                        <td class="align-middle text-center">{{ item.quantity }}</td>
-                                        <td class="align-middle text-end pe-3">{{ (item.unitPrice * item.quantity)|price }}</td>
+                                        <td class="align-middle ps-3">
+                                            <input class="form-control" type="text" name="orderItems[0][productCode]" autocomplete="off">
+                                        </td>
+                                        <td class="align-middle">
+                                            <input class="form-control" type="text" name="orderItems[0][productName]" autocomplete="off">
+                                        </td>
+                                        <td class="align-middle">
+                                            <input class="form-control text-end" type="number" min="0" step="1" name="orderItems[0][unitPrice]" value="0">
+                                        </td>
+                                        <td class="align-middle">
+                                            <input class="form-control text-end" type="number" min="1" step="1" name="orderItems[0][quantity]" value="1">
+                                        </td>
+                                        <td class="align-middle text-end pe-3 text-muted">登録時に再計算</td>
                                     </tr>
                                 {% else %}
-                                    <tr>
-                                        <td class="align-middle text-center text-muted" colspan="5">商品明細はありません</td>
-                                    </tr>
-                                {% endfor %}
+                                    {% for item in items %}
+                                        <tr>
+                                            <td class="align-middle ps-3">{{ item.productCode }}</td>
+                                            <td class="align-middle">{{ item.productName }}</td>
+                                            <td class="align-middle text-end">{{ item.unitPrice|price }}</td>
+                                            <td class="align-middle text-center">{{ item.quantity }}</td>
+                                            <td class="align-middle text-end pe-3">{{ (item.unitPrice * item.quantity)|price }}</td>
+                                        </tr>
+                                    {% else %}
+                                        <tr>
+                                            <td class="align-middle text-center text-muted" colspan="5">商品明細はありません</td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
                                 </tbody>
                             </table>
                         </div>
@@ -112,15 +145,21 @@
                     <div class="card-header">
                         <span class="card-title">ご請求額</span>
                     </div>
-                    <div class="card-body">
-                        <div class="row mb-2">
-                            <div class="col-6"><span>小計</span></div>
-                            <div class="col-6 text-end">{{ (order.subtotal|default(0))|price }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-6"><span>送料</span></div>
-                            <div class="col-6 text-end">{{ (order.deliveryFeeTotal|default(0))|price }}</div>
-                        </div>
+                        <div class="card-body">
+                            <div class="row mb-2">
+                                <div class="col-6"><span>小計</span></div>
+                                <div class="col-6 text-end">{{ (order.subtotal|default(0))|price }}</div>
+                            </div>
+                            <div class="row mb-2">
+                                <div class="col-6"><span>送料</span></div>
+                                <div class="col-6">
+                                    {% if isNew %}
+                                        <input class="form-control text-end" type="number" min="0" step="1" name="deliveryFeeTotal" value="0">
+                                    {% else %}
+                                        <div class="text-end">{{ (order.deliveryFeeTotal|default(0))|price }}</div>
+                                    {% endif %}
+                                </div>
+                            </div>
                         <div class="row mb-2">
                             <div class="col-6"><span>手数料</span></div>
                             <div class="col-6">{{ form.input('charge')|raw }}</div>
@@ -161,7 +200,7 @@
                     <div class="col-6">
                         <div id="ex-conversion-action" class="row align-items-center justify-content-end">
                             <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
+                                <button type="submit" class="btn btn-ec-conversion px-5">{{ isNew ? '登録' : '保存' }}</button>
                             </div>
                         </div>
                     </div>

@@ -62,7 +62,8 @@ final readonly class CsvConfigUpdated
             );
         }
 
-        $csvColumnConfigStorage->replaceType($csvType, CsvColumnConfigList::fromArray($entries));
+        $csvColumnConfigStorage->deleteType($csvType);
+        $csvColumnConfigStorage->insertType($csvType, CsvColumnConfigList::fromArray($entries));
 
         $this->csvType = $csvType;
         $this->columns = $columns;

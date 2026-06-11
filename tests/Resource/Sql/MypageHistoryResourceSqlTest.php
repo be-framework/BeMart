@@ -135,6 +135,7 @@ final class MypageHistoryResourceSqlTest extends AbstractResourceSqlTestCase
         $this->assertSame(9800, $shipping['items'][1]['unitPrice']);
 
         $this->assertCount(1, $ro->body['mailHistories']);
+        $this->assertSame('2026-04-01 10:05:00', $ro->body['mailHistories'][0]['sendDate']);
         $this->assertSame('ご注文ありがとうございます', $ro->body['mailHistories'][0]['mailSubject']);
     }
 

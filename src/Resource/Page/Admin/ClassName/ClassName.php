@@ -20,6 +20,8 @@ use MyVendor\BeMart\Be\Input\UpdateClassNameInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doUpdateClassName + doDeleteClassName — single-row endpoint
@@ -55,7 +57,8 @@ class ClassName extends ResourceObject
 
         assert($final instanceof ClassNameUpdated);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/class-name/class-name-list';
         $this->body = [
             'classNameId' => $final->classNameId,
             'name' => $final->name,
@@ -65,10 +68,10 @@ class ClassName extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateClassName` に対応する DELETE 操作。
+     * ALPS `doDeleteClassName` に対応する DELETE 操作。
      * @psalm-taint-source input $classNameId
      */
-    #[Alps('doUpdateClassName')]
+    #[Alps('doDeleteClassName')]
     #[JsonSchema(schema: 'delete-admin-class-name-class-name.json', params: 'delete-admin-class-name-class-name.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
     #[CsrfProtected]
@@ -78,7 +81,8 @@ class ClassName extends ResourceObject
 
         assert($final instanceof ClassNameDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/class-name/class-name-list';
         $this->body = ['classNameId' => $final->classNameId];
 
         return $this;

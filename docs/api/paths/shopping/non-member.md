@@ -6,13 +6,10 @@ EC-CUBE goShoppingNonMember / doSubmitNonMember —非会員購入 (Wave 7W).
 onGet  → goShoppingNonMember (safe form-info, anonymous-accessible)
   onPost → doSubmitNonMember   (unsafe, Direct, Semantic-validated)
 
-Wave 7W is the FORM ENTRY only. The Final intentionally does NOT
-persist a Cart / PreOrder under the guest's identity, and Pilot 5's
-doCheckout still requires a customer session — so the preOrderId
-returned by onPost will currently 403 on the subsequent checkout.
-Closing that gap is Phase 2's job (dedicated GuestProfile entity +
-non-member branch in CheckoutPrepared). See NonMemberSubmitted's
-docblock for the full rationale.
+Wave 7W started as the FORM ENTRY slice. The guest branch now persists
+a processing order and exposes a preOrderId, so an HTML form submission
+must redirect to the order-confirmation screen instead of returning a
+Resource-style 201 body that browsers cannot navigate from.
 
 Failure mapping (onPost):
   - CSRF invalid              → 403 (boundary)

@@ -27,17 +27,17 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
     private const PASSWORD = 'workflow-password-2026';
 
     private static string $email;
-    private static string $paymentName;
     private static string $productCode;
     private static string $productName;
     private static string $updatedProductName;
     private static string $memberOrderNo;
+    private static string $orderListHref;
+    private static string $mypageHref;
     private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
     {
         $suffix = bin2hex(random_bytes(4));
-        self::$paymentName = 'Workflow Purchase Payment ' . $suffix;
         self::$productCode = 'workflow-purchase-' . $suffix;
         self::$productName = 'Workflow Purchase Product ' . $suffix;
         self::$updatedProductName = 'Workflow Purchase Published ' . $suffix;
@@ -70,43 +70,12 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         return $response;
     }
 
-    #[Alps('goPaymentList')]
-    #[Depends('testShopConfigurationEntry')]
-    public function testPaymentList(ResourceObject $response): ResourceObject
-    {
-        return $this->follow($response, 'goPaymentList');
-    }
-
-    #[Alps('doCreatePayment')]
-    #[Depends('testPaymentList')]
-    public function testCreatesPayment(ResourceObject $response): ResourceObject
-    {
-        $created = $this->resource->post($this->linkHref($response, 'doCreatePayment'), [
-            'paymentMethodName' => self::$paymentName,
-            'charge' => 0,
-            'ruleMin' => 0,
-            'ruleMax' => 999999,
-            'visible' => true,
-            'csrfToken' => self::CSRF_TOKEN,
-        ]);
-
-        $this->assertSame(Code::CREATED, $created->code);
-        $this->assertSame(self::$paymentName, $this->bodyValue($created, 'paymentMethodName'));
-
-        return $created;
-    }
-
-    #[Alps('goPaymentList')]
-    #[Depends('testCreatesPayment')]
-    public function testReturnsToPaymentList(ResourceObject $response): ResourceObject
-    {
-        return $this->follow($response, 'goPaymentList');
-    }
-
     #[Alps('goProductList')]
-    #[Depends('testReturnsToPaymentList')]
+    #[Depends('testShopConfigurationEntry')]
     public function testAdminProductList(ResourceObject $response): ResourceObject
     {
+        self::$orderListHref = $this->linkHref($response, 'goOrderList');
+
         return $this->follow($response, 'goProductList');
     }
 
@@ -499,19 +468,117 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         $complete = $this->followLocation($response);
 
         $this->assertSame(self::$memberOrderNo, $this->bodyValue($complete, 'orderNo'));
+        self::$mypageHref = $this->linkHref($complete, 'goMypage');
 
         return $complete;
     }
 
-    #[Alps('goMypage')]
+    #[Alps('goOrderList')]
     #[Depends('testMemberShoppingComplete')]
-    public function testMemberMypageAfterCheckout(ResourceObject $response): ResourceObject
+    public function testAdminOrderListAfterMemberCheckout(ResourceObject $response): ResourceObject
     {
-        return $this->follow($response, 'goMypage');
+        $orderList = $this->resource->get(self::$orderListHref);
+
+        $this->assertSame(Code::OK, $orderList->code);
+
+        return $orderList;
+    }
+
+    #[Alps('goOrder')]
+    #[Depends('testAdminOrderListAfterMemberCheckout')]
+    public function testAdminOrderForMemberPurchase(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goOrder', ['orderNo' => self::$memberOrderNo]);
+    }
+
+    #[Alps('goOrderShippingAddress')]
+    #[Depends('testAdminOrderForMemberPurchase')]
+    public function testAdminOrderShippingAddressForMemberPurchase(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goOrderShippingAddress', ['orderNo' => self::$memberOrderNo]);
+    }
+
+    #[Alps('doUpdateOrderShippingAddress')]
+    #[Depends('testAdminOrderShippingAddressForMemberPurchase')]
+    public function testAdminUpdatesShippingAddressForMemberPurchase(ResourceObject $response): ResourceObject
+    {
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateOrderShippingAddress'), [
+            'orderNo' => self::$memberOrderNo,
+            'name01' => '履歴',
+            'name02' => '太郎',
+            'postalCode' => '1500001',
+            'pref' => 13,
+            'addr01' => '渋谷区',
+            'addr02' => '履歴1-1-1',
+            'phoneNumber' => '0312345678',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$memberOrderNo, $this->bodyValue($updated, 'orderNo'));
+
+        return $updated;
+    }
+
+    #[Alps('doUpdateTrackingNumber')]
+    #[Depends('testAdminUpdatesShippingAddressForMemberPurchase')]
+    public function testAdminUpdatesTrackingNumberForMemberPurchase(ResourceObject $response): ResourceObject
+    {
+        $updated = $this->resource->put($this->linkHref($response, 'doUpdateTrackingNumber'), [
+            'orderNo' => self::$memberOrderNo,
+            'trackingNumber' => 'TRK-MEMBER-HISTORY',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame('OK', $this->bodyValue($updated, 'status'));
+        $this->assertSame(self::$memberOrderNo, $this->bodyValue($updated, 'orderNo'));
+
+        return $updated;
+    }
+
+    #[Alps('goOrderMail')]
+    #[Depends('testAdminUpdatesTrackingNumberForMemberPurchase')]
+    public function testAdminOrderMailForMemberPurchase(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goOrderMail', ['orderNo' => self::$memberOrderNo]);
+    }
+
+    #[Alps('goOrderMailConfirm')]
+    #[Depends('testAdminOrderMailForMemberPurchase')]
+    public function testAdminOrderMailConfirmForMemberPurchase(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goOrderMailConfirm', ['orderNo' => self::$memberOrderNo]);
+    }
+
+    #[Alps('doSendOrderMail')]
+    #[Depends('testAdminOrderMailConfirmForMemberPurchase')]
+    public function testAdminSendsOrderMailForMemberPurchase(ResourceObject $response): ResourceObject
+    {
+        $sent = $this->resource->post($this->linkHref($response, 'doSendOrderMail'), [
+            'orderNo' => self::$memberOrderNo,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $sent->code);
+        $this->assertSame(self::$memberOrderNo, $this->bodyValue($sent, 'orderNo'));
+
+        return $sent;
+    }
+
+    #[Alps('goMypage')]
+    #[Depends('testAdminSendsOrderMailForMemberPurchase')]
+    public function testMemberMypageAfterAdminOrderMail(ResourceObject $response): ResourceObject
+    {
+        $mypage = $this->resource->get(self::$mypageHref);
+
+        $this->assertSame(Code::OK, $mypage->code);
+
+        return $mypage;
     }
 
     #[Alps('goOrderHistory')]
-    #[Depends('testMemberMypageAfterCheckout')]
+    #[Depends('testMemberMypageAfterAdminOrderMail')]
     public function testMemberOrderHistory(ResourceObject $response): ResourceObject
     {
         $history = $this->follow($response, 'goOrderHistory');

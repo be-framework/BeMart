@@ -22,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Provider\AddressIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\AdminIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\BlockIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\CategoryIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\CalendarHolidayIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\ClassCategoryIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\ClassNameIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
@@ -98,6 +99,7 @@ final class AppModule extends AbstractAppModule
         AddressIdProvider::class,
         AdminIdProvider::class,
         BlockIdProvider::class,
+        CalendarHolidayIdProvider::class,
         CategoryIdProvider::class,
         ClassCategoryIdProvider::class,
         ClassNameIdProvider::class,

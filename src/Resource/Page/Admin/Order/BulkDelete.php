@@ -47,6 +47,7 @@ class BulkDelete extends ResourceObject
     /**
      * ALPS `doBulkDeleteOrder` に対応する POST 操作。
      * @param list<string> $orderNos
+     * @param list<string> $ids EC-CUBE-compatible HTML form alias (`ids[]`).
      *
      * @psalm-taint-source input $orderNos
      */
@@ -55,15 +56,18 @@ class BulkDelete extends ResourceObject
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[CsrfProtected]
     public function onPost(
-        array $orderNos,
+        array $orderNos = [],
+        array $ids = [],
+        string|null $mode = null,
     ): static {
+        $targetOrderNos = $orderNos === [] ? $ids : $orderNos;
         $final = ($this->becoming)(new AdminBulkDeleteOrderInput(
-            orderNos: $orderNos,
+            orderNos: $targetOrderNos,
         ));
 
         assert($final instanceof AdminOrdersBulkDeleted);
 
-        $this->code = Code::OK;
+        $this->code = $mode === 'order_bulk_delete_form' ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/order-list';
         $this->body = [
             'orderNos' => $final->orderNos,

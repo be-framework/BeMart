@@ -54,11 +54,32 @@ Default patterns:
   and hidden side effects are asserted in Be / Resource / SQL contract
   tests. `flow-customer-inquiry` intentionally shows this shape with a
   public `ticketId` because there is no inquiry body readback resource.
+- Upload flows: in Resource/Hypermedia tests, use BEAR's `#[InputFile]`
+  boundary with `Koriym\FileUpload\FileUpload::fromFile(...)`; in HTTP and
+  browser tests, submit the same HTML form as multipart/form-data and prove
+  the uploaded state by readback. Reference:
+  https://bearsunday.github.io/manuals/1.0/ja/resource_param.html#%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB%E3%82%A2%E3%83%83%E3%83%97%E3%83%AD%E3%83%BC%E3%83%89%E3%81%AE%E3%83%86%E3%82%B9%E3%83%88
 
 Do not add DB reads to a workflow test only to prove persistence. If the
 saved state is not observable through a public resource, put that proof
 in the command/storage/SQL contract layer and keep the workflow focused
 on the hypermedia journey.
+
+Web+DB completion evidence has a stricter browser-facing contract in
+`docs/web-e2e/completion-evidence-rules.md`. In short: an unsafe browser
+feature is not green because a page was reachable or a `Location` header
+was returned. It is green only after the operation URL came from a public
+form/link/rel/Location, the request used the same cookie and CSRF boundary,
+and the resulting DB-backed state was read back with screenshot and JSON
+evidence. When the browser finds a gap, first express it as a Hypermedia
+or HTTP workflow regression, then fix the implementation.
+
+CSRF is not a null boundary in the current test contexts. The Fake context
+uses a fixed `FakeCsrfToken`, the SQL HTML context mirrors the rendered
+hidden `csrfToken` through the test header/session bridge, and only smoke
+tests use an always-valid token. Keep form token rendering and same-context
+submission visible in HTTP/browser evidence even if a future test module
+chooses to disable CSRF validation itself.
 
 ## Write once, run at two transports
 

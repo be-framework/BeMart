@@ -13,6 +13,7 @@ use MyVendor\BeMart\Module\App;
 use Throwable;
 
 use function assert;
+use function putenv;
 
 /**
  * @psalm-import-type Globals from RouterInterface
@@ -29,6 +30,8 @@ final class Bootstrap
      */
     public function __invoke(string $context, array $globals, array $server): int
     {
+        putenv('APP_CONTEXT=' . $context);
+
         $app = Injector::getInstance($context)->getInstance(AppInterface::class);
         assert($app instanceof App);
         /** @var array{HTTP_IF_NONE_MATCH?: string} $cacheServer */
@@ -48,7 +51,6 @@ final class Bootstrap
 
             $response = $app->resource->{$request->method}->uri($request->path)($request->query);
             assert($response instanceof ResourceObject);
-            $server['_BEMART_CONTEXT'] = $context;
             $response->transfer($app->responder, $server);
 
             return 0;

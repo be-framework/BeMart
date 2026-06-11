@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
+use MyVendor\BeMart\Be\Reason\Entity\CustomerEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\PaymentSuccessCase;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
@@ -14,6 +15,8 @@ use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
 
 use function array_map;
+use function is_int;
+use function is_string;
 
 /**
  * Final — proof that confirm() succeeded and the ShoppingConfirm state is
@@ -108,20 +111,10 @@ final readonly class OrderConfirmed
             $paymentMethodId,
         );
 
-        $customer = $customerQuery->item($order->customerId);
-        $this->customer = [
-            'name01' => $customer?->name01 ?? '',
-            'name02' => $customer?->name02 ?? '',
-            'kana01' => $customer?->kana01,
-            'kana02' => $customer?->kana02,
-            'companyName' => $customer?->companyName,
-            'email' => $customer?->email ?? '',
-            'phoneNumber' => $customer?->phoneNumber,
-            'postalCode' => $customer?->postalCode,
-            'pref' => $customer?->pref,
-            'addr01' => $customer?->addr01,
-            'addr02' => $customer?->addr02,
-        ];
+        $customer = $order->customerSnapshot !== []
+            ? self::customerFromSnapshot($order->customerSnapshot)
+            : self::customerFromEntity($customerQuery->item($order->customerId));
+        $this->customer = $customer;
 
         $this->items = array_map(
             function (CartItemEntity $item) use ($productClasses): array {
@@ -137,6 +130,79 @@ final readonly class OrderConfirmed
             },
             $order->items,
         );
+    }
+
+    /**
+     * @param array<string, mixed> $snapshot
+     *
+     * @return array{
+     *   name01: string, name02: string, kana01: string|null, kana02: string|null,
+     *   companyName: string|null, email: string, phoneNumber: string|null,
+     *   postalCode: string|null, pref: int|null, addr01: string|null, addr02: string|null
+     * }
+     */
+    private static function customerFromSnapshot(array $snapshot): array
+    {
+        return [
+            'name01' => self::stringValue($snapshot['name01'] ?? null),
+            'name02' => self::stringValue($snapshot['name02'] ?? null),
+            'kana01' => self::nullableString($snapshot['kana01'] ?? null),
+            'kana02' => self::nullableString($snapshot['kana02'] ?? null),
+            'companyName' => self::nullableString($snapshot['companyName'] ?? null),
+            'email' => self::stringValue($snapshot['email'] ?? null),
+            'phoneNumber' => self::nullableString($snapshot['phoneNumber'] ?? null),
+            'postalCode' => self::nullableString($snapshot['postalCode'] ?? null),
+            'pref' => self::nullableInt($snapshot['pref'] ?? null),
+            'addr01' => self::nullableString($snapshot['addr01'] ?? null),
+            'addr02' => self::nullableString($snapshot['addr02'] ?? null),
+        ];
+    }
+
+    /**
+     * @return array{
+     *   name01: string, name02: string, kana01: string|null, kana02: string|null,
+     *   companyName: string|null, email: string, phoneNumber: string|null,
+     *   postalCode: string|null, pref: int|null, addr01: string|null, addr02: string|null
+     * }
+     */
+    private static function customerFromEntity(CustomerEntity|null $customer): array
+    {
+        return [
+            'name01' => $customer?->name01 ?? '',
+            'name02' => $customer?->name02 ?? '',
+            'kana01' => $customer?->kana01,
+            'kana02' => $customer?->kana02,
+            'companyName' => $customer?->companyName,
+            'email' => $customer?->email ?? '',
+            'phoneNumber' => $customer?->phoneNumber,
+            'postalCode' => $customer?->postalCode,
+            'pref' => $customer?->pref,
+            'addr01' => $customer?->addr01,
+            'addr02' => $customer?->addr02,
+        ];
+    }
+
+    private static function stringValue(mixed $value): string
+    {
+        return is_string($value) || is_int($value) ? (string) $value : '';
+    }
+
+    private static function nullableString(mixed $value): string|null
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return self::stringValue($value);
+    }
+
+    private static function nullableInt(mixed $value): int|null
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (int) $value;
     }
 
     /**

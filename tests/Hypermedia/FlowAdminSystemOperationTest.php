@@ -172,6 +172,35 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         return $updated;
     }
 
+    #[Alps('doDeleteMember')]
+    #[Depends('testUpdatesAuthorityRole')]
+    public function testDeletesMember(ResourceObject $response): ResourceObject
+    {
+        $member = $this->follow($response, 'goMember', ['loginId' => self::$memberLoginId]);
+        $deleted = $this->resource->delete($this->linkHref($member, 'doDeleteMember'), [
+            'loginId' => self::$memberLoginId,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(self::$memberLoginId, $this->bodyValue($deleted, 'loginId'));
+        $this->assertFalse((bool) $this->bodyValue($deleted, 'alreadyDeleted'));
+
+        return $deleted;
+    }
+
+    #[Alps('goMember')]
+    #[Depends('testDeletesMember')]
+    public function testConfirmsDeletedMemberIsInactive(ResourceObject $response): ResourceObject
+    {
+        $memberList = $this->follow($response, 'goMemberList');
+        $member = $this->follow($memberList, 'goMember', ['loginId' => self::$memberLoginId]);
+
+        $this->assertSame(0, $this->bodyValue($member, 'work'));
+
+        return $member;
+    }
+
     #[Alps('goLoginHistoryList')]
     #[Depends('testUpdatesAuthorityRole')]
     public function testLoginHistoryList(ResourceObject $response): ResourceObject

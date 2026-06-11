@@ -25,8 +25,8 @@
      the Wave 9 CMS slice). The レイアウト名 column renders empty, not
      invented. Enumerated as residual — MISSING-BODY-FIELD: `pages[].layouts`.
    - `Page.edit_type` -> the body carries `pageEditType` (2 = system /
-     EDIT_TYPE_DEFAULT, 1 = EDIT_TYPE_USER). The delete affordance shows
-     only for user pages (`pageEditType == 1`).
+     EDIT_TYPE_DEFAULT, 0 = EDIT_TYPE_USER). The delete affordance shows
+     only for user pages (`pageEditType == 0`).
    - `csrf_token_for_anchor()` on the delete `<a>` -> EC-CUBE per-request
      CSRF widget. OMITTED. EC-CUBE-runtime only — enumerated as residual.
 #}
@@ -98,7 +98,7 @@
                                     </td>
                                     <td class="align-middle pe-3">
                                         <div class="row justify-content-end">
-                                            {% if Page.pageEditType == 1 %}
+                                            {% if Page.pageEditType == 0 %}
                                                 <div class="col-auto text-center" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
                                                     <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#delete_{{ Page.pageId }}">
                                                         <i class="fa fa-close fa-lg text-secondary" aria-hidden="true"></i>

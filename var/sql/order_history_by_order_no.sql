@@ -97,7 +97,9 @@ SELECT
           '[',
           GROUP_CONCAT(
             JSON_OBJECT(
-              'sendDate', mh.send_date, 'mailSubject',
+              'sendDate',
+              DATE_FORMAT(mh.send_date, '%Y-%m-%d %H:%i:%s'),
+              'mailSubject',
               mh.mail_subject, 'mailBody', mh.mail_body
             )
             ORDER BY

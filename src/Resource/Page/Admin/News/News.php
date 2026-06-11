@@ -26,6 +26,10 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function sprintf;
+use function str_contains;
+use function urlencode;
 
 /**
  * EC-CUBE goNews + doUpdateNews + doDeleteNews — single-row endpoint
@@ -73,7 +77,7 @@ class News extends ResourceObject
                 'newsId' => '',
                 'newsTitle' => '',
                 'newsDescription' => '',
-                'newsUrl' => '',
+                'newsUrl' => null,
                 'publishDate' => '2026-05-23 00:00:00',
                 'linkMethod' => false,
                 'csrfToken' => $this->csrf->token,
@@ -95,6 +99,7 @@ class News extends ResourceObject
             'newsUrl' => $final->newsUrl,
             'publishDate' => $final->publishDate,
             'linkMethod' => $final->linkMethod,
+            'csrfToken' => $this->csrf->token,
         ];
         // Phase 3: an AdminNewsForm pre-filled with the persisted row,
         // for the HTML edit page to render via `{{ form.input(...) }}`.
@@ -154,7 +159,8 @@ class News extends ResourceObject
 
         assert($final instanceof NewsUpdated);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = sprintf('/admin/news/news?newsId=%s', urlencode($final->newsId));
         $this->body = [
             'newsId' => $final->newsId,
             'newsTitle' => $final->newsTitle,
@@ -168,10 +174,10 @@ class News extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateNews` に対応する DELETE 操作。
+     * ALPS `doDeleteNews` に対応する DELETE 操作。
      * @psalm-taint-source input $newsId
      */
-    #[Alps('doUpdateNews')]
+    #[Alps('doDeleteNews')]
     #[JsonSchema(schema: 'delete-admin-news-news.json', params: 'delete-admin-news-news.param.json')]
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
@@ -182,7 +188,8 @@ class News extends ResourceObject
 
         assert($final instanceof NewsDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/news/news-list';
         $this->body = ['newsId' => $final->newsId];
 
         return $this;
