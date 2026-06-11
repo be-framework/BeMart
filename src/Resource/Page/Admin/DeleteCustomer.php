@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\CustomerNotFoundException;
@@ -18,8 +19,6 @@ use MyVendor\BeMart\Be\Input\AdminDeleteCustomerInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE doDeleteCustomer — 会員を削除する (管理画面).
@@ -65,6 +64,7 @@ class DeleteCustomer extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -88,7 +88,7 @@ class DeleteCustomer extends ResourceObject
 
         assert($final instanceof AdminCustomerDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         if ($this->code === Code::SEE_OTHER) {
             $this->headers['Location'] = '/admin/customer-list';
         }

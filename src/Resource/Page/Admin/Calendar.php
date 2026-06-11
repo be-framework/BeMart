@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Final\AdminCalendarFetched;
 use MyVendor\BeMart\Be\Final\CalendarHolidayCreated;
@@ -25,8 +26,6 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE 定休日カレンダー設定 — Setting/Shop Tier-2.
@@ -40,6 +39,7 @@ class Calendar extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -111,7 +111,7 @@ class Calendar extends ResourceObject
             $transitionId = 'doUpdateCalendar';
         }
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : ($isCreate ? Code::CREATED : Code::OK);
+        ($this->mutationResponse)($this, $isCreate ? Code::CREATED : Code::OK);
         $this->headers['Location'] = '/admin/calendar';
         $this->body = [
             'transitionId' => $transitionId,
@@ -146,7 +146,7 @@ class Calendar extends ResourceObject
 
         assert($final instanceof CalendarHolidayDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/calendar';
         $this->body = [
             'transitionId' => 'doDeleteCalendarHoliday',

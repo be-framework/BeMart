@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -22,12 +23,10 @@ use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_values;
 use function assert;
-use function getenv;
 use function is_array;
 use function is_bool;
 use function is_int;
 use function is_scalar;
-use function str_contains;
 
 /**
  * EC-CUBE doUpdateCsv — CSV出力設定を更新する (Wave 9).
@@ -56,6 +55,7 @@ class CsvConfig extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -131,17 +131,9 @@ class CsvConfig extends ResourceObject
             'columns' => $final->columns,
             'count' => $final->count,
         ];
-        if (self::isHtmlContext()) {
-            $this->code = Code::SEE_OTHER;
-            $this->headers['Location'] = '/admin/csv-config?csvType=' . $final->csvType;
-        }
+        $this->mutationResponse->redirectOnSuccess($this, '/admin/csv-config?csvType=' . $final->csvType);
 
         return $this;
-    }
-
-    private static function isHtmlContext(): bool
-    {
-        return str_contains((string) getenv('APP_CONTEXT'), 'html');
     }
 
     /**
