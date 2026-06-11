@@ -10,6 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminCsvConfigForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -49,6 +50,7 @@ final class AdminCsvConfigResourceTest extends TestCase
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
             }
         };
         $base->override($override);
