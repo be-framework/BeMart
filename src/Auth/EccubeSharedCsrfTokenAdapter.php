@@ -8,7 +8,6 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Override;
 
 use function bin2hex;
-use function getenv;
 use function hash_equals;
 use function headers_sent;
 use function is_string;
@@ -44,13 +43,11 @@ use const PHP_SESSION_ACTIVE;
  *      JSON / form body, and asks this adapter to compare it against
  *      `$_SESSION[SESSION_KEY]` using `hash_equals`.
  *
- * CLI safety: in `bin/app.php` there is no HTTP origin to defend, but a
- * trusted operator might want to invoke a state-changing endpoint to
- * smoke-test the production binding. The adapter honors a single env
- * var, {@see CLI_ENV_VAR}, as the reference token in CLI context (mirrors
- * Slice 7's {@see EccubeSharedSessionAdapter::CLI_ENV_VAR} pattern). If
- * unset, CLI POSTs fail the CSRF check the same way an anonymous browser
- * request would.
+ * CLI safety: in `bin/app.php` there is no HTTP origin to defend. CLI
+ * requests use the token in $_SESSION when a test or context module supplies
+ * one; otherwise POSTs fail the CSRF check the same way an anonymous browser
+ * request would. Application code must not inspect process environment to
+ * decide the trusted token.
  *
  * Comparison is always timing-safe (`hash_equals`). Empty strings and
  * non-string types are rejected before comparison.
@@ -71,15 +68,6 @@ final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
      */
     public const SESSION_KEY = '_csrf_token';
 
-    /**
-     * CLI-only reference token (operator scripts, subprocess smoke tests).
-     * When running under php-cli the adapter compares submitted tokens
-     * against this env var if `$_SESSION[SESSION_KEY]` is absent. NEVER
-     * set this in HTTP context — it grants any submitter who knows the
-     * value the right to bypass CSRF.
-     */
-    public const CLI_ENV_VAR = 'BEMART_CLI_CSRF_TOKEN';
-
     public function __construct(
         private string $sessionKey = self::SESSION_KEY,
     ) {
@@ -99,16 +87,6 @@ final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
         $stored = $session[$this->sessionKey] ?? null;
         if (is_string($stored) && $stored !== '' && hash_equals($stored, $token)) {
             return true;
-        }
-
-        // CLI fallback: operator scripts and subprocess tests may supply
-        // the trusted reference via env var. The HTTP path NEVER reaches
-        // this branch — `PHP_SAPI` distinguishes web SAPI from cli.
-        if (PHP_SAPI === 'cli') {
-            $env = getenv(self::CLI_ENV_VAR);
-            if ($env !== false && $env !== '' && hash_equals($env, $token)) {
-                return true;
-            }
         }
 
         return false;

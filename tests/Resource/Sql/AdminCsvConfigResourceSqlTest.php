@@ -8,6 +8,7 @@ use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use Ray\Di\AbstractModule;
 
 /**
@@ -60,6 +61,7 @@ final class AdminCsvConfigResourceSqlTest extends AbstractResourceSqlTestCase
             {
                 $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
+                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
             }
         };
     }
