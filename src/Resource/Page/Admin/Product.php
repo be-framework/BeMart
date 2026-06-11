@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\ProductCodeAlreadyInUseException;
@@ -26,9 +27,7 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
 use function sprintf;
-use function str_contains;
 use function urlencode;
 
 /**
@@ -57,6 +56,7 @@ class Product extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrf,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -223,7 +223,7 @@ class Product extends ResourceObject
 
         assert($final instanceof AdminProductDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         if ($this->code === Code::SEE_OTHER) {
             $this->headers['Location'] = '/admin/product-list';
         }

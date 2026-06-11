@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\PaymentMethodAdminNotFoundException;
@@ -24,9 +25,7 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
 use function sprintf;
-use function str_contains;
 use function urlencode;
 
 /**
@@ -42,6 +41,7 @@ class Payment extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -134,7 +134,7 @@ class Payment extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminUpdated);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = sprintf('/admin/payment/payment?paymentId=%s', urlencode($final->paymentId));
         $this->body = [
             'paymentId' => $final->paymentId,
@@ -163,7 +163,7 @@ class Payment extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/payment/payment-list';
         $this->body = ['paymentId' => $final->paymentId];
 

@@ -21,13 +21,12 @@ use MyVendor\BeMart\Be\Input\AdminLoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminLoginForm;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_values;
 use function assert;
-use function getenv;
-use function str_contains;
 use function trim;
 
 /**
@@ -73,6 +72,7 @@ class Login extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
         private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
+        private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
 
@@ -125,7 +125,7 @@ class Login extends ResourceObject
             'loginId' => $loginId ?? '',
             'password' => $password ?? '',
         ];
-        $browserForm = $mode !== null || str_contains((string) getenv('APP_CONTEXT'), 'html');
+        $browserForm = ($this->formSubmission)($mode);
         if ($browserForm) {
             $errors = $this->formErrors($values);
             if ($errors !== []) {

@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\DeliveryNotFoundException;
@@ -24,9 +25,7 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
 use function sprintf;
-use function str_contains;
 use function urlencode;
 
 /**
@@ -42,6 +41,7 @@ class Delivery extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -122,7 +122,7 @@ class Delivery extends ResourceObject
 
         assert($final instanceof DeliveryUpdated);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = sprintf('/admin/delivery/delivery?deliveryId=%s', urlencode($final->deliveryId));
         $this->body = [
             'deliveryId' => $final->deliveryId,
@@ -148,7 +148,7 @@ class Delivery extends ResourceObject
 
         assert($final instanceof DeliveryDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/delivery/delivery-list';
         $this->body = ['deliveryId' => $final->deliveryId];
 

@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\CategoryNotFoundException;
@@ -22,9 +23,7 @@ use MyVendor\BeMart\Be\Input\UpdateCategoryInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
 use function sprintf;
-use function str_contains;
 use function urlencode;
 
 /**
@@ -42,6 +41,7 @@ class Category extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -97,7 +97,7 @@ class Category extends ResourceObject
 
         assert($final instanceof CategoryUpdated);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = sprintf('/admin/category/category?categoryId=%s', urlencode($final->categoryId));
         $this->body = [
             'categoryId' => $final->categoryId,
@@ -123,7 +123,7 @@ class Category extends ResourceObject
 
         assert($final instanceof CategoryDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/category/category-list';
         $this->body = [
             'categoryId' => $final->categoryId,

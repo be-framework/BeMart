@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Final\AdminBlockFetched;
@@ -24,8 +25,6 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE doUpdateBlock + doDeleteBlock — single-row endpoint (Wave 9).
@@ -48,6 +47,7 @@ class Block extends ResourceObject
         private readonly CsrfToken $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -138,7 +138,7 @@ class Block extends ResourceObject
 
         assert($final instanceof BlockUpdated);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/block/block-list';
         $this->body = [
             'blockId' => $final->blockId,
@@ -165,7 +165,7 @@ class Block extends ResourceObject
 
         assert($final instanceof BlockDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/block/block-list';
         $this->body = ['blockId' => $final->blockId];
 

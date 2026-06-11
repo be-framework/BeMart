@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\CategoryCsvExported;
@@ -18,8 +19,6 @@ use MyVendor\BeMart\Be\Input\ImportCategoryCsvInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE goExportCategory + doImportCategoryCsv — CSV endpoint
@@ -39,6 +38,7 @@ class Csv extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -78,7 +78,7 @@ class Csv extends ResourceObject
 
         assert($final instanceof CategoryCsvImported);
 
-        $this->code = self::isHtmlContext() ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/category/category-list';
         $this->body = [
             'transitionId' => 'doImportCategoryCsv',
@@ -92,8 +92,4 @@ class Csv extends ResourceObject
         return $this;
     }
 
-    private static function isHtmlContext(): bool
-    {
-        return str_contains((string) getenv('APP_CONTEXT'), 'html');
-    }
 }

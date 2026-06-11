@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
@@ -23,8 +24,6 @@ use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function count;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE doUpdateOrderStatus — 受注ステータス変更 (Wave 7).
@@ -66,6 +65,7 @@ class OrderStatus extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -128,7 +128,7 @@ class OrderStatus extends ResourceObject
             return $this;
         }
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/order-status';
         $this->body = [
             'transitionId' => 'doUpdateOrderStatusList',
