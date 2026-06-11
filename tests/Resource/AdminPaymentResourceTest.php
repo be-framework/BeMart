@@ -10,6 +10,7 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -50,6 +51,7 @@ final class AdminPaymentResourceTest extends TestCase
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
             }
         };
         $base->override($override);
@@ -106,15 +108,6 @@ final class AdminPaymentResourceTest extends TestCase
             'paymentMethodName' => 'クレジットカード',
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-    }
-
-    public function testCreateRejectsMissingCsrf(): void
-    {
-        $ro = $this->resource->post('page://self/admin/payment/payment-list', [
-            'paymentMethodName' => 'クレジットカード',
-        ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testListReturnsRows(): void

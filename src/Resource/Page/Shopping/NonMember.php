@@ -83,8 +83,8 @@ class NonMember extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly FormFactory $formFactory,
         private readonly CsrfToken $csrf,
+        private readonly FormFactory $formFactory,
     ) {
     }
 
