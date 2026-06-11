@@ -119,13 +119,13 @@ class AuthorityRole extends ResourceObject
 
     /**
      * Wave 8: browser form input for URL deny rules. The primary HTML
-     * shape is `csrfToken` plus `AuthorityRoles[*][Authority]` /
-     * `AuthorityRoles[*][deny_url]`. The legacy member role-flip shape
-     * (`loginId`, `authority`) remains supported for member workflow.
+     * shape carries CSRF at the request boundary plus
+     * `AuthorityRoles[*][Authority]` / `AuthorityRoles[*][deny_url]`.
+     * The legacy member role-flip shape (`loginId`, `authority`)
+     * remains supported for member workflow.
      *
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $authority
-     * @psalm-taint-source input $csrfToken
      */
     #[Alps('doUpdateAuthorityRole')]
     #[JsonSchema(schema: 'post-admin-authority-role.json', params: 'post-admin-authority-role.param.json')]
@@ -137,7 +137,6 @@ class AuthorityRole extends ResourceObject
         string|null $loginId = null,
         int|null $authority = null,
         array $AuthorityRoles = [],
-        string|null $csrfToken = null,
     ): static {
         if ($AuthorityRoles !== []) {
             $final = ($this->becoming)(new UpdateAuthorityRulesInput(
