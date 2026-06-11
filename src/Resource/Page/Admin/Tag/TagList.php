@@ -21,6 +21,8 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE goTagList + doCreateTag — collection endpoint (Wave 9).
@@ -72,7 +74,7 @@ class TagList extends ResourceObject
 
         assert($final instanceof TagCreated);
 
-        $this->code = Code::CREATED;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = '/admin/tag/tag-list';
         $this->body = [
             'tagId' => $final->tagId,

@@ -14,6 +14,7 @@ use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
 use function bin2hex;
+use function is_string;
 use function random_bytes;
 
 class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
@@ -24,6 +25,9 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     private const CSRF_TOKEN = 'workflow-csv-csrf-token';
 
     private static WorkflowDbSession|null $dbSession = null;
+    private static string $csvClassName;
+    private static string $csvClassNameId;
+    private static string $csvClassCategory;
 
     public static function setUpBeforeClass(): void
     {
@@ -59,8 +63,8 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testCsvConfig')]
     public function testUpdatesCsvConfig(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->post('page://self/admin/csv-config', [
-            'csvType' => 3,
+        $updated = $this->resource->post($this->linkHref($response, 'doUpdateCsv'), [
+            'csvType' => 1,
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
                 ['columnName' => 'productName', 'enabled' => true, 'sortNo' => 2],
@@ -70,7 +74,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
         ]);
 
         $this->assertSame(Code::OK, $updated->code);
-        $this->assertSame(3, $this->bodyValue($updated, 'csvType'));
+        $this->assertSame(1, $this->bodyValue($updated, 'csvType'));
         $this->assertSame(3, $this->bodyValue($updated, 'count'));
 
         return $updated;
@@ -88,7 +92,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     public function testImportsProductCsv(ResourceObject $response): ResourceObject
     {
         $productCode = 'workflow-csv-product-' . bin2hex(random_bytes(4));
-        $imported = $this->resource->post('page://self/admin/product-csv', [
+        $imported = $this->resource->post($this->linkHref($response, 'doImportProductCsv'), [
             'csv' => "productCode,productName,price02,stock,productStatus,description,searchWord,note\n{$productCode},Workflow CSV Product,1200,5,1,CSV import product,workflow csv,Imported by workflow\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -111,7 +115,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testExportsCategoryCsv')]
     public function testImportsCategoryCsv(ResourceObject $response): ResourceObject
     {
-        $imported = $this->resource->post('page://self/admin/category/csv', [
+        $imported = $this->resource->post($this->linkHref($response, 'doImportCategoryCsv'), [
             'csv' => "category_id,category_name,parent_category_id\n,Workflow Category,\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -140,7 +144,7 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testExportsShippingCsv')]
     public function testImportsShippingCsv(ResourceObject $response): ResourceObject
     {
-        $imported = $this->resource->post('page://self/admin/order/import-shipping', [
+        $imported = $this->resource->post($this->linkHref($response, 'doImportShippingCsv'), [
             'csv' => "shipping_id,tracking_number,ship_date\n1,TRACK-WORKFLOW,2026-06-05\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -169,19 +173,44 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
     #[Depends('testExportsClassNameCsv')]
     public function testImportsClassNameCsv(ResourceObject $response): ResourceObject
     {
-        $imported = $this->resource->post('page://self/admin/product/csv-class-name', [
-            'csv' => "class_name_id,class_name,backend_name\n,Workflow Class,Workflow Class\n",
+        self::$csvClassName = 'WF CSV Class ' . bin2hex(random_bytes(4));
+        $imported = $this->resource->post($this->linkHref($response, 'doImportClassNameCsv'), [
+            'csv' => "class_name_id,class_name,backend_name\n," . self::$csvClassName . ',' . self::$csvClassName . "\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $imported->code);
         $this->assertSame('doImportClassNameCsv', $this->bodyValue($imported, 'transitionId'));
+        $this->assertSame(1, $this->bodyValue($imported, 'accepted'));
 
         return $imported;
     }
 
-    #[Alps('goExportClassCategory')]
+    #[Alps('goClassNameList')]
     #[Depends('testImportsClassNameCsv')]
+    public function testFindsImportedClassNameCsv(ResourceObject $response): ResourceObject
+    {
+        $list = $this->followLocation($response, '/admin/class-name/class-name-list');
+        $classNames = $this->bodyValue($list, 'classNames');
+        $this->assertIsArray($classNames);
+        foreach ($classNames as $className) {
+            $this->assertIsArray($className);
+            if (($className['name'] ?? null) !== self::$csvClassName) {
+                continue;
+            }
+
+            $classNameId = $className['classNameId'] ?? null;
+            $this->assertIsString($classNameId);
+            self::$csvClassNameId = $classNameId;
+
+            return $response;
+        }
+
+        $this->fail('Imported class name was not visible in class-name list.');
+    }
+
+    #[Alps('goExportClassCategory')]
+    #[Depends('testFindsImportedClassNameCsv')]
     public function testExportsClassCategoryCsv(ResourceObject $response): ResourceObject
     {
         return $this->follow($response, 'goExportClassCategory');
@@ -189,14 +218,40 @@ class FlowAdminCsvExchangeTest extends AbstractWorkflowTest
 
     #[Alps('doImportClassCategoryCsv')]
     #[Depends('testExportsClassCategoryCsv')]
-    public function testImportsClassCategoryCsv(ResourceObject $response): void
+    public function testImportsClassCategoryCsv(ResourceObject $response): ResourceObject
     {
-        $imported = $this->resource->post('page://self/admin/product/csv-class-category', [
-            'csv' => "class_category_id,class_name_id,class_category_name,backend_name\n,1,Workflow Size,Workflow Size\n",
+        self::$csvClassCategory = 'WF CSV CC ' . bin2hex(random_bytes(4));
+        $imported = $this->resource->post($this->linkHref($response, 'doImportClassCategoryCsv'), [
+            'csv' => "class_category_id,class_name_id,class_category_name,backend_name\n," . self::$csvClassNameId . ',' . self::$csvClassCategory . ',' . self::$csvClassCategory . "\n",
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $imported->code);
         $this->assertSame('doImportClassCategoryCsv', $this->bodyValue($imported, 'transitionId'));
+        $this->assertSame(1, $this->bodyValue($imported, 'accepted'));
+
+        return $imported;
+    }
+
+    #[Alps('goClassCategoryList')]
+    #[Depends('testImportsClassCategoryCsv')]
+    public function testFindsImportedClassCategoryCsv(ResourceObject $response): void
+    {
+        $list = $this->followLocation($response, '/admin/class-category/class-category-list');
+        $classCategories = $this->bodyValue($list, 'classCategories');
+        $this->assertIsArray($classCategories);
+        foreach ($classCategories as $classCategory) {
+            $this->assertIsArray($classCategory);
+            if (($classCategory['name'] ?? null) !== self::$csvClassCategory) {
+                continue;
+            }
+
+            $classNameId = $classCategory['classNameId'] ?? null;
+            $this->assertTrue(is_string($classNameId) && $classNameId === self::$csvClassNameId);
+
+            return;
+        }
+
+        $this->fail('Imported class category was not visible in class-category list.');
     }
 }

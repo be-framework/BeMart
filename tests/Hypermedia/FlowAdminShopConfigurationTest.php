@@ -12,9 +12,12 @@ use BEAR\Dev\Http\AbstractWorkflowTest;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
 
+use function array_column;
 use function assert;
 use function bin2hex;
+use function in_array;
 use function random_bytes;
+use function str_replace;
 
 class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
 {
@@ -26,6 +29,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     private static string $paymentName;
     private static string $deliveryName;
     private static string $taxApplyDate;
+    private static string $canonicalTaxApplyDate;
     private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
@@ -33,7 +37,8 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
         $suffix = bin2hex(random_bytes(4));
         self::$paymentName = 'Workflow Payment ' . $suffix;
         self::$deliveryName = 'Workflow Delivery ' . $suffix;
-        self::$taxApplyDate = '2027-01-' . (string) (10 + (int) (hexdec($suffix[0]) % 9));
+        self::$taxApplyDate = '2027-01-' . (string) (10 + (int) (hexdec($suffix[0]) % 9)) . 'T10:00';
+        self::$canonicalTaxApplyDate = str_replace('T', ' ', self::$taxApplyDate) . ':00';
         self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
@@ -66,7 +71,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     #[Depends('testBaseInfo')]
     public function testUpdatesBaseInfo(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->post('page://self/admin/base-info', [
+        $updated = $this->resource->post($this->linkHref($response, 'doUpdateBaseInfo'), [
             'shopName' => 'Workflow Shop Configuration',
             'shopKana' => 'ワークフローショップ',
             'shopNameEng' => 'Workflow Shop',
@@ -99,7 +104,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     #[Depends('testPaymentList')]
     public function testCreatesPayment(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/payment/payment-list', [
+        $created = $this->resource->post($this->linkHref($response, 'doCreatePayment'), [
             'paymentMethodName' => self::$paymentName,
             'charge' => 220,
             'ruleMin' => 0,
@@ -120,8 +125,9 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     {
         $paymentId = $this->bodyValue($response, 'paymentId');
         $this->assertIsString($paymentId);
+        $paymentList = $this->follow($response, 'goPaymentList');
 
-        $updated = $this->resource->put('page://self/admin/payment/payment', [
+        $updated = $this->resource->put($this->linkHref($paymentList, 'doUpdatePayment'), [
             'paymentId' => $paymentId,
             'paymentMethodName' => self::$paymentName . ' Updated',
             'charge' => 330,
@@ -138,14 +144,31 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
         return $updated;
     }
 
-    #[Alps('doDeletePayment')]
+    #[Alps('goPaymentList')]
     #[Depends('testUpdatesPayment')]
-    public function testDeletesPayment(ResourceObject $response): ResourceObject
+    public function testReadsUpdatedPayment(ResourceObject $response): ResourceObject
     {
         $paymentId = $this->bodyValue($response, 'paymentId');
         $this->assertIsString($paymentId);
 
-        $deleted = $this->resource->delete('page://self/admin/payment/payment', [
+        $paymentList = $this->follow($response, 'goPaymentList');
+        $payments = $paymentList->body['payments'] ?? [];
+        $this->assertIsArray($payments);
+        $this->assertContains($paymentId, array_column($payments, 'paymentId'));
+        $this->assertContains(self::$paymentName . ' Updated', array_column($payments, 'paymentMethodName'));
+
+        return $response;
+    }
+
+    #[Alps('doDeletePayment')]
+    #[Depends('testReadsUpdatedPayment')]
+    public function testDeletesPayment(ResourceObject $response): ResourceObject
+    {
+        $paymentId = $this->bodyValue($response, 'paymentId');
+        $this->assertIsString($paymentId);
+        $paymentList = $this->follow($response, 'goPaymentList');
+
+        $deleted = $this->resource->delete($this->linkHref($paymentList, 'doDeletePayment'), [
             'paymentId' => $paymentId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -156,8 +179,23 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
         return $deleted;
     }
 
-    #[Alps('goDeliveryList')]
+    #[Alps('goPaymentList')]
     #[Depends('testDeletesPayment')]
+    public function testConfirmsPaymentRemoved(ResourceObject $response): ResourceObject
+    {
+        $paymentId = $this->bodyValue($response, 'paymentId');
+        $this->assertIsString($paymentId);
+
+        $paymentList = $this->follow($response, 'goPaymentList');
+        $payments = $paymentList->body['payments'] ?? [];
+        $this->assertIsArray($payments);
+        $this->assertFalse(in_array($paymentId, array_column($payments, 'paymentId'), true));
+
+        return $response;
+    }
+
+    #[Alps('goDeliveryList')]
+    #[Depends('testConfirmsPaymentRemoved')]
     public function testDeliveryList(ResourceObject $response): ResourceObject
     {
         return $this->follow($response, 'goDeliveryList');
@@ -167,7 +205,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     #[Depends('testDeliveryList')]
     public function testCreatesDelivery(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/delivery/delivery-list', [
+        $created = $this->resource->post($this->linkHref($response, 'doCreateDelivery'), [
             'deliveryName' => self::$deliveryName,
             'visible' => true,
             'csrfToken' => self::CSRF_TOKEN,
@@ -185,8 +223,9 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     {
         $deliveryId = $this->bodyValue($response, 'deliveryId');
         $this->assertIsString($deliveryId);
+        $deliveryList = $this->follow($response, 'goDeliveryList');
 
-        $updated = $this->resource->put('page://self/admin/delivery/delivery', [
+        $updated = $this->resource->put($this->linkHref($deliveryList, 'doUpdateDelivery'), [
             'deliveryId' => $deliveryId,
             'deliveryName' => self::$deliveryName . ' Updated',
             'visible' => true,
@@ -206,8 +245,9 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     {
         $deliveryId = $this->bodyValue($response, 'deliveryId');
         $this->assertIsString($deliveryId);
+        $deliveryList = $this->follow($response, 'goDeliveryList');
 
-        $deleted = $this->resource->delete('page://self/admin/delivery/delivery', [
+        $deleted = $this->resource->delete($this->linkHref($deliveryList, 'doDeleteDelivery'), [
             'deliveryId' => $deliveryId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -218,8 +258,23 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
         return $deleted;
     }
 
-    #[Alps('goTaxRuleList')]
+    #[Alps('goDeliveryList')]
     #[Depends('testDeletesDelivery')]
+    public function testConfirmsDeliveryRemoved(ResourceObject $response): ResourceObject
+    {
+        $deliveryId = $this->bodyValue($response, 'deliveryId');
+        $this->assertIsString($deliveryId);
+
+        $deliveryList = $this->follow($response, 'goDeliveryList');
+        $deliveries = $deliveryList->body['deliveries'] ?? [];
+        $this->assertIsArray($deliveries);
+        $this->assertFalse(in_array($deliveryId, array_column($deliveries, 'deliveryId'), true));
+
+        return $response;
+    }
+
+    #[Alps('goTaxRuleList')]
+    #[Depends('testConfirmsDeliveryRemoved')]
     public function testTaxRuleList(ResourceObject $response): ResourceObject
     {
         return $this->follow($response, 'goTaxRuleList');
@@ -229,15 +284,15 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     #[Depends('testTaxRuleList')]
     public function testCreatesTaxRule(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/tax-rule/tax-rule-list', [
-            'taxRate' => 9.5,
+        $created = $this->resource->post($this->linkHref($response, 'doCreateTaxRule'), [
+            'taxRate' => '9.5',
             'applyDate' => self::$taxApplyDate,
-            'roundingType' => 1,
+            'roundingType' => '1',
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::CREATED, $created->code);
-        $this->assertSame(self::$taxApplyDate, $this->bodyValue($created, 'applyDate'));
+        $this->assertSame(self::$canonicalTaxApplyDate, $this->bodyValue($created, 'applyDate'));
 
         return $created;
     }
@@ -248,8 +303,9 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     {
         $taxRuleId = $this->bodyValue($response, 'taxRuleId');
         $this->assertIsString($taxRuleId);
+        $taxRuleList = $this->follow($response, 'goTaxRuleList');
 
-        $deleted = $this->resource->delete('page://self/admin/tax-rule/tax-rule', [
+        $deleted = $this->resource->delete($this->linkHref($taxRuleList, 'doDeleteTaxRule'), [
             'taxRuleId' => $taxRuleId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -260,8 +316,23 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
         return $deleted;
     }
 
-    #[Alps('goCalendar')]
+    #[Alps('goTaxRuleList')]
     #[Depends('testDeletesTaxRule')]
+    public function testConfirmsTaxRuleRemoved(ResourceObject $response): ResourceObject
+    {
+        $taxRuleId = $this->bodyValue($response, 'taxRuleId');
+        $this->assertIsString($taxRuleId);
+
+        $taxRuleList = $this->follow($response, 'goTaxRuleList');
+        $taxRules = $taxRuleList->body['taxRules'] ?? [];
+        $this->assertIsArray($taxRules);
+        $this->assertFalse(in_array($taxRuleId, array_column($taxRules, 'taxRuleId'), true));
+
+        return $response;
+    }
+
+    #[Alps('goCalendar')]
+    #[Depends('testConfirmsTaxRuleRemoved')]
     public function testCalendar(ResourceObject $response): ResourceObject
     {
         return $this->follow($response, 'goCalendar');
@@ -271,7 +342,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     #[Depends('testCalendar')]
     public function testCreatesCalendarHoliday(ResourceObject $response): ResourceObject
     {
-        $created = $this->resource->post('page://self/admin/calendar', [
+        $created = $this->resource->post($this->linkHref($response, 'doCreateCalendarHoliday'), [
             'operation' => 'create',
             'title' => 'Workflow Holiday',
             'holiday' => '2027-02-11',
@@ -280,6 +351,7 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
 
         $this->assertSame(Code::CREATED, $created->code);
         $this->assertSame('doCreateCalendarHoliday', $this->bodyValue($created, 'transitionId'));
+        $this->assertIsString($this->bodyValue($created, 'calendarId'));
 
         return $created;
     }
@@ -288,30 +360,68 @@ class FlowAdminShopConfigurationTest extends AbstractWorkflowTest
     #[Depends('testCreatesCalendarHoliday')]
     public function testUpdatesCalendar(ResourceObject $response): ResourceObject
     {
-        $updated = $this->resource->post('page://self/admin/calendar', [
+        $calendarId = $this->bodyValue($response, 'calendarId');
+        $this->assertIsString($calendarId);
+        $calendar = $this->follow($response, 'goCalendar');
+        $updated = $this->resource->post($this->linkHref($calendar, 'doUpdateCalendar'), [
             'operation' => 'update',
             'title' => 'Workflow Holiday Updated',
             'holiday' => '2027-02-12',
-            'calendarId' => 1,
+            'calendarId' => $calendarId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $updated->code);
         $this->assertSame('doUpdateCalendar', $this->bodyValue($updated, 'transitionId'));
+        $this->assertSame($calendarId, $this->bodyValue($updated, 'calendarId'));
 
         return $updated;
     }
 
-    #[Alps('doDeleteCalendarHoliday')]
+    #[Alps('goCalendar')]
     #[Depends('testUpdatesCalendar')]
-    public function testDeletesCalendarHoliday(ResourceObject $response): void
+    public function testReadsUpdatedCalendar(ResourceObject $response): ResourceObject
     {
-        $deleted = $this->resource->delete('page://self/admin/calendar', [
-            'calendarId' => 1,
+        $calendarId = $this->bodyValue($response, 'calendarId');
+        $this->assertIsString($calendarId);
+
+        $calendar = $this->follow($response, 'goCalendar');
+        $calendars = $calendar->body['calendars'] ?? [];
+        $this->assertIsArray($calendars);
+        $this->assertContains($calendarId, array_column($calendars, 'id'));
+        $this->assertContains('Workflow Holiday Updated', array_column($calendars, 'title'));
+
+        return $response;
+    }
+
+    #[Alps('doDeleteCalendarHoliday')]
+    #[Depends('testReadsUpdatedCalendar')]
+    public function testDeletesCalendarHoliday(ResourceObject $response): ResourceObject
+    {
+        $calendarId = $this->bodyValue($response, 'calendarId');
+        $this->assertIsString($calendarId);
+        $calendar = $this->follow($response, 'goCalendar');
+        $deleted = $this->resource->delete($this->linkHref($calendar, 'doDeleteCalendarHoliday'), [
+            'calendarId' => $calendarId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $deleted->code);
         $this->assertSame('doDeleteCalendarHoliday', $this->bodyValue($deleted, 'transitionId'));
+
+        return $deleted;
+    }
+
+    #[Alps('goCalendar')]
+    #[Depends('testDeletesCalendarHoliday')]
+    public function testConfirmsCalendarHolidayRemoved(ResourceObject $response): void
+    {
+        $calendarId = $this->bodyValue($response, 'calendarId');
+        $this->assertIsString($calendarId);
+
+        $calendar = $this->follow($response, 'goCalendar');
+        $calendars = $calendar->body['calendars'] ?? [];
+        $this->assertIsArray($calendars);
+        $this->assertFalse(in_array($calendarId, array_column($calendars, 'id'), true));
     }
 }

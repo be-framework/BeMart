@@ -87,12 +87,18 @@
           "$ref": "#/$defs/uriReference",
           "title": "ALPS遷移リンク",
           "description": "ALPS `goCart` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
+        },
+        "goMypage": {
+          "$ref": "#/$defs/uriReference",
+          "title": "ALPS遷移リンク",
+          "description": "ALPS `goMypage` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
         }
       },
       "additionalProperties": false,
       "required": [
         "goTop",
-        "goCart"
+        "goCart",
+        "goMypage"
       ]
     }
   },

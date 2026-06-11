@@ -20,6 +20,10 @@ use MyVendor\BeMart\Be\Input\UpdateClassCategoryInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function sprintf;
+use function str_contains;
+use function urlencode;
 
 /**
  * EC-CUBE doUpdateClassCategory + doDeleteClassCategory — single-row
@@ -57,7 +61,11 @@ class ClassCategory extends ResourceObject
 
         assert($final instanceof ClassCategoryUpdated);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = sprintf(
+            '/admin/class-category/class-category-list?classNameId=%s',
+            urlencode($final->classNameId),
+        );
         $this->body = [
             'classCategoryId' => $final->classCategoryId,
             'classNameId' => $final->classNameId,
@@ -68,10 +76,10 @@ class ClassCategory extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateClassCategory` に対応する DELETE 操作。
+     * ALPS `doDeleteClassCategory` に対応する DELETE 操作。
      * @psalm-taint-source input $classCategoryId
      */
-    #[Alps('doUpdateClassCategory')]
+    #[Alps('doDeleteClassCategory')]
     #[JsonSchema(schema: 'delete-admin-class-category-class-category.json', params: 'delete-admin-class-category-class-category.param.json')]
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
     #[CsrfProtected]
@@ -81,7 +89,11 @@ class ClassCategory extends ResourceObject
 
         assert($final instanceof ClassCategoryDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = sprintf(
+            '/admin/class-category/class-category-list?classNameId=%s',
+            urlencode($final->classNameId),
+        );
         $this->body = ['classCategoryId' => $final->classCategoryId];
 
         return $this;

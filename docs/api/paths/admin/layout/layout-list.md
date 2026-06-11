@@ -33,4 +33,5 @@ _No parameters required_
 
 | Relation | URL |
 |----------|-----|
+| goLayout | [<code>page://self/admin/layout/layout{?layoutId}</code>](/admin/layout/layout.md) |
 | doUpdateLayout | [<code>page://self/admin/layout/layout</code>](/admin/layout/layout.md) |

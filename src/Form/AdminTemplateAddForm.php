@@ -27,18 +27,18 @@ final class AdminTemplateAddForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('code', 'text')
+        $this->setField('templateCode', 'text')
             ->setAttribs(['id' => 'admin_template_code', 'class' => 'form-control', 'maxlength' => '255']);
 
-        $this->setField('name', 'text')
+        $this->setField('templateName', 'text')
             ->setAttribs(['id' => 'admin_template_name', 'class' => 'form-control', 'maxlength' => '255']);
 
         $this->setField('file', 'file')
             ->setAttribs(['id' => 'admin_template_file', 'class' => 'form-control']);
 
         // Non-authoritative structural checks only — authority is the Be domain.
-        $this->filter->validate('code')->isNotBlank();
-        $this->filter->validate('name')->isNotBlank();
+        $this->filter->validate('templateCode')->isNotBlank();
+        $this->filter->validate('templateName')->isNotBlank();
         $this->filter->validate('file')->isNotBlank();
     }
 }

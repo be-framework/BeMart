@@ -75,4 +75,27 @@ final class AdminPaymentEditHtmlRenderTest extends TestCase
             $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
         }
     }
+
+    public function testPaymentCreateFormPostsToCollectionWithSemanticFieldNames(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment')->toString();
+
+        $this->assertStringContainsString('action="/admin/payment/payment-list"', $html);
+        $this->assertStringContainsString('name="paymentMethodName"', $html);
+        $this->assertStringContainsString('name="ruleMin"', $html);
+        $this->assertStringContainsString('name="ruleMax"', $html);
+        $this->assertStringNotContainsString('name="_method" value="put"', $html);
+    }
+
+    public function testPaymentEditFormExposesPutAffordance(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment', [
+            'paymentId' => 'pay-credit',
+        ])->toString();
+
+        $this->assertStringContainsString('action="/admin/payment/payment?paymentId=pay-credit&amp;_method=put"', $html);
+        $this->assertStringContainsString('name="_method" value="put"', $html);
+        $this->assertStringContainsString('name="paymentId" value="pay-credit"', $html);
+        $this->assertStringContainsString('name="paymentMethodName"', $html);
+    }
 }

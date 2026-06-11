@@ -70,6 +70,11 @@ class MasterData extends ResourceObject
             'masterTypes' => $masterTypes,
             'selectedMaster' => $masterType,
             'rows' => $rows,
+            'submitTo' => [
+                'rel' => 'doSelectMasterData',
+                'method' => 'PUT',
+                'href' => 'page://self/admin/master-data',
+            ],
         ];
 
         return $this;
@@ -103,6 +108,11 @@ class MasterData extends ResourceObject
             'transitionId' => 'doSelectMasterData',
             'selectedMaster' => $final->masterType,
             'rows' => $final->rows,
+            'submitTo' => [
+                'rel' => 'doUpdateMasterData',
+                'method' => 'PUT',
+                'href' => 'page://self/admin/master-data-edit',
+            ],
         ];
 
         return $this;

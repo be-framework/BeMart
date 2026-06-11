@@ -5,6 +5,33 @@
   "description": "GET /admin/block/block response の response body schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
   "type": "object",
   "properties": {
+    "blockId": {
+      "type": "string",
+      "title": "ブロックID",
+      "description": "dtb_block.id の不透明な文字列ハンドル。新規作成フォームでは空文字、編集フォームでは既存ブロックID。",
+      "minLength": 0,
+      "maxLength": 128,
+      "example": "1"
+    },
+    "blockName": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "ブロック名",
+      "description": "ブロックの表示名。新規作成フォームでは空文字、編集フォームでは保存済み値。"
+    },
+    "blockFileName": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "ブロックファイル名",
+      "description": "ブロックのテンプレートファイル名。新規作成フォームでは空文字、編集フォームでは保存済み値。"
+    },
+    "blockDeletable": {
+      "type": "boolean",
+      "title": "削除可否",
+      "description": "管理画面で削除可能なユーザー定義ブロックかどうか。"
+    },
     "form": {
       "type": [
         "object",
@@ -14,6 +41,18 @@
       "title": "入力フォーム",
       "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
       "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+    },
+    "csrfToken": {
+      "title": "処理識別子",
+      "description": "フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。",
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "fake-csrf-token-bemart-2026"
     }
   },
   "additionalProperties": false,

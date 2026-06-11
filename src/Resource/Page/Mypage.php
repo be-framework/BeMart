@@ -43,12 +43,14 @@ class Mypage extends ResourceObject
     /** ALPS `goMypage` に対応する GET 操作。 */
     #[Alps('goMypage')]
     #[JsonSchema(schema: 'get-mypage.json', params: 'get-mypage.param.json')]
+    #[Link(rel: 'goOrderHistory', href: 'page://self/mypage/order-history')]
     #[Link(rel: 'goMypageHistory', href: 'page://self/mypage/history')]
     #[Link(rel: 'goMypageChange', href: 'page://self/mypage/change')]
     #[Link(rel: 'goCustomerAddressList', href: 'page://self/mypage/address-list')]
     #[Link(rel: 'goFavoriteList', href: 'page://self/mypage/favorite-list')]
     #[Link(rel: 'goMypageWithdraw', href: 'page://self/mypage/withdraw')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
+    #[Link(rel: 'goProductList', href: 'page://self/products')]
     #[Link(rel: 'doAddFavorite', href: 'page://self/mypage/favorite', method: 'post')]
     #[Link(rel: 'doRemoveFavorite', href: 'page://self/mypage/favorite', method: 'delete')]
     public function onGet(int $orderLimit = 5): static

@@ -24,6 +24,8 @@ use MyVendor\BeMart\Be\Input\UpdateCartItemQuantityInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doAddCartItem —カートに商品を追加。
@@ -119,7 +121,7 @@ class Item extends ResourceObject
             return $this->redirectToCartOnSuccess();
         }
 
-        return $this;
+        return $this->redirectToCartOnHtmlSuccess();
     }
 
     /**
@@ -159,7 +161,7 @@ class Item extends ResourceObject
             'saleTypeName' => $final->saleTypeName,
         ];
 
-        return $this;
+        return $this->redirectToCartOnHtmlSuccess();
     }
 
     /**
@@ -193,7 +195,7 @@ class Item extends ResourceObject
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
         ];
 
-        return $this;
+        return $this->redirectToCartOnHtmlSuccess();
     }
 
     private function missingQuantity(string $productCode): static
@@ -209,6 +211,15 @@ class Item extends ResourceObject
         if ($this->code < 400) {
             $this->code = Code::SEE_OTHER;
             $this->headers['Location'] = '/cart';
+        }
+
+        return $this;
+    }
+
+    private function redirectToCartOnHtmlSuccess(): static
+    {
+        if ($this->code < 400 && str_contains((string) getenv('APP_CONTEXT'), 'html')) {
+            return $this->redirectToCartOnSuccess();
         }
 
         return $this;

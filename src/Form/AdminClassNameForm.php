@@ -16,13 +16,16 @@ use Ray\WebFormModule\AbstractForm;
  * renders the create inputs through Ray.WebFormModule.
  *
  * EC-CUBE's `ClassNameType` declares `name` (規格名) and `backend_name`
- * (管理名). BeMart's
+ * (管理名). BeMart's unsafe Resource boundary accepts the canonical
+ * `classNameLabel` parameter, so the rendered field keeps EC-CUBE's
+ * `admin_class_name_name` id while posting that canonical name.
+ * BeMart's
  * {@see \MyVendor\BeMart\Resource\Page\Admin\ClassName\ClassNameList}
  * resource (Wave 7) projects only `classNameId` / `name`
  * ({@see \MyVendor\BeMart\Be\Final\AdminClassNameListFetched}). Both
- * fields are declared here so the rendered inline-create form carries
- * EC-CUBE's two-input shape; `backend_name` repopulates empty (the
- * projection does not carry it — FLAGGED for enrichment follow-up).
+ * `backend_name` remains a displayed residual only (the projection does
+ * not carry it — FLAGGED for enrichment follow-up) and must not be
+ * submitted to the canonical Resource request schema.
  *
  * VALIDATION AUTHORITY STAYS WITH the Be domain — this form is a
  * field-definition + renderer only (see var/templates/README.md).
@@ -38,7 +41,7 @@ final class AdminClassNameForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('name', 'text')
+        $this->setField('classNameLabel', 'text')
             ->setAttribs([
                 'id' => 'admin_class_name_name',
                 'class' => 'form-control',
@@ -53,6 +56,6 @@ final class AdminClassNameForm extends AbstractForm
         // NON-AUTHORITATIVE structural check only — the authoritative
         // class-name rule lives in the Be domain (CreateClassNameInput
         // Semantic).
-        $this->filter->validate('name')->isNotBlank();
+        $this->filter->validate('classNameLabel')->isNotBlank();
     }
 }

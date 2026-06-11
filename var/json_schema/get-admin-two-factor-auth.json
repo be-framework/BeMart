@@ -38,6 +38,9 @@
         "maxLength": 255,
         "description": "/admin/two-factor-auth のレスポンスに含まれる二要素認証行。親コレクション `fields` の1行を表し、固定できる業務列はschema propertyで明示する。"
       }
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,

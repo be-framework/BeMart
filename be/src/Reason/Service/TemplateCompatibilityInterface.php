@@ -20,10 +20,13 @@ interface TemplateCompatibilityInterface
     /** Activate the named template (apply it as the current theme). */
     public function select(string $templateId): void;
 
+    /** Return the currently active template id when it can be read back. */
+    public function selected(): string|null;
+
     public function delete(string $templateId): void;
 
     public function download(string $templateId): TemplateArchive;
 
-    /** Install an uploaded template; returns the new template id. */
-    public function install(string $code, string $name): string;
+    /** Install an uploaded template archive; returns the new template id. */
+    public function install(string $code, string $name, string $archiveName, int $archiveSize): string;
 }

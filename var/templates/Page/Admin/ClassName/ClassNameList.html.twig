@@ -196,14 +196,14 @@
                                         </div>
                                         <div class="col-3 me-2">
                                             <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                                            {{ form.input('name')|raw }}
+                                            {{ form.input('classNameLabel')|raw }}
                                         </div>
                                         <div class="col-auto align-self-center" data-bs-toggle="tooltip" data-bs-placement="top" title="管理者用に別名を登録しておくことができます（例：規格名：サイズ　管理名：サイズ（服）、サイズ（靴）等 ）。フロント画面には表示されません。">
                                             <span>管理名</span>
                                             <i class="fa fa-question-circle fa-lg ms-1"></i>
                                         </div>
                                         <div class="col-3">
-                                            {{ form.input('backend_name')|raw }}
+                                            <input type="text" id="admin_class_name_backend_name" class="form-control" value="" disabled>
                                         </div>
                                         <div class="col-auto">
                                             <button class="btn btn-ec-regular" type="submit">新規作成</button>
@@ -246,15 +246,15 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <form class="row d-none mode-edit" method="post" action="/admin/class-name/class-name-list">
+                                        <form class="row d-none mode-edit" method="post" action="/admin/class-name/class-name?classNameId={{ ClassName.classNameId|url_encode }}&_method=put">
                                             <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                                             <div class="col-auto align-self-center"><span>規格名</span></div>
                                             <div class="col-auto align-items-center">
-                                                <input type="text" class="form-control" name="name" value="{{ ClassName.name }}" data-origin-value="{{ ClassName.name }}">
+                                                <input type="text" class="form-control" name="classNameLabel" value="{{ ClassName.name }}" data-origin-value="{{ ClassName.name }}">
                                             </div>
                                             <div class="col-auto align-self-center"><span>管理名</span></div>
                                             <div class="col-auto align-items-center">
-                                                <input type="text" class="form-control" name="backend_name" value="" data-origin-value="">
+                                                <input type="text" class="form-control" value="" data-origin-value="" disabled>
                                             </div>
                                             <div class="col-auto align-items-center">
                                                 <button class="btn btn-ec-conversion" type="submit">決定</button>

@@ -11,18 +11,14 @@ Phase 3 — HTML FORM page. `onGet` exposes an {@see \AdminBlockForm}
 edit page (`Content/block_edit.twig` port) can render real `<input>`s
 via `{{ form.input(...) }}`.
 
-NOTE — single-row prefill: ALPS / the Be domain expose no
-`GetAdminBlockInput` / `AdminBlockFetched` (single-row fetch), so
-`onGet` renders the NEW-block form (the `admin_content_block_new`
-case). Pre-filling an existing row would need a Be fetch Input — a
-`be/src/` change out of this Phase 3 HTML wave's scope. FLAGGED:
-follow-up to add `GetAdminBlockInput` for existing-block edit prefill.
+`onGet` renders the NEW-block form when no blockId is supplied, and
+pre-fills the edit form when a blockId is supplied.
 
 
 
 
 ## GET
-Renders the block edit form (new-block case).
+Renders the block edit form.
 
 The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 
@@ -32,7 +28,10 @@ The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 
 ### Request
 
-_No parameters required_
+| Name | Type | Description | Default | Required | Constraints | Example |
+|------|------|-------------|---------|----------|-------------|---------|
+| blockId | string | ブロックID（入力） - dtb_block.id の不透明な文字列ハンドル。SQL 実装では dtb_block.id を文字列化して使用し、Fake 実装では bk-* seed handle を使用する。 |  | Optional | {"minLength":0,"maxLength":128} | 1 |
+
 
 ### Response
 
@@ -40,7 +39,12 @@ _No parameters required_
 
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
+| blockId | string | ブロックID - dtb_block.id の不透明な文字列ハンドル。新規作成フォームでは空文字、編集フォームでは既存ブロックID。 | Optional | {"minLength":0,"maxLength":128} | 1 |
+| blockName | string | ブロック名 - ブロックの表示名。新規作成フォームでは空文字、編集フォームでは保存済み値。 | Optional | {"minLength":0,"maxLength":32} |  |
+| blockFileName | string | ブロックファイル名 - ブロックのテンプレートファイル名。新規作成フォームでは空文字、編集フォームでは保存済み値。 | Optional | {"minLength":0,"maxLength":32} |  |
+| blockDeletable | boolean | 削除可否 - 管理画面で削除可能なユーザー定義ブロックかどうか。 | Optional |  |  |
 | form | object|array|null | 入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。 | Optional | {"$comment":"Aura/WebForm\u7531\u6765\u306e\u4e0d\u900f\u660e\u30d5\u30a9\u30fc\u30e0\u8868\u73fe\u3002Resource\u5883\u754c\u3067\u306f\u30d5\u30a9\u30fc\u30e0\u306e\u5b58\u5728\u3068\u30b3\u30f3\u30c6\u30ad\u30b9\u30c8\u3060\u3051\u3092\u5951\u7d04\u3057\u3001\u5185\u90e8\u69cb\u9020\u306f\u30d5\u30ec\u30fc\u30e0\u30ef\u30fc\u30af\u5883\u754c\u306b\u59d4\u306d\u308b\u305f\u3081\u8ffd\u52a0\u30ad\u30fc\u5236\u7d04\u3092\u7f6e\u304b\u306a\u3044\u3002"} |  |
+| csrfToken | string|null | 処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。 | Optional | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 
 #### Links
 
@@ -80,9 +84,9 @@ ALPS `doUpdateBlock` に対応する PUT 操作。
 |----------|-----|
 | goBlockList | [<code>page://self/admin/block/block-list</code>](/admin/block/block-list.md) |
 ## DELETE
-ALPS `doUpdateBlock` に対応する DELETE 操作。
+ALPS `doDeleteBlock` に対応する DELETE 操作。
 
-**ALPS**: `doUpdateBlock`
+**ALPS**: `doDeleteBlock`
 
 
 

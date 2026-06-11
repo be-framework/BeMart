@@ -16,6 +16,8 @@ use Ray\InputQuery\Attribute\Input;
 
 use function array_map;
 use function count;
+use function is_int;
+use function is_string;
 
 /**
  * Admin order fetched — Final, the back-office order detail view.
@@ -130,11 +132,27 @@ final readonly class AdminOrderFetched
         );
         $this->itemCount = count($items);
 
+        if ($customer === null && $order->customerSnapshot !== []) {
+            $this->customer = [
+                'customerId' => '',
+                'email' => self::stringValue($order->customerSnapshot['email'] ?? null),
+                'name01' => self::stringValue($order->customerSnapshot['name01'] ?? null),
+                'name02' => self::stringValue($order->customerSnapshot['name02'] ?? null),
+            ];
+
+            return;
+        }
+
         $this->customer = $customer === null ? null : [
             'customerId' => $customer->customerId,
             'email' => $customer->email,
             'name01' => $customer->name01,
             'name02' => $customer->name02,
         ];
+    }
+
+    private static function stringValue(mixed $value): string
+    {
+        return is_string($value) || is_int($value) ? (string) $value : '';
     }
 }

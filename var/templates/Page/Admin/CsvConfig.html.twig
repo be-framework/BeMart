@@ -9,67 +9,169 @@
 
 {% block javascript %}
     <script>
-        $(function() {
-            function add(event) {
-                $('#' + event.data.from + ' option:selected')
-                    .appendTo($('#' + event.data.to))
-                    .prop('selected', false);
+        document.addEventListener('DOMContentLoaded', function() {
+            function byId(id) {
+                return document.getElementById(id);
             }
 
-            function addAll(event) {
-                $('#' + event.data.from + ' option').each(function() {
-                    $(this).appendTo($('#' + event.data.to));
-                    $(this).prop('selected', false);
+            function moveSelected(fromId, toId) {
+                var from = byId(fromId);
+                var to = byId(toId);
+                if (!from || !to) {
+                    return;
+                }
+
+                Array.prototype.slice.call(from.selectedOptions).forEach(function(option) {
+                    option.selected = false;
+                    to.appendChild(option);
                 });
             }
 
-            $('#add').on('click', {from: 'csv-not-output', to: 'csv-output'}, add);
-            $('#add-all').on('click', {from: 'csv-not-output', to: 'csv-output'}, addAll);
-            $('#remove').on('click', {from: 'csv-output', to: 'csv-not-output'}, add);
-            $('#remove-all').on('click', {from: 'csv-output', to: 'csv-not-output'}, addAll);
-
-            $('.move').click(function() {
-                var $op = $('#csv-output option:selected');
-                var val = $(this).data('value');
-                if ($op.length) {
-                    val == 'up' ? $op.first().prev().before($op) : $op.last().next().after($op);
+            function moveAll(fromId, toId) {
+                var from = byId(fromId);
+                var to = byId(toId);
+                if (!from || !to) {
+                    return;
                 }
-            });
 
-            $('.move-most').click(function() {
-                var $op = $('#csv-output option:selected');
-                var val = $(this).data('value');
-                if ($op.length) {
-                    val == 'top' ? $op.prependTo('#csv-output') : $op.appendTo('#csv-output');
+                Array.prototype.slice.call(from.options).forEach(function(option) {
+                    option.selected = false;
+                    to.appendChild(option);
+                });
+            }
+
+            function bind(id, callback) {
+                var element = byId(id);
+                if (element) {
+                    element.addEventListener('click', callback);
                 }
-            });
+            }
 
-            $('#csv-type').on('change', function() {
-                var csvType = $(this).val();
-                location.href = '/admin/csv-config?csvType=' + encodeURIComponent(csvType);
-                return false;
-            });
+            bind('add', function() { moveSelected('csv-not-output', 'csv-output'); });
+            bind('add-all', function() { moveAll('csv-not-output', 'csv-output'); });
+            bind('remove', function() { moveSelected('csv-output', 'csv-not-output'); });
+            bind('remove-all', function() { moveAll('csv-output', 'csv-not-output'); });
 
-            $('#csv-form').submit(function() {
-                $('#csv-not-output').children().prop('selected', true);
-                $('#csv-output').children().prop('selected', true);
-                $('#csv-columns').remove();
+            Array.prototype.slice.call(document.querySelectorAll('.move')).forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var output = byId('csv-output');
+                    if (!output) {
+                        return;
+                    }
 
-                var columns = $('<div id="csv-columns" />').hide();
-                var sortNo = 0;
-                $('#csv-output option').each(function() {
-                    appendColumn(columns, sortNo++, $(this).val(), true);
+                    var selected = Array.prototype.slice.call(output.selectedOptions);
+                    if (selected.length === 0) {
+                        return;
+                    }
+
+                    if (button.dataset.value === 'up') {
+                        selected.forEach(function(option) {
+                            if (option.previousElementSibling) {
+                                output.insertBefore(option, option.previousElementSibling);
+                            }
+                        });
+                    } else {
+                        selected.reverse().forEach(function(option) {
+                            if (option.nextElementSibling) {
+                                output.insertBefore(option.nextElementSibling, option);
+                            }
+                        });
+                    }
                 });
-                $('#csv-not-output option').each(function() {
-                    appendColumn(columns, sortNo++, $(this).val(), false);
-                });
-                columns.appendTo('#csv-form');
             });
+
+            Array.prototype.slice.call(document.querySelectorAll('.move-most')).forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var output = byId('csv-output');
+                    if (!output) {
+                        return;
+                    }
+
+                    var selected = Array.prototype.slice.call(output.selectedOptions);
+                    if (selected.length === 0) {
+                        return;
+                    }
+
+                    if (button.dataset.value === 'top') {
+                        selected.reverse().forEach(function(option) {
+                            output.insertBefore(option, output.firstChild);
+                        });
+                    } else {
+                        selected.forEach(function(option) {
+                            output.appendChild(option);
+                        });
+                    }
+                });
+            });
+
+            var csvType = byId('csv-type');
+            if (csvType) {
+                csvType.addEventListener('change', function() {
+                    var csvType = this.value;
+                    location.href = '/admin/csv-config?csvType=' + encodeURIComponent(csvType);
+                });
+            }
+
+            var form = byId('csv-form');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    selectAllOptions('csv-not-output');
+                    selectAllOptions('csv-output');
+                    var existing = byId('csv-columns');
+                    if (existing) {
+                        existing.remove();
+                    }
+
+                    var columns = document.createElement('div');
+                    columns.id = 'csv-columns';
+                    columns.hidden = true;
+                    var sortNo = 0;
+                    appendColumns(columns, 'csv-output', sortNo, true);
+                    sortNo += optionCount('csv-output');
+                    appendColumns(columns, 'csv-not-output', sortNo, false);
+                    form.appendChild(columns);
+                });
+            }
+
+            function selectAllOptions(selectId) {
+                var select = byId(selectId);
+                if (!select) {
+                    return;
+                }
+
+                Array.prototype.slice.call(select.options).forEach(function(option) {
+                    option.selected = true;
+                });
+            }
+
+            function optionCount(selectId) {
+                var select = byId(selectId);
+                return select ? select.options.length : 0;
+            }
+
+            function appendColumns(container, selectId, offset, enabled) {
+                var select = byId(selectId);
+                if (!select) {
+                    return;
+                }
+
+                Array.prototype.slice.call(select.options).forEach(function(option, index) {
+                    appendColumn(container, offset + index, option.value, enabled);
+                });
+            }
 
             function appendColumn(container, index, columnName, enabled) {
-                $('<input>').attr({type: 'hidden', name: 'columns[' + index + '][columnName]'}).val(columnName).appendTo(container);
-                $('<input>').attr({type: 'hidden', name: 'columns[' + index + '][enabled]'}).val(enabled ? '1' : '0').appendTo(container);
-                $('<input>').attr({type: 'hidden', name: 'columns[' + index + '][sortNo]'}).val(index + 1).appendTo(container);
+                appendHidden(container, 'columns[' + index + '][columnName]', columnName);
+                appendHidden(container, 'columns[' + index + '][enabled]', enabled ? '1' : '0');
+                appendHidden(container, 'columns[' + index + '][sortNo]', String(index + 1));
+            }
+
+            function appendHidden(container, name, value) {
+                var input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = name;
+                input.value = value;
+                container.appendChild(input);
             }
         });
     </script>

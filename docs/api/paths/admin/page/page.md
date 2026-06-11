@@ -81,9 +81,9 @@ ALPS `doUpdatePage` に対応する PUT 操作。
 |----------|-----|
 | goPage | [<code>page://self/admin/page/page</code>](/admin/page/page.md) |
 ## DELETE
-ALPS `doUpdatePage` に対応する DELETE 操作。
+ALPS `doDeletePage` に対応する DELETE 操作。
 
-**ALPS**: `doUpdatePage`
+**ALPS**: `doDeletePage`
 
 
 

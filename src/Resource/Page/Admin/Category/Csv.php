@@ -18,6 +18,8 @@ use MyVendor\BeMart\Be\Input\ImportCategoryCsvInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE goExportCategory + doImportCategoryCsv — CSV endpoint
@@ -76,7 +78,7 @@ class Csv extends ResourceObject
 
         assert($final instanceof CategoryCsvImported);
 
-        $this->code = Code::OK;
+        $this->code = self::isHtmlContext() ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/category/category-list';
         $this->body = [
             'transitionId' => 'doImportCategoryCsv',
@@ -88,5 +90,10 @@ class Csv extends ResourceObject
         ];
 
         return $this;
+    }
+
+    private static function isHtmlContext(): bool
+    {
+        return str_contains((string) getenv('APP_CONTEXT'), 'html');
     }
 }

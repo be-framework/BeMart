@@ -40,9 +40,9 @@ ALPS `doUpdateClassName` に対応する PUT 操作。
 |----------|-----|
 | goClassNameList | [<code>page://self/admin/class-name/class-name-list</code>](/admin/class-name/class-name-list.md) |
 ## DELETE
-ALPS `doUpdateClassName` に対応する DELETE 操作。
+ALPS `doDeleteClassName` に対応する DELETE 操作。
 
-**ALPS**: `doUpdateClassName`
+**ALPS**: `doDeleteClassName`
 
 
 

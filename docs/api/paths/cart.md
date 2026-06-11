@@ -41,5 +41,4 @@ ALPS `goCart` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | doAddCartItem | [<code>page://self/cart/item</code>](/cart/item.md) |
-| goShoppingNonMember | [<code>page://self/shopping/non-member</code>](/shopping/non-member.md) |
-| goShopping | [<code>page://self/shopping</code>](/shopping.md) |
+| goCheckoutEntry | [<code>page://self/shopping</code>](/shopping.md) |

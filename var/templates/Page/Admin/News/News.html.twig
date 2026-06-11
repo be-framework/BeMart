@@ -49,7 +49,7 @@
 {% set sub_title = 'コンテンツ管理' %}
 
 {% block main %}
-    <form role="form" class="form-horizontal" name="form1" id="form1" method="post" action="?">
+    <form role="form" class="form-horizontal" name="form1" id="form1" method="post" action="{% if newsId is defined and newsId %}/admin/news/news?newsId={{ newsId }}&_method=put{% else %}/admin/news/news-list{% endif %}">
         <input type="hidden" id="news__token" name="csrfToken" value="{{ csrfToken|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
@@ -75,8 +75,8 @@
                                     </div>
 
                                     <div class="col mb-2">
-                                        {{ form.input('publish_date')|raw }}
-                                        {% if form.error('publish_date') %}<span class="invalid-feedback d-block">{{ form.error('publish_date') }}</span>{% endif %}
+                                        {{ form.input('publishDate')|raw }}
+                                        {% if form.error('publishDate') %}<span class="invalid-feedback d-block">{{ form.error('publishDate') }}</span>{% endif %}
                                     </div>
                                 </div>
 
@@ -88,8 +88,8 @@
                                         </span>
                                     </div>
                                     <div class="col mb-2">
-                                        {{ form.input('title')|raw }}
-                                        {% if form.error('title') %}<span class="invalid-feedback d-block">{{ form.error('title') }}</span>{% endif %}
+                                        {{ form.input('newsTitle')|raw }}
+                                        {% if form.error('newsTitle') %}<span class="invalid-feedback d-block">{{ form.error('newsTitle') }}</span>{% endif %}
                                     </div>
                                 </div>
 
@@ -100,16 +100,17 @@
                                         </div>
                                     </div>
                                     <div class="col mb-2">
-                                        {{ form.input('url')|raw }}
-                                        {% if form.error('url') %}<span class="invalid-feedback d-block">{{ form.error('url') }}</span>{% endif %}
+                                        {{ form.input('newsUrl')|raw }}
+                                        {% if form.error('newsUrl') %}<span class="invalid-feedback d-block">{{ form.error('newsUrl') }}</span>{% endif %}
                                     </div>
                                 </div>
 
                                 <div class="row">
                                     <div class="col-3">&nbsp;</div>
                                     <div class="col mb-2">
-                                        {{ form.input('link_method')|raw }}
-                                        {% if form.error('link_method') %}<span class="invalid-feedback d-block">{{ form.error('link_method') }}</span>{% endif %}
+                                        <input type="hidden" name="linkMethod" value="0">
+                                        <label for="admin_news_link_method"><input id="admin_news_link_method" type="checkbox" name="linkMethod" value="1"{% if linkMethod|default(false) %} checked{% endif %}> 別ウィンドウで開く</label>
+                                        {% if form.error('linkMethod') %}<span class="invalid-feedback d-block">{{ form.error('linkMethod') }}</span>{% endif %}
                                     </div>
                                 </div>
 
@@ -120,8 +121,8 @@
                                         </div>
                                     </div>
                                     <div class="col mb-2">
-                                        {{ form.input('description')|raw }}
-                                        {% if form.error('description') %}<span class="invalid-feedback d-block">{{ form.error('description') }}</span>{% endif %}
+                                        {{ form.input('newsDescription')|raw }}
+                                        {% if form.error('newsDescription') %}<span class="invalid-feedback d-block">{{ form.error('newsDescription') }}</span>{% endif %}
                                     </div>
                                 </div>
                             </div>

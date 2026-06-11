@@ -116,6 +116,7 @@
       "description": "日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用 都道府県ID。住所フォームの未選択状態では0、確定住所では1〜47を使う。 Fake観察数値 13〜27; 観察値 '13', '27'; null 3/9。",
       "type": [
         "integer",
+        "string",
         "null"
       ],
       "example": 13,
@@ -158,6 +159,7 @@
     "sex": {
       "type": [
         "integer",
+        "string",
         "null"
       ],
       "title": "性別（入力）",
@@ -168,12 +170,85 @@
     "job": {
       "type": [
         "integer",
+        "string",
         "null"
       ],
       "title": "職業（入力）",
       "description": "1=公務員〜18=その他の18区分 Fake観察数値 7〜18; 観察値 '7', '18'; null 3/5。",
       "example": 7,
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "email_confirm": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 254,
+      "title": "メールアドレス確認（入力）",
+      "description": "HTML会員登録フォームの確認用メールアドレス。Resource境界でemailと照合する。",
+      "$comment": "Browser-form boundary field; not persisted."
+    },
+    "password_confirm": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "パスワード確認（入力）",
+      "description": "HTML会員登録フォームの確認用パスワード。Resource境界でpasswordと照合し、失敗時も再表示しない。",
+      "$comment": "Browser-form boundary field; not persisted."
+    },
+    "birth_year": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 4,
+      "title": "生年月日 年（入力）",
+      "$comment": "Browser-form boundary field; combined into birth."
+    },
+    "birth_month": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 2,
+      "title": "生年月日 月（入力）",
+      "$comment": "Browser-form boundary field; combined into birth."
+    },
+    "birth_day": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 2,
+      "title": "生年月日 日（入力）",
+      "$comment": "Browser-form boundary field; combined into birth."
+    },
+    "user_policy_check": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 16,
+      "title": "利用規約同意（入力）",
+      "$comment": "Browser-form boundary field; required only for HTML registration submissions."
+    },
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "フォーム操作モード",
+      "$comment": "EC-CUBE compatible HTML form submit mode."
     }
   },
   "additionalProperties": false,

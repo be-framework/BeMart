@@ -17,6 +17,8 @@ use MyVendor\BeMart\Be\Input\DeleteTaxRuleInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doDeleteTaxRule — single-row endpoint (Wave 9θ).
@@ -49,7 +51,8 @@ class TaxRule extends ResourceObject
 
         assert($final instanceof TaxRuleDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/tax-rule/tax-rule-list';
         $this->body = ['taxRuleId' => $final->taxRuleId];
 
         return $this;

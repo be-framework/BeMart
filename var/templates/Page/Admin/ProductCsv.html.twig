@@ -1,0 +1,13 @@
+{% extends 'admin-base.html.twig' %}
+
+{% set title = '商品CSV' %}
+{% set sub_title = '商品管理' %}
+
+{% block main %}
+    <form method="post" action="/admin/product-csv" enctype="multipart/form-data">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <textarea name="csv" rows="8" cols="80"></textarea>
+        <button type="submit">CSV登録</button>
+    </form>
+    <a href="/admin/category/csv">カテゴリCSV</a>
+{% endblock %}

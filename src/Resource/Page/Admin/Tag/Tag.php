@@ -17,6 +17,8 @@ use MyVendor\BeMart\Be\Input\DeleteTagInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doDeleteTag — single-row endpoint (Wave 9). ALPS exposes
@@ -43,7 +45,7 @@ class Tag extends ResourceObject
 
         assert($final instanceof TagDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/tag/tag-list';
         $this->body = ['tagId' => $final->tagId];
 

@@ -61,6 +61,7 @@ final class AdminSecurityResourceTest extends TestCase
         $this->assertSame(Code::OK, $ro->code);
         $this->assertInstanceOf(AdminSecurityForm::class, $ro->body['form']);
         $this->assertFalse($ro->body['isSecureRequest']);
+        $this->assertSame(FakeCsrfToken::TOKEN, $ro->body['csrfToken']);
     }
 
     public function testOnGetAnonymousAdminReturns403(): void

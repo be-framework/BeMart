@@ -1,11 +1,8 @@
-DELETE FROM
-  dtb_block_position
+DELETE b,
+  bp
+FROM
+  dtb_block b
+  LEFT JOIN dtb_block_position bp ON bp.block_id = b.id
 WHERE
   :blockId REGEXP '^[0-9]+$'
-  AND block_id = CAST(:blockId AS UNSIGNED);
-
-DELETE FROM
-  dtb_block
-WHERE
-  :blockId REGEXP '^[0-9]+$'
-  AND id = CAST(:blockId AS UNSIGNED)
+  AND b.id = CAST(:blockId AS UNSIGNED)
