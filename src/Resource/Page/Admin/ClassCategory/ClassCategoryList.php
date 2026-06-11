@@ -22,7 +22,9 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
 use function sprintf;
+use function str_contains;
 use function urlencode;
 
 /**
@@ -53,6 +55,7 @@ class ClassCategoryList extends ResourceObject
     #[Link(rel: 'doCreateClassCategory', href: 'page://self/admin/class-category/class-category-list', method: 'post')]
     #[Link(rel: 'doUpdateClassCategory', href: 'page://self/admin/class-category/class-category', method: 'put')]
     #[Link(rel: 'doDeleteClassCategory', href: 'page://self/admin/class-category/class-category', method: 'delete')]
+    #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
     public function onGet(string|null $classNameId = null): static
     {
         $final = ($this->becoming)(new GetAdminClassCategoryListInput(classNameId: $classNameId));
@@ -93,10 +96,10 @@ class ClassCategoryList extends ResourceObject
 
         assert($final instanceof ClassCategoryCreated);
 
-        $this->code = Code::CREATED;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = sprintf(
-            '/admin/class-category/class-category?classCategoryId=%s',
-            urlencode($final->classCategoryId),
+            '/admin/class-category/class-category-list?classNameId=%s',
+            urlencode($final->classNameId),
         );
         $this->body = [
             'classCategoryId' => $final->classCategoryId,

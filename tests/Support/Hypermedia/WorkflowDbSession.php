@@ -27,7 +27,12 @@ final class WorkflowDbSession
     public static function start(Closure|null $beforeTransaction = null): self
     {
         $session = WorkflowTestSession::fromCurrent();
-        $injector = Injector::getInstance('html-prod-eccube-sql-hal-app');
+        // In-process hypermedia workflows need Resource operations and
+        // fixture/readback queries to share one SQL connection so class-level
+        // rollback actually protects operational rows. The `prod` compiled
+        // context resolves Resource SQL calls through a separate connection;
+        // HTTP workflow tests cover that boundary separately.
+        $injector = Injector::getInstance('html-eccube-sql-hal-app');
 
         // Internal hook shape: callers that only need the injector should use
         // startForAdmin() or startWithCsrfToken(), which adapt this signature.
@@ -83,11 +88,10 @@ final class WorkflowDbSession
             return $this->resource;
         }
 
-        $resource = $this->injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        $this->resource = $resource;
+        $this->resource = $this->injector->getInstance(ResourceInterface::class);
+        assert($this->resource instanceof ResourceInterface);
 
-        return $resource;
+        return $this->resource;
     }
 
     /** @param (Closure(): void)|null $afterRollback */

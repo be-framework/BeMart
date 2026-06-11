@@ -18,27 +18,42 @@
 
 {% block javascript %}
     <script>
-        $(function() {
-            $('#mail_template').on('change', function() {
-                var id = $(this).val();
-                if (id) {
-                    location.href = '/admin/mail-template/' + id;
-                } else {
-                    location.href = '/admin/mail-template';
-                }
-            });
+        document.addEventListener('DOMContentLoaded', function() {
+            var template = document.getElementById('mail_template');
+            if (template) {
+                template.addEventListener('change', function() {
+                    var id = this.value;
+                    if (id) {
+                        location.href = '/admin/mail-template?mailTemplateId=' + encodeURIComponent(id);
+                    } else {
+                        location.href = '/admin/mail-template';
+                    }
+                });
+            }
 
-            $('#form1').on('submit', function() {
-                $('#mail_tpl_data').val($('#editor').text());
-                $('#mail_html_tpl_data').val($('#html_editor').text());
-            });
+            var form = document.getElementById('form1');
+            if (form) {
+                form.addEventListener('submit', function() {
+                    var tplData = document.getElementById('mail_tpl_data');
+                    var htmlTplData = document.getElementById('mail_html_tpl_data');
+                    var editor = document.getElementById('editor');
+                    var htmlEditor = document.getElementById('html_editor');
+                    if (tplData && editor) {
+                        tplData.value = editor.textContent || '';
+                    }
+                    if (htmlTplData && htmlEditor) {
+                        htmlTplData.value = htmlEditor.textContent || '';
+                    }
+                });
+            }
         });
     </script>
 {% endblock %}
 
 {% block main %}
-    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="">
+    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/mail-template">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        {{ form.input('mailTemplateId')|raw }}
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

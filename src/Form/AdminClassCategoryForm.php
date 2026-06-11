@@ -16,13 +16,16 @@ use Ray\WebFormModule\AbstractForm;
  * BeMart renders the create inputs through Ray.WebFormModule.
  *
  * EC-CUBE's `ClassCategoryType` declares `name` (分類名) and
- * `backend_name` (管理名). BeMart's
+ * `backend_name` (管理名). BeMart's unsafe Resource boundary accepts the
+ * canonical `classCategoryName` parameter, so the rendered field keeps
+ * EC-CUBE's `admin_class_category_name` id while posting that canonical
+ * name. BeMart's
  * {@see \MyVendor\BeMart\Resource\Page\Admin\ClassCategory\ClassCategoryList}
  * resource (Wave 7) projects only `classCategoryId` / `classNameId` /
  * `name` ({@see \MyVendor\BeMart\Be\Final\AdminClassCategoryListFetched}).
- * Both fields are declared here so the rendered inline-create form
- * carries EC-CUBE's two-input shape; `backend_name` repopulates empty
- * (the projection does not carry it — FLAGGED for enrichment follow-up).
+ * `backend_name` remains a displayed residual only (the projection does
+ * not carry it — FLAGGED for enrichment follow-up) and must not be
+ * submitted to the canonical Resource request schema.
  *
  * VALIDATION AUTHORITY STAYS WITH the Be domain — this form is a
  * field-definition + renderer only (see var/templates/README.md).
@@ -39,7 +42,7 @@ final class AdminClassCategoryForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('name', 'text')
+        $this->setField('classCategoryName', 'text')
             ->setAttribs([
                 'id' => 'admin_class_category_name',
                 'class' => 'form-control',
@@ -54,6 +57,6 @@ final class AdminClassCategoryForm extends AbstractForm
         // NON-AUTHORITATIVE structural check only — the authoritative
         // class-category-name rule lives in the Be domain
         // (CreateClassCategoryInput Semantic).
-        $this->filter->validate('name')->isNotBlank();
+        $this->filter->validate('classCategoryName')->isNotBlank();
     }
 }

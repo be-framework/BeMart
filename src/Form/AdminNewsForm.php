@@ -25,10 +25,11 @@ use Ray\WebFormModule\AbstractForm;
  * page re-renders with EC-CUBE's exact form UX. The `#[FormValidation]`
  * aspect is NOT used.
  *
- * Field names / ids are ported from EC-CUBE's `NewsType` (block prefix
- * `admin_news`, so the FormView ids are `admin_news_<field>`); the
- * BeMart resource body keys are `newsTitle` / `newsUrl` / etc., so
- * {@see fillValues()} maps body keys -> EC-CUBE form field names.
+ * EC-CUBE's `NewsType` declares `title`, `publish_date`, `url`,
+ * `link_method`, and `description`. BeMart's unsafe Resource boundary
+ * accepts the canonical `newsTitle` / `publishDate` / etc. parameters,
+ * so the rendered fields keep EC-CUBE's `admin_news_<field>` ids while
+ * posting those canonical names.
  */
 final class AdminNewsForm extends AbstractForm
 {
@@ -44,28 +45,26 @@ final class AdminNewsForm extends AbstractForm
     /**
      * Declares the news form fields.
      *
-     * Ported verbatim from EC-CUBE's `NewsType::buildForm()` +
-     * `news_edit.twig`: `publish_date` (single-text datetime), `title`
-     * (text), `url` (text), `link_method` (checkbox), `description`
-     * (textarea, 8 rows). EC-CUBE's block prefix is `admin_news`, so the
-     * rendered ids are `admin_news_<field>`.
+     * Ported from EC-CUBE's `NewsType::buildForm()` + `news_edit.twig`.
+     * The field ids remain EC-CUBE compatible; the posted names are
+     * BeMart's canonical Resource request names.
      */
     #[Override]
     public function init(): void
     {
-        $this->setField('publish_date', 'text')
+        $this->setField('publishDate', 'text')
             ->setAttribs([
                 'id' => 'admin_news_publish_date',
                 'class' => 'form-control',
             ]);
 
-        $this->setField('title', 'text')
+        $this->setField('newsTitle', 'text')
             ->setAttribs([
                 'id' => 'admin_news_title',
                 'class' => 'form-control',
             ]);
 
-        $this->setField('url', 'text')
+        $this->setField('newsUrl', 'text')
             ->setAttribs([
                 'id' => 'admin_news_url',
                 'class' => 'form-control',
@@ -75,13 +74,13 @@ final class AdminNewsForm extends AbstractForm
         // state maps to dtb_news.link_method (target="_blank"). Aura.Html's
         // checkbox helper treats `options` as value=>label pairs; passing
         // a single pair yields one labelled checkbox with `value="1"`.
-        $this->setField('link_method', 'checkbox')
+        $this->setField('linkMethod', 'checkbox')
             ->setAttribs([
                 'id' => 'admin_news_link_method',
             ])
             ->setOptions(['1' => '別ウィンドウで開く']);
 
-        $this->setField('description', 'textarea')
+        $this->setField('newsDescription', 'textarea')
             ->setAttribs([
                 'id' => 'admin_news_description',
                 'class' => 'form-control',
@@ -92,31 +91,29 @@ final class AdminNewsForm extends AbstractForm
         // title / url / publish-date rules live in the Be domain
         // (CreateNewsInput / UpdateNewsInput Semantics). The News
         // resource does not consult this filter.
-        $this->filter->validate('publish_date')->isNotBlank();
-        $this->filter->validate('title')->isNotBlank();
+        $this->filter->validate('publishDate')->isNotBlank();
+        $this->filter->validate('newsTitle')->isNotBlank();
     }
 
     /**
      * Repopulates the form inputs from the News resource body.
      *
-     * Maps the resource body keys (`newsTitle`, `newsUrl`,
-     * `newsDescription`, `publishDate`, `linkMethod`) onto the EC-CUBE
-     * form field names. Called by the News resource so the edit page
-     * pre-fills with the persisted row, and re-fills with the submitted
-     * values after a rejected POST.
+     * Called by the News resource so the edit page pre-fills with the
+     * persisted row, and re-fills with the submitted values after a
+     * rejected POST.
      *
      * @param array<string, mixed> $body the News resource body
      */
     public function fillValues(array $body): void
     {
         $values = [
-            'publish_date' => (string) ($body['publishDate'] ?? ''),
-            'title' => (string) ($body['newsTitle'] ?? ''),
-            'url' => (string) ($body['newsUrl'] ?? ''),
-            'description' => (string) ($body['newsDescription'] ?? ''),
+            'publishDate' => (string) ($body['publishDate'] ?? ''),
+            'newsTitle' => (string) ($body['newsTitle'] ?? ''),
+            'newsUrl' => (string) ($body['newsUrl'] ?? ''),
+            'newsDescription' => (string) ($body['newsDescription'] ?? ''),
         ];
         if (! empty($body['linkMethod'])) {
-            $values['link_method'] = '1';
+            $values['linkMethod'] = '1';
         }
 
         $this->fill($values);

@@ -9,11 +9,13 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use BEAR\Dev\Http\AbstractWorkflowTest;
+use Koriym\FileUpload\FileUpload;
 use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
 use function bin2hex;
+use function dirname;
 use function random_bytes;
 
 class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
@@ -69,15 +71,17 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
     #[Depends('testTemplateInstall')]
     public function testInstallsTemplate(ResourceObject $response): ResourceObject
     {
-        $installed = $this->resource->post('page://self/admin/template/template-add', [
+        $installed = $this->resource->post($this->linkHref($response, 'doInstallTemplate'), [
             'templateCode' => self::$templateCode,
             'templateName' => 'Workflow Template',
+            'file' => FileUpload::fromFile(dirname(__DIR__) . '/fixtures/template-upload.zip'),
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $installed->code);
         $templateId = $this->bodyValue($installed, 'templateId');
         $this->assertIsString($templateId);
+        $this->assertSame('template-upload.zip', $this->bodyValue($installed, 'archiveName'));
         self::$templateId = $templateId;
 
         return $installed;
@@ -90,7 +94,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $templateId = self::$templateId;
         $this->assertIsString($templateId);
 
-        $selected = $this->resource->put('page://self/admin/template/template-list', [
+        $selected = $this->resource->put($this->linkHref($response, 'doSelectTemplate'), [
             'templateId' => $templateId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -98,7 +102,10 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $this->assertSame(Code::OK, $selected->code);
         $this->assertSame($templateId, $this->bodyValue($selected, 'templateId'));
 
-        return $selected;
+        $list = $this->followLocation($selected);
+        $this->assertTemplateActive($list, $templateId);
+
+        return $list;
     }
 
     #[Alps('doDownloadTemplate')]
@@ -108,7 +115,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $templateId = self::$templateId;
         $this->assertIsString($templateId);
 
-        $downloaded = $this->resource->post('page://self/admin/template/template-list', [
+        $downloaded = $this->resource->post($this->linkHref($response, 'doDownloadTemplate'), [
             'templateId' => $templateId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -116,7 +123,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $this->assertSame(Code::OK, $downloaded->code);
         $this->assertSame('application/zip', $this->header($downloaded, 'Content-Type'));
 
-        return $downloaded;
+        return $response;
     }
 
     #[Alps('doDeleteTemplate')]
@@ -126,7 +133,7 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
         $templateId = self::$templateId;
         $this->assertIsString($templateId);
 
-        $deleted = $this->resource->delete('page://self/admin/template/template-list', [
+        $deleted = $this->resource->delete($this->linkHref($response, 'doDeleteTemplate'), [
             'templateId' => $templateId,
             'csrfToken' => self::CSRF_TOKEN,
         ]);
@@ -142,5 +149,21 @@ class FlowAdminTemplateLifecycleTest extends AbstractWorkflowTest
     public function testReturnsToTemplateList(ResourceObject $response): void
     {
         $this->follow($response, 'goTemplateList');
+    }
+
+    private function assertTemplateActive(ResourceObject $response, string $templateId): void
+    {
+        $templates = $response->body['templates'] ?? [];
+        $this->assertIsArray($templates);
+
+        foreach ($templates as $template) {
+            if (($template['templateId'] ?? null) === $templateId) {
+                $this->assertTrue($template['active'] ?? false);
+
+                return;
+            }
+        }
+
+        $this->fail('Selected template was not visible in template list readback.');
     }
 }

@@ -24,6 +24,10 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function sprintf;
+use function str_contains;
+use function urlencode;
 
 /**
  * EC-CUBE doUpdatePayment + doDeletePayment — single-row endpoint
@@ -80,10 +84,10 @@ class Payment extends ResourceObject
         assert($form instanceof AdminPaymentForm);
         if ($payment !== null) {
             $form->fillValues([
-                'method' => $payment['paymentMethodName'],
+                'paymentMethodName' => $payment['paymentMethodName'],
                 'charge' => $payment['charge'],
-                'rule_min' => $payment['ruleMin'],
-                'rule_max' => $payment['ruleMax'],
+                'ruleMin' => $payment['ruleMin'],
+                'ruleMax' => $payment['ruleMax'],
                 'visible' => $payment['visible'] ? '1' : null,
             ]);
         }
@@ -130,7 +134,8 @@ class Payment extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminUpdated);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = sprintf('/admin/payment/payment?paymentId=%s', urlencode($final->paymentId));
         $this->body = [
             'paymentId' => $final->paymentId,
             'paymentMethodName' => $final->paymentMethodName,
@@ -144,10 +149,10 @@ class Payment extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdatePayment` に対応する DELETE 操作。
+     * ALPS `doDeletePayment` に対応する DELETE 操作。
      * @psalm-taint-source input $paymentId
      */
-    #[Alps('doUpdatePayment')]
+    #[Alps('doDeletePayment')]
     #[JsonSchema(schema: 'delete-admin-payment-payment.json', params: 'delete-admin-payment-payment.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
@@ -158,7 +163,8 @@ class Payment extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/payment/payment-list';
         $this->body = ['paymentId' => $final->paymentId];
 
         return $this;

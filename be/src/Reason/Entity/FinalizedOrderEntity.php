@@ -48,6 +48,13 @@ final readonly class FinalizedOrderEntity implements \Ray\MediaQuery\ToScalarInt
     public const STATUS_PROCESSING    = 8;
     public const STATUS_RETURNED      = 9;
 
+    /**
+     * @param array{
+     *   name01?: string, name02?: string, kana01?: string|null, kana02?: string|null,
+     *   companyName?: string|null, email?: string, phoneNumber?: string|null,
+     *   postalCode?: string|null, pref?: int|null, addr01?: string|null, addr02?: string|null
+     * } $customerSnapshot
+     */
     public function __construct(
         public string $orderNo,
         public string $preOrderId,
@@ -65,6 +72,7 @@ final readonly class FinalizedOrderEntity implements \Ray\MediaQuery\ToScalarInt
         public int $orderStatus,
         public string $orderDate,
         public string $paymentDate,
+        public array $customerSnapshot = [],
     ) {
     }
 }

@@ -1,0 +1,33 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "post-admin-mail-template-create.param.json",
+  "title": "POST /admin/mail-template/create request parameters",
+  "description": "Request parameter schema for creating the disposable admin mail template row used by Web/HTTP workflow verification.",
+  "type": "object",
+  "properties": {
+    "mailTemplateName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Admin-visible mail template name."
+    },
+    "fileName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Twig template file path stored in dtb_mail_template.file_name."
+    },
+    "mailSubject": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255,
+      "description": "Mail subject stored with the template row."
+    }
+  },
+  "required": [
+    "mailTemplateName",
+    "fileName",
+    "mailSubject"
+  ],
+  "additionalProperties": false
+}

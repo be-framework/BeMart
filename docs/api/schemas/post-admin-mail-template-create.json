@@ -1,0 +1,36 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "post-admin-mail-template-create.json",
+  "title": "POST /admin/mail-template/create response",
+  "description": "Admin mail template creation response for Web/HTTP workflow verification.",
+  "type": "object",
+  "properties": {
+    "mailTemplateId": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 2147483647
+    },
+    "mailTemplateName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "fileName": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "mailSubject": {
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 255
+    }
+  },
+  "required": [
+    "mailTemplateId",
+    "mailTemplateName",
+    "fileName",
+    "mailSubject"
+  ],
+  "additionalProperties": false
+}

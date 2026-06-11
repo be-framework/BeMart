@@ -19,7 +19,9 @@ use MyVendor\BeMart\Be\Input\GetAdminBlockListInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
 use function sprintf;
+use function str_contains;
 use function urlencode;
 
 /**
@@ -73,7 +75,7 @@ class BlockList extends ResourceObject
 
         assert($final instanceof BlockCreated);
 
-        $this->code = Code::CREATED;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = sprintf('/admin/block/block?blockId=%s', urlencode($final->blockId));
         $this->body = [
             'blockId' => $final->blockId,

@@ -10,6 +10,8 @@ use BEAR\Resource\RequestInterface;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use BEAR\Resource\Uri as ResourceUri;
+use FilesystemIterator;
+use Koriym\FileUpload\AbstractFileUpload;
 use Koriym\PhpServer\PhpServer;
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
@@ -17,9 +19,13 @@ use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Tests\Http\Exception\HalLinkNotFoundException;
 use MyVendor\BeMart\Tests\Support\UnsupportedResourceOperationException;
 use Override;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 use function array_key_exists;
+use function array_map;
 use function debug_backtrace;
+use function dirname;
 use function escapeshellarg;
 use function explode;
 use function file_exists;
@@ -29,6 +35,9 @@ use function http_build_query;
 use function implode;
 use function in_array;
 use function is_array;
+use function is_bool;
+use function is_float;
+use function is_int;
 use function is_dir;
 use function is_string;
 use function json_decode;
@@ -37,6 +46,7 @@ use function mkdir;
 use function preg_match;
 use function preg_replace;
 use function preg_split;
+use function rmdir;
 use function shell_exec;
 use function sprintf;
 use function str_contains;
@@ -48,6 +58,7 @@ use function substr;
 use function sys_get_temp_dir;
 use function tempnam;
 use function trim;
+use function unlink;
 
 use const DEBUG_BACKTRACE_IGNORE_ARGS;
 use const DIRECTORY_SEPARATOR;
@@ -88,9 +99,51 @@ final class HttpResource implements ResourceInterface
             return;
         }
 
+        $this->clearCompiledContextCache($index);
+
         $server = new PhpServer($host, $index);
         $server->start();
         self::$servers[$serverKey] = $server;
+    }
+
+    private function clearCompiledContextCache(string $index): void
+    {
+        $context = match (true) {
+            str_ends_with($index, '/prod-json-index.php') => 'prod-eccube-sql-hal-app',
+            str_ends_with($index, '/index.php') => 'html-test-hal-app',
+            str_ends_with($index, '/html-sql-index.php') => 'html-eccube-sql-hal-app',
+            default => null,
+        };
+        if ($context === null) {
+            return;
+        }
+
+        $contextDir = dirname(__DIR__, 2) . '/var/tmp/' . $context;
+        foreach (['di', 'injector', 'twig'] as $subDir) {
+            $this->removeDirectory($contextDir . '/' . $subDir);
+        }
+    }
+
+    private function removeDirectory(string $directory): void
+    {
+        if (! is_dir($directory)) {
+            return;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($directory, FilesystemIterator::SKIP_DOTS),
+            RecursiveIteratorIterator::CHILD_FIRST,
+        );
+        foreach ($iterator as $file) {
+            if ($file->isDir() && ! $file->isLink()) {
+                rmdir($file->getPathname());
+                continue;
+            }
+
+            unlink($file->getPathname());
+        }
+
+        rmdir($directory);
     }
 
     /** @param AbstractUri|string $uri */
@@ -398,8 +451,12 @@ final class HttpResource implements ResourceInterface
         }
 
         if ($method !== 'GET') {
-            $body = escapeshellarg(json_encode($query, JSON_THROW_ON_ERROR));
-            $curl .= sprintf(" -H 'Content-Type: application/json' -X %s -d %s", $method, $body);
+            if ($this->containsFileUpload($query)) {
+                $curl .= sprintf(' -X %s %s', $method, $this->multipartFields($query));
+            } else {
+                $body = escapeshellarg(json_encode($query, JSON_THROW_ON_ERROR));
+                $curl .= sprintf(" -H 'Content-Type: application/json' -X %s -d %s", $method, $body);
+            }
         }
 
         $curl .= ' ' . escapeshellarg($url);
@@ -409,6 +466,39 @@ final class HttpResource implements ResourceInterface
         }
 
         return $raw;
+    }
+
+    /** @param array<string, mixed> $query */
+    private function containsFileUpload(array $query): bool
+    {
+        foreach ($query as $value) {
+            if ($value instanceof AbstractFileUpload) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @param array<string, mixed> $query */
+    private function multipartFields(array $query): string
+    {
+        $fields = [];
+        foreach ($query as $name => $value) {
+            if ($value instanceof AbstractFileUpload) {
+                $fields[] = escapeshellarg($name . '=@' . $value->tmpName . ';type=' . $value->type . ';filename=' . $value->name);
+                continue;
+            }
+
+            if (is_string($value) || is_int($value) || is_float($value) || is_bool($value)) {
+                $fields[] = escapeshellarg($name . '=' . (string) $value);
+                continue;
+            }
+
+            $fields[] = escapeshellarg($name . '=' . json_encode($value, JSON_THROW_ON_ERROR));
+        }
+
+        return implode(' ', array_map(static fn (string $field): string => '-F ' . $field, $fields));
     }
 
     /** @return array<string, string> */
@@ -524,6 +614,11 @@ final class HttpResource implements ResourceInterface
     private function logFile(): string
     {
         if ($this->logPath === 'php://stderr' || str_ends_with($this->logPath, '.log')) {
+            $directory = dirname($this->logPath);
+            if ($directory !== '' && $directory !== '.' && ! is_dir($directory)) {
+                mkdir($directory, 0777, true);
+            }
+
             return $this->logPath;
         }
 

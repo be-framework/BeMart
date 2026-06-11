@@ -27,11 +27,20 @@ final readonly class CsvColumnConfigEntity implements \Ray\MediaQuery\ToScalarIn
 {
     use MediaQueryJsonEntityTrait;
 
+    public int $csvType;
+    public string $columnName;
+    public bool $enabled;
+    public int $sortNo;
+
     public function __construct(
-        public int $csvType,
-        public string $columnName,
-        public bool $enabled,
-        public int $sortNo,
+        int $csvType,
+        string $columnName,
+        bool|int|string $enabled,
+        int $sortNo,
     ) {
+        $this->csvType = $csvType;
+        $this->columnName = $columnName;
+        $this->enabled = $enabled === true || $enabled === 1 || $enabled === '1';
+        $this->sortNo = $sortNo;
     }
 }

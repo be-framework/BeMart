@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use Koriym\FileUpload\FileUpload;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
@@ -55,13 +56,26 @@ final class AdminTemplateManageResourceTest extends TestCase
 
     public function testSelect(): void
     {
+        $templateId = 'tp-default-pc';
         $ro = $this->resource->put('page://self/admin/template/template-list', [
-            'templateId' => 'default',
+            'templateId' => $templateId,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doSelectTemplate', $ro->body['transitionId']);
+
+        $list = $this->resource->get('page://self/admin/template/template-list');
+        $this->assertSame(Code::OK, $list->code);
+        foreach ($list->body['templates'] as $template) {
+            if ($template['templateId'] === $templateId) {
+                $this->assertTrue($template['active']);
+
+                return;
+            }
+        }
+
+        $this->fail('Selected template was not visible in template list readback.');
     }
 
     public function testSelectUnknownReturns404(): void
@@ -101,11 +115,14 @@ final class AdminTemplateManageResourceTest extends TestCase
         $ro = $this->resource->post('page://self/admin/template/template-add', [
             'templateCode' => 'mytheme',
             'templateName' => 'My Theme',
+            'file' => FileUpload::fromFile(__DIR__ . '/../fixtures/template-upload.zip'),
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doInstallTemplate', $ro->body['transitionId']);
+        $this->assertSame('template-upload.zip', $ro->body['archiveName']);
+        $this->assertGreaterThan(0, $ro->body['archiveSize']);
     }
 
     public function testInstallAnonymousReturns403(): void
@@ -116,6 +133,7 @@ final class AdminTemplateManageResourceTest extends TestCase
         $this->resource->post('page://self/admin/template/template-add', [
             'templateCode' => 'x',
             'templateName' => 'y',
+            'file' => FileUpload::fromFile(__DIR__ . '/../fixtures/template-upload.zip'),
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }

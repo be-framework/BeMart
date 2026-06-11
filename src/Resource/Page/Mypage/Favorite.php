@@ -20,6 +20,8 @@ use MyVendor\BeMart\Be\Input\RemoveFavoriteInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doAddFavorite — お気に入りに追加 (Pilot 13).
@@ -59,7 +61,7 @@ class Favorite extends ResourceObject
             'alreadyExisted' => $final->alreadyExisted,
         ];
 
-        return $this;
+        return $this->redirectToFavoriteListOnHtmlSuccess();
     }
 
     /**
@@ -92,6 +94,16 @@ class Favorite extends ResourceObject
             'productCode' => $final->productCode,
             'alreadyAbsent' => $final->alreadyAbsent,
         ];
+
+        return $this->redirectToFavoriteListOnHtmlSuccess();
+    }
+
+    private function redirectToFavoriteListOnHtmlSuccess(): static
+    {
+        if ($this->code < 400 && str_contains((string) getenv('APP_CONTEXT'), 'html')) {
+            $this->code = Code::SEE_OTHER;
+            $this->headers['Location'] = '/mypage/favorite-list';
+        }
 
         return $this;
     }

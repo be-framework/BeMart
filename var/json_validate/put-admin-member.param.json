@@ -28,6 +28,16 @@
       "description": "Fake観察文字長 1〜7; 観察値 'テスト管理者', '副管理者', '店舗オーナー', '削除済み管理者', 'Red', 'Blue', 'S', 'Color'。",
       "example": "テスト管理者",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "フォーム送信モード",
+      "$comment": "HTML form submit marker; Resource workflow calls omit it."
     }
   },
   "additionalProperties": false,

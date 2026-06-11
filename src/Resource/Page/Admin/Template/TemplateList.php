@@ -20,9 +20,12 @@ use MyVendor\BeMart\Be\Input\DeleteTemplateInput;
 use MyVendor\BeMart\Be\Input\DownloadTemplateInput;
 use MyVendor\BeMart\Be\Input\GetAdminTemplateListInput;
 use MyVendor\BeMart\Be\Input\SelectTemplateInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE goTemplateList — list-only endpoint (Wave 9). ALPS exposes
@@ -32,6 +35,7 @@ class TemplateList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrfToken,
     ) {
     }
 
@@ -53,6 +57,7 @@ class TemplateList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'templates' => $final->templates,
+            'csrfToken' => $this->csrfToken->token,
             'links' => [
                 'goTemplateAdd' => 'page://self/admin/template/template-add',
             ],
@@ -124,7 +129,7 @@ class TemplateList extends ResourceObject
 
         assert($final instanceof TemplateSelected || $final instanceof TemplateDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/template/template-list';
         $this->body = [
             'transitionId' => $transitionId,

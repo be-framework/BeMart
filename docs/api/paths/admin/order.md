@@ -84,6 +84,7 @@ row, or pasted into the URL).
 | goOrderList | [<code>page://self/admin/order-list</code>](/admin/order-list.md) |
 | doUpdateOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
 | doUpdateOrderStatus | [<code>page://self/admin/order-status</code>](/admin/order-status.md) |
+| goOrderShippingAddress | [<code>page://self/admin/order/shipping-address</code>](/admin/order/shipping-address.md) |
 ## PUT
 Wave 7: every editable field is admin-form input. The orderNo
 selector is also admin-controlled. Same taint discipline as the
@@ -126,3 +127,4 @@ Wave 5 / Wave 6 admin resources.
 | Relation | URL |
 |----------|-----|
 | goOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
+| doUpdateOrderStatus | [<code>page://self/admin/order-status</code>](/admin/order-status.md) |

@@ -121,7 +121,9 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
         $html = $this->resource->get('page://self/admin/class-name/class-name-list')->toString();
 
         $this->assertStringContainsString('id="admin_class_name_name"', $html);
+        $this->assertStringContainsString('name="classNameLabel"', $html);
         $this->assertStringContainsString('id="admin_class_name_backend_name"', $html);
+        $this->assertStringNotContainsString('name="backend_name"', $html);
     }
 
     #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
@@ -301,7 +303,15 @@ final class AdminClassNameListHtmlRenderTest extends TestCase
         $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
 
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($createForm): Markup {
-            if ($createForm instanceof AdminClassNameForm && is_string($field) && in_array($field, ['name', 'backend_name'], true)) {
+            if (! $createForm instanceof AdminClassNameForm || ! is_string($field)) {
+                return new Markup('', 'UTF-8');
+            }
+
+            if ($field === 'name') {
+                return new Markup($createForm->input('classNameLabel'), 'UTF-8');
+            }
+
+            if ($field === 'backend_name') {
                 return new Markup($createForm->input($field), 'UTF-8');
             }
 

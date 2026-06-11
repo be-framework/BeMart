@@ -14,6 +14,16 @@
       "description": "観察値 'true', 'false'。",
       "example": "true",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "フォーム送信モード",
+      "$comment": "HTML form submit marker; Resource workflow calls omit it."
     }
   },
   "additionalProperties": false,

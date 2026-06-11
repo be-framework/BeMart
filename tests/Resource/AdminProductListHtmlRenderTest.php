@@ -160,6 +160,24 @@ final class AdminProductListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('サンプル商品 A', $html);
     }
 
+    public function testProductListExposesUnsafeActionCsrfAffordances(): void
+    {
+        $html = $this->resource->get('page://self/admin/product-list')->toString();
+
+        $this->assertStringContainsString('data-delete-url="/admin/product?productCode=', $html);
+        $this->assertMatchesRegularExpression('/data-delete-url="[^"]+_method=delete"[^>]+token-for-anchor="[a-f0-9]{64}"/', $html);
+        $this->assertStringContainsString("'type': 'post'", $html);
+        $this->assertStringContainsString('data-method="post"', $html);
+        $this->assertMatchesRegularExpression('/href="\/admin\/product-copy\?productCode=[^"]+"[^>]+token-for-anchor="[a-f0-9]{64}"/', $html);
+
+        $this->assertStringContainsString('name="productCodes[]"', $html);
+        $this->assertStringContainsString('data-action="/admin/product-bulk-status"', $html);
+        $this->assertStringContainsString('data-product-status="1"', $html);
+        $this->assertStringContainsString('data-product-status="2"', $html);
+        $this->assertStringContainsString('data-product-status="3"', $html);
+        $this->assertMatchesRegularExpression('/<button[^>]+token-for-anchor="[a-f0-9]{64}"[^>]+class="[^"]*action-submit[^"]*"/', $html);
+    }
+
     /**
      * The honesty test: diff BeMart's rendered admin Product list against
      * EC-CUBE's own rendering. Every difference must be in the residual

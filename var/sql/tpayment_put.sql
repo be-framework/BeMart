@@ -66,4 +66,4 @@ VALUES
   visible =
 VALUES
   (visible),
-  update_date = NOW()
+  update_date = NOW();

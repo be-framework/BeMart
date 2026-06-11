@@ -17,6 +17,10 @@ namespace MyVendor\BeMart\Be\Reason\Entity;
  * mirrors EC-CUBE's table separation — order header lives in dtb_order,
  * delivery target lives in dtb_shipping — so the Phase 2 migration to
  * Ray.MediaQuery can map this entity 1:1 onto dtb_shipping rows.
+ *
+ * `trackingNumber` is a read-projection field for CSV export. It is not
+ * written through the address update transition; shipment fulfilment keeps
+ * using the narrow `updateTrackingNumber` command.
  */
 final readonly class ShippingAddressEntity implements \Ray\MediaQuery\ToScalarInterface
 {
@@ -31,6 +35,7 @@ final readonly class ShippingAddressEntity implements \Ray\MediaQuery\ToScalarIn
         public string $addr01,
         public string $addr02,
         public string $phoneNumber,
+        public string $trackingNumber = '',
     ) {
     }
 }

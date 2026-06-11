@@ -75,6 +75,14 @@ final class AdminProductCsvExportedTest extends TestCase
                 return $this->config;
             }
 
+            public function deleteType(int $csvType): void
+            {
+            }
+
+            public function insertType(int $csvType, \MyVendor\BeMart\Be\Reason\Query\Param\CsvColumnConfigList $entries): void
+            {
+            }
+
             public function replaceType(int $csvType, \MyVendor\BeMart\Be\Reason\Query\Param\CsvColumnConfigList $entries): void
             {
             }
@@ -128,9 +136,9 @@ final class AdminProductCsvExportedTest extends TestCase
         // Admin saved (via doUpdateCsv): productName first, then
         // productCode; everything else disabled / omitted.
         $becoming = $this->becomingWithConfig(self::TEST_ADMIN_ID, [
-            new CsvColumnConfigEntity(csvType: 3, columnName: 'productName', enabled: true, sortNo: 10),
-            new CsvColumnConfigEntity(csvType: 3, columnName: 'productCode', enabled: true, sortNo: 20),
-            new CsvColumnConfigEntity(csvType: 3, columnName: 'note', enabled: false, sortNo: 30),
+            new CsvColumnConfigEntity(csvType: 1, columnName: 'productName', enabled: true, sortNo: 10),
+            new CsvColumnConfigEntity(csvType: 1, columnName: 'productCode', enabled: true, sortNo: 20),
+            new CsvColumnConfigEntity(csvType: 1, columnName: 'note', enabled: false, sortNo: 30),
         ]);
 
         $final = $becoming(new AdminExportProductInput());
@@ -151,7 +159,7 @@ final class AdminProductCsvExportedTest extends TestCase
         // not encode must not yield an empty export — fall back to the
         // full default vector.
         $becoming = $this->becomingWithConfig(self::TEST_ADMIN_ID, [
-            new CsvColumnConfigEntity(csvType: 3, columnName: 'sinceDeletedColumn', enabled: true, sortNo: 1),
+            new CsvColumnConfigEntity(csvType: 1, columnName: 'sinceDeletedColumn', enabled: true, sortNo: 1),
         ]);
 
         $final = $becoming(new AdminExportProductInput());

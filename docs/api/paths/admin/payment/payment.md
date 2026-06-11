@@ -83,9 +83,9 @@ ALPS `doUpdatePayment` に対応する PUT 操作。
 |----------|-----|
 | goPaymentList | [<code>page://self/admin/payment/payment-list</code>](/admin/payment/payment-list.md) |
 ## DELETE
-ALPS `doUpdatePayment` に対応する DELETE 操作。
+ALPS `doDeletePayment` に対応する DELETE 操作。
 
-**ALPS**: `doUpdatePayment`
+**ALPS**: `doDeletePayment`
 
 
 

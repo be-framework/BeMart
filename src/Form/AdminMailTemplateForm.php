@@ -25,6 +25,8 @@ final class AdminMailTemplateForm extends AbstractForm
     #[Override]
     public function init(): void
     {
+        $this->setField('mailTemplateId', 'hidden')
+            ->setAttribs(['id' => 'mail_template_id']);
         $this->setField('template', 'select')
             ->setAttribs(['id' => 'mail_template', 'class' => 'form-select'])
             ->setOptions(self::TEMPLATE_OPTIONS);
@@ -45,6 +47,7 @@ final class AdminMailTemplateForm extends AbstractForm
 
     /**
      * @param array{
+     *   mailTemplateId?: int|string,
      *   template: string,
      *   name: string,
      *   file_name: string,
@@ -52,9 +55,16 @@ final class AdminMailTemplateForm extends AbstractForm
      *   tpl_data: string,
      *   html_tpl_data: string
      * } $values
+     * @param array<int|string, string>|null $templateOptions
      */
-    public function fillValues(array $values): void
+    public function fillValues(array $values, array|null $templateOptions = null): void
     {
+        if ($templateOptions !== null) {
+            $this->setField('template', 'select')
+                ->setAttribs(['id' => 'mail_template', 'class' => 'form-select'])
+                ->setOptions($templateOptions);
+        }
+
         $this->fill($values);
     }
 }

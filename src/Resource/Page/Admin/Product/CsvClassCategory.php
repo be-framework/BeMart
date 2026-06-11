@@ -20,6 +20,8 @@ use Override;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE 規格分類CSV登録 — Product Tier-2
@@ -69,7 +71,7 @@ class CsvClassCategory extends AbstractCsvUpload
 
         assert($final instanceof ClassCategoryCsvImported);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/class-category/class-category-list';
         $this->body = [
             'transitionId' => 'doImportClassCategoryCsv',

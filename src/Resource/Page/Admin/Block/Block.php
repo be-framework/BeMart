@@ -11,17 +11,21 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Be\Exception\BlockNotFoundException;
-use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\AdminBlockFetched;
 use MyVendor\BeMart\Be\Final\BlockDeleted;
 use MyVendor\BeMart\Be\Final\BlockUpdated;
 use MyVendor\BeMart\Be\Input\DeleteBlockInput;
+use MyVendor\BeMart\Be\Input\GetAdminBlockInput;
 use MyVendor\BeMart\Be\Input\UpdateBlockInput;
+use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminBlockForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doUpdateBlock + doDeleteBlock — single-row endpoint (Wave 9).
@@ -34,38 +38,81 @@ use function assert;
  * edit page (`Content/block_edit.twig` port) can render real `<input>`s
  * via `{{ form.input(...) }}`.
  *
- * NOTE — single-row prefill: ALPS / the Be domain expose no
- * `GetAdminBlockInput` / `AdminBlockFetched` (single-row fetch), so
- * `onGet` renders the NEW-block form (the `admin_content_block_new`
- * case). Pre-filling an existing row would need a Be fetch Input — a
- * `be/src/` change out of this Phase 3 HTML wave's scope. FLAGGED:
- * follow-up to add `GetAdminBlockInput` for existing-block edit prefill.
+ * `onGet` renders the NEW-block form when no blockId is supplied, and
+ * pre-fills the edit form when a blockId is supplied.
  */
 class Block extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrf,
+        private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
     }
 
     /**
-     * Renders the block edit form (new-block case).
+     * Renders the block edit form.
      *
      * The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
+     *
+     * @psalm-taint-source input $blockId
      */
     #[Alps('goBlock')]
-    #[JsonSchema(schema: 'get-admin-block-block.json')]
+    #[JsonSchema(schema: 'get-admin-block-block.json', params: 'get-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
-    public function onGet(): static
+    public function onGet(string|null $blockId = null): static
+    {
+        if ($blockId === null || $blockId === '') {
+            if ($this->adminSession->adminId === null) {
+                $this->code = Code::FORBIDDEN;
+                $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
+
+                return $this;
+            }
+
+            $this->code = Code::OK;
+            $this->body = [
+                'blockId' => '',
+                'blockName' => '',
+                'blockFileName' => '',
+                'blockDeletable' => true,
+                'csrfToken' => $this->csrf->token,
+            ];
+            $this->body['form'] = $this->editForm($this->body);
+
+            return $this;
+        }
+
+        $final = ($this->becoming)(new GetAdminBlockInput(blockId: $blockId));
+
+        assert($final instanceof AdminBlockFetched);
+
+        $this->code = Code::OK;
+        $this->body = [
+            'blockId' => $final->blockId,
+            'blockName' => $final->blockName,
+            'blockFileName' => $final->blockFileName,
+            'blockDeletable' => $final->blockDeletable,
+            'csrfToken' => $this->csrf->token,
+        ];
+        $this->body['form'] = $this->editForm($this->body);
+
+        return $this;
+    }
+
+    /**
+     * Builds an AdminBlockForm filled from a block body.
+     *
+     * @param array<string, mixed> $body
+     */
+    private function editForm(array $body): AdminBlockForm
     {
         $form = $this->formFactory->newInstance(AdminBlockForm::class);
         assert($form instanceof AdminBlockForm);
+        $form->fillValues($body);
 
-        $this->code = Code::OK;
-        $this->body = ['form' => $form];
-
-        return $this;
+        return $form;
     }
 
     /**
@@ -91,7 +138,8 @@ class Block extends ResourceObject
 
         assert($final instanceof BlockUpdated);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/block/block-list';
         $this->body = [
             'blockId' => $final->blockId,
             'blockName' => $final->blockName,
@@ -103,10 +151,10 @@ class Block extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateBlock` に対応する DELETE 操作。
+     * ALPS `doDeleteBlock` に対応する DELETE 操作。
      * @psalm-taint-source input $blockId
      */
-    #[Alps('doUpdateBlock')]
+    #[Alps('doDeleteBlock')]
     #[JsonSchema(schema: 'delete-admin-block-block.json', params: 'delete-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
@@ -117,7 +165,8 @@ class Block extends ResourceObject
 
         assert($final instanceof BlockDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/block/block-list';
         $this->body = ['blockId' => $final->blockId];
 
         return $this;

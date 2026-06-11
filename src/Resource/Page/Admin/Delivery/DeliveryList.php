@@ -19,7 +19,9 @@ use MyVendor\BeMart\Be\Input\GetAdminDeliveryListInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
 use function sprintf;
+use function str_contains;
 use function urlencode;
 
 /**
@@ -80,7 +82,7 @@ class DeliveryList extends ResourceObject
 
         assert($final instanceof DeliveryCreated);
 
-        $this->code = Code::CREATED;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = sprintf('/admin/delivery/delivery?deliveryId=%s', urlencode($final->deliveryId));
         $this->body = [
             'deliveryId' => $final->deliveryId,

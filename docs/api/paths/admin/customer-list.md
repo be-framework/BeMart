@@ -20,10 +20,7 @@ Filter scope (Wave 5 first iteration):
   Phase 2 will add phoneNumber, dateRange, purchaseAmount filters.
 
 Hypermedia: links to the per-customer admin detail and the admin
-customer-create endpoints. Those are Wave 5+ scope; the link targets
-exist as resource URIs but the resources themselves are deferred —
-the BEAR layer is forward-declaring the affordances per the
-`bear-skills:bear-hypermedia` discipline.
+customer actions that are available from the list surface.
 
 
 
@@ -61,4 +58,6 @@ mirrors the Wave 4 admin login.
 | Relation | URL |
 |----------|-----|
 | goCustomer | [<code>page://self/admin/customer</code>](/admin/customer.md) |
-| doCreateCustomer | [<code>page://self/admin/customer</code>](/admin/customer.md) |
+| doCreateCustomer | [<code>page://self/admin/create-customer</code>](/admin/create-customer.md) |
+| doDeleteCustomer | [<code>page://self/admin/delete-customer</code>](/admin/delete-customer.md) |
+| doResendActivationMail | [<code>page://self/admin/customer/resend-activation-mail</code>](/admin/customer/resend-activation-mail.md) |

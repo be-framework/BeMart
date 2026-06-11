@@ -21,7 +21,7 @@
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
    - `canonical-url route, params)` -> deterministic `/{route}?{query}`
      (`BeMartTwigExtension`).
-   - `form_widget(form.code|name|file)` -> `form.input('field')` — the
+   - `form_widget(form.code|name|file)` -> `form.input('templateCode'|'templateName'|'file')` — the
      real AdminTemplateAddForm fields (Ray.WebFormModule).
    - `form_widget(form._token)` (CSRF hidden input) -> `csrfToken|default('')`
      — EC-CUBE per-request CSRF runtime; enumerated as residual.
@@ -47,15 +47,15 @@
                             <div class="row mb-2">
                                 <div class="col-3"><span>テンプレートコード</span></div>
                                 <div class="col">
-                                    {{ form.input('code')|raw }}
-                                    {% if form.error('code') %}<span class="invalid-feedback d-block">{{ form.error('code') }}</span>{% endif %}
+                                    {{ form.input('templateCode')|raw }}
+                                    {% if form.error('templateCode') %}<span class="invalid-feedback d-block">{{ form.error('templateCode') }}</span>{% endif %}
                                 </div>
                             </div>
                             <div class="row mb-2">
                                 <div class="col-3"><span>テンプレート名</span></div>
                                 <div class="col">
-                                    {{ form.input('name')|raw }}
-                                    {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                    {{ form.input('templateName')|raw }}
+                                    {% if form.error('templateName') %}<span class="invalid-feedback d-block">{{ form.error('templateName') }}</span>{% endif %}
                                 </div>
                             </div>
                             <div class="row mb-2">

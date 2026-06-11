@@ -59,6 +59,28 @@ final class DownloadResponderTest extends TestCase
         $this->assertFalse($this->isDownload($ro, ['_BEMART_CONTEXT' => 'prod-eccube-sql-hal-app']));
     }
 
+    public function testCsvInHtmlContextUsesAppContextFallback(): void
+    {
+        $context = getenv('APP_CONTEXT');
+        putenv('APP_CONTEXT=html-eccube-sql-hal-app');
+
+        try {
+            $ro = $this->resourceWithDownload('text/csv; charset=UTF-8', ['csv' => "id,name\n1,BeMart\n"]);
+
+            $this->assertTrue($this->isDownload($ro));
+        } finally {
+            $context === false ? putenv('APP_CONTEXT') : putenv('APP_CONTEXT=' . $context);
+        }
+    }
+
+    public function testJsonInHtmlContextIsDirectOutput(): void
+    {
+        $ro = $this->resourceWithDownload('application/json; charset=utf-8', ['message' => 'ok', 'count' => 1]);
+
+        $this->assertTrue($this->isDownload($ro, ['_BEMART_CONTEXT' => 'html-eccube-sql-hal-app']));
+        $this->assertSame('{"message":"ok","count":1}', $this->downloadOutput($ro)->view);
+    }
+
     public function testHalJsonIsNotDownload(): void
     {
         $ro = $this->resourceWithDownload('application/hal+json', ['message' => 'ok']);

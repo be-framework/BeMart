@@ -14,27 +14,21 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MaintenanceToggled;
 use MyVendor\BeMart\Be\Input\ToggleMaintenanceInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
 /**
- * EC-CUBE メンテナンス管理 — admin CMS thin renderer (Phase 3 HTML).
+ * EC-CUBE メンテナンス管理 — admin CMS page.
  *
  * PORT-side note: EC-CUBE's `MaintenanceController` toggles the
- * maintenance-mode marker file; there is no Be domain entity for it. The
- * `Content/maintenance.twig` screen is a single有効/無効 toggle button —
- * the only `form_widget` call is the CSRF `_token` (EC-CUBE-runtime,
- * kept as a render-diff residual). This resource is a THIN HTML RENDERER
- * only — it carries no `be/src/` Becoming chain, authenticating at the
- * resource layer via {@see AdminSession}. `body['isMaintenance']`
- * drives which toggle button the template shows; it defaults to false
- * (maintenance off — the fresh-install state).
- *
- * FLAGGED: the maintenance-toggle POST action and the persisted
- * maintenance state are not modelled (operational, not a domain
- * mutation); only the GET render of the off-state is provided.
+ * maintenance-mode marker file; there is no long-lived business entity for
+ * it. This resource models the admin affordance as an explicit
+ * `doToggleMaintenance` transition and persists the operational marker
+ * through {@see MaintenanceModeInterface}. `body['isMaintenance']` drives
+ * which 有効/無効 button the template shows.
  */
 class Maintenance extends ResourceObject
 {
@@ -42,6 +36,7 @@ class Maintenance extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly BecomingInterface $becoming,
         private readonly MaintenanceModeInterface $maintenance,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -59,7 +54,10 @@ class Maintenance extends ResourceObject
         }
 
         $this->code = Code::OK;
-        $this->body = ['isMaintenance' => $this->maintenance->isEnabled()];
+        $this->body = [
+            'isMaintenance' => $this->maintenance->isEnabled(),
+            'csrfToken' => $this->csrf->token,
+        ];
 
         return $this;
     }
@@ -74,13 +72,13 @@ class Maintenance extends ResourceObject
     #[JsonSchema(schema: 'put-admin-content-maintenance.json', params: 'put-admin-content-maintenance.param.json')]
     #[Link(rel: 'goSystemInfo', href: 'page://self/admin/system')]
     #[CsrfProtected]
-    public function onPut(bool $enabled): static
+    public function onPut(bool $enabled, string|null $mode = null): static
     {
         $final = ($this->becoming)(new ToggleMaintenanceInput(enabled: $enabled));
 
         assert($final instanceof MaintenanceToggled);
 
-        $this->code = Code::OK;
+        $this->code = $mode === 'content_operation_form' ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/content/maintenance';
         $this->body = [
             'transitionId' => 'doToggleMaintenance',
