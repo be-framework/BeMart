@@ -43,6 +43,12 @@ final class HttpSqlNonMemberCheckoutFormTest extends TestCase
         self::$server->start();
     }
 
+    public static function tearDownAfterClass(): void
+    {
+        self::$server?->stop();
+        self::$server = null;
+    }
+
     protected function setUp(): void
     {
         $this->cookieJar = (string) tempnam(sys_get_temp_dir(), 'bemart-sql-non-member-cookie-');
