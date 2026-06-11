@@ -35,7 +35,7 @@
 | file upload を通常POST扱いにする | CSV/template upload で `$_FILES` がResourceへ渡らず、空CSVや `message=csv` になった | BEAR の `#[InputFile]` / multipart境界を Resource/HTTP/browser で統一していなかった | Resourceは `FileUpload::fromFile()`、HTTP/browserは同じHTML formに multipart submit |
 | JS依存のhidden field生成を見ない | CSV設定で実画面は `csvOutput[]` / `csvNotOutput[]` から hidden `columns[...]` を作るが、HTTP test は直接 `columns` を送っていた | ブラウザーDOMとsubmit時の実field shapeを確認していなかった | HTTP test は実formのfield名を正とし、JS生成fieldがある場合はBrowserで確認する |
 | fake/noop境界を本物の完成と混同する | メール、2FA、template select、maintenance/security設定などで、fake/noop/runtime境界を越えて完成扱いしそうになった | 外部境界や本番ファイル操作の安全なreadback条件を明確にしていなかった | fake/noop/runtime境界は明記する。本番SMTP/決済/破壊的ファイル操作は targetOut |
-| テスト都合でResourceやDTOを作る | 手札がないのに `PUT /admin/customer` や商品規格更新を作れば通せる箇所があった | OpenAPI/ALPS/HTML/Be Input が揃う前に、テストgreenを優先しそうになった | Resource/OpenAPI/ALPS/HTML form/readback が揃わない場合は fail/follow-up として止める |
+| テスト都合でResourceやDTOを作る | 手札がないのに `PUT /admin/customer` や 083 商品規格更新を作れば通せる箇所があった | OpenAPI/ALPS/HTML/Be Input が揃う前に、テストgreenを優先しそうになった | Resource/OpenAPI/ALPS/HTML form/readback が揃わない場合は fail/follow-up として止める。083 は ProductClass matrix の read/update contract が揃うまで green にしない |
 
 ## 次回の作業順
 
