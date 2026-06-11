@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -18,12 +19,10 @@ use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function array_key_exists;
-use function getenv;
 use function is_array;
 use function is_int;
 use function is_string;
 use function preg_match;
-use function str_contains;
 
 /**
  * EC-CUBE doCreateOrder — 受注を手動作成する (Wave 9η,
@@ -50,6 +49,7 @@ class Create extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -114,7 +114,7 @@ class Create extends ResourceObject
 
         assert($final instanceof AdminOrderCreated);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
+        ($this->mutationResponse)($this, Code::CREATED);
         $this->headers['Location'] = '/admin/order?orderNo=' . $final->orderNo;
         $this->body = [
             'orderNo' => $final->orderNo,

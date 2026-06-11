@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\AddressNotFoundException;
@@ -26,8 +27,6 @@ use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_filter;
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE 配送先住所 — single-resource endpoint (Pilot 16).
@@ -59,6 +58,7 @@ class Address extends ResourceObject
         private readonly CustomerSession $session,
         private readonly AddressStorageInterface $addresses,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -243,10 +243,7 @@ class Address extends ResourceObject
 
     private function redirectToAddressListOnHtmlSuccess(): static
     {
-        if ($this->code < 400 && str_contains((string) getenv('APP_CONTEXT'), 'html')) {
-            $this->code = Code::SEE_OTHER;
-            $this->headers['Location'] = '/mypage/address-list';
-        }
+        $this->mutationResponse->redirectOnSuccess($this, '/mypage/address-list');
 
         return $this;
     }

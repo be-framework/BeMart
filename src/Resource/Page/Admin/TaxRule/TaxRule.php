@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\TaxRuleNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -17,8 +18,6 @@ use MyVendor\BeMart\Be\Input\DeleteTaxRuleInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE doDeleteTaxRule — single-row endpoint (Wave 9θ).
@@ -33,6 +32,7 @@ class TaxRule extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -51,7 +51,7 @@ class TaxRule extends ResourceObject
 
         assert($final instanceof TaxRuleDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        ($this->mutationResponse)($this, Code::OK);
         $this->headers['Location'] = '/admin/tax-rule/tax-rule-list';
         $this->body = ['taxRuleId' => $final->taxRuleId];
 

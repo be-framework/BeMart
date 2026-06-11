@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
@@ -25,8 +26,6 @@ use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 use function array_map;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE doUpdateAuthorityRole — 権限ルール更新 (Wave 8).
@@ -71,6 +70,7 @@ class AuthorityRole extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly AuthorityRoleRuleStorageInterface $authorityRules,
         private readonly CsrfToken $csrf,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -145,7 +145,7 @@ class AuthorityRole extends ResourceObject
 
             assert($final instanceof AuthorityRulesUpdated);
 
-            $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+            ($this->mutationResponse)($this, Code::OK);
             $this->headers['Location'] = '/admin/authority-role';
             $this->body = [
                 'transitionId' => 'doUpdateAuthorityRole',
