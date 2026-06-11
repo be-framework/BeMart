@@ -89,9 +89,9 @@ ALPS `doUpdateNews` に対応する PUT 操作。
 |----------|-----|
 | goNews | [<code>page://self/admin/news/news</code>](/admin/news/news.md) |
 ## DELETE
-ALPS `doUpdateNews` に対応する DELETE 操作。
+ALPS `doDeleteNews` に対応する DELETE 操作。
 
-**ALPS**: `doUpdateNews`
+**ALPS**: `doDeleteNews`
 
 
 

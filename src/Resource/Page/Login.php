@@ -11,8 +11,11 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
+use MyVendor\BeMart\Be\Exception\EmailFormatException;
 use MyVendor\BeMart\Be\Exception\LoginFailedException;
+use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\CustomerAuthenticated;
 use MyVendor\BeMart\Be\Input\LoginInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
@@ -20,7 +23,9 @@ use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_values;
 use function assert;
+use function trim;
 
 /**
  * EC-CUBE doLogin — 会員ログイン (Pilot 6).
@@ -112,24 +117,49 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-login.json', params: 'post-login.param.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
-    public function onPost(string $email, string $password): static
+    public function onPost(string|null $email = null, string|null $password = null, string|null $mode = null): static
     {
-        $final = ($this->becoming)(new LoginInput(
-            email: $email,
-            password: $password,
-        ));
+        $values = [
+            'email' => $email ?? '',
+            'password' => $password ?? '',
+        ];
+        $browserForm = $mode !== null;
+        if ($browserForm) {
+            $errors = $this->formErrors($values);
+            if ($errors !== []) {
+                return $this->rejectForm($values, $errors);
+            }
+        }
+
+        try {
+            $final = ($this->becoming)(new LoginInput(
+                email: $values['email'],
+                password: $values['password'],
+            ));
+        } catch (SemanticVariableException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            [$field, $message] = self::semanticError($e);
+
+            return $this->rejectForm($values, [$field => $message]);
+        } catch (LoginFailedException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            return $this->rejectForm(
+                $values,
+                ['email' => self::domainMessage($e)],
+                Code::UNAUTHORIZED,
+            );
+        }
 
         assert($final instanceof CustomerAuthenticated);
 
         $this->sessionWriter->authenticate($final->customerId);
 
-        // Post/Redirect/Get: a successful login redirects to My Page.
-        // EC-CUBE's doLogin redirects to the `mypage` route (`/mypage`) —
-        // My Page reads the authenticated customer from the session, so
-        // the customerId is NOT a URL segment (there is no
-        // `/mypage/{customerId}` route). JSON clients still read
-        // `customerId` off the body below.
-        $this->code = Code::OK;
         $this->headers['Location'] = '/mypage';
         $this->body = [
             'customerId' => $final->customerId,
@@ -138,6 +168,15 @@ class Login extends ResourceObject
             'name02' => $final->name02,
             'customerStatus' => $final->customerStatus,
         ];
+        if ($browserForm) {
+            // Post/Redirect/Get: EC-CUBE's browser login redirects to My Page.
+            // JSON/Resource clients keep the success body below with 200 OK.
+            $this->code = Code::SEE_OTHER;
+
+            return $this;
+        }
+
+        $this->code = Code::OK;
 
         return $this;
     }
@@ -150,18 +189,80 @@ class Login extends ResourceObject
      * entered email and the inline error. Validation authority remains
      * with Be — the form is a renderer here, never a validator.
      */
-    private function failedForm(string $email, string $message): LoginForm
+    /** @param array{email: string, password: string} $values */
+    private function failedForm(array $values, array $errors): LoginForm
     {
         $form = $this->formFactory->newInstance(LoginForm::class);
         assert($form instanceof LoginForm);
 
         // Repopulate the email (EC-CUBE getLastUsername UX). The password
         // is deliberately not repopulated.
-        $form->fillValues(['email' => $email]);
-        // Bridge the Be-domain verdict onto the form's error state.
-        $form->setDomainError('email', $message);
+        $form->fillValues(['email' => $values['email']]);
+        foreach ($errors as $field => $message) {
+            $form->setDomainError($field, $message);
+        }
 
         return $form;
+    }
+
+    /** @param array{email: string, password: string} $values */
+    private function formErrors(array $values): array
+    {
+        $errors = [];
+        foreach ([
+            'email' => '入力してください。',
+            'password' => '入力してください。',
+        ] as $field => $message) {
+            if (trim($values[$field]) === '') {
+                $errors[$field] = $message;
+            }
+        }
+
+        return $errors;
+    }
+
+    /** @param array{email: string, password: string} $values */
+    private function rejectForm(array $values, array $errors, int $code = Code::BAD_REQUEST): static
+    {
+        $this->code = $code;
+        $this->body = [
+            'transitionId' => 'goLogin',
+            'fields' => ['email', 'password', 'csrfToken'],
+            'submitTo' => [
+                'method' => 'POST',
+                'href' => 'page://self/login',
+            ],
+            'csrfToken' => $this->csrf->token,
+            'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
+            'errors' => $errors,
+            'form' => $this->failedForm($values, $errors),
+        ];
+
+        return $this;
+    }
+
+    /** @return array{0: string, 1: string} */
+    private static function semanticError(SemanticVariableException $e): array
+    {
+        $exception = $e->getErrors()->exceptions[0] ?? null;
+        $message = $e->getErrors()->getMessages('ja')[0] ?? '入力内容を確認してください。';
+
+        $field = match (true) {
+            $exception instanceof PasswordFormatException => 'password',
+            $exception instanceof EmailFormatException => 'email',
+            default => 'email',
+        };
+
+        return [$field, $message];
+    }
+
+    private static function domainMessage(LoginFailedException $e): string
+    {
+        $message = (new ValidationMessageHandler())->getMessage($e, 'ja');
+
+        return $message !== '' && $message !== 'Validation error'
+            ? $message
+            : 'メールアドレスまたはパスワードが正しくありません。';
     }
 
     private function prefilledLoginForm(): LoginForm

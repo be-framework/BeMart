@@ -1,16 +1,12 @@
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/order/import-shipping
-EC-CUBE doImportShippingCsv — 配送CSVをインポートする (Wave 9η,
-**Phase 2 stub**).
+EC-CUBE doImportShippingCsv — 配送CSVをインポートする (Wave 9η).
 
 POST /admin/order/import-shipping
 
-Mirrors the Wave 8 {@see \MyVendor\BeMart\Resource\Page\Admin\Category\Csv::onPost}
-stub — accepts the CSV body as a plain string, returns 202 +
-`accepted=false` with a notice so callers cannot mistake the stub
-for a real import. The full parser (tracking-number column,
-shipDate parsing, dry-run preview) is Phase 2.
+Accepts the CSV body as a plain string and updates tracking numbers
+for existing orders. Unknown order rows are counted as skipped.
 
 Failure mapping:
   - Invalid CSRF                          → 403

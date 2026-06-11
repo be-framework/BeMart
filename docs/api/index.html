@@ -500,7 +500,7 @@ token into the session for the subsequent POST (same as Login).</div><div class=
   <td><a href="#GET/indexresponse" class="schema-link">GET /index response</a></td>
 </tr>
 <tr>
-  <td rowspan="3" class="path-cell" id="path-login">/login</td>
+  <td rowspan="4" class="path-cell" id="path-login">/login</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE goLogin — show the login form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state). The `csrfToken` body field carries the trusted reference
@@ -514,8 +514,8 @@ subsequent POST passes CSRF validation.</div><div class="method-alps"><a href=".
 </tr>
 <tr>
 
-  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: every form field is user-controlled input.</div><div class="method-alps"><a href="../alps.json.html#doLogin" class="alps-link">doLogin</a></div></td>
-  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a><span class="req">*</span></td>
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: every form field is user-controlled input.</div><div class="method-alps"><a href="../alps.json.html#doLogin" class="alps-link">doLogin</a></div></td>
+  <td><a href="../alps.json.html#email" class="param alps-param" title="メールアドレス">email</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">メールアドレス（入力） - 会員のログインIDを兼ねる。有効会員間で一意 ログインIDを兼ねるメールアドレス。会員登録・ログイン・通知で共通に使う。 Fake観察文字長 15〜58; 観察値 &#039;bob@example.com&#039;, &#039;login-test@example.com&#039;, &#039;alice@example.com&#039;, &#039;carol@example.com&#039;, &#039;provisional@example.com&#039;, &#039;withdrawn-30000000aaaa3333bbbb4444cccc5555@example.invalid&#039;。</td>
   <td><div class="extra-info">
@@ -524,12 +524,12 @@ subsequent POST passes CSRF validation.</div><div class="method-alps"><a href=".
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: alice@example.com</span>
     </div></td>
-  <td rowspan="2"><a href="#POST/loginresponse" class="schema-link">POST /login response</a></td>
+  <td rowspan="3"><a href="#POST/loginresponse" class="schema-link">POST /login response</a></td>
 </tr>
 <tr>
 
 
-  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">パスワード（入力） - 書き込み専用（ハッシュ化して保存） Fake観察文字長 50〜63; 観察値 &#039;$2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi&#039;, &#039;$2y$10$deputyplaceholder.hash.never.verified.0123456789abcdef&#039;, &#039;$2y$10$zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876&#039;, &#039;$2y$12$lbpzHVyv.ytzJju.4xk9Au5tPePdQe1WFH6sLWeWwcvIKbn0vMnE.&#039;, &#039;$2y$10$shopownerplaceholder.hash.never.verified.0123456789ab&#039;, &#039;$2y$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123&#039;, &#039;$2y$10$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS&#039;, &#039;$2y$12$placeholder.hash.never.verified.never.0123456789abcde&#039;。</td>
   <td><div class="extra-info">
@@ -537,6 +537,19 @@ subsequent POST passes CSRF validation.</div><div class="method-alps"><a href=".
       <span class="badge constraint">maxLength: 128</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: $2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード - HTMLフォーム送信をResource/JSON境界と区別するための任意パラメータ。ログイン画面では browser form re-render 判定にだけ使う。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge example">example: login</span>
     </div></td>
 
 </tr>
@@ -818,13 +831,11 @@ token into the session for the POST (same as Login).</div><div class="method-alp
   <td rowspan="1"><a href="#POST/admin/action-redirectresponse" class="schema-link">POST /admin/action-redirect response</a></td>
 </tr>
 <tr>
-  <td rowspan="3" class="path-cell" id="path-admin/authority-role">/admin/authority-role</td>
+  <td rowspan="5" class="path-cell" id="path-admin/authority-role">/admin/authority-role</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Phase 3 admin HTML Tier-2: render the authority-rule management
 screen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE
-also has a GET page for editing URL-deny rules. No persisted
-`dtb_authority_role` storage exists in BeMart yet, so this GET
-exposes the stable form body shape the HTML needs and flags the
-rule rows as static placeholders.</div><div class="method-alps"><a href="../alps.json.html#doUpdateAuthorityRole" class="alps-link">doUpdateAuthorityRole</a></div></td>
+uses the same resource to edit URL-deny rules stored in
+`dtb_authority_role`.</div><div class="method-alps"><a href="../alps.json.html#doUpdateAuthorityRole" class="alps-link">doUpdateAuthorityRole</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -832,10 +843,11 @@ rule rows as static placeholders.</div><div class="method-alps"><a href="../alps
 </tr>
 <tr>
 
-  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: both `loginId` and `authority` are admin-form input
-(loginId from the row selection, authority from a dropdown of
-mtb_authority values).</div><div class="method-alps"><a href="../alps.json.html#doUpdateAuthorityRole" class="alps-link">doUpdateAuthorityRole</a></div></td>
-  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: browser form input for URL deny rules. The primary HTML
+shape is `csrfToken` plus `AuthorityRoles[*][Authority]` /
+`AuthorityRoles[*][deny_url]`. The legacy member role-flip shape
+(`loginId`, `authority`) remains supported for member workflow.</div><div class="method-alps"><a href="../alps.json.html#doUpdateAuthorityRole" class="alps-link">doUpdateAuthorityRole</a></div></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 &#039;test-admin&#039;, &#039;shop-owner&#039;, &#039;deputy&#039;, &#039;deleted-admin&#039;, &#039;unknown-user&#039;。</td>
   <td><div class="extra-info">
@@ -844,17 +856,39 @@ mtb_authority values).</div><div class="method-alps"><a href="../alps.json.html#
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: test-admin</span>
     </div></td>
-  <td rowspan="2"><a href="#POST/admin/authority-roleresponse" class="schema-link">POST /admin/authority-role response</a></td>
+  <td rowspan="4"><a href="#POST/admin/authority-roleresponse" class="schema-link">POST /admin/authority-role response</a></td>
 </tr>
 <tr>
 
 
-  <td><a href="../alps.json.html#authority" class="param alps-param" title="権限">authority</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#authority" class="param alps-param" title="権限">authority</a></td>
   <td><span class="badge type-int">int</span></td>
   <td class="param-desc">権限（入力） - 管理者権限レベル。0=システム管理者（最高権限、全機能アクセス可能）, 1=店舗オーナー（制限あり、denyUrlで制限されたURLにアクセス不可）。数値が小さいほど権限が高い。AuthorityRoleのURL拒否パターンでアクセス制御 Fake観察数値 0〜1; 観察値 &#039;1&#039;, &#039;0&#039;。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: 1</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">AuthorityRoles</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc">権限ルール入力一覧 - 権限管理画面のURL拒否ルール行。HTML form の AuthorityRoles[*][Authority] / deny_url を受け取る。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minItems: 0</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
     </div></td>
 
 </tr>
@@ -1086,7 +1120,7 @@ with the dtb_base_info row for the HTML editor.</div><div class="method-alps"><a
 
 
   <td><span class="param">calendarId</span></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">カレンダーID（入力） - /admin/calendar のレスポンスで対象を識別するカレンダーID。DB採番ID、Fake文字列ID、互換境界IDのどれに該当するかをschemaの型とコメントで分ける。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
@@ -1099,7 +1133,7 @@ with the dtb_base_info row for the HTML editor.</div><div class="method-alps"><a
 
   <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">EC-CUBE doDeleteCalendarHoliday.</div><div class="method-alps"><a href="../alps.json.html#doDeleteCalendarHoliday" class="alps-link">doDeleteCalendarHoliday</a></div></td>
   <td><span class="param">calendarId</span></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">カレンダーID（入力） - /admin/calendar のレスポンスで対象を識別するカレンダーID。DB採番ID、Fake文字列ID、互換境界IDのどれに該当するかをschemaの型とコメントで分ける。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
@@ -1369,14 +1403,14 @@ can stay free of session lookups; we just map the exception.</div><div class="me
 
 </tr>
 <tr>
-  <td rowspan="3" class="path-cell" id="path-admin/csv-config">/admin/csv-config</td>
+  <td rowspan="5" class="path-cell" id="path-admin/csv-config">/admin/csv-config</td>
   <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE CSV出力項目設定 — Setting/Shop Tier-2.</div><div class="method-desc">Thin GET renderer for `Setting/Shop/csv.twig`. The existing POST
 persists a submitted vector; this GET serves the editor body.</div><div class="method-alps"><a href="../alps.json.html#doUpdateCsv" class="alps-link">doUpdateCsv</a></div></td>
   <td><a href="../alps.json.html#csvType" class="param alps-param" title="CSV種別">csvType</a></td>
   <td><span class="badge type-int">int</span></td>
-  <td class="param-desc">CSV種別（入力） - CSV出力項目設定で編集対象にするCSV種別。1=受注CSV, 2=会員CSV, 3=商品CSV, 4=配送CSV。HTTP queryでは文字列として届く場合があるためtransport schemaではstring|integer|nullを許容し、意味検証はResource/Semantic層へ委ねる。</td>
+  <td class="param-desc">CSV種別（入力） - CSV出力項目設定で編集対象にするCSV種別。1=商品CSV, 2=会員CSV, 3=受注CSV, 4=配送CSV。HTTP queryでは文字列として届く場合があるためtransport schemaではstring|integer|nullを許容し、意味検証はResource/Semantic層へ委ねる。</td>
   <td><div class="extra-info">
-      <span class="badge constraint">default: 1</span>
+      <span class="badge constraint">default: 3</span>
       <span class="badge constraint">enum: [1,2,3,4,&quot;1&quot;,&quot;2&quot;,&quot;3&quot;,&quot;4&quot;,null]</span>
       <span class="badge constraint">$comment: GET query transport boundary: browser selection values arrive as strings; Resource signature casts/validates csvType semantics.</span>
     </div></td>
@@ -1384,25 +1418,47 @@ persists a submitted vector; this GET serves the editor body.</div><div class="m
 </tr>
 <tr>
 
-  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 9: admin-form input. The columns list is sanitized by Be /
+  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 9: admin-form input. The columns list is sanitized by Be /
 Semantic; the column entries themselves carry user-supplied
 column names so the taint mark applies to the whole payload.</div><div class="method-alps"><a href="../alps.json.html#doUpdateCsv" class="alps-link">doUpdateCsv</a></div></td>
   <td><a href="../alps.json.html#csvType" class="param alps-param" title="CSV種別">csvType</a><span class="req">*</span></td>
   <td><span class="badge type-int">int</span></td>
-  <td class="param-desc">CSV種別（入力） - dtb_csv.csv_type_id — mtb_csv_type への FK（1=注文CSV, 2=会員CSV, 3=商品CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）</td>
+  <td class="param-desc">CSV種別（入力） - dtb_csv.csv_type_id — mtb_csv_type への FK（1=商品CSV, 2=会員CSV, 3=受注CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
     </div></td>
-  <td rowspan="2"><a href="#POST/admin/csv-configresponse" class="schema-link">POST /admin/csv-config response</a></td>
+  <td rowspan="4"><a href="#POST/admin/csv-configresponse" class="schema-link">POST /admin/csv-config response</a></td>
 </tr>
 <tr>
 
 
-  <td><span class="param">columns</span><span class="req">*</span></td>
+  <td><span class="param">columns</span></td>
   <td><span class="badge type-array">array</span></td>
   <td class="param-desc">CSV列定義 - /admin/csv-config のCSV列設定。各要素は出力対象フィールドと表示名を表す。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
+      <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">csvOutput</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">CSV出力対象列（HTML入力） - CSV設定画面の multi-select `csvOutput[]` が送る出力対象列。JavaScript が生成する columns[n] と同じ列ベクタへ Resource 境界で正規化される。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">csvNotOutput</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">CSV非出力対象列（HTML入力） - CSV設定画面の multi-select `csvNotOutput[]` が送る非出力対象列。JavaScript が生成する columns[n] と同じ列ベクタへ Resource 境界で正規化される。</td>
+  <td><div class="extra-info">
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
     </div></td>
 
@@ -1577,7 +1633,7 @@ Final to raise `UnauthorizedAdminAccessException`.</div><div class="method-alps"
   <td><a href="#GET/admin/logresponse" class="schema-link">GET /admin/log response</a></td>
 </tr>
 <tr>
-  <td rowspan="3" class="path-cell" id="path-admin/login">/admin/login</td>
+  <td rowspan="4" class="path-cell" id="path-admin/login">/admin/login</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Show the admin login form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework involved, no domain
 logic. Anonymous-accessible (returns 200 regardless of session
 state) — the admin firewall guard is on the POST. The `csrfToken`
@@ -1591,9 +1647,9 @@ issues, which the HTML port renders into the form&#039;s hidden
 </tr>
 <tr>
 
-  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 4 / Phase B Slice 9: every form field is user-controlled
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 4 / Phase B Slice 9: every form field is user-controlled
 input — same taint discipline as the customer login.</div><div class="method-alps"><a href="../alps.json.html#doAdminLogin" class="alps-link">doAdminLogin</a></div></td>
-  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 &#039;test-admin&#039;, &#039;shop-owner&#039;, &#039;deputy&#039;, &#039;deleted-admin&#039;, &#039;unknown-user&#039;。</td>
   <td><div class="extra-info">
@@ -1602,12 +1658,12 @@ input — same taint discipline as the customer login.</div><div class="method-a
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: test-admin</span>
     </div></td>
-  <td rowspan="2"><a href="#POST/admin/loginresponse" class="schema-link">POST /admin/login response</a></td>
+  <td rowspan="3"><a href="#POST/admin/loginresponse" class="schema-link">POST /admin/login response</a></td>
 </tr>
 <tr>
 
 
-  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#password" class="param alps-param" title="パスワード">password</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">パスワード（入力） - 書き込み専用（ハッシュ化して保存） Fake観察文字長 50〜63; 観察値 &#039;$2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi&#039;, &#039;$2y$10$deputyplaceholder.hash.never.verified.0123456789abcdef&#039;, &#039;$2y$10$zyxwvutsrqponmlkjihgfedcbaZYXWVUTSRQPONMLKJIHGFEDCBA9876&#039;, &#039;$2y$12$lbpzHVyv.ytzJju.4xk9Au5tPePdQe1WFH6sLWeWwcvIKbn0vMnE.&#039;, &#039;$2y$10$shopownerplaceholder.hash.never.verified.0123456789ab&#039;, &#039;$2y$10$abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123&#039;, &#039;$2y$10$0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRS&#039;, &#039;$2y$12$placeholder.hash.never.verified.never.0123456789abcde&#039;。</td>
   <td><div class="extra-info">
@@ -1615,6 +1671,19 @@ input — same taint discipline as the customer login.</div><div class="method-a
       <span class="badge constraint">maxLength: 128</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: $2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード - HTMLフォーム送信をResource/JSON境界と区別するための任意パラメータ。管理ログイン画面では browser form re-render 判定にだけ使う。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge example">example: login</span>
     </div></td>
 
 </tr>
@@ -1640,16 +1709,19 @@ input — same taint discipline as the customer logout.</div><div class="method-
   <td><a href="#POST/admin/logoutresponse" class="schema-link">POST /admin/logout response</a></td>
 </tr>
 <tr>
-  <td rowspan="4" class="path-cell" id="path-admin/mail-template">/admin/mail-template</td>
-  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 9ι: goMailTemplateList — admin lists every mail template.</div><div class="method-alps"><a href="../alps.json.html#goMailTemplateList" class="alps-link">goMailTemplateList</a></div></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td><a href="#GET/admin/mail-templateresponse" class="schema-link">GET /admin/mail-template response</a></td>
+  <td rowspan="5" class="path-cell" id="path-admin/mail-template">/admin/mail-template</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 9ι: goMailTemplateList — admin lists every mail template.</div><div class="method-alps"><a href="../alps.json.html#goMailTemplateList" class="alps-link">goMailTemplateList</a></div></td>
+  <td><a href="../alps.json.html#mailTemplateId" class="param alps-param" title="メールテンプレートID">mailTemplateId</a></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc">メールテンプレートID</td>
+  <td><div class="extra-info">
+
+    </div></td>
+  <td rowspan="1"><a href="#GET/admin/mail-templateresponse" class="schema-link">GET /admin/mail-template response</a></td>
 </tr>
 <tr>
 
-  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">ALPS `doUpdateMailTemplate` に対応する POST 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateMailTemplate" class="alps-link">doUpdateMailTemplate</a></div></td>
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">ALPS `doUpdateMailTemplate` に対応する POST 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateMailTemplate" class="alps-link">doUpdateMailTemplate</a></div></td>
   <td><a href="../alps.json.html#mailTemplateId" class="param alps-param" title="メールテンプレートID">mailTemplateId</a><span class="req">*</span></td>
   <td><span class="badge type-int">int</span></td>
   <td class="param-desc">メールテンプレートID（入力） - dtb_mail_template.id（int unsigned AUTO_INCREMENT）の正の整数主キー。doUpdateMailTemplate の必須入力で、既存行を指す必要がある。SqlMailTemplateStorage は findById / update をこの id で引き、未知 id は MailTemplateNotFoundException（404）。新規テンプレート作成フローは file_name 設定と Twig ファイル書き出しを伴うため Phase 2 scope であり、ID 生成器は存在しない（更新専用契約） Fake観察数値 1〜2; 観察値 &#039;1&#039;, &#039;2&#039;。</td>
@@ -1659,18 +1731,32 @@ input — same taint discipline as the customer logout.</div><div class="method-
       <span class="badge constraint">maxLength: 128</span>
       <span class="badge example">example: 1</span>
     </div></td>
-  <td rowspan="2"><a href="#POST/admin/mail-templateresponse" class="schema-link">POST /admin/mail-template response</a></td>
+  <td rowspan="3"><a href="#POST/admin/mail-templateresponse" class="schema-link">POST /admin/mail-template response</a></td>
 </tr>
 <tr>
 
 
-  <td><a href="../alps.json.html#mailSubject" class="param alps-param" title="メール件名">mailSubject</a><span class="req">*</span></td>
+  <td><a href="../alps.json.html#mailSubject" class="param alps-param" title="メール件名">mailSubject</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">メール件名（入力） - メールの件名。テンプレート変数を含む場合あり Fake観察文字長 13〜13; 観察値 &#039;ご注文ありがとうございます&#039;。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 32</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
+      <span class="badge example">example: ご注文ありがとうございます</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">mail_subject</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">メール件名（HTMLフォーム入力） - 管理画面HTMLフォームの `mail_subject` field。Resourceでは `mailSubject` と同じ doUpdateMailTemplate の件名入力として扱う。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: HTTP form boundary uses snake_case field names; Resource normalizes this to the ALPS mailSubject input.</span>
       <span class="badge example">example: ご注文ありがとうございます</span>
     </div></td>
 
@@ -1747,7 +1833,7 @@ semantics instead of generic ActionRedirect.</div><div class="method-alps"><a hr
 
 </tr>
 <tr>
-  <td rowspan="8" class="path-cell" id="path-admin/member">/admin/member</td>
+  <td rowspan="12" class="path-cell" id="path-admin/member">/admin/member</td>
   <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 8: the loginId comes from the admin UI (typed input or
 query string) — user-controlled.</div><div class="method-alps"><a href="../alps.json.html#goMember" class="alps-link">goMember</a></div></td>
   <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a></td>
@@ -1763,7 +1849,7 @@ query string) — user-controlled.</div><div class="method-alps"><a href="../alp
 </tr>
 <tr>
 
-  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: all form fields are user-controlled. The admin AUTHZ
+  <td rowspan="6" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: all form fields are user-controlled. The admin AUTHZ
 check lives inside the first Being (MemberCreating), so this
 method just maps the exceptions.</div><div class="method-alps"><a href="../alps.json.html#doCreateMember" class="alps-link">doCreateMember</a></div></td>
   <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
@@ -1775,7 +1861,7 @@ method just maps the exceptions.</div><div class="method-alps"><a href="../alps.
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: test-admin</span>
     </div></td>
-  <td rowspan="4"><a href="#POST/admin/memberresponse" class="schema-link">POST /admin/member response</a></td>
+  <td rowspan="6"><a href="#POST/admin/memberresponse" class="schema-link">POST /admin/member response</a></td>
 </tr>
 <tr>
 
@@ -1819,7 +1905,33 @@ method just maps the exceptions.</div><div class="method-alps"><a href="../alps.
 </tr>
 <tr>
 
-  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Wave 8: doUpdateMember — edits `name` only. The other admin
+
+  <td><span class="param">passwordConfirm</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">パスワード確認（入力）</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 128</span>
+      <span class="badge constraint">$comment: Browser-form boundary field; compared with password before CreateMemberInput.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: HTML form submit marker; Resource workflow calls omit it.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="3" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Wave 8: doUpdateMember — edits `name` only. The other admin
 fields (authority, work, passwordHash) have their own dedicated
 transitions / are out of scope for Phase 1. EC-CUBE 4.3
 dtb_member has no email column, so no mailAddress field is
@@ -1833,7 +1945,7 @@ accepted.</div><div class="method-alps"><a href="../alps.json.html#doUpdateMembe
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: test-admin</span>
     </div></td>
-  <td rowspan="2"><a href="#PUT/admin/memberresponse" class="schema-link">PUT /admin/member response</a></td>
+  <td rowspan="3"><a href="#PUT/admin/memberresponse" class="schema-link">PUT /admin/member response</a></td>
 </tr>
 <tr>
 
@@ -1851,7 +1963,20 @@ accepted.</div><div class="method-alps"><a href="../alps.json.html#doUpdateMembe
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">Wave 8: doDeleteMember — soft-delete (work=0). Idempotent
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: HTML form submit marker; Resource workflow calls omit it.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">Wave 8: doDeleteMember — soft-delete (work=0). Idempotent
 replay returns 200 with `alreadyDeleted=true`. Self-target
 raises {@see InsufficientAuthorityException} → 403.</div><div class="method-alps"><a href="../alps.json.html#doDeleteMember" class="alps-link">doDeleteMember</a></div></td>
   <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a><span class="req">*</span></td>
@@ -1863,7 +1988,20 @@ raises {@see InsufficientAuthorityException} → 403.</div><div class="method-al
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: test-admin</span>
     </div></td>
-  <td rowspan="1"><a href="#DELETE/admin/memberresponse" class="schema-link">DELETE /admin/member response</a></td>
+  <td rowspan="2"><a href="#DELETE/admin/memberresponse" class="schema-link">DELETE /admin/member response</a></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: HTML form submit marker; Resource workflow calls omit it.</span>
+    </div></td>
+
 </tr>
 <tr>
   <td rowspan="3" class="path-cell" id="path-admin/member-list">/admin/member-list</td>
@@ -2681,7 +2819,7 @@ surfaces `alreadyDeleted=true`.</div><div class="method-alps"><a href="../alps.j
 
 </tr>
 <tr>
-  <td rowspan="2" class="path-cell" id="path-admin/trade-law">/admin/trade-law</td>
+  <td rowspan="21" class="path-cell" id="path-admin/trade-law">/admin/trade-law</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Wave 9ι: goTradeLawList — admin views the current TradeLaw body.</div><div class="method-alps"><a href="../alps.json.html#goTradeLawList" class="alps-link">goTradeLawList</a></div></td>
   <td></td>
   <td></td>
@@ -2690,16 +2828,225 @@ surfaces `alreadyDeleted=true`.</div><div class="method-alps"><a href="../alps.j
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">ALPS `doUpdateTradeLaw` に対応する POST 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateTradeLaw" class="alps-link">doUpdateTradeLaw</a></div></td>
-  <td><a href="../alps.json.html#tradeLawBody" class="param alps-param" title="特定商取引法本文">tradeLawBody</a><span class="req">*</span></td>
+  <td rowspan="20" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">ALPS `doUpdateTradeLaw` に対応する POST 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateTradeLaw" class="alps-link">doUpdateTradeLaw</a></div></td>
+  <td><a href="../alps.json.html#tradeLawBody" class="param alps-param" title="特定商取引法本文">tradeLawBody</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">特定商取引法本文（入力） - 特定商取引法ページ本文の単一ブロブ投影。項目別行ではなく、ページ全体を1本の本文として扱う。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 255</span>
+      <span class="badge constraint">maxLength: 65535</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
     </div></td>
-  <td rowspan="1"><a href="#POST/admin/trade-lawresponse" class="schema-link">POST /admin/trade-law response</a></td>
+  <td rowspan="20"><a href="#POST/admin/trade-lawresponse" class="schema-link">POST /admin/trade-law response</a></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">HTMLフォーム送信時のPRG mode。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">enum: [&quot;trade_law_form&quot;,null]</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_1_name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_1_description</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_1_displayOrderScreen</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_2_name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_2_description</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_2_displayOrderScreen</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_3_name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_3_description</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_3_displayOrderScreen</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_4_name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_4_description</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_4_displayOrderScreen</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_5_name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_5_description</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_5_displayOrderScreen</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_6_name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_6_description</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">trade_law_6_displayOrderScreen</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+
 </tr>
 <tr>
   <td rowspan="3" class="path-cell" id="path-admin/two-factor-auth">/admin/two-factor-auth</td>
@@ -4372,11 +4719,16 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
   <td rowspan="5" class="path-cell" id="path-admin/block/block">/admin/block/block</td>
-  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the block edit form (new-block case).</div><div class="method-desc">The JSON contexts (`app`, `prod`, `test`) ignore `body[&#039;form&#039;]`.</div><div class="method-alps"><a href="../alps.json.html#goBlock" class="alps-link">goBlock</a></div></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td><a href="#GET/admin/block/blockresponse" class="schema-link">GET /admin/block/block response</a></td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the block edit form.</div><div class="method-desc">The JSON contexts (`app`, `prod`, `test`) ignore `body[&#039;form&#039;]`.</div><div class="method-alps"><a href="../alps.json.html#goBlock" class="alps-link">goBlock</a></div></td>
+  <td><a href="../alps.json.html#blockId" class="param alps-param" title="ブロックID">blockId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロックID（入力） - dtb_block.id の不透明な文字列ハンドル。SQL 実装では dtb_block.id を文字列化して使用し、Fake 実装では bk-* seed handle を使用する。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 128</span>
+      <span class="badge example">example: 1</span>
+    </div></td>
+  <td rowspan="1"><a href="#GET/admin/block/blockresponse" class="schema-link">GET /admin/block/block response</a></td>
 </tr>
 <tr>
 
@@ -4422,7 +4774,7 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doUpdateBlock` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateBlock" class="alps-link">doUpdateBlock</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doDeleteBlock` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doDeleteBlock" class="alps-link">doDeleteBlock</a></div></td>
   <td><a href="../alps.json.html#blockId" class="param alps-param" title="ブロックID">blockId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">ブロックID（入力） - dtb_block.id の不透明な文字列ハンドル。BeMart の BlockEntity 層は数値ではなく文字列として保持する。Fake 実装は `bk-` プレフィックス付きの英数字を生成し（シード `bk-header` を含む）、SQL 実装は dtb_block.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlBlockStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (BlockUpdated / BlockDeleted) を踏むため、シードハンドル `bk-header` や `nonexistent-zzz` は Fake / SQL 双方で 404 が同形 Fake観察文字長 7〜9; 観察値 &#039;bk-header&#039;, &#039;bk-user&#039;。</td>
@@ -4539,7 +4891,7 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doUpdateCategory` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateCategory" class="alps-link">doUpdateCategory</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doDeleteCategory` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doDeleteCategory" class="alps-link">doDeleteCategory</a></div></td>
   <td><a href="../alps.json.html#categoryId" class="param alps-param" title="カテゴリID">categoryId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">カテゴリID（入力） - dtb_category.id の不透明な文字列ハンドル。BeMart の CategoryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_category.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlCategoryStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (CategoryUpdated / CategoryDeleted / CategoryCreated の親解決) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。parentId（自己参照 FK parent_category_id）も同じ文字列ハンドルで表現され、非数値 parentId は SQL では NULL（ルート）に倒れる。blockId / pageId / tagId と同じ Fake↔SQL 二重性 Fake観察文字長 8〜10; 観察値 &#039;cat-food&#039;, &#039;cat-drinks&#039;。</td>
@@ -4663,7 +5015,7 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doUpdateClassCategory` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateClassCategory" class="alps-link">doUpdateClassCategory</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doDeleteClassCategory` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doDeleteClassCategory" class="alps-link">doDeleteClassCategory</a></div></td>
   <td><a href="../alps.json.html#classCategoryId" class="param alps-param" title="規格分類ID">classCategoryId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">規格分類ID（入力） - dtb_class_category.id の不透明な文字列ハンドル。BeMart の ClassCategoryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_class_category.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlClassCategoryStorage では miss として扱われ getById / put / remove のいずれも 404 経路（規格分類の更新・削除 Final）を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。classNameId / categoryId / blockId / tagId と同じ Fake↔SQL 二重性 Fake観察文字長 6〜8; 観察値 &#039;cc-red&#039;, &#039;cc-blue&#039;, &#039;cc-small&#039;。</td>
@@ -4759,7 +5111,7 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doUpdateClassName` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateClassName" class="alps-link">doUpdateClassName</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doDeleteClassName` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doDeleteClassName" class="alps-link">doDeleteClassName</a></div></td>
   <td><a href="../alps.json.html#classNameId" class="param alps-param" title="規格名ID">classNameId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">規格名ID（入力） - dtb_class_name.id の不透明な文字列ハンドル。BeMart の ClassNameEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_class_name.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlClassNameStorage では miss として扱われ getById / put / remove のいずれも 404 経路（規格名の更新・削除 Final）を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。categoryId / blockId / tagId と同じ Fake↔SQL 二重性 Fake観察文字長 7〜8; 観察値 &#039;cn-color&#039;, &#039;cn-size&#039;。</td>
@@ -4810,14 +5162,19 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
 
-  <td class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">ALPS `doClearCache` に対応する PUT 操作。</div><div class="method-alps"><a href="../alps.json.html#doClearCache" class="alps-link">doClearCache</a></div></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td><a href="#PUT/admin/content/cacheresponse" class="schema-link">PUT /admin/content/cache response</a></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Clears the application cache (doClearCache).</div><div class="method-alps"><a href="../alps.json.html#doClearCache" class="alps-link">doClearCache</a></div></td>
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: HTML form submit marker; Resource workflow calls omit it.</span>
+    </div></td>
+  <td rowspan="1"><a href="#PUT/admin/content/cacheresponse" class="schema-link">PUT /admin/content/cache response</a></td>
 </tr>
 <tr>
-  <td rowspan="2" class="path-cell" id="path-admin/content/css">/admin/content/css</td>
+  <td rowspan="3" class="path-cell" id="path-admin/content/css">/admin/content/css</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">ALPS `goContentCss` に対応する GET 操作。</div><div class="method-alps"><a href="../alps.json.html#goContentCss" class="alps-link">goContentCss</a></div></td>
   <td></td>
   <td></td>
@@ -4826,7 +5183,7 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Saves the customize CSS (doUpdateContentCss). ALPS idempotent → PUT.</div><div class="method-alps"><a href="../alps.json.html#doUpdateContentCss" class="alps-link">doUpdateContentCss</a></div></td>
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Saves the customize CSS (doUpdateContentCss). ALPS idempotent → PUT.</div><div class="method-alps"><a href="../alps.json.html#doUpdateContentCss" class="alps-link">doUpdateContentCss</a></div></td>
   <td><span class="param">css</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">処理一覧（入力） - /admin/content/css のレスポンスで運ぶ処理一覧。CSV/PDF/ログ等の内部形式は専用境界で扱い、JSON Schemaでは輸送上の型とサイズを契約する。</td>
@@ -4836,7 +5193,20 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
       <span class="badge constraint">default: </span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
     </div></td>
-  <td rowspan="1"><a href="#PUT/admin/content/cssresponse" class="schema-link">PUT /admin/content/css response</a></td>
+  <td rowspan="2"><a href="#PUT/admin/content/cssresponse" class="schema-link">PUT /admin/content/css response</a></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: HTML form submit marker; Resource workflow calls omit it.</span>
+    </div></td>
+
 </tr>
 <tr>
   <td rowspan="1" class="path-cell" id="path-admin/content/file-manager">/admin/content/file-manager</td>
@@ -4847,7 +5217,7 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
   <td><a href="#GET/admin/content/file-managerresponse" class="schema-link">GET /admin/content/file-manager response</a></td>
 </tr>
 <tr>
-  <td rowspan="2" class="path-cell" id="path-admin/content/js">/admin/content/js</td>
+  <td rowspan="3" class="path-cell" id="path-admin/content/js">/admin/content/js</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">ALPS `goContentJs` に対応する GET 操作。</div><div class="method-alps"><a href="../alps.json.html#goContentJs" class="alps-link">goContentJs</a></div></td>
   <td></td>
   <td></td>
@@ -4856,7 +5226,7 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Saves the customize JS (doUpdateContentJs). ALPS idempotent → PUT.</div><div class="method-alps"><a href="../alps.json.html#doUpdateContentJs" class="alps-link">doUpdateContentJs</a></div></td>
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Saves the customize JS (doUpdateContentJs). ALPS idempotent → PUT.</div><div class="method-alps"><a href="../alps.json.html#doUpdateContentJs" class="alps-link">doUpdateContentJs</a></div></td>
   <td><span class="param">js</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">処理一覧（入力） - /admin/content/js のレスポンスで運ぶ処理一覧。CSV/PDF/ログ等の内部形式は専用境界で扱い、JSON Schemaでは輸送上の型とサイズを契約する。</td>
@@ -4866,10 +5236,23 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
       <span class="badge constraint">default: </span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
     </div></td>
-  <td rowspan="1"><a href="#PUT/admin/content/jsresponse" class="schema-link">PUT /admin/content/js response</a></td>
+  <td rowspan="2"><a href="#PUT/admin/content/jsresponse" class="schema-link">PUT /admin/content/js response</a></td>
 </tr>
 <tr>
-  <td rowspan="2" class="path-cell" id="path-admin/content/maintenance">/admin/content/maintenance</td>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: HTML form submit marker; Resource workflow calls omit it.</span>
+    </div></td>
+
+</tr>
+<tr>
+  <td rowspan="3" class="path-cell" id="path-admin/content/maintenance">/admin/content/maintenance</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">ALPS `goMaintenance` に対応する GET 操作。</div><div class="method-alps"><a href="../alps.json.html#goMaintenance" class="alps-link">goMaintenance</a></div></td>
   <td></td>
   <td></td>
@@ -4878,7 +5261,7 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Toggles maintenance mode to an explicit state (doToggleMaintenance).</div><div class="method-desc">ALPS marks it `idempotent` → PUT.</div><div class="method-alps"><a href="../alps.json.html#doToggleMaintenance" class="alps-link">doToggleMaintenance</a></div></td>
+  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">Toggles maintenance mode to an explicit state (doToggleMaintenance).</div><div class="method-desc">ALPS marks it `idempotent` → PUT.</div><div class="method-alps"><a href="../alps.json.html#doToggleMaintenance" class="alps-link">doToggleMaintenance</a></div></td>
   <td><span class="param">enabled</span><span class="req">*</span></td>
   <td><span class="badge type-bool">bool</span></td>
   <td class="param-desc">処理状態フラグ（入力） - 観察値 &#039;true&#039;, &#039;false&#039;。</td>
@@ -4886,7 +5269,20 @@ multi-shipping screen instead of the main shopping screen.</div><div class="meth
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: true</span>
     </div></td>
-  <td rowspan="1"><a href="#PUT/admin/content/maintenanceresponse" class="schema-link">PUT /admin/content/maintenance response</a></td>
+  <td rowspan="2"><a href="#PUT/admin/content/maintenanceresponse" class="schema-link">PUT /admin/content/maintenance response</a></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォーム送信モード</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">$comment: HTML form submit marker; Resource workflow calls omit it.</span>
+    </div></td>
+
 </tr>
 <tr>
   <td rowspan="1" class="path-cell" id="path-admin/customer/resend-activation-mail">/admin/customer/resend-activation-mail</td>
@@ -4962,7 +5358,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doUpdateDelivery` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateDelivery" class="alps-link">doUpdateDelivery</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doDeleteDelivery` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doDeleteDelivery" class="alps-link">doDeleteDelivery</a></div></td>
   <td><a href="../alps.json.html#deliveryId" class="param alps-param" title="配送方法ID">deliveryId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">配送方法ID（入力） - dtb_delivery.id の不透明な文字列ハンドル。BeMart の DeliveryEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_delivery.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlDeliveryStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (DeliveryUpdated / DeliveryDeleted) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。blockId / pageId / categoryId と同じ Fake↔SQL 二重性 Fake観察文字長 10〜10; 観察値 &#039;del-yamato&#039;, &#039;del-yupack&#039;。</td>
@@ -5010,16 +5406,21 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 
 </tr>
 <tr>
-  <td rowspan="3" class="path-cell" id="path-admin/layout/layout">/admin/layout/layout</td>
-  <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the layout editor form (new-layout case).</div><div class="method-desc">The JSON contexts (`app`, `prod`, `test`) ignore `body[&#039;form&#039;]`.</div><div class="method-alps"><a href="../alps.json.html#doUpdateLayout" class="alps-link">doUpdateLayout</a></div></td>
-  <td></td>
-  <td></td>
-  <td></td>
-  <td><a href="#GET/admin/layout/layoutresponse" class="schema-link">GET /admin/layout/layout response</a></td>
+  <td rowspan="4" class="path-cell" id="path-admin/layout/layout">/admin/layout/layout</td>
+  <td rowspan="1" class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Renders the layout editor form (new-layout case).</div><div class="method-desc">The JSON contexts (`app`, `prod`, `test`) ignore `body[&#039;form&#039;]`.</div><div class="method-alps"><a href="../alps.json.html#goLayout" class="alps-link">goLayout</a></div></td>
+  <td><a href="../alps.json.html#layoutId" class="param alps-param" title="レイアウトID">layoutId</a></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">レイアウトID（入力） - dtb_layout.id の不透明な文字列ハンドル。SQL 実装では dtb_layout.id を文字列化して使用し、Fake 実装では seed handle を使用する。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 128</span>
+      <span class="badge example">example: 1</span>
+    </div></td>
+  <td rowspan="1"><a href="#GET/admin/layout/layoutresponse" class="schema-link">GET /admin/layout/layout response</a></td>
 </tr>
 <tr>
 
-  <td rowspan="2" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">ALPS `doUpdateLayout` に対応する PUT 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateLayout" class="alps-link">doUpdateLayout</a></div></td>
+  <td rowspan="3" class="method-cell"><span class="ti idempotent"></span>PUT<div class="method-title">ALPS `doUpdateLayout` に対応する PUT 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateLayout" class="alps-link">doUpdateLayout</a></div></td>
   <td><a href="../alps.json.html#layoutId" class="param alps-param" title="レイアウトID">layoutId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">レイアウトID（入力） - CMSレイアウトを識別する不透明な文字列ハンドル。seed 済みレイアウトを Fake/SQL 同型に扱う。 Fake観察文字長 13〜13; 観察値 &#039;lo-pc-default&#039;, &#039;lo-sp-default&#039;。</td>
@@ -5029,7 +5430,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: lo-pc-default</span>
     </div></td>
-  <td rowspan="2"><a href="#PUT/admin/layout/layoutresponse" class="schema-link">PUT /admin/layout/layout response</a></td>
+  <td rowspan="3"><a href="#PUT/admin/layout/layoutresponse" class="schema-link">PUT /admin/layout/layout response</a></td>
 </tr>
 <tr>
 
@@ -5041,6 +5442,20 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 32</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
+      <span class="badge example">example: PC標準</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">name</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">レイアウト名（HTMLフォーム入力） - EC-CUBE由来の HTML form field name。Resource では layoutName と同じ意味として扱う。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 255</span>
+      <span class="badge constraint">$comment: HTML form compatibility field. API clients should prefer layoutName.</span>
       <span class="badge example">example: PC標準</span>
     </div></td>
 
@@ -5185,7 +5600,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doUpdateNews` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdateNews" class="alps-link">doUpdateNews</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doDeleteNews` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doDeleteNews" class="alps-link">doDeleteNews</a></div></td>
   <td><a href="../alps.json.html#newsId" class="param alps-param" title="ニュースID">newsId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">ニュースID（入力） - dtb_news.id の不透明な文字列ハンドル。BeMart の NewsEntity 層は数値ではなく文字列として保持する。Fake 実装は `nw-` プレフィックス付きの英数字を生成し（シード `nw-welcome` を含む）、SQL 実装は dtb_news.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlNewsStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (AdminNewsFetched / NewsUpdated / NewsDeleted) を踏むため、シードハンドル `nw-welcome` や `nonexistent` は Fake / SQL 双方で 404 が同形 Fake観察文字長 10〜10; 観察値 &#039;nw-welcome&#039;。</td>
@@ -5273,16 +5688,39 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 
 </tr>
 <tr>
-  <td rowspan="1" class="path-cell" id="path-admin/order/bulk-delete">/admin/order/bulk-delete</td>
-  <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">ALPS `doBulkDeleteOrder` に対応する POST 操作。</div><div class="method-alps"><a href="../alps.json.html#doBulkDeleteOrder" class="alps-link">doBulkDeleteOrder</a></div></td>
-  <td><span class="param">orderNos</span><span class="req">*</span></td>
+  <td rowspan="3" class="path-cell" id="path-admin/order/bulk-delete">/admin/order/bulk-delete</td>
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">ALPS `doBulkDeleteOrder` に対応する POST 操作。</div><div class="method-alps"><a href="../alps.json.html#doBulkDeleteOrder" class="alps-link">doBulkDeleteOrder</a></div></td>
+  <td><span class="param">orderNos</span></td>
   <td><span class="badge type-array">array</span></td>
   <td class="param-desc">注文番号一覧（入力） - /admin/order/bulk-delete のレスポンスで扱う注文番号一覧。ALPS、Fake観察、Resource境界の形状から導いた業務契約。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
     </div></td>
-  <td rowspan="1"><a href="#POST/admin/order/bulk-deleteresponse" class="schema-link">POST /admin/order/bulk-delete response</a></td>
+  <td rowspan="3"><a href="#POST/admin/order/bulk-deleteresponse" class="schema-link">POST /admin/order/bulk-delete response</a></td>
+</tr>
+<tr>
+
+
+  <td><span class="param">ids</span></td>
+  <td><span class="badge type-array">array</span></td>
+  <td class="param-desc">注文番号一覧（HTML form alias） - EC-CUBE互換の受注一覧一括フォームが `ids[]` として送る注文番号一覧。Resource境界では `orderNos` に正規化する。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minItems: 0</span>
+      <span class="badge constraint">$comment: Transport alias only; business contract remains orderNos.</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">mode</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">フォームモード - HTML form submit からのPOSTを識別し、PRG応答にするためのフォーム境界値。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">enum: [&quot;order_bulk_delete_form&quot;,null]</span>
+    </div></td>
+
 </tr>
 <tr>
   <td rowspan="6" class="path-cell" id="path-admin/order/create">/admin/order/create</td>
@@ -5302,7 +5740,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 
 
   <td><span class="param">paymentMethodId</span><span class="req">*</span></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">支払方法ID - 受注に紐づく支払方法マスタID。Fake/EC-CUBE境界ではDB採番値として扱う。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
@@ -5328,11 +5766,11 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 
 
   <td><a href="../alps.json.html#deliveryFeeTotal" class="param alps-param" title="送料合計">deliveryFeeTotal</a></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">送料合計（入力） - 全配送先の送料合計（スナップショット）。deliveryFeeAmount（地域別送料）+ deliveryFee（商品別送料）×数量 の合計。DeliveryFeePreprocessorで計算。カートと受注の両方で使用 Fake観察数値 0〜800; 観察値 &#039;600&#039;, &#039;0&#039;, &#039;500&#039;, &#039;800&#039;, &#039;700&#039;。</td>
   <td><div class="extra-info">
       <span class="badge constraint">default: 0</span>
-      <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
+      <span class="badge constraint">$comment: 送料合計（入力）は本来数値の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: 600</span>
     </div></td>
 
@@ -5341,7 +5779,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 
 
   <td><a href="../alps.json.html#charge" class="param alps-param" title="手数料">charge</a></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">手数料（入力） - 受注の決済手数料。paymentCharge（支払方法マスタの手数料）のスナップショット。PaymentChargePreprocessorにより受注作成時にコピーされる Fake観察数値 0〜300; 観察値 &#039;0&#039;, &#039;300&#039;, &#039;200&#039;。</td>
   <td><div class="extra-info">
       <span class="badge constraint">default: 0</span>
@@ -5354,11 +5792,11 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 
 
   <td><a href="../alps.json.html#discount" class="param alps-param" title="値引き額">discount</a></td>
-  <td><span class="badge type-int">int</span></td>
+  <td><span class="badge type-string">string</span></td>
   <td class="param-desc">値引き額（入力） - 受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 &#039;0&#039;。</td>
   <td><div class="extra-info">
       <span class="badge constraint">default: 0</span>
-      <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
+      <span class="badge constraint">$comment: 値引き額（入力）は本来数値の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: 0</span>
     </div></td>
 
@@ -5796,7 +6234,7 @@ empty JSON-backed fake storage. AUTHZ is a direct admin-session check
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doUpdatePage` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdatePage" class="alps-link">doUpdatePage</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doDeletePage` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doDeletePage" class="alps-link">doDeletePage</a></div></td>
   <td><a href="../alps.json.html#pageId" class="param alps-param" title="ページID">pageId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">ページID（入力） - dtb_page.id の不透明な文字列ハンドル。BeMart の PageEntity 層は数値ではなく文字列として保持する。Fake 実装は `pg-` プレフィックス付きの英数字を生成し（シード `pg-homepage` を含む）、SQL 実装は dtb_page.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlPageStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (AdminPageFetched / PageUpdated / PageDeleted) を踏むため、シードハンドル `pg-homepage` や `nonexistent-zzz` は Fake / SQL 双方で 404 が同形 Fake観察文字長 6〜11; 観察値 &#039;pg-homepage&#039;, &#039;pg-company&#039;, &#039;pg-foo&#039;。</td>
@@ -5952,7 +6390,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 </tr>
 <tr>
 
-  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doUpdatePayment` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doUpdatePayment" class="alps-link">doUpdatePayment</a></div></td>
+  <td rowspan="1" class="method-cell"><span class="ti idempotent"></span>DELETE<div class="method-title">ALPS `doDeletePayment` に対応する DELETE 操作。</div><div class="method-alps"><a href="../alps.json.html#doDeletePayment" class="alps-link">doDeletePayment</a></div></td>
   <td><a href="../alps.json.html#paymentId" class="param alps-param" title="支払方法ID">paymentId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">支払方法ID（入力） - dtb_payment.id の不透明な文字列ハンドル。BeMart の PaymentMethodAdminEntity 層は数値ではなく文字列として保持する。Fake 実装は 32桁hex を生成し、SQL 実装は dtb_payment.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlPaymentMethodAdminStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (PaymentMethodAdminUpdated / PaymentMethodAdminDeleted) を踏むため、シードハンドル `nonexistent-zzz` は Fake / SQL 双方で 404 が同形。categoryId / blockId / tagId と同じ Fake↔SQL 二重性 Fake観察文字長 7〜10; Fake観察数値 1〜9; 観察値 &#039;2&#039;, &#039;pay-cod&#039;, &#039;pay-credit&#039;, &#039;1&#039;, &#039;9&#039;。</td>
@@ -6220,7 +6658,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 
 </tr>
 <tr>
-  <td rowspan="3" class="path-cell" id="path-admin/template/template-add">/admin/template/template-add</td>
+  <td rowspan="4" class="path-cell" id="path-admin/template/template-add">/admin/template/template-add</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">ALPS `goAdminTemplateTemplateAdd` に対応する GET 操作。</div><div class="method-alps"><a href="../alps.json.html#goAdminTemplateTemplateAdd" class="alps-link">goAdminTemplateTemplateAdd</a></div></td>
   <td></td>
   <td></td>
@@ -6229,7 +6667,7 @@ list doubles as the AUTHZ gate — no admin session → 403.</div><div class="me
 </tr>
 <tr>
 
-  <td rowspan="2" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Installs an uploaded design template (doInstallTemplate). ALPS
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Installs an uploaded design template (doInstallTemplate). ALPS
 marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.html#doInstallTemplate" class="alps-link">doInstallTemplate</a></div></td>
   <td><a href="../alps.json.html#templateCode" class="param alps-param" title="テンプレートコード">templateCode</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
@@ -6239,7 +6677,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 255</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
     </div></td>
-  <td rowspan="2"><a href="#POST/admin/template/template-addresponse" class="schema-link">POST /admin/template/template-add response</a></td>
+  <td rowspan="3"><a href="#POST/admin/template/template-addresponse" class="schema-link">POST /admin/template/template-add response</a></td>
 </tr>
 <tr>
 
@@ -6252,6 +6690,17 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 32</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: デフォルト (PC)</span>
+    </div></td>
+
+</tr>
+<tr>
+
+
+  <td><span class="param">file</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">テンプレートファイル - multipart/form-data の `file` または Resource テストで渡される FileUpload オブジェクト。詳細検証は `#[InputFile]` が担う。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">$comment: Koriym\FileUpload\FileUpload / ErrorFileUpload は schema では不透明オブジェクトとして扱う。</span>
     </div></td>
 
 </tr>
@@ -8143,6 +8592,24 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateAuthorityRole</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/authority-role</span>
+    </div>
+  </td>
+</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goMemberList</td>
   <td><span class="badge link">link</span></td>
@@ -8222,6 +8689,30 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">処理状態フラグ - Fake観察数値 1〜1; 観察値 &#039;1&#039;。</td>
   <td><div class="extra-info">
       <span class="badge example">example: 1</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">transitionId</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">count</span></td>
+  <td><span class="badge type-int">int</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">rules</span></td>
+  <td><span class="badge type-arraynull">array|null</span></td>
+  <td class="param-desc">権限ルール一覧 - 更新後の権限URL拒否ルール一覧。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -8629,6 +9120,14 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 
     </div></td>
 </tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCreateCalendarHoliday</td>
   <td><span class="badge link">link</span></td>
@@ -9020,10 +9519,18 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr>
   <td><span class="prop-name">csvType</span></td>
   <td><span class="badge type-int">int</span></td>
-  <td class="param-desc">CSV種別 - CSV出力項目設定で現在選択しているCSV種別。1=受注CSV, 2=会員CSV, 3=商品CSV, 4=配送CSV。画面の選択状態とPOST対象の列設定コンテキストを示す。</td>
+  <td class="param-desc">CSV種別 - CSV出力項目設定で現在選択しているCSV種別。1=商品CSV, 2=会員CSV, 3=受注CSV, 4=配送CSV。画面の選択状態とPOST対象の列設定コンテキストを示す。</td>
   <td><div class="extra-info">
       <span class="badge constraint">enum: [1,2,3,4]</span>
       <span class="badge example">example: 1</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
     </div></td>
 </tr>
 <tr class="link-row">
@@ -9060,7 +9567,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr>
   <td><span class="prop-name">csvType</span></td>
   <td><span class="badge type-intnull">int|null</span></td>
-  <td class="param-desc">CSV種別 - dtb_csv.csv_type_id — mtb_csv_type への FK（1=注文CSV, 2=会員CSV, 3=商品CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）</td>
+  <td class="param-desc">CSV種別 - dtb_csv.csv_type_id — mtb_csv_type への FK（1=商品CSV, 2=会員CSV, 3=受注CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）</td>
   <td><div class="extra-info">
       <span class="badge constraint">minimum: 0</span>
     </div></td>
@@ -10034,6 +10541,14 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
+<tr>
   <td><span class="prop-name">Mail</span></td>
   <td><span class="badge type-objectnull">object|null</span></td>
   <td class="param-desc">メールテンプレート詳細 - /admin/mail-template のレスポンスで扱うメールテンプレート詳細。ALPS、Fake観察、Resource境界の形状から導いた業務契約。</td>
@@ -10843,6 +11358,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div></td>
 </tr>
 <tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">CSRFトークン - 一覧画面から送信する削除フォーム用のCSRFトークン。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 160</span>
+      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
+    </div></td>
+</tr>
+<tr>
   <td><span class="prop-name">members</span></td>
   <td><span class="badge type-arraynull">array|null</span></td>
   <td class="param-desc">管理メンバー一覧 - /admin/member-list のレスポンスで扱う管理メンバー一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
@@ -11402,6 +11927,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">注文ステータス一覧 - /admin/order-status のレスポンスで扱う注文ステータス一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">CSRFトークン - POST /admin/order-status のhidden inputで送るCSRFトークン。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 160</span>
+      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
     </div></td>
 </tr>
 
@@ -12602,6 +13137,14 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
     </div></td>
 </tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateSecurity</td>
   <td><span class="badge link">link</span></td>
@@ -12808,7 +13351,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">特定商取引法本文 - 特定商取引法ページ本文の単一ブロブ投影。項目別行ではなく、ページ全体を1本の本文として扱う。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 255</span>
+      <span class="badge constraint">maxLength: 65535</span>
     </div></td>
 </tr>
 <tr>
@@ -12817,6 +13360,17 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">CSRFトークン - フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 8</span>
+      <span class="badge constraint">maxLength: 160</span>
+      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
+      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr>
@@ -12854,7 +13408,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">特定商取引法本文 - 特定商取引法ページ本文の単一ブロブ投影。項目別行ではなく、ページ全体を1本の本文として扱う。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 255</span>
+      <span class="badge constraint">maxLength: 65535</span>
     </div></td>
 </tr>
 <tr>
@@ -17621,11 +18175,58 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 </thead>
 <tbody>
 <tr>
+  <td><span class="prop-name">blockId</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロックID - dtb_block.id の不透明な文字列ハンドル。新規作成フォームでは空文字、編集フォームでは既存ブロックID。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 128</span>
+      <span class="badge example">example: 1</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">blockName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロック名 - ブロックの表示名。新規作成フォームでは空文字、編集フォームでは保存済み値。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">blockFileName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">ブロックファイル名 - ブロックのテンプレートファイル名。新規作成フォームでは空文字、編集フォームでは保存済み値。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 32</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">blockDeletable</span></td>
+  <td><span class="badge type-bool">bool</span></td>
+  <td class="param-desc">削除可否 - 管理画面で削除可能なユーザー定義ブロックかどうか。</td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
+<tr>
   <td><span class="prop-name">form</span></td>
   <td><span class="badge type-objectarraynull">object|array|null</span></td>
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 8</span>
+      <span class="badge constraint">maxLength: 160</span>
+      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
+      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -17932,6 +18533,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/category/category-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateCategory</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/category/category</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doDeleteCategory</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/category/category</span>
     </div>
   </td>
 </tr>
@@ -18603,6 +19224,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goClassNameList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/class-name/class-name-list</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -18831,6 +19462,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goClassCategoryList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/class-category/class-category-list{?classNameId}</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -18885,6 +19526,15 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr><th>Name</th><th>Type</th><th>Description</th><th>Meta</th></tr>
 </thead>
 <tbody>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">CSRFトークン - /admin/content/cache のHTMLフォーム送信用CSRFトークン。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 160</span>
+    </div></td>
+</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doClearCache</td>
   <td><span class="badge link">link</span></td>
@@ -18954,6 +19604,15 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">CSRFトークン - /admin/content/css のHTMLフォーム送信用CSRFトークン。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 160</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -19097,6 +19756,15 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
     </div></td>
 </tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">CSRFトークン - /admin/content/js のHTMLフォーム送信用CSRFトークン。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 160</span>
+    </div></td>
+</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateContentJs</td>
   <td><span class="badge link">link</span></td>
@@ -19165,6 +19833,15 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">メンテナンス中フラグ - /admin/content/maintenance の処理状態を示すメンテナンス中フラグ。画面表示や冪等処理結果の分岐に使う真偽値。</td>
   <td><div class="extra-info">
 
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">CSRFトークン - /admin/content/maintenance のHTMLフォーム送信用CSRFトークン。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 160</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -19556,6 +20233,45 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 </thead>
 <tbody>
 <tr>
+  <td><span class="prop-name">layoutId</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">レイアウトID - dtb_layout.id の不透明な文字列ハンドル。新規作成フォームでは null、編集フォームでは既存レイアウトID。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 128</span>
+      <span class="badge example">example: 1</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">layoutName</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">レイアウト名 - レイアウトの表示名。新規作成フォームでは空文字、編集フォームでは保存済み値。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 255</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">deviceType</span></td>
+  <td><span class="badge type-intnull">int|null</span></td>
+  <td class="param-desc">デバイス種別 - デバイス種別マスタ。新規作成フォームでは null、編集フォームでは保存済み値。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minimum: 0</span>
+      <span class="badge example">example: 10</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 8</span>
+      <span class="badge constraint">maxLength: 160</span>
+      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
+      <span class="badge example">example: fake-csrf-token-bemart-2026</span>
+    </div></td>
+</tr>
+<tr>
   <td><span class="prop-name">form</span></td>
   <td><span class="badge type-objectarraynull">object|array|null</span></td>
   <td class="param-desc">入力フォーム - Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。</td>
@@ -19570,6 +20286,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/layout/layout-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateLayout</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/layout/layout</span>
     </div>
   </td>
 </tr>
@@ -19662,6 +20388,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
     </div></td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goLayout</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/layout/layout{?layoutId}</span>
+    </div>
+  </td>
 </tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doUpdateLayout</td>
@@ -20399,6 +21135,17 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 64</span>
       <span class="badge example">example: past0000000000000000000000000001</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">CSRFトークン - 受注登録/編集フォーム送信用のCSRFトークン。Resource bodyからTwig hidden inputへ渡される。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 160</span>
+      <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
+      <span class="badge constraint">$comment: CSRF値はCsrfProtected境界の責務。GET bodyではフォーム文脈を示すためにnullを許容する。</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -21405,6 +22152,14 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
 <tr><th>Name</th><th>Type</th><th>Description</th><th>Meta</th></tr>
 </thead>
 <tbody>
+<tr>
+  <td><span class="prop-name">status</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc">Ajax処理ステータス - 管理画面の伝票番号更新Ajaxが成功判定に使用するステータス。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">enum: [&quot;OK&quot;]</span>
+    </div></td>
+</tr>
 <tr>
   <td><span class="prop-name">message</span></td>
   <td><span class="badge type-stringnull">string|null</span></td>
@@ -22897,6 +23652,14 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。</span>
     </div></td>
 </tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
+    </div></td>
+</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goTemplateList</td>
   <td><span class="badge link">link</span></td>
@@ -22948,6 +23711,24 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">pattern: ^[A-Za-z0-9._:@/-]*$</span>
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。</span>
       <span class="badge example">example: tp-default-pc</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">archiveName</span></td>
+  <td><span class="badge type-stringnull">string|null</span></td>
+  <td class="param-desc">テンプレートアーカイブ名 - アップロードされたテンプレートzipのファイル名。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 255</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">archiveSize</span></td>
+  <td><span class="badge type-intnull">int|null</span></td>
+  <td class="param-desc">テンプレートアーカイブサイズ - アップロードされたテンプレートzipのバイトサイズ。</td>
+  <td><div class="extra-info">
+      <span class="badge constraint">minimum: 0</span>
+      <span class="badge constraint">maximum: 10485760</span>
     </div></td>
 </tr>
 <tr>
@@ -23007,6 +23788,14 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">テンプレート一覧 - /admin/template/template-list のレスポンスで扱うテンプレート一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
+    </div></td>
+</tr>
+<tr>
+  <td><span class="prop-name">csrfToken</span></td>
+  <td><span class="badge type-string">string</span></td>
+  <td class="param-desc"></td>
+  <td><div class="extra-info">
+
     </div></td>
 </tr>
 <tr>

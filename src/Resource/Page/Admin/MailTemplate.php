@@ -19,11 +19,14 @@ use MyVendor\BeMart\Be\Input\GetMailTemplateListInput;
 use MyVendor\BeMart\Be\Input\UpdateMailTemplateInput;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminMailTemplateForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doUpdateMailTemplate + goMailTemplateList — メールテンプレート
@@ -49,6 +52,7 @@ class MailTemplate extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
+        private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
         private readonly MailTemplateStorageInterface $mailTemplates,
     ) {
@@ -64,7 +68,7 @@ class MailTemplate extends ResourceObject
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
-    public function onGet(): static
+    public function onGet(int|null $mailTemplateId = null): static
     {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
@@ -79,26 +83,30 @@ class MailTemplate extends ResourceObject
 
         $form = $this->formFactory->newInstance(AdminMailTemplateForm::class);
         assert($form instanceof AdminMailTemplateForm);
+        $selected = $this->selectedTemplate($final->mailTemplates, $mailTemplateId);
+        $selectedId = $selected['mailTemplateId'] ?? null;
         $form->fillValues([
-            'template' => '',
-            'name' => '',
-            'file_name' => '',
-            'mail_subject' => '',
+            'mailTemplateId' => $selectedId === null ? '' : (string) $selectedId,
+            'template' => $selectedId === null ? '' : (string) $selectedId,
+            'name' => $selected['mailTemplateName'] ?? '',
+            'file_name' => $selected['fileName'] ?? '',
+            'mail_subject' => $selected['mailSubject'] ?? '',
             'tpl_data' => '',
             'html_tpl_data' => '',
-        ]);
+        ], $this->templateOptions($final->mailTemplates));
 
         $this->code = Code::OK;
         $this->body = [
             'form' => $form,
-            'id' => null,
+            'id' => $selectedId,
             'Mail' => [
-                'id' => null,
-                'file_name' => '',
-                'isDeletable' => false,
+                'id' => $selectedId,
+                'file_name' => $selected['fileName'] ?? '',
+                'isDeletable' => (bool) ($selected['isDeletable'] ?? false),
             ],
             'mailTemplates' => $final->mailTemplates,
             'count' => $final->count,
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;
@@ -117,11 +125,12 @@ class MailTemplate extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         int $mailTemplateId,
-        string $mailSubject,
+        string $mailSubject = '',
+        string $mail_subject = '',
     ): static {
         $final = ($this->becoming)(new UpdateMailTemplateInput(
             mailTemplateId: $mailTemplateId,
-            mailSubject: $mailSubject,
+            mailSubject: $mailSubject !== '' ? $mailSubject : $mail_subject,
         ));
 
         assert($final instanceof MailTemplateUpdated);
@@ -134,6 +143,10 @@ class MailTemplate extends ResourceObject
             'mailSubject' => $final->mailSubject,
             'changed' => $final->changed,
         ];
+        if (self::isHtmlContext()) {
+            $this->code = Code::SEE_OTHER;
+            $this->headers['Location'] = '/admin/mail-template?mailTemplateId=' . $final->mailTemplateId;
+        }
 
         return $this;
     }
@@ -179,7 +192,51 @@ class MailTemplate extends ResourceObject
             'fileName' => $template->fileName,
             'message' => 'メールテンプレート削除Resourceへ到達しました。',
         ];
+        if (self::isHtmlContext()) {
+            $this->code = Code::SEE_OTHER;
+            $this->headers['Location'] = '/admin/mail-template';
+        }
 
         return $this;
+    }
+
+    /**
+     * @param list<array{mailTemplateId: int, mailTemplateName: string, fileName: string, mailSubject: string, isDeletable?: bool}> $mailTemplates
+     *
+     * @return array{mailTemplateId: int, mailTemplateName: string, fileName: string, mailSubject: string, isDeletable?: bool}|null
+     */
+    private function selectedTemplate(array $mailTemplates, int|null $mailTemplateId): array|null
+    {
+        if ($mailTemplateId === null) {
+            return null;
+        }
+
+        foreach ($mailTemplates as $mailTemplate) {
+            if ($mailTemplate['mailTemplateId'] === $mailTemplateId) {
+                return $mailTemplate;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @param list<array{mailTemplateId: int, mailTemplateName: string, fileName: string, mailSubject: string, isDeletable?: bool}> $mailTemplates
+     *
+     * @return array<int|string, string>
+     */
+    private function templateOptions(array $mailTemplates): array
+    {
+        $options = ['' => '選択してください'];
+        foreach ($mailTemplates as $mailTemplate) {
+            $options[(string) $mailTemplate['mailTemplateId']] = $mailTemplate['mailTemplateName'];
+        }
+
+        return $options;
+    }
+
+    private static function isHtmlContext(): bool
+    {
+        return str_contains((string) getenv('APP_CONTEXT'), 'html');
     }
 }

@@ -11,7 +11,7 @@
         "null"
       ],
       "minLength": 0,
-      "maxLength": 255,
+      "maxLength": 65535,
       "title": "特定商取引法本文",
       "description": "特定商取引法ページ本文の単一ブロブ投影。項目別行ではなく、ページ全体を1本の本文として扱う。"
     },

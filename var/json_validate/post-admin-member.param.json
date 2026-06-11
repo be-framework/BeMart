@@ -29,6 +29,16 @@
       "example": "$2y$12$stXeC3GBw5uMLkgK/6Vb0.R7XLnwERRqWM/Hl7rtAhp4IcHoK8eWi",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
+    "passwordConfirm": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "パスワード確認（入力）",
+      "$comment": "Browser-form boundary field; compared with password before CreateMemberInput."
+    },
     "name": {
       "type": [
         "string",
@@ -50,6 +60,16 @@
       "description": "管理者権限レベル。0=システム管理者（最高権限、全機能アクセス可能）, 1=店舗オーナー（制限あり、denyUrlで制限されたURLにアクセス不可）。数値が小さいほど権限が高い。AuthorityRoleのURL拒否パターンでアクセス制御 Fake観察数値 0〜1; 観察値 '1', '0'。",
       "example": 1,
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "フォーム送信モード",
+      "$comment": "HTML form submit marker; Resource workflow calls omit it."
     }
   },
   "additionalProperties": false,

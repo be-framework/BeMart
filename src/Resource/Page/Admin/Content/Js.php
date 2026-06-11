@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Content;
 
 use BEAR\ApiDoc\Annotation\Alps;
+use BEAR\Resource\Annotation\JsonSchema;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -14,10 +15,10 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ContentJsUpdated;
 use MyVendor\BeMart\Be\Input\UpdateContentJsInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Form\AdminJsForm;
 use Ray\WebFormModule\FormFactory;
-use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
 
@@ -27,13 +28,13 @@ use function assert;
  *
  * PORT-side note: EC-CUBE's `JsController` reads / writes a single
  * `customize.js` file on disk; there is no Be domain entity for it. This
- * resource is therefore a THIN HTML RENDERER only — it carries no
- * `be/src/` Becoming chain. It authenticates at the resource layer via
- * {@see AdminSession} and exposes an empty {@see AdminJsForm}
- * for the `Content/js.twig` port to render via `{{ form.input('js') }}`.
+ * customize-JS file was not modelled in any ALPS wave). The Be transition
+ * updates the EC-CUBE-compatible asset boundary; GET renders that readback
+ * through {@see AdminJsForm}.
  *
  * FLAGGED: a future `be/src/` wave should model the customize-JS file as
- * a Be domain so this resource can carry the real persisted JS.
+ * a Be domain so this resource can write the public customize.js asset
+ * instead of the runtime compatibility boundary.
  */
 class Js extends ResourceObject
 {
@@ -42,6 +43,7 @@ class Js extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly CustomizeAssetWriterInterface $assetWriter,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -63,7 +65,10 @@ class Js extends ResourceObject
         $form->fillValues(['js' => $this->assetWriter->readJs()]);
 
         $this->code = Code::OK;
-        $this->body = ['form' => $form];
+        $this->body = [
+            'form' => $form,
+            'csrfToken' => $this->csrf->token,
+        ];
 
         return $this;
     }
@@ -76,13 +81,13 @@ class Js extends ResourceObject
     #[Alps('doUpdateContentJs')]
     #[JsonSchema(schema: 'put-admin-content-js.json', params: 'put-admin-content-js.param.json')]
     #[CsrfProtected]
-    public function onPut(string $js = ''): static
+    public function onPut(string $js = '', string|null $mode = null): static
     {
         $final = ($this->becoming)(new UpdateContentJsInput(js: $js));
 
         assert($final instanceof ContentJsUpdated);
 
-        $this->code = Code::OK;
+        $this->code = $mode === 'content_operation_form' ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/content/js';
         $this->body = [
             'transitionId' => 'doUpdateContentJs',

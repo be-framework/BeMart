@@ -58,6 +58,7 @@ class Create extends ResourceObject
             mailTemplateName: $mailTemplateName,
             fileName: $fileName,
             subject: $mailSubject,
+            deletable: 1,
         ));
 
         $this->code = Code::CREATED;

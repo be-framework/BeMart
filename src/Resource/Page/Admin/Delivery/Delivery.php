@@ -24,6 +24,10 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function sprintf;
+use function str_contains;
+use function urlencode;
 
 /**
  * EC-CUBE doUpdateDelivery + doDeleteDelivery — single-row endpoint
@@ -80,7 +84,7 @@ class Delivery extends ResourceObject
         assert($form instanceof AdminDeliveryForm);
         if ($delivery !== null) {
             $form->fillValues([
-                'name' => $delivery['deliveryName'],
+                'deliveryName' => $delivery['deliveryName'],
                 'visible' => $delivery['visible'] ? '1' : null,
             ]);
         }
@@ -118,7 +122,8 @@ class Delivery extends ResourceObject
 
         assert($final instanceof DeliveryUpdated);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = sprintf('/admin/delivery/delivery?deliveryId=%s', urlencode($final->deliveryId));
         $this->body = [
             'deliveryId' => $final->deliveryId,
             'deliveryName' => $final->deliveryName,
@@ -129,10 +134,10 @@ class Delivery extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateDelivery` に対応する DELETE 操作。
+     * ALPS `doDeleteDelivery` に対応する DELETE 操作。
      * @psalm-taint-source input $deliveryId
      */
-    #[Alps('doUpdateDelivery')]
+    #[Alps('doDeleteDelivery')]
     #[JsonSchema(schema: 'delete-admin-delivery-delivery.json', params: 'delete-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
@@ -143,7 +148,8 @@ class Delivery extends ResourceObject
 
         assert($final instanceof DeliveryDeleted);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/delivery/delivery-list';
         $this->body = ['deliveryId' => $final->deliveryId];
 
         return $this;

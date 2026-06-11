@@ -31,7 +31,7 @@ final class AdminOrderShippingForm extends AbstractForm
             ->setAttribs(['id' => 'shipping_name_name01', 'class' => 'form-control', 'placeholder' => '姓']);
         $this->setField('name02', 'text')
             ->setAttribs(['id' => 'shipping_name_name02', 'class' => 'form-control', 'placeholder' => '名']);
-        $this->setField('postal_code', 'text')
+        $this->setField('postalCode', 'text')
             ->setAttribs(['id' => 'shipping_postal_code', 'class' => 'form-control']);
         // pref is an EC-CUBE master-data <select> (mtb_pref); the option
         // set is Doctrine data the resource body does not carry, so the
@@ -43,7 +43,7 @@ final class AdminOrderShippingForm extends AbstractForm
             ->setAttribs(['id' => 'shipping_address_addr01', 'class' => 'form-control']);
         $this->setField('addr02', 'text')
             ->setAttribs(['id' => 'shipping_address_addr02', 'class' => 'form-control']);
-        $this->setField('phone_number', 'text')
+        $this->setField('phoneNumber', 'text')
             ->setAttribs(['id' => 'shipping_phone_number', 'class' => 'form-control']);
 
         // Non-authoritative structural checks only — authority is the Be domain.

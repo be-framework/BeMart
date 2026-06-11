@@ -215,7 +215,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doLogin), href(goCustomerRegistration), href(doRequestPasswordReset) |
-| POST | email*, password* | href(goMypage) |
+| POST | email, password, mode | href(goMypage) |
 
 ### Page/Logout
 `/logout`
@@ -281,8 +281,8 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goMemberList) |
-| POST | loginId*, authority* | href(goMember), href(goMemberList), href(goLoginHistoryList) |
+| GET | - | href(doUpdateAuthorityRole), href(goMemberList) |
+| POST | loginId, authority, AuthorityRoles, csrfToken | href(goMember), href(goMemberList), href(goLoginHistoryList) |
 
 ### Page/Admin/BaseInfo
 `/admin/base-info`
@@ -322,7 +322,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | csvType | href(doUpdateCsv) |
-| POST | csvType*, columns* | href(goTop), href(goExportProduct) |
+| POST | csvType*, columns, csvOutput, csvNotOutput | href(goTop), href(goExportProduct) |
 
 ### Page/Admin/Customer
 `/admin/customer`
@@ -386,7 +386,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doAdminLogin) |
-| POST | loginId*, password* | href(goAdminTop) |
+| POST | loginId, password, mode | href(goAdminTop) |
 
 ### Page/Admin/LoginHistory
 `/admin/login-history`
@@ -407,8 +407,8 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateMailTemplate), href(doUpdateMailTemplate), href(goOrderMail), href(goPaymentList), href(goOrderList) |
-| POST | mailTemplateId*, mailSubject* | href(goTop), href(goOrderMail), href(doDeleteMailTemplate) |
+| GET | mailTemplateId | href(doCreateMailTemplate), href(doUpdateMailTemplate), href(goOrderMail), href(goPaymentList), href(goOrderList) |
+| POST | mailTemplateId*, mailSubject, mail_subject | href(goTop), href(goOrderMail), href(doDeleteMailTemplate) |
 | DELETE | mailTemplateId* | href(goMailTemplateList) |
 
 ### Page/Admin/MasterData
@@ -432,9 +432,9 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | loginId | href(goMemberList), href(doUpdateMember), href(doDeleteMember) |
-| POST | loginId*, password*, name*, authority* | href(goMember) |
-| PUT | loginId*, name | href(goMember) |
-| DELETE | loginId* | href(goMemberList) |
+| POST | loginId*, password*, name*, authority*, passwordConfirm, mode | href(goMember) |
+| PUT | loginId*, name, mode | href(goMember) |
+| DELETE | loginId*, mode | href(goMemberList) |
 
 ### Page/Admin/MemberList
 `/admin/member-list`
@@ -577,7 +577,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doUpdateTradeLaw) |
-| POST | tradeLawBody* | href(goTop), href(goContentCss) |
+| POST | tradeLawBody, mode, trade_law_1_name, trade_law_1_description, trade_law_1_displayOrderScreen, trade_law_2_name, trade_law_2_description, trade_law_2_displayOrderScreen, trade_law_3_name, trade_law_3_description, trade_law_3_displayOrderScreen, trade_law_4_name, trade_law_4_description, trade_law_4_displayOrderScreen, trade_law_5_name, trade_law_5_description, trade_law_5_displayOrderScreen, trade_law_6_name, trade_law_6_description, trade_law_6_displayOrderScreen | href(goTop), href(goContentCss) |
 
 ### Page/Admin/TwoFactorAuth
 `/admin/two-factor-auth`
@@ -861,7 +861,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goBlockList) |
+| GET | blockId | href(goBlockList) |
 | PUT | blockId*, blockName, blockFileName | href(goBlockList) |
 | DELETE | blockId* | href(goBlockList), href(goLayoutList) |
 
@@ -878,7 +878,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | categoryId* | href(goCategoryList) |
+| GET | categoryId* | href(goCategoryList), href(doUpdateCategory), href(doDeleteCategory) |
 | PUT | categoryId*, categoryName, sortNo, parentId | href(goCategory) |
 | DELETE | categoryId* | href(goCategoryList) |
 
@@ -925,7 +925,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | classNameId | href(doCreateClassCategory), href(doUpdateClassCategory), href(doDeleteClassCategory) |
+| GET | classNameId | href(doCreateClassCategory), href(doUpdateClassCategory), href(doDeleteClassCategory), href(goClassNameList) |
 | POST | classNameId*, classCategoryName* | href(goClassCategoryList) |
 
 ### Page/Admin/ClassName/ClassName
@@ -948,7 +948,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doCreateClassName), href(doUpdateClassName), href(doDeleteClassName) |
+| GET | - | href(doCreateClassName), href(doUpdateClassName), href(doDeleteClassName), href(goClassCategoryList) |
 | POST | classNameLabel* | href(goClassNameList) |
 
 ### Page/Admin/Content/Cache
@@ -957,7 +957,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doClearCache) |
-| PUT | - | href(goMaintenance) |
+| PUT | mode | href(goMaintenance) |
 
 ### Page/Admin/Content/Css
 `/admin/content/css`
@@ -965,7 +965,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doUpdateContentCss) |
-| PUT | css | href(goContentJs) |
+| PUT | css, mode | href(goContentJs) |
 
 ### Page/Admin/Content/FileManager
 `/admin/content/file-manager`
@@ -980,7 +980,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doUpdateContentJs) |
-| PUT | js | - |
+| PUT | js, mode | - |
 
 ### Page/Admin/Content/Maintenance
 `/admin/content/maintenance`
@@ -988,7 +988,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doToggleMaintenance) |
-| PUT | enabled* | href(goSystemInfo) |
+| PUT | enabled*, mode | href(goSystemInfo) |
 
 ### Page/Admin/Customer/ResendActivationMail
 `/admin/customer/resend-activation-mail`
@@ -1019,15 +1019,15 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goLayoutList) |
-| PUT | layoutId*, layoutName | href(goLayoutList), href(goTradeLawList) |
+| GET | layoutId | href(goLayoutList), href(doUpdateLayout) |
+| PUT | layoutId*, layoutName, name | href(goLayoutList), href(goTradeLawList) |
 
 ### Page/Admin/Layout/LayoutList
 `/admin/layout/layout-list`
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doUpdateLayout) |
+| GET | - | href(goLayout), href(doUpdateLayout) |
 
 ### Page/Admin/MailTemplate/Create
 `/admin/mail-template/create`
@@ -1058,7 +1058,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| POST | orderNos* | href(goOrderList) |
+| POST | orderNos, ids, mode | href(goOrderList) |
 
 ### Page/Admin/Order/Create
 `/admin/order/create`
@@ -1263,7 +1263,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(goTemplateList), href(doInstallTemplate) |
-| POST | templateCode*, templateName* | href(goTemplateList), href(doSelectTemplate) |
+| POST | templateCode*, templateName*, file | href(goTemplateList), href(doSelectTemplate) |
 
 ### Page/Admin/Template/TemplateList
 `/admin/template/template-list`
@@ -1303,17 +1303,17 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-unsupported-route | post-unsupported-route.json | message, routeName |
 | Get-admin-action-redirect | get-admin-action-redirect.json | message |
 | Post-admin-action-redirect | post-admin-action-redirect.json | message |
-| Get-admin-authority-role | get-admin-authority-role.json | authorityOptions, rules |
-| Post-admin-authority-role | post-admin-authority-role.json | message, adminId, loginId, previousAuthority, authority, changed |
+| Get-admin-authority-role | get-admin-authority-role.json | authorityOptions, rules, csrfToken |
+| Post-admin-authority-role | post-admin-authority-role.json | message, adminId, loginId, previousAuthority, authority, changed, transitionId, count, rules |
 | Get-admin-base-info | get-admin-base-info.json | form, phoneNumber, shopKana, businessHour, addr02, postalCode, pref, addr01, shopEmail01, shopName, companyName, shopMessage, shopNameEng |
 | Post-admin-base-info | post-admin-base-info.json | phoneNumber, shopKana, changed, businessHour, addr02, postalCode, pref, addr01, shopEmail01, shopName, companyName, shopMessage, shopNameEng |
-| Get-admin-calendar | get-admin-calendar.json | form, calendars, errors |
+| Get-admin-calendar | get-admin-calendar.json | form, calendars, errors, csrfToken |
 | Post-admin-calendar | post-admin-calendar.json | title, message, transitionId, calendarId, holiday |
 | Delete-admin-calendar | delete-admin-calendar.json | message, transitionId, calendarId |
 | Get-admin-change-password | get-admin-change-password.json | form, transitionId, fields |
 | Post-admin-change-password | post-admin-change-password.json | message, transitionId, loginId, adminId |
 | Post-admin-create-customer | post-admin-create-customer.json | name01, customerId, customerStatus, email, initialPoint, name02 |
-| Get-admin-csv-config | get-admin-csv-config.json | form, notOutputColumns, outputColumns, csvType |
+| Get-admin-csv-config | get-admin-csv-config.json | form, notOutputColumns, outputColumns, csvType, csrfToken |
 | Post-admin-csv-config | post-admin-csv-config.json | message, csvType, columns, count |
 | Get-admin-customer | get-admin-customer.json | form, sex, kana02, phoneNumber, initialPoint, totalSpent, name02, kana01, name01, favorites, postalCode, addr01, birth, customerId, addr02, customerStatus, email, pref, favoriteCount, companyName, job, orders, orderCount |
 | Get-admin-customer-csv | get-admin-customer-csv.json | rowCount, csv |
@@ -1327,7 +1327,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-admin-login | post-admin-login.json | name, loginId, authority, adminId |
 | Get-admin-login-history | get-admin-login-history.json | entries, count |
 | Post-admin-logout | post-admin-logout.json | message, wasLoggedIn, adminId |
-| Get-admin-mail-template | get-admin-mail-template.json | form, mailTemplates, id, count, Mail |
+| Get-admin-mail-template | get-admin-mail-template.json | form, mailTemplates, id, count, csrfToken, Mail |
 | Post-admin-mail-template | post-admin-mail-template.json | mailTemplateId, mailTemplateName, fileName, changed, mailSubject |
 | Delete-admin-mail-template | delete-admin-mail-template.json | mailTemplateId, mailTemplateName, fileName, message, transitionId |
 | Get-admin-master-data | get-admin-master-data.json | form, submitTo, masterTypes, selectedMaster, rows |
@@ -1337,11 +1337,11 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-admin-member | post-admin-member.json | name, sortNo, loginId, authority, work, adminId |
 | Put-admin-member | put-admin-member.json | name, sortNo, loginId, authority, work, adminId |
 | Delete-admin-member | delete-admin-member.json | message, adminId, loginId, alreadyDeleted |
-| Get-admin-member-list | get-admin-member-list.json | filters, count, members |
+| Get-admin-member-list | get-admin-member-list.json | filters, count, csrfToken, members |
 | Get-admin-order | get-admin-order.json | paymentDate, paymentMethodId, orderNo, orderStatus, orderDate, preOrderId, itemCount, discount, addPoint, items, customer, customerId, deliveryFeeTotal, usePoint, charge, paymentTotal, tax, orderStatusOptions, subtotal, csrfToken, total |
 | Put-admin-order | put-admin-order.json | orderNo, customerId, orderStatus, deliveryFeeTotal, usePoint, charge, paymentTotal, tax, subtotal, discount, total |
 | Get-admin-order-list | get-admin-order-list.json | offset, limit, orders, count, searchForm |
-| Get-admin-order-status | get-admin-order-status.json | form, orderStatuses |
+| Get-admin-order-status | get-admin-order-status.json | form, orderStatuses, csrfToken |
 | Put-admin-order-status | put-admin-order-status.json | orderStatusRows, message, count, transitionId |
 | Post-admin-order-status | post-admin-order-status.json | changed, previousStatus, orderNo, orderStatus |
 | Delete-admin-plugin | delete-admin-plugin.json | pluginCode, wasInstalled |
@@ -1359,12 +1359,12 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-admin-product-csv | post-admin-product-csv.json | message, transitionId, count, productCodes |
 | Get-admin-product-list | get-admin-product-list.json | filters, count, searchForm, products |
 | Get-admin-product-new | get-admin-product-new.json | productStatusOptions, csrfToken |
-| Get-admin-security | get-admin-security.json | isSecureRequest, form |
+| Get-admin-security | get-admin-security.json | isSecureRequest, form, csrfToken |
 | Put-admin-security | put-admin-security.json | message, transitionId, trustedHosts |
 | Put-admin-sort-no-move | put-admin-sort-no-move.json | message, masterType, rowId, sortNo |
 | Get-admin-system | get-admin-system.json | info, phpinfoEnabled |
 | Put-admin-toggle-visible | put-admin-toggle-visible.json | masterType, rowId, visible |
-| Get-admin-trade-law | get-admin-trade-law.json | tradeLawBody, form, tradeLawRows |
+| Get-admin-trade-law | get-admin-trade-law.json | tradeLawBody, form, csrfToken, tradeLawRows |
 | Post-admin-trade-law | post-admin-trade-law.json | tradeLawBody, changed |
 | Get-admin-two-factor-auth | get-admin-two-factor-auth.json | form, transitionId, fields, csrfToken |
 | Post-admin-two-factor-auth | post-admin-two-factor-auth.json | message, transitionId, loginId |
@@ -1420,7 +1420,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-shopping-shipping-multiple | post-shopping-shipping-multiple.json | message, transitionId, allocationCount |
 | Get-shopping-shipping-multiple-edit | get-shopping-shipping-multiple-edit.json | form, fields, submitTo, staticContent, transitionId, csrfToken, links |
 | Post-shopping-shipping-multiple-edit | post-shopping-shipping-multiple-edit.json | kana02, phoneNumber, message, name02, kana01, name01, addr02, postalCode, pref, addr01, companyName, transitionId |
-| Get-admin-block-block | get-admin-block-block.json | form |
+| Get-admin-block-block | get-admin-block-block.json | blockId, blockName, blockFileName, blockDeletable, form, csrfToken |
 | Put-admin-block-block | put-admin-block-block.json | blockDeletable, blockName, blockId, blockFileName |
 | Delete-admin-block-block | delete-admin-block-block.json | message, blockId |
 | Get-admin-block-block-list | get-admin-block-block-list.json | count, blocks |
@@ -1443,14 +1443,14 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Get-admin-class-name-class-name-export | get-admin-class-name-class-name-export.json | value |
 | Get-admin-class-name-class-name-list | get-admin-class-name-class-name-list.json | form, count, classNames |
 | Post-admin-class-name-class-name-list | post-admin-class-name-class-name-list.json | name, classNameId |
-| Get-admin-content-cache | get-admin-content-cache.json |  |
+| Get-admin-content-cache | get-admin-content-cache.json | csrfToken |
 | Put-admin-content-cache | put-admin-content-cache.json | message, transitionId |
-| Get-admin-content-css | get-admin-content-css.json | form |
+| Get-admin-content-css | get-admin-content-css.json | form, csrfToken |
 | Put-admin-content-css | put-admin-content-css.json | length, message, transitionId |
 | Get-admin-content-file-manager | get-admin-content-file-manager.json | form, tplIsTopDir, arrFileList, errors, tplNowDir, tplParentDir |
-| Get-admin-content-js | get-admin-content-js.json | form |
+| Get-admin-content-js | get-admin-content-js.json | form, csrfToken |
 | Put-admin-content-js | put-admin-content-js.json | length, message, transitionId |
-| Get-admin-content-maintenance | get-admin-content-maintenance.json | isMaintenance |
+| Get-admin-content-maintenance | get-admin-content-maintenance.json | isMaintenance, csrfToken |
 | Put-admin-content-maintenance | put-admin-content-maintenance.json | message, transitionId, isMaintenance |
 | Post-admin-customer-resend-activation-mail | post-admin-customer-resend-activation-mail.json | message, customerId, email |
 | Get-admin-delivery-delivery | get-admin-delivery-delivery.json | deliveryId, form, delivery |
@@ -1458,7 +1458,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-admin-delivery-delivery | delete-admin-delivery-delivery.json | deliveryId |
 | Get-admin-delivery-delivery-list | get-admin-delivery-delivery-list.json | deliveries, count |
 | Post-admin-delivery-delivery-list | post-admin-delivery-delivery-list.json | deliveryId, deliveryName, visible |
-| Get-admin-layout-layout | get-admin-layout-layout.json | form |
+| Get-admin-layout-layout | get-admin-layout-layout.json | layoutId, layoutName, deviceType, csrfToken, form |
 | Put-admin-layout-layout | put-admin-layout-layout.json | deviceType, layoutId, layoutName |
 | Get-admin-layout-layout-list | get-admin-layout-layout-list.json | count, layouts |
 | Post-admin-mail-template-create | post-admin-mail-template-create.json | mailTemplateId, mailTemplateName, fileName, mailSubject |
@@ -1469,7 +1469,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-admin-news-news-list | post-admin-news-news-list.json | newsUrl, linkMethod, newsId, newsTitle, publishDate, newsDescription |
 | Post-admin-order-bulk-delete | post-admin-order-bulk-delete.json | requestedCount, orderNos, changedCount |
 | Post-admin-order-create | post-admin-order-create.json | message, orderNo, customerId, paymentMethodId, subtotal, deliveryFeeTotal, charge, discount, tax, total, paymentTotal, addPoint, itemCount, orderStatus, orderDate |
-| Get-admin-order-edit | get-admin-order-edit.json | form, order, items, orderNo |
+| Get-admin-order-edit | get-admin-order-edit.json | form, order, items, orderNo, csrfToken |
 | Get-admin-order-export-order | get-admin-order-export-order.json | rowCount, csv |
 | Get-admin-order-export-order-pdf | get-admin-order-export-order-pdf.json | message, orderNo, orderNos, pdf, size, fileName |
 | Get-admin-order-export-shipping | get-admin-order-export-shipping.json | rowCount, csv |
@@ -1484,7 +1484,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Put-admin-order-shipping-address | put-admin-order-shipping-address.json | name01, addr02, postalCode, pref, addr01, phoneNumber, orderNo, name02 |
 | Get-admin-order-shipping-notify-mail | get-admin-order-shipping-notify-mail.json | orderNo, customerId, message, csrfToken, submitTo |
 | Post-admin-order-shipping-notify-mail | post-admin-order-shipping-notify-mail.json | trackingNumber, message, orderNo, customerId |
-| Put-admin-order-tracking-number | put-admin-order-tracking-number.json | message, trackingNumber, orderNo |
+| Put-admin-order-tracking-number | put-admin-order-tracking-number.json | status, message, trackingNumber, orderNo |
 | Get-admin-page-page | get-admin-page-page.json | form, pageFileName, pageUrl, pageId, pageName, csrfToken, pageEditType |
 | Put-admin-page-page | put-admin-page-page.json | pageFileName, pageUrl, pageId, pageName, pageEditType |
 | Delete-admin-page-page | delete-admin-page-page.json | message, pageId |
@@ -1509,14 +1509,14 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-admin-tax-rule-tax-rule | delete-admin-tax-rule-tax-rule.json | taxRuleId |
 | Get-admin-tax-rule-tax-rule-list | get-admin-tax-rule-tax-rule-list.json | form, taxRules, count |
 | Post-admin-tax-rule-tax-rule-list | post-admin-tax-rule-tax-rule-list.json | roundingType, taxRate, taxRuleId, applyDate |
-| Get-admin-template-template-add | get-admin-template-template-add.json | form |
-| Post-admin-template-template-add | post-admin-template-template-add.json | message, templateId, transitionId |
-| Get-admin-template-template-list | get-admin-template-template-list.json | count, templates, links |
+| Get-admin-template-template-add | get-admin-template-template-add.json | form, csrfToken |
+| Post-admin-template-template-add | post-admin-template-template-add.json | message, templateId, archiveName, archiveSize, transitionId |
+| Get-admin-template-template-list | get-admin-template-template-list.json | count, templates, csrfToken, links |
 | Put-admin-template-template-list | put-admin-template-template-list.json | message, transitionId, templateId |
 | Delete-admin-template-template-list | delete-admin-template-template-list.json | message, transitionId, templateId |
 | Post-admin-template-template-list | post-admin-template-template-list.json | message, value |
 
-## SQL (150)
+## SQL (160)
 
 | File | Query |
 |------|-------|
@@ -1613,6 +1613,15 @@ SET
   password = :passwordHash,
   update_date = NOW()
 WHE...` |
+| authority_role_delete_all.sql | `DELETE FROM
+  dtb_authority_role` |
+| authority_role_insert.sql | `INSERT INTO dtb_authority_role (
+  authority_id, creator_id, deny_url, create...` |
+| authority_role_list.sql | `SELECT
+  authority_id AS authority,
+  deny_url AS denyUrl
+FROM
+  dtb_authorit...` |
 | block_next_id.sql | `SELECT
   IFNULL(
     MAX(id),
@@ -1620,6 +1629,13 @@ WHE...` |
   ) + 1 AS next_id
 FROM
   dtb_block` |
+| calendarHoliday_next_id.sql | `SELECT
+  IFNULL(
+    MAX(id),
+    0
+  ) + 1 AS next_id
+FROM
+  dtb_calendar` |
 | cart_by_key.sql | `SELECT
   c.cart_key,
   c.sale_type_id,
@@ -1668,21 +1684,21 @@ FROM
   ) + 1 AS next_id
 FROM
   dtb_class_name` |
-| csv_column_list_by_type.sql | `SELECT
-  csv_type_id,
-  field_name,
-  enabled,
-  sort_no
-FROM
-  dtb_csv
-WHERE...` |
-| csv_column_replace_type.sql | `DELETE FROM
+| csv_column_delete_type.sql | `DELETE FROM
   dtb_csv
 WHERE
-  csv_type_id = :csvType;
-
-INSERT INTO dtb_csv (
-...` |
+  csv_type_id = :csvType` |
+| csv_column_insert_type.sql | `INSERT INTO dtb_csv (
+  csv_type_id, entity_name, field_name,
+  disp_name, so...` |
+| csv_column_list_by_type.sql | `SELECT
+  csv_type_id AS csvType,
+  field_name AS columnName,
+  enabled,
+  sor...` |
+| csv_column_replace_type.sql | `INSERT INTO dtb_csv (
+  csv_type_id, entity_name, field_name,
+  disp_name, so...` |
 | customer_activate.sql | `UPDATE
   dtb_customer
 SET
@@ -1964,21 +1980,17 @@ INSERT INTO dtb_product (
   s.postal_code,
   s.pref_id,
   ...` |
-| shipping_put.sql | `UPDATE
-  dtb_shipping s
-  INNER JOIN dtb_order o ON o.id = s.order_id
-SET
-  s...` |
+| shipping_put.sql | `INSERT INTO dtb_shipping (
+  id, order_id, pref_id, name01, name02,
+  postal_...` |
 | shipping_tracking_by_order_no.sql | `SELECT
   s.tracking_number
 FROM
   dtb_order o
   INNER JOIN dtb_shipping s ON ...` |
-| shipping_update_tracking.sql | `UPDATE
-  dtb_shipping s
-  INNER JOIN dtb_order o ON o.id = s.order_id
-SET
-  s...` |
+| shipping_update_tracking.sql | `INSERT INTO dtb_shipping (
+  id, order_id, name01, name02, tracking_number,
+ ...` |
 | tag_delete.sql | `DELETE FROM
   dtb_tag
 WHERE
@@ -2049,11 +2061,31 @@ FROM
 | tblock_put.sql | `INSERT INTO dtb_block (
   id, block_name, file_name, deletable,
   create_date...` |
-| tblock_remove.sql | `DELETE FROM
-  dtb_block_position
+| tblock_remove.sql | `DELETE b,
+  bp
+FROM
+  dtb_block b
+  LEFT JOIN dtb_block_position bp ON bp.blo...` |
+| tcalendar_holiday_delete.sql | `DELETE FROM
+  dtb_calendar
 WHERE
-  :blockId REGEXP '^[0-9]+$'
-  AND blo...` |
+  :calendarId REGEXP '^[0-9]+$'
+  AND id = C...` |
+| tcalendar_holiday_get.sql | `SELECT
+  CAST(id AS CHAR),
+  title,
+  DATE_FORMAT(holiday, '%Y-%m-%d')
+FROM
+ ...` |
+| tcalendar_holiday_list.sql | `SELECT
+  CAST(id AS CHAR),
+  title,
+  DATE_FORMAT(holiday, '%Y-%m-%d')
+FROM
+ ...` |
+| tcalendar_holiday_put.sql | `INSERT INTO dtb_calendar (
+  id, title, holiday, create_date, update_date,
+  ...` |
 | tcategory_get.sql | `SELECT
   CAST(id AS CHAR) AS id,
   category_name,
@@ -2115,10 +2147,10 @@ ORDER ...` |
   id, name, sort_no, create_date, update_date,
  ...` |
 | tclass_name_remove.sql | `DELETE FROM
-  dtb_class_category
+  dtb_class_name
 WHERE
   :classNameId REGEXP '^[0-9]+$'
-  AND...` |
+  AND id ...` |
 | tclass_name_reorder.sql | `UPDATE
   dtb_class_name
 SET
@@ -2193,18 +2225,18 @@ WHERE
   id,
   name,
   file_name,
-  mail_subject
+  mail_subject,
+  deletable
 FROM
-  dtb_mail_template
-WHE...` |
+  dtb_mail...` |
 | tmail_template_list.sql | `SELECT
   id,
   name,
   file_name,
-  mail_subject
+  mail_subject,
+  deletable
 FROM
-  dtb_mail_template
-ORD...` |
+  dtb_mail...` |
 | tmail_template_put.sql | `INSERT INTO dtb_mail_template (
   id, name, file_name, mail_subject,
   create...` |
@@ -2257,11 +2289,12 @@ WHERE
 | tpage_put.sql | `INSERT INTO dtb_page (
   id, page_name, url, file_name, edit_type,
   create_d...` |
-| tpage_remove.sql | `DELETE FROM
-  dtb_page_layout
-WHERE
-  :pageId REGEXP '^[0-9]+$'
-  AND page_id...` |
+| tpage_remove.sql | `DELETE
+  p,
+  pl
+FROM
+  dtb_page p
+  LEFT JOIN dtb_page_layout pl ON pl.page_...` |
 | tpayment_get.sql | `SELECT
   CAST(id AS CHAR),
   payment_method,

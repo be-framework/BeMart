@@ -1,8 +1,8 @@
 SELECT
-  csv_type_id,
-  field_name,
+  csv_type_id AS csvType,
+  field_name AS columnName,
   enabled,
-  sort_no
+  sort_no AS sortNo
 FROM
   dtb_csv
 WHERE

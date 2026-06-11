@@ -207,11 +207,11 @@
                                         </div>
                                         <div class="col-3 me-2">
                                             <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                                            {{ form.input('name')|raw }}
+                                            {{ form.input('classCategoryName')|raw }}
                                         </div>
                                         <div class="col-auto align-self-center"><span>管理名</span></div>
                                         <div class="col-3">
-                                            {{ form.input('backend_name')|raw }}
+                                            <input type="text" id="admin_class_category_backend_name" class="form-control" value="" disabled>
                                         </div>
                                         <div class="col-auto">
                                             <button class="btn btn-ec-regular" type="submit">新規作成</button>
@@ -248,21 +248,21 @@
                                                 </a>
                                                 <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
                                                     <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
-                                                       data-url="/admin/class-category/class-category?class_name_id={{ ClassCategory.classNameId }}&classCategoryId={{ ClassCategory.classCategoryId }}&_method=delete"
+                                                       data-url="/admin/class-category/class-category?classCategoryId={{ ClassCategory.classCategoryId }}&_method=delete"
                                                        data-message="この操作はあとから取り消すことができません。「{{ ClassCategory.name }}」を削除してよろしいですか？">
                                                         <i class="fa fa-close fa-lg text-secondary"></i>
                                                     </a>
                                                 </div>
                                             </div>
                                         </div>
-                                        <form class="row d-none mode-edit" method="post" action="/admin/class-category/class-category-list?classNameId={{ ClassCategory.classNameId }}&classCategoryId={{ ClassCategory.classCategoryId }}">
+                                        <form class="row d-none mode-edit" method="post" action="/admin/class-category/class-category?classCategoryId={{ ClassCategory.classCategoryId }}&_method=put">
                                             <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                                             <div class="col-3 me-2">
-                                                <input type="text" class="form-control" name="name" value="{{ ClassCategory.name }}" data-origin-value="{{ ClassCategory.name }}">
+                                                <input type="text" class="form-control" name="classCategoryName" value="{{ ClassCategory.name }}" data-origin-value="{{ ClassCategory.name }}">
                                             </div>
                                             <div class="col-auto align-self-center"><span>管理名</span></div>
                                             <div class="col-auto align-items-center">
-                                                <input type="text" class="form-control" name="backend_name" value="" data-origin-value="">
+                                                <input type="text" class="form-control" value="" data-origin-value="" disabled>
                                             </div>
                                             <div class="col-auto align-items-center">
                                                 <button class="btn btn-ec-conversion" type="submit">決定</button>

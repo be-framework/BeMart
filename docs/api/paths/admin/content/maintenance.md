@@ -1,21 +1,14 @@
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /admin/content/maintenance
-EC-CUBE メンテナンス管理 — admin CMS thin renderer (Phase 3 HTML).
+EC-CUBE メンテナンス管理 — admin CMS page.
 
 PORT-side note: EC-CUBE's `MaintenanceController` toggles the
-maintenance-mode marker file; there is no Be domain entity for it. The
-`Content/maintenance.twig` screen is a single有効/無効 toggle button —
-the only `form_widget` call is the CSRF `_token` (EC-CUBE-runtime,
-kept as a render-diff residual). This resource is a THIN HTML RENDERER
-only — it carries no `be/src/` Becoming chain, authenticating at the
-resource layer via {@see \AdminSession}. `body['isMaintenance']`
-drives which toggle button the template shows; it defaults to false
-(maintenance off — the fresh-install state).
-
-FLAGGED: the maintenance-toggle POST action and the persisted
-maintenance state are not modelled (operational, not a domain
-mutation); only the GET render of the off-state is provided.
+maintenance-mode marker file; there is no long-lived business entity for
+it. This resource models the admin affordance as an explicit
+`doToggleMaintenance` transition and persists the operational marker
+through {@see \MaintenanceModeInterface}. `body['isMaintenance']` drives
+which 有効/無効 button the template shows.
 
 
 
@@ -38,6 +31,7 @@ _No parameters required_
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
 | isMaintenance | boolean|null | メンテナンス中フラグ - /admin/content/maintenance の処理状態を示すメンテナンス中フラグ。画面表示や冪等処理結果の分岐に使う真偽値。 | Required |  |  |
+| csrfToken | string|null | CSRFトークン - /admin/content/maintenance のHTMLフォーム送信用CSRFトークン。 | Optional | {"minLength":0,"maxLength":160} |  |
 
 #### Links
 
@@ -58,6 +52,7 @@ ALPS marks it `idempotent` → PUT.
 | Name | Type | Description | Default | Required | Constraints | Example |
 |------|------|-------------|---------|----------|-------------|---------|
 | enabled | bool | 処理状態フラグ（入力） - 観察値 'true', 'false'。 |  | Required | {"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | true |
+| mode | string | フォーム送信モード |  | Optional | {"minLength":0,"maxLength":32,"$comment":"HTML form submit marker; Resource workflow calls omit it."} |  |
 
 
 ### Response

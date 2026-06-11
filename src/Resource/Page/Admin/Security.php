@@ -15,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\SecuritySettingsUpdated;
 use MyVendor\BeMart\Be\Input\UpdateSecurityInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Form\AdminSecurityForm;
 use Ray\WebFormModule\FormFactory;
@@ -39,6 +40,7 @@ class Security extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly SecurityConfigWriterInterface $securityConfig,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -71,6 +73,7 @@ class Security extends ResourceObject
         $this->body = [
             'form' => $form,
             'isSecureRequest' => false,
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;

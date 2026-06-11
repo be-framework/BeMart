@@ -19,6 +19,22 @@ ON DUPLICATE KEY UPDATE
     `update_date` = VALUES(`update_date`),
     `discriminator_type` = VALUES(`discriminator_type`);
 
+INSERT INTO `dtb_payment`
+    (`id`, `creator_id`, `payment_method`, `charge`, `rule_min`, `rule_max`, `sort_no`, `fixed`, `visible`, `create_date`, `update_date`, `discriminator_type`)
+VALUES
+    (1, NULL, '代金引換', 0, 0, NULL, 1, 1, 1, '2026-01-01 00:00:00', '2026-01-01 00:00:00', 'payment'),
+    (2, NULL, 'クレジットカード', 0, 0, NULL, 2, 1, 1, '2026-01-01 00:00:00', '2026-01-01 00:00:00', 'payment')
+ON DUPLICATE KEY UPDATE
+    `payment_method` = VALUES(`payment_method`),
+    `charge` = VALUES(`charge`),
+    `rule_min` = VALUES(`rule_min`),
+    `rule_max` = VALUES(`rule_max`),
+    `sort_no` = VALUES(`sort_no`),
+    `fixed` = VALUES(`fixed`),
+    `visible` = VALUES(`visible`),
+    `update_date` = VALUES(`update_date`),
+    `discriminator_type` = VALUES(`discriminator_type`);
+
 INSERT INTO `dtb_layout`
     (`id`, `device_type_id`, `layout_name`, `create_date`, `update_date`, `discriminator_type`)
 VALUES

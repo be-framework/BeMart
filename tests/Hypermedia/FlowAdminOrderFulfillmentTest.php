@@ -15,6 +15,7 @@ use PHPUnit\Framework\Attributes\Depends;
 use function assert;
 use function bin2hex;
 use function random_bytes;
+use function str_contains;
 
 class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
 {
@@ -395,6 +396,7 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
         ]);
 
         $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame('OK', $this->bodyValue($updated, 'status'));
         $this->assertSame(self::$orderNo, $this->bodyValue($updated, 'orderNo'));
 
         return $updated;
@@ -447,8 +449,37 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
 
     #[Alps('goExportShipping')]
     #[Depends('testExportsOrderCsv')]
-    public function testExportsShippingCsv(ResourceObject $response): void
+    public function testExportsShippingCsv(ResourceObject $response): ResourceObject
     {
-        $this->follow($response, 'goExportShipping');
+        return $this->follow($response, 'goExportShipping');
+    }
+
+    #[Alps('doImportShippingCsv')]
+    #[Depends('testExportsShippingCsv')]
+    public function testImportsShippingCsv(ResourceObject $response): ResourceObject
+    {
+        $trackingNumber = 'TRK-CSV-' . self::$paymentId;
+        $imported = $this->resource->post($this->linkHref($response, 'doImportShippingCsv'), [
+            'csv' => "受注番号,お問い合わせ番号\n" . self::$orderNo . ',' . $trackingNumber . "\n",
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $imported->code);
+        $this->assertSame('doImportShippingCsv', $this->bodyValue($imported, 'transitionId'));
+        $this->assertSame(1, $this->bodyValue($imported, 'imported'));
+        $this->assertSame(0, $this->bodyValue($imported, 'skipped'));
+
+        return $imported;
+    }
+
+    #[Alps('goExportShipping')]
+    #[Depends('testImportsShippingCsv')]
+    public function testExportsImportedShippingCsv(ResourceObject $response): void
+    {
+        $exported = $this->follow($response, 'goExportShipping');
+        $csv = $this->bodyString($exported, 'csv');
+
+        $this->assertTrue(str_contains($csv, self::$orderNo));
+        $this->assertTrue(str_contains($csv, 'TRK-CSV-' . self::$paymentId));
     }
 }

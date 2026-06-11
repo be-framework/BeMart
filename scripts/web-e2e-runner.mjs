@@ -272,6 +272,14 @@ function deriveTargetUrl(row, baselineRow, setup = null) {
     return `/admin/order?orderNo=${encodeURIComponent(business.memberOrderNo)}`;
   }
 
+  if (business.memberOrderNo && /\bPOST\s+\/admin\/order-status\b/.test(row.resource)) {
+    return `/admin/order?orderNo=${encodeURIComponent(business.memberOrderNo)}`;
+  }
+
+  if (business.memberOrderNo && /\bPUT\s+\/admin\/order\/tracking-number\b/.test(row.resource)) {
+    return '/admin/order-list';
+  }
+
   if (business.memberOrderNo && /\b(?:GET|POST)\s+\/admin\/order\/shipping-notify-mail\b/.test(row.resource)) {
     return `/admin/order/shipping-notify-mail?orderNo=${encodeURIComponent(business.memberOrderNo)}`;
   }
@@ -280,8 +288,19 @@ function deriveTargetUrl(row, baselineRow, setup = null) {
     return `/admin/order/send-mail?orderNo=${encodeURIComponent(business.memberOrderNo)}`;
   }
 
+  if (business.memberOrderNo && /\bPOST\s+\/admin\/order\/import-shipping\b/.test(row.resource)) {
+    return '/admin/order/import-shipping';
+  }
+
   if (business.memberOrderNo && /\b(?:GET|PUT|POST)\s+\/admin\/order\/shipping-address\b/.test(row.resource)) {
     return `/admin/order/shipping-address?orderNo=${encodeURIComponent(business.memberOrderNo)}`;
+  }
+
+  if (
+    business.adminMemberLoginId
+    && /\b(?:GET|POST|PUT|DELETE)\s+\/admin\/member(?:\s|;|$)/.test(row.resource)
+  ) {
+    return `/admin/member?loginId=${encodeURIComponent(business.adminMemberLoginId)}`;
   }
 
   if (/\bPOST\s+\/admin\/logout\b/.test(row.resource)) {
@@ -372,6 +391,14 @@ function safePath(urlOrPath) {
 async function snapshotPage(page) {
   return await page.evaluate(() => {
     const normalize = (value) => (value || '').replace(/\s+/g, ' ').trim();
+    const isVisible = (element) => Boolean(
+      element.offsetWidth
+      || element.offsetHeight
+      || element.getClientRects().length,
+    );
+    const visibleCount = (selector) => [...document.querySelectorAll(selector)]
+      .filter((element) => isVisible(element))
+      .length;
     const h1 = document.querySelector('h1')?.textContent ?? '';
     const errorSelectors = [
       '.ec-errorMessage',
@@ -398,6 +425,13 @@ async function snapshotPage(page) {
       h1: normalize(h1),
       pageText: normalize(document.body?.innerText ?? ''),
       errorText: [...new Set(errors)].join(' / '),
+      errorUi: {
+        visibleErrorMessages: visibleCount('.ec-errorMessage'),
+        visibleInvalidFeedback: visibleCount('.invalid-feedback'),
+        visibleTextDanger: visibleCount('.text-danger'),
+        visibleAlertDanger: visibleCount('.alert-danger'),
+        visibleErrorContainers: visibleCount('.error'),
+      },
       forms,
     };
   });
@@ -771,8 +805,25 @@ async function rowAttrByText(page, text, selector, attrName) {
       }
     }
 
+  return '';
+}, { text, selector, attr: attrName }).catch(() => '');
+}
+
+async function optionValueByText(page, selectSelector, text) {
+  return await page.evaluate(({ selector, text: optionText }) => {
+    const select = document.querySelector(selector);
+    if (!select) {
+      return '';
+    }
+
+    for (const option of select.querySelectorAll('option')) {
+      if ((option.textContent ?? '').trim() === optionText) {
+        return option.getAttribute('value') ?? '';
+      }
+    }
+
     return '';
-  }, { text, selector, attr: attrName }).catch(() => '');
+  }, { selector: selectSelector, text }).catch(() => '');
 }
 
 async function rowIdByText(page, text, prefix, queryKey) {
@@ -845,6 +896,40 @@ async function httpForm(context, baseUrl, method, target, form) {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     data: encodeFormBody(form),
+    maxRedirects: 0,
+    timeout: NAV_TIMEOUT_MS,
+  });
+}
+
+async function httpCsvUpload(context, baseUrl, target, csrfToken, fileName, csv) {
+  return await context.request.fetch(makeUrl(baseUrl, target), {
+    method: 'POST',
+    multipart: {
+      csrfToken,
+      import_file: {
+        name: fileName,
+        mimeType: 'text/csv',
+        buffer: Buffer.from(csv, 'utf8'),
+      },
+    },
+    maxRedirects: 0,
+    timeout: NAV_TIMEOUT_MS,
+  });
+}
+
+async function httpTemplateUpload(context, baseUrl, target, csrfToken, templateCode, templateName) {
+  return await context.request.fetch(makeUrl(baseUrl, target), {
+    method: 'POST',
+    multipart: {
+      csrfToken,
+      templateCode,
+      templateName,
+      file: {
+        name: `${templateCode}.zip`,
+        mimeType: 'application/zip',
+        buffer: Buffer.from('PK_FAKE_ZIP\nBeMart template upload regression fixture.\n', 'utf8'),
+      },
+    },
     maxRedirects: 0,
     timeout: NAV_TIMEOUT_MS,
   });
@@ -927,6 +1012,7 @@ async function submitBrowserForm(page, baseUrl, testCase, screenshotDir) {
     h1: snap.h1,
     pageText: truncate(snap.pageText, 1800),
     errorText: truncate(snap.errorText, 800),
+    errorUi: snap.errorUi,
     forms: snap.forms,
     screenshot: relativeFromWebE2e(screenshotFile),
   };
@@ -1099,7 +1185,8 @@ function escapeCssAttr(value) {
 }
 
 function negativeCaseDefinitions(runId) {
-  const email = `web-e2e-ng-${runId}@example.test`;
+  const suffix = crypto.createHash('sha1').update(runId).digest('hex').slice(0, 10);
+  const email = `web-e2e-ng-${suffix}@example.test`;
   return [
     {
       id: 'ng-entry-required-missing',
@@ -1111,6 +1198,7 @@ function negativeCaseDefinitions(runId) {
       data: { email: '', password: '', name01: '', name02: '' },
       expectedStatuses: [400, 403],
       expectedText: ['入力してください。', '必須', 'Invalid input', 'Validation error'],
+      expectedVisibleErrorMin: 1,
     },
     {
       id: 'ng-entry-invalid-email-mismatch',
@@ -1137,6 +1225,7 @@ function negativeCaseDefinitions(runId) {
       },
       expectedStatuses: [400, 409],
       expectedText: ['メール', 'パスワード', 'Invalid input', 'Invalid parameter type'],
+      expectedVisibleErrorMin: 1,
     },
     {
       id: 'ng-entry-csrf-missing',
@@ -1160,6 +1249,7 @@ function negativeCaseDefinitions(runId) {
       data: { email: 'missing@example.test', password: 'wrong-password-2026' },
       expectedStatuses: [401],
       expectedText: ['ログイン', '認証', 'メールアドレス'],
+      expectedVisibleErrorMin: 1,
     },
     {
       id: 'ng-login-invalid-email',
@@ -1204,6 +1294,7 @@ function negativeCaseDefinitions(runId) {
       data: { contactName01: '', contactName02: '', contactEmail: '', contactContents: '' },
       expectedStatuses: [400, 403],
       expectedText: ['入力してください。', '必須', 'Invalid input'],
+      expectedVisibleErrorMin: 1,
     },
     {
       id: 'ng-contact-invalid-email-long-body',
@@ -1242,6 +1333,7 @@ function negativeCaseDefinitions(runId) {
       data: { name01: '', name02: '', kana01: '', kana02: '', companyName: '', email: '', email_confirm: '', phoneNumber: '', postalCode: '', pref: '', addr01: '', addr02: '' },
       expectedStatuses: [400],
       expectedText: ['入力してください。', 'お客様情報の入力'],
+      expectedVisibleErrorMin: 1,
     },
     {
       id: 'ng-shopping-checkout-nonexistent-preorder',
@@ -1286,6 +1378,7 @@ function negativeCaseDefinitions(runId) {
       data: { loginId: 'missing-admin', password: 'wrong-password-2026' },
       expectedStatuses: [401],
       expectedText: ['ログイン', '認証'],
+      expectedVisibleErrorMin: 1,
     },
     {
       id: 'ng-admin-login-csrf-invalid',
@@ -1335,6 +1428,17 @@ function negativeCaseDefinitions(runId) {
   ];
 }
 
+function visibleErrorUiTotal(errorUi) {
+  if (!errorUi || typeof errorUi !== 'object') {
+    return 0;
+  }
+
+  return Number(errorUi.visibleErrorMessages ?? 0)
+    + Number(errorUi.visibleInvalidFeedback ?? 0)
+    + Number(errorUi.visibleTextDanger ?? 0)
+    + Number(errorUi.visibleAlertDanger ?? 0);
+}
+
 async function runNegativeCases(page, context, baseUrl, runId, screenshotDir, skipNegative) {
   if (skipNegative) {
     return [];
@@ -1357,7 +1461,10 @@ async function runNegativeCases(page, context, baseUrl, runId, screenshotDir, sk
         : testCase.expectedStatuses.includes(observedStatus);
       const text = `${observation.errorText} ${observation.pageText}`;
       const textOk = testCase.expectedText.some((expected) => text.includes(expected));
-      const finalStatus = !isRuntimeErrorPage(text) && statusOk && (textOk || observedStatus === 403 || observedStatus === 401)
+      const visibleErrorUi = visibleErrorUiTotal(observation.errorUi);
+      const expectedVisibleErrorMin = testCase.expectedVisibleErrorMin ?? 0;
+      const visibleErrorOk = visibleErrorUi >= expectedVisibleErrorMin;
+      const finalStatus = !isRuntimeErrorPage(text) && statusOk && visibleErrorOk && (textOk || observedStatus === 403 || observedStatus === 401)
         ? 'pass'
         : 'fail';
 
@@ -1369,7 +1476,17 @@ async function runNegativeCases(page, context, baseUrl, runId, screenshotDir, sk
         mode: testCase.mode,
         expectedStatuses: testCase.expectedStatuses,
         expectedText: testCase.expectedText,
+        expectedVisibleErrorMin,
+        visibleErrorUi,
         status: finalStatus,
+        failureReason: finalStatus === 'pass'
+          ? ''
+          : [
+            statusOk ? '' : `unexpected status ${observedStatus}`,
+            textOk ? '' : 'expected error text not found',
+            visibleErrorOk ? '' : `visible error UI ${visibleErrorUi} < ${expectedVisibleErrorMin}`,
+            isRuntimeErrorPage(text) ? 'runtime error page' : '',
+          ].filter(Boolean).join('; '),
         ...observation,
       });
     } catch (error) {
@@ -1381,7 +1498,10 @@ async function runNegativeCases(page, context, baseUrl, runId, screenshotDir, sk
         mode: testCase.mode,
         expectedStatuses: testCase.expectedStatuses,
         expectedText: testCase.expectedText,
+        expectedVisibleErrorMin: testCase.expectedVisibleErrorMin ?? 0,
+        visibleErrorUi: 0,
         status: 'fail',
+        failureReason: `${error.name}: ${error.message}`,
         finalUrl: null,
         httpStatus: null,
         title: '',
@@ -1533,13 +1653,41 @@ function markdownReport(run) {
   const fresh = changedFailures(run.results, run.baseline.results ?? []);
   const opFailures = run.operationCoverage.filter((op) => op.status === 'fail');
   const ngFailures = run.negativeCases.filter((testCase) => testCase.status === 'fail');
+  const limitedNote = run.context.limit
+    ? `
+> Note: this is a limited regression run executed with \`--limit=${run.context.limit}\`.
+> Runner-marked failures after the limit are "not executed" rows, not new product regressions.
+`
+    : '';
+  const onlyNegativeNote = run.context.onlyNegative
+    ? `
+> Note: this is a negative-form regression run executed with \`--only-negative\`.
+> Feature matrix, OpenAPI coverage, and setup evidence are intentionally skipped in this run.
+`
+    : '';
+  const scopeText = run.context.onlyNegative
+    ? `- このrunは \`--only-negative\` の限定回帰run。母集団は NG cases ${run.negativeCases.length} 件で、feature matrix と OpenAPI operation coverage は実行しない。
+- 各 browser form NG case は、HTTP status、日本語エラー文、可視エラーUI数、最終URL、screenshotを保存した。
+- JSON/HTTP error 境界の NG case は、期待statusと日本語メッセージを保存し、可視エラーUIが不要なケースは \`visibleErrorUi=0/0\` として扱う。`
+    : `- 母集団は \`docs/api/openapi.json\` の ${run.operationCoverage.length} operations と \`docs/web-e2e/feature-implementation-matrix.md\` の ${run.results.length} features。
+- 画面 feature は matrix の順序で実ブラウザ到達、最終URL、HTTP status、title、h1、主要テキスト、form一覧、screenshotを保存した。
+- CSV/PDF/unsafe operation など画面だけで完結しない OpenAPI operation は、feature row に紐づくものは matrix coverage、未紐づきのものは同一 browser context の HTTP probe として記録した。
+- Web で前提データを作れないもの、未ログイン/管理者未作成で到達できないものは \`fail\` として記録した。`;
+  const setupText = run.context.onlyNegative
+    ? '- `--only-negative` のため、管理ログイン・会員登録・業務状態作成 setup は実行していない。'
+    : `- 管理ログイン: ${run.setup.adminLogin?.success ? 'pass' : 'fail'} final=\`${run.setup.adminLogin?.finalUrl ?? ''}\`
+- 会員登録: ${run.setup.customerRegistration?.success ? 'pass' : 'fail'} final=\`${run.setup.customerRegistration?.finalUrl ?? ''}\`
+- 業務状態作成: ${run.setup.businessState?.success ? 'pass' : 'fail'} product=\`${run.setup.businessState?.productCode ?? ''}\` memberOrder=\`${run.setup.businessState?.memberOrderNo ?? ''}\` nonMemberOrder=\`${run.setup.businessState?.nonMemberOrderNo ?? ''}\`
+${(run.setup.businessState?.steps ?? []).map((item) => `- ${statusLabel(item.status)} setup:${item.id} final=\`${item.finalUrl ?? item.location ?? ''}\` screenshot=\`${item.screenshot ?? ''}\`${item.error ? ` error=${truncate(item.error, 180)}` : ''}`).join('\n')}`;
 
   return `# ${run.runId} Web+DB 全ルート検証結果
+${limitedNote}${onlyNegativeNote}
 
 ## Summary
 
 - context: \`${run.context.appContext}\`
 - baseUrl: \`${run.baseUrl}\`
+- network scope: \`${run.context.networkScope}\`
 - DB: \`${run.db.name}\` (\`DATABASE_URL\`)
 - Fake JSON / Fake context / 直接DB seed: **未使用前提**。runner は Web/HTTP 境界のみを操作し、SQL fixture は投入しない。
 - Feature matrix: pass ${featureSummary.pass} / fail ${featureSummary.fail} / 対象外 ${featureSummary.targetOut}
@@ -1550,17 +1698,11 @@ function markdownReport(run) {
 
 ## Scope
 
-- 母集団は \`docs/api/openapi.json\` の ${run.operationCoverage.length} operations と \`docs/web-e2e/feature-implementation-matrix.md\` の ${run.results.length} features。
-- 画面 feature は matrix の順序で実ブラウザ到達、最終URL、HTTP status、title、h1、主要テキスト、form一覧、screenshotを保存した。
-- CSV/PDF/unsafe operation など画面だけで完結しない OpenAPI operation は、feature row に紐づくものは matrix coverage、未紐づきのものは同一 browser context の HTTP probe として記録した。
-- Web で前提データを作れないもの、未ログイン/管理者未作成で到達できないものは \`fail\` として記録した。
+${scopeText}
 
 ## Setup Evidence
 
-- 管理ログイン: ${run.setup.adminLogin?.success ? 'pass' : 'fail'} final=\`${run.setup.adminLogin?.finalUrl ?? ''}\`
-- 会員登録: ${run.setup.customerRegistration?.success ? 'pass' : 'fail'} final=\`${run.setup.customerRegistration?.finalUrl ?? ''}\`
-- 業務状態作成: ${run.setup.businessState?.success ? 'pass' : 'fail'} product=\`${run.setup.businessState?.productCode ?? ''}\` memberOrder=\`${run.setup.businessState?.memberOrderNo ?? ''}\` nonMemberOrder=\`${run.setup.businessState?.nonMemberOrderNo ?? ''}\`
-${(run.setup.businessState?.steps ?? []).map((item) => `- ${statusLabel(item.status)} setup:${item.id} final=\`${item.finalUrl ?? item.location ?? ''}\` screenshot=\`${item.screenshot ?? ''}\`${item.error ? ` error=${truncate(item.error, 180)}` : ''}`).join('\n')}
+${setupText}
 
 ## Known Failures
 
@@ -1578,17 +1720,18 @@ ${opFailures.length > 80 ? `\n- ... ${opFailures.length - 80} more operation fai
 
 ## Negative Case Failures
 
-${ngFailures.length === 0 ? '- なし' : ngFailures.map((item) => `- ${item.name}: status=${item.httpStatus ?? 'browser'}, final=\`${item.finalUrl ?? ''}\`, error=${truncate(item.errorText || item.pageText, 220)}, screenshot=\`${item.screenshot ?? ''}\``).join('\n')}
+${ngFailures.length === 0 ? '- なし' : ngFailures.map((item) => `- ${item.name}: status=${item.httpStatus ?? 'browser'}, visibleErrorUi=${item.visibleErrorUi ?? 0}/${item.expectedVisibleErrorMin ?? 0}, final=\`${item.finalUrl ?? ''}\`, error=${truncate(item.failureReason || item.errorText || item.pageText, 220)}, screenshot=\`${item.screenshot ?? ''}\``).join('\n')}
 
 ## Negative Cases
 
-${run.negativeCases.map((item) => `- ${statusLabel(item.status)} ${item.name}: ${item.method} ${item.path}, status=${item.httpStatus ?? 'browser'}, final=\`${item.finalUrl ?? ''}\`, screenshot=\`${item.screenshot ?? ''}\``).join('\n')}
+${run.negativeCases.map((item) => `- ${statusLabel(item.status)} ${item.name}: ${item.method} ${item.path}, status=${item.httpStatus ?? 'browser'}, visibleErrorUi=${item.visibleErrorUi ?? 0}/${item.expectedVisibleErrorMin ?? 0}, final=\`${item.finalUrl ?? ''}\`, screenshot=\`${item.screenshot ?? ''}\``).join('\n')}
 
 ## Boundaries
 
 - 外部決済、実SMTP、本番運用ファイル破壊操作は fake/noop または HTTP 境界確認に留める。
 - 管理者アカウントや商品・注文などの dtb_* 業務データは runner では直接 SQL seed しない。Web で作成できない場合は該当 feature/operation を fail とする。
 - \`注文履歴詳細\` / \`再注文\` は既存 known fail として、今回 run でも前提注文作成可否を結果に残す。
+- \`baseUrl\` は runner プロセスから見たネットワーク境界。ローカルChrome/in-app browserが別マシンで動く場合、同じ \`localhost\` / \`127.0.0.1\` でもこの証跡とは同一視しない。
 `;
 }
 
@@ -1760,6 +1903,12 @@ async function maybeAdminLogin(page, context, baseUrl, knownTotpSecret = '') {
         csrfToken,
       });
       const verifyLocation = parseLocation(verify);
+      twoFactorStep = {
+        ...twoFactorStep,
+        verifyStatus: verify.status(),
+        verifyLocation,
+        verifyText: truncate(decodeResponseText(await verify.text().catch(() => '')), 300),
+      };
       if (verifyLocation) {
         await page.goto(makeUrl(baseUrl, verifyLocation), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
       }
@@ -1805,6 +1954,7 @@ async function maybeCustomerLogin(page, context, baseUrl, email, password) {
     const login = await httpForm(context, baseUrl, 'POST', '/login', {
       email,
       password,
+      mode: 'login',
       csrfToken,
     });
     const location = parseLocation(login);
@@ -1844,15 +1994,66 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
   const steps = [];
   const productCode = `we-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
   let productName = `Web E2E 完成判定 ${runId}`;
+  const csvProductCode = `we-csv-${Math.random().toString(36).slice(2, 10)}`;
+  const csvProductName = `Web E2E CSV商品 ${runId}`;
   const copiedProductCode = `${productCode}-copy`;
   const taxonomySuffix = Math.random().toString(36).slice(2, 8);
   const categoryName = `WE Category ${taxonomySuffix}`;
   const updatedCategoryName = `WE Category U ${taxonomySuffix}`;
+  const csvCategoryName = `WE CSV Category ${taxonomySuffix}`;
+  const csvClassNameLabel = `WE CSV Class ${taxonomySuffix}`;
+  const csvClassCategoryName = `WE CSV CC ${taxonomySuffix}`;
   const tagName = `WE Tag ${taxonomySuffix}`;
+  const templateCode = `we-template-${taxonomySuffix}`;
+  const templateName = `Web E2E テンプレート ${taxonomySuffix}`;
+  const mailTemplateName = `Web E2E メールテンプレート ${taxonomySuffix}`;
+  const mailTemplateInitialSubject = `Web E2E メール件名 ${taxonomySuffix}`;
+  const mailTemplateUpdatedSubject = `Web E2E メール件名更新 ${taxonomySuffix}`;
+  const classNameLabel = `WE Class ${taxonomySuffix}`;
+  const updatedClassNameLabel = `WE Class U ${taxonomySuffix}`;
+  const classCategoryName = `WE Class Category ${taxonomySuffix}`;
+  const updatedClassCategoryName = `WE Class Category U ${taxonomySuffix}`;
+  const baseInfoShopName = `Web E2E 基本情報 ${taxonomySuffix}`;
   const paymentMaintenanceName = `Web E2E 支払CRUD ${taxonomySuffix}`;
   const updatedPaymentMaintenanceName = `Web E2E 支払CRUD 更新 ${taxonomySuffix}`;
-  let paymentId = '';
+  const deliveryMaintenanceName = `Web E2E 配送CRUD ${taxonomySuffix}`;
+  const updatedDeliveryMaintenanceName = `Web E2E 配送CRUD 更新 ${taxonomySuffix}`;
+  const masterDataPaymentName = `Web E2E Master 支払 ${taxonomySuffix}`;
+  const calendarHolidayTitle = `Web E2E 定休日 ${taxonomySuffix}`;
+  const updatedCalendarHolidayTitle = `Web E2E 定休日更新 ${taxonomySuffix}`;
+  const calendarHolidayDate = `2027-05-${String(10 + Math.floor(Math.random() * 10)).padStart(2, '0')}`;
+  const updatedCalendarHolidayDate = `2027-06-${String(10 + Math.floor(Math.random() * 10)).padStart(2, '0')}`;
+  const newsTitle = `Web E2E 新着情報 ${taxonomySuffix}`;
+  const updatedNewsTitle = `Web E2E 新着情報更新 ${taxonomySuffix}`;
+  const pageName = `Web E2E ページ ${taxonomySuffix}`;
+  const updatedPageName = `Web E2E ページ更新 ${taxonomySuffix}`;
+  const pageUrl = `web-e2e-page-${taxonomySuffix}`;
+  const updatedPageUrl = `web-e2e-page-updated-${taxonomySuffix}`;
+  const pageFileName = `web_e2e_page_${taxonomySuffix}`;
+  const updatedPageFileName = `web_e2e_page_updated_${taxonomySuffix}`;
+  const blockName = `Web E2E ブロック ${taxonomySuffix}`;
+  const updatedBlockName = `Web E2E ブロック更新 ${taxonomySuffix}`;
+  const blockFileName = `web_e2e_block_${taxonomySuffix}`;
+  const updatedBlockFileName = `web_e2e_block_updated_${taxonomySuffix}`;
+  const updatedLayoutName = `Web E2E レイアウト更新 ${taxonomySuffix}`;
+  const adminMemberLoginId = `workflow-admin-${taxonomySuffix}`;
+  const adminMemberName = `Web E2E メンバー ${taxonomySuffix}`;
+  const adminMemberUpdatedName = `Web E2E メンバー更新 ${taxonomySuffix}`;
+  const adminMemberDeleteLoginId = `workflow-admin-delete-${taxonomySuffix}`;
+  const adminMemberDeleteName = `Web E2E メンバー削除 ${taxonomySuffix}`;
+  const adminMemberPassword = `WebE2E-Member-${taxonomySuffix}-Pass1`;
+  const orderTrackingNumber = `TRK-${taxonomySuffix.toUpperCase()}`;
+  const csvTrackingNumber = `TRK-CSV-${taxonomySuffix.toUpperCase()}`;
+  const taxRuleRate = '9.5';
+  const taxRuleApplyDate = `2027-04-${String(10 + Math.floor(Math.random() * 10)).padStart(2, '0')}T10:00`;
   let paymentMaintenanceId = '';
+  let deliveryMaintenanceId = '';
+  let taxRuleId = '';
+  let calendarHolidayId = '';
+  let newsId = '';
+  let pageId = '';
+  let blockId = '';
+  let layoutId = '';
   let csrfToken = setup.adminLogin?.csrfToken || '';
   let memberOrderNo = '';
   let nonMemberOrderNo = '';
@@ -1860,9 +2061,15 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
   let addressId = '';
   let categoryId = '';
   let tagId = '';
+  let templateId = '';
+  let mailTemplateId = '';
+  let classNameId = '';
+  let classCategoryId = '';
+  let csvClassNameId = '';
   let adminCustomerId = '';
   let adminCustomerLocation = '';
-  const adminCustomerEmail = `admin-customer-${runId}@example.test`;
+  let manualOrderNo = '';
+  const adminCustomerEmail = `admin-customer-${taxonomySuffix}@example.test`;
 
   const step = async (id, fn) => {
     try {
@@ -1884,23 +2091,1242 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
     }
   };
 
-  await step('admin-payment-create', async () => {
-    if (!setup.adminLogin?.success) {
-      throw new Error('admin login failed');
+  await step('admin-base-info-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/base-info'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#shop_master_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/base-info')) {
+      throw new Error(`base info form action was not exposed: ${action || '(empty)'}`);
     }
 
-    const response = await httpForm(context, baseUrl, 'POST', '/admin/payment/payment-list', {
-      paymentMethodName: `Web E2E 決済 ${runId}`,
-      charge: '0',
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      company_name: 'Web E2E Company',
+      shop_name: baseInfoShopName,
+      shop_kana: 'ウェブイーツーイー',
+      shop_name_eng: 'Web E2E Shop',
+      postal_code: '1500001',
+      pref: '13',
+      addr01: '渋谷区',
+      addr02: 'Web E2E 1-1-1',
+      phone_number: '0312345678',
+      business_hour: '10:00-18:00',
+      email01: `shop-${runId}@example.test`,
+      shop_message: 'Updated by Web+DB runner through the HTML shop master form.',
       csrfToken,
     });
-    paymentId = parseQueryValue(parseLocation(response), 'paymentId');
-    recordOperation(operationEvidence, 'POST', '/admin/payment/payment-list', response, { paymentId });
+    recordOperation(operationEvidence, 'POST', '/admin/base-info', response, {
+      shopName: baseInfoShopName,
+      action,
+    });
     if (response.status() >= 400) {
-      throw new Error(`payment create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+      throw new Error(`base info update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
     }
 
-    return { httpStatus: response.status(), location: parseLocation(response), paymentId };
+    await page.goto(makeUrl(baseUrl, '/admin/base-info'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const renderedName = await inputValue(page, 'input[name="shop_name"]');
+    if (renderedName !== baseInfoShopName) {
+      throw new Error(`updated base info was not visible on readback: ${renderedName || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/base-info')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-base-info-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      shopName: baseInfoShopName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-cache-clear', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/content/cache'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, 'form[action*="/admin/content/cache"]')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/content/cache')) {
+      throw new Error(`cache clear form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      mode: 'content_operation_form',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/content/cache', response, { action });
+    if (response.status() >= 400) {
+      throw new Error(`cache clear failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    const location = parseLocation(response) || '/admin/content/cache';
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('PUT', '/admin/content/cache')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-cache-clear');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-maintenance-toggle', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/content/maintenance'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, 'form[action*="/admin/content/maintenance"]')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/content/maintenance')) {
+      throw new Error(`maintenance form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const enabled = await httpForm(context, baseUrl, 'POST', action, {
+      enabled: '1',
+      mode: 'content_operation_form',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/content/maintenance', enabled, { action, enabled: true });
+    if (enabled.status() >= 400) {
+      throw new Error(`maintenance enable failed status=${enabled.status()} body=${truncate(await enabled.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(enabled) || '/admin/content/maintenance'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const enabledSnap = await snapshotPage(page);
+    if (!enabledSnap.pageText.includes('無効にする')) {
+      throw new Error('maintenance enable was not visible on readback');
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/content/maintenance')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-maintenance-enable');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(enabledSnap.pageText, 600);
+      evidence.readback = 'maintenance enabled page shows disable button';
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const disabled = await httpForm(context, baseUrl, 'POST', action, {
+      enabled: '0',
+      mode: 'content_operation_form',
+      csrfToken,
+    });
+    if (disabled.status() >= 400) {
+      throw new Error(`maintenance disable failed status=${disabled.status()} body=${truncate(await disabled.text().catch(() => ''), 300)}`);
+    }
+    if (evidence) {
+      evidence.disabledStatus = disabled.status();
+      evidence.disabledLocation = parseLocation(disabled);
+    }
+
+    return {
+      httpStatus: enabled.status(),
+      finalUrl: evidence?.finalUrl ?? page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageText: evidence?.pageText ?? '',
+    };
+  });
+
+  await step('admin-content-css-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/content/css'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#content_css_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/content/css')) {
+      throw new Error(`css form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const cssMarker = `/* bemart-css-readback-${taxonomySuffix} */\n.bemart-css-readback-${taxonomySuffix} { color: #123456; }\n`;
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      css: cssMarker,
+      mode: 'content_operation_form',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/content/css', response, { action });
+    if (response.status() >= 400) {
+      throw new Error(`css update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(response) || '/admin/content/css'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const renderedCss = await inputValue(page, 'textarea[name="css"]');
+    if (!renderedCss.includes('bemart-css-readback')) {
+      throw new Error('updated CSS was not visible on readback');
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('PUT', '/admin/content/css')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-content-css-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'textarea[name="css"] contains bemart-css-readback marker';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-content-js-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/content/js'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#content_js_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/content/js')) {
+      throw new Error(`js form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const jsMarker = `window.bemartJsReadback = 'bemart-js-readback-${taxonomySuffix}';\n`;
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      js: jsMarker,
+      mode: 'content_operation_form',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/content/js', response, { action });
+    if (response.status() >= 400) {
+      throw new Error(`js update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(response) || '/admin/content/js'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const renderedJs = await inputValue(page, 'textarea[name="js"]');
+    if (!renderedJs.includes('bemart-js-readback')) {
+      throw new Error('updated JS was not visible on readback');
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('PUT', '/admin/content/js')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-content-js-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'textarea[name="js"] contains bemart-js-readback marker';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-trade-law-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/trade-law'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, 'form[action="/admin/trade-law"]')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/trade-law')) {
+      throw new Error(`trade-law form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const vendor = `BeMart 特商法 ${taxonomySuffix}`;
+    const address = `東京都テスト区 ${taxonomySuffix}`;
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      trade_law_1_name: '販売業者',
+      trade_law_1_description: vendor,
+      trade_law_1_displayOrderScreen: '1',
+      trade_law_2_name: '所在地',
+      trade_law_2_description: address,
+      trade_law_2_displayOrderScreen: '1',
+      mode: 'trade_law_form',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'POST', '/admin/trade-law', response, { action, vendor, address });
+    if (response.status() >= 400) {
+      throw new Error(`trade-law update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(response) || '/admin/trade-law'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const nameReadback = await inputValue(page, 'input[name="trade_law_1_name"]');
+    const vendorReadback = await inputValue(page, 'textarea[name="trade_law_1_description"]');
+    const addressReadback = await inputValue(page, 'textarea[name="trade_law_2_description"]');
+    if (nameReadback !== '販売業者' || !vendorReadback.includes(vendor) || !addressReadback.includes(address)) {
+      throw new Error(`trade-law readback missing updated rows: name=${nameReadback} vendor=${vendorReadback} address=${addressReadback}`);
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('POST', '/admin/trade-law')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-trade-law-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'trade-law row fields show updated vendor and address';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-master-data-select', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/master-data'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form1')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/master-data')) {
+      throw new Error(`master-data select form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const masterType = 'payment';
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      masterType,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/master-data', response, { action, masterType });
+    if (response.status() >= 400) {
+      throw new Error(`master-data select failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/master-data?masterType=${masterType}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const selectedMaster = await inputValue(page, 'form#form2 input[name="masterType"]');
+    const rowInputCount = await page.locator('form#form2 input[name^="rows["]').count();
+    if (selectedMaster !== masterType || rowInputCount === 0) {
+      throw new Error(`master-data select readback missing edit rows: selected=${selectedMaster || '(empty)'} rowInputCount=${rowInputCount}`);
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('PUT', '/admin/master-data')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-master-data-select');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = `form#form2 exposes ${rowInputCount} row inputs for ${masterType}`;
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-master-data-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/master-data?masterType=payment'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form2')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/master-data-edit')) {
+      throw new Error(`master-data edit form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const rowId = await inputValue(page, 'form#form2 input[name="rows[0][id]"]');
+    if (!/^\d+$/.test(rowId)) {
+      throw new Error(`master-data payment row id was not available: ${rowId || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      masterType: 'payment',
+      'rows[0][id]': rowId,
+      'rows[0][name]': masterDataPaymentName,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/master-data-edit', response, {
+      action,
+      masterType: 'payment',
+      rowId,
+      name: masterDataPaymentName,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`master-data update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(response) || '/admin/master-data?masterType=payment'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const selectedMaster = await inputValue(page, 'form#form2 input[name="masterType"]');
+    const updatedName = await inputValue(page, 'form#form2 input[name="rows[0][name]"]');
+    if (selectedMaster !== 'payment' || updatedName !== masterDataPaymentName) {
+      throw new Error(`master-data update readback missing: selected=${selectedMaster || '(empty)'} name=${updatedName || '(empty)'}`);
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('PUT', '/admin/master-data-edit')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-master-data-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'payment master row name is durable after save and Location navigation';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-news-create', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/news/news'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form1')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/news/news-list')) {
+      throw new Error(`news create form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      newsTitle,
+      publishDate: '2027-03-01 00:00:00',
+      newsDescription: 'Created by Web+DB runner through the admin news form.',
+      newsUrl: `https://example.com/news/${taxonomySuffix}`,
+      linkMethod: '0',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    newsId = await jsonValue(response, 'newsId') || parseQueryValue(location, 'newsId');
+    recordOperation(operationEvidence, 'POST', '/admin/news/news-list', response, {
+      newsId,
+      newsTitle,
+      action,
+    });
+    if (response.status() >= 400 || !newsId) {
+      throw new Error(`news create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || `/admin/news/news?newsId=${encodeURIComponent(newsId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const renderedTitle = await inputValue(page, 'input[name="newsTitle"]');
+    const renderedDescription = await page.locator('textarea[name="newsDescription"]').first().inputValue().catch(() => '');
+    if (renderedTitle !== newsTitle || !renderedDescription.includes('Created by Web+DB runner')) {
+      throw new Error(`created news was not visible on detail readback: title=${renderedTitle || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/news/news-list')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-news-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      newsId,
+      newsTitle,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-news-update', async () => {
+    if (!newsId) {
+      throw new Error('news id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/news/news?newsId=${encodeURIComponent(newsId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form1')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/news/news') || !action.includes('_method=put')) {
+      throw new Error(`news update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      newsTitle: updatedNewsTitle,
+      publishDate: '2027-03-02 00:00:00',
+      newsDescription: 'Updated by Web+DB runner through the admin news form.',
+      newsUrl: `https://example.com/news-updated/${taxonomySuffix}`,
+      linkMethod: '0',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'PUT', '/admin/news/news', response, {
+      newsId,
+      newsTitle: updatedNewsTitle,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`news update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || `/admin/news/news?newsId=${encodeURIComponent(newsId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const renderedTitle = await inputValue(page, 'input[name="newsTitle"]');
+    const renderedDescription = await page.locator('textarea[name="newsDescription"]').first().inputValue().catch(() => '');
+    if (renderedTitle !== updatedNewsTitle || !renderedDescription.includes('Updated by Web+DB runner')) {
+      throw new Error(`updated news was not visible on detail readback: title=${renderedTitle || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/news/news')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-news-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      newsId,
+      newsTitle: updatedNewsTitle,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-news-delete', async () => {
+    if (!newsId) {
+      throw new Error('news id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/news/news-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteUrl = (await rowAttrByText(page, updatedNewsTitle, 'a[href*="/admin/news/news"][href*="_method=delete"]', 'href')).replaceAll('&amp;', '&');
+    if (!deleteUrl.includes('/admin/news/news') || !deleteUrl.includes('_method=delete')) {
+      throw new Error(`news delete URL was not exposed for ${newsId}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', deleteUrl, {
+      _method: 'delete',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'DELETE', '/admin/news/news', response, {
+      newsId,
+      newsTitle: updatedNewsTitle,
+      action: deleteUrl,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`news delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/news/news-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (snap.pageText.includes(updatedNewsTitle)) {
+      throw new Error('deleted news was still visible on news list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/news/news')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-news-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      newsId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-page-create', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/page/page'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#content_page_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/page/page-list')) {
+      throw new Error(`page create form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      pageName,
+      pageUrl,
+      pageFileName,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    pageId = await jsonValue(response, 'pageId') || parseQueryValue(location, 'pageId');
+    recordOperation(operationEvidence, 'POST', '/admin/page/page-list', response, {
+      pageId,
+      pageName,
+      action,
+    });
+    if (response.status() >= 400 || !pageId) {
+      throw new Error(`page create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || `/admin/page/page?pageId=${encodeURIComponent(pageId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const renderedName = await inputValue(page, 'input[name="pageName"]');
+    const renderedUrl = await inputValue(page, 'input[name="pageUrl"]');
+    const renderedFileName = await inputValue(page, 'input[name="pageFileName"]');
+    if (renderedName !== pageName || renderedUrl !== pageUrl || renderedFileName !== pageFileName) {
+      throw new Error(`created page was not visible on detail readback: name=${renderedName || '(empty)'} url=${renderedUrl || '(empty)'} file=${renderedFileName || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/page/page-list')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-page-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageId,
+      pageName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-page-update', async () => {
+    if (!pageId) {
+      throw new Error('page id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/page/page?pageId=${encodeURIComponent(pageId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#content_page_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/page/page') || !action.includes('_method=put')) {
+      throw new Error(`page update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      pageName: updatedPageName,
+      pageUrl: updatedPageUrl,
+      pageFileName: updatedPageFileName,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'PUT', '/admin/page/page', response, {
+      pageId,
+      pageName: updatedPageName,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`page update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || `/admin/page/page?pageId=${encodeURIComponent(pageId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const renderedName = await inputValue(page, 'input[name="pageName"]');
+    const renderedUrl = await inputValue(page, 'input[name="pageUrl"]');
+    const renderedFileName = await inputValue(page, 'input[name="pageFileName"]');
+    if (renderedName !== updatedPageName || renderedUrl !== updatedPageUrl || renderedFileName !== updatedPageFileName) {
+      throw new Error(`updated page was not visible on detail readback: name=${renderedName || '(empty)'} url=${renderedUrl || '(empty)'} file=${renderedFileName || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/page/page')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-page-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageId,
+      pageName: updatedPageName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-page-delete', async () => {
+    if (!pageId) {
+      throw new Error('page id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/page/page-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteUrl = (await rowAttrByText(page, updatedPageName, 'a[href*="/admin/page/page"][href*="_method=delete"]', 'href')).replaceAll('&amp;', '&');
+    if (!deleteUrl.includes('/admin/page/page') || !deleteUrl.includes('_method=delete')) {
+      throw new Error(`page delete URL was not exposed for ${pageId}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', deleteUrl, {
+      _method: 'delete',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'DELETE', '/admin/page/page', response, {
+      pageId,
+      pageName: updatedPageName,
+      action: deleteUrl,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`page delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/page/page-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (snap.pageText.includes(updatedPageName)) {
+      throw new Error('deleted page was still visible on page list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/page/page')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-page-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-block-create', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/block/block'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#content_block_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/block/block-list')) {
+      throw new Error(`block create form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      blockName,
+      blockFileName,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    blockId = parseQueryValue(location, 'blockId');
+    recordOperation(operationEvidence, 'POST', '/admin/block/block-list', response, {
+      blockId,
+      blockName,
+      action,
+    });
+    if (response.status() >= 400 || !blockId) {
+      throw new Error(`block create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/block/block-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(blockName) || !snap.pageText.includes(`${blockFileName}.twig`)) {
+      throw new Error(`created block was not visible on list readback: block=${blockName}`);
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/block/block-list')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-block-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      blockId,
+      blockName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-block-update', async () => {
+    if (!blockId) {
+      throw new Error('block id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/block/block?blockId=${encodeURIComponent(blockId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#content_block_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/block/block') || !action.includes('_method=put')) {
+      throw new Error(`block update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const prefilledName = await page.locator('input[name="blockName"]').inputValue();
+    const prefilledFileName = await page.locator('input[name="blockFileName"]').inputValue();
+    if (prefilledName !== blockName || prefilledFileName !== blockFileName) {
+      throw new Error(`block edit form was not prefilled: name=${prefilledName} file=${prefilledFileName}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      blockName: updatedBlockName,
+      blockFileName: updatedBlockFileName,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'PUT', '/admin/block/block', response, {
+      blockId,
+      blockName: updatedBlockName,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`block update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/block/block-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(updatedBlockName) || !snap.pageText.includes(`${updatedBlockFileName}.twig`)) {
+      throw new Error(`updated block was not visible on list readback: block=${updatedBlockName}`);
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/block/block')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-block-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      blockId,
+      blockName: updatedBlockName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-block-delete', async () => {
+    if (!blockId) {
+      throw new Error('block id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/block/block-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteUrl = (await rowAttrByText(page, updatedBlockName, 'a[href*="/admin/block/block"][href*="_method=delete"]', 'href')).replaceAll('&amp;', '&');
+    if (!deleteUrl.includes('/admin/block/block') || !deleteUrl.includes('_method=delete')) {
+      throw new Error(`block delete URL was not exposed for ${blockId}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', deleteUrl, {
+      _method: 'delete',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'DELETE', '/admin/block/block', response, {
+      blockId,
+      blockName: updatedBlockName,
+      action: deleteUrl,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`block delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/block/block-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (snap.pageText.includes(updatedBlockName)) {
+      throw new Error('deleted block was still visible on block list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/block/block')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-block-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      blockId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-layout-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/layout/layout-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const editUrl = (await page.locator('a[href^="/admin/layout/layout?layoutId="]').first().getAttribute('href') ?? '').replaceAll('&amp;', '&');
+    layoutId = parseQueryValue(editUrl, 'layoutId');
+    if (!editUrl.includes('/admin/layout/layout') || !layoutId) {
+      throw new Error('layout edit URL was not exposed on layout list');
+    }
+
+    await page.goto(makeUrl(baseUrl, editUrl), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form1')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/layout/layout') || !action.includes('_method=put')) {
+      throw new Error(`layout update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const prefilledName = await page.locator('input[name="name"]').inputValue();
+    if (prefilledName === '') {
+      throw new Error('layout edit form was not prefilled');
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      name: updatedLayoutName,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'PUT', '/admin/layout/layout', response, {
+      layoutId,
+      layoutName: updatedLayoutName,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`layout update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/layout/layout-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(updatedLayoutName)) {
+      throw new Error(`updated layout was not visible on list readback: layout=${updatedLayoutName}`);
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/layout/layout')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-layout-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      layoutId,
+      layoutName: updatedLayoutName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-member-maintenance', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/member'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const createAction = (await formAction(page, '#member_form')).replaceAll('&amp;', '&');
+    if (!createAction.includes('/admin/member')) {
+      throw new Error(`member create form action was not exposed: ${createAction || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const created = await httpForm(context, baseUrl, 'POST', createAction, {
+      name: adminMemberName,
+      loginId: adminMemberLoginId,
+      password: adminMemberPassword,
+      passwordConfirm: adminMemberPassword,
+      authority: '1',
+      mode: 'member_form',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'POST', '/admin/member', created, {
+      action: createAction,
+      loginId: adminMemberLoginId,
+      name: adminMemberName,
+    });
+    if (created.status() >= 400) {
+      throw new Error(`member create failed status=${created.status()} body=${truncate(await created.text().catch(() => ''), 300)}`);
+    }
+
+    const createLocation = parseLocation(created) || `/admin/member?loginId=${encodeURIComponent(adminMemberLoginId)}`;
+    await page.goto(makeUrl(baseUrl, createLocation), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    let snap = await snapshotPage(page);
+    const renderedLoginId = await inputValue(page, 'input[name="loginId"]');
+    const renderedName = await inputValue(page, 'input[name="name"]');
+    if (renderedLoginId !== adminMemberLoginId || renderedName !== adminMemberName) {
+      throw new Error(`created member was not visible on detail readback: loginId=${renderedLoginId || '(empty)'} name=${renderedName || '(empty)'}`);
+    }
+
+    let evidence = operationEvidence[operationKey('POST', '/admin/member')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-member-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    const updateAction = (await formAction(page, '#member_form')).replaceAll('&amp;', '&');
+    if (!updateAction.includes('/admin/member')) {
+      throw new Error(`member update form action was not exposed: ${updateAction || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const updated = await httpForm(context, baseUrl, 'POST', updateAction, {
+      name: adminMemberUpdatedName,
+      loginId: adminMemberLoginId,
+      mode: 'member_form',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/member', updated, {
+      action: updateAction,
+      loginId: adminMemberLoginId,
+      name: adminMemberUpdatedName,
+    });
+    if (updated.status() >= 400) {
+      throw new Error(`member update failed status=${updated.status()} body=${truncate(await updated.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(updated) || `/admin/member?loginId=${encodeURIComponent(adminMemberLoginId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    snap = await snapshotPage(page);
+    const updatedRenderedName = await inputValue(page, 'input[name="name"]');
+    if (updatedRenderedName !== adminMemberUpdatedName) {
+      throw new Error(`updated member was not visible on detail readback: ${updatedRenderedName || '(empty)'}`);
+    }
+
+    evidence = operationEvidence[operationKey('PUT', '/admin/member')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-member-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/member'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csrfToken = await readCsrf(page) || csrfToken;
+    const deleteTargetCreated = await httpForm(context, baseUrl, 'POST', createAction, {
+      name: adminMemberDeleteName,
+      loginId: adminMemberDeleteLoginId,
+      password: adminMemberPassword,
+      passwordConfirm: adminMemberPassword,
+      authority: '1',
+      mode: 'member_form',
+      csrfToken,
+    });
+    if (deleteTargetCreated.status() >= 400) {
+      throw new Error(`member delete target create failed status=${deleteTargetCreated.status()} body=${truncate(await deleteTargetCreated.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/member-list?nameKeyword=${encodeURIComponent(adminMemberDeleteName)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteAction = (await page.evaluate((loginId) => {
+      for (const form of document.querySelectorAll('form[action]')) {
+        const action = form.getAttribute('action') ?? '';
+        if (action.includes('/admin/member') && action.includes(loginId) && action.includes('_method=delete')) {
+          return action;
+        }
+      }
+
+      return '';
+    }, adminMemberDeleteLoginId)).replaceAll('&amp;', '&');
+    if (!deleteAction.includes('/admin/member') || !deleteAction.includes('_method=delete')) {
+      throw new Error(`member delete form action was not exposed for ${adminMemberDeleteName}: ${deleteAction || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const deleted = await httpForm(context, baseUrl, 'POST', deleteAction, {
+      mode: 'member_form',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'DELETE', '/admin/member', deleted, {
+      action: deleteAction,
+      loginId: adminMemberDeleteLoginId,
+      name: adminMemberDeleteName,
+    });
+    if (deleted.status() >= 400) {
+      throw new Error(`member delete failed status=${deleted.status()} body=${truncate(await deleted.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(deleted) || '/admin/member-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    snap = await snapshotPage(page);
+
+    evidence = operationEvidence[operationKey('DELETE', '/admin/member')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-member-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: deleted.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      loginId: adminMemberLoginId,
+      updatedName: adminMemberUpdatedName,
+      deletedLoginId: adminMemberDeleteLoginId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-security-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/security'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, 'form[action*="/admin/security"]')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/security') || !action.includes('_method=put')) {
+      throw new Error(`security form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const trustedHosts = `^bemart-${taxonomySuffix}\\.test$`;
+    const updated = await httpForm(context, baseUrl, 'POST', action, {
+      adminRouteDir: 'admin',
+      adminAllowHosts: '',
+      adminDenyHosts: '',
+      frontAllowHosts: '',
+      frontDenyHosts: '',
+      trustedHosts,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/security', updated, {
+      action,
+      trustedHosts,
+    });
+    if (updated.status() >= 400) {
+      throw new Error(`security update failed status=${updated.status()} body=${truncate(await updated.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(updated) || '/admin/security'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const renderedTrustedHosts = await inputValue(page, 'input[name="trustedHosts"]');
+    if (renderedTrustedHosts !== trustedHosts) {
+      throw new Error(`updated trustedHosts was not visible on security readback: ${renderedTrustedHosts || '(empty)'}`);
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('PUT', '/admin/security')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-security-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: updated.status(),
+      location: parseLocation(updated),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      trustedHosts,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-authority-role-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/authority-role'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, 'form[name="form1"]')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/authority-role')) {
+      throw new Error(`authority-role form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const denyUrl = `/admin/web-e2e-deny-${taxonomySuffix}`;
+    const updated = await httpForm(context, baseUrl, 'POST', action, {
+      'AuthorityRoles[0][Authority]': '1',
+      'AuthorityRoles[0][deny_url]': denyUrl,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'POST', '/admin/authority-role', updated, {
+      action,
+      denyUrl,
+    });
+    if (updated.status() >= 400) {
+      throw new Error(`authority-role update failed status=${updated.status()} body=${truncate(await updated.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(updated) || '/admin/authority-role'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const renderedDenyUrl = await inputValue(page, 'input[name="AuthorityRoles[0][deny_url]"]');
+    if (renderedDenyUrl !== denyUrl) {
+      throw new Error(`updated denyUrl was not visible on authority-role readback: ${renderedDenyUrl || '(empty)'}`);
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('POST', '/admin/authority-role')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-authority-role-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.forms = snap.forms;
+    }
+
+    return {
+      httpStatus: updated.status(),
+      location: parseLocation(updated),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      denyUrl,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-two-factor-verify', async () => {
+    const browser = context.browser();
+    if (!browser) {
+      throw new Error('Playwright browser is not available for isolated admin 2FA verification context');
+    }
+
+    const adminContext = await browser.newContext();
+    const adminPage = await adminContext.newPage();
+    try {
+      const login = await maybeAdminLogin(adminPage, adminContext, baseUrl, setup.adminLogin?.totpSecret ?? '');
+      if (!login.success) {
+        throw new Error(login.error || login.errorText || 'isolated admin 2FA login failed');
+      }
+
+      const twoFactor = login.twoFactorStep ?? {};
+      if (twoFactor.type !== 'verify') {
+        throw new Error(`admin 2FA verification path was not exercised: ${twoFactor.type || '(none)'}`);
+      }
+
+      operationEvidence[operationKey('POST', '/admin/two-factor-auth')] = {
+        method: 'POST',
+        path: '/admin/two-factor-auth',
+        httpStatus: twoFactor.verifyStatus ?? null,
+        location: twoFactor.verifyLocation ?? '',
+        ok: (twoFactor.verifyStatus ?? 500) < 400,
+        scenario: 'admin 2FA verification after setup',
+      };
+
+      await adminPage.goto(makeUrl(baseUrl, '/admin/index'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+      await adminPage.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+      const snap = await snapshotPage(adminPage);
+      if (!snap.pageText.includes('ホーム') && !snap.pageText.includes('BeMart 管理者')) {
+        throw new Error('admin index was not visible after 2FA verification');
+      }
+
+      const evidence = operationEvidence[operationKey('POST', '/admin/two-factor-auth')];
+      if (evidence) {
+        evidence.screenshot = await pageScreenshotStep(adminPage, screenshotDir, 'admin-two-factor-verify');
+        evidence.finalUrl = adminPage.url();
+        evidence.pageText = truncate(snap.pageText, 600);
+      }
+
+      return {
+        httpStatus: twoFactor.verifyStatus ?? null,
+        location: twoFactor.verifyLocation ?? '',
+        finalUrl: adminPage.url(),
+        screenshot: evidence?.screenshot ?? '',
+        pageText: truncate(snap.pageText, 600),
+      };
+    } finally {
+      await adminContext.close().catch(() => {});
+    }
   });
 
   await step('admin-payment-maintenance-create', async () => {
@@ -2067,6 +3493,754 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
     };
   });
 
+  await step('admin-delivery-maintenance-create', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/delivery/delivery'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#delivery_edit_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/delivery/delivery-list')) {
+      throw new Error(`delivery create form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      deliveryName: deliveryMaintenanceName,
+      visible: '1',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    deliveryMaintenanceId = await jsonValue(response, 'deliveryId') || parseQueryValue(location, 'deliveryId');
+    recordOperation(operationEvidence, 'POST', '/admin/delivery/delivery-list', response, {
+      deliveryId: deliveryMaintenanceId,
+      deliveryName: deliveryMaintenanceName,
+      action,
+    });
+    if (response.status() >= 400 || !deliveryMaintenanceId) {
+      throw new Error(`delivery maintenance create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || `/admin/delivery/delivery?deliveryId=${encodeURIComponent(deliveryMaintenanceId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const renderedName = await inputValue(page, 'input[name="deliveryName"]');
+    if (renderedName !== deliveryMaintenanceName) {
+      throw new Error(`created delivery was not visible on detail readback: ${renderedName || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/delivery/delivery-list')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-delivery-maintenance-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      deliveryId: deliveryMaintenanceId,
+      deliveryName: deliveryMaintenanceName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-delivery-maintenance-update', async () => {
+    if (!deliveryMaintenanceId) {
+      throw new Error('delivery maintenance id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/delivery/delivery?deliveryId=${encodeURIComponent(deliveryMaintenanceId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#delivery_edit_form')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/delivery/delivery') || !action.includes('_method=put')) {
+      throw new Error(`delivery update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      _method: 'put',
+      deliveryId: deliveryMaintenanceId,
+      deliveryName: updatedDeliveryMaintenanceName,
+      visible: '1',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'PUT', '/admin/delivery/delivery', response, {
+      deliveryId: deliveryMaintenanceId,
+      deliveryName: updatedDeliveryMaintenanceName,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`delivery maintenance update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || `/admin/delivery/delivery?deliveryId=${encodeURIComponent(deliveryMaintenanceId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const renderedName = await inputValue(page, 'input[name="deliveryName"]');
+    if (renderedName !== updatedDeliveryMaintenanceName) {
+      throw new Error(`updated delivery was not visible on detail readback: ${renderedName || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/delivery/delivery')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-delivery-maintenance-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      deliveryId: deliveryMaintenanceId,
+      deliveryName: updatedDeliveryMaintenanceName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-delivery-maintenance-delete', async () => {
+    if (!deliveryMaintenanceId) {
+      throw new Error('delivery maintenance id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/delivery/delivery-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteUrl = (await rowAttrByText(page, updatedDeliveryMaintenanceName, 'a[data-url*="/admin/delivery/delivery"]', 'data-url')).replaceAll('&amp;', '&');
+    const deleteToken = await page.locator('#DeleteModal [data-post-action="delete"]').first().getAttribute('token-for-anchor').catch(() => '') || '';
+    if (!deleteUrl.includes('/admin/delivery/delivery')) {
+      throw new Error(`delivery delete URL was not exposed for ${deliveryMaintenanceId}`);
+    }
+
+    const response = await httpForm(context, baseUrl, 'POST', deleteUrl, {
+      _method: 'delete',
+      csrfToken: deleteToken || csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'DELETE', '/admin/delivery/delivery', response, {
+      deliveryId: deliveryMaintenanceId,
+      deliveryName: updatedDeliveryMaintenanceName,
+      action: deleteUrl,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`delivery maintenance delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/delivery/delivery-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (snap.pageText.includes(updatedDeliveryMaintenanceName)) {
+      throw new Error('deleted delivery was still visible on delivery list');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/delivery/delivery')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-delivery-maintenance-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      deliveryId: deliveryMaintenanceId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-tax-rule-create', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/tax-rule/tax-rule-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form1')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/tax-rule/tax-rule-list')) {
+      throw new Error(`tax rule create form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      taxRate: taxRuleRate,
+      applyDate: taxRuleApplyDate,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    taxRuleId = await jsonValue(response, 'taxRuleId') || parseQueryValue(location, 'taxRuleId');
+    recordOperation(operationEvidence, 'POST', '/admin/tax-rule/tax-rule-list', response, {
+      taxRuleId,
+      taxRate: taxRuleRate,
+      applyDate: taxRuleApplyDate,
+      action,
+    });
+    if (response.status() >= 400 || !taxRuleId) {
+      throw new Error(`tax rule create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/tax-rule/tax-rule-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const rowVisible = await page.locator(`#ex-tax_rule-${taxRuleId}`).first().count().catch(() => 0);
+    if (rowVisible !== 1) {
+      throw new Error(`created tax rule was not visible on list readback: ${taxRuleId}`);
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('POST', '/admin/tax-rule/tax-rule-list')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-tax-rule-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      taxRuleId,
+      taxRate: taxRuleRate,
+      applyDate: taxRuleApplyDate,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-tax-rule-delete', async () => {
+    if (!taxRuleId) {
+      throw new Error('tax rule id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/tax-rule/tax-rule-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteUrl = await page.evaluate((id) => {
+      const row = document.getElementById(`ex-tax_rule-${id}`);
+      return row?.querySelector('a[href*="/admin/tax-rule/tax-rule"]')?.getAttribute('href') ?? '';
+    }, taxRuleId).catch(() => '');
+    if (!deleteUrl.includes('/admin/tax-rule/tax-rule')) {
+      throw new Error(`tax rule delete URL was not exposed for ${taxRuleId}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', deleteUrl.replaceAll('&amp;', '&'), {
+      _method: 'delete',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'DELETE', '/admin/tax-rule/tax-rule', response, {
+      taxRuleId,
+      action: deleteUrl,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`tax rule delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/tax-rule/tax-rule-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const rowVisible = await page.locator(`#ex-tax_rule-${taxRuleId}`).first().count().catch(() => 0);
+    if (rowVisible !== 0) {
+      throw new Error(`deleted tax rule was still visible on list readback: ${taxRuleId}`);
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/tax-rule/tax-rule')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-tax-rule-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      taxRuleId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-calendar-holiday-create', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/calendar'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form1')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/calendar') || !action.includes('operation=create')) {
+      throw new Error(`calendar create form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      title: calendarHolidayTitle,
+      holiday: calendarHolidayDate,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/calendar', response, {
+      title: calendarHolidayTitle,
+      holiday: calendarHolidayDate,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`calendar holiday create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/calendar'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    calendarHolidayId = await jsonValue(response, 'calendarId') || await rowIdByText(page, calendarHolidayTitle, 'ex-calendar-', 'calendarId');
+    const snap = await snapshotPage(page);
+    if (!calendarHolidayId || !snap.pageText.includes(calendarHolidayTitle) || !snap.pageText.includes(calendarHolidayDate)) {
+      throw new Error('created calendar holiday was not visible on calendar readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/calendar')];
+    if (evidence) {
+      evidence.calendarId = calendarHolidayId;
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-calendar-holiday-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      calendarId: calendarHolidayId,
+      title: calendarHolidayTitle,
+      holiday: calendarHolidayDate,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-calendar-holiday-update', async () => {
+    if (!calendarHolidayId) {
+      throw new Error('calendar holiday id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/calendar'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, `#edit-form_${calendarHolidayId}`)).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/calendar') || !action.includes('operation=update')) {
+      throw new Error(`calendar update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      operation: 'update',
+      calendarId: calendarHolidayId,
+      title: updatedCalendarHolidayTitle,
+      holiday: updatedCalendarHolidayDate,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    if (response.status() >= 400) {
+      throw new Error(`calendar holiday update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/calendar'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(updatedCalendarHolidayTitle) || !snap.pageText.includes(updatedCalendarHolidayDate)) {
+      throw new Error('updated calendar holiday was not visible on calendar readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/calendar')];
+    if (evidence) {
+      evidence.updatedTitle = updatedCalendarHolidayTitle;
+      evidence.updatedHoliday = updatedCalendarHolidayDate;
+      evidence.updateStatus = response.status();
+      evidence.updateLocation = location;
+      evidence.updateScreenshot = await pageScreenshotStep(page, screenshotDir, 'admin-calendar-holiday-update');
+      evidence.updateFinalUrl = page.url();
+      evidence.updatePageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      calendarId: calendarHolidayId,
+      title: updatedCalendarHolidayTitle,
+      holiday: updatedCalendarHolidayDate,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-calendar-holiday-delete', async () => {
+    if (!calendarHolidayId) {
+      throw new Error('calendar holiday id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/calendar'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteUrl = await page.evaluate((id) => {
+      const row = document.getElementById(`ex-calendar-${id}`);
+      return row?.querySelector('a[href*="/admin/calendar"][href*="_method=delete"]')?.getAttribute('href') ?? '';
+    }, calendarHolidayId).catch(() => '');
+    if (!deleteUrl.includes('/admin/calendar') || !deleteUrl.includes('_method=delete')) {
+      throw new Error(`calendar delete URL was not exposed for ${calendarHolidayId}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', deleteUrl.replaceAll('&amp;', '&'), {
+      _method: 'delete',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'DELETE', '/admin/calendar', response, {
+      calendarId: calendarHolidayId,
+      title: updatedCalendarHolidayTitle,
+      action: deleteUrl,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`calendar holiday delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, parseLocation(response) || '/admin/calendar'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (snap.pageText.includes(updatedCalendarHolidayTitle)) {
+      throw new Error('deleted calendar holiday was still visible on calendar readback');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/calendar')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-calendar-holiday-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      calendarId: calendarHolidayId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-class-name-create', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/class-name/class-name-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form1')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/class-name/class-name-list')) {
+      throw new Error(`class name create form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const canonicalField = await page.locator('#form1 [name="classNameLabel"]').first().count().catch(() => 0);
+    const legacyBackendField = await page.locator('#form1 [name="backend_name"]').first().count().catch(() => 0);
+    if (canonicalField !== 1 || legacyBackendField !== 0) {
+      throw new Error(`class name form fields were not canonical: classNameLabel=${canonicalField} backend_name=${legacyBackendField}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      classNameLabel,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/class-name/class-name-list', response, {
+      classNameLabel,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`class name create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/class-name/class-name-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    classNameId = await jsonValue(response, 'classNameId') || await rowIdByText(page, classNameLabel, 'ex-class_name-', 'classNameId');
+    const snap = await snapshotPage(page);
+    if (!classNameId || !snap.pageText.includes(classNameLabel)) {
+      throw new Error('created class name was not visible on class-name list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/class-name/class-name-list')];
+    if (evidence) {
+      evidence.classNameId = classNameId;
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-class-name-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      classNameId,
+      classNameLabel,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-class-name-update', async () => {
+    if (!classNameId) {
+      throw new Error('class name id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/class-name/class-name-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await rowAttrByText(page, classNameLabel, 'form.mode-edit', 'action')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/class-name/class-name') || !action.includes('_method=put')) {
+      throw new Error(`class name update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      _method: 'put',
+      classNameLabel: updatedClassNameLabel,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'PUT', '/admin/class-name/class-name', response, {
+      classNameId,
+      classNameLabel: updatedClassNameLabel,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`class name update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/class-name/class-name-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(updatedClassNameLabel)) {
+      throw new Error('updated class name was not visible on class-name list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/class-name/class-name')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-class-name-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      classNameId,
+      classNameLabel: updatedClassNameLabel,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-class-category-create', async () => {
+    if (!classNameId) {
+      throw new Error('class name id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/class-category/class-category-list?classNameId=${encodeURIComponent(classNameId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#form1')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/class-category/class-category-list') || !action.includes(`classNameId=${encodeURIComponent(classNameId)}`)) {
+      throw new Error(`class category create form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const canonicalField = await page.locator('#form1 [name="classCategoryName"]').first().count().catch(() => 0);
+    const legacyBackendField = await page.locator('#form1 [name="backend_name"]').first().count().catch(() => 0);
+    if (canonicalField !== 1 || legacyBackendField !== 0) {
+      throw new Error(`class category form fields were not canonical: classCategoryName=${canonicalField} backend_name=${legacyBackendField}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      classCategoryName,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/class-category/class-category-list', response, {
+      classNameId,
+      classCategoryName,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`class category create failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || `/admin/class-category/class-category-list?classNameId=${encodeURIComponent(classNameId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    classCategoryId = await jsonValue(response, 'classCategoryId') || await rowIdByText(page, classCategoryName, 'ex-class_category-', 'classCategoryId');
+    const snap = await snapshotPage(page);
+    if (!classCategoryId || !snap.pageText.includes(classCategoryName)) {
+      throw new Error('created class category was not visible on class-category list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/class-category/class-category-list')];
+    if (evidence) {
+      evidence.classCategoryId = classCategoryId;
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-class-category-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      classNameId,
+      classCategoryId,
+      classCategoryName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-class-category-update', async () => {
+    if (!classCategoryId) {
+      throw new Error('class category id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/class-category/class-category-list?classNameId=${encodeURIComponent(classNameId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await rowAttrByText(page, classCategoryName, 'form.mode-edit', 'action')).replaceAll('&amp;', '&');
+    if (!action.includes('/admin/class-category/class-category') || !action.includes('_method=put')) {
+      throw new Error(`class category update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      _method: 'put',
+      classCategoryName: updatedClassCategoryName,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'PUT', '/admin/class-category/class-category', response, {
+      classNameId,
+      classCategoryId,
+      classCategoryName: updatedClassCategoryName,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`class category update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || `/admin/class-category/class-category-list?classNameId=${encodeURIComponent(classNameId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(updatedClassCategoryName)) {
+      throw new Error('updated class category was not visible on class-category list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/class-category/class-category')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-class-category-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      classNameId,
+      classCategoryId,
+      classCategoryName: updatedClassCategoryName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-class-category-delete', async () => {
+    if (!classCategoryId) {
+      throw new Error('class category id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/class-category/class-category-list?classNameId=${encodeURIComponent(classNameId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteUrl = (await rowAttrByText(page, updatedClassCategoryName, 'a[data-url*="/admin/class-category/class-category"]', 'data-url')).replaceAll('&amp;', '&');
+    if (!deleteUrl.includes('/admin/class-category/class-category')) {
+      throw new Error(`class category delete URL was not exposed for ${classCategoryId}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', deleteUrl, {
+      _method: 'delete',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'DELETE', '/admin/class-category/class-category', response, {
+      classNameId,
+      classCategoryId,
+      classCategoryName: updatedClassCategoryName,
+      action: deleteUrl,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`class category delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/class-category/class-category-list?classNameId=${encodeURIComponent(classNameId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (snap.pageText.includes(updatedClassCategoryName)) {
+      throw new Error('deleted class category was still visible on class-category list');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/class-category/class-category')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-class-category-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      classNameId,
+      classCategoryId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-class-name-delete', async () => {
+    if (!classNameId) {
+      throw new Error('class name id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/class-name/class-name-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const deleteUrl = (await rowAttrByText(page, updatedClassNameLabel, 'a[data-url*="/admin/class-name/class-name"]', 'data-url')).replaceAll('&amp;', '&');
+    if (!deleteUrl.includes('/admin/class-name/class-name')) {
+      throw new Error(`class name delete URL was not exposed for ${classNameId}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', deleteUrl, {
+      _method: 'delete',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'DELETE', '/admin/class-name/class-name', response, {
+      classNameId,
+      classNameLabel: updatedClassNameLabel,
+      action: deleteUrl,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`class name delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location || '/admin/class-name/class-name-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (snap.pageText.includes(updatedClassNameLabel)) {
+      throw new Error('deleted class name was still visible on class-name list');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/class-name/class-name')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-class-name-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      classNameId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
   await step('admin-product-create', async () => {
     const response = await httpForm(context, baseUrl, 'POST', '/admin/product', {
       productCode,
@@ -2099,6 +4273,111 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
     return {
       finalUrl: page.url(),
       screenshot: await pageScreenshotStep(page, screenshotDir, 'admin-product-readback'),
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-product-csv-upload', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/product/csv-product'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#csv_product_form');
+    if (!action.includes('/admin/product-csv')) {
+      throw new Error(`product CSV upload form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const csv = `productCode,productName,price02,stock,productStatus,description,searchWord,note\n${csvProductCode},${csvProductName},1234,7,1,Created through Web+DB CSV upload,csv upload,web-e2e\n`;
+    const response = await httpCsvUpload(context, baseUrl, action, csrfToken, 'products.csv', csv);
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/product-csv', response, {
+      productCode: csvProductCode,
+      productName: csvProductName,
+      action,
+    });
+    if (response.status() !== 303 || location !== '/admin/product-list') {
+      throw new Error(`product CSV upload did not PRG to product list status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/product?productCode=${encodeURIComponent(csvProductCode)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(csvProductCode) && !snap.pageText.includes(csvProductName)) {
+      throw new Error('CSV imported product was not visible on admin product readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/product-csv')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-product-csv-upload');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'admin product detail includes CSV product code/name';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      productCode: csvProductCode,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-csv-config-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/csv-config?csvType=3'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#csv-form');
+    if (!action.includes('/admin/csv-config')) {
+      throw new Error(`CSV config form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const selectedType = await inputValue(page, '#csv-type');
+    if (selectedType !== '3') {
+      throw new Error(`CSV config form did not select order CSV type: ${selectedType || '(empty)'}`);
+    }
+
+    await page.locator('#csv-output').selectOption('paymentTotal');
+    await page.locator('.move-most[data-value="top"]').click();
+    const responsePromise = page.waitForResponse((response) => (
+      safePath(response.url()) === '/admin/csv-config'
+      && response.request().method() === 'POST'
+    ), { timeout: NAV_TIMEOUT_MS });
+    await page.locator('#csv-form button[type="submit"]').click();
+    const response = await responsePromise;
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/csv-config', response, {
+      action,
+      csvType: '3',
+      readback: 'GET /admin/order/export-order CSV header starts with paymentTotal,orderNo,orderDate',
+    });
+    if (response.status() !== 303 || !location.includes('/admin/csv-config?csvType=3')) {
+      throw new Error(`CSV config update did not PRG to the selected CSV type status=${response.status()} location=${location || '(none)'}`);
+    }
+
+    await page.waitForLoadState('domcontentloaded', { timeout: NAV_TIMEOUT_MS }).catch(() => {});
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const csv = await httpGet(context, baseUrl, '/admin/order/export-order');
+    const csvBody = await csv.text();
+    if (csv.status() >= 400 || !csvBody.startsWith('paymentTotal,orderNo,orderDate')) {
+      throw new Error(`CSV config readback failed status=${csv.status()} header=${truncate(csvBody.split('\n')[0] ?? '', 120)}`);
+    }
+
+    const snap = await snapshotPage(page);
+    const evidence = operationEvidence[operationKey('POST', '/admin/csv-config')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-csv-config-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.csvHeader = csvBody.split('\n')[0] ?? '';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      csvHeader: csvBody.split('\n')[0] ?? '',
       pageText: truncate(snap.pageText, 600),
     };
   });
@@ -2456,6 +4735,150 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
     };
   });
 
+  await step('admin-category-csv-upload', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/product/csv-category'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#csv_category_form');
+    if (!action.includes('/admin/category/csv')) {
+      throw new Error(`category CSV upload form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const csv = `category_id,category_name,parent_category_id\n,${csvCategoryName},\n`;
+    const response = await httpCsvUpload(context, baseUrl, action, csrfToken, 'categories.csv', csv);
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/category/csv', response, {
+      categoryName: csvCategoryName,
+      action,
+    });
+    if (response.status() !== 303 || location !== '/admin/category/category-list') {
+      throw new Error(`category CSV upload did not PRG to category list status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(csvCategoryName)) {
+      throw new Error('CSV imported category was not visible on category list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/category/csv')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-category-csv-upload');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'admin category list includes CSV category name';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      categoryName: csvCategoryName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-class-name-csv-upload', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/product/csv-class-name'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#csv_class_name_form');
+    if (!action.includes('/admin/product/csv-class-name')) {
+      throw new Error(`class-name CSV upload form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const csv = `class_name_id,class_name,backend_name\n,${csvClassNameLabel},${csvClassNameLabel}\n`;
+    const response = await httpCsvUpload(context, baseUrl, action, csrfToken, 'class_names.csv', csv);
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/product/csv-class-name', response, {
+      classNameLabel: csvClassNameLabel,
+      action,
+    });
+    if (response.status() !== 303 || location !== '/admin/class-name/class-name-list') {
+      throw new Error(`class-name CSV upload did not PRG to class-name list status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csvClassNameId = await rowIdByText(page, csvClassNameLabel, 'ex-class_name-', 'classNameId');
+    const snap = await snapshotPage(page);
+    if (!csvClassNameId || !snap.pageText.includes(csvClassNameLabel)) {
+      throw new Error('CSV imported class name was not visible on class-name list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/product/csv-class-name')];
+    if (evidence) {
+      evidence.classNameId = csvClassNameId;
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-class-name-csv-upload');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'admin class-name list includes CSV class name';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      classNameId: csvClassNameId,
+      classNameLabel: csvClassNameLabel,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-class-category-csv-upload', async () => {
+    if (!csvClassNameId) {
+      throw new Error('CSV class-name id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/product/csv-class-category'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#csv_class_category_form');
+    if (!action.includes('/admin/product/csv-class-category')) {
+      throw new Error(`class-category CSV upload form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const csv = `class_category_id,class_name_id,class_category_name,backend_name\n,${csvClassNameId},${csvClassCategoryName},${csvClassCategoryName}\n`;
+    const response = await httpCsvUpload(context, baseUrl, action, csrfToken, 'class_categories.csv', csv);
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/product/csv-class-category', response, {
+      classNameId: csvClassNameId,
+      classCategoryName: csvClassCategoryName,
+      action,
+    });
+    if (response.status() !== 303 || location !== '/admin/class-category/class-category-list') {
+      throw new Error(`class-category CSV upload did not PRG to class-category list status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/class-category/class-category-list?classNameId=${encodeURIComponent(csvClassNameId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(csvClassCategoryName)) {
+      throw new Error('CSV imported class category was not visible on class-category list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/product/csv-class-category')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-class-category-csv-upload');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'admin class-category list includes CSV class category under CSV class name';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      classNameId: csvClassNameId,
+      classCategoryName: csvClassCategoryName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
   await step('admin-tag-create', async () => {
     await page.goto(makeUrl(baseUrl, '/admin/tag/tag-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
     await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
@@ -2556,6 +4979,322 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
     };
   });
 
+  await step('admin-template-upload', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/template/template-add'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#template_add_form');
+    if (!action.includes('/admin/template/template-add')) {
+      throw new Error(`template upload form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpTemplateUpload(context, baseUrl, action, csrfToken, templateCode, templateName);
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/template/template-add', response, {
+      templateCode,
+      templateName,
+      action,
+    });
+    if (response.status() !== 303 || location !== '/admin/template/template-list') {
+      throw new Error(`template upload did not PRG to template list status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    templateId = await rowAttrByText(page, templateName, 'input[name="template"]', 'value');
+    const snap = await snapshotPage(page);
+    if (!templateId || !snap.pageText.includes(templateName)) {
+      throw new Error('uploaded template was not visible on template list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/template/template-add')];
+    if (evidence) {
+      evidence.templateId = templateId;
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-template-upload');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'template list includes uploaded template name and radio value';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      templateId,
+      templateName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-template-select', async () => {
+    if (!templateId) {
+      throw new Error('template id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/template/template-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#form1');
+    if (!action.includes('/admin/template/template-list') || !action.includes('_method=put')) {
+      throw new Error(`template select form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      csrfToken,
+      templateId,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'PUT', '/admin/template/template-list', response, {
+      templateId,
+      templateName,
+      action,
+    });
+    if (response.status() !== 303 || location !== '/admin/template/template-list') {
+      throw new Error(`template select did not PRG to template list status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const checked = await rowAttrByText(page, templateName, 'input[name="template"]', 'checked');
+    const snap = await snapshotPage(page);
+    if (checked === null) {
+      throw new Error('selected template was not rendered as checked on template list readback');
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/template/template-list')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-template-select');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'template list radio is checked for selected template';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      templateId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-template-delete', async () => {
+    if (!templateId) {
+      throw new Error('template id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/template/template-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csrfToken = await readCsrf(page) || csrfToken;
+    const deleteAction = await rowAttrByText(page, templateName, 'a.btn-ec-delete[href*="_method=delete"]', 'href');
+    if (!deleteAction.includes('/admin/template/template-list') || !deleteAction.includes('_method=delete')) {
+      throw new Error(`template delete affordance was not exposed for ${templateId}`);
+    }
+
+    const response = await httpForm(context, baseUrl, 'POST', deleteAction, {
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'DELETE', '/admin/template/template-list', response, {
+      templateId,
+      templateName,
+      action: deleteAction,
+    });
+    if (response.status() !== 303 || location !== '/admin/template/template-list') {
+      throw new Error(`template delete did not PRG to template list status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (snap.pageText.includes(templateName)) {
+      throw new Error('deleted template was still visible on template list');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/template/template-list')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-template-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'template list no longer includes deleted template name';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      templateId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-mail-template-create', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/mail-template'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', '/admin/mail-template/create', {
+      mailTemplateName,
+      fileName: `Mail/web-e2e-mail-${taxonomySuffix}.twig`,
+      mailSubject: mailTemplateInitialSubject,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/mail-template/create', response, {
+      mailTemplateName,
+      mailTemplateInitialSubject,
+      action: '/admin/mail-template/create',
+    });
+    if (response.status() !== 201 || location !== '/admin/mail-template') {
+      throw new Error(`mail template create failed status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    mailTemplateId = await optionValueByText(page, '#mail_template', mailTemplateName);
+    const snap = await snapshotPage(page);
+    if (!mailTemplateId || !snap.pageText.includes(mailTemplateName)) {
+      throw new Error('created mail template was not visible in mail-template select options');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/mail-template/create')];
+    if (evidence) {
+      evidence.mailTemplateId = mailTemplateId;
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-mail-template-create');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'mail-template select includes created template option';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      mailTemplateId,
+      mailTemplateName,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-mail-template-update', async () => {
+    if (!mailTemplateId) {
+      throw new Error('mail template id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/mail-template?mailTemplateId=${encodeURIComponent(mailTemplateId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#form1');
+    if (!action.includes('/admin/mail-template')) {
+      throw new Error(`mail-template edit form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const hiddenId = await inputValue(page, 'input[name="mailTemplateId"]');
+    const subject = await inputValue(page, 'input[name="mail_subject"]');
+    if (hiddenId !== mailTemplateId || subject !== mailTemplateInitialSubject) {
+      throw new Error(`mail-template edit form was not populated hiddenId=${hiddenId || '(empty)'} subject=${subject || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      mailTemplateId,
+      mail_subject: mailTemplateUpdatedSubject,
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'POST', '/admin/mail-template', response, {
+      mailTemplateId,
+      mailTemplateName,
+      action,
+      field: 'mail_subject',
+    });
+    if (response.status() !== 303 || location !== `/admin/mail-template?mailTemplateId=${mailTemplateId}`) {
+      throw new Error(`mail-template update did not PRG to selected edit screen status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const updatedValue = await inputValue(page, 'input[name="mail_subject"]');
+    const snap = await snapshotPage(page);
+    if (updatedValue !== mailTemplateUpdatedSubject) {
+      throw new Error(`mail-template subject readback mismatch: ${updatedValue || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/mail-template')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-mail-template-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.forms = snap.forms;
+      evidence.readback = 'selected mail-template form shows updated mail_subject value';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      mailTemplateId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-mail-template-delete', async () => {
+    if (!mailTemplateId) {
+      throw new Error('mail template id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/mail-template?mailTemplateId=${encodeURIComponent(mailTemplateId)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csrfToken = await readCsrf(page) || csrfToken;
+    const deleteAction = await page.locator('a.btn-ec-delete[href*="/admin/mail-template"][href*="_method=delete"]').first()
+      .evaluate((element) => element.getAttribute('href') ?? '')
+      .catch(() => '');
+    if (!deleteAction.includes('/admin/mail-template') || !deleteAction.includes('_method=delete')) {
+      throw new Error(`mail-template delete affordance was not exposed for ${mailTemplateId}`);
+    }
+
+    const response = await httpForm(context, baseUrl, 'POST', deleteAction, {
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    recordOperation(operationEvidence, 'DELETE', '/admin/mail-template', response, {
+      mailTemplateId,
+      mailTemplateName,
+      action: deleteAction,
+    });
+    if (response.status() !== 303 || location !== '/admin/mail-template') {
+      throw new Error(`mail-template delete did not PRG to list status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const optionValue = await optionValueByText(page, '#mail_template', mailTemplateName);
+    const snap = await snapshotPage(page);
+    if (optionValue !== '' || snap.pageText.includes(mailTemplateName)) {
+      throw new Error('deleted mail template was still visible on mail-template list');
+    }
+
+    const evidence = operationEvidence[operationKey('DELETE', '/admin/mail-template')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-mail-template-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'mail-template select no longer includes deleted template option';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      mailTemplateId,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
   await step('admin-customer-create', async () => {
     const response = await httpForm(context, baseUrl, 'POST', '/admin/create-customer', {
       email: adminCustomerEmail,
@@ -2620,6 +5359,85 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
       finalUrl: page.url(),
       screenshot: await pageScreenshotStep(page, screenshotDir, 'admin-customer-readback'),
       pageText: truncate(listSnap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-create', async () => {
+    if (!adminCustomerId) {
+      throw new Error('admin customer id was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/order-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const createHref = await page.locator('a[href="/admin/order/edit"]').first()
+      .evaluate((element) => element.getAttribute('href') ?? '')
+      .catch(() => '');
+    if (createHref !== '/admin/order/edit') {
+      throw new Error(`admin order create link was not exposed: ${createHref || '(empty)'}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, createHref), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = await formAction(page, '#order_form');
+    if (!action.includes('/admin/order/create')) {
+      throw new Error(`blank order editor did not expose create action: ${action || '(empty)'}`);
+    }
+
+    const hasProductCodeInput = await page.locator('input[name="orderItems[0][productCode]"]').count();
+    if (hasProductCodeInput === 0) {
+      throw new Error('blank order editor did not expose orderItems[0][productCode] input');
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      customerId: adminCustomerId,
+      paymentMethodId: '1',
+      'orderItems[0][productCode]': productCode,
+      'orderItems[0][productName]': productName,
+      'orderItems[0][unitPrice]': '1200',
+      'orderItems[0][quantity]': '2',
+      deliveryFeeTotal: '0',
+      charge: '0',
+      discount: '0',
+      csrfToken,
+    });
+    const location = parseLocation(response);
+    manualOrderNo = parseQueryValue(location, 'orderNo');
+    recordOperation(operationEvidence, 'POST', '/admin/order/create', response, {
+      customerId: adminCustomerId,
+      productCode,
+      productName,
+      orderNo: manualOrderNo,
+      action,
+    });
+    if (response.status() !== 303 || !location.startsWith('/admin/order?orderNo=') || !manualOrderNo) {
+      throw new Error(`admin order create did not PRG to order detail status=${response.status()} location=${location || '(none)'} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes(productCode) || !snap.pageText.includes(productName) || !snap.pageText.includes(adminCustomerId)) {
+      throw new Error('created admin order detail did not show customer/product readback');
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/order/create')];
+    if (evidence) {
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-create');
+      evidence.readback = 'admin order detail shows customer id, product code and product name created from blank editor form';
+    }
+
+    return {
+      httpStatus: response.status(),
+      location,
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: manualOrderNo,
+      customerId: adminCustomerId,
+      productCode,
+      pageText: truncate(snap.pageText, 600),
     };
   });
 
@@ -2710,6 +5528,7 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
   });
 
   await step('non-member-purchase', async () => {
+    const nonMemberEmail = `non-member-${runId}@example.test`;
     const add = await httpForm(context, baseUrl, 'POST', '/cart/item', {
       productCode,
       quantity: '1',
@@ -2727,8 +5546,8 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
       kana01: 'ヤマダ',
       kana02: 'タロウ',
       companyName: '',
-      email: `non-member-${runId}@example.test`,
-      email_confirm: `non-member-${runId}@example.test`,
+      email: nonMemberEmail,
+      email_confirm: nonMemberEmail,
       phoneNumber: '0312345678',
       postalCode: '1000001',
       pref: '13',
@@ -2737,23 +5556,49 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
       csrfToken,
     });
     recordOperation(operationEvidence, 'POST', '/shopping/non-member', nonMember, { scenario: 'non-member' });
-    const preOrderId = parseQueryValue(parseLocation(nonMember), 'preOrderId');
-    if (!preOrderId) {
-      throw new Error(`non-member submit did not return preOrderId status=${nonMember.status()} body=${truncate(await nonMember.text().catch(() => ''), 300)}`);
+    const nonMemberLocation = parseLocation(nonMember);
+    const preOrderId = parseQueryValue(nonMemberLocation, 'preOrderId');
+    const paymentMethodId = parseQueryValue(nonMemberLocation, 'paymentMethodId') || '1';
+    if (nonMember.status() !== 303 || !nonMemberLocation.startsWith('/shopping/confirm') || !preOrderId) {
+      throw new Error(`non-member submit did not redirect to confirm status=${nonMember.status()} location=${nonMemberLocation || '(none)'} body=${truncate(await nonMember.text().catch(() => ''), 300)}`);
     }
 
-    const confirm = await httpForm(context, baseUrl, 'POST', '/shopping/confirm', {
-      preOrderId,
-      payment: paymentId || '1',
-      csrfToken,
-    });
-    recordOperation(operationEvidence, 'POST', '/shopping/confirm', confirm, { preOrderId, scenario: 'non-member' });
-    if (confirm.status() >= 400) {
-      throw new Error(`non-member confirm failed status=${confirm.status()} body=${truncate(await confirm.text().catch(() => ''), 300)}`);
+    await page.goto(makeUrl(baseUrl, nonMemberLocation), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const confirmSnap = await snapshotPage(page);
+    if (!confirmSnap.pageText.includes('ご注文内容のご確認') || !confirmSnap.pageText.includes(nonMemberEmail) || !confirmSnap.pageText.includes('代金引換')) {
+      throw new Error(`non-member confirm readback was incomplete: ${truncate(confirmSnap.pageText, 500)}`);
     }
 
-    const checkout = await httpForm(context, baseUrl, 'POST', '/shopping/checkout', {
-      preOrderId,
+    const nonMemberConfirmScreenshot = await pageScreenshotStep(page, screenshotDir, 'shopping-non-member-confirm');
+    const nonMemberEvidence = operationEvidence[operationKey('POST', '/shopping/non-member')];
+    if (nonMemberEvidence) {
+      nonMemberEvidence.location = nonMemberLocation;
+      nonMemberEvidence.finalUrl = page.url();
+      nonMemberEvidence.screenshot = nonMemberConfirmScreenshot;
+      nonMemberEvidence.title = confirmSnap.title;
+      nonMemberEvidence.h1 = confirmSnap.h1;
+      nonMemberEvidence.pageText = truncate(confirmSnap.pageText, 1000);
+      nonMemberEvidence.forms = confirmSnap.forms;
+      nonMemberEvidence.preOrderId = preOrderId;
+      nonMemberEvidence.paymentMethodId = paymentMethodId;
+      nonMemberEvidence.readback = 'confirm page includes non-member email and installer payment name';
+    }
+    confirmScreenshot = confirmScreenshot || nonMemberConfirmScreenshot;
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const checkoutAction = (await formAction(page, '#shopping-form')).replaceAll('&amp;', '&') || '/shopping/checkout';
+    if (!safePath(checkoutAction).includes('/shopping/checkout')) {
+      throw new Error(`non-member checkout form action was not exposed: ${checkoutAction || '(empty)'}`);
+    }
+
+    const checkoutPreOrderId = await inputValue(page, '[name="preOrderId"]') || preOrderId;
+    if (checkoutPreOrderId !== preOrderId) {
+      throw new Error(`non-member confirm preOrderId changed from ${preOrderId} to ${checkoutPreOrderId}`);
+    }
+
+    const checkout = await httpForm(context, baseUrl, 'POST', checkoutAction, {
+      preOrderId: checkoutPreOrderId,
       csrfToken,
     });
     recordOperation(operationEvidence, 'POST', '/shopping/checkout', checkout, { preOrderId, scenario: 'non-member' });
@@ -2801,7 +5646,7 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
     await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
     csrfToken = await readCsrf(page) || csrfToken;
     const preOrderId = await inputValue(page, '[name="preOrderId"]');
-    const payment = await inputValue(page, '[name="payment"]:checked').catch(() => '') || paymentId || '1';
+    const payment = await inputValue(page, '[name="payment"]:checked').catch(() => '') || '1';
     if (!preOrderId) {
       const snap = await snapshotPage(page);
       throw new Error(`member shopping page did not expose preOrderId: ${truncate(snap.pageText, 400)}`);
@@ -2887,6 +5732,518 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
       orderNo: memberOrderNo,
       finalUrl: page.url(),
       screenshot: await pageScreenshotStep(page, screenshotDir, 'member-reorder-cart'),
+    };
+  });
+
+  await step('admin-order-update', async () => {
+    if (!memberOrderNo) {
+      throw new Error('member order was not created');
+    }
+
+    const admin = await maybeAdminLogin(page, context, baseUrl, setup.adminLogin?.totpSecret ?? '');
+    if (!admin.success) {
+      throw new Error(admin.error || admin.errorText || 'admin login failed for order maintenance');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/order?orderNo=${encodeURIComponent(memberOrderNo)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#order_form')).replaceAll('&amp;', '&');
+    if (!safePath(action).includes('/admin/order')) {
+      throw new Error(`order update form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || admin.csrfToken || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      _method: 'put',
+      orderNo: memberOrderNo,
+      discount: '100',
+      charge: '50',
+      usePoint: '0',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/order', response, {
+      orderNo: memberOrderNo,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`order update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/order?orderNo=${encodeURIComponent(memberOrderNo)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const discount = await inputValue(page, 'input[name="discount"]');
+    const charge = await inputValue(page, 'input[name="charge"]');
+    const snap = await snapshotPage(page);
+    if (discount !== '100' || charge !== '50' || !snap.pageText.includes(memberOrderNo)) {
+      throw new Error(`order update readback failed discount=${discount || '(empty)'} charge=${charge || '(empty)'}`);
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/order')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'admin order detail shows updated discount and charge';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: memberOrderNo,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-bulk-delete', async () => {
+    if (!nonMemberOrderNo) {
+      throw new Error('non-member order was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/order-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csrfToken = await readCsrf(page) || csrfToken;
+
+    const selectedOrderNo = await rowAttrByText(page, nonMemberOrderNo, 'input[name="ids[]"]', 'value');
+    if (selectedOrderNo !== nonMemberOrderNo) {
+      throw new Error(`bulk delete checkbox was not exposed for ${nonMemberOrderNo}: value=${selectedOrderNo || '(empty)'}`);
+    }
+
+    const mode = await inputValue(page, '#form_bulk input[name="mode"]');
+    const action = await page.evaluate(() => {
+      const direct = document.querySelector('#form_bulk')?.getAttribute('action') ?? '';
+      if (direct.includes('/admin/order/bulk-delete')) {
+        return direct;
+      }
+
+      const scripts = Array.from(document.scripts).map((script) => script.textContent ?? '').join('\n');
+      const match = scripts.match(/#form_bulk'\)\.attr\('action',\s*["']([^"']+)["']/);
+
+      return match?.[1] ?? '';
+    }).catch(() => '');
+    if (!safePath(action).includes('/admin/order/bulk-delete')) {
+      throw new Error(`bulk delete form action was not exposed: ${action || '(empty)'}`);
+    }
+    if (mode !== 'order_bulk_delete_form') {
+      throw new Error(`bulk delete form mode was not exposed: ${mode || '(empty)'}`);
+    }
+
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      'ids[]': nonMemberOrderNo,
+      mode,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'POST', '/admin/order/bulk-delete', response, {
+      orderNo: nonMemberOrderNo,
+      action,
+      mode,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`order bulk delete failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/order?orderNo=${encodeURIComponent(nonMemberOrderNo)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes('注文取消') && !snap.pageText.includes('3')) {
+      throw new Error(`bulk delete readback did not show canceled status: ${truncate(snap.pageText, 400)}`);
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/order/bulk-delete')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-bulk-delete');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'admin order detail shows canceled status after bulk delete form submit';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: nonMemberOrderNo,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-status-settings-update', async () => {
+    await page.goto(makeUrl(baseUrl, '/admin/order-status'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csrfToken = await readCsrf(page) || csrfToken;
+    const action = (await formAction(page, '#form')).replaceAll('&amp;', '&');
+    if (!safePath(action).includes('/admin/order-status')) {
+      throw new Error(`order status settings form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      order_status_1_customer_order_status_name: '注文受付',
+      order_status_1_name: '新規受付',
+      order_status_1_color: '#437ec4',
+      order_status_1_display_order_count: '1',
+      orderStatusRows: 'browser-form-submit',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/order-status', response, { action });
+    if (response.status() >= 400) {
+      throw new Error(`order status settings update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    const location = parseLocation(response) || '/admin/order-status';
+    await page.goto(makeUrl(baseUrl, location), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    const rowInputCount = await page.locator('#form input[name^="order_status_"]').count();
+    const readbackName = await inputValue(page, 'input[name="order_status_1_name"]');
+    if (!snap.pageText.includes('受注対応状況') || rowInputCount === 0 || readbackName !== '新規受付') {
+      throw new Error(`order status settings readback did not render settings rows: inputs=${rowInputCount} name=${readbackName || '(empty)'} text=${truncate(snap.pageText, 400)}`);
+    }
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/order-status')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-status-settings-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'admin order status settings form returns to settings page after PUT and row input value is visible';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-status-update', async () => {
+    if (!memberOrderNo) {
+      throw new Error('member order was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/order-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csrfToken = await readCsrf(page) || csrfToken;
+    const action = (await rowAttrByText(page, memberOrderNo, 'a[data-type="status"]', 'data-update-status-url')).replaceAll('&amp;', '&');
+    const orderStatus = await rowAttrByText(page, memberOrderNo, 'a[data-type="status"]', 'data-update-status-id') || '5';
+    if (!safePath(action).includes('/admin/order-status')) {
+      throw new Error(`order status action was not exposed as canonical resource: ${action || '(empty)'}`);
+    }
+
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      orderStatus,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'POST', '/admin/order-status', response, {
+      orderNo: memberOrderNo,
+      orderStatus,
+      action,
+    });
+    if (response.status() >= 400) {
+      throw new Error(`order status update failed status=${response.status()} body=${truncate(await response.text().catch(() => ''), 300)}`);
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/order?orderNo=${encodeURIComponent(memberOrderNo)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const snap = await snapshotPage(page);
+    if (!snap.pageText.includes('発送済み') && !snap.pageText.includes(orderStatus)) {
+      throw new Error(`order status readback did not show ${orderStatus}: ${truncate(snap.pageText, 400)}`);
+    }
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/order-status')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-status-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'admin order detail shows updated order status';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: memberOrderNo,
+      orderStatus,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-shipping-address-update', async () => {
+    if (!memberOrderNo) {
+      throw new Error('member order was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/order/shipping-address?orderNo=${encodeURIComponent(memberOrderNo)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#shipping_form')).replaceAll('&amp;', '&');
+    if (!safePath(action).includes('/admin/order/shipping-address')) {
+      throw new Error(`shipping address form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      _method: 'put',
+      orderNo: memberOrderNo,
+      name01: '配送',
+      name02: '太郎',
+      postalCode: '1500001',
+      pref: '13',
+      addr01: '渋谷区',
+      addr02: 'Web E2E 1-1-1',
+      phoneNumber: '0312345678',
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/order/shipping-address', response, {
+      orderNo: memberOrderNo,
+      action,
+    });
+    const responseText = decodeResponseText(await response.text().catch(() => ''));
+    if (response.status() >= 400) {
+      throw new Error(`shipping address update failed status=${response.status()} body=${truncate(responseText, 300)}`);
+    }
+
+    const csvResponse = await context.request.fetch(makeUrl(baseUrl, '/admin/order/export-shipping'), {
+      timeout: NAV_TIMEOUT_MS,
+    });
+    const csvText = decodeResponseText(await csvResponse.text().catch(() => ''));
+    if (csvResponse.status() >= 400 || !csvText.includes(memberOrderNo) || !csvText.includes('Web E2E 1-1-1')) {
+      throw new Error(`shipping CSV readback failed status=${csvResponse.status()} body=${truncate(csvText, 400)}`);
+    }
+
+    await page.setContent(`
+      <!doctype html>
+      <meta charset="utf-8">
+      <title>shipping address update</title>
+      <body><h1>shipping address update</h1><pre>${escapeHtml(csvText)}</pre></body>
+    `, { waitUntil: 'domcontentloaded' });
+    const snap = await snapshotPage(page);
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/order/shipping-address')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-shipping-address-update');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'shipping export CSV includes updated address';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: memberOrderNo,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-tracking-number-update', async () => {
+    if (!memberOrderNo) {
+      throw new Error('member order was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/order-list'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    csrfToken = await readCsrf(page) || csrfToken;
+    const action = (await rowAttrByText(page, memberOrderNo, 'input.update_tracking_number', 'data-url')).replaceAll('&amp;', '&');
+    if (!safePath(action).includes('/admin/order/tracking-number')) {
+      throw new Error(`tracking-number action was not exposed: ${action || '(empty)'}`);
+    }
+
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      trackingNumber: orderTrackingNumber,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'PUT', '/admin/order/tracking-number', response, {
+      orderNo: memberOrderNo,
+      trackingNumber: orderTrackingNumber,
+      action,
+    });
+    const responseText = decodeResponseText(await response.text().catch(() => ''));
+    if (response.status() >= 400 || !responseText.includes(orderTrackingNumber)) {
+      throw new Error(`tracking-number update failed status=${response.status()} body=${truncate(responseText, 300)}`);
+    }
+
+    await page.setContent(`
+      <!doctype html>
+      <meta charset="utf-8">
+      <title>tracking-number update</title>
+      <body><h1>tracking-number update</h1><pre>${escapeHtml(responseText)}</pre></body>
+    `, { waitUntil: 'domcontentloaded' });
+    const snap = await snapshotPage(page);
+
+    const evidence = operationEvidence[operationKey('PUT', '/admin/order/tracking-number')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-tracking-number-update');
+      evidence.finalUrl = action;
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'tracking-number update response includes updated tracking number';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: action,
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: memberOrderNo,
+      trackingNumber: orderTrackingNumber,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-shipping-csv-import', async () => {
+    if (!memberOrderNo) {
+      throw new Error('member order was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, '/admin/order/import-shipping'), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#csv_shipping_form')).replaceAll('&amp;', '&');
+    if (!safePath(action).includes('/admin/order/import-shipping')) {
+      throw new Error(`shipping CSV import form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const csv = `受注番号,お問い合わせ番号\n${memberOrderNo},${csvTrackingNumber}\n`;
+    const response = await httpCsvUpload(context, baseUrl, action, csrfToken, 'shipping.csv', csv);
+    recordOperation(operationEvidence, 'POST', '/admin/order/import-shipping', response, {
+      orderNo: memberOrderNo,
+      trackingNumber: csvTrackingNumber,
+      action,
+    });
+    const responseText = decodeResponseText(await response.text().catch(() => ''));
+    if (response.status() >= 400) {
+      throw new Error(`shipping CSV import failed status=${response.status()} body=${truncate(responseText, 300)}`);
+    }
+
+    const csvResponse = await context.request.fetch(makeUrl(baseUrl, '/admin/order/export-shipping'), {
+      timeout: NAV_TIMEOUT_MS,
+    });
+    const csvText = decodeResponseText(await csvResponse.text().catch(() => ''));
+    if (csvResponse.status() >= 400 || !csvText.includes(memberOrderNo) || !csvText.includes(csvTrackingNumber)) {
+      throw new Error(`shipping CSV import readback failed status=${csvResponse.status()} body=${truncate(csvText, 400)}`);
+    }
+
+    await page.setContent(`
+      <!doctype html>
+      <meta charset="utf-8">
+      <title>shipping CSV import</title>
+      <body><h1>shipping CSV import</h1><pre>${escapeHtml(csvText)}</pre></body>
+    `, { waitUntil: 'domcontentloaded' });
+    const snap = await snapshotPage(page);
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/order/import-shipping')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-shipping-csv-import');
+      evidence.finalUrl = page.url();
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'shipping export CSV includes imported tracking number';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: page.url(),
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: memberOrderNo,
+      trackingNumber: csvTrackingNumber,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-shipping-notify-send', async () => {
+    if (!memberOrderNo) {
+      throw new Error('member order was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/order/shipping-notify-mail?orderNo=${encodeURIComponent(memberOrderNo)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#shipping_notify_mail_form')).replaceAll('&amp;', '&') || '/admin/order/shipping-notify-mail';
+    if (!safePath(action).includes('/admin/order/shipping-notify-mail')) {
+      throw new Error(`shipping notify form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      orderNo: memberOrderNo,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'POST', '/admin/order/shipping-notify-mail', response, {
+      orderNo: memberOrderNo,
+      action,
+    });
+    const responseText = decodeResponseText(await response.text().catch(() => ''));
+    if (response.status() >= 400 || !responseText.includes('出荷通知メールを送信しました')) {
+      throw new Error(`shipping notify send failed status=${response.status()} body=${truncate(responseText, 300)}`);
+    }
+
+    await page.setContent(`
+      <!doctype html>
+      <meta charset="utf-8">
+      <title>shipping notify mail</title>
+      <body><h1>shipping notify mail</h1><pre>${escapeHtml(responseText)}</pre></body>
+    `, { waitUntil: 'domcontentloaded' });
+    const snap = await snapshotPage(page);
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/order/shipping-notify-mail')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-shipping-notify-send');
+      evidence.finalUrl = action;
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'shipping notify mail response includes fake/noop send message';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: action,
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: memberOrderNo,
+      pageText: truncate(snap.pageText, 600),
+    };
+  });
+
+  await step('admin-order-mail-send', async () => {
+    if (!memberOrderNo) {
+      throw new Error('member order was not created');
+    }
+
+    await page.goto(makeUrl(baseUrl, `/admin/order/send-mail?orderNo=${encodeURIComponent(memberOrderNo)}`), { waitUntil: 'domcontentloaded', timeout: NAV_TIMEOUT_MS });
+    await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+    const action = (await formAction(page, '#mail_form')).replaceAll('&amp;', '&') || `/admin/order/send-mail?orderNo=${encodeURIComponent(memberOrderNo)}`;
+    if (!safePath(action).includes('/admin/order/send-mail')) {
+      throw new Error(`order mail form action was not exposed: ${action || '(empty)'}`);
+    }
+
+    csrfToken = await readCsrf(page) || csrfToken;
+    const response = await httpForm(context, baseUrl, 'POST', action, {
+      orderNo: memberOrderNo,
+      csrfToken,
+    });
+    recordOperation(operationEvidence, 'POST', '/admin/order/send-mail', response, {
+      orderNo: memberOrderNo,
+      action,
+    });
+    const responseText = decodeResponseText(await response.text().catch(() => ''));
+    if (response.status() >= 400 || !responseText.includes('注文確認メールを再送しました')) {
+      throw new Error(`order mail send failed status=${response.status()} body=${truncate(responseText, 300)}`);
+    }
+
+    await page.setContent(`
+      <!doctype html>
+      <meta charset="utf-8">
+      <title>order mail send</title>
+      <body><h1>order mail send</h1><pre>${escapeHtml(responseText)}</pre></body>
+    `, { waitUntil: 'domcontentloaded' });
+    const snap = await snapshotPage(page);
+
+    const evidence = operationEvidence[operationKey('POST', '/admin/order/send-mail')];
+    if (evidence) {
+      evidence.screenshot = await pageScreenshotStep(page, screenshotDir, 'admin-order-mail-send');
+      evidence.finalUrl = action;
+      evidence.pageText = truncate(snap.pageText, 600);
+      evidence.readback = 'order mail response includes fake/noop send message';
+    }
+
+    return {
+      httpStatus: response.status(),
+      finalUrl: action,
+      screenshot: evidence?.screenshot ?? '',
+      orderNo: memberOrderNo,
+      pageText: truncate(snap.pageText, 600),
     };
   });
 
@@ -3067,7 +6424,7 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
     const contact = await httpForm(context, baseUrl, 'POST', '/contact', {
       contactName01: '問い合わせ',
       contactName02: '太郎',
-      contactEmail: `contact-${runId}@example.test`,
+      contactEmail: `contact-${taxonomySuffix}@example.test`,
       contactContents: 'Web+DB completion runner contact submit boundary.',
       mode: 'confirm',
       csrfToken: contactCsrf,
@@ -3181,10 +6538,18 @@ async function maybeSeedBusinessState(page, context, baseUrl, runId, setup, scre
     success: failed.length === 0,
     productCode,
     productName,
-    paymentId,
     paymentMaintenanceId,
+    deliveryMaintenanceId,
+    taxRuleId,
+    calendarHolidayId,
+    newsId,
+    pageId,
+    adminMemberLoginId,
+    classNameId,
+    classCategoryId,
     categoryId,
     tagId,
+    mailTemplateId,
     memberOrderNo,
     nonMemberOrderNo,
     confirmScreenshot,
@@ -3203,8 +6568,11 @@ async function main() {
   const updateMatrix = args['update-matrix'] !== 'false' && args['no-update-matrix'] !== true;
   const probeUncovered = args['no-probe-uncovered'] !== true;
   const skipNegative = args['skip-negative'] === true;
+  const onlyNegative = args['only-negative'] === true;
   const limit = args.limit ? Number(args.limit) : null;
   const headless = args.headed === true ? false : true;
+
+  await clearCompiledContextCache();
 
   const [baseline, openapi, matrixMarkdown] = await Promise.all([
     readJson(baselinePath),
@@ -3226,12 +6594,25 @@ async function main() {
   });
   const page = await context.newPage();
 
-  const setup = {
-    adminLogin: await maybeAdminLogin(page, context, baseUrl),
-  };
-  setup.customerRegistration = await maybeRegisterCustomer(page, baseUrl, runId);
-  setup.businessState = await maybeSeedBusinessState(page, context, baseUrl, runId, setup, screenshotDir);
-  if (setup.adminLogin?.success) {
+  const setup = onlyNegative
+    ? {
+      adminLogin: null,
+      customerRegistration: null,
+      businessState: {
+        attempted: false,
+        success: false,
+        operationEvidence: {},
+        steps: [],
+      },
+    }
+    : {
+      adminLogin: await maybeAdminLogin(page, context, baseUrl),
+    };
+  if (!onlyNegative) {
+    setup.customerRegistration = await maybeRegisterCustomer(page, baseUrl, runId);
+    setup.businessState = await maybeSeedBusinessState(page, context, baseUrl, runId, setup, screenshotDir);
+  }
+  if (!onlyNegative && setup.adminLogin?.success) {
     setup.businessState.operationEvidence[operationKey('POST', '/admin/login')] = {
       method: 'POST',
       path: '/admin/login',
@@ -3241,7 +6622,7 @@ async function main() {
       scenario: 'admin setup login',
     };
   }
-  if ((setup.adminLogin?.twoFactorStep?.setupStatus ?? 500) < 400) {
+  if (!onlyNegative && (setup.adminLogin?.twoFactorStep?.setupStatus ?? 500) < 400) {
     setup.businessState.operationEvidence[operationKey('PUT', '/admin/two-factor-auth-set')] = {
       method: 'PUT',
       path: '/admin/two-factor-auth-set',
@@ -3251,7 +6632,7 @@ async function main() {
       scenario: 'admin 2FA setup',
     };
   }
-  if (setup.customerRegistration?.success) {
+  if (!onlyNegative && setup.customerRegistration?.success) {
     setup.businessState.operationEvidence[operationKey('POST', '/entry')] = {
       method: 'POST',
       path: '/entry',
@@ -3261,7 +6642,7 @@ async function main() {
       scenario: 'customer registration setup',
     };
   }
-  if (setup.businessState.steps.some((step) => step.id === 'customer-login' && step.status === 'pass')) {
+  if (!onlyNegative && setup.businessState.steps.some((step) => step.id === 'customer-login' && step.status === 'pass')) {
     setup.businessState.operationEvidence[operationKey('POST', '/login')] = {
       method: 'POST',
       path: '/login',
@@ -3272,7 +6653,7 @@ async function main() {
     };
   }
 
-  const featureRows = limit ? matrixRows.slice(0, limit) : matrixRows;
+  const featureRows = onlyNegative ? [] : (limit ? matrixRows.slice(0, limit) : matrixRows);
   const results = [];
   for (const row of featureRows) {
     const result = await visitFeature(page, baseUrl, row, baselineByNo.get(row.no), screenshotDir, setup);
@@ -3280,7 +6661,7 @@ async function main() {
     process.stdout.write(`${String(row.no).padStart(3, '0')} ${result.webResult} ${row.section} ${row.feature}\n`);
   }
 
-  if (limit && matrixRows.length > limit) {
+  if (!onlyNegative && limit && matrixRows.length > limit) {
     for (const row of matrixRows.slice(limit)) {
       results.push({
         ...row,
@@ -3310,13 +6691,15 @@ async function main() {
     skipNegative,
   );
 
-  const operationCoverage = await buildOperationCoverage(
-    context,
-    baseUrl,
-    operations,
-    results,
-    probeUncovered,
-  );
+  const operationCoverage = onlyNegative
+    ? []
+    : await buildOperationCoverage(
+      context,
+      baseUrl,
+      operations,
+      results,
+      probeUncovered,
+    );
 
   await browser.close();
 
@@ -3330,7 +6713,13 @@ async function main() {
       appContext: process.env.APP_CONTEXT || 'html-eccube-sql-hal-app',
       phpServer: 'public/page.php',
       runner: 'scripts/web-e2e-runner.mjs',
+      networkScope: 'baseUrl is resolved from the runner process, not necessarily the user-visible local browser.',
       node: process.version,
+      limit,
+      probeUncovered,
+      skipNegative,
+      onlyNegative,
+      updateMatrix,
     },
     baseUrl,
     db: {
@@ -3360,13 +6749,20 @@ async function main() {
 
   await writeJson(`docs/web-e2e/results/${runId}.json`, withoutBaselineResults(run));
   await writeReport(run);
-  await updateMatrixFile(matrixPath, results, runId, updateMatrix && !limit);
-  await updateEvidenceRetention(runId, updateMatrix && !limit);
+  await updateMatrixFile(matrixPath, results, runId, updateMatrix && !limit && !onlyNegative);
+  await updateEvidenceRetention(runId, updateMatrix && !limit && !onlyNegative);
 
   process.stdout.write(`\nrunId=${runId}\n`);
   process.stdout.write(`features pass=${featureSummary.pass} fail=${featureSummary.fail} targetOut=${featureSummary.targetOut}\n`);
   process.stdout.write(`operations pass=${operationSummary.pass} fail=${operationSummary.fail} targetOut=${operationSummary.targetOut}\n`);
   process.stdout.write(`negative pass=${negativeSummary.pass} fail=${negativeSummary.fail}\n`);
+}
+
+async function clearCompiledContextCache() {
+  const contextDir = abs('var/tmp/html-eccube-sql-hal-app');
+  for (const subDir of ['di', 'injector', 'twig']) {
+    await fs.rm(path.join(contextDir, subDir), { recursive: true, force: true });
+  }
 }
 
 function databaseName(databaseUrl) {

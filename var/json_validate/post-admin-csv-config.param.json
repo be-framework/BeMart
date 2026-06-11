@@ -11,7 +11,7 @@
         "null"
       ],
       "title": "CSV種別（入力）",
-      "description": "dtb_csv.csv_type_id — mtb_csv_type への FK（1=注文CSV, 2=会員CSV, 3=商品CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）",
+      "description": "dtb_csv.csv_type_id — mtb_csv_type への FK（1=商品CSV, 2=会員CSV, 3=受注CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
     "columns": {
@@ -26,6 +26,17 @@
         "title": "CSV列（入力）",
         "description": "/admin/csv-config のレスポンスに含まれるCSV列。親コレクション `columns` の1行を表し、固定できる業務列はschema propertyで明示する。",
         "properties": {
+          "columnName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "CSV列名（入力）",
+            "description": "doUpdateCsv が保存するCSV列の内部名。HTMLフォームでは columns[n][columnName] として送信される。",
+            "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+          },
           "name": {
             "type": [
               "string",
@@ -63,11 +74,23 @@
           "enabled": {
             "type": [
               "boolean",
+              "integer",
+              "string",
               "null"
             ],
             "title": "処理状態フラグ（入力）",
             "description": "観察値 'true', 'false'。",
             "example": "true",
+            "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+          },
+          "sortNo": {
+            "type": [
+              "integer",
+              "string",
+              "null"
+            ],
+            "title": "CSV列順（入力）",
+            "description": "doUpdateCsv の列順。HTMLフォームでは文字列として送信される。",
             "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
           }
         },
@@ -75,6 +98,45 @@
       },
       "minItems": 0,
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csvOutput": {
+      "type": [
+        "array",
+        "string",
+        "null"
+      ],
+      "title": "CSV出力対象列（HTML入力）",
+      "description": "CSV設定画面の multi-select `csvOutput[]` が送る出力対象列。JavaScript が生成する columns[n] と同じ列ベクタへ Resource 境界で正規化される。",
+      "items": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "minLength": 0,
+        "maxLength": 255
+      },
+      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csvNotOutput": {
+      "type": [
+        "array",
+        "string",
+        "null"
+      ],
+      "title": "CSV非出力対象列（HTML入力）",
+      "description": "CSV設定画面の multi-select `csvNotOutput[]` が送る非出力対象列。JavaScript が生成する columns[n] と同じ列ベクタへ Resource 境界で正規化される。",
+      "items": {
+        "type": [
+          "string",
+          "null"
+        ],
+        "minLength": 0,
+        "maxLength": 255
+      },
+      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,
@@ -297,7 +359,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape. Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
   "required": [
-    "csvType",
-    "columns"
+    "csvType"
   ]
 }

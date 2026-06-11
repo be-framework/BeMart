@@ -107,6 +107,7 @@ final readonly class CheckoutCompleted
             orderStatus: FinalizedOrderEntity::STATUS_NEW,
             orderDate: $orderDate,
             paymentDate: $paymentDate,
+            customerSnapshot: $order->customerSnapshot,
         );
 
         // Freeze the order-time line-item snapshot. The display name is

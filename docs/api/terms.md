@@ -4,13 +4,24 @@ This index reports lexical identifier matches only; it does not prove semantic e
 
 ## Summary
 
-- Terms used in API: 372
+- Terms used in API: 404
 - Terms with same-name ALPS descriptor: 152
-- Lexical ALPS coverage: 40.9%
+- Lexical ALPS coverage: 37.6%
 - Reserved representation fields: 0
 - ☑︎ = ALPS descriptor binding
 
 ## Terms
+
+### `Authority`
+
+- usages:
+  - schema property: post-admin-authority-role.param.json#/properties/AuthorityRoles/items/properties/Authority
+
+### `AuthorityRoles`
+
+- usages:
+  - parameter: POST /admin/authority-role {AuthorityRoles}
+  - schema property: post-admin-authority-role.param.json#/properties/AuthorityRoles
 
 ### `Mail`
 
@@ -24,6 +35,11 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: post-admin-order-import-shipping.json#/properties/accepted
   - schema property: post-admin-product-csv-class-category.json#/properties/accepted
   - schema property: post-admin-product-csv-class-name.json#/properties/accepted
+
+### `active`
+
+- usages:
+  - schema property: get-admin-template-template-list.json#/properties/templates/items/properties/active
 
 ### `addPoint` ☑︎
 
@@ -228,6 +244,16 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-admin-tax-rule-tax-rule-list.json#/properties/taxRules/items/properties/applyDate
   - schema property: post-admin-tax-rule-tax-rule-list.json#/properties/applyDate
 
+### `archiveName`
+
+- usages:
+  - schema property: post-admin-template-template-add.json#/properties/archiveName
+
+### `archiveSize`
+
+- usages:
+  - schema property: post-admin-template-template-add.json#/properties/archiveSize
+
 ### `arrFileList`
 
 - usages:
@@ -248,12 +274,14 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - usages:
   - parameter: POST /admin/authority-role {authority}
   - parameter: POST /admin/member {authority}
+  - schema property: post-admin-authority-role.param.json#/properties/AuthorityRoles/items/properties/authority
   - schema property: post-admin-authority-role.param.json#/properties/authority
   - schema property: post-admin-member.param.json#/properties/authority
   - schema property: get-admin-authority-role.json#/properties/rules/items/properties/authority
   - schema property: get-admin-member-list.json#/properties/members/items/properties/authority
   - schema property: get-admin-member.json#/properties/authority
   - schema property: post-admin-authority-role.json#/properties/authority
+  - schema property: post-admin-authority-role.json#/properties/rules/items/properties/authority
   - schema property: post-admin-login.json#/properties/authority
   - schema property: post-admin-member.json#/properties/authority
   - schema property: put-admin-member.json#/properties/authority
@@ -299,6 +327,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - doc: このブロックを管理画面から削除できるか。システム標準ブロックは削除不可
 - usages:
   - schema property: get-admin-block-block-list.json#/properties/blocks/items/properties/blockDeletable
+  - schema property: get-admin-block-block.json#/properties/blockDeletable
   - schema property: post-admin-block-block-list.json#/properties/blockDeletable
   - schema property: put-admin-block-block.json#/properties/blockDeletable
 
@@ -312,6 +341,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: post-admin-block-block-list.param.json#/properties/blockFileName
   - schema property: put-admin-block-block.param.json#/properties/blockFileName
   - schema property: get-admin-block-block-list.json#/properties/blocks/items/properties/blockFileName
+  - schema property: get-admin-block-block.json#/properties/blockFileName
   - schema property: post-admin-block-block-list.json#/properties/blockFileName
   - schema property: put-admin-block-block.json#/properties/blockFileName
 
@@ -320,12 +350,15 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - title: ブロックID
 - doc: dtb_block.id の不透明な文字列ハンドル。BeMart の BlockEntity 層は数値ではなく文字列として保持する。Fake 実装は `bk-` プレフィックス付きの英数字を生成し（シード `bk-header` を含む）、SQL 実装は dtb_block.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。非数値 ID は SqlBlockStorage では miss として扱われ getById / put / remove のいずれも 404 経路 (BlockUpdated / BlockDeleted) を踏むため、シードハンドル `bk-header` や `nonexistent-zzz` は Fake / SQL 双方で 404 が同形
 - usages:
+  - parameter: GET /admin/block/block {blockId}
   - parameter: PUT /admin/block/block {blockId}
   - parameter: DELETE /admin/block/block {blockId}
   - schema property: delete-admin-block-block.param.json#/properties/blockId
+  - schema property: get-admin-block-block.param.json#/properties/blockId
   - schema property: put-admin-block-block.param.json#/properties/blockId
   - schema property: delete-admin-block-block.json#/properties/blockId
   - schema property: get-admin-block-block-list.json#/properties/blocks/items/properties/blockId
+  - schema property: get-admin-block-block.json#/properties/blockId
   - schema property: post-admin-block-block-list.json#/properties/blockId
   - schema property: put-admin-block-block.json#/properties/blockId
 
@@ -339,6 +372,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: post-admin-block-block-list.param.json#/properties/blockName
   - schema property: put-admin-block-block.param.json#/properties/blockName
   - schema property: get-admin-block-block-list.json#/properties/blocks/items/properties/blockName
+  - schema property: get-admin-block-block.json#/properties/blockName
   - schema property: post-admin-block-block-list.json#/properties/blockName
   - schema property: put-admin-block-block.json#/properties/blockName
 
@@ -662,6 +696,11 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - usages:
   - schema property: get-admin-order-status.json#/properties/orderStatuses/items/properties/colorKey
 
+### `columnName`
+
+- usages:
+  - schema property: post-admin-csv-config.param.json#/properties/columns/items/properties/columnName
+
 ### `columns`
 
 - usages:
@@ -787,6 +826,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-admin-tax-rule-tax-rule-list.json#/properties/count
   - schema property: get-admin-template-template-list.json#/properties/count
   - schema property: get-mypage-address-list.json#/properties/count
+  - schema property: post-admin-authority-role.json#/properties/count
   - schema property: post-admin-csv-config.json#/properties/count
   - schema property: post-admin-product-csv.json#/properties/count
   - schema property: put-admin-master-data-edit.json#/properties/count
@@ -810,8 +850,11 @@ This index reports lexical identifier matches only; it does not prove semantic e
 ### `csrfToken`
 
 - usages:
+  - parameter: POST /admin/authority-role {csrfToken}
   - schema property: delete-admin-tag-tag.param.json#/properties/csrfToken
+  - schema property: post-admin-authority-role.param.json#/properties/csrfToken
   - schema property: post-admin-category-csv.param.json#/properties/csrfToken
+  - schema property: post-admin-csv-config.param.json#/properties/csrfToken
   - schema property: post-admin-order-shipping-notify-mail.param.json#/properties/csrfToken
   - schema property: post-admin-product-csv-class-category.param.json#/properties/csrfToken
   - schema property: post-admin-product-csv-class-name.param.json#/properties/csrfToken
@@ -821,14 +864,31 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: post-shopping-confirm.param.json#/properties/csrfToken
   - schema property: put-admin-master-data-edit.param.json#/properties/csrfToken
   - schema property: put-admin-master-data.param.json#/properties/csrfToken
+  - schema property: get-admin-authority-role.json#/properties/csrfToken
+  - schema property: get-admin-block-block.json#/properties/csrfToken
+  - schema property: get-admin-calendar.json#/properties/csrfToken
+  - schema property: get-admin-content-cache.json#/properties/csrfToken
+  - schema property: get-admin-content-css.json#/properties/csrfToken
+  - schema property: get-admin-content-js.json#/properties/csrfToken
+  - schema property: get-admin-content-maintenance.json#/properties/csrfToken
+  - schema property: get-admin-csv-config.json#/properties/csrfToken
+  - schema property: get-admin-layout-layout.json#/properties/csrfToken
   - schema property: get-admin-login.json#/properties/csrfToken
+  - schema property: get-admin-mail-template.json#/properties/csrfToken
+  - schema property: get-admin-member-list.json#/properties/csrfToken
   - schema property: get-admin-member.json#/properties/csrfToken
   - schema property: get-admin-news-news.json#/properties/csrfToken
+  - schema property: get-admin-order-edit.json#/properties/csrfToken
   - schema property: get-admin-order-shipping-notify-mail.json#/properties/csrfToken
+  - schema property: get-admin-order-status.json#/properties/csrfToken
   - schema property: get-admin-order.json#/properties/csrfToken
   - schema property: get-admin-page-page.json#/properties/csrfToken
   - schema property: get-admin-product-new.json#/properties/csrfToken
   - schema property: get-admin-product.json#/properties/csrfToken
+  - schema property: get-admin-security.json#/properties/csrfToken
+  - schema property: get-admin-template-template-add.json#/properties/csrfToken
+  - schema property: get-admin-template-template-list.json#/properties/csrfToken
+  - schema property: get-admin-trade-law.json#/properties/csrfToken
   - schema property: get-admin-two-factor-auth-set.json#/properties/csrfToken
   - schema property: get-admin-two-factor-auth.json#/properties/csrfToken
   - schema property: get-cart.json#/properties/csrfToken
@@ -873,6 +933,18 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-admin-order-export-order.json#/properties/csv
   - schema property: get-admin-order-export-shipping.json#/properties/csv
   - schema property: get-admin-product-csv.json#/properties/csv
+
+### `csvNotOutput`
+
+- usages:
+  - parameter: POST /admin/csv-config {csvNotOutput}
+  - schema property: post-admin-csv-config.param.json#/properties/csvNotOutput
+
+### `csvOutput`
+
+- usages:
+  - parameter: POST /admin/csv-config {csvOutput}
+  - schema property: post-admin-csv-config.param.json#/properties/csvOutput
 
 ### `csvTitle`
 
@@ -1082,7 +1154,14 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - title: 拒否URL
 - doc: アクセスを拒否する管理画面URLパターン。authority=1（店舗オーナー）に対して適用
 - usages:
+  - schema property: post-admin-authority-role.param.json#/properties/AuthorityRoles/items/properties/denyUrl
   - schema property: get-admin-authority-role.json#/properties/rules/items/properties/denyUrl
+  - schema property: post-admin-authority-role.json#/properties/rules/items/properties/denyUrl
+
+### `deny_url`
+
+- usages:
+  - schema property: post-admin-authority-role.param.json#/properties/AuthorityRoles/items/properties/deny_url
 
 ### `description`
 
@@ -1128,6 +1207,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - doc: デバイス種別マスタ（EC-CUBE 2.xからの名残）。値: 2=モバイル, 10=PC。非連番のIDは旧バージョンのデバイスサポート（ガラケー等）に由来。ページレイアウトのデバイス別表示に使用
 - usages:
   - schema property: get-admin-layout-layout-list.json#/properties/layouts/items/properties/deviceType
+  - schema property: get-admin-layout-layout.json#/properties/deviceType
   - schema property: get-admin-template-template-list.json#/properties/templates/items/properties/deviceType
   - schema property: put-admin-layout-layout.json#/properties/deviceType
 
@@ -1351,6 +1431,12 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-shopping-shipping-multiple-edit.json#/properties/fields
   - schema property: get-shopping-shipping-multiple.json#/properties/fields
   - schema property: get-shopping-shipping.json#/properties/fields
+
+### `file`
+
+- usages:
+  - parameter: POST /admin/template/template-add {file}
+  - schema property: post-admin-template-template-add.param.json#/properties/file
 
 ### `fileName` ☑︎
 
@@ -2071,6 +2157,12 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-products.json#/properties/products/items/properties/id
   - schema property: put-admin-master-data.json#/properties/rows/items/properties/id
 
+### `ids`
+
+- usages:
+  - parameter: POST /admin/order/bulk-delete {ids}
+  - schema property: post-admin-order-bulk-delete.param.json#/properties/ids
+
 ### `imagePath`
 
 - usages:
@@ -2104,6 +2196,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
 
 - usages:
   - schema property: get-admin-mail-template.json#/properties/Mail/properties/isDeletable
+  - schema property: get-admin-mail-template.json#/properties/mailTemplates/items/properties/isDeletable
 
 ### `isMaintenance`
 
@@ -2227,9 +2320,12 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - title: レイアウトID
 - doc: CMSレイアウトを識別する不透明な文字列ハンドル。seed 済みレイアウトを Fake/SQL 同型に扱う。
 - usages:
+  - parameter: GET /admin/layout/layout {layoutId}
   - parameter: PUT /admin/layout/layout {layoutId}
+  - schema property: get-admin-layout-layout.param.json#/properties/layoutId
   - schema property: put-admin-layout-layout.param.json#/properties/layoutId
   - schema property: get-admin-layout-layout-list.json#/properties/layouts/items/properties/layoutId
+  - schema property: get-admin-layout-layout.json#/properties/layoutId
   - schema property: put-admin-layout-layout.json#/properties/layoutId
 
 ### `layoutName` ☑︎
@@ -2240,6 +2336,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - parameter: PUT /admin/layout/layout {layoutName}
   - schema property: put-admin-layout-layout.param.json#/properties/layoutName
   - schema property: get-admin-layout-layout-list.json#/properties/layouts/items/properties/layoutName
+  - schema property: get-admin-layout-layout.json#/properties/layoutName
   - schema property: put-admin-layout-layout.json#/properties/layoutName
 
 ### `layouts`
@@ -2393,6 +2490,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - title: メールテンプレートID
 - doc: dtb_mail_template.id（int unsigned AUTO_INCREMENT）の正の整数主キー。doUpdateMailTemplate の必須入力で、既存行を指す必要がある。SqlMailTemplateStorage は findById / update をこの id で引き、未知 id は MailTemplateNotFoundException（404）。新規テンプレート作成フローは file_name 設定と Twig ファイル書き出しを伴うため Phase 2 scope であり、ID 生成器は存在しない（更新専用契約）
 - usages:
+  - parameter: GET /admin/mail-template {mailTemplateId}
   - parameter: POST /admin/mail-template {mailTemplateId}
   - parameter: DELETE /admin/mail-template {mailTemplateId}
   - schema property: delete-admin-mail-template.param.json#/properties/mailTemplateId
@@ -2418,6 +2516,12 @@ This index reports lexical identifier matches only; it does not prove semantic e
 
 - usages:
   - schema property: get-admin-mail-template.json#/properties/mailTemplates
+
+### `mail_subject`
+
+- usages:
+  - parameter: POST /admin/mail-template {mail_subject}
+  - schema property: post-admin-mail-template.param.json#/properties/mail_subject
 
 ### `mainImage`
 
@@ -2952,20 +3056,44 @@ This index reports lexical identifier matches only; it does not prove semantic e
 ### `mode`
 
 - usages:
+  - parameter: PUT /admin/content/cache {mode}
+  - parameter: PUT /admin/content/css {mode}
+  - parameter: PUT /admin/content/js {mode}
+  - parameter: PUT /admin/content/maintenance {mode}
+  - parameter: POST /admin/login {mode}
+  - parameter: POST /admin/member {mode}
+  - parameter: PUT /admin/member {mode}
+  - parameter: DELETE /admin/member {mode}
+  - parameter: POST /admin/order/bulk-delete {mode}
+  - parameter: POST /admin/trade-law {mode}
   - parameter: POST /contact {mode}
   - parameter: POST /entry {mode}
+  - parameter: POST /login {mode}
+  - schema property: delete-admin-member.param.json#/properties/mode
+  - schema property: post-admin-login.param.json#/properties/mode
+  - schema property: post-admin-member.param.json#/properties/mode
+  - schema property: post-admin-order-bulk-delete.param.json#/properties/mode
+  - schema property: post-admin-trade-law.param.json#/properties/mode
   - schema property: post-contact.param.json#/properties/mode
   - schema property: post-entry.param.json#/properties/mode
+  - schema property: post-login.param.json#/properties/mode
+  - schema property: put-admin-content-cache.param.json#/properties/mode
+  - schema property: put-admin-content-css.param.json#/properties/mode
+  - schema property: put-admin-content-js.param.json#/properties/mode
+  - schema property: put-admin-content-maintenance.param.json#/properties/mode
+  - schema property: put-admin-member.param.json#/properties/mode
 
 ### `name`
 
 - usages:
+  - parameter: PUT /admin/layout/layout {name}
   - parameter: POST /admin/member {name}
   - parameter: PUT /admin/member {name}
   - parameter: GET /products {name}
   - schema property: get-products.param.json#/properties/name
   - schema property: post-admin-csv-config.param.json#/properties/columns/items/properties/name
   - schema property: post-admin-member.param.json#/properties/name
+  - schema property: put-admin-layout-layout.param.json#/properties/name
   - schema property: put-admin-master-data-edit.param.json#/properties/rows/items/properties/name
   - schema property: put-admin-member.param.json#/properties/name
   - schema property: put-admin-order-status.param.json#/properties/orderStatuses/items/properties/name
@@ -3553,6 +3681,12 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: post-entry.param.json#/properties/password
   - schema property: post-login.param.json#/properties/password
   - schema property: post-reset.param.json#/properties/password
+
+### `passwordConfirm`
+
+- usages:
+  - parameter: POST /admin/member {passwordConfirm}
+  - schema property: post-admin-member.param.json#/properties/passwordConfirm
 
 ### `password_confirm`
 
@@ -4625,6 +4759,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
 
 - usages:
   - schema property: get-admin-authority-role.json#/properties/rules
+  - schema property: post-admin-authority-role.json#/properties/rules
 
 ### `saleTypeId` ☑︎
 
@@ -4850,6 +4985,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - parameter: POST /admin/category/category-list {sortNo}
   - parameter: PUT /admin/sort-no-move {sortNo}
   - schema property: post-admin-category-category-list.param.json#/properties/sortNo
+  - schema property: post-admin-csv-config.param.json#/properties/columns/items/properties/sortNo
   - schema property: put-admin-category-category.param.json#/properties/sortNo
   - schema property: put-admin-master-data-edit.param.json#/properties/rows/items/properties/sortNo
   - schema property: put-admin-sort-no-move.param.json#/properties/sortNo
@@ -4887,6 +5023,11 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-shopping-shipping-multiple-edit.json#/properties/staticContent
   - schema property: get-shopping-shipping-multiple.json#/properties/staticContent
   - schema property: get-shopping-shipping.json#/properties/staticContent
+
+### `status`
+
+- usages:
+  - schema property: put-admin-order-tracking-number.json#/properties/status
 
 ### `stock` ☑︎
 
@@ -5210,6 +5351,96 @@ This index reports lexical identifier matches only; it does not prove semantic e
 - usages:
   - schema property: get-admin-trade-law.json#/properties/tradeLawRows
 
+### `trade_law_1_description`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_1_description}
+
+### `trade_law_1_displayOrderScreen`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_1_displayOrderScreen}
+
+### `trade_law_1_name`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_1_name}
+
+### `trade_law_2_description`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_2_description}
+
+### `trade_law_2_displayOrderScreen`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_2_displayOrderScreen}
+
+### `trade_law_2_name`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_2_name}
+
+### `trade_law_3_description`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_3_description}
+
+### `trade_law_3_displayOrderScreen`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_3_displayOrderScreen}
+
+### `trade_law_3_name`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_3_name}
+
+### `trade_law_4_description`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_4_description}
+
+### `trade_law_4_displayOrderScreen`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_4_displayOrderScreen}
+
+### `trade_law_4_name`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_4_name}
+
+### `trade_law_5_description`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_5_description}
+
+### `trade_law_5_displayOrderScreen`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_5_displayOrderScreen}
+
+### `trade_law_5_name`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_5_name}
+
+### `trade_law_6_description`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_6_description}
+
+### `trade_law_6_displayOrderScreen`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_6_displayOrderScreen}
+
+### `trade_law_6_name`
+
+- usages:
+  - parameter: POST /admin/trade-law {trade_law_6_name}
+
 ### `transitionId`
 
 - usages:
@@ -5252,6 +5483,7 @@ This index reports lexical identifier matches only; it does not prove semantic e
   - schema property: get-shopping-shipping-multiple-edit.json#/properties/transitionId
   - schema property: get-shopping-shipping-multiple.json#/properties/transitionId
   - schema property: get-shopping-shipping.json#/properties/transitionId
+  - schema property: post-admin-authority-role.json#/properties/transitionId
   - schema property: post-admin-calendar.json#/properties/transitionId
   - schema property: post-admin-category-csv.json#/properties/transitionId
   - schema property: post-admin-change-password.json#/properties/transitionId

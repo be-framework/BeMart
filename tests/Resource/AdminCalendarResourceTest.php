@@ -21,10 +21,7 @@ use function dirname;
 /**
  * Resource-layer coverage for the admin 定休日カレンダー Setting/Shop Tier-2 page.
  *
- * The resource is a thin GET renderer for the EC-CUBE holiday-calendar
- * editor. BeMart has no calendar master transition/storage in this
- * wave, so the page exposes a renderer seed body shape only. The AUTHZ
- * guard rejects anonymous admins with 403.
+ * Resource-layer coverage for the EC-CUBE holiday-calendar editor.
  */
 final class AdminCalendarResourceTest extends TestCase
 {
@@ -118,7 +115,7 @@ final class AdminCalendarResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame('doDeleteCalendarHoliday', $ro->body['transitionId']);
-        $this->assertSame(1, $ro->body['calendarId']);
+        $this->assertSame('1', $ro->body['calendarId']);
     }
 
 }

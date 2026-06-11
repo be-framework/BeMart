@@ -32,6 +32,7 @@ class LayoutList extends ResourceObject
     /** ALPS `goLayoutList` に対応する GET 操作。 */
     #[Alps('goLayoutList')]
     #[JsonSchema(schema: 'get-admin-layout-layout-list.json')]
+    #[Link(rel: 'goLayout', href: 'page://self/admin/layout/layout{?layoutId}')]
     #[Link(rel: 'doUpdateLayout', href: 'page://self/admin/layout/layout', method: 'put')]
     public function onGet(): static
     {

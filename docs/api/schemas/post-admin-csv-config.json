@@ -22,7 +22,7 @@
         "null"
       ],
       "title": "CSV種別",
-      "description": "dtb_csv.csv_type_id — mtb_csv_type への FK（1=注文CSV, 2=会員CSV, 3=商品CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）",
+      "description": "dtb_csv.csv_type_id — mtb_csv_type への FK（1=商品CSV, 2=会員CSV, 3=受注CSV, 4=出荷CSV）。1つの csvType が複数の列設定行（dtb_csv 行）を所有する。doUpdateCsv は1つの csvType の列ベクタ全体を一括 POST し、SqlCsvColumnConfigStorage::replaceType がその csvType の行集合をアトミックに置換する。mtb_csv_type は structure-only ダンプで空のため SQL テストは seedCsvTypes でシード（seedAdminMasters と同じ空マスタ FK シード規約）",
       "minimum": 0
     },
     "columns": {
