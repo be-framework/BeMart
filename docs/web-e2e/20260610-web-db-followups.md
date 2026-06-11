@@ -279,7 +279,22 @@ Full suite green でも `BEAR.Dev.HtmlLinkAudit` warning は多数出力され�
 
 残る商品カタログ系は商品規格編集。商品CSV取込、カテゴリCSV取込、規格CSV取込、規格分類CSV取込は 2026-06-11 admin CSV follow-up で、ブラウザでフォームとCSRFを取得し、multipart upload後に一覧/readbackで結果を確認済み。
 
-商品規格編集は現状で止める。`src/Resource/Page/Admin/Product/ProductClass.php` は `onGet()` のみで、template は `POST /admin/product/product-class` を出しているが、Resource/OpenAPI 上の保存 transition は `PUT /admin/product/product-class` として未実装。Be 側にも `UpdateProductClassInput` / `ProductClassUpdated` は存在しない。ここで runner 専用の直PUTや空のFinalを作ると、商品規格の本質である class-name/class-category -> price/stock/product-code の行更新を隠すだけになる。次に進める条件は、ProductClass matrix の read model と update transition を設計し、class-name/class-category 由来のIDを商品規格UIへ流し、価格/在庫の更新後に商品詳細または管理画面で readback できる Hypermedia/HTTP workflow を先に追加すること。
+商品規格編集は現状で止める。`src/Resource/Page/Admin/Product/ProductClass.php` は `onGet()` のみで、template は `POST /admin/product/product-class` を出しているが、Resource/OpenAPI 上の保存 transition は `PUT /admin/product/product-class` として未実装。Be 側にも `UpdateProductClassInput` / `ProductClassUpdated` は存在しない。ここで runner 専用の直PUTや空のFinalを作ると、商品規格の本質である class-name/class-category -> price/stock/product-code の行更新を隠すだけになる。
+
+083 商品規格編集が他の規格CRUDより難しい理由:
+
+- 071-082 は `dtb_class_name` / `dtb_class_category` のマスタCRUDだが、083 はそのマスタを商品へ結びつける `dtb_product_class` のSKU行編集で、対象テーブルも業務意味も違う。
+- EC-CUBE の商品規格編集は、規格1 × 規格2 の matrix から複数SKU行を作り、それぞれに商品コード、価格、在庫、在庫無制限、送料などを持たせる。現在のTwig portは editor shell と空の新規行だけで、既存商品から ProductClass matrix を読む read model がない。
+- HTML form は `POST /admin/product/product-class`、matrix は `PUT /admin/product/product-class` を期待しているが、Resource method、ALPS descriptor、OpenAPI request schema、Be Input/Final、SQL write contract が揃っていない。
+- 商品詳細、カート、注文は `ProductClassQueryInterface` / `dtb_product_class` を参照するため、083 の保存は表示だけでなく購買導線の SKU 解決にも影響する。保存後の readback は管理画面だけでなく、必要に応じて商品詳細またはカート投入まで確認する。
+
+083 を green にしてよい条件:
+
+1. Hypermedia workflow を先に追加し、admin product detail から `goAdminProductProductClass` を辿って ProductClass editor に入り、保存 affordance を表現する。
+2. `onGet()` が対象商品の既存 ProductClass 行を read model として返し、class-name/class-category 由来のIDと表示名、商品コード、価格、在庫、在庫無制限、送料を画面に出す。
+3. 保存 transition は Resource/OpenAPI/ALPS/HTML form/Be Input/Final/SQL が同じ field shape を共有する。直接SQL seedで ProductClass を作って通すのは禁止する。
+4. OK case は保存後に 303 PRG し、管理画面または商品詳細で更新後のSKU情報を readback する。
+5. NG case は必須欠落、数値不正、存在しない productCode / classCategoryId、CSRF 不一致で inline error または HTTP error を確認する。
 
 ### Admin customer workflow
 
