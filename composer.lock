@@ -9345,6 +9345,12 @@
             "alias_normalized": "0.1.0.0"
         },
         {
+            "package": "bear/tool-use",
+            "version": "dev-codex/review-hardening",
+            "alias": "1.x-dev",
+            "alias_normalized": "1.9999999.9999999.9999999-dev"
+        },
+        {
             "package": "ray/fake-query",
             "version": "dev-codex/fake-query-release-hardening",
             "alias": "1.x-dev",
@@ -9355,6 +9361,7 @@
     "stability-flags": {
         "be-framework/be": 20,
         "bear/devtools": 20,
+        "bear/tool-use": 20,
         "my-vendor/be-mart-be": 20,
         "ray/fake-query": 20
     },
