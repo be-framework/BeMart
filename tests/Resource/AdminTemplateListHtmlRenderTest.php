@@ -123,6 +123,8 @@ final class AdminTemplateListHtmlRenderTest extends TestCase
             '<div class="c-pageTitle">',
             'class="c-primaryCol"',
             'name="form1" id="form1"',
+            'name="csrfToken"',
+            'id="form_selected" name="templateId"',
             'class="table"',
             'class="btn btn-ec-actionIcon action-download"',
             'class="btn btn-ec-actionIcon action-delete"',

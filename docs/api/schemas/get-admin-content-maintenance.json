@@ -12,6 +12,16 @@
       ],
       "title": "メンテナンス中フラグ",
       "description": "/admin/content/maintenance の処理状態を示すメンテナンス中フラグ。画面表示や冪等処理結果の分岐に使う真偽値。"
+    },
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 160,
+      "title": "CSRFトークン",
+      "description": "/admin/content/maintenance のHTMLフォーム送信用CSRFトークン。"
     }
   },
   "additionalProperties": false,

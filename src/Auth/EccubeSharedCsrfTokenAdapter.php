@@ -9,8 +9,15 @@ use Override;
 
 use function bin2hex;
 use function hash_equals;
+use function headers_sent;
 use function is_string;
 use function random_bytes;
+use function session_name;
+use function session_start;
+use function session_status;
+
+use const PHP_SAPI;
+use const PHP_SESSION_ACTIVE;
 
 /**
  * Production CsrfToken adapter — validates submitted tokens
@@ -64,6 +71,7 @@ final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
     public function __construct(
         private string $sessionKey = self::SESSION_KEY,
     ) {
+        $this->ensureSessionStarted();
         parent::__construct($this->resolveToken());
     }
 
@@ -100,5 +108,27 @@ final readonly class EccubeSharedCsrfTokenAdapter extends CsrfToken
         }
 
         return $token;
+    }
+
+    private function ensureSessionStarted(): void
+    {
+        if (PHP_SAPI === 'cli') {
+            return;
+        }
+
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            return;
+        }
+
+        if (headers_sent()) {
+            return;
+        }
+
+        session_name(EccubeSharedSessionAdapter::COOKIE_NAME);
+        session_start([
+            'use_strict_mode' => true,
+            'cookie_httponly' => true,
+            'cookie_samesite' => 'Lax',
+        ]);
     }
 }

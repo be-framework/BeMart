@@ -8,8 +8,8 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Injector;
 use BEAR\Dev\Http\AbstractWorkflowTest;
+use MyVendor\BeMart\Tests\Support\Hypermedia\WorkflowDbSession;
 use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
@@ -25,12 +25,28 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
 {
     public const FLOW_ID = 'flow-customer-inquiry';
 
+    private const CSRF_TOKEN = 'workflow-inquiry-csrf-token';
     private const CONTACT_EMAIL = 'yamada@example.com';
+
+    private static WorkflowDbSession|null $dbSession = null;
+
+    public static function setUpBeforeClass(): void
+    {
+        self::$dbSession = WorkflowDbSession::startWithCsrfToken(self::CSRF_TOKEN);
+    }
+
+    public static function tearDownAfterClass(): void
+    {
+        self::$dbSession?->restore();
+        self::$dbSession = null;
+
+        parent::tearDownAfterClass();
+    }
 
     protected function newResource(): ResourceInterface
     {
-        $resource = Injector::getInstance('test-hal-app')->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        $resource = self::$dbSession->resource();
 
         return $resource;
     }
@@ -55,7 +71,13 @@ class FlowCustomerInquiryTest extends AbstractWorkflowTest
     #[Depends('testContactForm')]
     public function testDoSubmitContact(ResourceObject $response): ResourceObject
     {
-        $submitted = $this->resource->post('page://self/contact', [
+        $submitTo = $this->bodyValue($response, 'submitTo');
+        $this->assertIsArray($submitTo);
+        $this->assertSame('doSubmitContact', $submitTo['rel'] ?? null);
+        $this->assertSame('POST', $submitTo['method'] ?? null);
+        $this->assertIsString($submitTo['href'] ?? null);
+
+        $submitted = $this->resource->post((string) $submitTo['href'], [
             'contactName01' => '山田',
             'contactName02' => '太郎',
             'contactEmail' => self::CONTACT_EMAIL,

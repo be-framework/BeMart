@@ -6,7 +6,8 @@ SELECT
   s.pref_id,
   s.addr01,
   s.addr02,
-  s.phone_number
+  s.phone_number,
+  COALESCE(s.tracking_number, '') AS tracking_number
 FROM
   dtb_order o
   INNER JOIN dtb_shipping s ON s.order_id = o.id

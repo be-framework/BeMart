@@ -92,10 +92,11 @@
             "description": "明細1件あたりの単価。受注/カート明細・お気に入りスナップショットでは追加時点の price02 をスナップショットして保持する（後の値引きやマスタ改定に影響されない）。BeMart 側では `int` 円整数 Fake観察数値 1200〜9800; 観察値 '1200', '9800'。",
             "type": [
               "integer",
+              "string",
               "null"
             ],
-            "example": 1200,
-            "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+            "example": "1200",
+            "$comment": "単価（入力）は本来数値の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
           },
           "tax": {
             "type": [
@@ -119,11 +120,12 @@
       "description": "全配送先の送料合計（スナップショット）。deliveryFeeAmount（地域別送料）+ deliveryFee（商品別送料）×数量 の合計。DeliveryFeePreprocessorで計算。カートと受注の両方で使用 Fake観察数値 0〜800; 観察値 '600', '0', '500', '800', '700'。",
       "type": [
         "integer",
+        "string",
         "null"
       ],
-      "example": 600,
+      "example": "600",
       "default": 0,
-      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+      "$comment": "送料合計（入力）は本来数値の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
     "charge": {
       "title": "手数料（入力）",
@@ -142,11 +144,12 @@
       "description": "受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 '0'。",
       "type": [
         "integer",
+        "string",
         "null"
       ],
-      "example": 0,
+      "example": "0",
       "default": 0,
-      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+      "$comment": "値引き額（入力）は本来数値の業務値だが、HTTPフォームでは文字列として届く。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     }
   },
   "additionalProperties": false,

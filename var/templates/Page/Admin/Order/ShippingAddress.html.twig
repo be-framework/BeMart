@@ -30,6 +30,7 @@
 
 {% block main %}
     <form role="form" method="post" action="/admin/order/shipping-address?orderNo={{ orderNo }}" id="shipping_form" name="form1" novalidate>
+        <input type="hidden" name="_method" value="put">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
         <div class="c-contentsArea__cols">
@@ -52,7 +53,7 @@
                             </div>
                             <div class="row mb-2">
                                 <div class="col-3"><span>郵便番号</span></div>
-                                <div class="col-4">{{ form.input('postal_code')|raw }}</div>
+                                <div class="col-4">{{ form.input('postalCode')|raw }}</div>
                             </div>
                             <div class="row mb-2">
                                 <div class="col-3"><span>都道府県</span></div>
@@ -68,7 +69,7 @@
                             </div>
                             <div class="row mb-2">
                                 <div class="col-3"><span>電話番号</span></div>
-                                <div class="col-4">{{ form.input('phone_number')|raw }}</div>
+                                <div class="col-4">{{ form.input('phoneNumber')|raw }}</div>
                             </div>
                         </div>
                     </div>

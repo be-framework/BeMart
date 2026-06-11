@@ -77,9 +77,9 @@ ALPS `doUpdateDelivery` に対応する PUT 操作。
 |----------|-----|
 | goDeliveryList | [<code>page://self/admin/delivery/delivery-list</code>](/admin/delivery/delivery-list.md) |
 ## DELETE
-ALPS `doUpdateDelivery` に対応する DELETE 操作。
+ALPS `doDeleteDelivery` に対応する DELETE 操作。
 
-**ALPS**: `doUpdateDelivery`
+**ALPS**: `doDeleteDelivery`
 
 
 

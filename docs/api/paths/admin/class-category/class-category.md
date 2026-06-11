@@ -43,9 +43,9 @@ ALPS `doUpdateClassCategory` に対応する PUT 操作。
 |----------|-----|
 | goClassCategoryList | [<code>page://self/admin/class-category/class-category-list</code>](/admin/class-category/class-category-list.md) |
 ## DELETE
-ALPS `doUpdateClassCategory` に対応する DELETE 操作。
+ALPS `doDeleteClassCategory` に対応する DELETE 操作。
 
-**ALPS**: `doUpdateClassCategory`
+**ALPS**: `doDeleteClassCategory`
 
 
 

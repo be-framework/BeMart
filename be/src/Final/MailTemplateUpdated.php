@@ -61,6 +61,7 @@ final readonly class MailTemplateUpdated
             mailTemplateName: $existing->mailTemplateName,
             fileName: $existing->fileName,
             subject: $mailSubject,
+            deletable: $existing->deletable,
         );
 
         $changed = $existing->subject !== $next->subject;

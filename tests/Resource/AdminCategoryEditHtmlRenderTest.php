@@ -76,4 +76,16 @@ final class AdminCategoryEditHtmlRenderTest extends TestCase
             $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
         }
     }
+
+    public function testCategoryDetailExposesDeleteAffordance(): void
+    {
+        $html = $this->resource->get('page://self/admin/category/category', [
+            'categoryId' => 'cat-food',
+        ])->toString();
+
+        $this->assertStringContainsString('href="/admin/category/category?categoryId=cat-food', $html);
+        $this->assertStringContainsString('_method=delete"', $html);
+        $this->assertStringContainsString('data-method="delete"', $html);
+        $this->assertStringContainsString('token-for-anchor=', $html);
+    }
 }

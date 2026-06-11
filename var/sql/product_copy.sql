@@ -90,4 +90,4 @@ WHERE
   AND pc.class_category_id1 IS NULL
   AND pc.class_category_id2 IS NULL
 LIMIT
-  1
+  1;

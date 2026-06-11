@@ -67,6 +67,36 @@
       "title": "処理状態フラグ",
       "description": "Fake観察数値 1〜1; 観察値 '1'。",
       "example": "1"
+    },
+    "transitionId": {
+      "$ref": "#/$defs/transitionId"
+    },
+    "count": {
+      "$ref": "#/$defs/nonNegativeInteger"
+    },
+    "rules": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "権限ルール一覧",
+      "description": "更新後の権限URL拒否ルール一覧。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "authority": {
+            "$ref": "#/properties/authority"
+          },
+          "denyUrl": {
+            "$ref": "#/$defs/uriReference"
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 0
     }
   },
   "additionalProperties": false,
@@ -288,11 +318,5 @@
     }
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
-  "required": [
-    "adminId",
-    "loginId",
-    "previousAuthority",
-    "authority",
-    "changed"
-  ]
+  "required": []
 }

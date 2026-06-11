@@ -12,6 +12,7 @@ use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Ray\Di\Di\Inject;
@@ -20,6 +21,7 @@ use Ray\InputQuery\Attribute\Input;
 use function array_map;
 use function array_sum;
 use function count;
+use function ctype_digit;
 
 /**
  * Shopping fetched — Final, the checkout review page projection.
@@ -105,6 +107,7 @@ final readonly class ShoppingFetched
         #[Inject] CustomerQueryInterface $customerQuery,
         #[Inject] CartQueryInterface $cartQuery,
         #[Inject] OrderCommandInterface $orderCommand,
+        #[Inject] PaymentMethodAdminStorageInterface $paymentMethodStorage,
         #[Inject] PaymentMethodFactoryInterface $paymentMethodFactory,
     ) {
         $sessionCustomerId = $session->customerId;
@@ -121,9 +124,11 @@ final readonly class ShoppingFetched
         }
 
         $carts = $cartQuery->listBySessionPrefix($sessionPrefix);
+        $paymentMethods = $this->paymentMethods($paymentMethodStorage, $paymentMethodFactory);
+        $paymentMethodId = (int) ($paymentMethods[0]['paymentMethodId'] ?? 1);
         $primaryCart = $carts[0] ?? null;
         if ($primaryCart instanceof CartEntity && $primaryCart->preOrderId !== '') {
-            $this->registerProcessingOrder($primaryCart, $customer->customerId, $orderCommand);
+            $this->registerProcessingOrder($primaryCart, $customer->customerId, $paymentMethodId, $orderCommand);
         }
 
         $this->customerId = $customer->customerId;
@@ -159,13 +164,34 @@ final readonly class ShoppingFetched
         $this->cartCount = count($carts);
         $this->totalPrice = array_sum(array_map(static fn (CartEntity $c) => $c->totalPrice, $carts));
         $this->deliveryFeeTotal = array_sum(array_map(static fn (CartEntity $c) => $c->deliveryFeeTotal, $carts));
-        $this->paymentMethods = $paymentMethodFactory->available();
+        $this->paymentMethods = $paymentMethods;
         $this->canCheckout = $this->cartCount > 0;
+    }
+
+    /** @return list<array{paymentMethodId: int, paymentMethodName: string}> */
+    private function paymentMethods(
+        PaymentMethodAdminStorageInterface $paymentMethodStorage,
+        PaymentMethodFactoryInterface $paymentMethodFactory,
+    ): array {
+        $methods = [];
+        foreach ($paymentMethodStorage->list() as $paymentMethod) {
+            if (! $paymentMethod->visible || ! ctype_digit($paymentMethod->paymentId)) {
+                continue;
+            }
+
+            $methods[] = [
+                'paymentMethodId' => (int) $paymentMethod->paymentId,
+                'paymentMethodName' => $paymentMethod->paymentMethodName,
+            ];
+        }
+
+        return $methods === [] ? $paymentMethodFactory->available() : $methods;
     }
 
     private function registerProcessingOrder(
         CartEntity $cart,
         string $customerId,
+        int $paymentMethodId,
         OrderCommandInterface $orderCommand,
     ): void {
         $now = (new DateTimeImmutable())->format('Y-m-d H:i:s');
@@ -173,7 +199,7 @@ final readonly class ShoppingFetched
             orderNo: $cart->preOrderId,
             preOrderId: $cart->preOrderId,
             customerId: $customerId,
-            paymentMethodId: 2,
+            paymentMethodId: $paymentMethodId,
             subtotal: $cart->totalPrice,
             deliveryFeeTotal: $cart->deliveryFeeTotal,
             charge: 0,

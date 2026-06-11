@@ -1,13 +1,15 @@
 <a href="../index.md" style="color: black; text-decoration: none;">BeMart Page Resource API Doc</a>
 
 # /shopping
-EC-CUBE goShopping — 注文情報入力画面 (Pilot — checkout review).
+EC-CUBE checkout entry / goShopping — 注文情報入力画面.
 
-Safe read. No CSRF (read-only). AUTHN required — Be Final raises
-UnauthenticatedException when the session has no customerId, which
-we map to 401. Aggregates the customer's default shipping fields,
-the current carts under the active sessionPrefix, and the list of
-user-selectable payment methods into a single review projection.
+Safe read. No CSRF (read-only). This resource is also the HTML
+checkout gateway reached from the cart CTA (`goCheckoutEntry`).
+Anonymous / stale sessions are redirected to the checkout login page
+instead of exposing a raw JSON 401 in the browser. Authenticated
+sessions resolve the member checkout projection (`goShopping`):
+customer shipping fields, the current carts under the active
+sessionPrefix, and selectable payment methods.
 
 Empty-cart handling: 200 with `canCheckout = false` rather than
 404. The frontend renders the "カートが空です" panel in that case;
@@ -15,7 +17,7 @@ the customer can navigate back to `goCart` to add items.
 
 Failure mapping:
   - SemanticVariableException → 400 (sessionPrefix malformed)
-  - UnauthenticatedException  → 401 (no / stale session)
+  - UnauthenticatedException  → 303 /shopping/login (checkout entry)
 
 Coexists with `Resource\Page\Shopping\` directory (which holds
 Checkout.php from Pilot 5) — the same file-plus-sibling-directory
@@ -34,9 +36,9 @@ the JSON-context tests assert key-wise on `body` and are unaffected.
 
 
 ## GET
-ALPS `goShopping` に対応する GET 操作。
+ALPS `goCheckoutEntry` / `goShopping` に対応する GET 操作。
 
-**ALPS**: `goShopping`
+**ALPS**: `goCheckoutEntry, goShopping`
 
 
 
@@ -72,5 +74,5 @@ ALPS `goShopping` に対応する GET 操作。
 
 | Relation | URL |
 |----------|-----|
-| doCheckout | [<code>page://self/shopping/checkout</code>](/shopping/checkout.md) |
+| doConfirmOrder | [<code>page://self/shopping/confirm</code>](/shopping/confirm.md) |
 | goCart | [<code>page://self/cart</code>](/cart.md) |

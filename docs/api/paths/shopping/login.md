@@ -7,7 +7,7 @@ Pure form-info endpoint: no Be Framework, no domain logic, no Reasons.
 Anonymous-accessible (this IS the unauthenticated branch of the
 checkout flow). Maps to `page://self/shopping/login`.
 
-Reached when an anonymous visitor hits `goShopping`. Three exits:
+Reached when an anonymous visitor hits `goCheckoutEntry`. Three exits:
 member login (doLogin), customer registration (goCustomerRegistration),
 or non-member purchase (goShoppingNonMember). The page itself carries a
 login form (the same `CustomerLoginType` shape as the standalone

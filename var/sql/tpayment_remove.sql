@@ -8,4 +8,4 @@ DELETE FROM
   dtb_payment
 WHERE
   :paymentId REGEXP '^[0-9]+$'
-  AND id = CAST(:paymentId AS UNSIGNED)
+  AND id = CAST(:paymentId AS UNSIGNED);

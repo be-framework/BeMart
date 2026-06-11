@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "get-admin-block-block.param.json",
+  "title": "GET /admin/block/block request parameters",
+  "description": "GET /admin/block/block request parameters の request parameter schema。新規作成フォームでは blockId なし、編集フォームでは既存 blockId を指定する。",
+  "type": "object",
+  "properties": {
+    "blockId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "ブロックID（入力）",
+      "description": "dtb_block.id の不透明な文字列ハンドル。SQL 実装では dtb_block.id を文字列化して使用し、Fake 実装では bk-* seed handle を使用する。",
+      "example": "1",
+      "minLength": 0,
+      "maxLength": 128
+    }
+  },
+  "additionalProperties": false
+}

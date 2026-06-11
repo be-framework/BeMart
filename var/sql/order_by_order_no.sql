@@ -14,7 +14,31 @@ SELECT
   use_point,
   order_status_id,
   order_date,
-  payment_date
+  payment_date,
+  JSON_OBJECT(
+    'name01',
+    name01,
+    'name02',
+    name02,
+    'kana01',
+    kana01,
+    'kana02',
+    kana02,
+    'companyName',
+    company_name,
+    'email',
+    email,
+    'phoneNumber',
+    phone_number,
+    'postalCode',
+    postal_code,
+    'pref',
+    pref_id,
+    'addr01',
+    addr01,
+    'addr02',
+    addr02
+  ) AS customer_snapshot_json
 FROM
   dtb_order
 WHERE

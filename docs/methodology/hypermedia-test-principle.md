@@ -21,6 +21,22 @@ One scenario pins a transition described by ALPS and is then projected across bo
 
 That is why this layer is stronger than a single test category. A change that preserves the workflow across PHP, HTTP, and HTML has much better evidence than a change that only satisfies one representation.
 
+## Completion gate and stop rule
+
+For BeMart, workflow evidence is also the completion gate for Web+DB. "The page opens" is not enough. A feature is complete only when the affordance exposed by Web/HTTP can create or change business state, and that state can be read back through another page, another role, or another projection.
+
+The loop is fixed:
+
+1. Express the business story as a Hypermedia workflow.
+2. Project the same story through real HTTP.
+3. Exercise the browser/Web+DB route and NG cases.
+4. If the browser finds a bug, add or adjust the Hypermedia/HTTP regression first.
+5. Confirm the regression is red, fix the implementation, then rerun Hypermedia -> HTTP -> browser.
+
+The stop rule matters as much as the green path. If an unsafe operation cannot be reached from `_links`, `Location`, an HTML form action, or an ALPS-described transition, do not invent a runner-only shortcut. If the request body cannot be derived from the form/profile with enough confidence, do not synthesize a body just to make a row pass. Record it as fail or targetOut with the missing affordance and follow-up.
+
+The `20260610-web-db-all-routes` run applies this rule. Storefront purchase, order history detail, reorder, profile maintenance, contact, password request, downloads, NG form cases, admin product create/update/copy/bulk status/delete, admin category create/update/delete, admin tag create/delete, and admin payment create/update/delete are green through Web/HTTP evidence. Other Admin CRUD/update operations remain fail where only page reachability exists. That is intentional: green without workflow evidence would be weaker than a visible fail.
+
 ## The underrated-ness
 
 Hypermedia (Resource-layer) tests sit between unit tests and E2E:

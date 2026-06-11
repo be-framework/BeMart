@@ -165,7 +165,7 @@
                                                         <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top"
                                                              title="削除">
                                                             <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
-                                                               data-url="/admin/delivery/delivery?deliveryId={{ Delivery.deliveryId }}&_method=delete"
+                                                               data-url="/admin/delivery/delivery?deliveryId={{ Delivery.deliveryId }}&amp;_method=delete"
                                                                data-message="この操作はあとから取り消すことができません。「{{ Delivery.deliveryName }}」を削除してよろしいですか？">
                                                                 <i class="fa fa-close fa-lg"></i>
                                                             </a>
@@ -197,6 +197,9 @@
                                                     キャンセル
                                                 </button>
                                                 <a class="btn btn-ec-delete" href="#"
+                                                   data-post-action="delete"
+                                                   token-for-anchor="{{ csrf_token_for_anchor('admin_delivery_delete') }}"
+                                                   data-method="delete"
                                                    data-confirm="false">
                                                     削除
                                                 </a>

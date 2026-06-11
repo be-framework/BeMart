@@ -51,6 +51,11 @@
                                     <td>{{ Category.sortNo }}</td>
                                     <td class="text-end pe-3">
                                         <a class="btn btn-ec-regular" href="/admin/category/category?categoryId={{ Category.categoryId }}">編集</a>
+                                        <a class="btn btn-ec-delete"
+                                           href="/admin/category/category?categoryId={{ Category.categoryId }}&amp;_method=delete"
+                                           data-method="delete"
+                                           data-confirm="false"
+                                           token-for-anchor="{{ csrf_token_for_anchor('admin_category_delete') }}">削除</a>
                                     </td>
                                 </tr>
                             {% else %}

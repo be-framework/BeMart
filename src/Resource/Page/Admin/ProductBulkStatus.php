@@ -17,6 +17,8 @@ use MyVendor\BeMart\Be\Input\AdminBulkUpdateProductStatusInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
+use function str_contains;
 
 /**
  * EC-CUBE doBulkUpdateProductStatus — 商品ステータスを一括変更する
@@ -55,7 +57,10 @@ class ProductBulkStatus extends ResourceObject
 
         assert($final instanceof AdminProductsStatusBulkUpdated);
 
-        $this->code = Code::OK;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
+        if ($this->code === Code::SEE_OTHER) {
+            $this->headers['Location'] = '/admin/product-list';
+        }
         $this->body = [
             'productCodes' => $final->productCodes,
             'productStatus' => $final->productStatus,

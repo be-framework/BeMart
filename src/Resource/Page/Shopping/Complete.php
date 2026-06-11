@@ -61,6 +61,7 @@ class Complete extends ResourceObject
     #[JsonSchema(schema: 'get-shopping-complete.json', params: 'get-shopping-complete.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
+    #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     public function onGet(string $orderNo = ''): static
     {
         $order = $orderNo === '' ? null : $this->orderQuery->byOrderNo($orderNo);
@@ -77,6 +78,7 @@ class Complete extends ResourceObject
             'links' => [
                 'goTop' => 'page://self/',
                 'goCart' => 'page://self/cart',
+                'goMypage' => 'page://self/mypage',
             ],
         ];
 

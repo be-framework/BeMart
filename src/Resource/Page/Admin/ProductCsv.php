@@ -25,8 +25,10 @@ use function fclose;
 use function fgetcsv;
 use function fopen;
 use function fwrite;
+use function getenv;
 use function is_string;
 use function rewind;
+use function str_contains;
 use function trim;
 
 /**
@@ -159,7 +161,7 @@ class ProductCsv extends ResourceObject
 
         fclose($handle);
 
-        $this->code = Code::OK;
+        $this->code = self::isHtmlContext() ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/product-list';
         $this->body = [
             'transitionId' => 'doImportProductCsv',
@@ -168,5 +170,10 @@ class ProductCsv extends ResourceObject
         ];
 
         return $this;
+    }
+
+    private static function isHtmlContext(): bool
+    {
+        return str_contains((string) getenv('APP_CONTEXT'), 'html');
     }
 }

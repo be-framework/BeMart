@@ -27,10 +27,13 @@ Failure mapping (cross-firewall AUTHZ → existence ladder):
   - UnauthorizedAdminAccessException   → 403 (no admin session)
   - CustomerNotFoundException          → 404 (no such customerId)
 
-Success (200): `{customerId, originalEmail, alreadyDeleted, message}`.
-The `alreadyDeleted` flag distinguishes a fresh delete (false, mail
-sent) from an idempotent replay (true, no mail) — same shape as the
-pilot's idempotent re-add convention.
+Success: JSON/HAL contexts return 200 with `{customerId,
+originalEmail, alreadyDeleted, message}`. HTML contexts use
+Post/Redirect/Get and return 303 to the customer list, matching the
+admin list-row delete affordance. The `alreadyDeleted` flag
+distinguishes a fresh delete (false, mail sent) from an idempotent
+replay (true, no mail) — same shape as the pilot's idempotent re-add
+convention.
 
 Anti-enumeration: the 403 / 404 ordering matches the Be Final's
 check sequence (AUTHZ first, existence second). An admin-anonymous

@@ -23,6 +23,8 @@ final readonly class InstallTemplateInput
     public function __construct(
         public string $templateCode,
         public string $templateName,
+        public string $archiveName,
+        public int $archiveSize,
     ) {
     }
 }

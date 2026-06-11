@@ -19,7 +19,9 @@ use MyVendor\BeMart\Be\Input\GetAdminNewsListInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function getenv;
 use function sprintf;
+use function str_contains;
 use function urlencode;
 
 /**
@@ -83,7 +85,7 @@ class NewsList extends ResourceObject
 
         assert($final instanceof NewsCreated);
 
-        $this->code = Code::CREATED;
+        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = sprintf('/admin/news/news?newsId=%s', urlencode($final->newsId));
         $this->body = [
             'newsId' => $final->newsId,
