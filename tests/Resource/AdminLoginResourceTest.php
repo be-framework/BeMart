@@ -56,7 +56,7 @@ final class AdminLoginResourceTest extends TestCase
         );
     }
 
-    public function testOnPostAuthenticatesAndReturns200(): void
+    public function testOnPostAuthenticatesAndRedirectsToTwoFactorAuth(): void
     {
         $ro = $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
@@ -64,7 +64,7 @@ final class AdminLoginResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('ad000000000000000000000000000001', $ro->body['adminId']);
         $this->assertSame('test-admin', $ro->body['loginId']);
         $this->assertSame('テスト管理者', $ro->body['name']);
@@ -84,7 +84,7 @@ final class AdminLoginResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/two-factor-auth-set', $ro->headers['Location']);
         $this->assertSame('test-admin', $_SESSION[HtmlAdminLoginChallengeAdapter::SETUP_CHALLENGE_KEY]['loginId'] ?? null);
         $this->assertSame(FakeTwoFactorAuth::FIXED_SECRET, $_SESSION[HtmlAdminLoginChallengeAdapter::SETUP_CHALLENGE_KEY]['authKey'] ?? null);

@@ -76,6 +76,7 @@ $(function () {
                         <input type="hidden" id="admin_two_factor_auth__token" name="csrfToken" value="{{ csrfToken|default('') }}">
                         {{ form.input('authKey')|raw }}
                         <h5 class="mb-3">2段階認証</h5>
+                        <p class="text-muted small text-start">テスト環境では認証コード <strong>123456</strong> を入力してください。</p>
                         <p class="mb-3 text-start">QRコードを2段階認証用スマートフォンアプリで読み込み、表示された6桁の数字を入力してください。</p>
                         <div id="qrcode" class="mb-3"></div>
                         {% if message is defined and message %}
@@ -83,7 +84,8 @@ $(function () {
                         {% endif %}
                         <div class="row">
                             <div class="col-12">
-                                <div class="mb-3 d-flex justify-content-center">
+                                <div class="mb-3 bemart-admin-field">
+                                    <label for="admin_two_factor_auth_device_token" class="form-label fw-bold">認証コード</label>
                                     {{ form.input('deviceToken')|raw }}
                                 </div>
                                 <p class="mb-3 text-start">{% if form.error('deviceToken') %}<span class="invalid-feedback d-block">{{ form.error('deviceToken') }}</span>{% endif %}</p>

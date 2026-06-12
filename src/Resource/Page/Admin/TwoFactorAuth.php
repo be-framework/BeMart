@@ -47,6 +47,9 @@ use function assert;
  */
 class TwoFactorAuth extends ResourceObject
 {
+    // PoC fixture prefill for the browser demo. Remove before production hardening.
+    private const POC_DEVICE_TOKEN = '123456';
+
     public function __construct(
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
@@ -73,14 +76,17 @@ class TwoFactorAuth extends ResourceObject
         $this->verificationChallenge();
 
         $this->code = Code::OK;
+        $form = $this->formFactory->newInstance(AdminTwoFactorAuthForm::class);
+        assert($form instanceof AdminTwoFactorAuthForm);
+        $form->fillValues(['deviceToken' => self::POC_DEVICE_TOKEN]);
+
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuth',
             'fields' => ['deviceToken', 'csrfToken'],
             'csrfToken' => $this->csrf->token,
-            // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
-            'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
+            // PoC fixture prefill for quick HTML-context verification.
+            'form' => $form,
         ];
-        assert($this->body['form'] instanceof AdminTwoFactorAuthForm);
 
         return $this;
     }
@@ -147,7 +153,7 @@ class TwoFactorAuth extends ResourceObject
         assert($final instanceof TwoFactorAuthVerified);
         $this->loginChallenge->completeVerification($challenge);
 
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doVerifyTwoFactorAuth',

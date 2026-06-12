@@ -56,10 +56,12 @@
                     <form name="form1" id="form1" method="post" action="/admin/login">
                         <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
                         <p><img src="{{ asset('assets/img/logo2.png', 'admin') }}" alt="BeMart" width="106"></p>
-                        <div class="mb-3">
+                        <div class="mb-3 bemart-admin-field">
+                            <label for="loginId" class="form-label fw-bold">ログインID</label>
                             {{ form.input('loginId')|raw }}
                         </div>
-                        <div class="mb-3">
+                        <div class="mb-3 bemart-admin-field">
+                            <label for="admin_login_password" class="form-label fw-bold">パスワード</label>
                             {{ form.input('password')|raw }}
                         </div>
                         {% if message is defined and message %}

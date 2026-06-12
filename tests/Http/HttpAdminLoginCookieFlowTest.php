@@ -36,7 +36,7 @@ final class HttpAdminLoginCookieFlowTest extends TestCase
             'csrfToken' => $this->bodyString($loginForm, 'csrfToken'),
         ]);
 
-        $this->assertSame(Code::OK, $login->code, $login->toString());
+        $this->assertSame(Code::SEE_OTHER, $login->code, $login->toString());
         $next = $this->headerString($login, 'Location');
         $this->assertContains($next, ['/admin/two-factor-auth-set', '/admin/two-factor-auth']);
 
@@ -44,7 +44,7 @@ final class HttpAdminLoginCookieFlowTest extends TestCase
             ? $this->completeInitialTwoFactorSetup($resource, $next)
             : $this->completeTwoFactorChallenge($resource, $next);
 
-        $this->assertSame(Code::OK, $verified->code, $verified->toString());
+        $this->assertSame(Code::SEE_OTHER, $verified->code, $verified->toString());
         $adminHome = $resource->get($this->headerString($verified, 'Location'));
 
         $this->assertSame(Code::OK, $adminHome->code, $adminHome->toString());

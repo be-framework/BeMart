@@ -177,7 +177,7 @@ class Login extends ResourceObject
         // next login-context 2FA step. JSON clients still read the
         // authenticated admin proof off the body below, but the trusted
         // identity used by 2FA is the session-backed challenge above.
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = $location;
         $this->body = [
             'adminId' => $final->adminId,

@@ -52,10 +52,11 @@ final class AdminTwoFactorAuthForm extends AbstractForm
         $this->setField('deviceToken', 'text')
             ->setAttribs([
                 'id' => 'admin_two_factor_auth_device_token',
-                'class' => 'w-100',
+                'class' => 'form-control text-center',
                 'maxlength' => '6',
-                'style' => 'width: 100px;',
-                'placeholder' => 'トークン',
+                'inputmode' => 'numeric',
+                'pattern' => '\\d{6}',
+                'placeholder' => '123456',
                 'autofocus' => 'autofocus',
             ]);
 
