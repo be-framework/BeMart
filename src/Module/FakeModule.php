@@ -58,6 +58,10 @@ final class FakeModule extends AbstractAppModule
             MediaQueryQueries::fromAppRoot($root),
         ));
 
+        if (PHP_SAPI === 'cli-server') {
+            $this->override(new HtmlFakeCartModule());
+        }
+
         $inventory = new FakeInventoryAllocator();
         $gateway = new FakePaymentGateway();
         $mailer = new FakeMailer();
