@@ -50,6 +50,6 @@ final class HelpResourceTest extends TestCase
         $this->assertSame([], $ro->body['fields']);
         $this->assertNull($ro->body['submitTo']);
         $this->assertSame($page, $ro->body['staticContent']['page']);
-        $this->assertSame('page://self/', $ro->body['links']['goTop']);
+        $this->assertArrayNotHasKey('links', $ro->body);
     }
 }

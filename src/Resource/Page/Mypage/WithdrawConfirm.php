@@ -66,10 +66,6 @@ class WithdrawConfirm extends ResourceObject
                 'href' => 'page://self/mypage/withdraw',
             ],
             'csrfToken' => null,
-            'links' => [
-                'doWithdrawCustomer' => 'page://self/mypage/withdraw',
-                'goMypage' => 'page://self/mypage',
-            ],
         ];
 
         return $this;

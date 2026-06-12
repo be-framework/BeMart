@@ -81,25 +81,6 @@
     },
     "csrfToken": {
       "$ref": "#/$defs/csrfToken"
-    },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/admin/template/template-list のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "goTemplateAdd": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goTemplateAdd` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "goTemplateAdd"
-      ]
     }
   },
   "additionalProperties": false,

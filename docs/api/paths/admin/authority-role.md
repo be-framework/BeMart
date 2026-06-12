@@ -71,9 +71,11 @@ _No parameters required_
 | goMemberList | [<code>page://self/admin/member-list</code>](/admin/member-list.md) |
 ## POST
 Wave 8: browser form input for URL deny rules. The primary HTML
-shape is `csrfToken` plus `AuthorityRoles[*][Authority]` /
-`AuthorityRoles[*][deny_url]`. The legacy member role-flip shape
-(`loginId`, `authority`) remains supported for member workflow.
+shape carries CSRF at the request boundary plus
+`AuthorityRoles[*][Authority]` / `AuthorityRoles[*][deny_url]`.
+
+The legacy member role-flip shape (`loginId`, `authority`)
+remains supported for member workflow.
 
 **ALPS**: `doUpdateAuthorityRole`
 
@@ -86,7 +88,6 @@ shape is `csrfToken` plus `AuthorityRoles[*][Authority]` /
 | loginId | string | ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 'test-admin', 'shop-owner', 'deputy', 'deleted-admin', 'unknown-user'。 |  | Optional | {"minLength":0,"maxLength":128,"$comment":"BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | test-admin |
 | authority | int | 権限（入力） - 管理者権限レベル。0=システム管理者（最高権限、全機能アクセス可能）, 1=店舗オーナー（制限あり、denyUrlで制限されたURLにアクセス不可）。数値が小さいほど権限が高い。AuthorityRoleのURL拒否パターンでアクセス制御 Fake観察数値 0〜1; 観察値 '1', '0'。 |  | Optional | {"$comment":"Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."} | 1 |
 | AuthorityRoles | array | 権限ルール入力一覧 - 権限管理画面のURL拒否ルール行。HTML form の AuthorityRoles[*][Authority] / deny_url を受け取る。 | array () | Optional | {"items":{"type":["object","null"],"properties":{"Authority":{"type":["integer","string","null"],"title":"\u6a29\u9650"},"authority":{"type":["integer","string","null"],"title":"\u6a29\u9650"},"deny_url":{"type":["string","null"],"title":"\u62d2\u5426URL"},"denyUrl":{"type":["string","null"],"title":"\u62d2\u5426URL"}},"additionalProperties":true},"minItems":0} |  |
-| csrfToken | string |  |  | Optional | {"$ref":"#/$defs/csrfToken"} |  |
 
 
 ### Response

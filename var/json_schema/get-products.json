@@ -378,37 +378,6 @@
         "$comment": "配列要素はFake/Resourceで観察された既知propertyに固定する。新しい列が必要になった場合はSemantic-Ex観察に追加してschemaを更新する。"
       },
       "minItems": 0
-    },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/products のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "goTop": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goTop` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "goProduct": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goProduct` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "goCart": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goCart` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "goTop",
-        "goProduct",
-        "goCart"
-      ]
     }
   },
   "additionalProperties": false,

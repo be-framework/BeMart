@@ -42,9 +42,6 @@ class About extends ResourceObject
                 'title' => '当サイトについて',
                 'sections' => [],
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

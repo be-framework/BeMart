@@ -54,10 +54,6 @@ class ChangeComplete extends ResourceObject
                 'page' => 'mypage-change-complete',
                 'title' => 'マイページ/会員情報編集(完了)',
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-                'goMypage' => 'page://self/mypage',
-            ],
         ];
 
         return $this;

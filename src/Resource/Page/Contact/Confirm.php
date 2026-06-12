@@ -74,10 +74,6 @@ class Confirm extends ResourceObject
                 'page' => 'contact-confirm',
                 'title' => 'お問い合わせ',
             ],
-            'links' => [
-                'doSubmitContact' => 'page://self/contact',
-                'goTop' => 'page://self/',
-            ],
             // Phase 3: the confirm screen carries the inquiry payload as
             // hidden inputs — a ContactConfirmForm (every field `hidden`).
             // JSON contexts ignore `body['form']`.

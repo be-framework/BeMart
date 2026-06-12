@@ -35,7 +35,6 @@ final class ShoppingErrorResourceTest extends TestCase
         $this->assertSame([], $ro->body['fields']);
         $this->assertNull($ro->body['submitTo']);
         $this->assertSame('shopping-error', $ro->body['staticContent']['page']);
-        // ALPS #ShoppingError declares a single outbound transition: goCart.
-        $this->assertSame('page://self/cart', $ro->body['links']['goCart']);
+        $this->assertArrayNotHasKey('links', $ro->body);
     }
 }

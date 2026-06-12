@@ -110,11 +110,6 @@ class Products extends ResourceObject
                 'pageno' => (string) $pageNo,
             ],
             'pager' => $this->pager($totalItemCount, $pageNo, $dispNumber),
-            'links' => [
-                'goProduct' => 'page://self/product',
-                'goCart' => 'page://self/cart',
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

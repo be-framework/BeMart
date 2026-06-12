@@ -58,9 +58,6 @@ class TemplateList extends ResourceObject
             'count' => $final->count,
             'templates' => $final->templates,
             'csrfToken' => $this->csrfToken->token,
-            'links' => [
-                'goTemplateAdd' => 'page://self/admin/template/template-add',
-            ],
         ];
 
         return $this;
