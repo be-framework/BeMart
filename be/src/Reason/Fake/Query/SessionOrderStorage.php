@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Be\Reason\Fake\Query;
 
+use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
@@ -98,7 +99,7 @@ final class SessionOrderStorage implements OrderQueryInterface, OrderCommandInte
     public function register(FinalizedOrderEntity $order): void
     {
         $rows = $this->rows();
-        $rows[$order->orderNo] = self::rowFromFinalized($order);
+        $rows[$order->orderNo] = $this->rowFromFinalized($order);
         $this->writeRows($rows);
     }
 
@@ -118,6 +119,37 @@ final class SessionOrderStorage implements OrderQueryInterface, OrderCommandInte
 
         $rows[$orderNo]['orderStatus'] = $newStatus;
         $this->writeRows($rows);
+    }
+
+    /** @return list<array{productCode: string, productName: string, quantity: int, unitPrice: int}> */
+    public function itemRowsByOrderNo(string $orderNo): array
+    {
+        $row = $this->rows()[$orderNo] ?? null;
+        if (! is_array($row)) {
+            return [];
+        }
+
+        /** @var mixed $items */
+        $items = $row['items'] ?? [];
+        if (! is_array($items) || $items === []) {
+            $cart = $this->cartStorage->findByPreOrderId((string) ($row['preOrderId'] ?? ''));
+            $items = $cart?->items ?? [];
+        }
+
+        return array_values(array_map(
+            static fn (mixed $item): array => $item instanceof CartItemEntity ? [
+                'productCode' => $item->productCode,
+                'productName' => $item->productName,
+                'quantity' => $item->quantity,
+                'unitPrice' => $item->price,
+            ] : (is_array($item) ? [
+                'productCode' => (string) ($item['productCode'] ?? ''),
+                'productName' => (string) ($item['productName'] ?? ''),
+                'quantity' => (int) ($item['quantity'] ?? 0),
+                'unitPrice' => (int) ($item['unitPrice'] ?? 0),
+            ] : ['productCode' => '', 'productName' => '', 'quantity' => 0, 'unitPrice' => 0]),
+            $items,
+        ));
     }
 
     /** @return array<string, mixed>|null */
@@ -194,7 +226,7 @@ final class SessionOrderStorage implements OrderQueryInterface, OrderCommandInte
     }
 
     /** @return array<string, mixed> */
-    private static function rowFromFinalized(FinalizedOrderEntity $order): array
+    private function rowFromFinalized(FinalizedOrderEntity $order): array
     {
         return [
             'orderNo' => $order->orderNo,
@@ -214,6 +246,15 @@ final class SessionOrderStorage implements OrderQueryInterface, OrderCommandInte
             'orderDate' => $order->orderDate,
             'paymentDate' => $order->paymentDate,
             'customerSnapshot' => $order->customerSnapshot,
+            'items' => array_map(
+                static fn (CartItemEntity $item): array => [
+                    'productCode' => $item->productCode,
+                    'productName' => $item->productName,
+                    'quantity' => $item->quantity,
+                    'unitPrice' => $item->price,
+                ],
+                $this->cartStorage->findByPreOrderId($order->preOrderId)?->items ?? [],
+            ),
         ];
     }
 
