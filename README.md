@@ -24,7 +24,7 @@ BeMart の価値は、EC-CUBE を別の PHP フレームワークへ移したこ
 
 言語やフレームワークは変わります。一方で、「商品を探す」「カートへ入れる」
 「注文を確定する」「受注を管理する」「配送を更新する」といった業務の意味は長く残ります。
-BeMart は、その長寿命な意味を [`alps.json`](docs/api/)、Be domain、BEAR Resource、
+BeMart は、その長寿命な意味を [`alps.json`](alps.json)、Be domain、BEAR Resource、
 Ray.MediaQuery SQL、Twig HTML、workflow evidence へ分解し、同じ契約の複数の投影として
 扱えることを示します。
 
@@ -52,10 +52,19 @@ EC-CUBE route と ALPS / 実装状態の対応は
 [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html)、
 API surface は [`docs/api/`](docs/api/) にあります。
 
+生成された公開・検証成果物は次から直接確認できます。
+
+- ALPS HTML: [`alps.json.html`](alps.json.html)
+- API docs: [`docs/api/`](docs/api/)
+- OpenAPI: [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html)
+- API terms: [`docs/api/terms.html`](docs/api/terms.html)
+- API audit: [`docs/api/audit.md`](docs/api/audit.md)
+- SQL Quality report: [`build/sql-quality/summary_report.md`](build/sql-quality/summary_report.md)
+
 ## 2パスマイグレーション
 
 移植は 2 つの動きでできています。最初に EC-CUBE の Entity、Route、Controller、Twig から
-語彙と状態遷移を逆算し、[`alps.json`](docs/api/) という意味構造の契約へ束ねます。次に、その契約を Be domain、
+語彙と状態遷移を逆算し、[`alps.json`](alps.json) という意味構造の契約へ束ねます。次に、その契約を Be domain、
 BEAR Resource、Ray.MediaQuery SQL、Twig HTML、workflow/state-transition evidence へ投影します。
 
 ```text
