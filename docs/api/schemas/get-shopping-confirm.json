@@ -285,31 +285,6 @@
       "example": 12700,
       "minimum": 0,
       "maximum": 999999999
-    },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/shopping/confirm のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "goShoppingError": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goShoppingError` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "doCheckout": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `doCheckout` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "goShoppingError",
-        "doCheckout"
-      ]
     }
   },
   "additionalProperties": false,

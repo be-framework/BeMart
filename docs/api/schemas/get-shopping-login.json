@@ -58,37 +58,6 @@
       "maxLength": 96,
       "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
       "example": "doAddCartItem"
-    },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/shopping/login のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "doLogin": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `doLogin` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "goCustomerRegistration": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goCustomerRegistration` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "goShoppingNonMember": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goShoppingNonMember` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "doLogin",
-        "goCustomerRegistration",
-        "goShoppingNonMember"
-      ]
     }
   },
   "additionalProperties": false,

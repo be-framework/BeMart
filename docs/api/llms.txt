@@ -282,7 +282,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Method | Parameters | Links |
 |--------|------------|-------|
 | GET | - | href(doUpdateAuthorityRole), href(goMemberList) |
-| POST | loginId, authority, AuthorityRoles, csrfToken | href(goMember), href(goMemberList), href(goLoginHistoryList) |
+| POST | loginId, authority, AuthorityRoles | href(goMember), href(goMemberList), href(goLoginHistoryList) |
 
 ### Page/Admin/BaseInfo
 `/admin/base-info`
@@ -1286,16 +1286,16 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-contact | post-contact.json | contactEmail, contactName02, contactName01, ticketId |
 | Get-entry | get-entry.json | form, fields, submitTo, transitionId, csrfToken |
 | Post-entry | post-entry.json | name01, customerId, customerStatus, email, initialPoint, name02 |
-| Get-forgot-complete | get-forgot-complete.json | fields, submitTo, transitionId, links |
+| Get-forgot-complete | get-forgot-complete.json | fields, submitTo, transitionId |
 | Get-forgot-password | get-forgot-password.json | form, fields, submitTo, transitionId, csrfToken |
 | Post-forgot-password | post-forgot-password.json | message |
-| Get-index | get-index.json | fields, submitTo, staticContent, transitionId, links |
+| Get-index | get-index.json | fields, submitTo, staticContent, transitionId |
 | Get-login | get-login.json | form, fields, submitTo, transitionId, csrfToken |
 | Post-login | post-login.json | name01, customerId, customerStatus, email, name02 |
 | Post-logout | post-logout.json | message, wasLoggedIn, customerId |
 | Get-mypage | get-mypage.json | name01, customerId, recentOrders, email, favoriteCount, recentOrderCount, name02 |
 | Get-product | get-product.json | form, stock, productName, description, classNames, price02, mainImage, tagNames, categoryNames, productCode, stockFind, csrfToken |
-| Get-products | get-products.json | filters, pager, transitionId, csrfToken, totalItemCount, products, links |
+| Get-products | get-products.json | filters, pager, transitionId, csrfToken, totalItemCount, products |
 | Get-reset | get-reset.json | form, fields, resetKey, submitTo, transitionId, csrfToken |
 | Post-reset | post-reset.json | customerId |
 | Get-shopping | get-shopping.json | form, cartCount, totalPrice, canCheckout, name02, customerId, deliveryFeeTotal, name01, carts, email, paymentMethods, defaultShippingAddress, preOrderId, csrfToken |
@@ -1376,17 +1376,17 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-cart-item | post-cart-item.json | cartKey, requestedQuantity, saleTypeName, productCode, totalPrice, unitPrice, adjustedQuantity, deliveryFeeTotal |
 | Put-cart-item | put-cart-item.json | cartKey, requestedQuantity, saleTypeName, productCode, totalPrice, unitPrice, adjustedQuantity, deliveryFeeTotal |
 | Delete-cart-item | delete-cart-item.json | cartKey, productCode, totalPrice, deliveryFeeTotal |
-| Get-contact-complete | get-contact-complete.json | fields, submitTo, staticContent, transitionId, ticketId, links |
-| Get-contact-confirm | get-contact-confirm.json | form, fields, submitTo, staticContent, transitionId, links |
-| Get-entry-activate | get-entry-activate.json | fields, submitTo, staticContent, transitionId, links |
+| Get-contact-complete | get-contact-complete.json | fields, submitTo, staticContent, transitionId, ticketId |
+| Get-contact-confirm | get-contact-confirm.json | form, fields, submitTo, staticContent, transitionId |
+| Get-entry-activate | get-entry-activate.json | fields, submitTo, staticContent, transitionId |
 | Post-entry-activate | post-entry-activate.json | message |
-| Get-entry-complete | get-entry-complete.json | fields, submitTo, staticContent, transitionId, links |
-| Get-entry-confirm | get-entry-confirm.json | form, fields, submitTo, staticContent, transitionId, links |
-| Get-help-about | get-help-about.json | fields, submitTo, staticContent, transitionId, links |
-| Get-help-agreement | get-help-agreement.json | fields, submitTo, staticContent, transitionId, links |
-| Get-help-guide | get-help-guide.json | fields, submitTo, staticContent, transitionId, links |
-| Get-help-privacy | get-help-privacy.json | fields, submitTo, staticContent, transitionId, links |
-| Get-help-trade-law | get-help-trade-law.json | fields, submitTo, staticContent, transitionId, links |
+| Get-entry-complete | get-entry-complete.json | fields, submitTo, staticContent, transitionId |
+| Get-entry-confirm | get-entry-confirm.json | form, fields, submitTo, staticContent, transitionId |
+| Get-help-about | get-help-about.json | fields, submitTo, staticContent, transitionId |
+| Get-help-agreement | get-help-agreement.json | fields, submitTo, staticContent, transitionId |
+| Get-help-guide | get-help-guide.json | fields, submitTo, staticContent, transitionId |
+| Get-help-privacy | get-help-privacy.json | fields, submitTo, staticContent, transitionId |
+| Get-help-trade-law | get-help-trade-law.json | fields, submitTo, staticContent, transitionId |
 | Get-mypage-address | get-mypage-address.json | form, submitTo, transitionId, csrfToken, addressId |
 | Put-mypage-address | put-mypage-address.json | kana02, phoneNumber, name02, customerId, kana01, name01, addr02, postalCode, pref, addr01, companyName, addressId |
 | Delete-mypage-address | delete-mypage-address.json | customerId, addressId |
@@ -1394,7 +1394,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-mypage-address-list | post-mypage-address-list.json | kana02, phoneNumber, name02, customerId, kana01, name01, addr02, postalCode, pref, addr01, companyName, addressId |
 | Get-mypage-change | get-mypage-change.json | form, kana02, phoneNumber, name02, customerId, kana01, name01, addr02, email, postalCode, pref, addr01, submitTo, companyName |
 | Post-mypage-change | post-mypage-change.json | message, email, customerId, name01, name02 |
-| Get-mypage-change-complete | get-mypage-change-complete.json | fields, submitTo, staticContent, transitionId, links |
+| Get-mypage-change-complete | get-mypage-change-complete.json | fields, submitTo, staticContent, transitionId |
 | Post-mypage-favorite | post-mypage-favorite.json | alreadyExisted, productName, productCode, unitPrice, customerId |
 | Delete-mypage-favorite | delete-mypage-favorite.json | alreadyAbsent, customerId, productCode |
 | Get-mypage-favorite-list | get-mypage-favorite-list.json | favoriteCount, customerId, favorites |
@@ -1403,22 +1403,22 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-mypage-reorder | post-mypage-reorder.json | skippedCount, skippedProductCodes, addedCount, cartKeys, orderNo, customerId |
 | Get-mypage-withdraw | get-mypage-withdraw.json | name01, fields, email, name02, submitTo, transitionId, csrfToken, customerId |
 | Post-mypage-withdraw | post-mypage-withdraw.json | message, cleared, customerId, dummyEmail |
-| Get-mypage-withdraw-complete | get-mypage-withdraw-complete.json | fields, submitTo, staticContent, transitionId, links |
-| Get-mypage-withdraw-confirm | get-mypage-withdraw-confirm.json | fields, submitTo, transitionId, csrfToken, links |
+| Get-mypage-withdraw-complete | get-mypage-withdraw-complete.json | fields, submitTo, staticContent, transitionId |
+| Get-mypage-withdraw-confirm | get-mypage-withdraw-confirm.json | fields, submitTo, transitionId, csrfToken |
 | Post-shopping-checkout | post-shopping-checkout.json | addPoint, orderDate, paymentTotal, completeMessage, paymentDate, orderNo, customerId, total, orderStatus |
-| Get-shopping-complete | get-shopping-complete.json | completeMessage, staticContent, transitionId, orderNo, links |
-| Get-shopping-confirm | get-shopping-confirm.json | addPoint, items, paymentMethodId, customer, deliveryFeeTotal, usePoint, charge, paymentMethodName, paymentTotal, preOrderId, tax, submitTo, subtotal, transitionId, discount, csrfToken, total, links |
-| Get-shopping-error | get-shopping-error.json | fields, submitTo, staticContent, transitionId, links |
-| Get-shopping-login | get-shopping-login.json | form, fields, submitTo, staticContent, transitionId, links |
+| Get-shopping-complete | get-shopping-complete.json | completeMessage, staticContent, transitionId, orderNo |
+| Get-shopping-confirm | get-shopping-confirm.json | addPoint, items, paymentMethodId, customer, deliveryFeeTotal, usePoint, charge, paymentMethodName, paymentTotal, preOrderId, tax, submitTo, subtotal, transitionId, discount, csrfToken, total |
+| Get-shopping-error | get-shopping-error.json | fields, submitTo, staticContent, transitionId |
+| Get-shopping-login | get-shopping-login.json | form, fields, submitTo, staticContent, transitionId |
 | Get-shopping-non-member | get-shopping-non-member.json | form, fields, submitTo, transitionId, csrfToken |
 | Post-shopping-non-member | post-shopping-non-member.json | name01, email, paymentMethodId, preOrderId, name02 |
-| Get-shopping-shipping | get-shopping-shipping.json | fields, submitTo, staticContent, transitionId, addresses, csrfToken, links |
+| Get-shopping-shipping | get-shopping-shipping.json | fields, submitTo, staticContent, transitionId, addresses, csrfToken |
 | Post-shopping-shipping | post-shopping-shipping.json | message, transitionId, shippingAddressId |
-| Get-shopping-shipping-edit | get-shopping-shipping-edit.json | form, fields, submitTo, staticContent, transitionId, csrfToken, links |
+| Get-shopping-shipping-edit | get-shopping-shipping-edit.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
 | Post-shopping-shipping-edit | post-shopping-shipping-edit.json | kana02, phoneNumber, message, name02, kana01, name01, addr02, postalCode, pref, addr01, companyName, transitionId |
-| Get-shopping-shipping-multiple | get-shopping-shipping-multiple.json | fields, submitTo, staticContent, transitionId, addresses, cartItems, links |
+| Get-shopping-shipping-multiple | get-shopping-shipping-multiple.json | fields, submitTo, staticContent, transitionId, addresses, cartItems |
 | Post-shopping-shipping-multiple | post-shopping-shipping-multiple.json | message, transitionId, allocationCount |
-| Get-shopping-shipping-multiple-edit | get-shopping-shipping-multiple-edit.json | form, fields, submitTo, staticContent, transitionId, csrfToken, links |
+| Get-shopping-shipping-multiple-edit | get-shopping-shipping-multiple-edit.json | form, fields, submitTo, staticContent, transitionId, csrfToken |
 | Post-shopping-shipping-multiple-edit | post-shopping-shipping-multiple-edit.json | kana02, phoneNumber, message, name02, kana01, name01, addr02, postalCode, pref, addr01, companyName, transitionId |
 | Get-admin-block-block | get-admin-block-block.json | blockId, blockName, blockFileName, blockDeletable, form, csrfToken |
 | Put-admin-block-block | put-admin-block-block.json | blockDeletable, blockName, blockId, blockFileName |
@@ -1511,7 +1511,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Post-admin-tax-rule-tax-rule-list | post-admin-tax-rule-tax-rule-list.json | roundingType, taxRate, taxRuleId, applyDate |
 | Get-admin-template-template-add | get-admin-template-template-add.json | form, csrfToken |
 | Post-admin-template-template-add | post-admin-template-template-add.json | message, templateId, archiveName, archiveSize, transitionId |
-| Get-admin-template-template-list | get-admin-template-template-list.json | count, templates, csrfToken, links |
+| Get-admin-template-template-list | get-admin-template-template-list.json | count, templates, csrfToken |
 | Put-admin-template-template-list | put-admin-template-template-list.json | message, transitionId, templateId |
 | Delete-admin-template-template-list | delete-admin-template-template-list.json | message, transitionId, templateId |
 | Post-admin-template-template-list | post-admin-template-template-list.json | message, value |

@@ -21,9 +21,8 @@ Notably absent: 401/403 for "no admin session". Per ALPS
 success — the response body simply carries `wasLoggedIn=false`.
 
 In the html context this resource clears the flat admin session key
-read by HtmlAdminSessionAdapter. The clear is guarded by
-an html APP_CONTEXT and PHP_SESSION_ACTIVE so app/test/prod contexts keep
-their existing session behaviour.
+through the session-writer port. Non-html contexts bind a no-op writer,
+so Resource code does not branch on environment or touch PHP session storage.
 
 Source-of-truth gap: alps.json does not currently carry a
 `doAdminLogout` transition id; using the conventional name to

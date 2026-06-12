@@ -85,25 +85,6 @@
       "maxLength": 128,
       "pattern": "^[A-Za-z0-9._:@/-]*$",
       "$comment": "BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。"
-    },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/contact/complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "goTop": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goTop` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "goTop"
-      ]
     }
   },
   "additionalProperties": false,

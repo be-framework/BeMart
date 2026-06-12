@@ -74,9 +74,6 @@ class Activate extends ResourceObject
                 'page' => 'entry-activate',
                 'title' => '新規会員登録(完了)',
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

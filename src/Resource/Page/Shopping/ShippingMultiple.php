@@ -47,10 +47,6 @@ class ShippingMultiple extends ResourceObject
             'fields' => [],
             'submitTo' => null,
             'staticContent' => null,
-            'links' => [
-                'goShopping' => 'page://self/shopping',
-                'goShoppingShipping' => 'page://self/shopping/shipping',
-            ],
             'cartItems' => [],
             'addresses' => [],
         ];
