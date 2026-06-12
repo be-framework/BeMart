@@ -21,4 +21,6 @@ if (session_status() !== PHP_SESSION_ACTIVE && ! headers_sent()) {
     ]);
 }
 
-exit((new Bootstrap())('html-eccube-sql-hal-app', $GLOBALS, $_SERVER));
+$context = getenv('APP_CONTEXT') ?: 'html-eccube-sql-hal-app';
+
+exit((new Bootstrap())($context, $GLOBALS, $_SERVER));
