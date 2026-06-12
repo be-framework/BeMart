@@ -2290,5 +2290,515 @@
             "commerce",
             "edited"
         ]
+    },
+    {
+        "id": "product-fallback-storage",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/storage.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "storage"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-kitchen",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/kitchen.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "kitchen"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-furniture",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/furniture.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "furniture"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-lighting",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/lighting.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "lighting"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-fabric",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/fabric.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "fabric"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-desk",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/desk.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "desk"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-books",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/books.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "books"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-music",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/music.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "music"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-craft",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/craft.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "craft"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-cleaning",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/cleaning.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "cleaning"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-bath",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/bath.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "bath"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-coffee",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/coffee.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "coffee"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-garden",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/garden.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "garden"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-pet",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/pet.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "pet"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-outdoor",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/outdoor.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "outdoor"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-gift",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/gift.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "gift"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-tableware",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/tableware.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "tableware"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-stationery",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/stationery.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "stationery"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-audio",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/audio.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "audio"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-fallback-kids",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/fallback/kids.svg",
+        "tags": [
+            "product",
+            "idea-store",
+            "category-fallback",
+            "kids"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "fallback",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-011",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-011.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-012",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-012.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-013",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-013.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-014",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-014.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-015",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-015.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-016",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-016.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-017",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-017.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-018",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-018.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-019",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-019.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
+    },
+    {
+        "id": "product-real-home-020",
+        "type": "product",
+        "src": "/assets/idea-store/images/product/real/product-home-020.png",
+        "tags": [
+            "product",
+            "idea-store",
+            "realistic",
+            "catalog"
+        ],
+        "mood": [
+            "quiet",
+            "natural",
+            "commerce",
+            "edited"
+        ]
     }
 ]
