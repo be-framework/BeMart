@@ -18,7 +18,6 @@ use Exception;
 use Override;
 use Throwable;
 
-use const E_ERROR;
 
 final class AppThrowableHandler implements ThrowableHandlerInterface
 {
@@ -117,7 +116,12 @@ final class AppThrowableHandler implements ThrowableHandlerInterface
         }
 
         $this->delegated = false;
-        $this->errorPage = new AppErrorPage($status, ['message' => $this->message($e, $status)]);
+        $this->errorPage = new AppErrorPage(
+            $status,
+            ['message' => $this->message($e, $status)],
+            $this->isHtmlContext(),
+            $request->path,
+        );
 
         return $this;
     }
@@ -131,9 +135,19 @@ final class AppThrowableHandler implements ThrowableHandlerInterface
             return;
         }
 
-        ($this->responder)($this->errorPage ?? new AppErrorPage(Code::ERROR, [
-            'message' => $this->statusText(Code::ERROR),
-        ]), []);
+        ($this->responder)($this->errorPage ?? new AppErrorPage(
+            Code::ERROR,
+            ['message' => $this->statusText(Code::ERROR)],
+            $this->isHtmlContext(),
+        ), []);
+    }
+
+
+    private function isHtmlContext(): bool
+    {
+        $context = getenv('APP_CONTEXT');
+
+        return is_string($context) && str_contains($context, 'html');
     }
 
     private function status(Throwable $e): int|null

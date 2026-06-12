@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
@@ -100,6 +101,26 @@ final class AdminIndexHtmlRenderTest extends TestCase
             }
         });
         $this->resource = $injector->getInstance(ResourceInterface::class);
+    }
+
+    public function testAnonymousAdminDoesNotRenderDashboard(): void
+    {
+        $session = new FakeAdminSession(null);
+        $injector = HtmlTestInjector::getOverrideInstance(new class ($session) extends AbstractModule {
+            public function __construct(private readonly FakeAdminSession $session)
+            {
+                parent::__construct();
+            }
+
+            protected function configure(): void
+            {
+                $this->bind(AdminSession::class)->toInstance($this->session);
+            }
+        });
+        $resource = $injector->getInstance(ResourceInterface::class);
+
+        $this->expectException(UnauthorizedAdminAccessException::class);
+        $resource->get('page://self/admin/index');
     }
 
     public function testDashboardRendersAsHtmlDocument(): void

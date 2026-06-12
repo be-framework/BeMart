@@ -8,6 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -51,10 +52,10 @@ class Index extends ResourceObject
     /**
      * Renders the admin dashboard scaffolding.
      *
-     * Admin-only: returns 403 for an anonymous (not-logged-in-as-admin)
-     * request — the same firewall contract as the News / Customer admin
-     * pages, enforced here at the resource layer because there is no Be
-     * Final to raise `UnauthorizedAdminAccessException`.
+     * Admin-only: raises UnauthorizedAdminAccessException for an anonymous
+     * (not-logged-in-as-admin) request — the same firewall contract as the
+     * News / Customer admin pages, enforced here at the resource layer
+     * because there is no Be Final to raise it.
      */
     #[Alps('goAdminTop')]
     #[JsonSchema(schema: 'get-admin-index.json')]
@@ -65,10 +66,7 @@ class Index extends ResourceObject
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {
-            $this->code = Code::FORBIDDEN;
-            $this->body = ['message' => 'この操作には管理者ログインが必要です。'];
-
-            return $this;
+            throw new UnauthorizedAdminAccessException();
         }
 
         $this->code = Code::OK;
