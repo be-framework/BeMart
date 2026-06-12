@@ -108,8 +108,12 @@ final class AdminBlockHtmlRenderTest extends TestCase
         $html = $this->resource->get('page://self/admin/block/block')->toString();
 
         $this->assertStringContainsString('id="block_name"', $html);
+        $this->assertStringContainsString('name="blockName"', $html);
         $this->assertStringContainsString('id="block_file_name"', $html);
+        $this->assertStringContainsString('name="blockFileName"', $html);
         $this->assertStringContainsString('id="block_block_html"', $html);
+        $this->assertStringContainsString('disabled="disabled"', $html);
+        $this->assertStringContainsString('action="/admin/block/block-list"', $html);
         $this->assertStringContainsString('class="c-conversionArea"', $html);
     }
 
@@ -264,14 +268,19 @@ final class AdminBlockHtmlRenderTest extends TestCase
 
         // EC-CUBE's `form_widget(form.<field>)` renders through BeMart's
         // real AdminBlockForm so the inputs are byte-identical to
-        // BeMart's port. Fields the AdminBlockForm does NOT declare
+        // BeMart's port. EC-CUBE field names map to BeMart's canonical
+        // Resource request names. Fields the AdminBlockForm does NOT declare
         // (`csrfToken`, `id`, `DeviceType` — EC-CUBE bookkeeping / CSRF
         // runtime) render empty here, mirroring BeMart's port; both are
         // residual families.
-        $formFields = ['name', 'file_name', 'block_html'];
+        $formFields = [
+            'name' => 'blockName',
+            'file_name' => 'blockFileName',
+            'block_html' => 'block_html',
+        ];
         $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
-            if ($form instanceof AdminBlockForm && is_string($field) && in_array($field, $formFields, true)) {
-                return new Markup($form->input($field), 'UTF-8');
+            if ($form instanceof AdminBlockForm && is_string($field) && isset($formFields[$field])) {
+                return new Markup($form->input($formFields[$field]), 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

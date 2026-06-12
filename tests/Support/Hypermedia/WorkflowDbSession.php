@@ -8,6 +8,10 @@ use Aura\Sql\ExtendedPdoInterface;
 use BEAR\Resource\ResourceInterface;
 use Closure;
 use MyVendor\BeMart\Injector;
+use MyVendor\BeMart\Support\Resource\ApiMutationResponse;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
+use Override;
+use Ray\Di\AbstractModule;
 use Ray\Di\InjectorInterface;
 
 use function assert;
@@ -27,7 +31,18 @@ final class WorkflowDbSession
     public static function start(Closure|null $beforeTransaction = null): self
     {
         $session = WorkflowTestSession::fromCurrent();
-        $injector = Injector::getInstance('html-prod-eccube-sql-hal-app');
+        // In-process hypermedia workflows need Resource operations and
+        // fixture/readback queries to share one SQL connection so class-level
+        // rollback actually protects operational rows. The `prod` compiled
+        // context resolves Resource SQL calls through a separate connection;
+        // HTTP workflow tests cover that boundary separately.
+        $injector = Injector::getOverrideInstance('html-eccube-sql-hal-app', new class extends AbstractModule {
+            #[Override]
+            protected function configure(): void
+            {
+                $this->bind(MutationResponseInterface::class)->to(ApiMutationResponse::class);
+            }
+        });
 
         // Internal hook shape: callers that only need the injector should use
         // startForAdmin() or startWithCsrfToken(), which adapt this signature.
@@ -83,11 +98,10 @@ final class WorkflowDbSession
             return $this->resource;
         }
 
-        $resource = $this->injector->getInstance(ResourceInterface::class);
-        assert($resource instanceof ResourceInterface);
-        $this->resource = $resource;
+        $this->resource = $this->injector->getInstance(ResourceInterface::class);
+        assert($this->resource instanceof ResourceInterface);
 
-        return $resource;
+        return $this->resource;
     }
 
     /** @param (Closure(): void)|null $afterRollback */

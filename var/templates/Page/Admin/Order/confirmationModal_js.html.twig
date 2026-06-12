@@ -123,11 +123,14 @@
         },
         getPromises: function (progress, url, data) {
             if (data == undefined) {
-                data = {'notificationMail': $('input#notificationMail:checked').val()};
+                data = {
+                    'notificationMail': $('input#notificationMail:checked').val(),
+                    'csrfToken': $('#form_bulk input[name="csrfToken"]').val()
+                };
             }
             return $.ajax({
                 'url': url,
-                'type': 'PUT',
+                'type': 'POST',
                 'data': data
             })
                 .fail(function () {
@@ -165,7 +168,10 @@
                 $('input[data-id]:checked').each(function () {
                     statuses.push({
                         'url': $(this).data('update-status-url'),
-                        'data': {'order_status': $('#option_bulk_status').val()}
+                        'data': {
+                            'orderStatus': $('#option_bulk_status').val(),
+                            'csrfToken': $('#form_bulk input[name="csrfToken"]').val()
+                        }
                     });
                 });
                 // ポイントや在庫の加算・減算は非同期で実行できないため、同期処理で実行
@@ -222,8 +228,9 @@
             value: function (progress) {
                 var url = this.eventTarget.data('update-status-url');
                 var data = {
-                    'order_status': this.eventTarget.data('update-status-id'),
-                    'notificationMail': $('input#notificationMail:checked').val()
+                    'orderStatus': this.eventTarget.data('update-status-id'),
+                    'notificationMail': $('input#notificationMail:checked').val(),
+                    'csrfToken': $('#form_bulk input[name="csrfToken"]').val()
                 };
                 return ConfirmationModal.prototype.getPromises.call(this, progress, url, data);
             }

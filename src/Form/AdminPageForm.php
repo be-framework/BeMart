@@ -16,10 +16,10 @@ use Ray\WebFormModule\AbstractForm;
  * Ray.WebFormModule (Aura.Input + Aura.Filter + Aura.Html) — the same
  * recipe as the admin pilot {@see AdminNewsForm}.
  *
- * Field names ported from `MainEditType::buildForm()`: `name`, `url`,
- * `file_name`, `tpl_data` (textarea), plus the meta fields `author`,
- * `description`, `keyword`, `meta_robots`, `meta_tags`. EC-CUBE's block
- * prefix is `main_edit`, so the rendered ids are `main_edit_<field>`.
+ * EC-CUBE's `MainEditType` declares `name`, `url`, and `file_name`.
+ * BeMart's unsafe Resource boundary accepts the canonical `pageName`,
+ * `pageUrl`, and `pageFileName` parameters, so the rendered fields keep
+ * EC-CUBE's `main_edit_<field>` ids while posting those canonical names.
  *
  * The PC/Mobile layout selects (`PcLayout` / `SpLayout`) are NOT declared
  * here — the AdminPageFetched projection carries no page->layout join
@@ -44,34 +44,34 @@ final class AdminPageForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('name', 'text')
+        $this->setField('pageName', 'text')
             ->setAttribs(['id' => 'main_edit_name', 'class' => 'form-control']);
 
-        $this->setField('url', 'text')
+        $this->setField('pageUrl', 'text')
             ->setAttribs(['id' => 'main_edit_url', 'class' => 'form-control']);
 
-        $this->setField('file_name', 'text')
+        $this->setField('pageFileName', 'text')
             ->setAttribs(['id' => 'main_edit_file_name', 'class' => 'form-control']);
 
         $this->setField('tpl_data', 'textarea')
-            ->setAttribs(['id' => 'main_edit_tpl_data', 'class' => 'form-control']);
+            ->setAttribs(['id' => 'main_edit_tpl_data', 'class' => 'form-control', 'disabled' => 'disabled']);
 
         // メタ設定 — author / description / keyword / robot / metatag.
         $this->setField('author', 'text')
-            ->setAttribs(['id' => 'main_edit_author', 'class' => 'form-control']);
+            ->setAttribs(['id' => 'main_edit_author', 'class' => 'form-control', 'disabled' => 'disabled']);
         $this->setField('description', 'text')
-            ->setAttribs(['id' => 'main_edit_description', 'class' => 'form-control']);
+            ->setAttribs(['id' => 'main_edit_description', 'class' => 'form-control', 'disabled' => 'disabled']);
         $this->setField('keyword', 'text')
-            ->setAttribs(['id' => 'main_edit_keyword', 'class' => 'form-control']);
+            ->setAttribs(['id' => 'main_edit_keyword', 'class' => 'form-control', 'disabled' => 'disabled']);
         $this->setField('meta_robots', 'text')
-            ->setAttribs(['id' => 'main_edit_meta_robots', 'class' => 'form-control']);
+            ->setAttribs(['id' => 'main_edit_meta_robots', 'class' => 'form-control', 'disabled' => 'disabled']);
         $this->setField('meta_tags', 'textarea')
-            ->setAttribs(['id' => 'main_edit_meta_tags', 'class' => 'form-control']);
+            ->setAttribs(['id' => 'main_edit_meta_tags', 'class' => 'form-control', 'disabled' => 'disabled']);
 
         // NON-AUTHORITATIVE structural checks only.
-        $this->filter->validate('name')->isNotBlank();
-        $this->filter->validate('url')->isNotBlank();
-        $this->filter->validate('file_name')->isNotBlank();
+        $this->filter->validate('pageName')->isNotBlank();
+        $this->filter->validate('pageUrl')->isNotBlank();
+        $this->filter->validate('pageFileName')->isNotBlank();
     }
 
     /**
@@ -82,9 +82,9 @@ final class AdminPageForm extends AbstractForm
     public function fillValues(array $body): void
     {
         $this->fill([
-            'name' => (string) ($body['pageName'] ?? ''),
-            'url' => (string) ($body['pageUrl'] ?? ''),
-            'file_name' => (string) ($body['pageFileName'] ?? ''),
+            'pageName' => (string) ($body['pageName'] ?? ''),
+            'pageUrl' => (string) ($body['pageUrl'] ?? ''),
+            'pageFileName' => (string) ($body['pageFileName'] ?? ''),
             // The free-page template body + meta fields are out of the
             // Wave 9 CMS slice — see port header. Render empty.
             'tpl_data' => (string) ($body['pageTplData'] ?? ''),

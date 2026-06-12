@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Provide\Error;
 
 use BEAR\Resource\Code;
 use BEAR\Resource\Exception\BadRequestException;
+use BEAR\Resource\Exception\JsonSchemaException;
 use BEAR\Sunday\Extension\Error\ErrorInterface;
 use BEAR\Sunday\Extension\Error\ThrowableHandlerInterface;
 use BEAR\Sunday\Extension\Router\RouterMatch as Request;
@@ -141,6 +142,10 @@ final class AppThrowableHandler implements ThrowableHandlerInterface
             return Code::BAD_REQUEST;
         }
 
+        if ($e instanceof JsonSchemaException) {
+            return Code::BAD_REQUEST;
+        }
+
         if ($e instanceof BadRequestException) {
             $code = $e->getCode();
 
@@ -169,6 +174,12 @@ final class AppThrowableHandler implements ThrowableHandlerInterface
     {
         if ($e instanceof SemanticVariableException) {
             return $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
+        }
+
+        if ($e instanceof JsonSchemaException) {
+            $message = preg_replace('/; by .+$/', '', $e->getMessage());
+
+            return 'Invalid input. ' . ($message ?: 'Request parameters do not match the schema.');
         }
 
         if ($e instanceof BadRequestException && $e->getMessage() !== '') {

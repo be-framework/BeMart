@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -29,6 +30,7 @@ class BlockList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -73,8 +75,7 @@ class BlockList extends ResourceObject
 
         assert($final instanceof BlockCreated);
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/admin/block/block?blockId=%s', urlencode($final->blockId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/block/block?blockId=%s', urlencode($final->blockId)));
         $this->body = [
             'blockId' => $final->blockId,
             'blockName' => $final->blockName,

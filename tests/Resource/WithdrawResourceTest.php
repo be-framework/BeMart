@@ -20,7 +20,7 @@ use function dirname;
 final class WithdrawResourceTest extends TestCase
 {
     private const ALICE_ID = '0123456789abcdef0123456789abcdef';
-    private const ALICE_DUMMY_EMAIL = 'withdrawn-0123456789abcdef0123456789abcdef@example.invalid';
+    private const ALICE_DUMMY_EMAIL = 'withdrawn-0123456789abcdef0123456789abcdef@example.test';
 
     private ResourceInterface $resource;
 

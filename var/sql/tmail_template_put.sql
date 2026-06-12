@@ -1,6 +1,6 @@
 INSERT INTO dtb_mail_template (
   id, name, file_name, mail_subject,
-  create_date, update_date, discriminator_type
+  create_date, update_date, deletable, discriminator_type
 )
 SELECT
   CAST(
@@ -23,6 +23,15 @@ SELECT
   ),
   NOW(),
   NOW(),
+  COALESCE(
+    CAST(
+      JSON_VALUE(
+        CAST(:entity AS CHAR),
+        '$.deletable'
+      ) AS UNSIGNED
+    ),
+    0
+  ),
   'mail_template'
 WHERE
   JSON_VALUE(
@@ -39,4 +48,7 @@ VALUES
   mail_subject =
 VALUES
   (mail_subject),
+  deletable =
+VALUES
+  (deletable),
   update_date = NOW()

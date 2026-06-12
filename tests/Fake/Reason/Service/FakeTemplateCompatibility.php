@@ -9,6 +9,7 @@ use MyVendor\BeMart\Be\Reason\Service\TemplateCompatibilityInterface;
 use Override;
 
 use function array_key_exists;
+use function count;
 use function sprintf;
 
 /**
@@ -18,7 +19,7 @@ use function sprintf;
 final class FakeTemplateCompatibility implements TemplateCompatibilityInterface
 {
     /** @var array<string, bool> */
-    public array $templates = ['default' => true];
+    public array $templates = ['default' => true, 'tp-default-pc' => true, 'tp-default-sp' => true];
 
     /** @var list<string> */
     public array $selected = [];
@@ -39,6 +40,19 @@ final class FakeTemplateCompatibility implements TemplateCompatibilityInterface
     }
 
     #[Override]
+    public function selected(): string|null
+    {
+        for ($index = count($this->selected) - 1; $index >= 0; $index--) {
+            $templateId = $this->selected[$index];
+            if ($this->exists($templateId)) {
+                return $templateId;
+            }
+        }
+
+        return null;
+    }
+
+    #[Override]
     public function delete(string $templateId): void
     {
         $this->templates[$templateId] = false;
@@ -53,7 +67,7 @@ final class FakeTemplateCompatibility implements TemplateCompatibilityInterface
     }
 
     #[Override]
-    public function install(string $code, string $name): string
+    public function install(string $code, string $name, string $archiveName, int $archiveSize): string
     {
         $templateId = 'tpl_' . $code;
         $this->templates[$templateId] = true;

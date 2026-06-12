@@ -42,4 +42,13 @@
             </div>
         </div>
     </form>
+    <div class="c-conversionArea">
+        <div class="c-conversionArea__container text-end">
+            <a class="btn btn-ec-delete"
+               href="/admin/category/category?categoryId={{ categoryId }}&amp;_method=delete"
+               data-method="delete"
+               data-confirm="false"
+               token-for-anchor="{{ csrf_token_for_anchor('admin_category_delete') }}">削除</a>
+        </div>
+    </div>
 {% endblock %}

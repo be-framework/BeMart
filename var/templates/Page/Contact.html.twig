@@ -76,11 +76,11 @@
                                 <label class="ec-label">お名前</label>
                             </dt>
                             <dd>
-                                <div class="ec-halfInput">
+                                <div class="ec-halfInput{% if form.error('contactName01') or form.error('contactName02') %} error{% endif %}">
                                     {{ form.input('contactName01')|raw }}
                                     {{ form.input('contactName02')|raw }}
-                                    {{ form.error('contactName01') }}
-                                    {{ form.error('contactName02') }}
+                                    {% if form.error('contactName01') %}<p class="ec-errorMessage">{{ form.error('contactName01') }}</p>{% endif %}
+                                    {% if form.error('contactName02') %}<p class="ec-errorMessage">{{ form.error('contactName02') }}</p>{% endif %}
                                 </div>
                             </dd>
                         </dl>
@@ -89,9 +89,9 @@
                                 <label class="ec-label">メールアドレス</label>
                             </dt>
                             <dd>
-                                <div class="ec-input">
+                                <div class="ec-input{% if form.error('contactEmail') %} error{% endif %}">
                                     {{ form.input('contactEmail')|raw }}
-                                    {{ form.error('contactEmail') }}
+                                    {% if form.error('contactEmail') %}<p class="ec-errorMessage">{{ form.error('contactEmail') }}</p>{% endif %}
                                 </div>
                             </dd>
                         </dl>
@@ -100,9 +100,9 @@
                                 <label class="ec-label">お問い合わせ内容</label>
                             </dt>
                             <dd>
-                                <div class="ec-input">
+                                <div class="ec-input{% if form.error('contactContents') %} error{% endif %}">
                                     {{ form.input('contactContents')|raw }}
-                                    {{ form.error('contactContents') }}
+                                    {% if form.error('contactContents') %}<p class="ec-errorMessage">{{ form.error('contactContents') }}</p>{% endif %}
                                 </div>
                                 <p>ご注文に関するお問い合わせには、必ず「ご注文番号」をご記入くださいますようお願いいたします。</p>
                             </dd>

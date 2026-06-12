@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
@@ -39,6 +40,7 @@ class Withdraw extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CustomerSession $session,
         private readonly CustomerQueryInterface $customerQuery,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -117,7 +119,7 @@ class Withdraw extends ResourceObject
 
         assert($final instanceof CustomerWithdrawn);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/mypage/withdraw-complete');
         $this->body = [
             'customerId' => $final->customerId,
             'dummyEmail' => $final->dummyEmail,

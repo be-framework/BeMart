@@ -144,7 +144,7 @@ final class WorkflowFixtureBoundary
     {
         return new CustomerEntity(
             customerId: $customer->customerId,
-            email: sprintf('withdrawn-%s@example.invalid', $customer->customerId),
+            email: sprintf('withdrawn-%s@example.test', $customer->customerId),
             passwordHash: $customer->passwordHash,
             name01: $customer->name01,
             name02: $customer->name02,

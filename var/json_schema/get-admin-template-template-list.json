@@ -63,12 +63,24 @@
             "title": "テンプレート名",
             "description": "テンプレートの表示名 Fake観察文字長 10〜11; 観察値 'デフォルト (PC)', 'デフォルト (スマホ)'。",
             "example": "デフォルト (PC)"
+          },
+          "active": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "title": "適用中テンプレート",
+            "description": "現在適用されているテンプレートかどうか。TemplateCompatibility の runtime readback 境界から導出され、HTML radio の checked 状態に対応する。",
+            "example": true
           }
         },
         "additionalProperties": false,
         "$comment": "配列要素はFake/Resourceで観察された既知propertyに固定する。新しい列が必要になった場合はSemantic-Ex観察に追加してschemaを更新する。"
       },
       "minItems": 0
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     },
     "links": {
       "type": [

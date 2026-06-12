@@ -161,6 +161,10 @@ final class AdminOrderListHtmlRenderTest extends TestCase
         $this->assertStringContainsString('id="admin_search_order_multi"', $html);
         $this->assertStringContainsString('検索結果：', $html);
         $this->assertStringContainsString('class="action-edit"', $html);
+        $this->assertStringContainsString('data-update-status-url="/admin/order-status?orderNo=', $html);
+        $this->assertStringContainsString('data-update-status-id="5"', $html);
+        $this->assertStringContainsString("'type': 'POST'", $html);
+        $this->assertStringContainsString("'orderStatus': this.eventTarget.data('update-status-id')", $html);
     }
 
     /**

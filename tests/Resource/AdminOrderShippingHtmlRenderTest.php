@@ -70,6 +70,9 @@ final class AdminOrderShippingHtmlRenderTest extends TestCase
             '<header class="c-headerBar">',
             '<div class="c-contentsArea">',
             'id="shipping_form"',
+            'name="_method" value="put"',
+            'name="postalCode"',
+            'name="phoneNumber"',
             'お届け先',
             '都道府県',
         ] as $needle) {

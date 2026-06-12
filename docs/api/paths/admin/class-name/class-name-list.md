@@ -42,6 +42,7 @@ _No parameters required_
 | doCreateClassName | [<code>page://self/admin/class-name/class-name-list</code>](/admin/class-name/class-name-list.md) |
 | doUpdateClassName | [<code>page://self/admin/class-name/class-name</code>](/admin/class-name/class-name.md) |
 | doDeleteClassName | [<code>page://self/admin/class-name/class-name</code>](/admin/class-name/class-name.md) |
+| goClassCategoryList | [<code>page://self/admin/class-category/class-category-list{?classNameId}</code>](/admin/class-category/class-category-list.md) |
 ## POST
 ALPS `doCreateClassName` に対応する POST 操作。
 

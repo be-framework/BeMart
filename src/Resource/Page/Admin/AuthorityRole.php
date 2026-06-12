@@ -9,36 +9,43 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
 use MyVendor\BeMart\Be\Exception\InsufficientAuthorityException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Final\AuthorityRulesUpdated;
 use MyVendor\BeMart\Be\Final\AuthorityRoleUpdated;
+use MyVendor\BeMart\Be\Input\UpdateAuthorityRulesInput;
 use MyVendor\BeMart\Be\Input\UpdateAuthorityRoleInput;
+use MyVendor\BeMart\Be\Reason\Query\AuthorityRoleRuleStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function array_map;
 
 /**
  * EC-CUBE doUpdateAuthorityRole — 権限ルール更新 (Wave 8).
  *
- *   POST → flip the persisted `authority` column on one admin.
+ *   GET  → render URL deny rules from `dtb_authority_role`.
+ *   POST → either update URL deny rules or flip one admin member's
+ *          persisted `authority` column.
  *
- * Role-flip is a sub-resource of the admin member rather than a
- * method on {@see Member} because its semantics carry distinct
- * privilege-escalation risk (the Final enforces
- * `caller.authority < target.authority`). Surfacing a separate URL
- * (`/admin/authority-role`) keeps the AUTHZ story explicit and
- * matches the ALPS-level separation of `doUpdateMember` vs
- * `doUpdateAuthorityRole`. Same architectural choice as Wave 7's
- * `doUpdateOrderStatus` → {@see OrderStatus}.
+ * EC-CUBE's HTML form posts `AuthorityRoles[*][Authority]` and
+ * `AuthorityRoles[*][deny_url]` to edit URL deny rules. BeMart stores
+ * those rows in `dtb_authority_role` and redirects back to the same
+ * page for browser PRG/readback. The same ALPS transition also keeps
+ * the legacy member role-flip shape (`loginId`, `authority`) because
+ * existing member-management workflow uses this resource as a distinct
+ * authorization-sensitive action.
  *
  * Choice of POST (not PATCH): BEAR.Sunday's natural verb set is GET /
- * POST / PUT / DELETE — PATCH is not first-class. POST against this
- * sub-resource carries the same shape as Wave 7 OrderStatus and Wave
- * 6 DeleteCustomer (POST + CSRF + target id + new value).
+ * POST / PUT / DELETE — PATCH is not first-class. POST carries the
+ * same browser-form shape as Wave 7 OrderStatus and Wave 6
+ * DeleteCustomer (POST + CSRF + form body).
  *
  * Failure mapping:
  *   - Invalid CSRF                          → 403
@@ -47,33 +54,35 @@ use function assert;
  *   - AdminNotFoundException                → 404 (unknown loginId)
  *   - InsufficientAuthorityException        → 403 (priv-escalation refused)
  *
- * Idempotency: when the supplied `authority` matches the persisted
- * value, the projection carries `changed=false` and the storage is
- * untouched. Replay returns 200 with the same body shape — mirrors
- * AdminOrderStatusUpdated's `changed` discipline (Wave 7).
+ * Idempotency: when the supplied member `authority` matches the
+ * persisted value, the projection carries `changed=false` and the
+ * storage is untouched. URL deny rule updates replace the submitted
+ * rule set and return the saved rows.
  *
- * Mass-assignment safety: only `loginId` (target) and `authority`
- * (new value) are accepted; no path here reaches the other
- * dtb_member columns.
+ * Mass-assignment safety: member role-flip accepts only `loginId`
+ * (target) and `authority` (new value). URL deny rule edit accepts
+ * only `AuthorityRoles[*][Authority]` and `AuthorityRoles[*][deny_url]`.
  */
 class AuthorityRole extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
+        private readonly AuthorityRoleRuleStorageInterface $authorityRules,
+        private readonly CsrfToken $csrf,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
     /**
      * Phase 3 admin HTML Tier-2: render the authority-rule management
      * screen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE
-     * also has a GET page for editing URL-deny rules. No persisted
-     * `dtb_authority_role` storage exists in BeMart yet, so this GET
-     * exposes the stable form body shape the HTML needs and flags the
-     * rule rows as static placeholders.
+     * uses the same resource to edit URL-deny rules stored in
+     * `dtb_authority_role`.
      */
     #[Alps('doUpdateAuthorityRole')]
     #[JsonSchema(schema: 'get-admin-authority-role.json')]
+    #[Link(rel: 'doUpdateAuthorityRole', href: 'page://self/admin/authority-role', method: 'post')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     public function onGet(): static
     {
@@ -84,24 +93,36 @@ class AuthorityRole extends ResourceObject
             return $this;
         }
 
+        $rules = $this->authorityRules->list();
+        $ruleRows = $rules === []
+            ? [['authority' => 1, 'denyUrl' => '/setting/system/security']]
+            : array_map(
+                static fn ($rule): array => [
+                    'authority' => $rule->authority,
+                    'denyUrl' => $rule->denyUrl,
+                ],
+                $rules,
+            );
+
         $this->code = Code::OK;
         $this->body = [
             'authorityOptions' => [
                 ['id' => 0, 'label' => 'システム管理者'],
                 ['id' => 1, 'label' => '店舗オーナー'],
             ],
-            'rules' => [
-                ['authority' => 1, 'denyUrl' => '/setting/system/security'],
-            ],
+            'rules' => $ruleRows,
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;
     }
 
     /**
-     * Wave 8: both `loginId` and `authority` are admin-form input
-     * (loginId from the row selection, authority from a dropdown of
-     * mtb_authority values).
+     * Wave 8: browser form input for URL deny rules. The primary HTML
+     * shape carries CSRF at the request boundary plus
+     * `AuthorityRoles[*][Authority]` / `AuthorityRoles[*][deny_url]`.
+     * The legacy member role-flip shape (`loginId`, `authority`)
+     * remains supported for member workflow.
      *
      * @psalm-taint-source input $loginId
      * @psalm-taint-source input $authority
@@ -113,9 +134,35 @@ class AuthorityRole extends ResourceObject
     #[Link(rel: 'goLoginHistoryList', href: 'page://self/admin/login-history')]
     #[CsrfProtected]
     public function onPost(
-        string $loginId,
-        int $authority,
+        string|null $loginId = null,
+        int|null $authority = null,
+        array $AuthorityRoles = [],
     ): static {
+        if ($AuthorityRoles !== []) {
+            $final = ($this->becoming)(new UpdateAuthorityRulesInput(
+                authorityRoles: $AuthorityRoles,
+            ));
+
+            assert($final instanceof AuthorityRulesUpdated);
+
+            ($this->mutationResponse)($this, Code::OK, '/admin/authority-role');
+            $this->body = [
+                'transitionId' => 'doUpdateAuthorityRole',
+                'count' => $final->count,
+                'rules' => $final->rules,
+                'message' => '権限設定を更新しました。',
+            ];
+
+            return $this;
+        }
+
+        if ($loginId === null || $authority === null) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = ['message' => 'loginId と authority が必要です。'];
+
+            return $this;
+        }
+
         $final = ($this->becoming)(new UpdateAuthorityRoleInput(
             loginId: $loginId,
             authority: $authority,

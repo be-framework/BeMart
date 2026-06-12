@@ -18,6 +18,7 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
 use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -52,6 +53,7 @@ class TwoFactorAuth extends ResourceObject
         private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -73,7 +75,8 @@ class TwoFactorAuth extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuth',
-            'fields' => ['deviceToken'],
+            'fields' => ['deviceToken', 'csrfToken'],
+            'csrfToken' => $this->csrf->token,
             // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
             'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
         ];

@@ -1,11 +1,13 @@
 INSERT INTO dtb_order (
   customer_id, payment_id, pre_order_id,
-  order_no, name01, name02, subtotal,
-  discount, delivery_fee_total, charge,
-  tax, total, payment_total, add_point,
-  use_point, order_status_id, order_date,
-  payment_date, create_date, update_date,
-  discriminator_type
+  order_no, name01, name02, kana01,
+  kana02, company_name, email, phone_number,
+  postal_code, pref_id, addr01, addr02,
+  subtotal, discount, delivery_fee_total,
+  charge, tax, total, payment_total,
+  add_point, use_point, order_status_id,
+  order_date, payment_date, create_date,
+  update_date, discriminator_type
 )
 SELECT
   CASE WHEN JSON_VALUE(
@@ -41,8 +43,95 @@ SELECT
     CAST(:order AS CHAR),
     '$.orderNo'
   ),
-  '-',
-  '-',
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.name01'
+      ),
+      ''
+    ),
+    '-'
+  ),
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.name02'
+      ),
+      ''
+    ),
+    '-'
+  ),
+  NULLIF(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.customerSnapshot.kana01'
+    ),
+    ''
+  ),
+  NULLIF(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.customerSnapshot.kana02'
+    ),
+    ''
+  ),
+  NULLIF(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.customerSnapshot.companyName'
+    ),
+    ''
+  ),
+  NULLIF(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.customerSnapshot.email'
+    ),
+    ''
+  ),
+  NULLIF(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.customerSnapshot.phoneNumber'
+    ),
+    ''
+  ),
+  NULLIF(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.customerSnapshot.postalCode'
+    ),
+    ''
+  ),
+  CASE WHEN JSON_VALUE(
+    CAST(:order AS CHAR),
+    '$.customerSnapshot.pref'
+  ) REGEXP '^[0-9]+$' THEN
+    CAST(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.pref'
+      ) AS UNSIGNED
+    )
+  ELSE
+    NULL
+  END,
+  NULLIF(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.customerSnapshot.addr01'
+    ),
+    ''
+  ),
+  NULLIF(
+    JSON_VALUE(
+      CAST(:order AS CHAR),
+      '$.customerSnapshot.addr02'
+    ),
+    ''
+  ),
   CAST(
     JSON_VALUE(
       CAST(:order AS CHAR),
@@ -146,6 +235,39 @@ VALUES
   payment_id =
 VALUES
   (payment_id),
+  name01 =
+VALUES
+  (name01),
+  name02 =
+VALUES
+  (name02),
+  kana01 =
+VALUES
+  (kana01),
+  kana02 =
+VALUES
+  (kana02),
+  company_name =
+VALUES
+  (company_name),
+  email =
+VALUES
+  (email),
+  phone_number =
+VALUES
+  (phone_number),
+  postal_code =
+VALUES
+  (postal_code),
+  pref_id =
+VALUES
+  (pref_id),
+  addr01 =
+VALUES
+  (addr01),
+  addr02 =
+VALUES
+  (addr02),
   subtotal =
 VALUES
   (subtotal),

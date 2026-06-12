@@ -19,7 +19,6 @@ use function is_scalar;
 use function is_string;
 use function json_encode;
 use function stream_get_contents;
-use function str_contains;
 use function strtolower;
 
 use const JSON_THROW_ON_ERROR;
@@ -32,6 +31,7 @@ final class DownloadResponder implements TransferInterface
     public function __construct(
         private readonly HeaderInterface $header,
         private readonly ConditionalResponseInterface $conditionalResponse,
+        private readonly DownloadContentTypePolicyInterface $downloadContentTypePolicy,
     ) {
     }
 
@@ -83,12 +83,8 @@ final class DownloadResponder implements TransferInterface
         }
 
         $contentType = strtolower($contentType);
-        $context = (string) ($server['_BEMART_CONTEXT'] ?? '');
 
-        return (str_contains($context, 'html') && str_contains($contentType, 'text/csv'))
-            || str_contains($contentType, 'application/zip')
-            || str_contains($contentType, 'application/pdf')
-            || str_contains($contentType, 'application/octet-stream');
+        return ($this->downloadContentTypePolicy)($contentType);
     }
 
     /** @param mixed $body */

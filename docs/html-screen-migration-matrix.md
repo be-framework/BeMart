@@ -63,6 +63,12 @@ HTML移植の残差を「エンティティがある/ない」だけで判断す
 | 共通 | 未定義Resource / MethodNotAllowed / 必須param不足 | 修正済み | raw Fatal + HTTP 200は禁止。HTMLは専用エラー、JSONはHTTPコード付き |
 | 共通 | EC-CUBE route名リンク | 修正中 | 142 routeのうち99は実導線、43は非画面アクション中心の未対応alert + 501 fallback。 |
 
+## Web+DB完成判定との差分（2026-06-10）
+
+このマトリクスはHTML画面移植とroute到達のベースラインであり、Web+DBの完成判定そのものではない。最新の完成判定は `docs/web-e2e/20260610-web-db-all-routes-report.md` と `docs/web-e2e/feature-implementation-matrix.md` を正とする。
+
+20260610 run では、画面表示は多くのrouteで安定しているが、Admin の unsafe CRUD/update は実フォーム・実リンク・`Location`・ALPS rel から副作用を実行し、readback できるところまで確認できていないため fail として残した。画面があることと、業務状態をWeb/HTTP affordanceで変更できることは分けて扱う。
+
 ## Route変換マトリクス
 
 下表はテンプレート内の `url()` / `path()` route名に対して、BeMartがブラウザへ出すURLと状態を示します。未対応routeはリンクを隠さず、JS有効時はalertで説明し、JS無効時は安全な501ページへ遷移します。

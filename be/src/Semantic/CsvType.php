@@ -13,9 +13,9 @@ use MyVendor\BeMart\Be\Exception\CsvTypeFormatException;
  * EC-CUBE 4.3 dtb_csv carries a `csv_type` column that addresses one of
  * four built-in CSV export categories:
  *
- *   1 = order      (受注)
+ *   1 = product    (商品)
  *   2 = customer   (会員)
- *   3 = product    (商品)
+ *   3 = order      (受注)
  *   4 = shipping   (出荷)
  *
  * Anything outside that set is rejected — the storage cannot tell

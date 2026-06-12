@@ -29,6 +29,18 @@
       "description": "メールの件名。テンプレート変数を含む場合あり Fake観察文字長 13〜13; 観察値 'ご注文ありがとうございます'。",
       "example": "ご注文ありがとうございます",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "mail_subject": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 32,
+      "title": "メール件名（HTMLフォーム入力）",
+      "description": "管理画面HTMLフォームの `mail_subject` field。Resourceでは `mailSubject` と同じ doUpdateMailTemplate の件名入力として扱う。",
+      "example": "ご注文ありがとうございます",
+      "$comment": "HTTP form boundary uses snake_case field names; Resource normalizes this to the ALPS mailSubject input."
     }
   },
   "additionalProperties": false,
@@ -251,7 +263,6 @@
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape. Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
   "required": [
-    "mailTemplateId",
-    "mailSubject"
+    "mailTemplateId"
   ]
 }

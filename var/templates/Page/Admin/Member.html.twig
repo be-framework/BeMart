@@ -33,11 +33,10 @@
    - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
      hidden `_token` input is kept (structure) with an empty value;
      EC-CUBE-runtime only — enumerated as residual.
-   - `form_widget(form.Authority)` (権限 entity select) -> the
-     MemberFetched projection carries `authority` only as a bare int
-     (mtb_authority id) with no option set; AdminMemberForm omits the
-     control. The 権限 row renders without an input. FLAGGED
-     missing-body-field — enumerated as residual.
+   - `form_widget(form.Authority)` (権限 entity select) -> BeMart renders
+     the EC-CUBE mtb_authority options for create. Existing member edits
+     keep authority read-only here; role flips use `/admin/authority-role`
+     so the privilege-escalation guard remains observable.
    - `form_widget(form.Work)` (稼働 radio) -> likewise `work` is a bare
      int (mtb_work id) with no option set; the control is omitted. The
      稼働 row renders without an input. FLAGGED missing-body-field.
@@ -54,8 +53,10 @@
 {% set sub_title = 'システム設定' %}
 
 {% block main %}
-    <form name="member_form" role="form" id="member_form" method="post" action="" novalidate>
+    {% set is_edit = loginId is defined and loginId %}
+    <form name="member_form" role="form" id="member_form" method="post" action="{% if is_edit %}/admin/member?_method=put{% else %}/admin/member{% endif %}" novalidate>
         <input type="hidden" id="member__token" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="mode" value="member_form">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -90,7 +91,6 @@
                                 <div class="row mb-2">
                                     <div class="col-3">
                                         <span>所属</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
                                     </div>
                                     <div class="col">
                                         <div class="row">
@@ -115,34 +115,36 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>パスワード</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {{ form.input('password')|raw }}
+                                {% if not is_edit %}
+                                    <div class="row mb-2">
+                                        <div class="col-3">
+                                            <span>パスワード</span>
+                                            <span class="badge bg-primary ms-1">必須</span>
+                                        </div>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    {{ form.input('password')|raw }}
+                                                </div>
+                                                {% if form.error('password') %}<span class="invalid-feedback d-block">{{ form.error('password') }}</span>{% endif %}
                                             </div>
-                                            {% if form.error('password') %}<span class="invalid-feedback d-block">{{ form.error('password') }}</span>{% endif %}
                                         </div>
                                     </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>パスワード(確認)</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {{ form.input('passwordConfirm')|raw }}
+                                    <div class="row mb-2">
+                                        <div class="col-3">
+                                            <span>パスワード(確認)</span>
+                                            <span class="badge bg-primary ms-1">必須</span>
+                                        </div>
+                                        <div class="col">
+                                            <div class="row">
+                                                <div class="col">
+                                                    {{ form.input('passwordConfirm')|raw }}
+                                                </div>
+                                                {% if form.error('passwordConfirm') %}<span class="invalid-feedback d-block">{{ form.error('passwordConfirm') }}</span>{% endif %}
                                             </div>
-                                            {% if form.error('passwordConfirm') %}<span class="invalid-feedback d-block">{{ form.error('passwordConfirm') }}</span>{% endif %}
                                         </div>
                                     </div>
-                                </div>
+                                {% endif %}
                                 <div class="row mb-2">
                                     <div class="col-3">
                                         <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="権限管理で設定した権限を選択できます。">
@@ -154,7 +156,13 @@
                                     <div class="col">
                                         <div class="row">
                                             <div class="col">
+                                                {% if is_edit %}
+                                                    {{ authority is same as(0) ? 'システム管理者' : '店舗オーナー' }}
+                                                {% else %}
+                                                    {{ form.input('authority')|raw }}
+                                                {% endif %}
                                             </div>
+                                            {% if form.error('authority') %}<span class="invalid-feedback d-block">{{ form.error('authority') }}</span>{% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -203,7 +211,7 @@
                         <div id="ex-conversion-action" class="row align-items-center justify-content-end">
                             <div class="col-auto">
                                 <button class="btn btn-ec-conversion px-5"
-                                        type="submit">登録</button>
+                                        type="submit">{% if is_edit %}登録{% else %}登録{% endif %}</button>
                             </div>
                         </div>
                     </div>

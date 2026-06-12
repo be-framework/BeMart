@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\PaymentMethodAdminNotFoundException;
@@ -24,6 +25,8 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function sprintf;
+use function urlencode;
 
 /**
  * EC-CUBE doUpdatePayment + doDeletePayment — single-row endpoint
@@ -38,6 +41,7 @@ class Payment extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -80,10 +84,10 @@ class Payment extends ResourceObject
         assert($form instanceof AdminPaymentForm);
         if ($payment !== null) {
             $form->fillValues([
-                'method' => $payment['paymentMethodName'],
+                'paymentMethodName' => $payment['paymentMethodName'],
                 'charge' => $payment['charge'],
-                'rule_min' => $payment['ruleMin'],
-                'rule_max' => $payment['ruleMax'],
+                'ruleMin' => $payment['ruleMin'],
+                'ruleMax' => $payment['ruleMax'],
                 'visible' => $payment['visible'] ? '1' : null,
             ]);
         }
@@ -130,7 +134,7 @@ class Payment extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminUpdated);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/payment/payment?paymentId=%s', urlencode($final->paymentId)));
         $this->body = [
             'paymentId' => $final->paymentId,
             'paymentMethodName' => $final->paymentMethodName,
@@ -144,10 +148,10 @@ class Payment extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdatePayment` に対応する DELETE 操作。
+     * ALPS `doDeletePayment` に対応する DELETE 操作。
      * @psalm-taint-source input $paymentId
      */
-    #[Alps('doUpdatePayment')]
+    #[Alps('doDeletePayment')]
     #[JsonSchema(schema: 'delete-admin-payment-payment.json', params: 'delete-admin-payment-payment.param.json')]
     #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
@@ -158,7 +162,7 @@ class Payment extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminDeleted);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/payment/payment-list');
         $this->body = ['paymentId' => $final->paymentId];
 
         return $this;

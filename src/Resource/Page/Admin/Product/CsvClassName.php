@@ -16,6 +16,7 @@ use MyVendor\BeMart\Be\Final\ClassNameCsvImported;
 use MyVendor\BeMart\Be\Input\ImportClassNameCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Support\Resource\AbstractCsvUpload;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Override;
 use Ray\WebFormModule\FormFactory;
 
@@ -39,6 +40,7 @@ class CsvClassName extends AbstractCsvUpload
         AdminSession $adminSession,
         FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
         parent::__construct($adminSession, $formFactory);
     }
@@ -70,8 +72,7 @@ class CsvClassName extends AbstractCsvUpload
 
         assert($final instanceof ClassNameCsvImported);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/class-name/class-name-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/class-name/class-name-list');
         $this->body = [
             'transitionId' => 'doImportClassNameCsv',
             'accepted' => $final->accepted,

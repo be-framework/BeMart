@@ -168,6 +168,17 @@ final class AdminMemberHtmlRenderTest extends TestCase
         $this->assertStringContainsString('value="test-admin"', $html);
     }
 
+    public function testMemberListDeleteFormIsBrowserVisibleAffordance(): void
+    {
+        $html = $this->resource->get('page://self/admin/member-list')->toString();
+
+        $this->assertStringContainsString('<div id="form1" data-form-name="form1">', $html);
+        $this->assertStringNotContainsString('<form name="form1" id="form1"', $html);
+        $this->assertStringContainsString('action="/admin/member?loginId=', $html);
+        $this->assertStringContainsString('_method=delete', $html);
+        $this->assertStringContainsString('name="mode" value="member_form"', $html);
+    }
+
     /**
      * The honesty test: diff BeMart's rendered admin Member-edit page
      * against EC-CUBE's own rendering. Every difference must be in the
