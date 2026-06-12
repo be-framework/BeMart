@@ -30,7 +30,7 @@
 | runner専用の直POSTで穴を塞ぐ | 画面に action/link がない operation を、runner側でpayloadを作れば通せそうな箇所があった | 「全件green」を急ぐと、アプリが公開していない affordance をテストが発明してしまう | URLはHTML form/link/Location/ALPS relから取る。推測が必要なら止める |
 | ローカルブラウザーとrunner証跡を混ぜる | 手元Chrome/in-app browserの `localhost:8080` と Codex runner の `127.0.0.1:18080` が別マシン/別サーバーだった | `localhost` は観測者のプロセスから見た境界で、同じ文字列でも同じサーバーとは限らない | 証跡には baseUrl、DB名、runner/local区分、listener確認を残す |
 | 既存PHP serverやcompiled cacheを信じる | 修正後も古いTwig/DIが使われ、存在するはずのリンクがブラウザーrunnerに出なかった | 起動済み server が古い compiled context を保持していた | runner前に対象port停止、`var/tmp/html-eccube-sql-hal-app/{di,injector,twig}` 削除、server再起動 |
-| 0件状態を検証しない | 受注作成リンクが `{% if count %}` の内側にあり、受注0件では新規作成できなかった | 業務状態が既にある画面だけを見て、初期状態から状態を作る導線を見ていなかった | CRUD create は fresh DB / 0件一覧から開始する regression を持つ |
+| 0件状態を検証しない | 受注作成リンクが Liquid の `if count` 条件内にあり、受注0件では新規作成できなかった | 業務状態が既にある画面だけを見て、初期状態から状態を作る導線を見ていなかった | CRUD create は fresh DB / 0件一覧から開始する regression を持つ |
 | フォームNGをHTTP statusだけで見る | 空POSTや確認不一致で、例外画面・空再描画・JSONだけが返る状態を見逃した | inline error、入力値再表示、パスワード非再表示、可視エラーUI数を見ていなかった | NG case は同じフォーム画面、inline error、再表示/非再表示、screenshot を確認する |
 | file upload を通常POST扱いにする | CSV/template upload で `$_FILES` がResourceへ渡らず、空CSVや `message=csv` になった | BEAR の `#[InputFile]` / multipart境界を Resource/HTTP/browser で統一していなかった | Resourceは `FileUpload::fromFile()`、HTTP/browserは同じHTML formに multipart submit |
 | JS依存のhidden field生成を見ない | CSV設定で実画面は `csvOutput[]` / `csvNotOutput[]` から hidden `columns[...]` を作るが、HTTP test は直接 `columns` を送っていた | ブラウザーDOMとsubmit時の実field shapeを確認していなかった | HTTP test は実formのfield名を正とし、JS生成fieldがある場合はBrowserで確認する |
