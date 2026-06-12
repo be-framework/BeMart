@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
@@ -24,8 +25,6 @@ use MyVendor\BeMart\Be\Input\UpdateCartItemQuantityInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE doAddCartItem —カートに商品を追加。
@@ -42,6 +41,7 @@ class Item extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -218,9 +218,7 @@ class Item extends ResourceObject
 
     private function redirectToCartOnHtmlSuccess(): static
     {
-        if ($this->code < 400 && str_contains((string) getenv('APP_CONTEXT'), 'html')) {
-            return $this->redirectToCartOnSuccess();
-        }
+        ($this->mutationResponse)($this, $this->code, '/cart');
 
         return $this;
     }

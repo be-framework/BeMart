@@ -8,6 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\TemplateNotFoundException;
@@ -24,8 +25,6 @@ use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE goTemplateList — list-only endpoint (Wave 9). ALPS exposes
@@ -36,6 +35,7 @@ class TemplateList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrfToken,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -129,8 +129,7 @@ class TemplateList extends ResourceObject
 
         assert($final instanceof TemplateSelected || $final instanceof TemplateDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
-        $this->headers['Location'] = '/admin/template/template-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/template/template-list');
         $this->body = [
             'transitionId' => $transitionId,
             'templateId' => $final->templateId,

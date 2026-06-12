@@ -11,13 +11,13 @@ use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Module\TestModule;
+use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
-use function getenv;
-use function putenv;
 
 /**
  * Wave 9 — resource-layer coverage for the admin Tag endpoints.
@@ -33,19 +33,24 @@ final class AdminTagResourceTest extends TestCase
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
-    private function rebindAdminSession(string|null $adminId): void
+    private function rebindAdminSession(string|null $adminId, bool $htmlMutation = false): void
     {
         $session = new FakeAdminSession($adminId);
         $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session) extends AbstractModule {
-            public function __construct(private readonly FakeAdminSession $session)
-            {
+        $override = new class ($session, $htmlMutation) extends AbstractModule {
+            public function __construct(
+                private readonly FakeAdminSession $session,
+                private readonly bool $htmlMutation,
+            ) {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                if ($this->htmlMutation) {
+                    $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
+                }
             }
         };
         $base->override($override);
@@ -89,16 +94,11 @@ final class AdminTagResourceTest extends TestCase
 
     public function testCreateHtmlContextRedirectsToTagList(): void
     {
-        $previousContext = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html-test-hal-app');
-        try {
-            $ro = $this->resource->post('page://self/admin/tag/tag-list', [
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
+        $ro = $this->resource->post('page://self/admin/tag/tag-list', [
                 'tagName' => '限定',
                 'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
-        } finally {
-            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
-        }
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/tag/tag-list', $ro->headers['Location']);
@@ -127,17 +127,12 @@ final class AdminTagResourceTest extends TestCase
 
     public function testDeleteHtmlContextRedirectsToTagList(): void
     {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
         $id = $this->seed('Tmp');
-        $previousContext = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html-test-hal-app');
-        try {
-            $ro = $this->resource->delete('page://self/admin/tag/tag', [
+        $ro = $this->resource->delete('page://self/admin/tag/tag', [
                 'tagId' => $id,
                 'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
-        } finally {
-            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
-        }
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/tag/tag-list', $ro->headers['Location']);

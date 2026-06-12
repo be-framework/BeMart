@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
@@ -20,8 +21,6 @@ use MyVendor\BeMart\Be\Input\RemoveFavoriteInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE doAddFavorite — お気に入りに追加 (Pilot 13).
@@ -34,6 +33,7 @@ class Favorite extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -100,10 +100,7 @@ class Favorite extends ResourceObject
 
     private function redirectToFavoriteListOnHtmlSuccess(): static
     {
-        if ($this->code < 400 && str_contains((string) getenv('APP_CONTEXT'), 'html')) {
-            $this->code = Code::SEE_OTHER;
-            $this->headers['Location'] = '/mypage/favorite-list';
-        }
+        ($this->mutationResponse)($this, $this->code, '/mypage/favorite-list');
 
         return $this;
     }
