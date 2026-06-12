@@ -75,11 +75,6 @@ class Complete extends ResourceObject
                 'page' => 'shopping-complete',
                 'title' => 'ご注文完了',
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-                'goCart' => 'page://self/cart',
-                'goMypage' => 'page://self/mypage',
-            ],
         ];
 
         return $this;

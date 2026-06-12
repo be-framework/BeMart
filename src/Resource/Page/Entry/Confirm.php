@@ -79,10 +79,6 @@ class Confirm extends ResourceObject
                 'page' => 'entry-confirm',
                 'title' => '新規会員登録(確認)',
             ],
-            'links' => [
-                'doRegisterCustomer' => 'page://self/entry',
-                'goTop' => 'page://self/',
-            ],
             // Phase 3: the confirm screen carries the registration payload
             // as hidden inputs — an EntryConfirmForm (every field `hidden`).
             // JSON contexts ignore `body['form']`.

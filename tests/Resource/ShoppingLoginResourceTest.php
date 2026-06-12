@@ -35,9 +35,6 @@ final class ShoppingLoginResourceTest extends TestCase
         $this->assertSame([], $ro->body['fields']);
         $this->assertNull($ro->body['submitTo']);
         $this->assertNull($ro->body['staticContent']);
-        // Three exits per ALPS #ShoppingLogin: member login, registration, non-member.
-        $this->assertArrayHasKey('doLogin', $ro->body['links']);
-        $this->assertArrayHasKey('goCustomerRegistration', $ro->body['links']);
-        $this->assertArrayHasKey('goShoppingNonMember', $ro->body['links']);
+        $this->assertArrayNotHasKey('links', $ro->body);
     }
 }

@@ -57,19 +57,6 @@ class Index extends ResourceObject
             'fields' => [],
             'submitTo' => null,
             'staticContent' => null,
-            'links' => [
-                'goProductList' => 'page://self/products',
-                'goCart' => 'page://self/cart',
-                'goContactForm' => 'page://self/contact',
-                'goCustomerRegistration' => 'page://self/entry',
-                'goLogin' => 'page://self/login',
-                'goMypage' => 'page://self/mypage',
-                'goHelpAbout' => 'page://self/help/about',
-                'goHelpGuide' => 'page://self/help/guide',
-                'goHelpAgreement' => 'page://self/help/agreement',
-                'goHelpPrivacy' => 'page://self/help/privacy',
-                'goHelpTradeLaw' => 'page://self/help/trade-law',
-            ],
         ];
 
         return $this;

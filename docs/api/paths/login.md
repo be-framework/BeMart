@@ -12,12 +12,10 @@ Failure mapping:
   - LoginFailedException      → 401 (no such email OR wrong password
                                       — combined, no user enumeration)
 
-In the html context, public/index.php starts a PHP session before
-dispatch and this resource mirrors `customerId` into the flat session
-key read by HtmlSessionAdapter. The write is guarded by
-an html APP_CONTEXT and PHP_SESSION_ACTIVE so app/test/prod contexts
-keep their existing session behaviour and are not polluted by direct
-`$_SESSION` writes.
+In the html context, the context module binds a session writer that
+mirrors `customerId` into the flat session key read by the HTML session
+adapter. Non-html contexts bind a no-op writer, so Resource code does
+not branch on environment or touch PHP session storage directly.
 
 Phase 3 — HTML FORM page. The resource builds a {@see \LoginForm}
 (Ray.WebFormModule AbstractForm) and exposes it as `body['form']` so
