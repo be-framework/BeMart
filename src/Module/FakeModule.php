@@ -58,9 +58,7 @@ final class FakeModule extends AbstractAppModule
             MediaQueryQueries::fromAppRoot($root),
         ));
 
-        if (PHP_SAPI === 'cli-server') {
-            $this->override(new HtmlFakeCartModule());
-        }
+        $browserFakeContext = PHP_SAPI === 'cli-server';
 
         $inventory = new FakeInventoryAllocator();
         $gateway = new FakePaymentGateway();
@@ -76,7 +74,10 @@ final class FakeModule extends AbstractAppModule
         $this->bind(FakeMailer::class)->toInstance($mailer);
         $this->bind(MailerInterface::class)->toInstance($mailer);
         $this->bind(FakeSession::class)->toInstance($session);
-        $this->bind(CustomerSession::class)->toInstance($session);
+        if (! $browserFakeContext) {
+            $this->bind(CustomerSession::class)->toInstance($session);
+        }
+
         $this->bind(FakeAdminSession::class)->toInstance($adminSession);
         $this->bind(AdminSession::class)->toInstance($adminSession);
         $this->bind(NullCsrfToken::class)->toInstance($csrf);
@@ -115,5 +116,9 @@ final class FakeModule extends AbstractAppModule
         $this->bind(CustomerInitialPointInterface::class)->to(FakeCustomerInitialPoint::class)->in(Scope::SINGLETON);
         $this->bind(PurchaseFlowInterface::class)->to(FakePurchaseFlow::class)->in(Scope::SINGLETON);
         $this->bind(PaymentMethodFactoryInterface::class)->to(FakePaymentMethodFactory::class)->in(Scope::SINGLETON);
+
+        if ($browserFakeContext) {
+            $this->override(new HtmlFakeCartModule());
+        }
     }
 }

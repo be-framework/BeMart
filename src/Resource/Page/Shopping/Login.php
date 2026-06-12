@@ -8,9 +8,12 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
+
+use function assert;
 
 /**
  * EC-CUBE goShoppingLogin — 購入ログイン (Wave 3H pure renderer).
@@ -37,8 +40,14 @@ use BEAR\Resource\Annotation\JsonSchema;
  */
 class Login extends ResourceObject
 {
+    // Same PoC fixture as the standalone Login page, so the demo checkout
+    // flow can proceed with one click in the browser.
+    private const POC_LOGIN_EMAIL = 'login-test@example.com';
+    private const POC_LOGIN_PASSWORD = 'login-test-password-2026';
+
     public function __construct(
         private readonly FormFactory $formFactory,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -61,11 +70,26 @@ class Login extends ResourceObject
                 'goCustomerRegistration' => 'page://self/entry',
                 'goShoppingNonMember' => 'page://self/shopping/non-member',
             ],
-            // Phase 3: an empty LoginForm for the HTML port to render
-            // the checkout-login inputs. JSON contexts ignore it.
-            'form' => $this->formFactory->newInstance(LoginForm::class),
+            'csrfToken' => $this->csrf->token,
+            // Phase 3: a LoginForm for the HTML port to render the
+            // checkout-login inputs. It is prefilled like /login for the
+            // browser demo; JSON contexts ignore it.
+            'form' => $this->prefilledLoginForm(),
         ];
 
         return $this;
+    }
+
+    private function prefilledLoginForm(): LoginForm
+    {
+        $form = $this->formFactory->newInstance(LoginForm::class);
+        assert($form instanceof LoginForm);
+
+        $form->fillValues([
+            'email' => self::POC_LOGIN_EMAIL,
+            'password' => self::POC_LOGIN_PASSWORD,
+        ]);
+
+        return $form;
     }
 }

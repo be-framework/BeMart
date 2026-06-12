@@ -25,6 +25,8 @@ use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_values;
 use function assert;
+use function preg_match;
+use function str_starts_with;
 use function trim;
 
 /**
@@ -117,7 +119,12 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'post-login.json', params: 'post-login.param.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
     #[CsrfProtected]
-    public function onPost(string|null $email = null, string|null $password = null, string|null $mode = null): static
+    public function onPost(
+        string|null $email = null,
+        string|null $password = null,
+        string|null $mode = null,
+        string|null $_target_path = null,
+    ): static
     {
         $values = [
             'email' => $email ?? '',
@@ -160,7 +167,9 @@ class Login extends ResourceObject
 
         $this->sessionWriter->authenticate($final->customerId);
 
-        $this->headers['Location'] = '/mypage';
+        $this->headers['Location'] = $browserForm
+            ? self::browserRedirectPath($_target_path, '/mypage')
+            : '/mypage';
         $this->body = [
             'customerId' => $final->customerId,
             'email' => $final->email,
@@ -169,7 +178,8 @@ class Login extends ResourceObject
             'customerStatus' => $final->customerStatus,
         ];
         if ($browserForm) {
-            // Post/Redirect/Get: EC-CUBE's browser login redirects to My Page.
+            // Post/Redirect/Get: EC-CUBE's browser login follows the form target
+            // when present (checkout -> /shopping), otherwise falls back to My Page.
             // JSON/Resource clients keep the success body below with 200 OK.
             $this->code = Code::SEE_OTHER;
 
@@ -263,6 +273,19 @@ class Login extends ResourceObject
         return $message !== '' && $message !== 'Validation error'
             ? $message
             : 'メールアドレスまたはパスワードが正しくありません。';
+    }
+
+    private static function browserRedirectPath(string|null $path, string $fallback): string
+    {
+        if ($path === null || $path === '' || $path[0] !== '/' || str_starts_with($path, '//')) {
+            return $fallback;
+        }
+
+        if (preg_match('/[\r\n]/', $path) === 1) {
+            return $fallback;
+        }
+
+        return $path;
     }
 
     private function prefilledLoginForm(): LoginForm

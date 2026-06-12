@@ -50,6 +50,11 @@
       "title": "静的コンテンツ",
       "description": "/shopping/login で表示する規約・ヘルプ・エラー等の静的ページ本文とセクション情報。"
     },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken",
+      "title": "CSRFトークン",
+      "description": "購入ログインフォームのPOST検証に使うCSRFトークン。"
+    },
     "transitionId": {
       "title": "ALPS遷移ID",
       "description": "このレスポンス/操作が対応するALPS遷移ID。クライアントの状態遷移追跡に使う。",

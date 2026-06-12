@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use MyVendor\BeMart\Auth\HtmlSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Query\SessionCartStorage;
 use MyVendor\BeMart\Be\Reason\Query\CartCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
+use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
 use Override;
 use Ray\Di\AbstractModule;
 use Ray\Di\Scope;
@@ -20,5 +22,6 @@ final class HtmlFakeCartModule extends AbstractModule
         $this->bind(SessionCartStorage::class)->in(Scope::SINGLETON);
         $this->bind(CartQueryInterface::class)->to(SessionCartStorage::class)->in(Scope::SINGLETON);
         $this->bind(CartCommandInterface::class)->to(SessionCartStorage::class)->in(Scope::SINGLETON);
+        $this->bind(CustomerSession::class)->to(HtmlSessionAdapter::class);
     }
 }
