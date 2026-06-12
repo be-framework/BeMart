@@ -1,11 +1,443 @@
 [
-  {
-    "newsId": "nw-welcome",
-    "newsTitle": "ようこそ",
-    "newsDescription": "EC-CUBE へようこそ。",
-    "newsUrl": null,
-    "publishDate": "2026-01-01T00:00:00+09:00",
-    "linkMethod": false,
-    "visible": true
-  }
+    {
+        "newsId": "nw-idea-001",
+        "newsTitle": "台所道具の再入荷 #01",
+        "newsDescription": "毎日の料理を助ける定番アイテムが再入荷しました。",
+        "newsUrl": null,
+        "publishDate": "2026-06-12T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-002",
+        "newsTitle": "週末ワークショップ #02",
+        "newsDescription": "木工と修理の小さなワークショップを開催します。",
+        "newsUrl": null,
+        "publishDate": "2026-06-11T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-003",
+        "newsTitle": "家具配送のご案内 #03",
+        "newsDescription": "大型家具の配送枠を拡大しました。",
+        "newsUrl": null,
+        "publishDate": "2026-06-10T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-004",
+        "newsTitle": "読書と音楽フェア #04",
+        "newsDescription": "本と音楽で過ごす夜のための特集を公開しました。",
+        "newsUrl": null,
+        "publishDate": "2026-06-09T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-005",
+        "newsTitle": "ギフトラッピング #05",
+        "newsDescription": "季節の贈り物向けにラッピング資材を追加しました。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-06-08T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-006",
+        "newsTitle": "収納週間 #06",
+        "newsDescription": "玄関・リビング・台所を整える収納道具を特集しています。",
+        "newsUrl": null,
+        "publishDate": "2026-06-07T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-007",
+        "newsTitle": "台所道具の再入荷 #07",
+        "newsDescription": "毎日の料理を助ける定番アイテムが再入荷しました。",
+        "newsUrl": null,
+        "publishDate": "2026-06-06T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-008",
+        "newsTitle": "週末ワークショップ #08",
+        "newsDescription": "木工と修理の小さなワークショップを開催します。",
+        "newsUrl": null,
+        "publishDate": "2026-06-05T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-009",
+        "newsTitle": "家具配送のご案内 #09",
+        "newsDescription": "大型家具の配送枠を拡大しました。",
+        "newsUrl": null,
+        "publishDate": "2026-06-04T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-010",
+        "newsTitle": "読書と音楽フェア #10",
+        "newsDescription": "本と音楽で過ごす夜のための特集を公開しました。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-06-03T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-011",
+        "newsTitle": "ギフトラッピング #11",
+        "newsDescription": "季節の贈り物向けにラッピング資材を追加しました。",
+        "newsUrl": null,
+        "publishDate": "2026-06-02T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-012",
+        "newsTitle": "収納週間 #12",
+        "newsDescription": "玄関・リビング・台所を整える収納道具を特集しています。",
+        "newsUrl": null,
+        "publishDate": "2026-06-01T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-013",
+        "newsTitle": "台所道具の再入荷 #13",
+        "newsDescription": "毎日の料理を助ける定番アイテムが再入荷しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-31T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": false
+    },
+    {
+        "newsId": "nw-idea-014",
+        "newsTitle": "週末ワークショップ #14",
+        "newsDescription": "木工と修理の小さなワークショップを開催します。",
+        "newsUrl": null,
+        "publishDate": "2026-05-30T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-015",
+        "newsTitle": "家具配送のご案内 #15",
+        "newsDescription": "大型家具の配送枠を拡大しました。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-05-29T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-016",
+        "newsTitle": "読書と音楽フェア #16",
+        "newsDescription": "本と音楽で過ごす夜のための特集を公開しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-28T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-017",
+        "newsTitle": "ギフトラッピング #17",
+        "newsDescription": "季節の贈り物向けにラッピング資材を追加しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-27T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-018",
+        "newsTitle": "収納週間 #18",
+        "newsDescription": "玄関・リビング・台所を整える収納道具を特集しています。",
+        "newsUrl": null,
+        "publishDate": "2026-05-26T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-019",
+        "newsTitle": "台所道具の再入荷 #19",
+        "newsDescription": "毎日の料理を助ける定番アイテムが再入荷しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-25T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-020",
+        "newsTitle": "週末ワークショップ #20",
+        "newsDescription": "木工と修理の小さなワークショップを開催します。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-05-24T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-021",
+        "newsTitle": "家具配送のご案内 #21",
+        "newsDescription": "大型家具の配送枠を拡大しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-23T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-022",
+        "newsTitle": "読書と音楽フェア #22",
+        "newsDescription": "本と音楽で過ごす夜のための特集を公開しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-22T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-023",
+        "newsTitle": "ギフトラッピング #23",
+        "newsDescription": "季節の贈り物向けにラッピング資材を追加しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-21T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-024",
+        "newsTitle": "収納週間 #24",
+        "newsDescription": "玄関・リビング・台所を整える収納道具を特集しています。",
+        "newsUrl": null,
+        "publishDate": "2026-05-20T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-025",
+        "newsTitle": "台所道具の再入荷 #25",
+        "newsDescription": "毎日の料理を助ける定番アイテムが再入荷しました。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-05-19T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-026",
+        "newsTitle": "週末ワークショップ #26",
+        "newsDescription": "木工と修理の小さなワークショップを開催します。",
+        "newsUrl": null,
+        "publishDate": "2026-05-18T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": false
+    },
+    {
+        "newsId": "nw-idea-027",
+        "newsTitle": "家具配送のご案内 #27",
+        "newsDescription": "大型家具の配送枠を拡大しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-17T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-028",
+        "newsTitle": "読書と音楽フェア #28",
+        "newsDescription": "本と音楽で過ごす夜のための特集を公開しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-16T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-029",
+        "newsTitle": "ギフトラッピング #29",
+        "newsDescription": "季節の贈り物向けにラッピング資材を追加しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-15T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-030",
+        "newsTitle": "収納週間 #30",
+        "newsDescription": "玄関・リビング・台所を整える収納道具を特集しています。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-05-14T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-031",
+        "newsTitle": "台所道具の再入荷 #31",
+        "newsDescription": "毎日の料理を助ける定番アイテムが再入荷しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-13T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-032",
+        "newsTitle": "週末ワークショップ #32",
+        "newsDescription": "木工と修理の小さなワークショップを開催します。",
+        "newsUrl": null,
+        "publishDate": "2026-05-12T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-033",
+        "newsTitle": "家具配送のご案内 #33",
+        "newsDescription": "大型家具の配送枠を拡大しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-11T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-034",
+        "newsTitle": "読書と音楽フェア #34",
+        "newsDescription": "本と音楽で過ごす夜のための特集を公開しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-10T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-035",
+        "newsTitle": "ギフトラッピング #35",
+        "newsDescription": "季節の贈り物向けにラッピング資材を追加しました。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-05-09T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-036",
+        "newsTitle": "収納週間 #36",
+        "newsDescription": "玄関・リビング・台所を整える収納道具を特集しています。",
+        "newsUrl": null,
+        "publishDate": "2026-05-08T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-037",
+        "newsTitle": "台所道具の再入荷 #37",
+        "newsDescription": "毎日の料理を助ける定番アイテムが再入荷しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-07T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-038",
+        "newsTitle": "週末ワークショップ #38",
+        "newsDescription": "木工と修理の小さなワークショップを開催します。",
+        "newsUrl": null,
+        "publishDate": "2026-05-06T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-039",
+        "newsTitle": "家具配送のご案内 #39",
+        "newsDescription": "大型家具の配送枠を拡大しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-05T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": false
+    },
+    {
+        "newsId": "nw-idea-040",
+        "newsTitle": "読書と音楽フェア #40",
+        "newsDescription": "本と音楽で過ごす夜のための特集を公開しました。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-05-04T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-041",
+        "newsTitle": "ギフトラッピング #41",
+        "newsDescription": "季節の贈り物向けにラッピング資材を追加しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-03T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-042",
+        "newsTitle": "収納週間 #42",
+        "newsDescription": "玄関・リビング・台所を整える収納道具を特集しています。",
+        "newsUrl": null,
+        "publishDate": "2026-05-02T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-043",
+        "newsTitle": "台所道具の再入荷 #43",
+        "newsDescription": "毎日の料理を助ける定番アイテムが再入荷しました。",
+        "newsUrl": null,
+        "publishDate": "2026-05-01T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-044",
+        "newsTitle": "週末ワークショップ #44",
+        "newsDescription": "木工と修理の小さなワークショップを開催します。",
+        "newsUrl": null,
+        "publishDate": "2026-04-30T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-045",
+        "newsTitle": "家具配送のご案内 #45",
+        "newsDescription": "大型家具の配送枠を拡大しました。",
+        "newsUrl": "/products?orderby=latest",
+        "publishDate": "2026-04-29T09:00:00+09:00",
+        "linkMethod": true,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-046",
+        "newsTitle": "読書と音楽フェア #46",
+        "newsDescription": "本と音楽で過ごす夜のための特集を公開しました。",
+        "newsUrl": null,
+        "publishDate": "2026-04-28T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-047",
+        "newsTitle": "ギフトラッピング #47",
+        "newsDescription": "季節の贈り物向けにラッピング資材を追加しました。",
+        "newsUrl": null,
+        "publishDate": "2026-04-27T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-idea-048",
+        "newsTitle": "収納週間 #48",
+        "newsDescription": "玄関・リビング・台所を整える収納道具を特集しています。",
+        "newsUrl": null,
+        "publishDate": "2026-04-26T09:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    },
+    {
+        "newsId": "nw-welcome",
+        "newsTitle": "ようこそ",
+        "newsDescription": "EC-CUBE へようこそ。",
+        "newsUrl": null,
+        "publishDate": "2026-01-01T00:00:00+09:00",
+        "linkMethod": false,
+        "visible": true
+    }
 ]
