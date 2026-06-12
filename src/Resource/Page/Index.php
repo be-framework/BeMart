@@ -9,6 +9,16 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use BEAR\Resource\Annotation\JsonSchema;
+use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+use MyVendor\BeMart\Be\Reason\Entity\ProductReviewSummary;
+use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductReviewQueryInterface;
+use MyVendor\BeMart\Support\ProductImageCatalog;
+
+use function array_filter;
+use function array_map;
+use function array_slice;
+use function array_values;
 
 /**
  * EC-CUBE goTop — トップページ (Wave 3H pure renderer).
@@ -29,6 +39,12 @@ use BEAR\Resource\Annotation\JsonSchema;
  */
 class Index extends ResourceObject
 {
+    public function __construct(
+        private readonly ProductQueryInterface $productQuery,
+        private readonly ProductReviewQueryInterface $productReviewQuery,
+    ) {
+    }
+
     /**
      * EC-CUBE goTop — render the top page scaffolding.
      *
@@ -51,12 +67,18 @@ class Index extends ResourceObject
     #[Link(rel: 'goHelpTradeLaw', href: 'page://self/help/trade-law')]
     public function onGet(): static
     {
+        $products = array_slice(array_values(array_filter(
+            $this->productQuery->list(40, 0),
+            static fn (ProductEntity $product): bool => $product->productStatus === ProductEntity::STATUS_VISIBLE,
+        )), 0, 20);
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goTop',
             'fields' => [],
             'submitTo' => null,
             'staticContent' => null,
+            'featuredProducts' => array_map($this->productRow(...), $products),
             'links' => [
                 'goProductList' => 'page://self/products',
                 'goCart' => 'page://self/cart',
@@ -73,5 +95,38 @@ class Index extends ResourceObject
         ];
 
         return $this;
+    }
+
+    /** @return array{id: string, productCode: string, name: string, productName: string, price02: int, stock: int|null, stockFind: bool, descriptionList: string, mainListImage: string, categoryNames: list<string>, tagNames: list<string>, reviewSummary: array{averageRating: float|null, reviewCount: int}} */
+    private function productRow(ProductEntity $product): array
+    {
+        return [
+            'id' => $product->productCode,
+            'productCode' => $product->productCode,
+            'name' => $product->productName,
+            'productName' => $product->productName,
+            'price02' => $product->price02,
+            'stock' => $product->stock,
+            'stockFind' => $product->stock === null || $product->stock > 0,
+            'descriptionList' => $product->description ?? '',
+            'mainListImage' => $product->imagePath ?? ProductImageCatalog::forProductCode($product->productCode),
+            'categoryNames' => $product->categoryNames,
+            'tagNames' => $product->tagNames,
+            'reviewSummary' => $this->reviewSummary($product->productCode),
+        ];
+    }
+
+    /** @return array{averageRating: float|null, reviewCount: int} */
+    private function reviewSummary(string $productCode): array
+    {
+        $summary = $this->productReviewQuery->summaryByProduct($productCode);
+        if (! $summary instanceof ProductReviewSummary || $summary->reviewCount <= 0) {
+            return ['averageRating' => null, 'reviewCount' => 0];
+        }
+
+        return [
+            'averageRating' => $summary->averageRating,
+            'reviewCount' => $summary->reviewCount,
+        ];
     }
 }

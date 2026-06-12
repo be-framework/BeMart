@@ -372,6 +372,40 @@
             "title": "ファイル名",
             "description": "商品画像のファイル名 Fake観察文字長 12〜15; 観察値 'Mail/order.twig', 'Mail/entry.twig', 'sample-a.jpg', 'sample-b.jpg'。",
             "example": "Mail/order.twig"
+          },
+          "reviewSummary": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "title": "レビュー集計",
+            "description": "商品レビューの平均評価と件数。レビューがない場合は averageRating=null, reviewCount=0。",
+            "properties": {
+              "averageRating": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 5,
+                "title": "平均評価",
+                "description": "商品レビューの平均評価。小数1桁で丸めた値。",
+                "example": 4.2
+              },
+              "reviewCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647,
+                "title": "レビュー件数",
+                "description": "商品に紐づくレビュー件数。",
+                "example": 10
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "averageRating",
+              "reviewCount"
+            ]
           }
         },
         "additionalProperties": false,

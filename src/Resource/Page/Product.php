@@ -12,12 +12,17 @@ use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\ProductNotFoundException;
 use MyVendor\BeMart\Be\Final\ProductFetched;
 use MyVendor\BeMart\Be\Input\GetProductInput;
+use MyVendor\BeMart\Be\Reason\Entity\ProductReview;
+use MyVendor\BeMart\Be\Reason\Entity\ProductReviewSummary;
+use MyVendor\BeMart\Be\Reason\Query\ProductReviewQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AddCartForm;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_map;
+use function array_slice;
 use function assert;
 
 /**
@@ -49,6 +54,7 @@ class Product extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
         private readonly CsrfToken $csrf,
+        private readonly ProductReviewQueryInterface $productReviewQuery,
     ) {
     }
 
@@ -88,18 +94,51 @@ class Product extends ResourceObject
             'tagNames' => $final->tagNames,
             'classNames' => $final->classNames,
             'mainImage' => $final->imagePath ?? ProductImageCatalog::forProductCode($final->productCode),
+            'reviewSummary' => $this->reviewSummary($final->productCode),
+            'reviews' => $this->reviews($final->productCode),
             // Phase 3: the add-to-cart form. EC-CUBE renders the add-cart
             // quantity input through `AddCartType`; BeMart renders it
             // through this AddCartForm. The hidden `productCode` is seeded
             // with the product code. JSON contexts ignore `form`.
             'form' => $this->addCartForm($final->productCode),
             // CSRF reference for the add-to-cart POST: the HTML port
-            // renders it into the form's hidden `_token` input so the
+            // renders it into the form's hidden `csrfToken` input so the
             // POST to `page://self/cart/item` passes CSRF validation.
             'csrfToken' => $this->csrf->token,
         ];
 
         return $this;
+    }
+
+
+    /** @return array{averageRating: float|null, reviewCount: int} */
+    private function reviewSummary(string $productCode): array
+    {
+        $summary = $this->productReviewQuery->summaryByProduct($productCode);
+        if (! $summary instanceof ProductReviewSummary || $summary->reviewCount <= 0) {
+            return ['averageRating' => null, 'reviewCount' => 0];
+        }
+
+        return [
+            'averageRating' => $summary->averageRating,
+            'reviewCount' => $summary->reviewCount,
+        ];
+    }
+
+    /** @return list<array{reviewId: string, title: string, body: string, reviewer: string, createdAt: string, rating: int}> */
+    private function reviews(string $productCode): array
+    {
+        return array_map(
+            static fn (ProductReview $review): array => [
+                'reviewId' => $review->reviewId,
+                'title' => $review->title,
+                'body' => $review->body,
+                'reviewer' => $review->reviewer,
+                'createdAt' => $review->createdAt,
+                'rating' => $review->rating,
+            ],
+            array_slice($this->productReviewQuery->listByProduct($productCode, 5), 0, 5),
+        );
     }
 
     /**

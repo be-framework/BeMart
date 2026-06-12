@@ -127,6 +127,210 @@
         "goCart",
         "goProductList"
       ]
+    },
+    "featuredProducts": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "おすすめ商品一覧",
+      "description": "トップページに表示する商品概要一覧。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "title": "商品概要",
+        "description": "/products のレスポンスに含まれる商品概要。親コレクション `products` の1行を表し、固定できる業務列はschema propertyで明示する。",
+        "properties": {
+          "mainListImage": {
+            "title": "一覧メイン画像URI",
+            "description": "/products の画面表示に使う一覧メイン画像URI。業務エンティティそのものではなくテンプレート/一覧表示の補助値。",
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri-reference",
+            "minLength": 1,
+            "maxLength": 2048,
+            "example": "/products"
+          },
+          "stock": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 2147483647,
+            "title": "在庫数",
+            "description": "物理在庫数。stockUnlimited=trueの場合は無視される。注文確定時に引き当てが行われる Fake観察数値 0〜100; 観察値 '0', '10', '20', '50', '5', '7', '100', '3'; null 9/73。",
+            "example": 0
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "商品名",
+            "description": "/products で表示する商品名。検索・一覧・詳細でユーザーに見せる販売名。",
+            "example": "テスト管理者"
+          },
+          "productName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 128,
+            "title": "商品名",
+            "description": "商品の表示名 Fake観察文字長 6〜17。",
+            "example": "サンプル商品 A"
+          },
+          "price02": {
+            "title": "販売価格",
+            "description": "実際の販売価格（税抜）。税計算・小計計算のベース Fake観察数値 800〜28000。",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 999999999,
+            "example": 3500
+          },
+          "tagNames": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "title": "タグ名一覧",
+            "description": "Fake観察数値 0〜2。",
+            "items": {
+              "type": "string",
+              "title": "タグ名",
+              "minLength": 0,
+              "maxLength": 128,
+              "description": "/products のレスポンスに含まれる商品行。親コレクション `tagNames` の1行を表し、固定できる業務列はschema propertyで明示する。"
+            },
+            "minItems": 0
+          },
+          "categoryNames": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "title": "カテゴリ名一覧",
+            "description": "Fake観察数値 0〜4。",
+            "items": {
+              "type": "string",
+              "title": "カテゴリ名",
+              "minLength": 0,
+              "maxLength": 128,
+              "description": "/products のレスポンスに含まれる商品行。親コレクション `categoryNames` の1行を表し、固定できる業務列はschema propertyで明示する。"
+            },
+            "minItems": 0
+          },
+          "productCode": {
+            "title": "商品コード",
+            "description": "SKU/品番。在庫管理や受注明細での識別に使用 商品を識別するSKU。Fake corpusではASCII英数・ハイフン中心で、受注明細/カート明細の結合キーになる。 Fake観察文字長 10〜26。",
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 64,
+            "example": "sample-001"
+          },
+          "descriptionList": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "一覧用説明文",
+            "description": "商品一覧・検索結果に表示する短い説明文"
+          },
+          "stockFind": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "title": "在庫検索フラグ",
+            "description": "/products の処理文脈から派生した在庫検索フラグ。ALPS基礎語だけでは単位や用途が不足するため、このResource上の意味を明示する。"
+          },
+          "id": {
+            "type": [
+              "string",
+              "integer",
+              "null"
+            ],
+            "title": "ID",
+            "description": "Fake観察文字長 13〜32; 観察値 'ad000000000000000000000000000001', 'ad000000000000000000000000000003', 'fedcba9876543210fedcba9876543210', '10000000aaaa1111bbbb2222cccc3333', 'ad000000000000000000000000000002', '0123456789abcdef0123456789abcdef', 'aaaaaaaa00000000bbbbbbbb11111111', '20000000dddd2222eeee3333ffff4444'。",
+            "example": "ad000000000000000000000000000001",
+            "minLength": 0,
+            "maxLength": 128,
+            "$comment": "Fake文字列IDとEC-CUBE整数IDの両方が観察されるため、この境界だけmixedBoundaryIdとして扱う。"
+          },
+          "unitPrice": {
+            "title": "単価（表示/計算用）",
+            "description": "明細1件あたりの単価。受注/カート明細・お気に入りスナップショットでは追加時点の price02 をスナップショットして保持する（後の値引きやマスタ改定に影響されない）。BeMart 側では `int` 円整数 Fake観察数値 1200〜9800; 観察値 '1200', '9800'。",
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 999999999,
+            "example": 1200
+          },
+          "fileName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 255,
+            "title": "ファイル名",
+            "description": "商品画像のファイル名 Fake観察文字長 12〜15; 観察値 'Mail/order.twig', 'Mail/entry.twig', 'sample-a.jpg', 'sample-b.jpg'。",
+            "example": "Mail/order.twig"
+          },
+          "reviewSummary": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "title": "レビュー集計",
+            "description": "商品レビューの平均評価と件数。レビューがない場合は averageRating=null, reviewCount=0。",
+            "properties": {
+              "averageRating": {
+                "type": [
+                  "number",
+                  "null"
+                ],
+                "minimum": 1,
+                "maximum": 5,
+                "title": "平均評価",
+                "description": "商品レビューの平均評価。小数1桁で丸めた値。",
+                "example": 4.2
+              },
+              "reviewCount": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647,
+                "title": "レビュー件数",
+                "description": "商品に紐づくレビュー件数。",
+                "example": 10
+              }
+            },
+            "additionalProperties": false,
+            "required": [
+              "averageRating",
+              "reviewCount"
+            ]
+          }
+        },
+        "additionalProperties": false,
+        "$comment": "配列要素はFake/Resourceで観察された既知propertyに固定する。新しい列が必要になった場合はSemantic-Ex観察に追加してschemaを更新する。"
+      },
+      "minItems": 0
     }
   },
   "additionalProperties": false,

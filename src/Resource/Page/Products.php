@@ -9,7 +9,9 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Entity\ProductEntity;
+use MyVendor\BeMart\Be\Reason\Entity\ProductReviewSummary;
 use MyVendor\BeMart\Be\Reason\Query\ProductQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\ProductReviewQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Support\ProductImageCatalog;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -42,8 +44,11 @@ use function usort;
  */
 class Products extends ResourceObject
 {
+    private const CATALOG_SCAN_LIMIT = 3000;
+
     public function __construct(
         private readonly ProductQueryInterface $productQuery,
+        private readonly ProductReviewQueryInterface $productReviewQuery,
         private readonly CsrfToken $csrf,
     ) {
     }
@@ -78,8 +83,8 @@ class Products extends ResourceObject
         $pageNo = max(1, (int) ($pageno ?? '1'));
 
         $products = $keyword === null || $keyword === ''
-            ? $this->productQuery->list(500, 0)
-            : $this->productQuery->search($keyword, 500);
+            ? $this->productQuery->list(self::CATALOG_SCAN_LIMIT, 0)
+            : $this->productQuery->search($keyword, self::CATALOG_SCAN_LIMIT);
 
         $visibleProducts = array_values(array_filter(
             $products,
@@ -120,7 +125,7 @@ class Products extends ResourceObject
         return $this;
     }
 
-    /** @return array{id: string, productCode: string, name: string, productName: string, price02: int, stock: int|null, stockFind: bool, descriptionList: string, mainListImage: string, categoryNames: list<string>, tagNames: list<string>} */
+    /** @return array{id: string, productCode: string, name: string, productName: string, price02: int, stock: int|null, stockFind: bool, descriptionList: string, mainListImage: string, categoryNames: list<string>, tagNames: list<string>, reviewSummary: array{averageRating: float|null, reviewCount: int}} */
     private function productRow(ProductEntity $product): array
     {
         return [
@@ -138,6 +143,22 @@ class Products extends ResourceObject
             'mainListImage' => $product->imagePath ?? ProductImageCatalog::forProductCode($product->productCode),
             'categoryNames' => $product->categoryNames,
             'tagNames' => $product->tagNames,
+            'reviewSummary' => $this->reviewSummary($product->productCode),
+        ];
+    }
+
+
+    /** @return array{averageRating: float|null, reviewCount: int} */
+    private function reviewSummary(string $productCode): array
+    {
+        $summary = $this->productReviewQuery->summaryByProduct($productCode);
+        if (! $summary instanceof ProductReviewSummary || $summary->reviewCount <= 0) {
+            return ['averageRating' => null, 'reviewCount' => 0];
+        }
+
+        return [
+            'averageRating' => $summary->averageRating,
+            'reviewCount' => $summary->reviewCount,
         ];
     }
 

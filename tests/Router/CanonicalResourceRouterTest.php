@@ -54,6 +54,59 @@ final class CanonicalResourceRouterTest extends TestCase
         $this->assertNotSame('page://self/admin/product-csv', $match->path);
     }
 
+
+    public function testIdeaStoreLegacyProductDetailMapsToCanonicalProduct(): void
+    {
+        $match = $this->router->match(
+            ['_GET' => [], '_POST' => []],
+            ['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/products/detail/IDEA000001'],
+        );
+
+        $this->assertSame('get', $match->method);
+        $this->assertSame('page://self/product', $match->path);
+        $this->assertSame(['productCode' => 'IDEA000001'], $match->query);
+    }
+
+    public function testIdeaStoreLegacyProductListMapsToCanonicalProducts(): void
+    {
+        $match = $this->router->match(
+            ['_GET' => ['name' => '収納'], '_POST' => []],
+            ['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/products/list?name=%E5%8F%8E%E7%B4%8D'],
+        );
+
+        $this->assertSame('get', $match->method);
+        $this->assertSame('page://self/products', $match->path);
+        $this->assertSame(['name' => '収納'], $match->query);
+    }
+
+    public function testIdeaStoreLegacyAddCartMapsPathProductCode(): void
+    {
+        $match = $this->router->match(
+            ['_GET' => [], '_POST' => ['quantity' => '1', 'csrfToken' => 'token-1']],
+            ['REQUEST_METHOD' => 'POST', 'REQUEST_URI' => '/products/add_cart/IDEA000001'],
+        );
+
+        $this->assertSame('post', $match->method);
+        $this->assertSame('page://self/cart/item', $match->path);
+        $this->assertSame([
+            'quantity' => '1',
+            'csrfToken' => 'token-1',
+            'productCode' => 'IDEA000001',
+        ], $match->query);
+    }
+
+    public function testIdeaStoreLegacyNonMemberMapsToCanonicalNonMember(): void
+    {
+        $match = $this->router->match(
+            ['_GET' => [], '_POST' => []],
+            ['REQUEST_METHOD' => 'GET', 'REQUEST_URI' => '/shopping/nonmember'],
+        );
+
+        $this->assertSame('get', $match->method);
+        $this->assertSame('page://self/shopping/non-member', $match->path);
+        $this->assertSame([], $match->query);
+    }
+
     public function testPostMethodOverrideDispatchesToPutAndRemovesMethodField(): void
     {
         $match = $this->router->match(
@@ -96,6 +149,19 @@ final class CanonicalResourceRouterTest extends TestCase
     public function testRouteNameGenerationIsDisabled(): void
     {
         $this->assertFalse($this->router->generate('product_detail', ['id' => 'sample-001']));
+    }
+
+
+    public function testCliRawJapaneseQueryKeepsUtf8Value(): void
+    {
+        $match = $this->router->match(
+            ['argv' => ['bin/page.php', 'get', '/products?name=収納'], '_GET' => [], '_POST' => []],
+            ['argv' => ['bin/page.php', 'get', '/products?name=収納'], 'argc' => 3],
+        );
+
+        $this->assertSame('get', $match->method);
+        $this->assertSame('page://self/products', $match->path);
+        $this->assertSame(['name' => '収納'], $match->query);
     }
 
     public function testCliArgvMapsToResourcePathAndQuery(): void

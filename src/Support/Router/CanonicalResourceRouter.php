@@ -8,14 +8,20 @@ use BEAR\Sunday\Extension\Router\RouterInterface;
 use BEAR\Sunday\Extension\Router\RouterMatch;
 use Override;
 
+use function explode;
 use function file_get_contents;
 use function is_array;
 use function is_string;
 use function json_decode;
 use function parse_str;
 use function parse_url;
+use function preg_match;
+use function rawurldecode;
 use function rtrim;
 use function str_contains;
+use function str_replace;
+use function strpos;
+use function substr;
 use function strtolower;
 
 use const PHP_URL_PATH;
@@ -25,8 +31,9 @@ use const UPLOAD_ERR_OK;
 /**
  * Canonical BEAR resource router.
  *
- * The public HTTP URL is the BEAR Resource path. There are no EC-CUBE route
- * names, path parameters, aliases, or compatibility redirects here.
+ * The public HTTP URL is the BEAR Resource path. IDEA STORE keeps a
+ * narrow storefront compatibility layer for EC-CUBE-shaped inbound URLs
+ * while generated links use canonical resource paths.
  */
 final class CanonicalResourceRouter implements RouterInterface
 {
@@ -37,6 +44,8 @@ final class CanonicalResourceRouter implements RouterInterface
         [$method, $target, $cliQuery] = $this->requestTarget($globals, $server);
         $path = $this->normalizePath((string) (parse_url($target, PHP_URL_PATH) ?? '/'));
         $params = $this->requestParams($method, $globals, $server) + $cliQuery;
+        [$path, $legacyParams] = $this->legacyStorefrontRoute($path);
+        $params += $legacyParams;
 
         if ($method === 'post') {
             $override = strtolower((string) ($params['_method'] ?? ''));
@@ -143,14 +152,72 @@ final class CanonicalResourceRouter implements RouterInterface
         }
 
         $target = (string) $argv[2];
-        $query = [];
-        $queryString = (string) (parse_url($target, PHP_URL_QUERY) ?? '');
-        if ($queryString !== '') {
-            parse_str($queryString, $query);
+        $queryString = $this->cliQueryString($target);
+        $query = $this->parseCliQueryString($queryString);
+
+        return [strtolower((string) $argv[1]), $target, $query];
+    }
+
+
+
+    private function cliQueryString(string $target): string
+    {
+        $question = strpos($target, '?');
+        if ($question === false) {
+            return '';
         }
 
-        /** @var array<string, mixed> $query */
-        return [strtolower((string) $argv[1]), $target, $query];
+        return substr($target, $question + 1);
+    }
+
+    /** @return array<string, string> */
+    private function parseCliQueryString(string $queryString): array
+    {
+        if ($queryString === '') {
+            return [];
+        }
+
+        $query = [];
+        foreach (explode('&', $queryString) as $pair) {
+            if ($pair === '') {
+                continue;
+            }
+
+            [$key, $value] = explode('=', $pair, 2) + [1 => ''];
+            $key = rawurldecode(str_replace('+', ' ', $key));
+            if ($key === '') {
+                continue;
+            }
+
+            $query[$key] = rawurldecode(str_replace('+', ' ', $value));
+        }
+
+        return $query;
+    }
+
+
+    /**
+     * @return array{0: string, 1: array<string, string>}
+     */
+    private function legacyStorefrontRoute(string $path): array
+    {
+        if ($path === '/products/list') {
+            return ['/products', []];
+        }
+
+        if ($path === '/shopping/nonmember') {
+            return ['/shopping/non-member', []];
+        }
+
+        if (preg_match('#^/products/detail/([^/]+)$#', $path, $matches) === 1) {
+            return ['/product', ['productCode' => rawurldecode($matches[1])]];
+        }
+
+        if (preg_match('#^/products/add_cart/([^/]+)$#', $path, $matches) === 1) {
+            return ['/cart/item', ['productCode' => rawurldecode($matches[1])]];
+        }
+
+        return [$path, []];
     }
 
     /** @param array<string, mixed> $server */

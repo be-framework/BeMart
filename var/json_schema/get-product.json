@@ -146,6 +146,109 @@
       "maxLength": 160,
       "pattern": "^[A-Za-z0-9_.:-]+$",
       "example": "fake-csrf-token-bemart-2026"
+    },
+    "reviewSummary": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "title": "レビュー集計",
+      "description": "商品レビューの平均評価と件数。レビューがない場合は averageRating=null, reviewCount=0。",
+      "properties": {
+        "averageRating": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 1,
+          "maximum": 5,
+          "title": "平均評価",
+          "description": "商品レビューの平均評価。小数1桁で丸めた値。",
+          "example": 4.2
+        },
+        "reviewCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647,
+          "title": "レビュー件数",
+          "description": "商品に紐づくレビュー件数。",
+          "example": 10
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "averageRating",
+        "reviewCount"
+      ]
+    },
+    "reviews": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "商品レビュー一覧",
+      "description": "商品詳細に表示する最新レビュー一覧。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "title": "商品レビュー",
+        "description": "商品詳細で表示する最新レビュー。",
+        "properties": {
+          "reviewId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64,
+            "title": "レビューID",
+            "example": "rev-000001"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "レビュータイトル"
+          },
+          "body": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 2000,
+            "title": "レビュー本文"
+          },
+          "reviewer": {
+            "type": "string",
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "レビュアー"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date",
+            "minLength": 10,
+            "maxLength": 10,
+            "title": "レビュー作成日",
+            "example": "2026-01-25"
+          },
+          "rating": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "title": "評価",
+            "example": 4
+          }
+        },
+        "additionalProperties": false,
+        "required": [
+          "reviewId",
+          "title",
+          "body",
+          "reviewer",
+          "createdAt",
+          "rating"
+        ]
+      },
+      "minItems": 0,
+      "maxItems": 5
     }
   },
   "additionalProperties": false,
@@ -371,6 +474,8 @@
     "productName",
     "price02",
     "productCode",
-    "stockFind"
+    "stockFind",
+    "reviewSummary",
+    "reviews"
   ]
 }
