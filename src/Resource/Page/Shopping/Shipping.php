@@ -51,11 +51,6 @@ class Shipping extends ResourceObject
                 'href' => 'page://self/shopping/shipping',
             ],
             'staticContent' => null,
-            'links' => [
-                'doSelectShippingAddress' => 'page://self/shopping/shipping',
-                'goShoppingShippingEdit' => 'page://self/shopping/shipping-edit',
-                'goShoppingShippingMultiple' => 'page://self/shopping/shipping-multiple',
-            ],
             'addresses' => [],
             'csrfToken' => null,
         ];

@@ -49,9 +49,6 @@ class Complete extends ResourceObject
                 'page' => 'entry-complete',
                 'title' => '新規会員登録(仮登録完了)',
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

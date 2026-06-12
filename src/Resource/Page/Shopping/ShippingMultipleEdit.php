@@ -83,10 +83,6 @@ class ShippingMultipleEdit extends ResourceObject
                 'href' => 'page://self/shopping/shipping-multiple-edit',
             ],
             'staticContent' => null,
-            'links' => [
-                'doAddMultipleShippingAddress' => 'page://self/shopping/shipping-multiple-edit',
-                'goShoppingShippingMultiple' => 'page://self/shopping/shipping-multiple',
-            ],
             'csrfToken' => null,
             // Phase 3: an empty ShoppingShippingEditForm (the shared
             // CustomerAddressType shape) for the HTML port to render the

@@ -69,37 +69,6 @@
       "title": "注文番号",
       "description": "顧客向けの注文番号。フォーマットはカスタマイズ可能 Fake観察文字長 32〜32; 観察値 'past0000000000000000000000000001'。",
       "example": "past0000000000000000000000000001"
-    },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/shopping/complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "goTop": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goTop` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "goCart": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goCart` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "goMypage": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goMypage` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "goTop",
-        "goCart",
-        "goMypage"
-      ]
     }
   },
   "additionalProperties": false,
