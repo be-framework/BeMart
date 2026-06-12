@@ -19,6 +19,7 @@ use MyVendor\BeMart\Be\Final\CheckoutCompleted;
 use MyVendor\BeMart\Be\Input\CheckoutInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_key_exists;
 use function assert;
 
 /**
@@ -70,7 +71,8 @@ class Checkout extends ResourceObject
 
         assert($final instanceof CheckoutCompleted);
 
-        $this->code = Code::CREATED;
+        $browserForm = array_key_exists('mode', $this->uri->query);
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = '/shopping/complete?orderNo=' . $final->orderNo;
         $this->body = [
             'orderNo' => $final->orderNo,

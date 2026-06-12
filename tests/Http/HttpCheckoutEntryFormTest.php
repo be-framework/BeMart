@@ -9,14 +9,17 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use PHPUnit\Framework\TestCase;
 
 use function escapeshellarg;
+use function html_entity_decode;
 use function http_build_query;
 use function is_string;
 use function preg_match;
+use function preg_quote;
 use function shell_exec;
 use function sprintf;
 use function str_contains;
 use function sys_get_temp_dir;
 use function tempnam;
+use const ENT_QUOTES;
 
 /**
  * Browser-form smoke for the anonymous cart → checkout entry feature.
@@ -164,9 +167,19 @@ final class HttpCheckoutEntryFormTest extends TestCase
         $this->assertStringContainsString('paymentMethodId=', $location);
         $this->assertStringNotContainsString('Invalid parameter type', $submitted['body']);
 
-        // html-test-hal-app uses Ray.FakeQuery, whose command side is not a
-        // durable DB. This HTTP smoke therefore pins the browser redirect
-        // contract only; DB-backed tests cover the confirm-screen readback.
+        $confirm = $this->form('GET', $location);
+        $this->assertSame(200, $confirm['status']);
+        $this->assertStringContainsString('ご注文内容', $confirm['body']);
+        $this->assertStringContainsString('サンプル商品 A', $confirm['body']);
+        $this->assertStringNotContainsString('確認できる注文内容がありません。', $confirm['body']);
+
+        $checkout = $this->form('POST', '/shopping/checkout', [
+            'mode' => 'checkout',
+            'preOrderId' => $this->inputValue($confirm['body'], 'preOrderId'),
+            'csrfToken' => $this->inputValue($confirm['body'], 'csrfToken'),
+        ]);
+        $this->assertSame(303, $checkout['status'], $checkout['body']);
+        $this->assertStringStartsWith('/shopping/complete?orderNo=', $checkout['headers']['Location'] ?? '');
     }
 
     public function testEntryEmptyBrowserFormRendersValidationErrorsWithoutPasswordEcho(): void
@@ -335,6 +348,14 @@ final class HttpCheckoutEntryFormTest extends TestCase
         $this->assertStringContainsString('Invalid input.', $rejected['body']);
         $this->assertStringContainsString('[contactContents]', $rejected['body']);
         $this->assertStringNotContainsString('Internal Server Error', $rejected['body']);
+    }
+
+    private function inputValue(string $html, string $name): string
+    {
+        $pattern = '/<input[^>]*name="' . preg_quote($name, '/') . '"[^>]*value="([^"]*)"/';
+        $this->assertSame(1, preg_match($pattern, $html, $match));
+
+        return html_entity_decode($match[1], ENT_QUOTES);
     }
 
     /**
