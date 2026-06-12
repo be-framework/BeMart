@@ -140,10 +140,6 @@ class Confirm extends ResourceObject
                 'href' => 'page://self/shopping/checkout',
             ],
             'csrfToken' => null,
-            'links' => [
-                'doCheckout' => 'page://self/shopping/checkout',
-                'goShoppingError' => 'page://self/shopping/error',
-            ],
         ];
 
         return $this;

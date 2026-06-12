@@ -213,37 +213,6 @@
       "maxLength": 160,
       "pattern": "^[A-Za-z0-9_.:-]+$",
       "example": "fake-csrf-token-bemart-2026"
-    },
-    "links": {
-      "type": [
-        "object",
-        "null"
-      ],
-      "title": "ALPS遷移リンク集合",
-      "description": "/shopping/shipping のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。",
-      "properties": {
-        "doSelectShippingAddress": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `doSelectShippingAddress` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "goShoppingShippingMultiple": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goShoppingShippingMultiple` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        },
-        "goShoppingShippingEdit": {
-          "$ref": "#/$defs/uriReference",
-          "title": "ALPS遷移リンク",
-          "description": "ALPS `goShoppingShippingEdit` 遷移のリンク先URI。property名がrel、値がhrefを表す。"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "doSelectShippingAddress",
-        "goShoppingShippingMultiple",
-        "goShoppingShippingEdit"
-      ]
     }
   },
   "additionalProperties": false,

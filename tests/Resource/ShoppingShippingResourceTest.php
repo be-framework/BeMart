@@ -67,7 +67,7 @@ final class ShoppingShippingResourceTest extends TestCase
         // Cart-item × address allocation is a Wave-future TODO.
         $this->assertSame([], $ro->body['cartItems']);
         $this->assertSame([], $ro->body['addresses']);
-        $this->assertSame('page://self/shopping', $ro->body['links']['goShopping']);
+        $this->assertArrayNotHasKey('links', $ro->body);
     }
 
     public function testOnPostShippingSelectsAddress(): void

@@ -50,9 +50,6 @@ class WithdrawComplete extends ResourceObject
                 'page' => 'mypage-withdraw-complete',
                 'title' => 'マイページ/退会手続き',
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

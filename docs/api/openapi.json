@@ -1190,7 +1190,8 @@
             },
             "post": {
                 "operationId": "doUpdateAuthorityRole",
-                "summary": "Wave 8: browser form input for URL deny rules. The primary HTML\nshape is `csrfToken` plus `AuthorityRoles[*][Authority]` /\n`AuthorityRoles[*][deny_url]`. The legacy member role-flip shape\n(`loginId`, `authority`) remains supported for member workflow.",
+                "summary": "Wave 8: browser form input for URL deny rules. The primary HTML\nshape carries CSRF at the request boundary plus\n`AuthorityRoles[*][Authority]` / `AuthorityRoles[*][deny_url]`.",
+                "description": "The legacy member role-flip shape (`loginId`, `authority`)\nremains supported for member workflow.",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1266,9 +1267,6 @@
                                             "additionalProperties": true
                                         },
                                         "minItems": 0
-                                    },
-                                    "csrfToken": {
-                                        "$ref": "#/$defs/csrfToken"
                                     }
                                 }
                             }
@@ -6576,6 +6574,9 @@
                                             "string",
                                             "null"
                                         ],
+                                        "minLength": 0,
+                                        "maxLength": 2,
+                                        "pattern": "^\\d*$",
                                         "example": 13,
                                         "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
                                     },
@@ -13426,31 +13427,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/forgot-complete \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goLogin": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goLogin` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop",
-                            "goLogin"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -14280,85 +14256,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/index \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goHelpPrivacy": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goHelpPrivacy` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goCustomerRegistration": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goCustomerRegistration` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goHelpGuide": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goHelpGuide` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goHelpAbout": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goHelpAbout` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goHelpAgreement": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goHelpAgreement` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goMypage": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goMypage` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goContactForm": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goContactForm` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goLogin": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goLogin` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goHelpTradeLaw": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goHelpTradeLaw` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goCart": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goCart` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goProductList": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goProductList` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goHelpPrivacy",
-                            "goCustomerRegistration",
-                            "goHelpGuide",
-                            "goHelpAbout",
-                            "goHelpAgreement",
-                            "goMypage",
-                            "goContactForm",
-                            "goLogin",
-                            "goHelpTradeLaw",
-                            "goCart",
-                            "goProductList"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -16626,37 +16523,6 @@
                             "$comment": "\u914d\u5217\u8981\u7d20\u306fFake/Resource\u3067\u89b3\u5bdf\u3055\u308c\u305f\u65e2\u77e5property\u306b\u56fa\u5b9a\u3059\u308b\u3002\u65b0\u3057\u3044\u5217\u304c\u5fc5\u8981\u306b\u306a\u3063\u305f\u5834\u5408\u306fSemantic-Ex\u89b3\u5bdf\u306b\u8ffd\u52a0\u3057\u3066schema\u3092\u66f4\u65b0\u3059\u308b\u3002"
                         },
                         "minItems": 0
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/products \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goProduct": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goProduct` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goCart": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goCart` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop",
-                            "goProduct",
-                            "goCart"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -41611,25 +41477,6 @@
                         "maxLength": 128,
                         "pattern": "^[A-Za-z0-9._:@/-]*$",
                         "$comment": "BeMart/Fake\u5883\u754c\u3067\u89b3\u5bdf\u3055\u308c\u308b\u4e0d\u900f\u660e\u306a\u6587\u5b57\u5217ID\u3002DB\u63a1\u756a\u5024\u3068\u3057\u3066\u306e\u6570\u5024\u6f14\u7b97\u306b\u306f\u4f7f\u308f\u306a\u3044\u3002"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/contact/complete \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -41973,31 +41820,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/contact/confirm \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "doSubmitContact": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `doSubmitContact` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop",
-                            "doSubmitContact"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -42296,25 +42118,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/entry/activate \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -42850,25 +42653,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/entry/complete \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -43211,31 +42995,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/entry/confirm \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "doRegisterCustomer": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `doRegisterCustomer` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop",
-                            "doRegisterCustomer"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -43584,25 +43343,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/help/about \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -43951,25 +43691,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/help/agreement \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -44318,25 +44039,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/help/guide \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -44685,25 +44387,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/help/privacy \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -45052,25 +44735,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/help/trade-law \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -47804,31 +47468,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/mypage/change-complete \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goMypage": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goMypage` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop",
-                            "goMypage"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -50972,25 +50611,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/mypage/withdraw-complete \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -51300,31 +50920,6 @@
                         "maxLength": 160,
                         "pattern": "^[A-Za-z0-9_.:-]+$",
                         "example": "fake-csrf-token-bemart-2026"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/mypage/withdraw-confirm \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "doWithdrawCustomer": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `doWithdrawCustomer` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goMypage": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goMypage` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "doWithdrawCustomer",
-                            "goMypage"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -51946,37 +51541,6 @@
                         "title": "\u6ce8\u6587\u756a\u53f7",
                         "description": "\u9867\u5ba2\u5411\u3051\u306e\u6ce8\u6587\u756a\u53f7\u3002\u30d5\u30a9\u30fc\u30de\u30c3\u30c8\u306f\u30ab\u30b9\u30bf\u30de\u30a4\u30ba\u53ef\u80fd Fake\u89b3\u5bdf\u6587\u5b57\u9577 32\u301c32; \u89b3\u5bdf\u5024 'past0000000000000000000000000001'\u3002",
                         "example": "past0000000000000000000000000001"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/shopping/complete \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTop": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTop` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goCart": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goCart` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goMypage": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goMypage` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTop",
-                            "goCart",
-                            "goMypage"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -52489,31 +52053,6 @@
                         "example": 12700,
                         "minimum": 0,
                         "maximum": 999999999
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/shopping/confirm \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goShoppingError": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goShoppingError` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "doCheckout": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `doCheckout` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goShoppingError",
-                            "doCheckout"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -52876,25 +52415,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/shopping/error \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goCart": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goCart` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goCart"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -53178,37 +52698,6 @@
                         "maxLength": 96,
                         "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
                         "example": "doAddCartItem"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/shopping/login \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "doLogin": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `doLogin` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goCustomerRegistration": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goCustomerRegistration` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goShoppingNonMember": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goShoppingNonMember` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "doLogin",
-                            "goCustomerRegistration",
-                            "goShoppingNonMember"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -54247,37 +53736,6 @@
                         "maxLength": 160,
                         "pattern": "^[A-Za-z0-9_.:-]+$",
                         "example": "fake-csrf-token-bemart-2026"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/shopping/shipping \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "doSelectShippingAddress": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `doSelectShippingAddress` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goShoppingShippingMultiple": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goShoppingShippingMultiple` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goShoppingShippingEdit": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goShoppingShippingEdit` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "doSelectShippingAddress",
-                            "goShoppingShippingMultiple",
-                            "goShoppingShippingEdit"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -54869,31 +54327,6 @@
                         "maxLength": 160,
                         "pattern": "^[A-Za-z0-9_.:-]+$",
                         "example": "fake-csrf-token-bemart-2026"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/shopping/shipping-edit \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "doUpdateShippingAddress": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `doUpdateShippingAddress` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goShoppingShipping": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goShoppingShipping` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "doUpdateShippingAddress",
-                            "goShoppingShipping"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -55790,31 +55223,6 @@
                             "$comment": "\u914d\u5217\u8981\u7d20\u306fFake/Resource\u3067\u89b3\u5bdf\u3055\u308c\u305f\u65e2\u77e5property\u306b\u56fa\u5b9a\u3059\u308b\u3002\u65b0\u3057\u3044\u5217\u304c\u5fc5\u8981\u306b\u306a\u3063\u305f\u5834\u5408\u306fSemantic-Ex\u89b3\u5bdf\u306b\u8ffd\u52a0\u3057\u3066schema\u3092\u66f4\u65b0\u3059\u308b\u3002"
                         },
                         "minItems": 0
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/shopping/shipping-multiple \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goShopping": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goShopping` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goShoppingShipping": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goShoppingShipping` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goShopping",
-                            "goShoppingShipping"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -56406,31 +55814,6 @@
                         "maxLength": 160,
                         "pattern": "^[A-Za-z0-9_.:-]+$",
                         "example": "fake-csrf-token-bemart-2026"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/shopping/shipping-multiple-edit \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "doAddMultipleShippingAddress": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `doAddMultipleShippingAddress` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            },
-                            "goShoppingShippingMultiple": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goShoppingShippingMultiple` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "doAddMultipleShippingAddress",
-                            "goShoppingShippingMultiple"
-                        ]
                     }
                 },
                 "additionalProperties": false,
@@ -82061,25 +81444,6 @@
                     },
                     "csrfToken": {
                         "$ref": "#/$defs/csrfToken"
-                    },
-                    "links": {
-                        "type": [
-                            "object",
-                            "null"
-                        ],
-                        "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408",
-                        "description": "/admin/template/template-list \u306e\u30ec\u30b9\u30dd\u30f3\u30b9\u304b\u3089\u5229\u7528\u3067\u304d\u308bALPS\u9077\u79fb\u30ea\u30f3\u30af\u96c6\u5408\u3002property\u540d\u304crel\u3001\u5024\u304c\u9077\u79fb\u5148URI\u3092\u8868\u3059\u3002",
-                        "properties": {
-                            "goTemplateAdd": {
-                                "$ref": "#/$defs/uriReference",
-                                "title": "ALPS\u9077\u79fb\u30ea\u30f3\u30af",
-                                "description": "ALPS `goTemplateAdd` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"
-                            }
-                        },
-                        "additionalProperties": false,
-                        "required": [
-                            "goTemplateAdd"
-                        ]
                     }
                 },
                 "additionalProperties": false,
