@@ -54,6 +54,10 @@ use Ray\WebFormModule\AbstractForm;
  */
 final class ShoppingOrderForm extends AbstractForm
 {
+    private const DELIVERY_OPTIONS = ['1' => '標準配送'];
+    private const DELIVERY_DATE_OPTIONS = ['' => '指定なし'];
+    private const DELIVERY_TIME_OPTIONS = ['' => '指定なし'];
+
     /**
      * Domain errors bridged in from the Be Becoming chain, keyed by
      * field name.
@@ -88,13 +92,16 @@ final class ShoppingOrderForm extends AbstractForm
         // 配送方法 / お届け日 / お届け時間 — EC-CUBE master-data selects.
         $this->setField('delivery', 'select')
             ->setAttribs(['class' => 'form-control'])
-            ->setOptions([]);
+            ->setOptions(self::DELIVERY_OPTIONS)
+            ->setValue('1');
         $this->setField('shipping_delivery_date', 'select')
             ->setAttribs(['class' => 'form-control'])
-            ->setOptions([]);
+            ->setOptions(self::DELIVERY_DATE_OPTIONS)
+            ->setValue('');
         $this->setField('delivery_time', 'select')
             ->setAttribs(['class' => 'form-control'])
-            ->setOptions([]);
+            ->setOptions(self::DELIVERY_TIME_OPTIONS)
+            ->setValue('');
 
         // お支払方法 — radio group; options come from body.paymentMethods.
         $this->setField('payment', 'radio')->setOptions([]);

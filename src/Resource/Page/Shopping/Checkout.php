@@ -62,15 +62,27 @@ class Checkout extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     #[CsrfProtected]
-    public function onPost(string $preOrderId): static
+    public function onPost(string $preOrderId, string|null $mode = null): static
     {
-        $final = ($this->becoming)(new CheckoutInput(
-            preOrderId: $preOrderId,
-        ));
+        try {
+            $final = ($this->becoming)(new CheckoutInput(
+                preOrderId: $preOrderId,
+            ));
+        } catch (PreOrderNotFoundException | UnauthorizedPreOrderAccessException | InsufficientStockException | PaymentDeclinedException | SemanticVariableException $e) {
+            if ($mode !== null) {
+                $this->code = Code::SEE_OTHER;
+                $this->headers['Location'] = '/shopping/error';
+                $this->body = ['message' => $e->getMessage()];
+
+                return $this;
+            }
+
+            throw $e;
+        }
 
         assert($final instanceof CheckoutCompleted);
 
-        $this->code = Code::CREATED;
+        $this->code = $mode !== null ? Code::SEE_OTHER : Code::CREATED;
         $this->headers['Location'] = '/shopping/complete?orderNo=' . $final->orderNo;
         $this->body = [
             'orderNo' => $final->orderNo,

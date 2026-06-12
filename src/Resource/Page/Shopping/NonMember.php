@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Resource\Page\Shopping;
 
 use BEAR\ApiDoc\Annotation\Alps;
 use MyVendor\BeMart\Annotation\CsrfProtected;
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -85,6 +86,7 @@ class NonMember extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
+        private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
     }
 
@@ -185,7 +187,7 @@ class NonMember extends ResourceObject
                 pref: $prefValue,
                 addr01: $values['addr01'],
                 addr02: $values['addr02'],
-                sessionPrefix: $sessionPrefix ?? 'session-prefix-1',
+                sessionPrefix: $this->effectiveSessionPrefix($sessionPrefix),
             ));
         } catch (SemanticVariableException $e) {
             [$field, $message] = self::semanticError($e);
@@ -214,6 +216,11 @@ class NonMember extends ResourceObject
     private function isBrowserFormSubmission(): bool
     {
         return array_key_exists('email_confirm', $this->uri->query);
+    }
+
+    private function effectiveSessionPrefix(string|null $submittedPrefix): string
+    {
+        return $this->cartSessionPrefix->prefix() ?? $submittedPrefix ?? 'session-prefix-1';
     }
 
     private function formBody(NonMemberForm $form): array

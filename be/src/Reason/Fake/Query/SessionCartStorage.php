@@ -75,6 +75,17 @@ final class SessionCartStorage implements CartQueryInterface, CartCommandInterfa
         return array_values(array_map(fn (array $row): CartEntity => $this->cartFromRow($row), $rows));
     }
 
+    public function findByPreOrderId(string $preOrderId): CartEntity|null
+    {
+        foreach ($this->rows() as $row) {
+            if ((string) ($row['preOrderId'] ?? '') === $preOrderId) {
+                return $this->cartFromRow($row);
+            }
+        }
+
+        return null;
+    }
+
     #[Override]
     public function save(CartEntity $cart): SavedCart
     {

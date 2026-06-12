@@ -15,6 +15,7 @@ use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -46,6 +47,7 @@ class Confirm extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -79,9 +81,10 @@ class Confirm extends ResourceObject
     #[CsrfProtected]
     public function onPost(
         string $preOrderId,
-        int $payment = 2,
+        int|null $payment = null,
+        int|null $paymentMethodId = null,
     ): static {
-        return $this->confirmOrder($preOrderId, $payment);
+        return $this->confirmOrder($preOrderId, $payment ?? $paymentMethodId ?? 2);
     }
 
     private function confirmOrder(string $preOrderId, int $paymentMethodId): static
@@ -139,7 +142,7 @@ class Confirm extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/shopping/checkout',
             ],
-            'csrfToken' => null,
+            'csrfToken' => $this->csrf->token,
             'links' => [
                 'doCheckout' => 'page://self/shopping/checkout',
                 'goShoppingError' => 'page://self/shopping/error',

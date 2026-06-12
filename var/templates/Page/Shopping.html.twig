@@ -83,12 +83,12 @@
         <div class="idea-option-list">
           {% for payment in paymentMethods|default([]) %}
             <label class="idea-option-card">
-              <input type="radio" name="paymentMethodId" value="{{ payment.paymentMethodId }}" {% if loop.first %}checked{% endif %}>
+              <input type="radio" name="payment" value="{{ payment.paymentMethodId }}" {% if loop.first %}checked{% endif %}>
               <span>{{ payment.paymentMethodName }}</span>
             </label>
           {% else %}
             <label class="idea-option-card">
-              <input type="radio" name="paymentMethodId" value="1" checked>
+              <input type="radio" name="payment" value="1" checked>
               <span>代金引換</span>
             </label>
           {% endfor %}
