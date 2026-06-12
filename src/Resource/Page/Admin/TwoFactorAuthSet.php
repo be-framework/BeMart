@@ -162,7 +162,7 @@ class TwoFactorAuthSet extends ResourceObject
         assert($final instanceof TwoFactorAuthConfigured);
         $this->loginChallenge->completeSetup($challenge);
 
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doSetTwoFactorAuth',

@@ -46,6 +46,9 @@ use function assert;
  */
 class TwoFactorAuth extends ResourceObject
 {
+    // PoC fixture prefill for the browser demo. Remove before production hardening.
+    private const POC_DEVICE_TOKEN = '123456';
+
     public function __construct(
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
@@ -144,7 +147,7 @@ class TwoFactorAuth extends ResourceObject
         assert($final instanceof TwoFactorAuthVerified);
         $this->loginChallenge->completeVerification($challenge);
 
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doVerifyTwoFactorAuth',
