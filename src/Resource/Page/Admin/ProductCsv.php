@@ -161,8 +161,7 @@ class ProductCsv extends ResourceObject
 
         fclose($handle);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/product-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/product-list');
         $this->body = [
             'transitionId' => 'doImportProductCsv',
             'count' => $count,

@@ -128,8 +128,7 @@ class OrderStatus extends ResourceObject
             return $this;
         }
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/order-status';
+        ($this->mutationResponse)($this, Code::OK, '/admin/order-status');
         $this->body = [
             'transitionId' => 'doUpdateOrderStatusList',
             'count' => count($orderStatuses),

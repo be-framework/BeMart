@@ -218,7 +218,7 @@ class Item extends ResourceObject
 
     private function redirectToCartOnHtmlSuccess(): static
     {
-        $this->mutationResponse->redirectOnSuccess($this, '/cart');
+        ($this->mutationResponse)($this, $this->code, '/cart');
 
         return $this;
     }

@@ -134,8 +134,7 @@ class Payment extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = sprintf('/admin/payment/payment?paymentId=%s', urlencode($final->paymentId));
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/payment/payment?paymentId=%s', urlencode($final->paymentId)));
         $this->body = [
             'paymentId' => $final->paymentId,
             'paymentMethodName' => $final->paymentMethodName,
@@ -163,8 +162,7 @@ class Payment extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/payment/payment-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/payment/payment-list');
         $this->body = ['paymentId' => $final->paymentId];
 
         return $this;

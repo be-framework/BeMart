@@ -88,10 +88,7 @@ class DeleteCustomer extends ResourceObject
 
         assert($final instanceof AdminCustomerDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        if ($this->code === Code::SEE_OTHER) {
-            $this->headers['Location'] = '/admin/customer-list';
-        }
+        ($this->mutationResponse)($this, Code::OK, '/admin/customer-list');
         $this->body = [
             'customerId' => $final->customerId,
             'originalEmail' => $final->originalEmail,

@@ -82,8 +82,7 @@ class DeliveryList extends ResourceObject
 
         assert($final instanceof DeliveryCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = sprintf('/admin/delivery/delivery?deliveryId=%s', urlencode($final->deliveryId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/delivery/delivery?deliveryId=%s', urlencode($final->deliveryId)));
         $this->body = [
             'deliveryId' => $final->deliveryId,
             'deliveryName' => $final->deliveryName,

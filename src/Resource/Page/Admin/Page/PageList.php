@@ -82,8 +82,7 @@ class PageList extends ResourceObject
 
         assert($final instanceof PageCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = sprintf('/admin/page/page?pageId=%s', urlencode($final->pageId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/page/page?pageId=%s', urlencode($final->pageId)));
         $this->body = [
             'pageId' => $final->pageId,
             'pageName' => $final->pageName,

@@ -131,7 +131,7 @@ class CsvConfig extends ResourceObject
             'columns' => $final->columns,
             'count' => $final->count,
         ];
-        $this->mutationResponse->redirectOnSuccess($this, '/admin/csv-config?csvType=' . $final->csvType);
+        ($this->mutationResponse)($this, Code::OK, '/admin/csv-config?csvType=' . $final->csvType);
 
         return $this;
     }

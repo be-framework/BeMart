@@ -75,8 +75,7 @@ class BlockList extends ResourceObject
 
         assert($final instanceof BlockCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = sprintf('/admin/block/block?blockId=%s', urlencode($final->blockId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/block/block?blockId=%s', urlencode($final->blockId)));
         $this->body = [
             'blockId' => $final->blockId,
             'blockName' => $final->blockName,

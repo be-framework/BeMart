@@ -134,8 +134,7 @@ class Page extends ResourceObject
 
         assert($final instanceof PageUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = sprintf('/admin/page/page?pageId=%s', urlencode($final->pageId));
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/page/page?pageId=%s', urlencode($final->pageId)));
         $this->body = [
             'pageId' => $final->pageId,
             'pageName' => $final->pageName,
@@ -162,8 +161,7 @@ class Page extends ResourceObject
 
         assert($final instanceof PageDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/page/page-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/page/page-list');
         $this->body = ['pageId' => $final->pageId];
 
         return $this;

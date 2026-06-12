@@ -72,8 +72,7 @@ class CsvClassName extends AbstractCsvUpload
 
         assert($final instanceof ClassNameCsvImported);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/class-name/class-name-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/class-name/class-name-list');
         $this->body = [
             'transitionId' => 'doImportClassNameCsv',
             'accepted' => $final->accepted,
