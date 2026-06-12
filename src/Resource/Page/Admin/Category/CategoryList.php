@@ -97,8 +97,7 @@ class CategoryList extends ResourceObject
 
         assert($final instanceof CategoryCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = sprintf('/admin/category/category?categoryId=%s', urlencode($final->categoryId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/category/category?categoryId=%s', urlencode($final->categoryId)));
         $this->body = [
             'categoryId' => $final->categoryId,
             'categoryName' => $final->categoryName,

@@ -57,8 +57,7 @@ class ClassName extends ResourceObject
 
         assert($final instanceof ClassNameUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/class-name/class-name-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/class-name/class-name-list');
         $this->body = [
             'classNameId' => $final->classNameId,
             'name' => $final->name,
@@ -81,8 +80,7 @@ class ClassName extends ResourceObject
 
         assert($final instanceof ClassNameDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/class-name/class-name-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/class-name/class-name-list');
         $this->body = ['classNameId' => $final->classNameId];
 
         return $this;

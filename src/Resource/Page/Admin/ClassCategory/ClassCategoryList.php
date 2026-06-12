@@ -96,10 +96,13 @@ class ClassCategoryList extends ResourceObject
 
         assert($final instanceof ClassCategoryCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = sprintf(
-            '/admin/class-category/class-category-list?classNameId=%s',
-            urlencode($final->classNameId),
+        ($this->mutationResponse)(
+            $this,
+            Code::CREATED,
+            sprintf(
+                '/admin/class-category/class-category-list?classNameId=%s',
+                urlencode($final->classNameId),
+            ),
         );
         $this->body = [
             'classCategoryId' => $final->classCategoryId,

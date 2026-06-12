@@ -111,8 +111,7 @@ class Calendar extends ResourceObject
             $transitionId = 'doUpdateCalendar';
         }
 
-        ($this->mutationResponse)($this, $isCreate ? Code::CREATED : Code::OK);
-        $this->headers['Location'] = '/admin/calendar';
+        ($this->mutationResponse)($this, $isCreate ? Code::CREATED : Code::OK, '/admin/calendar');
         $this->body = [
             'transitionId' => $transitionId,
             'calendarId' => $final->calendarId,
@@ -146,8 +145,7 @@ class Calendar extends ResourceObject
 
         assert($final instanceof CalendarHolidayDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/calendar';
+        ($this->mutationResponse)($this, Code::OK, '/admin/calendar');
         $this->body = [
             'transitionId' => 'doDeleteCalendarHoliday',
             'calendarId' => $final->calendarId,

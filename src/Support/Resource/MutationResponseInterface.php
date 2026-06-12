@@ -9,6 +9,4 @@ use BEAR\Resource\ResourceObject;
 interface MutationResponseInterface
 {
     public function __invoke(ResourceObject $ro, int $defaultCode, string|null $location = null): void;
-
-    public function redirectOnSuccess(ResourceObject $ro, string $location): void;
 }

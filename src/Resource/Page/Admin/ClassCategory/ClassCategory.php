@@ -61,10 +61,13 @@ class ClassCategory extends ResourceObject
 
         assert($final instanceof ClassCategoryUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = sprintf(
-            '/admin/class-category/class-category-list?classNameId=%s',
-            urlencode($final->classNameId),
+        ($this->mutationResponse)(
+            $this,
+            Code::OK,
+            sprintf(
+                '/admin/class-category/class-category-list?classNameId=%s',
+                urlencode($final->classNameId),
+            ),
         );
         $this->body = [
             'classCategoryId' => $final->classCategoryId,
@@ -89,10 +92,13 @@ class ClassCategory extends ResourceObject
 
         assert($final instanceof ClassCategoryDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = sprintf(
-            '/admin/class-category/class-category-list?classNameId=%s',
-            urlencode($final->classNameId),
+        ($this->mutationResponse)(
+            $this,
+            Code::OK,
+            sprintf(
+                '/admin/class-category/class-category-list?classNameId=%s',
+                urlencode($final->classNameId),
+            ),
         );
         $this->body = ['classCategoryId' => $final->classCategoryId];
 

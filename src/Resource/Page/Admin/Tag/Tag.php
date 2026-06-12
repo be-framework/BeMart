@@ -45,8 +45,7 @@ class Tag extends ResourceObject
 
         assert($final instanceof TagDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/tag/tag-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/tag/tag-list');
         $this->body = ['tagId' => $final->tagId];
 
         return $this;

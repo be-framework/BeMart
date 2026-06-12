@@ -54,8 +54,7 @@ class MasterDataEdit extends ResourceObject
 
         assert($final instanceof MasterDataUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/master-data?masterType=' . rawurlencode($final->masterType);
+        ($this->mutationResponse)($this, Code::OK, '/admin/master-data?masterType=' . rawurlencode($final->masterType));
         $this->body = [
             'transitionId' => 'doUpdateMasterData',
             'masterType' => $final->masterType,

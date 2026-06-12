@@ -117,8 +117,7 @@ class Layout extends ResourceObject
 
         assert($final instanceof LayoutUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/layout/layout-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/layout/layout-list');
         $this->body = [
             'layoutId' => $final->layoutId,
             'layoutName' => $final->layoutName,

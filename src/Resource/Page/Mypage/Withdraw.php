@@ -119,10 +119,7 @@ class Withdraw extends ResourceObject
 
         assert($final instanceof CustomerWithdrawn);
 
-        ($this->mutationResponse)($this, Code::OK);
-        if ($this->code === Code::SEE_OTHER) {
-            $this->headers['Location'] = '/mypage/withdraw-complete';
-        }
+        ($this->mutationResponse)($this, Code::OK, '/mypage/withdraw-complete');
         $this->body = [
             'customerId' => $final->customerId,
             'dummyEmail' => $final->dummyEmail,

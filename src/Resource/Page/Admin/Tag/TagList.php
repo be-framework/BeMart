@@ -74,8 +74,7 @@ class TagList extends ResourceObject
 
         assert($final instanceof TagCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = '/admin/tag/tag-list';
+        ($this->mutationResponse)($this, Code::CREATED, '/admin/tag/tag-list');
         $this->body = [
             'tagId' => $final->tagId,
             'tagName' => $final->tagName,

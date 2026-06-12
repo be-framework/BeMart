@@ -114,8 +114,7 @@ class Create extends ResourceObject
 
         assert($final instanceof AdminOrderCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = '/admin/order?orderNo=' . $final->orderNo;
+        ($this->mutationResponse)($this, Code::CREATED, '/admin/order?orderNo=' . $final->orderNo);
         $this->body = [
             'orderNo' => $final->orderNo,
             'customerId' => $final->customerId,

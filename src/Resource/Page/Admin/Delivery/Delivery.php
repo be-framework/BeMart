@@ -122,8 +122,7 @@ class Delivery extends ResourceObject
 
         assert($final instanceof DeliveryUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = sprintf('/admin/delivery/delivery?deliveryId=%s', urlencode($final->deliveryId));
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/delivery/delivery?deliveryId=%s', urlencode($final->deliveryId)));
         $this->body = [
             'deliveryId' => $final->deliveryId,
             'deliveryName' => $final->deliveryName,
@@ -148,8 +147,7 @@ class Delivery extends ResourceObject
 
         assert($final instanceof DeliveryDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/delivery/delivery-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/delivery/delivery-list');
         $this->body = ['deliveryId' => $final->deliveryId];
 
         return $this;

@@ -17,10 +17,4 @@ final class ApiMutationResponse implements MutationResponseInterface
             $ro->headers['Location'] = $location;
         }
     }
-
-    #[Override]
-    public function redirectOnSuccess(ResourceObject $ro, string $location): void
-    {
-        unset($ro, $location);
-    }
 }
