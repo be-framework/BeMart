@@ -161,7 +161,7 @@ final class CartHtmlRenderTest extends TestCase
             'quantity' => 3,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
-        $this->assertSame(Code::CREATED, $post->code);
+        $this->assertSame(Code::SEE_OTHER, $post->code);
 
         $html = $this->resource->get('page://self/cart', [
             'sessionPrefix' => 'session-prefix-1',

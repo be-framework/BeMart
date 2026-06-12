@@ -16,12 +16,11 @@ use MyVendor\BeMart\Be\Final\ClassCategoryCsvImported;
 use MyVendor\BeMart\Be\Input\ImportClassCategoryCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Support\Resource\AbstractCsvUpload;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Override;
 use Ray\WebFormModule\FormFactory;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE 規格分類CSV登録 — Product Tier-2
@@ -41,6 +40,7 @@ class CsvClassCategory extends AbstractCsvUpload
         AdminSession $adminSession,
         FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
         parent::__construct($adminSession, $formFactory);
     }
@@ -71,8 +71,7 @@ class CsvClassCategory extends AbstractCsvUpload
 
         assert($final instanceof ClassCategoryCsvImported);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
-        $this->headers['Location'] = '/admin/class-category/class-category-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/class-category/class-category-list');
         $this->body = [
             'transitionId' => 'doImportClassCategoryCsv',
             'accepted' => $final->accepted,

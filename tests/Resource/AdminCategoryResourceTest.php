@@ -12,14 +12,14 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Module\TestModule;
+use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
-use function getenv;
 use function str_contains;
-use function putenv;
 
 /**
  * Wave 7 — resource-layer coverage for the admin Category endpoints.
@@ -46,19 +46,24 @@ final class AdminCategoryResourceTest extends TestCase
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
-    private function rebindAdminSession(string|null $adminId): void
+    private function rebindAdminSession(string|null $adminId, bool $htmlMutation = false): void
     {
         $session = new FakeAdminSession($adminId);
         $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session) extends AbstractModule {
-            public function __construct(private readonly FakeAdminSession $session)
-            {
+        $override = new class ($session, $htmlMutation) extends AbstractModule {
+            public function __construct(
+                private readonly FakeAdminSession $session,
+                private readonly bool $htmlMutation,
+            ) {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                if ($this->htmlMutation) {
+                    $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
+                }
                 $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
             }
         };
@@ -92,17 +97,12 @@ final class AdminCategoryResourceTest extends TestCase
 
     public function testCreateHtmlContextRedirectsToCategoryDetail(): void
     {
-        $previousContext = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html-test-hal-app');
-        try {
-            $ro = $this->resource->post('page://self/admin/category/category-list', [
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
+        $ro = $this->resource->post('page://self/admin/category/category-list', [
                 'categoryName' => 'Food',
                 'sortNo' => 10,
                 'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
-        } finally {
-            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
-        }
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertStringContainsString('/admin/category/category?categoryId=', $ro->headers['Location']);
@@ -200,18 +200,13 @@ final class AdminCategoryResourceTest extends TestCase
 
     public function testPutHtmlContextRedirectsToCategoryDetail(): void
     {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
         $id = $this->seed('Food', 10);
-        $previousContext = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html-test-hal-app');
-        try {
-            $ro = $this->resource->put('page://self/admin/category/category', [
+        $ro = $this->resource->put('page://self/admin/category/category', [
                 'categoryId' => $id,
                 'categoryName' => 'Foods',
                 'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
-        } finally {
-            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
-        }
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/category/category?categoryId=' . $id, $ro->headers['Location']);
@@ -244,17 +239,12 @@ final class AdminCategoryResourceTest extends TestCase
 
     public function testDeleteHtmlContextRedirectsToCategoryList(): void
     {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
         $id = $this->seed('Food');
-        $previousContext = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html-test-hal-app');
-        try {
-            $ro = $this->resource->delete('page://self/admin/category/category', [
+        $ro = $this->resource->delete('page://self/admin/category/category', [
                 'categoryId' => $id,
                 'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
-        } finally {
-            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
-        }
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/category/category-list', $ro->headers['Location']);

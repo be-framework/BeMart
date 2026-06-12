@@ -9,6 +9,7 @@ use Be\Framework\BecomingInterface;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Koriym\FileUpload\ErrorFileUpload;
 use Koriym\FileUpload\FileUpload;
 use MyVendor\BeMart\Annotation\CsrfProtected;
@@ -23,8 +24,6 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
-use function str_contains;
 
 /**
  * EC-CUBE テンプレート登録 — Store Tier-2 (`admin/Store/template_add.twig`).
@@ -48,6 +47,7 @@ class TemplateAdd extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrfToken,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -122,8 +122,7 @@ class TemplateAdd extends ResourceObject
 
         assert($final instanceof TemplateInstalled);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
-        $this->headers['Location'] = '/admin/template/template-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/template/template-list');
         $this->body = [
             'transitionId' => 'doInstallTemplate',
             'templateId' => $final->templateId,

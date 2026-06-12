@@ -13,13 +13,13 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use MyVendor\BeMart\Module\TestModule;
+use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
-use function getenv;
-use function putenv;
 use function str_contains;
 
 /**
@@ -38,19 +38,24 @@ final class AdminPaymentResourceTest extends TestCase
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
-    private function rebindAdminSession(string|null $adminId): void
+    private function rebindAdminSession(string|null $adminId, bool $htmlMutation = false): void
     {
         $session = new FakeAdminSession($adminId);
         $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session) extends AbstractModule {
-            public function __construct(private readonly FakeAdminSession $session)
-            {
+        $override = new class ($session, $htmlMutation) extends AbstractModule {
+            public function __construct(
+                private readonly FakeAdminSession $session,
+                private readonly bool $htmlMutation,
+            ) {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                if ($this->htmlMutation) {
+                    $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
+                }
                 $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
             }
         };
@@ -83,17 +88,12 @@ final class AdminPaymentResourceTest extends TestCase
 
     public function testCreateHtmlContextRedirectsToPaymentDetail(): void
     {
-        $previousContext = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html-test-hal-app');
-        try {
-            $ro = $this->resource->post('page://self/admin/payment/payment-list', [
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
+        $ro = $this->resource->post('page://self/admin/payment/payment-list', [
                 'paymentMethodName' => 'クレジットカード',
                 'charge' => 0,
                 'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
-        } finally {
-            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
-        }
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertStringContainsString('/admin/payment/payment?paymentId=', $ro->headers['Location']);
@@ -147,19 +147,14 @@ final class AdminPaymentResourceTest extends TestCase
 
     public function testPutHtmlContextRedirectsToPaymentDetail(): void
     {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
         $id = $this->seed('クレジットカード');
-        $previousContext = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html-test-hal-app');
-        try {
-            $ro = $this->resource->put('page://self/admin/payment/payment', [
+        $ro = $this->resource->put('page://self/admin/payment/payment', [
                 'paymentId' => $id,
                 'paymentMethodName' => 'クレジット',
                 'charge' => 200,
                 'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
-        } finally {
-            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
-        }
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/payment/payment?paymentId=' . $id, $ro->headers['Location']);
@@ -191,17 +186,12 @@ final class AdminPaymentResourceTest extends TestCase
 
     public function testDeleteHtmlContextRedirectsToPaymentList(): void
     {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
         $id = $this->seed('代金引換');
-        $previousContext = getenv('APP_CONTEXT');
-        putenv('APP_CONTEXT=html-test-hal-app');
-        try {
-            $ro = $this->resource->delete('page://self/admin/payment/payment', [
+        $ro = $this->resource->delete('page://self/admin/payment/payment', [
                 'paymentId' => $id,
                 'csrfToken' => FakeCsrfToken::TOKEN,
             ]);
-        } finally {
-            putenv($previousContext === false ? 'APP_CONTEXT' : 'APP_CONTEXT=' . $previousContext);
-        }
 
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertSame('/admin/payment/payment-list', $ro->headers['Location']);
