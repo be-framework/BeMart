@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use BEAR\Dev\Html\HtmlLinkAuditLoggerInterface;
 use BEAR\Dev\Html\LinkHeaderModule;
 use BEAR\Package\Provide\Representation\RouterReverseLinker;
 use BEAR\Resource\ReverseLinkerInterface;
@@ -18,6 +19,7 @@ use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\HtmlDownloadContentTypePolicy;
+use MyVendor\BeMart\Support\Html\SilentHtmlLinkAuditLogger;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use MyVendor\BeMart\Support\Resource\HtmlAdminLoginFormSubmission;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
@@ -42,6 +44,7 @@ final class HtmlModule extends AbstractModule
     protected function configure(): void
     {
         $this->override(new LinkHeaderModule(new TwigModule(options: $this->twigOptions)));
+        $this->bind(HtmlLinkAuditLoggerInterface::class)->to(SilentHtmlLinkAuditLogger::class);
         $this->bind(ReverseLinkerInterface::class)->to(RouterReverseLinker::class);
         $this->bind(AdminSession::class)->to(HtmlAdminSessionAdapter::class);
         $this->bind(CustomerSessionWriterInterface::class)->to(HtmlCustomerSessionWriter::class);
