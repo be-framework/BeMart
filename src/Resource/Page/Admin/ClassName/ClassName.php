@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\ClassNameNotFoundException;
@@ -32,6 +33,7 @@ class ClassName extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -55,7 +57,7 @@ class ClassName extends ResourceObject
 
         assert($final instanceof ClassNameUpdated);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/class-name/class-name-list');
         $this->body = [
             'classNameId' => $final->classNameId,
             'name' => $final->name,
@@ -65,10 +67,10 @@ class ClassName extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateClassName` に対応する DELETE 操作。
+     * ALPS `doDeleteClassName` に対応する DELETE 操作。
      * @psalm-taint-source input $classNameId
      */
-    #[Alps('doUpdateClassName')]
+    #[Alps('doDeleteClassName')]
     #[JsonSchema(schema: 'delete-admin-class-name-class-name.json', params: 'delete-admin-class-name-class-name.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
     #[CsrfProtected]
@@ -78,7 +80,7 @@ class ClassName extends ResourceObject
 
         assert($final instanceof ClassNameDeleted);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/class-name/class-name-list');
         $this->body = ['classNameId' => $final->classNameId];
 
         return $this;

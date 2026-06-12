@@ -48,9 +48,9 @@
      NOT carried (Wave 8 shallow-grid slice). The min/max ranges collapse
      to the single value; the create/update cells render empty.
      FLAGGED for enrichment follow-up.
-   - `csrf_token_for_anchor()` on the copy / bulk-status anchors -> EC-CUBE
-     per-request CSRF widget. OMITTED exactly as the storefront ports
-     omit it.
+   - `csrf_token_for_anchor()` on unsafe action anchors/buttons -> BeMart
+     reuses the request CSRF token so the ported JavaScript can submit
+     copy/delete/bulk-status operations through the same HTTP boundary.
    - `search_items.twig` include (saved-search chips) -> EC-CUBE admin
      fragment with no BeMart equivalent; dropped (the render-diff loader
      serves it empty).
@@ -80,7 +80,7 @@
                 var promises = checkedList.map(function() {
                     return $.ajax({
                         'url': $(this).data('delete-url'),
-                        'type': 'delete',
+                        'type': 'post',
                         'data': {'csrfToken': $(this).attr('token-for-anchor')}
                     }).always(function() {
                         $('.progress-bar', modal).css('width', (++currentCount / totalCount * 100) + '%');
@@ -139,13 +139,16 @@
             $('#form_bulk').find('.action-submit').on('click', function(event) {
                 event.preventDefault();
                 var form = $(this).closest('form');
-                if (!form.find('input:checkbox[name^="ids"]:checked').length) {
+                if (!form.find('input:checkbox[name^="productCodes"]:checked').length) {
                     alert('please check');
                     return false;
                 }
 
                 $('<input />').attr('type', 'hidden').attr('name', 'csrfToken')
                     .val($(this).attr('token-for-anchor'))
+                    .appendTo(form);
+                $('<input />').attr('type', 'hidden').attr('name', 'productStatus')
+                    .val($(this).data('product-status'))
                     .appendTo(form);
                 form.attr('action', $(this).data('action')).submit();
                 return false;
@@ -280,14 +283,14 @@
                                 <div id="btn_bulk" class="d-none">
                                     <label class="me-2">一括操作</label>
                                     <div class="btn-group me-2" role="group">
-                                        <button data-action="/admin/product-list" class="btn btn-ec-regular action-submit" type="button">
+                                        <button data-action="/admin/product-bulk-status" data-product-status="1" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular action-submit" type="button">
                                             <span>公開</span>
                                         </button>
-                                        <button data-action="/admin/product-list" class="btn btn-ec-regular action-submit" type="button">
+                                        <button data-action="/admin/product-bulk-status" data-product-status="2" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular action-submit" type="button">
                                             <span>非公開</span>
                                         </button>
                                     </div>
-                                    <button data-action="/admin/product-list" class="btn btn-ec-regular me-2 action-submit">
+                                    <button data-action="/admin/product-bulk-status" data-product-status="3" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular me-2 action-submit">
                                         廃止
                                     </button>
                                     <button type="button" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal" class="btn btn-ec-delete">削除</button>
@@ -330,7 +333,7 @@
                                     {% for Product in products %}
                                         <tr id="ex-product-{{ Product.productCode }}">
                                             <td class="align-middle ps-3">
-                                                <input type="checkbox" name="ids[]" value="{{ Product.productCode }}" id="check_{{ Product.productCode }}" data-delete-url="/admin/product?productCode={{ Product.productCode }}&_method=delete">
+                                                <input type="checkbox" name="productCodes[]" value="{{ Product.productCode }}" id="check_{{ Product.productCode }}" data-delete-url="/admin/product?productCode={{ Product.productCode }}&_method=delete" token-for-anchor="{{ csrf_token_for_anchor('admin_product_delete') }}">
                                             </td>
                                             <td class="align-middle">{{ Product.productCode }}</td>
                                             <td class="align-middle">
@@ -404,7 +407,8 @@
                                                                                 href="/admin/product-copy?productCode={{ Product.productCode }}"
                                                                                 class="btn btn-ec-conversion"
                                                                                 data-confirm="false"
-                                                                                data-method="post">
+                                                                                data-method="post"
+                                                                                token-for-anchor="{{ csrf_token_for_anchor('admin_product_product_copy') }}">
                                                                             複製
                                                                         </a>
                                                                     </div>

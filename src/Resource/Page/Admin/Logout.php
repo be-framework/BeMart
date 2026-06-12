@@ -73,7 +73,7 @@ class Logout extends ResourceObject
 
         // Post/Redirect/Get: EC-CUBE's doAdminLogout redirects back to the
         // admin login page (the `goAdminLogin` transition declared above).
-        $this->code = Code::OK;
+        $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/admin/login';
         $this->body = [
             'wasLoggedIn' => $final->wasLoggedIn,

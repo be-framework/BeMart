@@ -44,6 +44,8 @@ ALPS `goCategory` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | goCategoryList | [<code>page://self/admin/category/category-list</code>](/admin/category/category-list.md) |
+| doUpdateCategory | [<code>page://self/admin/category/category</code>](/admin/category/category.md) |
+| doDeleteCategory | [<code>page://self/admin/category/category</code>](/admin/category/category.md) |
 ## PUT
 ALPS `doUpdateCategory` に対応する PUT 操作。
 
@@ -78,9 +80,9 @@ ALPS `doUpdateCategory` に対応する PUT 操作。
 |----------|-----|
 | goCategory | [<code>page://self/admin/category/category</code>](/admin/category/category.md) |
 ## DELETE
-ALPS `doUpdateCategory` に対応する DELETE 操作。
+ALPS `doDeleteCategory` に対応する DELETE 操作。
 
-**ALPS**: `doUpdateCategory`
+**ALPS**: `doDeleteCategory`
 
 
 

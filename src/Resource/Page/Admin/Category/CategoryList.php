@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\CategoryNotFoundException;
@@ -45,6 +46,7 @@ class CategoryList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -95,8 +97,7 @@ class CategoryList extends ResourceObject
 
         assert($final instanceof CategoryCreated);
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/admin/category/category?categoryId=%s', urlencode($final->categoryId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/category/category?categoryId=%s', urlencode($final->categoryId)));
         $this->body = [
             'categoryId' => $final->categoryId,
             'categoryName' => $final->categoryName,

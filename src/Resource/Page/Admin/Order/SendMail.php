@@ -108,6 +108,7 @@ class SendMail extends ResourceObject
         assert($final instanceof AdminOrderMailSent);
 
         $this->code = Code::OK;
+        $this->headers['Content-Type'] = 'application/json; charset=utf-8';
         $this->body = [
             'orderNo' => $final->orderNo,
             'customerId' => $final->customerId,

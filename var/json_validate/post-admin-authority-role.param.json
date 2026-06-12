@@ -26,6 +26,57 @@
       "description": "管理者権限レベル。0=システム管理者（最高権限、全機能アクセス可能）, 1=店舗オーナー（制限あり、denyUrlで制限されたURLにアクセス不可）。数値が小さいほど権限が高い。AuthorityRoleのURL拒否パターンでアクセス制御 Fake観察数値 0〜1; 観察値 '1', '0'。",
       "example": 1,
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
+    },
+    "AuthorityRoles": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "権限ルール入力一覧",
+      "description": "権限管理画面のURL拒否ルール行。HTML form の AuthorityRoles[*][Authority] / deny_url を受け取る。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "properties": {
+          "Authority": {
+            "type": [
+              "integer",
+              "string",
+              "null"
+            ],
+            "title": "権限"
+          },
+          "authority": {
+            "type": [
+              "integer",
+              "string",
+              "null"
+            ],
+            "title": "権限"
+          },
+          "deny_url": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "拒否URL"
+          },
+          "denyUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "title": "拒否URL"
+          }
+        },
+        "additionalProperties": true
+      },
+      "minItems": 0
     }
   },
   "additionalProperties": false,
@@ -247,8 +298,5 @@
     }
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape. Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
-  "required": [
-    "loginId",
-    "authority"
-  ]
+  "required": []
 }

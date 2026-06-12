@@ -39,10 +39,7 @@ use function assert;
  *   Phase 2 will add phoneNumber, dateRange, purchaseAmount filters.
  *
  * Hypermedia: links to the per-customer admin detail and the admin
- * customer-create endpoints. Those are Wave 5+ scope; the link targets
- * exist as resource URIs but the resources themselves are deferred —
- * the BEAR layer is forward-declaring the affordances per the
- * `bear-skills:bear-hypermedia` discipline.
+ * customer actions that are available from the list surface.
  */
 class CustomerList extends ResourceObject
 {
@@ -63,7 +60,9 @@ class CustomerList extends ResourceObject
     #[Alps('goCustomerList')]
     #[JsonSchema(schema: 'get-admin-customer-list.json', params: 'get-admin-customer-list.param.json')]
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
-    #[Link(rel: 'doCreateCustomer', href: 'page://self/admin/customer', method: 'post')]
+    #[Link(rel: 'doCreateCustomer', href: 'page://self/admin/create-customer', method: 'post')]
+    #[Link(rel: 'doDeleteCustomer', href: 'page://self/admin/delete-customer', method: 'post')]
+    #[Link(rel: 'doResendActivationMail', href: 'page://self/admin/customer/resend-activation-mail', method: 'post')]
     public function onGet(
         string|null $nameKeyword = null,
         string|null $emailKeyword = null,

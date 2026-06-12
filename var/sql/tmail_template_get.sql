@@ -2,7 +2,8 @@ SELECT
   id,
   name,
   file_name,
-  mail_subject
+  mail_subject,
+  deletable
 FROM
   dtb_mail_template
 WHERE

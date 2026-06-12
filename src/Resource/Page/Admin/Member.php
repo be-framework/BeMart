@@ -11,9 +11,14 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
+use MyVendor\BeMart\Be\Exception\AuthorityFormatException;
 use MyVendor\BeMart\Be\Exception\InsufficientAuthorityException;
+use MyVendor\BeMart\Be\Exception\LoginIdFormatException;
 use MyVendor\BeMart\Be\Exception\LoginIdAlreadyTakenException;
+use MyVendor\BeMart\Be\Exception\MemberNameFormatException;
+use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MemberCreated;
 use MyVendor\BeMart\Be\Final\MemberDeleted;
@@ -29,8 +34,10 @@ use MyVendor\BeMart\Form\AdminMemberForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_values;
 use function assert;
 use function sprintf;
+use function trim;
 use function urlencode;
 
 /**
@@ -83,6 +90,8 @@ class Member extends ResourceObject
     #[Alps('goMember')]
     #[JsonSchema(schema: 'get-admin-member.json', params: 'get-admin-member.param.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
+    #[Link(rel: 'doUpdateMember', href: 'page://self/admin/member', method: 'put')]
+    #[Link(rel: 'doDeleteMember', href: 'page://self/admin/member', method: 'delete')]
     public function onGet(string|null $loginId = null): static
     {
         if ($loginId === null || $loginId === '') {
@@ -122,6 +131,7 @@ class Member extends ResourceObject
             'authority' => $final->authority,
             'work' => $final->work,
             'sortNo' => $final->sortNo,
+            'csrfToken' => $this->csrf->token,
         ];
         // Phase 3: an AdminMemberForm pre-filled with the persisted row,
         // for the HTML edit page (var/templates/Page/Admin/Member.html.twig)
@@ -156,17 +166,65 @@ class Member extends ResourceObject
         string $password,
         string $name,
         int $authority,
+        string|null $passwordConfirm = null,
+        string|null $mode = null,
     ): static {
-        $final = ($this->becoming)(new CreateMemberInput(
-            loginId: $loginId,
-            password: $password,
-            name: $name,
-            authority: $authority,
-        ));
+        $browserForm = $mode === 'member_form';
+        if ($browserForm) {
+            $errors = $this->createFormErrors($loginId, $password, $name, $passwordConfirm, $authority);
+            if ($errors !== []) {
+                return $this->rejectForm(
+                    [
+                        'loginId' => $loginId,
+                        'name' => $name,
+                        'authority' => (string) $authority,
+                    ],
+                    $errors,
+                );
+            }
+        }
+
+        try {
+            $final = ($this->becoming)(new CreateMemberInput(
+                loginId: $loginId,
+                password: $password,
+                name: $name,
+                authority: $authority,
+            ));
+        } catch (SemanticVariableException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            [$field, $message] = self::semanticError($e);
+
+            return $this->rejectForm(
+                [
+                    'loginId' => $loginId,
+                    'name' => $name,
+                    'authority' => (string) $authority,
+                ],
+                [$field => $message],
+            );
+        } catch (LoginIdAlreadyTakenException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            return $this->rejectForm(
+                [
+                    'loginId' => $loginId,
+                    'name' => $name,
+                    'authority' => (string) $authority,
+                ],
+                ['loginId' => self::domainMessage($e)],
+                409,
+            );
+        }
 
         assert($final instanceof MemberCreated);
 
-        $this->code = Code::CREATED;
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::CREATED;
         // goMember is keyed by loginId.
         $this->headers['Location'] = sprintf('/admin/member?loginId=%s', urlencode($final->loginId));
         $this->body = [
@@ -198,15 +256,44 @@ class Member extends ResourceObject
     public function onPut(
         string $loginId,
         string|null $name = null,
+        string|null $mode = null,
     ): static {
-        $final = ($this->becoming)(new UpdateMemberInput(
-            loginId: $loginId,
-            name: $name,
-        ));
+        $browserForm = $mode === 'member_form';
+        if ($browserForm && trim((string) $name) === '') {
+            return $this->rejectForm(
+                [
+                    'loginId' => $loginId,
+                    'name' => (string) $name,
+                ],
+                ['name' => '入力してください。'],
+            );
+        }
+
+        try {
+            $final = ($this->becoming)(new UpdateMemberInput(
+                loginId: $loginId,
+                name: $name,
+            ));
+        } catch (SemanticVariableException $e) {
+            if (! $browserForm) {
+                throw $e;
+            }
+
+            [$field, $message] = self::semanticError($e);
+
+            return $this->rejectForm(
+                [
+                    'loginId' => $loginId,
+                    'name' => (string) $name,
+                ],
+                [$field => $message],
+            );
+        }
 
         assert($final instanceof MemberUpdated);
 
-        $this->code = Code::OK;
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = sprintf('/admin/member?loginId=%s', urlencode($final->loginId));
         $this->body = [
             'adminId' => $final->adminId,
             'loginId' => $final->loginId,
@@ -220,6 +307,92 @@ class Member extends ResourceObject
     }
 
     /**
+     * @return array<string, string>
+     */
+    private function createFormErrors(
+        string $loginId,
+        string $password,
+        string $name,
+        string|null $passwordConfirm,
+        int $authority,
+    ): array {
+        $errors = [];
+        foreach ([
+            'name' => $name,
+            'loginId' => $loginId,
+            'password' => $password,
+            'passwordConfirm' => (string) $passwordConfirm,
+        ] as $field => $value) {
+            if (trim($value) === '') {
+                $errors[$field] = '入力してください。';
+            }
+        }
+
+        if ($passwordConfirm !== null && $password !== '' && $passwordConfirm !== '' && $password !== $passwordConfirm) {
+            $errors['passwordConfirm'] = 'パスワードが一致しません。';
+        }
+
+        if ($authority !== 0 && $authority !== 1) {
+            $errors['authority'] = '権限を選択してください。';
+        }
+
+        return $errors;
+    }
+
+    /** @param array<string, string> $values */
+    private function rejectForm(array $values, array $errors, int $code = Code::BAD_REQUEST): static
+    {
+        $form = $this->formFactory->newInstance(AdminMemberForm::class);
+        assert($form instanceof AdminMemberForm);
+        $form->fillValues($values);
+        foreach ($errors as $field => $message) {
+            $form->setDomainError($field, $message);
+        }
+
+        $this->code = $code;
+        $this->body = [
+            'adminId' => '',
+            'loginId' => $values['loginId'] ?? '',
+            'name' => $values['name'] ?? '',
+            'authority' => (int) ($values['authority'] ?? 1),
+            'work' => 0,
+            'sortNo' => 0,
+            'csrfToken' => $this->csrf->token,
+            'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
+            'errors' => $errors,
+            'form' => $form,
+        ];
+
+        return $this;
+    }
+
+    /** @return array{0: string, 1: string} */
+    private static function semanticError(SemanticVariableException $e): array
+    {
+        $exception = $e->getErrors()->exceptions[0] ?? null;
+        $message = $e->getErrors()->getMessages('ja')[0] ?? '入力内容を確認してください。';
+
+        $field = match (true) {
+            $exception instanceof PasswordFormatException => 'password',
+            $exception instanceof MemberNameFormatException => 'name',
+            $exception instanceof LoginIdFormatException => 'loginId',
+            $exception instanceof AuthorityFormatException => 'authority',
+            default => 'name',
+        };
+
+        return [$field, $message];
+    }
+
+    private static function domainMessage(LoginIdAlreadyTakenException $e): string
+    {
+        $message = (new ValidationMessageHandler())->getMessage($e, 'ja');
+
+        return $message !== '' && $message !== 'Validation error'
+            ? $message
+            : 'このログインIDは既に使用されています。';
+    }
+
+    /**
      * Wave 8: doDeleteMember — soft-delete (work=0). Idempotent
      * replay returns 200 with `alreadyDeleted=true`. Self-target
      * raises {@see InsufficientAuthorityException} → 403.
@@ -230,13 +403,17 @@ class Member extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-member.json', params: 'delete-admin-member.param.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     #[CsrfProtected]
-    public function onDelete(string $loginId): static
+    public function onDelete(string $loginId, string|null $mode = null): static
     {
         $final = ($this->becoming)(new DeleteMemberInput(loginId: $loginId));
 
         assert($final instanceof MemberDeleted);
 
-        $this->code = Code::OK;
+        $browserForm = $mode === 'member_form';
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
+        if ($browserForm) {
+            $this->headers['Location'] = '/admin/member-list';
+        }
         $this->body = [
             'adminId' => $final->adminId,
             'loginId' => $final->loginId,

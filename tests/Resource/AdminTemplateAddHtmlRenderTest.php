@@ -61,6 +61,11 @@ final class AdminTemplateAddHtmlRenderTest extends TestCase
         $this->assertStringContainsString('<header class="c-headerBar">', $html);
         $this->assertStringContainsString('<div class="c-contentsArea">', $html);
         $this->assertStringContainsString('id="template_add_form"', $html);
+        $this->assertStringContainsString('enctype="multipart/form-data"', $html);
+        $this->assertStringContainsString('name="csrfToken"', $html);
+        $this->assertStringContainsString('name="templateCode"', $html);
+        $this->assertStringContainsString('name="templateName"', $html);
+        $this->assertStringContainsString('name="file"', $html);
         $this->assertStringContainsString('テンプレート登録', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);

@@ -21,7 +21,9 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function preg_match;
 use function sprintf;
+use function str_replace;
 use function urlencode;
 
 /**
@@ -87,6 +89,7 @@ class TaxRuleList extends ResourceObject
         string $applyDate,
         int $roundingType = 1,
     ): static {
+        $applyDate = self::canonicalApplyDate($applyDate);
         $final = ($this->becoming)(new CreateTaxRuleInput(
             taxRate: $taxRate,
             applyDate: $applyDate,
@@ -105,5 +108,14 @@ class TaxRuleList extends ResourceObject
         ];
 
         return $this;
+    }
+
+    private static function canonicalApplyDate(string $applyDate): string
+    {
+        if (preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/', $applyDate) === 1) {
+            return str_replace('T', ' ', $applyDate) . ':00';
+        }
+
+        return $applyDate;
     }
 }

@@ -4,7 +4,18 @@
   "title": "GET /admin/content/cache response",
   "description": "GET /admin/content/cache response の response body schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
   "type": "object",
-  "properties": {},
+  "properties": {
+    "csrfToken": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 160,
+      "title": "CSRFトークン",
+      "description": "/admin/content/cache のHTMLフォーム送信用CSRFトークン。"
+    }
+  },
   "additionalProperties": false,
   "$defs": {
     "productCode": {

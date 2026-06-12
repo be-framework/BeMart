@@ -9,7 +9,18 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
+use Be\Framework\BecomingInterface;
+use MyVendor\BeMart\Be\Final\AdminCalendarFetched;
+use MyVendor\BeMart\Be\Final\CalendarHolidayCreated;
+use MyVendor\BeMart\Be\Final\CalendarHolidayDeleted;
+use MyVendor\BeMart\Be\Final\CalendarHolidayUpdated;
+use MyVendor\BeMart\Be\Input\CreateCalendarHolidayInput;
+use MyVendor\BeMart\Be\Input\DeleteCalendarHolidayInput;
+use MyVendor\BeMart\Be\Input\GetAdminCalendarInput;
+use MyVendor\BeMart\Be\Input\UpdateCalendarHolidayInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminCalendarForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -19,16 +30,16 @@ use function assert;
 /**
  * EC-CUBE 定休日カレンダー設定 — Setting/Shop Tier-2.
  *
- * Thin renderer / action surface for `Setting/Shop/calendar.twig`.
- * BeMart has no holiday-calendar storage in this wave, so POST/DELETE
- * deliberately expose a concrete, CSRF-protected Resource surface that
- * proves the EC-CUBE aliases no longer fall back to ActionRedirect.
+ * Renderer and action surface for `Setting/Shop/calendar.twig`.
  */
 class Calendar extends ResourceObject
 {
     public function __construct(
+        private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
+        private readonly CsrfToken $csrf,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -47,28 +58,12 @@ class Calendar extends ResourceObject
             return $this;
         }
 
-        $form = $this->formFactory->newInstance(AdminCalendarForm::class);
-        assert($form instanceof AdminCalendarForm);
-        $form->fillValues(['title' => '', 'holiday' => '']);
+        $final = ($this->becoming)(new GetAdminCalendarInput());
 
-        $newYear = $this->formFactory->newInstance(AdminCalendarForm::class);
-        assert($newYear instanceof AdminCalendarForm);
-        $newYear->fillValues(['title' => '元日', 'holiday' => '2026-01-01']);
+        assert($final instanceof AdminCalendarFetched);
 
         $this->code = Code::OK;
-        $this->body = [
-            'form' => $form,
-            'calendars' => [
-                [
-                    'id' => 1,
-                    'title' => '元日',
-                    'holiday' => '2026-01-01',
-                    'form' => $newYear,
-                    'hasError' => false,
-                ],
-            ],
-            'errors' => [],
-        ];
+        $this->body = $this->calendarBody($final->calendars);
 
         return $this;
     }
@@ -89,7 +84,7 @@ class Calendar extends ResourceObject
         string $operation = 'update',
         string $title = '',
         string $holiday = '',
-        int|null $calendarId = null,
+        string|int|null $calendarId = null,
     ): static {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
@@ -99,13 +94,30 @@ class Calendar extends ResourceObject
         }
 
         $isCreate = $operation === 'create';
-        $this->code = $isCreate ? Code::CREATED : Code::OK;
+        if ($isCreate) {
+            $final = ($this->becoming)(new CreateCalendarHolidayInput(
+                title: $title,
+                holiday: $holiday,
+            ));
+            assert($final instanceof CalendarHolidayCreated);
+            $transitionId = 'doCreateCalendarHoliday';
+        } else {
+            $final = ($this->becoming)(new UpdateCalendarHolidayInput(
+                calendarId: (string) $calendarId,
+                title: $title,
+                holiday: $holiday,
+            ));
+            assert($final instanceof CalendarHolidayUpdated);
+            $transitionId = 'doUpdateCalendar';
+        }
+
+        ($this->mutationResponse)($this, $isCreate ? Code::CREATED : Code::OK, '/admin/calendar');
         $this->body = [
-            'transitionId' => $isCreate ? 'doCreateCalendarHoliday' : 'doUpdateCalendar',
-            'calendarId' => $calendarId,
-            'title' => $title,
-            'holiday' => $holiday,
-            'message' => $isCreate ? '休日作成Resourceへ到達しました。' : '営業日カレンダー更新Resourceへ到達しました。',
+            'transitionId' => $transitionId,
+            'calendarId' => $final->calendarId,
+            'title' => $final->title,
+            'holiday' => $final->holiday,
+            'message' => $isCreate ? '休日を作成しました。' : '休日を更新しました。',
         ];
 
         return $this;
@@ -120,7 +132,7 @@ class Calendar extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-calendar.json', params: 'delete-admin-calendar.param.json')]
     #[Link(rel: 'goCalendar', href: 'page://self/admin/calendar')]
     #[CsrfProtected]
-    public function onDelete(int|null $calendarId = null): static
+    public function onDelete(string|int|null $calendarId = null): static
     {
         if ($this->adminSession->adminId === null) {
             $this->code = Code::FORBIDDEN;
@@ -129,13 +141,58 @@ class Calendar extends ResourceObject
             return $this;
         }
 
-        $this->code = Code::OK;
+        $final = ($this->becoming)(new DeleteCalendarHolidayInput(calendarId: (string) $calendarId));
+
+        assert($final instanceof CalendarHolidayDeleted);
+
+        ($this->mutationResponse)($this, Code::OK, '/admin/calendar');
         $this->body = [
             'transitionId' => 'doDeleteCalendarHoliday',
-            'calendarId' => $calendarId,
-            'message' => '休日削除Resourceへ到達しました。',
+            'calendarId' => $final->calendarId,
+            'message' => '休日を削除しました。',
         ];
 
         return $this;
+    }
+
+    /**
+     * @param list<array{calendarId: string, title: string|null, holiday: string}> $calendars
+     * @return array{
+     *     form: AdminCalendarForm,
+     *     calendars: list<array{id: string, title: string, holiday: string, form: AdminCalendarForm, hasError: false}>,
+     *     errors: list<string>,
+     *     csrfToken: string
+     * }
+     */
+    private function calendarBody(array $calendars): array
+    {
+        $form = $this->formFactory->newInstance(AdminCalendarForm::class);
+        assert($form instanceof AdminCalendarForm);
+        $form->fillValues(['title' => '', 'holiday' => '']);
+
+        $items = [];
+        foreach ($calendars as $row) {
+            $rowForm = $this->formFactory->newInstance(AdminCalendarForm::class);
+            assert($rowForm instanceof AdminCalendarForm);
+            $rowForm->fillValues([
+                'title' => (string) ($row['title'] ?? ''),
+                'holiday' => $row['holiday'],
+            ]);
+
+            $items[] = [
+                'id' => $row['calendarId'],
+                'title' => (string) ($row['title'] ?? ''),
+                'holiday' => $row['holiday'],
+                'form' => $rowForm,
+                'hasError' => false,
+            ];
+        }
+
+        return [
+            'form' => $form,
+            'calendars' => $items,
+            'errors' => [],
+            'csrfToken' => $this->csrf->token,
+        ];
     }
 }

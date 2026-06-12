@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\AddressNotFoundException;
@@ -57,6 +58,7 @@ class Address extends ResourceObject
         private readonly CustomerSession $session,
         private readonly AddressStorageInterface $addresses,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -212,7 +214,7 @@ class Address extends ResourceObject
             'addr02' => $final->addr02,
         ];
 
-        return $this;
+        return $this->redirectToAddressListOnHtmlSuccess();
     }
 
     /**
@@ -235,6 +237,13 @@ class Address extends ResourceObject
             'addressId' => $final->addressId,
             'customerId' => $final->customerId,
         ];
+
+        return $this->redirectToAddressListOnHtmlSuccess();
+    }
+
+    private function redirectToAddressListOnHtmlSuccess(): static
+    {
+        ($this->mutationResponse)($this, $this->code, '/mypage/address-list');
 
         return $this;
     }

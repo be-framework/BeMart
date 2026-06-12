@@ -8,4 +8,4 @@ DELETE FROM
   dtb_category
 WHERE
   :categoryId REGEXP '^[0-9]+$'
-  AND id = CAST(:categoryId AS UNSIGNED)
+  AND id = CAST(:categoryId AS UNSIGNED);

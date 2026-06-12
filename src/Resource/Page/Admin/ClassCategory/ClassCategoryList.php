@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\ClassNameNotFoundException;
@@ -41,6 +42,7 @@ class ClassCategoryList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -53,6 +55,7 @@ class ClassCategoryList extends ResourceObject
     #[Link(rel: 'doCreateClassCategory', href: 'page://self/admin/class-category/class-category-list', method: 'post')]
     #[Link(rel: 'doUpdateClassCategory', href: 'page://self/admin/class-category/class-category', method: 'put')]
     #[Link(rel: 'doDeleteClassCategory', href: 'page://self/admin/class-category/class-category', method: 'delete')]
+    #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
     public function onGet(string|null $classNameId = null): static
     {
         $final = ($this->becoming)(new GetAdminClassCategoryListInput(classNameId: $classNameId));
@@ -93,10 +96,13 @@ class ClassCategoryList extends ResourceObject
 
         assert($final instanceof ClassCategoryCreated);
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf(
-            '/admin/class-category/class-category?classCategoryId=%s',
-            urlencode($final->classCategoryId),
+        ($this->mutationResponse)(
+            $this,
+            Code::CREATED,
+            sprintf(
+                '/admin/class-category/class-category-list?classNameId=%s',
+                urlencode($final->classNameId),
+            ),
         );
         $this->body = [
             'classCategoryId' => $final->classCategoryId,

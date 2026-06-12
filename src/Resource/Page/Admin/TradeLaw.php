@@ -17,6 +17,7 @@ use MyVendor\BeMart\Be\Final\TradeLawUpdated;
 use MyVendor\BeMart\Be\Input\GetTradeLawInput;
 use MyVendor\BeMart\Be\Input\UpdateTradeLawInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminTradeLawForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -24,6 +25,7 @@ use BEAR\Resource\Annotation\JsonSchema;
 use function assert;
 use function count;
 use function explode;
+use function implode;
 use function trim;
 
 /**
@@ -46,6 +48,7 @@ class TradeLaw extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -78,6 +81,7 @@ class TradeLaw extends ResourceObject
             'form' => $form,
             'tradeLawRows' => $rows,
             'tradeLawBody' => $final->tradeLawBody,
+            'csrfToken' => $this->csrf->token,
         ];
 
         return $this;
@@ -128,18 +132,75 @@ class TradeLaw extends ResourceObject
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goContentCss', href: 'page://self/admin/content/css')]
     #[CsrfProtected]
-    public function onPost(string $tradeLawBody): static
-    {
+    public function onPost(
+        string|null $tradeLawBody = null,
+        string|null $mode = null,
+        string|null $trade_law_1_name = null,
+        string|null $trade_law_1_description = null,
+        string|null $trade_law_1_displayOrderScreen = null,
+        string|null $trade_law_2_name = null,
+        string|null $trade_law_2_description = null,
+        string|null $trade_law_2_displayOrderScreen = null,
+        string|null $trade_law_3_name = null,
+        string|null $trade_law_3_description = null,
+        string|null $trade_law_3_displayOrderScreen = null,
+        string|null $trade_law_4_name = null,
+        string|null $trade_law_4_description = null,
+        string|null $trade_law_4_displayOrderScreen = null,
+        string|null $trade_law_5_name = null,
+        string|null $trade_law_5_description = null,
+        string|null $trade_law_5_displayOrderScreen = null,
+        string|null $trade_law_6_name = null,
+        string|null $trade_law_6_description = null,
+        string|null $trade_law_6_displayOrderScreen = null,
+    ): static {
+        unset(
+            $trade_law_1_displayOrderScreen,
+            $trade_law_2_displayOrderScreen,
+            $trade_law_3_displayOrderScreen,
+            $trade_law_4_displayOrderScreen,
+            $trade_law_5_displayOrderScreen,
+            $trade_law_6_displayOrderScreen,
+        );
+
+        $tradeLawBody ??= $this->tradeLawBodyFromRows([
+            [$trade_law_1_name, $trade_law_1_description],
+            [$trade_law_2_name, $trade_law_2_description],
+            [$trade_law_3_name, $trade_law_3_description],
+            [$trade_law_4_name, $trade_law_4_description],
+            [$trade_law_5_name, $trade_law_5_description],
+            [$trade_law_6_name, $trade_law_6_description],
+        ]);
         $final = ($this->becoming)(new UpdateTradeLawInput(tradeLawBody: $tradeLawBody));
 
         assert($final instanceof TradeLawUpdated);
 
-        $this->code = Code::OK;
+        $this->code = $mode === 'trade_law_form' ? Code::SEE_OTHER : Code::OK;
+        $this->headers['Location'] = '/admin/trade-law';
         $this->body = [
             'tradeLawBody' => $final->tradeLawBody,
             'changed' => $final->changed,
         ];
 
         return $this;
+    }
+
+    /**
+     * @param list<array{string|null, string|null}> $rows
+     */
+    private function tradeLawBodyFromRows(array $rows): string
+    {
+        $lines = [];
+        foreach ($rows as [$name, $description]) {
+            $name = trim((string) $name);
+            $description = trim((string) $description);
+            if ($name === '' && $description === '') {
+                continue;
+            }
+
+            $lines[] = $name === '' ? $description : $name . ': ' . $description;
+        }
+
+        return implode("\n", $lines);
     }
 }

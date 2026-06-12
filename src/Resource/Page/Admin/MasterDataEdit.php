@@ -8,6 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Annotation\CsrfProtected;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Be\Input\UpdateMasterDataInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function rawurlencode;
 
 /**
  * EC-CUBE マスタデータ編集 — Setting/System (doUpdateMasterData).
@@ -31,6 +33,7 @@ class MasterDataEdit extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -51,8 +54,7 @@ class MasterDataEdit extends ResourceObject
 
         assert($final instanceof MasterDataUpdated);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/master-data';
+        ($this->mutationResponse)($this, Code::OK, '/admin/master-data?masterType=' . rawurlencode($final->masterType));
         $this->body = [
             'transitionId' => 'doUpdateMasterData',
             'masterType' => $final->masterType,

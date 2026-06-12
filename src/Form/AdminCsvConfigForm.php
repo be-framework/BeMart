@@ -18,9 +18,9 @@ final class AdminCsvConfigForm extends AbstractForm
 {
     /** @var array<int, string> — numeric-string keys coerce to int (EC-CUBE CsvType ids) */
     private const CSV_TYPES = [
-        '1' => '受注CSV',
+        '3' => '受注CSV',
         '2' => '会員CSV',
-        '3' => '商品CSV',
+        '1' => '商品CSV',
         '4' => '配送CSV',
     ];
 
@@ -53,7 +53,7 @@ final class AdminCsvConfigForm extends AbstractForm
             ->setOptions(self::OUTPUT_COLUMNS);
 
         $this->fill([
-            'csvType' => '1',
+            'csvType' => '3',
             'csvOutput' => ['orderNo', 'orderDate', 'customerName', 'paymentTotal'],
             'csvNotOutput' => [],
         ]);

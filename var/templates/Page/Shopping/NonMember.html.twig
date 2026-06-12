@@ -103,11 +103,11 @@
                         <label class="ec-label">お名前</label>
                     </dt>
                     <dd>
-                        <div class="ec-halfInput">
+                        <div class="ec-halfInput{% if form.error('name01') or form.error('name02') %} error{% endif %}">
                             {{ form.input('name01')|raw }}
                             {{ form.input('name02')|raw }}
-                            {{ form.error('name01') }}
-                            {{ form.error('name02') }}
+                            {% if form.error('name01') %}<p class="ec-errorMessage">{{ form.error('name01') }}</p>{% endif %}
+                            {% if form.error('name02') %}<p class="ec-errorMessage">{{ form.error('name02') }}</p>{% endif %}
                         </div>
                     </dd>
                 </dl>
@@ -116,11 +116,11 @@
                         <label class="ec-label">お名前(カナ)</label>
                     </dt>
                     <dd>
-                        <div class="ec-halfInput">
+                        <div class="ec-halfInput{% if form.error('kana01') or form.error('kana02') %} error{% endif %}">
                             {{ form.input('kana01')|raw }}
                             {{ form.input('kana02')|raw }}
-                            {{ form.error('kana01') }}
-                            {{ form.error('kana02') }}
+                            {% if form.error('kana01') %}<p class="ec-errorMessage">{{ form.error('kana01') }}</p>{% endif %}
+                            {% if form.error('kana02') %}<p class="ec-errorMessage">{{ form.error('kana02') }}</p>{% endif %}
                         </div>
                     </dd>
                 </dl>
@@ -129,9 +129,9 @@
                         <label class="ec-label">会社名</label>
                     </dt>
                     <dd>
-                        <div class="ec-halfInput">
+                        <div class="ec-halfInput{% if form.error('companyName') %} error{% endif %}">
                             {{ form.input('companyName')|raw }}
-                            {{ form.error('companyName') }}
+                            {% if form.error('companyName') %}<p class="ec-errorMessage">{{ form.error('companyName') }}</p>{% endif %}
                         </div>
                     </dd>
                 </dl>
@@ -140,7 +140,7 @@
                         <label class="ec-label">住所</label>
                     </dt>
                     <dd>
-                        <div class="ec-zipInput"><span>〒</span>
+                        <div class="ec-zipInput{% if form.error('postalCode') %} error{% endif %}"><span>〒</span>
                             {{ form.input('postalCode')|raw }}
                             <div class="ec-zipInputHelp">
                                 <div class="ec-zipInputHelp__icon">
@@ -149,20 +149,20 @@
                                     </div>
                                 </div><a href="https://www.post.japanpost.jp/zipcode/" target="_blank"><span>郵便番号検索</span></a>
                             </div>
-                            {{ form.error('postalCode') }}
+                            {% if form.error('postalCode') %}<p class="ec-errorMessage">{{ form.error('postalCode') }}</p>{% endif %}
                         </div>
 
-                        <div class="ec-select">
+                        <div class="ec-select{% if form.error('pref') %} error{% endif %}">
                             {{ form.input('pref')|raw }}
-                            {{ form.error('pref') }}
+                            {% if form.error('pref') %}<p class="ec-errorMessage">{{ form.error('pref') }}</p>{% endif %}
                         </div>
-                        <div class="ec-input">
+                        <div class="ec-input{% if form.error('addr01') %} error{% endif %}">
                             {{ form.input('addr01')|raw }}
-                            {{ form.error('addr01') }}
+                            {% if form.error('addr01') %}<p class="ec-errorMessage">{{ form.error('addr01') }}</p>{% endif %}
                         </div>
-                        <div class="ec-input">
+                        <div class="ec-input{% if form.error('addr02') %} error{% endif %}">
                             {{ form.input('addr02')|raw }}
-                            {{ form.error('addr02') }}
+                            {% if form.error('addr02') %}<p class="ec-errorMessage">{{ form.error('addr02') }}</p>{% endif %}
                         </div>
                     </dd>
                 </dl>
@@ -171,9 +171,9 @@
                         <label class="ec-label">電話番号</label>
                     </dt>
                     <dd>
-                        <div class="ec-telInput">
+                        <div class="ec-telInput{% if form.error('phoneNumber') %} error{% endif %}">
                             {{ form.input('phoneNumber')|raw }}
-                            {{ form.error('phoneNumber') }}
+                            {% if form.error('phoneNumber') %}<p class="ec-errorMessage">{{ form.error('phoneNumber') }}</p>{% endif %}
                         </div>
                     </dd>
                 </dl>
@@ -182,13 +182,13 @@
                         <label class="ec-label">メールアドレス</label>
                     </dt>
                     <dd>
-                        <div class="ec-input">
+                        <div class="ec-input{% if form.error('email') %} error{% endif %}">
                             {{ form.input('email')|raw }}
-                            {{ form.error('email') }}
+                            {% if form.error('email') %}<p class="ec-errorMessage">{{ form.error('email') }}</p>{% endif %}
                         </div>
-                        <div class="ec-input">
+                        <div class="ec-input{% if form.error('email_confirm') %} error{% endif %}">
                             {{ form.input('email_confirm')|raw }}
-                            {{ form.error('email_confirm') }}
+                            {% if form.error('email_confirm') %}<p class="ec-errorMessage">{{ form.error('email_confirm') }}</p>{% endif %}
                         </div>
                     </dd>
                 </dl>

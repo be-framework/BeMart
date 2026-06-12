@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\CategoryCsvExported;
@@ -37,6 +38,7 @@ class Csv extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -76,8 +78,7 @@ class Csv extends ResourceObject
 
         assert($final instanceof CategoryCsvImported);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/category/category-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/category/category-list');
         $this->body = [
             'transitionId' => 'doImportCategoryCsv',
             'accepted' => $final->accepted,
@@ -89,4 +90,5 @@ class Csv extends ResourceObject
 
         return $this;
     }
+
 }

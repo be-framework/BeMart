@@ -11,10 +11,32 @@
         "null"
       ],
       "minLength": 0,
-      "maxLength": 255,
+      "maxLength": 65535,
       "title": "特定商取引法本文（入力）",
       "description": "特定商取引法ページ本文の単一ブロブ投影。項目別行ではなく、ページ全体を1本の本文として扱う。",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "trade_law_form",
+        null
+      ],
+      "description": "HTMLフォーム送信時のPRG mode。"
+    }
+  },
+  "patternProperties": {
+    "^trade_law_[1-6]_(name|description|displayOrderScreen)$": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 65535,
+      "description": "EC-CUBE互換の特定商取引法行フォームフィールド。Resource境界で tradeLawBody に正規化する。"
     }
   },
   "additionalProperties": false,
@@ -236,7 +258,5 @@
     }
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape. Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
-  "required": [
-    "tradeLawBody"
-  ]
+  "required": []
 }

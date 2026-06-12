@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
@@ -40,6 +41,7 @@ class Item extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -119,7 +121,7 @@ class Item extends ResourceObject
             return $this->redirectToCartOnSuccess();
         }
 
-        return $this;
+        return $this->redirectToCartOnHtmlSuccess();
     }
 
     /**
@@ -159,7 +161,7 @@ class Item extends ResourceObject
             'saleTypeName' => $final->saleTypeName,
         ];
 
-        return $this;
+        return $this->redirectToCartOnHtmlSuccess();
     }
 
     /**
@@ -193,7 +195,7 @@ class Item extends ResourceObject
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
         ];
 
-        return $this;
+        return $this->redirectToCartOnHtmlSuccess();
     }
 
     private function missingQuantity(string $productCode): static
@@ -210,6 +212,13 @@ class Item extends ResourceObject
             $this->code = Code::SEE_OTHER;
             $this->headers['Location'] = '/cart';
         }
+
+        return $this;
+    }
+
+    private function redirectToCartOnHtmlSuccess(): static
+    {
+        ($this->mutationResponse)($this, $this->code, '/cart');
 
         return $this;
     }

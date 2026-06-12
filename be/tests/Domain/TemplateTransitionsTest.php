@@ -84,7 +84,12 @@ final class TemplateTransitionsTest extends TestCase
 
     public function testInstallTemplate(): void
     {
-        $final = ($this->becoming)(new InstallTemplateInput(templateCode: 'mytheme', templateName: 'My Theme'));
+        $final = ($this->becoming)(new InstallTemplateInput(
+            templateCode: 'mytheme',
+            templateName: 'My Theme',
+            archiveName: 'mytheme.zip',
+            archiveSize: 128,
+        ));
         $this->assertInstanceOf(TemplateInstalled::class, $final);
         $this->assertNotSame('', $final->templateId);
     }
@@ -93,6 +98,11 @@ final class TemplateTransitionsTest extends TestCase
     {
         $this->build(null);
         $this->expectException(UnauthorizedAdminAccessException::class);
-        ($this->becoming)(new InstallTemplateInput(templateCode: 'x', templateName: 'y'));
+        ($this->becoming)(new InstallTemplateInput(
+            templateCode: 'x',
+            templateName: 'y',
+            archiveName: 'x.zip',
+            archiveSize: 128,
+        ));
     }
 }

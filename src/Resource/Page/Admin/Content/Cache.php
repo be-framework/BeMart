@@ -14,6 +14,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\CacheCleared;
 use MyVendor\BeMart\Be\Input\ClearCacheInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -32,6 +33,7 @@ class Cache extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -49,24 +51,23 @@ class Cache extends ResourceObject
         }
 
         $this->code = Code::OK;
-        $this->body = [];
+        $this->body = ['csrfToken' => $this->csrf->token];
 
         return $this;
     }
 
     /** Clears the application cache (doClearCache). */
-    /** ALPS `doClearCache` に対応する PUT 操作。 */
     #[Alps('doClearCache')]
-    #[JsonSchema(schema: 'put-admin-content-cache.json')]
+    #[JsonSchema(schema: 'put-admin-content-cache.json', params: 'put-admin-content-cache.param.json')]
     #[Link(rel: 'goMaintenance', href: 'page://self/admin/content/maintenance')]
     #[CsrfProtected]
-    public function onPut(): static
+    public function onPut(string|null $mode = null): static
     {
         $final = ($this->becoming)(new ClearCacheInput());
 
         assert($final instanceof CacheCleared);
 
-        $this->code = Code::OK;
+        $this->code = $mode === 'content_operation_form' ? Code::SEE_OTHER : Code::OK;
         $this->headers['Location'] = '/admin/content/cache';
         $this->body = [
             'transitionId' => 'doClearCache',

@@ -37,6 +37,12 @@ use Ray\WebFormModule\AbstractForm;
  */
 final class AdminMemberForm extends AbstractForm
 {
+    /** @var array<int|string, string> */
+    private const AUTHORITY_OPTIONS = [
+        '0' => 'システム管理者',
+        '1' => '店舗オーナー',
+    ];
+
     /**
      * Domain errors bridged in from the Be Becoming chain, keyed by
      * field name.
@@ -68,6 +74,7 @@ final class AdminMemberForm extends AbstractForm
             ->setAttribs([
                 'id' => 'admin_member_department',
                 'class' => 'form-control',
+                'disabled' => 'disabled',
             ]);
 
         $this->setField('loginId', 'text')
@@ -88,9 +95,18 @@ final class AdminMemberForm extends AbstractForm
                 'class' => 'form-control',
             ]);
 
+        $this->setField('authority', 'select')
+            ->setAttribs([
+                'id' => 'admin_member_authority',
+                'class' => 'form-select',
+            ])
+            ->setOptions(self::AUTHORITY_OPTIONS)
+            ->setValue('1');
+
         $this->setField('twoFactorAuthEnabled', 'checkbox')
             ->setAttribs([
                 'id' => 'admin_member_twoFactorAuthEnabled',
+                'disabled' => 'disabled',
             ])
             ->setOptions(['1' => '2段階認証']);
 
@@ -118,6 +134,7 @@ final class AdminMemberForm extends AbstractForm
         $this->fill([
             'name' => (string) ($body['name'] ?? ''),
             'loginId' => (string) ($body['loginId'] ?? ''),
+            'authority' => (string) ($body['authority'] ?? '1'),
         ]);
     }
 

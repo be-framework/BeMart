@@ -29,6 +29,7 @@ _No parameters required_
 
 | Name | Type | Description | Required | Constraints | Example |
 |------|------|-------------|----------|-------------|---------|
+| csrfToken | string|null | CSRFトークン - /admin/content/cache のHTMLフォーム送信用CSRFトークン。 | Optional | {"minLength":0,"maxLength":160} |  |
 
 #### Links
 
@@ -36,7 +37,7 @@ _No parameters required_
 |----------|-----|
 | doClearCache | [<code>page://self/admin/content/cache</code>](/admin/content/cache.md) |
 ## PUT
-ALPS `doClearCache` に対応する PUT 操作。
+Clears the application cache (doClearCache).
 
 **ALPS**: `doClearCache`
 
@@ -44,7 +45,10 @@ ALPS `doClearCache` に対応する PUT 操作。
 
 ### Request
 
-_No parameters required_
+| Name | Type | Description | Default | Required | Constraints | Example |
+|------|------|-------------|---------|----------|-------------|---------|
+| mode | string | フォーム送信モード |  | Optional | {"minLength":0,"maxLength":32,"$comment":"HTML form submit marker; Resource workflow calls omit it."} |  |
+
 
 ### Response
 

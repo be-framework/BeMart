@@ -14,6 +14,9 @@
       "title": "入力フォーム",
       "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
       "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,

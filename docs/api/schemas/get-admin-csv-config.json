@@ -130,7 +130,7 @@
     "csvType": {
       "type": "integer",
       "title": "CSV種別",
-      "description": "CSV出力項目設定で現在選択しているCSV種別。1=受注CSV, 2=会員CSV, 3=商品CSV, 4=配送CSV。画面の選択状態とPOST対象の列設定コンテキストを示す。",
+      "description": "CSV出力項目設定で現在選択しているCSV種別。1=商品CSV, 2=会員CSV, 3=受注CSV, 4=配送CSV。画面の選択状態とPOST対象の列設定コンテキストを示す。",
       "enum": [
         1,
         2,
@@ -138,6 +138,9 @@
         4
       ],
       "example": 1
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,
@@ -362,6 +365,7 @@
   "required": [
     "notOutputColumns",
     "outputColumns",
-    "csvType"
+    "csvType",
+    "csrfToken"
   ]
 }

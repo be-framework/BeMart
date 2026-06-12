@@ -16,9 +16,12 @@ use Ray\WebFormModule\AbstractForm;
  * Ray.WebFormModule (Aura.Input + Aura.Filter + Aura.Html) — the same
  * recipe as the admin pilot {@see AdminNewsForm}.
  *
- * Field names ported from `BlockType::buildForm()`: `name` (text),
- * `file_name` (text), `block_html` (textarea). EC-CUBE's block prefix is
- * `block`, so the rendered ids are `block_<field>`.
+ * EC-CUBE's `BlockType` declares `name`, `file_name`, and `block_html`.
+ * BeMart's unsafe Resource boundary accepts the canonical `blockName` and
+ * `blockFileName` parameters, so the rendered fields keep EC-CUBE's
+ * `block_<field>` ids while posting those canonical names. `block_html`
+ * remains visible in the editor shell but is disabled because the current
+ * Block Resource contract does not persist the template body.
  *
  * VALIDATION AUTHORITY STAYS WITH the Be Becoming chain (the
  * CreateBlockInput / UpdateBlockInput Semantics). This form is a
@@ -39,13 +42,13 @@ final class AdminBlockForm extends AbstractForm
     #[Override]
     public function init(): void
     {
-        $this->setField('name', 'text')
+        $this->setField('blockName', 'text')
             ->setAttribs([
                 'id' => 'block_name',
                 'class' => 'form-control',
             ]);
 
-        $this->setField('file_name', 'text')
+        $this->setField('blockFileName', 'text')
             ->setAttribs([
                 'id' => 'block_file_name',
                 'class' => 'form-control',
@@ -55,12 +58,13 @@ final class AdminBlockForm extends AbstractForm
             ->setAttribs([
                 'id' => 'block_block_html',
                 'class' => 'form-control',
+                'disabled' => 'disabled',
             ]);
 
         // NON-AUTHORITATIVE structural checks only. Authoritative rules
         // live in the Be domain.
-        $this->filter->validate('name')->isNotBlank();
-        $this->filter->validate('file_name')->isNotBlank();
+        $this->filter->validate('blockName')->isNotBlank();
+        $this->filter->validate('blockFileName')->isNotBlank();
     }
 
     /**
@@ -71,8 +75,8 @@ final class AdminBlockForm extends AbstractForm
     public function fillValues(array $body): void
     {
         $this->fill([
-            'name' => (string) ($body['blockName'] ?? ''),
-            'file_name' => (string) ($body['blockFileName'] ?? ''),
+            'blockName' => (string) ($body['blockName'] ?? ''),
+            'blockFileName' => (string) ($body['blockFileName'] ?? ''),
             // The block source code (dtb_block tpl) is out of the Wave 9
             // CMS slice — see AdminBlockForm port header. Renders empty.
             'block_html' => (string) ($body['blockHtml'] ?? ''),

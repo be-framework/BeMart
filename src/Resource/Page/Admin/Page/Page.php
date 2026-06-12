@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\PageNotFoundException;
@@ -26,6 +27,8 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function sprintf;
+use function urlencode;
 
 /**
  * EC-CUBE goPage + doUpdatePage + doDeletePage — single-row endpoint
@@ -44,6 +47,7 @@ class Page extends ResourceObject
         private readonly CsrfToken $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -68,7 +72,7 @@ class Page extends ResourceObject
             $this->body = [
                 'pageId' => '',
                 'pageName' => '',
-                'pageUrl' => '',
+                'pageUrl' => null,
                 'pageFileName' => '',
                 'pageEditType' => 1,
                 'csrfToken' => $this->csrf->token,
@@ -92,6 +96,7 @@ class Page extends ResourceObject
             'pageUrl' => $final->pageUrl,
             'pageFileName' => $final->pageFileName,
             'pageEditType' => $final->pageEditType,
+            'csrfToken' => $this->csrf->token,
         ];
         // Phase 3: an AdminPageForm pre-filled with the persisted row,
         // for the HTML edit page to render via `{{ form.input(...) }}`.
@@ -129,7 +134,7 @@ class Page extends ResourceObject
 
         assert($final instanceof PageUpdated);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/page/page?pageId=%s', urlencode($final->pageId)));
         $this->body = [
             'pageId' => $final->pageId,
             'pageName' => $final->pageName,
@@ -142,10 +147,10 @@ class Page extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdatePage` に対応する DELETE 操作。
+     * ALPS `doDeletePage` に対応する DELETE 操作。
      * @psalm-taint-source input $pageId
      */
-    #[Alps('doUpdatePage')]
+    #[Alps('doDeletePage')]
     #[JsonSchema(schema: 'delete-admin-page-page.json', params: 'delete-admin-page-page.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
@@ -156,7 +161,7 @@ class Page extends ResourceObject
 
         assert($final instanceof PageDeleted);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/page/page-list');
         $this->body = ['pageId' => $final->pageId];
 
         return $this;

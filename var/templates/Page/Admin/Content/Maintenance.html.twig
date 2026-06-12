@@ -33,6 +33,7 @@
 {% block main %}
     <form method="post" action="/admin/content/maintenance?_method=put">
         <input type="hidden" id="maintenance__token" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="mode" value="content_operation_form">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
@@ -53,10 +54,10 @@
                             <div class="row mb-2">
                                 <div class="col-auto">
                                     {% if isMaintenance %}
-                                    <input type="hidden" name="maintenance" value="off">
+                                    <input type="hidden" name="enabled" value="0">
                                     <button type="submit" class="btn btn-ec-conversion">無効にする</button>
                                     {% else %}
-                                    <input type="hidden" name="maintenance" value="on">
+                                    <input type="hidden" name="enabled" value="1">
                                     <button type="submit" class="btn btn-ec-conversion">有効にする</button>
                                     {% endif %}
                                 </div>

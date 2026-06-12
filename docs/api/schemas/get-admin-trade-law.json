@@ -11,7 +11,7 @@
         "null"
       ],
       "minLength": 0,
-      "maxLength": 255,
+      "maxLength": 65535,
       "title": "特定商取引法本文",
       "description": "特定商取引法ページ本文の単一ブロブ投影。項目別行ではなく、ページ全体を1本の本文として扱う。"
     },
@@ -24,6 +24,15 @@
       "title": "入力フォーム",
       "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
       "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+    },
+    "csrfToken": {
+      "title": "CSRFトークン",
+      "description": "フォーム送信元を検証するトークン。Fake環境では deterministic な値を使う。",
+      "type": "string",
+      "minLength": 8,
+      "maxLength": 160,
+      "pattern": "^[A-Za-z0-9_.:-]+$",
+      "example": "fake-csrf-token-bemart-2026"
     },
     "tradeLawRows": {
       "type": [
@@ -343,6 +352,7 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "tradeLawBody",
+    "csrfToken",
     "tradeLawRows"
   ]
 }
