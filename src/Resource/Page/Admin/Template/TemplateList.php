@@ -129,8 +129,7 @@ class TemplateList extends ResourceObject
 
         assert($final instanceof TemplateSelected || $final instanceof TemplateDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/template/template-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/template/template-list');
         $this->body = [
             'transitionId' => $transitionId,
             'templateId' => $final->templateId,

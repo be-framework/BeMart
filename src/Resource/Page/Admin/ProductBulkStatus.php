@@ -57,10 +57,7 @@ class ProductBulkStatus extends ResourceObject
 
         assert($final instanceof AdminProductsStatusBulkUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        if ($this->code === Code::SEE_OTHER) {
-            $this->headers['Location'] = '/admin/product-list';
-        }
+        ($this->mutationResponse)($this, Code::OK, '/admin/product-list');
         $this->body = [
             'productCodes' => $final->productCodes,
             'productStatus' => $final->productStatus,

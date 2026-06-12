@@ -85,8 +85,7 @@ class NewsList extends ResourceObject
 
         assert($final instanceof NewsCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = sprintf('/admin/news/news?newsId=%s', urlencode($final->newsId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/news/news?newsId=%s', urlencode($final->newsId)));
         $this->body = [
             'newsId' => $final->newsId,
             'newsTitle' => $final->newsTitle,

@@ -138,8 +138,7 @@ class Block extends ResourceObject
 
         assert($final instanceof BlockUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/block/block-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/block/block-list');
         $this->body = [
             'blockId' => $final->blockId,
             'blockName' => $final->blockName,
@@ -165,8 +164,7 @@ class Block extends ResourceObject
 
         assert($final instanceof BlockDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/block/block-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/block/block-list');
         $this->body = ['blockId' => $final->blockId];
 
         return $this;

@@ -243,7 +243,7 @@ class Address extends ResourceObject
 
     private function redirectToAddressListOnHtmlSuccess(): static
     {
-        $this->mutationResponse->redirectOnSuccess($this, '/mypage/address-list');
+        ($this->mutationResponse)($this, $this->code, '/mypage/address-list');
 
         return $this;
     }

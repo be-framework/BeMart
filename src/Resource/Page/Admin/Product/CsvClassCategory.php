@@ -71,8 +71,7 @@ class CsvClassCategory extends AbstractCsvUpload
 
         assert($final instanceof ClassCategoryCsvImported);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/class-category/class-category-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/class-category/class-category-list');
         $this->body = [
             'transitionId' => 'doImportClassCategoryCsv',
             'accepted' => $final->accepted,

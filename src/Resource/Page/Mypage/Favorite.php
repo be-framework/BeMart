@@ -100,7 +100,7 @@ class Favorite extends ResourceObject
 
     private function redirectToFavoriteListOnHtmlSuccess(): static
     {
-        $this->mutationResponse->redirectOnSuccess($this, '/mypage/favorite-list');
+        ($this->mutationResponse)($this, $this->code, '/mypage/favorite-list');
 
         return $this;
     }

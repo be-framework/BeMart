@@ -83,8 +83,7 @@ class ClassNameList extends ResourceObject
 
         assert($final instanceof ClassNameCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = '/admin/class-name/class-name-list';
+        ($this->mutationResponse)($this, Code::CREATED, '/admin/class-name/class-name-list');
         $this->body = [
             'classNameId' => $final->classNameId,
             'name' => $final->name,

@@ -145,8 +145,7 @@ class AuthorityRole extends ResourceObject
 
             assert($final instanceof AuthorityRulesUpdated);
 
-            ($this->mutationResponse)($this, Code::OK);
-            $this->headers['Location'] = '/admin/authority-role';
+            ($this->mutationResponse)($this, Code::OK, '/admin/authority-role');
             $this->body = [
                 'transitionId' => 'doUpdateAuthorityRole',
                 'count' => $final->count,

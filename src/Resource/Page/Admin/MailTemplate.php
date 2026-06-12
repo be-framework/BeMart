@@ -143,7 +143,7 @@ class MailTemplate extends ResourceObject
             'mailSubject' => $final->mailSubject,
             'changed' => $final->changed,
         ];
-        $this->mutationResponse->redirectOnSuccess($this, '/admin/mail-template?mailTemplateId=' . $final->mailTemplateId);
+        ($this->mutationResponse)($this, Code::OK, '/admin/mail-template?mailTemplateId=' . $final->mailTemplateId);
 
         return $this;
     }
@@ -189,7 +189,7 @@ class MailTemplate extends ResourceObject
             'fileName' => $template->fileName,
             'message' => 'メールテンプレート削除Resourceへ到達しました。',
         ];
-        $this->mutationResponse->redirectOnSuccess($this, '/admin/mail-template');
+        ($this->mutationResponse)($this, Code::OK, '/admin/mail-template');
 
         return $this;
     }

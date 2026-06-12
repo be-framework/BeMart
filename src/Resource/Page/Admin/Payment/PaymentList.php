@@ -94,8 +94,7 @@ class PaymentList extends ResourceObject
 
         assert($final instanceof PaymentMethodAdminCreated);
 
-        ($this->mutationResponse)($this, Code::CREATED);
-        $this->headers['Location'] = sprintf('/admin/payment/payment?paymentId=%s', urlencode($final->paymentId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/payment/payment?paymentId=%s', urlencode($final->paymentId)));
         $this->body = [
             'paymentId' => $final->paymentId,
             'paymentMethodName' => $final->paymentMethodName,

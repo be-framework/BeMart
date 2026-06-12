@@ -51,8 +51,7 @@ class TaxRule extends ResourceObject
 
         assert($final instanceof TaxRuleDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/tax-rule/tax-rule-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/tax-rule/tax-rule-list');
         $this->body = ['taxRuleId' => $final->taxRuleId];
 
         return $this;

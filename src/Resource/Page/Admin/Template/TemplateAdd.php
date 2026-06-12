@@ -122,8 +122,7 @@ class TemplateAdd extends ResourceObject
 
         assert($final instanceof TemplateInstalled);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/template/template-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/template/template-list');
         $this->body = [
             'transitionId' => 'doInstallTemplate',
             'templateId' => $final->templateId,

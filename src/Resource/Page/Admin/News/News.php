@@ -159,8 +159,7 @@ class News extends ResourceObject
 
         assert($final instanceof NewsUpdated);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = sprintf('/admin/news/news?newsId=%s', urlencode($final->newsId));
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/news/news?newsId=%s', urlencode($final->newsId)));
         $this->body = [
             'newsId' => $final->newsId,
             'newsTitle' => $final->newsTitle,
@@ -188,8 +187,7 @@ class News extends ResourceObject
 
         assert($final instanceof NewsDeleted);
 
-        ($this->mutationResponse)($this, Code::OK);
-        $this->headers['Location'] = '/admin/news/news-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/news/news-list');
         $this->body = ['newsId' => $final->newsId];
 
         return $this;
