@@ -54,11 +54,11 @@ API surface は [`docs/api/`](docs/api/) にあります。
 
 生成された公開・検証成果物は次から直接確認できます。
 
-- ALPS profile: [`alps.json`](alps.json)
 - ALPS HTML: [`alps.json.html`](alps.json.html)
-- ALPS diagram: [`alps.svg`](alps.svg)
 - API docs: [`docs/api/`](docs/api/)
 - OpenAPI: [`openapi.yaml`](openapi.yaml) / [`openapi.html`](openapi.html)
+- API terms: [`docs/api/terms.html`](docs/api/terms.html)
+- API audit: [`docs/api/audit.md`](docs/api/audit.md)
 - SQL Quality report: [`build/sql-quality/summary_report.md`](build/sql-quality/summary_report.md)
 
 ## 2パスマイグレーション
