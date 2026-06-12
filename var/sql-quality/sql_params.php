@@ -82,7 +82,7 @@ return [
     'cart_by_session_prefix.sql' => ['sessionPrefix' => 'sample-session'],
 
     // ── plugin / csv ─────────────────────────────────────────────────────────
-    'plugin_find_by_code.sql' => ['code' => 'SamplePlugin'],
+    'plugin_find_by_code.sql' => ['pluginCode' => 'SamplePlugin'],
     'plugin_list_all.sql' => [],
     'csv_column_list_by_type.sql' => ['csvType' => 1],
 
