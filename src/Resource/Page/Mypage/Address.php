@@ -148,7 +148,7 @@ class Address extends ResourceObject
             'form' => $form,
         ];
 
-        return $this->redirectToAddressListOnHtmlSuccess();
+        return $this;
     }
 
     /**
