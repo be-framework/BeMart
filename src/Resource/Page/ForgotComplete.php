@@ -51,10 +51,6 @@ class ForgotComplete extends ResourceObject
             'transitionId' => 'goForgotComplete',
             'fields' => [],
             'submitTo' => null,
-            'links' => [
-                'goLogin' => 'page://self/login',
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

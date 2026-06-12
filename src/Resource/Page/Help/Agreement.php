@@ -39,9 +39,6 @@ class Agreement extends ResourceObject
                 'title' => 'ご利用規約',
                 'sections' => [],
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

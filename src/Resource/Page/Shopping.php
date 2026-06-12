@@ -123,11 +123,6 @@ class Shopping extends ResourceObject
         $this->body = [
             'transitionId' => 'goCheckoutEntry',
             'message' => '購入手続きに進むにはログインまたはゲスト購入を選択してください。',
-            'links' => [
-                'goShoppingLogin' => 'page://self/shopping/login',
-                'goShoppingNonMember' => 'page://self/shopping/non-member',
-                'goCart' => 'page://self/cart',
-            ],
             '_links' => [
                 // Suppress method-level doConfirmOrder for anonymous 303 HAL; entries without href are not rendered.
                 'doConfirmOrder' => [],

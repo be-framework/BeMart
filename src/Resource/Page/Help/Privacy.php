@@ -39,9 +39,6 @@ class Privacy extends ResourceObject
                 'title' => 'プライバシーポリシー',
                 'sections' => [],
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

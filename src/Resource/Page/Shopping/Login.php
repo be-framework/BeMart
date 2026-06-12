@@ -56,11 +56,6 @@ class Login extends ResourceObject
             'fields' => [],
             'submitTo' => null,
             'staticContent' => null,
-            'links' => [
-                'doLogin' => 'page://self/login',
-                'goCustomerRegistration' => 'page://self/entry',
-                'goShoppingNonMember' => 'page://self/shopping/non-member',
-            ],
             // Phase 3: an empty LoginForm for the HTML port to render
             // the checkout-login inputs. JSON contexts ignore it.
             'form' => $this->formFactory->newInstance(LoginForm::class),

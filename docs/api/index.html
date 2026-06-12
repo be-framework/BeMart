@@ -831,7 +831,7 @@ token into the session for the POST (same as Login).</div><div class="method-alp
   <td rowspan="1"><a href="#POST/admin/action-redirectresponse" class="schema-link">POST /admin/action-redirect response</a></td>
 </tr>
 <tr>
-  <td rowspan="5" class="path-cell" id="path-admin/authority-role">/admin/authority-role</td>
+  <td rowspan="4" class="path-cell" id="path-admin/authority-role">/admin/authority-role</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">Phase 3 admin HTML Tier-2: render the authority-rule management
 screen. The ALPS transition covers `doUpdateAuthorityRole`; EC-CUBE
 uses the same resource to edit URL-deny rules stored in
@@ -843,10 +843,10 @@ uses the same resource to edit URL-deny rules stored in
 </tr>
 <tr>
 
-  <td rowspan="4" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: browser form input for URL deny rules. The primary HTML
-shape is `csrfToken` plus `AuthorityRoles[*][Authority]` /
-`AuthorityRoles[*][deny_url]`. The legacy member role-flip shape
-(`loginId`, `authority`) remains supported for member workflow.</div><div class="method-alps"><a href="../alps.json.html#doUpdateAuthorityRole" class="alps-link">doUpdateAuthorityRole</a></div></td>
+  <td rowspan="3" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Wave 8: browser form input for URL deny rules. The primary HTML
+shape carries CSRF at the request boundary plus
+`AuthorityRoles[*][Authority]` / `AuthorityRoles[*][deny_url]`.</div><div class="method-desc">The legacy member role-flip shape (`loginId`, `authority`)
+remains supported for member workflow.</div><div class="method-alps"><a href="../alps.json.html#doUpdateAuthorityRole" class="alps-link">doUpdateAuthorityRole</a></div></td>
   <td><a href="../alps.json.html#loginId" class="param alps-param" title="ログインID">loginId</a></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">ログインID（入力） - 管理画面ログイン用のID。一意 Fake観察文字長 6〜13; 観察値 &#039;test-admin&#039;, &#039;shop-owner&#039;, &#039;deputy&#039;, &#039;deleted-admin&#039;, &#039;unknown-user&#039;。</td>
@@ -856,7 +856,7 @@ shape is `csrfToken` plus `AuthorityRoles[*][Authority]` /
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: test-admin</span>
     </div></td>
-  <td rowspan="4"><a href="#POST/admin/authority-roleresponse" class="schema-link">POST /admin/authority-role response</a></td>
+  <td rowspan="3"><a href="#POST/admin/authority-roleresponse" class="schema-link">POST /admin/authority-role response</a></td>
 </tr>
 <tr>
 
@@ -878,17 +878,6 @@ shape is `csrfToken` plus `AuthorityRoles[*][Authority]` /
   <td class="param-desc">権限ルール入力一覧 - 権限管理画面のURL拒否ルール行。HTML form の AuthorityRoles[*][Authority] / deny_url を受け取る。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
-    </div></td>
-
-</tr>
-<tr>
-
-
-  <td><span class="param">csrfToken</span></td>
-  <td><span class="badge type-string">string</span></td>
-  <td class="param-desc"></td>
-  <td><div class="extra-info">
-
     </div></td>
 
 </tr>
@@ -4314,6 +4303,9 @@ defence (bound params, HTML escape on render).</div><div class="method-alps"><a 
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">都道府県（入力） - 日本の都道府県（1=北海道〜47=沖縄県）。住所の最上位区分として顧客・受注・配送先で使用。配送料の地域区分（DeliveryFee）や税率の地域設定（TaxRule）にも使用 都道府県ID。住所フォームの未選択状態では0、確定住所では1〜47を使う。 Fake観察数値 13〜27; 観察値 &#039;13&#039;, &#039;27&#039;; null 3/9。</td>
   <td><div class="extra-info">
+      <span class="badge constraint">minLength: 0</span>
+      <span class="badge constraint">maxLength: 2</span>
+      <span class="badge constraint">pattern: ^\d*$</span>
       <span class="badge constraint">$comment: Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.</span>
       <span class="badge example">example: 13</span>
     </div></td>
@@ -7205,15 +7197,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /forgot-complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;,&quot;goLogin&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goLogin</td>
   <td><span class="badge link">link</span></td>
@@ -7389,15 +7372,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /index のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goHelpPrivacy&quot;,&quot;goCustomerRegistration&quot;,&quot;goHelpGuide&quot;,&quot;goHelpAbout&quot;,&quot;goHelpAgreement&quot;,&quot;goMypage&quot;,&quot;goContactForm&quot;,&quot;goLogin&quot;,&quot;goHelpTradeLaw&quot;,&quot;goCart&quot;,&quot;goProductList&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -8131,15 +8105,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">商品一覧 - /products のレスポンスで扱う商品一覧。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minItems: 0</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /products のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;,&quot;goProduct&quot;,&quot;goCart&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -14181,15 +14146,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">$comment: BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /contact/complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goTop</td>
   <td><span class="badge link">link</span></td>
@@ -14254,15 +14210,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /contact/confirm のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;,&quot;doSubmitContact&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -14331,15 +14278,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /entry/activate のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -14431,15 +14369,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /entry/complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goTop</td>
   <td><span class="badge link">link</span></td>
@@ -14504,15 +14433,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /entry/confirm のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;,&quot;doRegisterCustomer&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -14583,15 +14503,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /help/about のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goTop</td>
   <td><span class="badge link">link</span></td>
@@ -14648,15 +14559,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /help/agreement のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -14717,15 +14619,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /help/guide のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goTop</td>
   <td><span class="badge link">link</span></td>
@@ -14784,15 +14677,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /help/privacy のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goTop</td>
   <td><span class="badge link">link</span></td>
@@ -14849,15 +14733,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /help/trade-law のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -15696,15 +15571,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /mypage/change-complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;,&quot;goMypage&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goTop</td>
   <td><span class="badge link">link</span></td>
@@ -16521,15 +16387,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /mypage/withdraw-complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goTop</td>
   <td><span class="badge link">link</span></td>
@@ -16588,15 +16445,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 160</span>
       <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
       <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /mypage/withdraw-confirm のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;doWithdrawCustomer&quot;,&quot;goMypage&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -16788,15 +16636,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minLength: 0</span>
       <span class="badge constraint">maxLength: 64</span>
       <span class="badge example">example: past0000000000000000000000000001</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /shopping/complete のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTop&quot;,&quot;goCart&quot;,&quot;goMypage&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -17010,15 +16849,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: 12700</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /shopping/confirm のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goShoppingError&quot;,&quot;doCheckout&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doCheckout</td>
   <td><span class="badge link">link</span></td>
@@ -17107,15 +16937,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: doAddCartItem</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /shopping/error のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goCart&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goCart</td>
   <td><span class="badge link">link</span></td>
@@ -17180,15 +17001,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 96</span>
       <span class="badge constraint">pattern: ^(go|do)[A-Z][A-Za-z0-9]*$</span>
       <span class="badge example">example: doAddCartItem</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /shopping/login のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;doLogin&quot;,&quot;goCustomerRegistration&quot;,&quot;goShoppingNonMember&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -17448,15 +17260,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge example">example: fake-csrf-token-bemart-2026</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /shopping/shipping のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;doSelectShippingAddress&quot;,&quot;goShoppingShippingMultiple&quot;,&quot;goShoppingShippingEdit&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doSelectShippingAddress</td>
   <td><span class="badge link">link</span></td>
@@ -17604,15 +17407,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 160</span>
       <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
       <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /shopping/shipping-edit のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;doUpdateShippingAddress&quot;,&quot;goShoppingShipping&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -17843,15 +17637,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">minItems: 0</span>
     </div></td>
 </tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /shopping/shipping-multiple のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goShopping&quot;,&quot;goShoppingShipping&quot;]</span>
-    </div></td>
-</tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goShopping</td>
   <td><span class="badge link">link</span></td>
@@ -17988,15 +17773,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 160</span>
       <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]+$</span>
       <span class="badge example">example: fake-csrf-token-bemart-2026</span>
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /shopping/shipping-multiple-edit のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;doAddMultipleShippingAddress&quot;,&quot;goShoppingShippingMultiple&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">
@@ -23796,15 +23572,6 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc"></td>
   <td><div class="extra-info">
 
-    </div></td>
-</tr>
-<tr>
-  <td><span class="prop-name">links</span></td>
-  <td><span class="badge type-objectnull">object|null</span></td>
-  <td class="param-desc">ALPS遷移リンク集合 - /admin/template/template-list のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。</td>
-  <td><div class="extra-info">
-      <span class="badge constraint">additionalProperties: </span>
-      <span class="badge constraint">required: [&quot;goTemplateAdd&quot;]</span>
     </div></td>
 </tr>
 <tr class="link-row">

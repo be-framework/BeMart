@@ -68,12 +68,11 @@ final class ShoppingCompleteResourceTest extends TestCase
         $this->assertSame('', $ro->body['orderNo']);
     }
 
-    public function testOnGetExposesOutboundTransitions(): void
+    public function testOnGetDoesNotExposeBodyLinks(): void
     {
         $ro = $this->resource->get('page://self/shopping/complete');
 
         $this->assertIsArray($ro->body);
-        $this->assertSame('page://self/', $ro->body['links']['goTop']);
-        $this->assertSame('page://self/cart', $ro->body['links']['goCart']);
+        $this->assertArrayNotHasKey('links', $ro->body);
     }
 }

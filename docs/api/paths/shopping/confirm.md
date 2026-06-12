@@ -64,7 +64,6 @@ ALPS `goShopping` に対応する GET 操作。
 | discount | int|null | 値引き額 - 受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 '0'。 | Required | {"minimum":0,"maximum":999999999} | 0 |
 | csrfToken | string|null | 処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。 | Optional | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 | total | int|null | 受注合計 - 受注合計金額。計算式: subtotal(商品税込合計) + deliveryFeeTotal(送料) + charge(手数料) - discount(値引き)。カートのtotalPriceとは別プロパティ Fake観察数値 12700〜12700; 観察値 '12700'。 | Required | {"minimum":0,"maximum":999999999} | 12700 |
-| links | object|null | ALPS遷移リンク集合 - /shopping/confirm のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。 | Optional | {"properties":{"goShoppingError":{"$ref":"#/$defs/uriReference","title":"ALPS\u9077\u79fb\u30ea\u30f3\u30af","description":"ALPS `goShoppingError` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"},"doCheckout":{"$ref":"#/$defs/uriReference","title":"ALPS\u9077\u79fb\u30ea\u30f3\u30af","description":"ALPS `doCheckout` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"}},"additionalProperties":false,"required":["goShoppingError","doCheckout"]} |  |
 
 #### Links
 
@@ -112,7 +111,6 @@ Keep GET query compatibility while accepting the real browser form.
 | discount | int|null | 値引き額 - 受注全体の値引き合計額。クーポン等による値引き Fake観察数値 0〜0; 観察値 '0'。 | Required | {"minimum":0,"maximum":999999999} | 0 |
 | csrfToken | string|null | 処理識別子 - フォーム送信の偽造を防ぐために送信元画面で発行されるトークン。Fake環境では deterministic な値を使う。 | Optional | {"minLength":8,"maxLength":160,"pattern":"^[A-Za-z0-9_.:-]+$"} | fake-csrf-token-bemart-2026 |
 | total | int|null | 受注合計 - 受注合計金額。計算式: subtotal(商品税込合計) + deliveryFeeTotal(送料) + charge(手数料) - discount(値引き)。カートのtotalPriceとは別プロパティ Fake観察数値 12700〜12700; 観察値 '12700'。 | Required | {"minimum":0,"maximum":999999999} | 12700 |
-| links | object|null | ALPS遷移リンク集合 - /shopping/confirm のレスポンスから利用できるALPS遷移リンク集合。property名がrel、値が遷移先URIを表す。 | Optional | {"properties":{"goShoppingError":{"$ref":"#/$defs/uriReference","title":"ALPS\u9077\u79fb\u30ea\u30f3\u30af","description":"ALPS `goShoppingError` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"},"doCheckout":{"$ref":"#/$defs/uriReference","title":"ALPS\u9077\u79fb\u30ea\u30f3\u30af","description":"ALPS `doCheckout` \u9077\u79fb\u306e\u30ea\u30f3\u30af\u5148URI\u3002property\u540d\u304crel\u3001\u5024\u304chref\u3092\u8868\u3059\u3002"}},"additionalProperties":false,"required":["goShoppingError","doCheckout"]} |  |
 
 #### Links
 

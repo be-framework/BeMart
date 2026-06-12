@@ -40,9 +40,6 @@ class Guide extends ResourceObject
                 'title' => 'ご利用ガイド',
                 'sections' => [],
             ],
-            'links' => [
-                'goTop' => 'page://self/',
-            ],
         ];
 
         return $this;

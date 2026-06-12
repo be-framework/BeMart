@@ -47,7 +47,6 @@ class Complete extends ResourceObject
                 'page' => 'contact-complete',
                 'title' => 'お問い合わせ(完了)',
             ],
-            'links' => ['goTop' => 'page://self/'],
         ];
 
         return $this;
