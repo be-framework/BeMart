@@ -1,0 +1,38 @@
+{% set code = product.productCode|default(product.id|default('')) %}
+{% set name = product.productName|default(product.name|default('IDEA STORE 商品')) %}
+{% set image = product.image|default(product.mainListImage|default('/assets/idea-store/images/product/real/product-001.png')) %}
+{% if image starts with 'idea-store/' %}
+  {% set image = '/save_image/' ~ image %}
+{% elseif image starts with 'save_image/' or image starts with 'assets/' %}
+  {% set image = '/' ~ image %}
+{% endif %}
+{% set categoryName = product.categoryName|default(product.categoryNames|default([])|first|default('IDEA STORE')) %}
+{% set description = product.shortDescription|default(product.descriptionList|default(product.description|default('住まいと自分時間を心地よくするための道具です。'))) %}
+{% set price = product.price|default(product.price02|default(0)) %}
+{% set stock = product.stock|default(null) %}
+{% set badge = product.badge|default(loop is defined and loop.index <= 3 ? 'NEW' : 'IDEA PICK') %}
+<a class="idea-card idea-product-card" href="/product?productCode={{ code }}">
+  <span class="idea-product-card-media">
+    <span class="idea-product-badge">{{ badge }}</span>
+    <img src="{{ image }}" alt="{{ name }}"{% if loop is defined and loop.index > 8 %} loading="lazy"{% endif %}>
+  </span>
+  <span class="idea-card-body">
+    <span class="idea-card-kicker">{{ categoryName }}</span>
+    <strong class="idea-card-title">{{ name }}</strong>
+    <span class="idea-muted">{{ description }}</span>
+    {% set reviewSummary = product.reviewSummary|default(null) %}
+    {% set reviewCount = reviewSummary.reviewCount|default(0) %}
+    {% set averageRating = reviewSummary.averageRating|default(null) %}
+    {% if reviewCount > 0 and averageRating is not same as(null) %}
+      <span class="idea-rating" aria-label="レビュー評価 {{ averageRating|number_format(1, '.', '') }}、{{ reviewCount }}件">★★★★★ <span>{{ averageRating|number_format(1, '.', '') }}</span> <small>({{ reviewCount }})</small></span>
+    {% else %}
+      <span class="idea-rating idea-rating--empty" aria-label="レビューなし">レビューなし</span>
+    {% endif %}
+    <span class="idea-card-bottom"><span class="idea-price">¥{{ price|number_format }}</span><span aria-hidden="true">→</span></span>
+    <span class="idea-shipping">{% if stock is not null and stock > 0 %}在庫あり・最短翌日{% else %}入荷待ち{% endif %}</span>
+    <span class="idea-card-cta-row" aria-hidden="true">
+      <span class="idea-card-cta idea-card-cta--primary">詳細を見る</span>
+      <span class="idea-card-cta">詳細からカートへ</span>
+    </span>
+  </span>
+</a>
