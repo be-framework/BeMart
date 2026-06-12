@@ -299,7 +299,7 @@ final class ResourceSmokeTest extends TestCase
             'POST page://self/mypage/withdraw' => Code::OK,
             'POST page://self/reset?resetKey=valid-reset-key-pilot15-aaaa1111&password=smoke-passphrase-2026' => Code::OK,
             'POST page://self/shopping/checkout?preOrderId=aaaa00000000000000000000000000000000aaaa' => Code::CREATED,
-            'POST page://self/shopping/confirm?preOrderId=aceface0000000000000000000000000000a11ce&payment=2' => Code::OK,
+            'POST page://self/shopping/confirm?preOrderId=aceface0000000000000000000000000000a11ce&payment=2&cardNumber=4242424242424242&cardName=IDEA%20TARO&cardExpiryMonth=12&cardExpiryYear=30&cardSecurityCode=123' => Code::OK,
             'POST page://self/shopping/non-member?name01=%E5%B1%B1%E7%94%B0&name02=%E5%A4%AA%E9%83%8E&kana01=%E3%83%A4%E3%83%9E%E3%83%80&kana02=%E3%82%BF%E3%83%AD%E3%82%A6&email=smoke-eb56b445%40example.com&phoneNumber=0312345678&postalCode=1500001&pref=13&addr01=%E6%B8%8B%E8%B0%B7%E5%8C%BA&addr02=%E7%A5%9E%E5%AE%AE%E5%89%8D1-1-1' => Code::CREATED,
             'POST page://self/shopping/shipping' => Code::SEE_OTHER,
             'POST page://self/shopping/shipping-edit' => Code::SEE_OTHER,

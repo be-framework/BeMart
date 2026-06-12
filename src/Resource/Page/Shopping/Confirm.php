@@ -8,17 +8,26 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use DateTimeImmutable;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
 use MyVendor\BeMart\Be\Final\OrderConfirmed;
+use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
+use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
+use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
+use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use MyVendor\BeMart\Be\Final\OrderConfirmFailed;
 use MyVendor\BeMart\Be\Input\ConfirmOrderInput;
 use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function preg_replace;
+use function strlen;
+use function substr;
+use function trim;
 
 /**
  * EC-CUBE goShoppingConfirm — 注文内容のご確認.
@@ -48,6 +57,8 @@ class Confirm extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly CsrfToken $csrf,
+        private readonly OrderQueryInterface $orders,
+        private readonly OrderCommandInterface $orderCommand,
     ) {
     }
 
@@ -83,11 +94,31 @@ class Confirm extends ResourceObject
         string $preOrderId,
         int|null $payment = null,
         int|null $paymentMethodId = null,
+        string|null $cardNumber = null,
+        string|null $cardName = null,
+        string|null $cardExpiryMonth = null,
+        string|null $cardExpiryYear = null,
+        string|null $cardSecurityCode = null,
     ): static {
-        return $this->confirmOrder($preOrderId, $payment ?? $paymentMethodId ?? 2);
+        $selectedPaymentMethodId = $payment ?? $paymentMethodId ?? 2;
+        if (
+            $selectedPaymentMethodId === 2
+            && ! self::creditCardComplete($cardNumber, $cardName, $cardExpiryMonth, $cardExpiryYear, $cardSecurityCode)
+        ) {
+            $this->code = Code::BAD_REQUEST;
+            $this->body = [
+                'message' => 'クレジットカード情報を入力してください。',
+                'preOrderId' => $preOrderId,
+                'paymentMethodId' => $selectedPaymentMethodId,
+            ];
+
+            return $this;
+        }
+
+        return $this->confirmOrder($preOrderId, $selectedPaymentMethodId, $selectedPaymentMethodId === 2 ? self::cardLast4($cardNumber) : null);
     }
 
-    private function confirmOrder(string $preOrderId, int $paymentMethodId): static
+    private function confirmOrder(string $preOrderId, int $paymentMethodId, string|null $cardLast4 = null): static
     {
         try {
             $final = ($this->becoming)(new ConfirmOrderInput(
@@ -120,6 +151,7 @@ class Confirm extends ResourceObject
         }
 
         assert($final instanceof OrderConfirmed);
+        $this->persistSelectedPayment($preOrderId, $final);
 
         $this->code = Code::OK;
         $this->body = [
@@ -148,7 +180,68 @@ class Confirm extends ResourceObject
                 'goShoppingError' => 'page://self/shopping/error',
             ],
         ];
+        if ($cardLast4 !== null) {
+            $this->body['cardLast4'] = $cardLast4;
+        }
 
         return $this;
+    }
+
+
+    private function persistSelectedPayment(string $preOrderId, OrderConfirmed $final): void
+    {
+        $order = $this->orders->byPreOrderId($preOrderId);
+        if (! $order instanceof OrderEntity) {
+            return;
+        }
+
+        $now = (new DateTimeImmutable())->format('Y-m-d H:i:s');
+        $this->orderCommand->register(new FinalizedOrderEntity(
+            orderNo: $preOrderId,
+            preOrderId: $preOrderId,
+            customerId: $order->customerId,
+            paymentMethodId: $final->paymentMethodId,
+            subtotal: $final->subtotal,
+            deliveryFeeTotal: $final->deliveryFeeTotal,
+            charge: $final->charge,
+            discount: $final->discount,
+            tax: $final->tax,
+            total: $final->total,
+            paymentTotal: $final->paymentTotal,
+            addPoint: $final->addPoint,
+            usePoint: $final->usePoint,
+            orderStatus: FinalizedOrderEntity::STATUS_PROCESSING,
+            orderDate: $now,
+            paymentDate: '',
+            customerSnapshot: $final->customer,
+        ));
+    }
+
+    private static function creditCardComplete(
+        string|null $cardNumber,
+        string|null $cardName,
+        string|null $cardExpiryMonth,
+        string|null $cardExpiryYear,
+        string|null $cardSecurityCode,
+    ): bool {
+        $digits = self::cardDigits($cardNumber);
+
+        return strlen($digits) >= 12
+            && trim((string) $cardName) !== ''
+            && trim((string) $cardExpiryMonth) !== ''
+            && trim((string) $cardExpiryYear) !== ''
+            && strlen(self::cardDigits($cardSecurityCode)) >= 3;
+    }
+
+    private static function cardLast4(string|null $cardNumber): string|null
+    {
+        $digits = self::cardDigits($cardNumber);
+
+        return strlen($digits) >= 4 ? substr($digits, -4) : null;
+    }
+
+    private static function cardDigits(string|null $value): string
+    {
+        return preg_replace('/\D+/', '', (string) $value) ?? '';
     }
 }

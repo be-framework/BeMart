@@ -94,6 +94,26 @@
           {% endfor %}
         </div>
         {% if form is defined %}<p class="idea-form-error">{{ form.error('payment') }}</p>{% endif %}
+        <div class="idea-credit-card-fields" data-credit-card-fields hidden>
+          <p class="idea-muted">Fake決済でも、注文確認へ進むにはテスト用カード情報の入力が必要です。実カード情報は保存されません。</p>
+          <div class="idea-form-grid">
+            <label class="idea-field">カード番号
+              <input type="text" name="cardNumber" inputmode="numeric" autocomplete="cc-number" placeholder="4242 4242 4242 4242" maxlength="23" data-credit-card-input>
+            </label>
+            <label class="idea-field">カード名義
+              <input type="text" name="cardName" autocomplete="cc-name" placeholder="IDEA TARO" maxlength="64" data-credit-card-input>
+            </label>
+            <label class="idea-field">有効期限（月）
+              <input type="text" name="cardExpiryMonth" inputmode="numeric" autocomplete="cc-exp-month" placeholder="12" maxlength="2" data-credit-card-input>
+            </label>
+            <label class="idea-field">有効期限（年）
+              <input type="text" name="cardExpiryYear" inputmode="numeric" autocomplete="cc-exp-year" placeholder="30" maxlength="4" data-credit-card-input>
+            </label>
+            <label class="idea-field">セキュリティコード
+              <input type="text" name="cardSecurityCode" inputmode="numeric" autocomplete="cc-csc" placeholder="123" maxlength="4" data-credit-card-input>
+            </label>
+          </div>
+        </div>
       </section>
 
       <section class="idea-checkout-panel">
@@ -143,4 +163,27 @@
     </div>
   </section>
 {% endif %}
+
+<script>
+(() => {
+  const form = document.querySelector('.idea-checkout-form');
+  if (!form) return;
+  const cardFields = form.querySelector('[data-credit-card-fields]');
+  if (!cardFields) return;
+  const inputs = Array.from(cardFields.querySelectorAll('[data-credit-card-input]'));
+  const syncCreditCardFields = () => {
+    const checked = form.querySelector('input[name="payment"]:checked');
+    const creditSelected = checked && checked.value === '2';
+    cardFields.hidden = !creditSelected;
+    inputs.forEach((input) => {
+      input.disabled = !creditSelected;
+      input.required = creditSelected;
+    });
+  };
+  form.querySelectorAll('input[name="payment"]').forEach((input) => {
+    input.addEventListener('change', syncCreditCardFields);
+  });
+  syncCreditCardFields();
+})();
+</script>
 {% endblock %}

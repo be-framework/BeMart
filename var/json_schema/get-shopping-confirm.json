@@ -310,6 +310,18 @@
         "goShoppingError",
         "doCheckout"
       ]
+    },
+    "cardLast4": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "カード番号下4桁（Fake決済表示）",
+      "description": "クレジットカードFake決済で確認画面に表示するカード番号下4桁。カード番号全体は保存しない。",
+      "minLength": 0,
+      "maxLength": 4,
+      "pattern": "^\\d{0,4}$",
+      "example": "4242"
     }
   },
   "additionalProperties": false,

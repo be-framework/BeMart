@@ -87,6 +87,7 @@
         </div>
         <div class="idea-info-list">
           <p><strong>{{ paymentMethodName|default('お支払い方法未選択') }}</strong></p>
+          {% if cardLast4|default('') %}<p>Fake決済カード：**** **** **** {{ cardLast4 }}</p>{% endif %}
           <p>手数料 ¥{{ charge|default(0)|number_format }}</p>
         </div>
       </section>

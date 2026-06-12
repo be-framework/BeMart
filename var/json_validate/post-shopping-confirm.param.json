@@ -46,6 +46,61 @@
       "maxLength": 128,
       "$comment": "transport compatibility: payment と同じ意味。"
     },
+    "cardNumber": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "カード番号（Fake入力）",
+      "description": "クレジットカード選択時にHTMLフォームから送られるFake決済用カード番号。保存しない。",
+      "minLength": 0,
+      "maxLength": 32,
+      "example": "4242 4242 4242 4242"
+    },
+    "cardName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "カード名義（Fake入力）",
+      "description": "クレジットカード選択時にHTMLフォームから送られるFake決済用カード名義。保存しない。",
+      "minLength": 0,
+      "maxLength": 128,
+      "example": "IDEA TARO"
+    },
+    "cardExpiryMonth": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "カード有効期限月（Fake入力）",
+      "description": "クレジットカード選択時にHTMLフォームから送られるFake決済用有効期限月。保存しない。",
+      "minLength": 0,
+      "maxLength": 2,
+      "example": "12"
+    },
+    "cardExpiryYear": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "カード有効期限年（Fake入力）",
+      "description": "クレジットカード選択時にHTMLフォームから送られるFake決済用有効期限年。保存しない。",
+      "minLength": 0,
+      "maxLength": 4,
+      "example": "30"
+    },
+    "cardSecurityCode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "カードセキュリティコード（Fake入力）",
+      "description": "クレジットカード選択時にHTMLフォームから送られるFake決済用セキュリティコード。保存しない。",
+      "minLength": 0,
+      "maxLength": 4,
+      "example": "123"
+    },
     "csrfToken": {
       "type": [
         "string",
