@@ -8,6 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Be\Exception\TemplateNotFoundException;
@@ -20,6 +21,7 @@ use MyVendor\BeMart\Be\Input\DeleteTemplateInput;
 use MyVendor\BeMart\Be\Input\DownloadTemplateInput;
 use MyVendor\BeMart\Be\Input\GetAdminTemplateListInput;
 use MyVendor\BeMart\Be\Input\SelectTemplateInput;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
@@ -32,6 +34,8 @@ class TemplateList extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly CsrfToken $csrfToken,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -53,6 +57,7 @@ class TemplateList extends ResourceObject
         $this->body = [
             'count' => $final->count,
             'templates' => $final->templates,
+            'csrfToken' => $this->csrfToken->token,
             'links' => [
                 'goTemplateAdd' => 'page://self/admin/template/template-add',
             ],
@@ -124,8 +129,7 @@ class TemplateList extends ResourceObject
 
         assert($final instanceof TemplateSelected || $final instanceof TemplateDeleted);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/template/template-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/template/template-list');
         $this->body = [
             'transitionId' => $transitionId,
             'templateId' => $final->templateId,

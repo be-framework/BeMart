@@ -12,6 +12,12 @@ The implementation is a Composer project; ALPS artifacts are validated separatel
 - `asd --validate alps.json` validates the ALPS profile before review or commit.
 - `asd -f html -o alps.json.html alps.json` / `asd -f svg -o alps.svg alps.json` regenerate the HTML/SVG; keep the `docs/` copies in sync.
 
+## Local Database
+
+- On this machine, use MariaDB as `root` with no password.
+- Default SQL test URL: `mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14`.
+- Prepare the schema/master data with `sql/setup-db.sh "$DATABASE_URL"` before SQL-backed HTTP or Web+DB runs.
+
 ## Coding Style & Naming Conventions
 Use 2-space indentation in JSON and YAML. Keep Markdown concise and instructional; the existing public docs are written in Japanese, so match that tone for user-facing prose. Follow existing naming patterns: lowerCamelCase for ALPS descriptor IDs such as `productName`, kebab-case for note files such as `verify-similar-names.md`, and short ATX headings in Markdown. Avoid reformatting generated HTML by hand unless the generation source is unavailable.
 

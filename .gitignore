@@ -1,7 +1,8 @@
 /vendor/
+/node_modules/
 /.phpunit.cache/
 /build/
-/var/log/*.json
+/var/log/
 /var/tmp/
 /tests/Http/log/*.log
 .DS_Store

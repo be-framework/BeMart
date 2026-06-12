@@ -18,6 +18,7 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
 use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
 use Ray\WebFormModule\FormFactory;
@@ -60,6 +61,7 @@ class TwoFactorAuthSet extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
+        private readonly CsrfToken $csrf,
     ) {
     }
 
@@ -71,25 +73,31 @@ class TwoFactorAuthSet extends ResourceObject
      */
     #[Alps('doSetTwoFactorAuth')]
     #[JsonSchema(schema: 'get-admin-two-factor-auth-set.json')]
+    #[Link(rel: 'doSetTwoFactorAuth', href: 'page://self/admin/two-factor-auth-set', method: 'put')]
     #[Link(rel: 'goAdminLogin', href: 'page://self/admin/login')]
     public function onGet(): static
     {
         $challenge = $this->setupChallenge();
+        $authKey = $challenge?->authKey ?? '';
+        $form = $this->formFactory->newInstance(AdminTwoFactorAuthForm::class);
+        assert($form instanceof AdminTwoFactorAuthForm);
+        if ($authKey !== '') {
+            $form->fillValues(['authKey' => $authKey]);
+        }
 
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuthSet',
-            'fields' => ['deviceToken', 'authKey'],
+            'fields' => ['deviceToken', 'authKey', 'csrfToken'],
             // The QR-code JS reads authKey. It is present only when a
             // password-verified setup challenge exists; otherwise the empty
             // placeholder keeps anonymous GET render fidelity.
-            'authKey' => $challenge?->authKey ?? '',
+            'authKey' => $authKey,
             'memberName' => '',
             'shopName' => 'BeMart',
-            // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
-            'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
+            'csrfToken' => $this->csrf->token,
+            'form' => $form,
         ];
-        assert($this->body['form'] instanceof AdminTwoFactorAuthForm);
 
         return $this;
     }

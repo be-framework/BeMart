@@ -10,8 +10,11 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use MyVendor\BeMart\Module\TestModule;
+use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
@@ -35,19 +38,25 @@ final class AdminPaymentResourceTest extends TestCase
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
     }
 
-    private function rebindAdminSession(string|null $adminId): void
+    private function rebindAdminSession(string|null $adminId, bool $htmlMutation = false): void
     {
         $session = new FakeAdminSession($adminId);
         $base = new TestModule(new Meta('MyVendor\\BeMart', 'test'));
-        $override = new class ($session) extends AbstractModule {
-            public function __construct(private readonly FakeAdminSession $session)
-            {
+        $override = new class ($session, $htmlMutation) extends AbstractModule {
+            public function __construct(
+                private readonly FakeAdminSession $session,
+                private readonly bool $htmlMutation,
+            ) {
                 parent::__construct();
             }
 
             protected function configure(): void
             {
                 $this->bind(AdminSession::class)->toInstance($this->session);
+                if ($this->htmlMutation) {
+                    $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
+                }
+                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
             }
         };
         $base->override($override);
@@ -75,6 +84,19 @@ final class AdminPaymentResourceTest extends TestCase
         $this->assertSame(Code::CREATED, $ro->code);
         $this->assertSame('クレジットカード', $ro->body['paymentMethodName']);
         $this->assertTrue($ro->body['visible']);
+    }
+
+    public function testCreateHtmlContextRedirectsToPaymentDetail(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
+        $ro = $this->resource->post('page://self/admin/payment/payment-list', [
+                'paymentMethodName' => 'クレジットカード',
+                'charge' => 0,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertStringContainsString('/admin/payment/payment?paymentId=', $ro->headers['Location']);
     }
 
     public function testCreateRejectsAnonymousAdmin(): void
@@ -123,6 +145,21 @@ final class AdminPaymentResourceTest extends TestCase
         $this->assertSame(200, $ro->body['charge']);
     }
 
+    public function testPutHtmlContextRedirectsToPaymentDetail(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
+        $id = $this->seed('クレジットカード');
+        $ro = $this->resource->put('page://self/admin/payment/payment', [
+                'paymentId' => $id,
+                'paymentMethodName' => 'クレジット',
+                'charge' => 200,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/payment/payment?paymentId=' . $id, $ro->headers['Location']);
+    }
+
     public function testPutUnknownIdReturns404(): void
     {
         $this->expectException(\MyVendor\BeMart\Be\Exception\PaymentMethodAdminNotFoundException::class);
@@ -145,6 +182,29 @@ final class AdminPaymentResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertSame($id, $ro->body['paymentId']);
+    }
+
+    public function testDeleteHtmlContextRedirectsToPaymentList(): void
+    {
+        $this->rebindAdminSession(self::TEST_ADMIN_ID, true);
+        $id = $this->seed('代金引換');
+        $ro = $this->resource->delete('page://self/admin/payment/payment', [
+                'paymentId' => $id,
+                'csrfToken' => FakeCsrfToken::TOKEN,
+            ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/payment/payment-list', $ro->headers['Location']);
+    }
+
+    public function testDeleteRejectsMissingCsrf(): void
+    {
+        $id = $this->seed('代金引換');
+        $ro = $this->resource->delete('page://self/admin/payment/payment', [
+            'paymentId' => $id,
+        ]);
+        $this->assertSame(Code::FORBIDDEN, $ro->code);
+        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testOnGetNewReturnsBlankForm(): void

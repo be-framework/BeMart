@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\ClassCategoryNotFoundException;
@@ -20,6 +21,8 @@ use MyVendor\BeMart\Be\Input\UpdateClassCategoryInput;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function sprintf;
+use function urlencode;
 
 /**
  * EC-CUBE doUpdateClassCategory + doDeleteClassCategory — single-row
@@ -34,6 +37,7 @@ class ClassCategory extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -57,7 +61,14 @@ class ClassCategory extends ResourceObject
 
         assert($final instanceof ClassCategoryUpdated);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)(
+            $this,
+            Code::OK,
+            sprintf(
+                '/admin/class-category/class-category-list?classNameId=%s',
+                urlencode($final->classNameId),
+            ),
+        );
         $this->body = [
             'classCategoryId' => $final->classCategoryId,
             'classNameId' => $final->classNameId,
@@ -68,10 +79,10 @@ class ClassCategory extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateClassCategory` に対応する DELETE 操作。
+     * ALPS `doDeleteClassCategory` に対応する DELETE 操作。
      * @psalm-taint-source input $classCategoryId
      */
-    #[Alps('doUpdateClassCategory')]
+    #[Alps('doDeleteClassCategory')]
     #[JsonSchema(schema: 'delete-admin-class-category-class-category.json', params: 'delete-admin-class-category-class-category.param.json')]
     #[Link(rel: 'goClassCategoryList', href: 'page://self/admin/class-category/class-category-list')]
     #[CsrfProtected]
@@ -81,7 +92,14 @@ class ClassCategory extends ResourceObject
 
         assert($final instanceof ClassCategoryDeleted);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)(
+            $this,
+            Code::OK,
+            sprintf(
+                '/admin/class-category/class-category-list?classNameId=%s',
+                urlencode($final->classNameId),
+            ),
+        );
         $this->body = ['classCategoryId' => $final->classCategoryId];
 
         return $this;

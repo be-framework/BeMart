@@ -156,12 +156,28 @@ final class AdminNewsHtmlRenderTest extends TestCase
             'newsId' => 'nw-welcome',
         ])->toString();
 
+        $this->assertStringContainsString('action="/admin/news/news?newsId=nw-welcome&_method=put"', $html);
         $this->assertStringContainsString('id="admin_news_title"', $html);
-        $this->assertStringContainsString('name="title"', $html);
+        $this->assertStringContainsString('name="newsTitle"', $html);
         // The seed post's title is repopulated from the resource body.
         $this->assertStringContainsString('value="ようこそ"', $html);
         $this->assertStringContainsString('id="admin_news_publish_date"', $html);
+        $this->assertStringContainsString('name="publishDate"', $html);
         $this->assertStringContainsString('<textarea id="admin_news_description"', $html);
+        $this->assertStringContainsString('name="newsDescription"', $html);
+        $this->assertStringContainsString('name="linkMethod" value="0"', $html);
+        $this->assertStringNotContainsString('name="linkMethod[]"', $html);
+    }
+
+    public function testNewNewsFormPostsToCollectionCreateAction(): void
+    {
+        $html = $this->resource->get('page://self/admin/news/news')->toString();
+
+        $this->assertStringContainsString('action="/admin/news/news-list"', $html);
+        $this->assertStringContainsString('name="newsTitle"', $html);
+        $this->assertStringContainsString('name="publishDate"', $html);
+        $this->assertStringContainsString('name="newsUrl"', $html);
+        $this->assertStringContainsString('name="newsDescription"', $html);
     }
 
     /**
@@ -233,6 +249,10 @@ final class AdminNewsHtmlRenderTest extends TestCase
             // context has no per-request CSRF widget.
             'name="csrfToken"',
             'csrfcsrfToken',
+            // BeMart posts the canonical checkbox field through a plain
+            // HTML form, so it includes a hidden false value before the
+            // checkbox. EC-CUBE's Symfony widget owns that behavior.
+            'name="linkMethod" value="0"',
             // Form: EC-CUBE's `visible` display-status select in the
             // conversion area. The AdminNewsFetched projection does not
             // carry dtb_news.visible (out of the Wave 9 CMS slice), so the
@@ -353,10 +373,23 @@ final class AdminNewsHtmlRenderTest extends TestCase
         // residual families. Returns Twig\Markup so the markup is not
         // double-escaped, matching EC-CUBE's real form_widget + BeMart's
         // `|raw`.
-        $formFields = ['publish_date', 'title', 'url', 'link_method', 'description'];
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
-            if ($form instanceof AdminNewsForm && is_string($field) && in_array($field, $formFields, true)) {
-                return new Markup($form->input($field), 'UTF-8');
+        $formFieldMap = [
+            'publish_date' => 'publishDate',
+            'title' => 'newsTitle',
+            'url' => 'newsUrl',
+            'link_method' => 'linkMethod',
+            'description' => 'newsDescription',
+        ];
+        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFieldMap): Markup {
+            if ($field === 'link_method') {
+                return new Markup(
+                    '<label for="admin_news_link_method"><input id="admin_news_link_method" type="checkbox" name="linkMethod" value="1" /> 別ウィンドウで開く</label>',
+                    'UTF-8',
+                );
+            }
+
+            if ($form instanceof AdminNewsForm && is_string($field) && isset($formFieldMap[$field])) {
+                return new Markup($form->input($formFieldMap[$field]), 'UTF-8');
             }
 
             return new Markup('', 'UTF-8');

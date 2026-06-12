@@ -87,6 +87,9 @@
         "$comment": "配列要素はマスタ/CSV/option mapの動的行であり、列集合が対象種別により変わるため固定shape化しない。既知propertyは契約し、追加列は該当サービス境界で扱う。"
       },
       "minItems": 0
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     }
   },
   "additionalProperties": false,
@@ -310,6 +313,7 @@
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
   "required": [
     "authorityOptions",
-    "rules"
+    "rules",
+    "csrfToken"
   ]
 }

@@ -1,0 +1,13 @@
+{% extends 'admin-base.html.twig' %}
+
+{% set title = '配送CSV' %}
+{% set sub_title = '受注管理' %}
+
+{% block main %}
+    <form method="post" action="/admin/order/import-shipping" enctype="multipart/form-data">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <textarea name="csv" rows="8" cols="80"></textarea>
+        <button type="submit">出荷CSV登録</button>
+    </form>
+    <a href="/admin/order-list">受注一覧</a>
+{% endblock %}

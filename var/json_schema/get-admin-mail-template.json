@@ -74,6 +74,14 @@
             "title": "メール件名",
             "description": "メールの件名。テンプレート変数を含む場合あり Fake観察文字長 13〜13; 観察値 'ご注文ありがとうございます'。",
             "example": "ご注文ありがとうございます"
+          },
+          "isDeletable": {
+            "type": [
+              "boolean",
+              "null"
+            ],
+            "title": "削除可能フラグ",
+            "description": "dtb_mail_template.deletable 由来の削除可能フラグ。管理画面の削除 affordance 表示に使う。"
           }
         },
         "additionalProperties": false,
@@ -103,6 +111,9 @@
       "maximum": 2147483647,
       "title": "件数",
       "description": "/admin/mail-template のレスポンスで返す件数。一覧・集計・処理結果の規模を表す非負整数。"
+    },
+    "csrfToken": {
+      "$ref": "#/$defs/csrfToken"
     },
     "Mail": {
       "type": [
@@ -374,6 +385,7 @@
   "required": [
     "mailTemplates",
     "id",
-    "count"
+    "count",
+    "csrfToken"
   ]
 }

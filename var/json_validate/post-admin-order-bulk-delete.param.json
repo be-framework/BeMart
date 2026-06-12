@@ -22,6 +22,36 @@
       },
       "minItems": 0,
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "ids": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "注文番号一覧（HTML form alias）",
+      "description": "EC-CUBE互換の受注一覧一括フォームが `ids[]` として送る注文番号一覧。Resource境界では `orderNos` に正規化する。",
+      "items": {
+        "type": "string",
+        "title": "注文番号",
+        "minLength": 0,
+        "maxLength": 64,
+        "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+        "description": "/admin/order/bulk-delete のHTMLフォーム入力に含まれる注文行。"
+      },
+      "minItems": 0,
+      "$comment": "Transport alias only; business contract remains orderNos."
+    },
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "フォームモード",
+      "description": "HTML form submit からのPOSTを識別し、PRG応答にするためのフォーム境界値。",
+      "enum": [
+        "order_bulk_delete_form",
+        null
+      ]
     }
   },
   "additionalProperties": false,
@@ -243,7 +273,5 @@
     }
   },
   "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape. Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
-  "required": [
-    "orderNos"
-  ]
+  "required": []
 }

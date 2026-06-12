@@ -29,7 +29,7 @@ use function count;
  */
 final readonly class MailTemplateListFetched
 {
-    /** @var list<array{mailTemplateId: int, mailTemplateName: string, fileName: string, mailSubject: string}> */
+    /** @var list<array{mailTemplateId: int, mailTemplateName: string, fileName: string, mailSubject: string, isDeletable: bool}> */
     public array $mailTemplates;
 
     public int $count;
@@ -50,6 +50,7 @@ final readonly class MailTemplateListFetched
                 'mailTemplateName' => $t->mailTemplateName,
                 'fileName' => $t->fileName,
                 'mailSubject' => $t->subject,
+                'isDeletable' => $t->deletable === 1,
             ],
             $rows,
         );

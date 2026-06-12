@@ -1,0 +1,15 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+language: "ja-JP"
+reviews:
+  profile: "chill"
+  path_filters:
+    - "!docs/api/**"
+    - "!docs/web-e2e/results/**"
+    - "!docs/web-e2e/screenshots/**"
+    - "!docs/web-e2e/202606*-report.md"
+    - "!docs/web-e2e/20260611-*.md"
+    - "!var/json_schema/**"
+    - "!var/json_validate/**"
+    - "!var/sql/**"
+    - "!**/*.html"
+    - "!composer.lock"

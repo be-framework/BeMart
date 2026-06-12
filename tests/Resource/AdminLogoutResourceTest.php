@@ -63,7 +63,7 @@ final class AdminLogoutResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertTrue($ro->body['wasLoggedIn']);
         $this->assertSame(self::TEST_ADMIN_ID, $ro->body['adminId']);
         $this->assertStringContainsString('ログアウト', $ro->body['message']);
@@ -80,7 +80,7 @@ final class AdminLogoutResourceTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertFalse($ro->body['wasLoggedIn']);
         $this->assertNull($ro->body['adminId']);
     }

@@ -6,6 +6,7 @@ namespace MyVendor\BeMart\Be\Final;
 
 use MyVendor\BeMart\Be\Exception\ClassNameNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
+use MyVendor\BeMart\Be\Reason\Query\ClassCategoryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\ClassNameStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use Ray\Di\Di\Inject;
@@ -16,11 +17,11 @@ use Ray\InputQuery\Attribute\Input;
  *
  *   DeleteClassNameInput → ClassNameDeleted (Direct, idempotent)
  *
- * ALPS doc note: real EC-CUBE refuses deletion when child ClassCategory
- * rows or referencing ProductClass rows exist. The in-memory store
- * does NOT enforce that referential guard in this first iteration —
- * the deletion is unconditional once AUTHZ + existence pass. Phase 2
- * will add the dependency check once a real consumer asks for it.
+ * ALPS doc note: this BeMart slice deletes child ClassCategory rows before
+ * removing the ClassName axis, matching the already-published admin delete
+ * affordance while keeping SQL storage to single statements per command.
+ * ProductClass dependency guards remain a follow-up because product-class
+ * lifecycle completion is still under Web+DB evidence.
  */
 final readonly class ClassNameDeleted
 {
@@ -29,6 +30,7 @@ final readonly class ClassNameDeleted
     public function __construct(
         #[Input] string $classNameId,
         #[Inject] AdminSession $adminSession,
+        #[Inject] ClassCategoryStorageInterface $classCategories,
         #[Inject] ClassNameStorageInterface $classNames,
     ) {
         if ($adminSession->adminId === null) {
@@ -37,6 +39,10 @@ final readonly class ClassNameDeleted
 
         if ($classNames->item($classNameId) === null) {
             throw new ClassNameNotFoundException();
+        }
+
+        foreach ($classCategories->listByClassName($classNameId) as $classCategory) {
+            $classCategories->delete($classCategory->classCategoryId);
         }
 
         $classNames->delete($classNameId);

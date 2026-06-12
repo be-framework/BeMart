@@ -28,6 +28,18 @@
       "description": "レイアウトの表示名 Fake観察文字長 4〜5; 観察値 'PC標準', 'スマホ標準'。",
       "example": "PC標準",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "name": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 255,
+      "title": "レイアウト名（HTMLフォーム入力）",
+      "description": "EC-CUBE由来の HTML form field name。Resource では layoutName と同じ意味として扱う。",
+      "example": "PC標準",
+      "$comment": "HTML form compatibility field. API clients should prefer layoutName."
     }
   },
   "additionalProperties": false,

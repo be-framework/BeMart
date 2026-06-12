@@ -9,7 +9,9 @@ use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Provide\Transfer\ConditionalResponseInterface;
 use BEAR\Sunday\Provide\Transfer\HeaderInterface;
 use BEAR\Sunday\Provide\Transfer\Output;
+use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
+use MyVendor\BeMart\Provide\Transfer\HtmlDownloadContentTypePolicy;
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;
 
@@ -20,7 +22,7 @@ final class DownloadResponderTest extends TestCase
     {
         $ro = $this->resourceWithDownload('text/csv; charset=UTF-8', ['csv' => "id,name\n1,BeMart\n"]);
 
-        $this->assertTrue($this->isDownload($ro, ['_BEMART_CONTEXT' => 'html-eccube-sql-hal-app']));
+        $this->assertTrue($this->isDownload($ro, html: true));
         $output = $this->downloadOutput($ro);
 
         $this->assertSame(Code::OK, $output->code);
@@ -56,7 +58,22 @@ final class DownloadResponderTest extends TestCase
     {
         $ro = $this->resourceWithDownload('text/csv; charset=UTF-8', ['csv' => "id,name\n1,BeMart\n"]);
 
-        $this->assertFalse($this->isDownload($ro, ['_BEMART_CONTEXT' => 'prod-eccube-sql-hal-app']));
+        $this->assertFalse($this->isDownload($ro));
+    }
+
+    public function testCsvInHtmlPolicyIsDownload(): void
+    {
+        $ro = $this->resourceWithDownload('text/csv; charset=UTF-8', ['csv' => "id,name\n1,BeMart\n"]);
+
+        $this->assertTrue($this->isDownload($ro, html: true));
+    }
+
+    public function testJsonInHtmlContextIsDirectOutput(): void
+    {
+        $ro = $this->resourceWithDownload('application/json; charset=utf-8', ['message' => 'ok', 'count' => 1]);
+
+        $this->assertTrue($this->isDownload($ro, html: true));
+        $this->assertSame('{"message":"ok","count":1}', $this->downloadOutput($ro)->view);
     }
 
     public function testHalJsonIsNotDownload(): void
@@ -80,12 +97,11 @@ final class DownloadResponderTest extends TestCase
         return $ro;
     }
 
-    /** @param array<string, mixed> $server */
-    private function isDownload(ResourceObject $ro, array $server = []): bool
+    private function isDownload(ResourceObject $ro, bool $html = false): bool
     {
         $method = new ReflectionMethod(DownloadResponder::class, 'isDownload');
 
-        return (bool) $method->invoke($this->responder(), $ro, $server);
+        return (bool) $method->invoke($this->responder($html), $ro, []);
     }
 
     private function downloadOutput(ResourceObject $ro): Output
@@ -96,8 +112,10 @@ final class DownloadResponderTest extends TestCase
         return $method->invoke($this->responder(), $ro);
     }
 
-    private function responder(): DownloadResponder
+    private function responder(bool $html = false): DownloadResponder
     {
+        $apiPolicy = new ApiDownloadContentTypePolicy();
+
         return new DownloadResponder(
             new class implements HeaderInterface {
                 /** {@inheritDoc} */
@@ -126,6 +144,7 @@ final class DownloadResponderTest extends TestCase
                     return new Output(Code::NOT_MODIFIED, [], '');
                 }
             },
+            $html ? new HtmlDownloadContentTypePolicy($apiPolicy) : $apiPolicy,
         );
     }
 }

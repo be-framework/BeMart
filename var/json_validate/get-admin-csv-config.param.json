@@ -12,8 +12,8 @@
         "null"
       ],
       "title": "CSV種別（入力）",
-      "description": "CSV出力項目設定で編集対象にするCSV種別。1=受注CSV, 2=会員CSV, 3=商品CSV, 4=配送CSV。HTTP queryでは文字列として届く場合があるためtransport schemaではstring|integer|nullを許容し、意味検証はResource/Semantic層へ委ねる。",
-      "default": 1,
+      "description": "CSV出力項目設定で編集対象にするCSV種別。1=商品CSV, 2=会員CSV, 3=受注CSV, 4=配送CSV。HTTP queryでは文字列として届く場合があるためtransport schemaではstring|integer|nullを許容し、意味検証はResource/Semantic層へ委ねる。",
+      "default": 3,
       "examples": [
         1,
         "3"

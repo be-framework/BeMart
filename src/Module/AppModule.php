@@ -22,6 +22,7 @@ use MyVendor\BeMart\Be\Reason\Provider\AddressIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\AdminIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\BlockIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\CategoryIdProvider;
+use MyVendor\BeMart\Be\Reason\Provider\CalendarHolidayIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\ClassCategoryIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\ClassNameIdProvider;
 use MyVendor\BeMart\Be\Reason\Provider\CustomerIdProvider;
@@ -79,7 +80,13 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use MyVendor\BeMart\Annotation\CsrfProtected;
 use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
+use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
+use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
+use MyVendor\BeMart\Support\Resource\ApiMutationResponse;
+use MyVendor\BeMart\Support\Resource\ExplicitAdminLoginFormSubmission;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Ray\Di\Scope;
 use Ray\WebFormModule\FormFactory;
 
@@ -98,6 +105,7 @@ final class AppModule extends AbstractAppModule
         AddressIdProvider::class,
         AdminIdProvider::class,
         BlockIdProvider::class,
+        CalendarHolidayIdProvider::class,
         CategoryIdProvider::class,
         ClassCategoryIdProvider::class,
         ClassNameIdProvider::class,
@@ -131,7 +139,11 @@ final class AppModule extends AbstractAppModule
         $this->install(new PackageModule());
         $this->override(new AppErrorModule());
         $this->override(new CanonicalResourceRouterModule());
+        $this->bind(ApiDownloadContentTypePolicy::class);
+        $this->bind(DownloadContentTypePolicyInterface::class)->to(ApiDownloadContentTypePolicy::class);
         $this->bind(TransferInterface::class)->to(DownloadResponder::class);
+        $this->bind(MutationResponseInterface::class)->to(ApiMutationResponse::class);
+        $this->bind(AdminLoginFormSubmissionInterface::class)->to(ExplicitAdminLoginFormSubmission::class);
         // PackageModule does not bind @AppName by itself; BEAR\Package\Module
         // factory normally overrides it. Install explicitly so tests can use
         // `new Injector(new *Module(...))` without the factory.

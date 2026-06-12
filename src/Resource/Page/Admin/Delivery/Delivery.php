@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\DeliveryNotFoundException;
@@ -24,6 +25,8 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
+use function sprintf;
+use function urlencode;
 
 /**
  * EC-CUBE doUpdateDelivery + doDeleteDelivery — single-row endpoint
@@ -38,6 +41,7 @@ class Delivery extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -80,7 +84,7 @@ class Delivery extends ResourceObject
         assert($form instanceof AdminDeliveryForm);
         if ($delivery !== null) {
             $form->fillValues([
-                'name' => $delivery['deliveryName'],
+                'deliveryName' => $delivery['deliveryName'],
                 'visible' => $delivery['visible'] ? '1' : null,
             ]);
         }
@@ -118,7 +122,7 @@ class Delivery extends ResourceObject
 
         assert($final instanceof DeliveryUpdated);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/delivery/delivery?deliveryId=%s', urlencode($final->deliveryId)));
         $this->body = [
             'deliveryId' => $final->deliveryId,
             'deliveryName' => $final->deliveryName,
@@ -129,10 +133,10 @@ class Delivery extends ResourceObject
     }
 
     /**
-     * ALPS `doUpdateDelivery` に対応する DELETE 操作。
+     * ALPS `doDeleteDelivery` に対応する DELETE 操作。
      * @psalm-taint-source input $deliveryId
      */
-    #[Alps('doUpdateDelivery')]
+    #[Alps('doDeleteDelivery')]
     #[JsonSchema(schema: 'delete-admin-delivery-delivery.json', params: 'delete-admin-delivery-delivery.param.json')]
     #[Link(rel: 'goDeliveryList', href: 'page://self/admin/delivery/delivery-list')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
@@ -143,7 +147,7 @@ class Delivery extends ResourceObject
 
         assert($final instanceof DeliveryDeleted);
 
-        $this->code = Code::OK;
+        ($this->mutationResponse)($this, Code::OK, '/admin/delivery/delivery-list');
         $this->body = ['deliveryId' => $final->deliveryId];
 
         return $this;

@@ -62,6 +62,9 @@ class BaseInfo extends ResourceObject
     #[Alps('goBaseInfo')]
     #[JsonSchema(schema: 'get-admin-base-info.json')]
     #[Link(rel: 'doUpdateBaseInfo', href: 'page://self/admin/base-info', method: 'post')]
+    #[Link(rel: 'goPaymentList', href: 'page://self/admin/payment/payment-list')]
+    #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     public function onGet(): static
     {
         $final = ($this->becoming)(new GetBaseInfoInput());

@@ -27,6 +27,15 @@
       "description": "テンプレートの表示名 Fake観察文字長 10〜11; 観察値 'デフォルト (PC)', 'デフォルト (スマホ)'。",
       "example": "デフォルト (PC)",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "file": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "title": "テンプレートファイル",
+      "description": "multipart/form-data の `file` または Resource テストで渡される FileUpload オブジェクト。詳細検証は `#[InputFile]` が担う。",
+      "$comment": "Koriym\\FileUpload\\FileUpload / ErrorFileUpload は schema では不透明オブジェクトとして扱う。"
     }
   },
   "additionalProperties": false,

@@ -12,8 +12,8 @@
   Page resource (src/Resource/Page/Admin/Page/Page.php) exposes an
   {@see \MyVendor\BeMart\Form\AdminPageForm} as `body['form']`, pre-filled
   with the persisted row. The inputs render through that real form object:
-    {{ form.input('name')|raw }}      <- real <input> w/ id/attrs/value
-    {{ form.error('name') }}          <- inline Be-domain error, if any
+    {{ form.input('pageName')|raw }}  <- real <input> w/ EC-CUBE id and canonical name
+    {{ form.error('pageName') }}      <- inline Be-domain error, if any
   `AdminPageForm::init()` ports the field names / ids from EC-CUBE's
   `MainEditType` (block prefix `main_edit`).
 
@@ -84,7 +84,7 @@
 
 {% block main %}
     <form id="content_page_form" method="post"
-          action="/admin/page/page?pageId={{ pageId }}">
+          action="{% if pageId is defined and pageId %}/admin/page/page?pageId={{ pageId }}&_method=put{% else %}/admin/page/page-list{% endif %}">
         <input type="hidden" id="main_edit__token" name="csrfToken" value="{{ csrfToken|default('') }}">
 
         <div class="c-contentsArea__cols">
@@ -111,8 +111,8 @@
                                         <span class="badge bg-primary ms-1">必須</span>
                                     </div>
                                     <div class="col-10">
-                                        {{ form.input('name')|raw }}
-                                        {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
+                                        {{ form.input('pageName')|raw }}
+                                        {% if form.error('pageName') %}<span class="invalid-feedback d-block">{{ form.error('pageName') }}</span>{% endif %}
                                     </div>
                                 </div>
                                 <!-- URL -->
@@ -124,8 +124,8 @@
                                     <div class="col-10">
                                         <div class="row">
                                             <div class="col pe-0"><span class="align-middle">{{ pageUrl|default('') }}</span></div>
-                                            <div>{{ form.input('url')|raw }}</div>
-                                            {% if form.error('url') %}<span class="invalid-feedback d-block">{{ form.error('url') }}</span>{% endif %}
+                                            <div>{{ form.input('pageUrl')|raw }}</div>
+                                            {% if form.error('pageUrl') %}<span class="invalid-feedback d-block">{{ form.error('pageUrl') }}</span>{% endif %}
                                         </div>
                                     </div>
                                 </div>
@@ -141,9 +141,9 @@
                                         <div class="row">
                                             <div class="col pe-0 align-middle">
                                                 <span class="align-middle">{{ pageFileName|default('') }}.twig</span>
-                                                <div>{{ form.input('file_name')|raw }}</div>
+                                                <div>{{ form.input('pageFileName')|raw }}</div>
                                             </div>
-                                            {% if form.error('file_name') %}<span class="invalid-feedback d-block">{{ form.error('file_name') }}</span>{% endif %}
+                                            {% if form.error('pageFileName') %}<span class="invalid-feedback d-block">{{ form.error('pageFileName') }}</span>{% endif %}
                                         </div>
                                     </div>
                                 </div>

@@ -113,6 +113,10 @@ final class LoginHtmlRenderTest extends TestCase
         // CSRF widget (CsrfToken is isValid-only — Slice 8), so
         // the value is empty. Same hidden input, different (empty) value.
         '<input type="hidden" name="csrfToken" value="">',
+        // BeMart adds a transport-only marker so browser form submissions
+        // can re-render validation errors without changing JSON Resource
+        // error semantics. EC-CUBE derives this from Symfony form context.
+        '<input type="hidden" name="mode" value="login">',
     ];
 
     private ResourceInterface $resource;
@@ -219,9 +223,10 @@ final class LoginHtmlRenderTest extends TestCase
         // With the form inputs rendered by a real LoginForm on both
         // sides, the residual is purely the shared <head> frame material
         // + the CSRF hidden value — no form-widget residual at all.
-        // Wave 1 was 15; this rework keeps it at 13 with the live token.
+        // Wave 1 was 15; this rework keeps it tight with the live token
+        // and the HTML-only browser-form mode marker.
         $this->assertLessThanOrEqual(
-            13,
+            14,
             count($onlyInEcCube) + count($onlyInBeMart),
             'residual diff unexpectedly large — port may have drifted',
         );

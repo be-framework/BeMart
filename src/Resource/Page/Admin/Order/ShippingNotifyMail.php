@@ -104,7 +104,7 @@ class ShippingNotifyMail extends ResourceObject
         assert($final instanceof ShippingNotifyMailSent);
 
         $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/order?orderNo=' . $final->orderNo;
+        $this->headers['Content-Type'] = 'application/json; charset=utf-8';
         $this->body = [
             'orderNo' => $final->orderNo,
             'customerId' => $final->customerId,

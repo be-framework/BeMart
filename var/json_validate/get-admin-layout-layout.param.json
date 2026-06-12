@@ -1,0 +1,21 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "get-admin-layout-layout.param.json",
+  "title": "GET /admin/layout/layout request parameters",
+  "description": "GET /admin/layout/layout request parameters の request parameter schema。新規作成フォームでは layoutId なし、編集フォームでは既存 layoutId を指定する。",
+  "type": "object",
+  "properties": {
+    "layoutId": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "レイアウトID（入力）",
+      "description": "dtb_layout.id の不透明な文字列ハンドル。SQL 実装では dtb_layout.id を文字列化して使用し、Fake 実装では seed handle を使用する。",
+      "example": "1",
+      "minLength": 0,
+      "maxLength": 128
+    }
+  },
+  "additionalProperties": false
+}

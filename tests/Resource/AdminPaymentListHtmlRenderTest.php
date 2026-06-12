@@ -129,6 +129,17 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
         }
     }
 
+    public function testPaymentListExposesDeleteAffordance(): void
+    {
+        $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
+
+        $this->assertStringContainsString('data-url="/admin/payment/payment?paymentId=', $html);
+        $this->assertStringContainsString('_method=delete"', $html);
+        $this->assertStringContainsString('data-post-action="delete"', $html);
+        $this->assertStringContainsString('token-for-anchor=', $html);
+        $this->assertStringContainsString('data-method="delete"', $html);
+    }
+
     #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
     public function testPaymentListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {

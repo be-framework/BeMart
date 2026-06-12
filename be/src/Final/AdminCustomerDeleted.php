@@ -25,8 +25,8 @@ use function sprintf;
  * EC-CUBE convention (preserved verbatim from Wave 2G
  * {@see CustomerWithdrawn}): `dtb_customer` rows are NEVER physically
  * deleted — soft delete flips `customer_status` to 3 (Withdrawn) and
- * overwrites `email` with `withdrawn-{customerId}@example.invalid`
- * (the `.invalid` TLD is RFC 2606 reserved, so the slot never collides
+ * overwrites `email` with `withdrawn-{customerId}@example.test`
+ * (the `.test` TLD is RFC 2606 reserved, so the slot never collides
  * with a real address and the human is free to re-register). The row
  * is retained for FK integrity: outstanding orders (`dtb_order`) keep
  * pointing at a real customerId — the ALPS doc text "受注は会員IDをNULLにして保持"
@@ -127,7 +127,7 @@ final readonly class AdminCustomerDeleted
         $name01 = $current->name01;
         $name02 = $current->name02;
 
-        $dummyEmail = sprintf('withdrawn-%s@example.invalid', $current->customerId);
+        $dummyEmail = sprintf('withdrawn-%s@example.test', $current->customerId);
 
         // Step 2: persist the withdrawn shape (record of truth FIRST,
         // mirroring CheckoutCompleted's order convention).
