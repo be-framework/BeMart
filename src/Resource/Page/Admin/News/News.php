@@ -9,6 +9,7 @@ use MyVendor\BeMart\Annotation\CsrfProtected;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\NewsNotFoundException;
@@ -26,9 +27,7 @@ use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function assert;
-use function getenv;
 use function sprintf;
-use function str_contains;
 use function urlencode;
 
 /**
@@ -52,6 +51,7 @@ class News extends ResourceObject
         private readonly CsrfToken $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -159,8 +159,7 @@ class News extends ResourceObject
 
         assert($final instanceof NewsUpdated);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
-        $this->headers['Location'] = sprintf('/admin/news/news?newsId=%s', urlencode($final->newsId));
+        ($this->mutationResponse)($this, Code::OK, sprintf('/admin/news/news?newsId=%s', urlencode($final->newsId)));
         $this->body = [
             'newsId' => $final->newsId,
             'newsTitle' => $final->newsTitle,
@@ -188,8 +187,7 @@ class News extends ResourceObject
 
         assert($final instanceof NewsDeleted);
 
-        $this->code = str_contains((string) getenv('APP_CONTEXT'), 'html') ? Code::SEE_OTHER : Code::OK;
-        $this->headers['Location'] = '/admin/news/news-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/news/news-list');
         $this->body = ['newsId' => $final->newsId];
 
         return $this;

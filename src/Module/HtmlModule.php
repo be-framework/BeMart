@@ -16,6 +16,12 @@ use MyVendor\BeMart\Auth\HtmlCartSessionPrefix;
 use MyVendor\BeMart\Auth\HtmlCustomerSessionWriter;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
+use MyVendor\BeMart\Provide\Transfer\HtmlDownloadContentTypePolicy;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
+use MyVendor\BeMart\Support\Resource\HtmlAdminLoginFormSubmission;
+use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Override;
 use Ray\Di\AbstractModule;
 use Ray\WebFormModule\WebFormModule;
@@ -41,6 +47,9 @@ final class HtmlModule extends AbstractModule
         $this->bind(CustomerSessionWriterInterface::class)->to(HtmlCustomerSessionWriter::class);
         $this->bind(AdminSessionWriterInterface::class)->to(HtmlAdminSessionWriter::class);
         $this->bind(CartSessionPrefixInterface::class)->to(HtmlCartSessionPrefix::class);
+        $this->bind(DownloadContentTypePolicyInterface::class)->to(HtmlDownloadContentTypePolicy::class);
+        $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
+        $this->bind(AdminLoginFormSubmissionInterface::class)->to(HtmlAdminLoginFormSubmission::class);
         $this->bind(Environment::class)->toProvider(HtmlTwigEnvironmentProvider::class);
         $this->install(new WebFormModule());
     }
