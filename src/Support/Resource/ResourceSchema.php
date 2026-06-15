@@ -86,7 +86,7 @@ final readonly class ResourceSchema
     private static function matchesType(mixed $value, string $type): bool
     {
         foreach (explode('|', $type) as $candidate) {
-            if (self::matchesSingleType($value, $candidate)) {
+            if (self::matchesSingleType($value, trim($candidate))) {
                 return true;
             }
         }
