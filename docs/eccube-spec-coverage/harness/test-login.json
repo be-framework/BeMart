@@ -1,0 +1,9 @@
+[
+  { "area": "EF", "item_id": "customer-login-test", "title": "テスト会員ログイン確認", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/login" },
+      { "action": "fill", "sel": "input[name=\"email\"]", "value": "login-test@example.com" },
+      { "action": "fill", "sel": "input[name=\"password\"]", "value": "login-test-password-2026" },
+      { "action": "submitFollow", "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]" }
+    ] }
+]

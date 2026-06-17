@@ -1,0 +1,494 @@
+[
+  {
+    "area": "EA06",
+    "item_id": "EA0601-UC01-T01",
+    "title": "新着情報管理（新規作成）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0601-UC02-T01",
+    "title": "新着情報管理（編集）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0601-UC03-T01",
+    "title": "新着情報管理（削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0602-UC01-T01",
+    "title": "ファイル管理（ファイルのアップロード）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0602-UC01-T02",
+    "title": "ファイル管理（ファイルのダウンロード）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0602-UC01-T03",
+    "title": "ファイル管理（ファイルの表示）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0602-UC01-T04",
+    "title": "ファイル管理（ファイルの削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0602-UC01-T05",
+    "title": "ファイル管理（パスのコピー）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0602-UC01-T06",
+    "title": "ファイル管理（フォルダ作成）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0602-UC01-T07",
+    "title": "ファイル管理（フォルダの表示）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0602-UC01-T08",
+    "title": "ファイル管理（フォルダの削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0603-UC01-T01",
+    "title": "ページ管理（新規作成）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0603-UC01-T02",
+    "title": "ページ管理（ページ編集）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0603-UC01-T03",
+    "title": "ページ管理（削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0604-UC01-T01",
+    "title": "ブロック管理（新規作成）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0604-UC01-T02",
+    "title": "ブロック管理（ブロック編集）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0604-UC01-T03",
+    "title": "ブロック管理（削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0605-UC01-T01",
+    "title": "レイアウト管理（新規作成）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0605-UC01-T02",
+    "title": "レイアウト管理（編集）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0605-UC01-T03",
+    "title": "レイアウト管理（削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0606-UC01-T01",
+    "title": "CSS管理",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0607-UC01-T01",
+    "title": "JavaScript管理",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0607-UC08-T01",
+    "title": "メンテナンス管理(無効→有効)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA06",
+    "item_id": "EA0607-UC08-T01",
+    "title": "メンテナンス管理(有効→無効)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/content"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0701-UC01-T01",
+    "title": "会社情報の設定、編集",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/setting/shop"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0702-UC01-T01",
+    "title": "特定商取引法の設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tradelaw"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0703-UC01-T01",
+    "title": "会員規約の設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/setting/shop"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0704-UC01-T01",
+    "title": "支払い方法設定の一覧を表示",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/payment"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0704-UC02-T01",
+    "title": "支払い方法一覧の順序入れ替え",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/payment"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0704-UC03-T01",
+    "title": "支払い方法の削除",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/payment"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0705-UC01-T01",
+    "title": "支払い方法の登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/payment"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0705-UC02-T01",
+    "title": "支払い方法の編集",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/payment"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0706-UC01-T01",
+    "title": "配送方法設定の一覧を表示",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/setting/shop/delivery"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0706-UC03-T01",
+    "title": "配送方法の削除",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/setting/shop/delivery"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0706-UC02-T01",
+    "title": "配送方法一覧の順序入れ替え",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/setting/shop/delivery"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0707-UC01-T01",
+    "title": "配送方法の登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/setting/shop/delivery"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0707-UC02-T01",
+    "title": "配送方法の編集",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/setting/shop/delivery"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0708-UC01-T01",
+    "title": "税率設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0709-UC02-T01",
+    "title": "メールテンプレート（注文受付メール、問合受付メール）編集",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/mail"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0710-UC01-T01",
+    "title": "CSV出力項目設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/csv"
+      }
+    ]
+  },
+  {
+    "area": "EA07",
+    "item_id": "EA0711-UC01-T01",
+    "title": "受注対応状況設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/setting/shop"
+      }
+    ]
+  }
+]

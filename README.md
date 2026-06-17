@@ -174,6 +174,17 @@ composer serve:page              # http://127.0.0.1:8081 HTML
 
 開発用 DB 接続の基本は `127.0.0.1:3306` の `root` / パスワードなしです。
 
+### キャッシュ（コード更新後は serve の前に）
+
+prod / SQL context はコンパイル済み DI コンテナを `var/tmp/` にキャッシュします。
+**pull・ブランチ切替・依存更新などでコード（特にコンストラクタや DI 配線）を変えたら、
+`composer serve` / `serve:page` の前に `composer clean`** を実行してください。
+古いコンテナのままだと DI 初期化エラー（例: `must not be accessed before initialization`）で落ちます。
+
+```bash
+composer clean   # 全 context のコンパイル済み DI キャッシュを消す
+```
+
 ### 環境変数
 
 | 変数 | 用途 | 例 |

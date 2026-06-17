@@ -1,0 +1,9 @@
+[
+  { "area": "EF03", "item_id": "EF0302-UC01-T01p1", "title": "会員ログインセッション確立（後続項目の前提）", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/login" },
+      { "action": "fill", "sel": "input[name=\"email\"]", "value": "login-test@example.com" },
+      { "action": "fill", "sel": "input[name=\"password\"]", "value": "login-test-password-2026" },
+      { "action": "submitFollow", "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]" }
+    ] }
+]

@@ -1,0 +1,89 @@
+{
+  "$schema": "https://alps-io.github.io/schemas/alps.json",
+  "alps": {
+    "version": "1.0",
+    "title": "BeMart Implementation Status Profile",
+    "doc": {
+      "value": "Declares the meaning of the BeMart × EC-CUBE 結合試験 coverage report."
+    },
+    "descriptor": [
+      {
+        "id": "implementationStatus",
+        "type": "semantic",
+        "title": "Coverage report document"
+      },
+      {
+        "id": "pageSummary",
+        "type": "semantic",
+        "title": "What this page covers and headline metrics"
+      },
+      {
+        "id": "selectionNote",
+        "type": "semantic",
+        "title": "Scope, granularity and how status was derived"
+      },
+      {
+        "id": "statusLegend",
+        "type": "semantic",
+        "title": "Meaning of the status values"
+      },
+      {
+        "id": "areaSection",
+        "type": "semantic",
+        "title": "A functional area (EF front / EA admin)"
+      },
+      {
+        "id": "screenGroup",
+        "type": "semantic",
+        "title": "A screen (画面ID) grouping its use-case test items"
+      },
+      {
+        "id": "screenName",
+        "type": "semantic",
+        "title": "Screen name"
+      },
+      {
+        "id": "coverageItem",
+        "type": "semantic",
+        "title": "One use-case test item (1 row)",
+        "descriptor": [
+          {
+            "id": "useCaseId",
+            "type": "semantic",
+            "title": "EC-CUBE 結合試験 item id (画面ID-UCxx-Txx)"
+          },
+          {
+            "id": "screenUrl",
+            "type": "semantic",
+            "title": "BeMart URL template for the screen/operation"
+          },
+          {
+            "id": "useCaseTitle",
+            "type": "semantic",
+            "title": "Spec section title (verbatim)"
+          },
+          {
+            "id": "status",
+            "type": "semantic",
+            "title": "Verification status value"
+          },
+          {
+            "id": "specLink",
+            "type": "semantic",
+            "title": "Provenance link to the EC-CUBE spec source"
+          },
+          {
+            "id": "testLink",
+            "type": "semantic",
+            "title": "Link to the BeMart test that exercises it"
+          },
+          {
+            "id": "evidenceLink",
+            "type": "semantic",
+            "title": "Link to a captured screenshot"
+          }
+        ]
+      }
+    ]
+  }
+}

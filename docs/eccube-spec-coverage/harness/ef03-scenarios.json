@@ -1,0 +1,984 @@
+[
+  {
+    "area": "EF03",
+    "item_id": "EF0302-UC02-T01",
+    "title": "ゲスト購入（通常パターン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "clickText",
+        "text": "ゲスト購入"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name01]",
+        "value": "試験"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name02]",
+        "value": "太郎"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana01]",
+        "value": "シケン"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana02]",
+        "value": "タロウ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=postalCode]",
+        "value": "5300001"
+      },
+      {
+        "action": "selectFirst",
+        "sel": "select[name=pref]"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr01]",
+        "value": "大阪市北区"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr02]",
+        "value": "梅田1-1-1"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=phoneNumber]",
+        "value": "0612345678"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email]",
+        "value": "guest-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email_confirm]",
+        "value": "guest-test@example.com"
+      },
+      {
+        "action": "clickText",
+        "text": "次へ"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC02-T01",
+    "title": "ゲスト購入（お客様情報の変更）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "clickText",
+        "text": "ゲスト購入"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name01]",
+        "value": "試験"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name02]",
+        "value": "花子"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana01]",
+        "value": "シケン"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana02]",
+        "value": "ハナコ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=postalCode]",
+        "value": "5300001"
+      },
+      {
+        "action": "selectFirst",
+        "sel": "select[name=pref]"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr01]",
+        "value": "大阪市北区"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr02]",
+        "value": "梅田1-1-1"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=phoneNumber]",
+        "value": "0612345678"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email]",
+        "value": "guest2@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email_confirm]",
+        "value": "guest2@example.com"
+      },
+      {
+        "action": "clickText",
+        "text": "次へ"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC04-T01",
+    "title": "ゲスト購入（お届け先情報の変更）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "clickText",
+        "text": "ゲスト購入"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name01]",
+        "value": "配送"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name02]",
+        "value": "花子"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana01]",
+        "value": "ハイソウ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana02]",
+        "value": "ハナコ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=postalCode]",
+        "value": "5300001"
+      },
+      {
+        "action": "selectFirst",
+        "sel": "select[name=pref]"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr01]",
+        "value": "大阪市北区"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr02]",
+        "value": "梅田1-1-1"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=phoneNumber]",
+        "value": "0612345678"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email]",
+        "value": "guest3@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email_confirm]",
+        "value": "guest3@example.com"
+      },
+      {
+        "action": "clickText",
+        "text": "次へ"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC04-T02",
+    "title": "ゲスト購入（お届け先情報の追加）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "2"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "clickText",
+        "text": "ゲスト購入"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name01]",
+        "value": "複数"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name02]",
+        "value": "配送"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana01]",
+        "value": "フクスウ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana02]",
+        "value": "ハイソウ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=postalCode]",
+        "value": "5300001"
+      },
+      {
+        "action": "selectFirst",
+        "sel": "select[name=pref]"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr01]",
+        "value": "大阪市北区"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr02]",
+        "value": "梅田1-1-1"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=phoneNumber]",
+        "value": "0612345678"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email]",
+        "value": "guest4@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email_confirm]",
+        "value": "guest4@example.com"
+      },
+      {
+        "action": "clickText",
+        "text": "次へ"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC06-T01",
+    "title": "複数配送 - 同じ商品種別（同一お届け先）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "2"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "clickText",
+        "text": "ゲスト購入"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name01]",
+        "value": "複数"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name02]",
+        "value": "同一"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana01]",
+        "value": "フクスウ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana02]",
+        "value": "ドウイツ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=postalCode]",
+        "value": "5300001"
+      },
+      {
+        "action": "selectFirst",
+        "sel": "select[name=pref]"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr01]",
+        "value": "大阪市北区"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr02]",
+        "value": "梅田1-1-1"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=phoneNumber]",
+        "value": "0612345678"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email]",
+        "value": "guest5@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email_confirm]",
+        "value": "guest5@example.com"
+      },
+      {
+        "action": "clickText",
+        "text": "次へ"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC06-T02",
+    "title": "複数配送 - 同じ商品種別（別お届け先）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "2"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "clickText",
+        "text": "ゲスト購入"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name01]",
+        "value": "複数"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=name02]",
+        "value": "別送"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana01]",
+        "value": "フクスウ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=kana02]",
+        "value": "ベッソウ"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=postalCode]",
+        "value": "5300001"
+      },
+      {
+        "action": "selectFirst",
+        "sel": "select[name=pref]"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr01]",
+        "value": "大阪市北区"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=addr02]",
+        "value": "梅田1-1-1"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=phoneNumber]",
+        "value": "0612345678"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email]",
+        "value": "guest6@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=email_confirm]",
+        "value": "guest6@example.com"
+      },
+      {
+        "action": "clickText",
+        "text": "次へ"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0301-UC01-T01",
+    "title": "カート（[お買い物を続ける]ボタン押下）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      },
+      {
+        "action": "goto",
+        "url": "/products"
+      },
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "1"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0301-UC01-T02",
+    "title": "カート（[x]ボタン押下）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "1"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000004"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "1"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.ec-icon[data-message]"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0301-UC01-T03",
+    "title": "カート（数量の変更）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "1"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form.ec-cartRow__amountUpForm"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0303-UC01-T01",
+    "title": "販売種別不一致時カート分割",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000006"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000008"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC06-T05",
+    "title": "複数配送 - 注文確認戻る",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "2"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC06-T06",
+    "title": "複数配送 - 更新",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "2"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC06-T07",
+    "title": "販売種別が一致しないケース",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000006"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000008"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC08-T01",
+    "title": "複数配送 - 購入確認画面からカートに戻る",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "2"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC08-T02",
+    "title": "複数配送 - 購入確認画面からカートに戻る(お届け先初期化)",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "2"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC09-T03",
+    "title": "複数配送 - 複数配送設定画面での販売制限エラー",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"quantity\"]",
+        "value": "5"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0302-UC01-T01",
+    "title": "ログインユーザ購入（通常パターン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "clickText",
+        "text": "確認する"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC05-T01",
+    "title": "お届け先の追加",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      },
+      {
+        "action": "clickText",
+        "text": "確認する"
+      },
+      {
+        "action": "clickText",
+        "text": "注文する"
+      }
+    ]
+  },
+  {
+    "area": "EF03",
+    "item_id": "EF0305-UC07-T01",
+    "title": "複数配送 - ログインしてカートをマージ",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/product?productCode=CODE000002"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "button.add-cart"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      },
+      {
+        "action": "clickText",
+        "text": "レジに進む"
+      }
+    ]
+  }
+]
