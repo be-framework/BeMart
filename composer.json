@@ -116,7 +116,7 @@
     "apidoc:terms": "./vendor/bin/apidoc terms",
     "clean": [
       "./vendor/bin/psalm --clear-cache",
-      "rm -rf .phpunit.cache var/tmp/*/*.php"
+      "rm -rf .phpunit.cache var/tmp/*/di var/tmp/*/cache var/tmp/*/twig var/tmp/*/injector var/tmp/*/*.php"
     ],
     "build": [
       "@clean",

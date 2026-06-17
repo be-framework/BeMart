@@ -1,0 +1,503 @@
+[
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC01-T01",
+    "title": "受注検索（検索結果1件以上）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC01-T02",
+    "title": "受注検索（検索結果0件）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC01-T03",
+    "title": "受注検索（検索エラー）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC02-T01",
+    "title": "受注CSVダウンロード",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC02-T02",
+    "title": "受注情報のCSV出力 項目変更設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC03-T01",
+    "title": "配送CSVダウンロード",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC03-T02",
+    "title": "配送情報のCSV出力 項目変更設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC05-T01",
+    "title": "受注編集（正常系）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC05-T02",
+    "title": "受注編集（異常系）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC05-T03",
+    "title": "受注編集（明細削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC06-T01",
+    "title": "受注編集（ステータス変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0401-UC08-T01",
+    "title": "受注編集（一覧からステータス変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0402-UC01-T01",
+    "title": "メール通知",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0402-UC02-T01",
+    "title": "一括メール通知（正常系）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0402-UC02-T01",
+    "title": "一括メール通知（キャンセル）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0405-UC01-T01",
+    "title": "受注登録（正常系）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0405-UC01-T02",
+    "title": "受注登録（異常系）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0405-UC02-T01",
+    "title": "[複数配送] お届け先をコピー",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0405-UC02-T02",
+    "title": "[複数配送] 出荷情報の追加",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0405-UC04-T01",
+    "title": "[複数配送] お届け先を1つ削除すると受注情報が更新される",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0405-UC06-T01",
+    "title": "ー括受注のステータス変更",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0405-UC06-T02",
+    "title": "納品書の出力",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA04",
+    "item_id": "EA0405-UC06-T03",
+    "title": "納品書の一括出力",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC01-T01",
+    "title": "会員検索（検索結果1件以上）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC01-T02",
+    "title": "会員検索（検索結果0件）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC01-T03",
+    "title": "会員検索（検索エラー）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC03-T01",
+    "title": "会員削除（削除実行）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC03-T02",
+    "title": "会員削除（削除キャンセル）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC04-T01",
+    "title": "会員情報のCSV出力 項目変更設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC05-T01",
+    "title": "会員情報のCSVダウンロード",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC06-T01",
+    "title": "仮会員メール再送（再送実行）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0501-UC06-T02",
+    "title": "仮会員メール再送（再送キャンセル）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0502-UC01-T01",
+    "title": "会員登録・変更（登録）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0502-UC01-T02",
+    "title": "会員登録・変更（登録・必須項目未入力）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0502-UC02-T01",
+    "title": "会員登録・変更（編集）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA05",
+    "item_id": "EA0502-UC02-T02",
+    "title": "会員登録・変更（編集・必須項目未入力）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/customer-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  }
+]

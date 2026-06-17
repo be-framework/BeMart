@@ -1,0 +1,23 @@
+[
+  { "area": "EF0305", "item_id": "guest-checkout", "title": "ゲスト購入 注文完了（cart→レジ→ゲスト→お客様情報→確認→注文する）", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/product?productCode=CODE000002" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/cart" },
+      { "action": "clickText", "text": "レジに進む" },
+      { "action": "clickText", "text": "ゲスト購入" },
+      { "action": "fill", "sel": "input[name=name01]", "value": "試験" },
+      { "action": "fill", "sel": "input[name=name02]", "value": "太郎" },
+      { "action": "fill", "sel": "input[name=kana01]", "value": "シケン" },
+      { "action": "fill", "sel": "input[name=kana02]", "value": "タロウ" },
+      { "action": "fill", "sel": "input[name=postalCode]", "value": "5300001" },
+      { "action": "selectFirst", "sel": "select[name=pref]" },
+      { "action": "fill", "sel": "input[name=addr01]", "value": "大阪市北区" },
+      { "action": "fill", "sel": "input[name=addr02]", "value": "梅田1-1-1" },
+      { "action": "fill", "sel": "input[name=phoneNumber]", "value": "0612345678" },
+      { "action": "fill", "sel": "input[name=email]", "value": "guest-test@example.com" },
+      { "action": "fill", "sel": "input[name=email_confirm]", "value": "guest-test@example.com" },
+      { "action": "clickText", "text": "次へ" },
+      { "action": "clickText", "text": "注文する" }
+    ] }
+]
