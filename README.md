@@ -18,9 +18,17 @@ Symfony 版 EC-CUBE の単なる書き直しではありません。EC-CUBE が�
 ## このプロジェクトが示すもの
 
 BeMart の価値は、EC-CUBE を別の PHP フレームワークへ移したことだけではありません。
-重要なのは、既存アプリケーションに埋め込まれていた業務意味、状態遷移、入力制約、
-永続化境界、画面上の affordance を取り出し、次の実装が参照できる構造として
-再配置したことです。
+大事なのは、システムのあちこちに散らばっていた意味——業務意味、状態遷移、入力制約、
+永続化境界、画面上の affordance——を取り出して、一か所に集めたことです。
+図も、API スキーマも、新しい実装も、その一か所から作られます。
+コードは、そこから出てくるものの一つにすぎない。
+
+形は砂時計に似ています。多くの入口がひとつの細いくびれに集まり、
+そこからまた、多くの出口へ分かれていく。
+ここに書かないこともあります。画面の見た目、データの保存方法、速度。
+それらは出口の側の仕事です。
+
+この形の論は [BEAR.Sunday — ALPS（意味を一箇所に置く）](https://bearsunday.github.io/learn/ja/alps/index.html) にあります。
 
 言語やフレームワークは変わります。一方で、「商品を探す」「カートへ入れる」
 「注文を確定する」「受注を管理する」「配送を更新する」といった業務の意味は長く残ります。
@@ -233,7 +241,8 @@ SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 
 ## 外部参照
 
-- [ALPS manual](https://www.app-state-diagram.com/manuals/1.0/ja/index.html)
+- [ALPS — 意味を一箇所に置く（BEAR.Sunday）](https://bearsunday.github.io/learn/ja/alps/index.html) — 本稿が依る「蜂の腰」の論
+- [ALPS manual](https://www.app-state-diagram.com/manuals/1.0/ja/index.html) — ALPS の仕様
 - [app-state-diagram](https://github.com/alps-asd/app-state-diagram)
 - [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube)
 - [Be Framework](https://be-framework.github.io/llms-full.txt)
