@@ -8,8 +8,7 @@ BeMart は、EC-CUBE 4.3 の実装に埋もれた業務制約を抽出し、
 ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ整理し、再配置する
 アプリケーション・オーバーホールの実証プロジェクトです。
 
-Symfony 版 EC-CUBE の単なる書き直しではありません。EC-CUBE が持つ業務語彙、
-状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装に埋もれた暗黙の制約から
+Symfony 版 EC-CUBE の単なる書き直しではありません。実装に埋もれた暗黙の制約を、
 読める契約へ変えることが目的です。外から見える振る舞いは残したまま、各要素を分解して
 境界と責任を確かめ、一つずつ組み直す——いわば制約の抽出と整理、再配置です。
 
@@ -18,15 +17,17 @@ Symfony 版 EC-CUBE の単なる書き直しではありません。EC-CUBE が�
 ## このプロジェクトが示すもの
 
 BeMart の価値は、EC-CUBE を別の PHP フレームワークへ移したことだけではありません。
-重要なのは、既存アプリケーションに埋め込まれていた業務意味、状態遷移、入力制約、
-永続化境界、画面上の affordance を取り出し、次の実装が参照できる構造として
-再配置したことです。
+大事なのは、システムのあちこちに散らばっていた意味——業務意味、状態遷移、入力制約、
+永続化境界、画面上の affordance——を取り出して、一か所に集めたことです。
+図も、API スキーマも、新しい実装も、その一か所から作られます。
+コードは、そこから出てくるものの一つにすぎない。
 
-言語やフレームワークは変わります。一方で、「商品を探す」「カートへ入れる」
-「注文を確定する」「受注を管理する」「配送を更新する」といった業務の意味は長く残ります。
-BeMart は、その長寿命な意味を [`alps.json`](alps.json)、Be domain、BEAR Resource、
-Ray.MediaQuery SQL、Twig HTML、workflow evidence へ分解し、同じ契約の複数の投影として
-扱えることを示します。
+形は砂時計に似ています。多くの入口がひとつの細いくびれに集まり、
+そこからまた、多くの出口へ分かれていく。
+ここに書かないこともあります。画面の見た目、データの保存方法、速度。
+それらは出口の側の仕事です。
+
+この形の論は [BEAR.Sunday — ALPS（意味を一箇所に置く）](https://bearsunday.github.io/learn/ja/alps/index.html) にあります。
 
 ## Evidence Snapshot
 
@@ -143,7 +144,15 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 
 ## 起動
 
-SQL-backed context は [`malt`](https://github.com/koriym/homebrew-malt) と `DATABASE_URL` を使います。
+前提: PHP 8.x / Composer。まず依存をインストールします。
+
+```bash
+composer install
+```
+
+### SQL-backed ローカルサイト
+
+SQL context は [`malt`](https://github.com/koriym/homebrew-malt) と `DATABASE_URL` を使います。
 DB 初期化の詳細は [`sql/README.md`](sql/README.md) を参照してください。
 
 ```bash
@@ -165,11 +174,59 @@ composer serve:page              # http://127.0.0.1:8081 HTML
 
 開発用 DB 接続の基本は `127.0.0.1:3306` の `root` / パスワードなしです。
 
+### 環境変数
+
+| 変数 | 用途 | 例 |
+|---|---|---|
+| `DATABASE_URL` | SQL context（`composer serve` / `serve:page` / SQL テスト）の接続先。**未設定だと SQL context の起動時に例外**になります | `mysql://root@127.0.0.1:3306/eccubedb?charset=utf8mb4` |
+| `APP_CONTEXT` | context の明示切替（任意）。既定は `serve`=`sql-html-app`、`serve:page`=`html-eccube-sql-hal-app` | `html-eccube-sql-hal-app` |
+
+## 管理画面にログインする
+
+入口は **`/admin/login`** です（HTML サーバ例: http://127.0.0.1:8081/admin/login ）。
+`sql/setup-db.sh` が流し込む seed 管理者でログインできます。
+
+| login_id | password |
+|---|---|
+| `test-admin` | `local-dev-admin-password` |
+
+### 2段階認証（TOTP）
+
+EC-CUBE 互換の TOTP（RFC 6238）です。**SMS／メールのようなコード配信はありません**。
+認証アプリ（Google Authenticator など）が 30 秒ごとに生成する 6 桁を入力します。
+
+1. 初回ログイン（2FA 未登録）→ `/admin/two-factor-auth-set` で **QR コードが表示**されます。
+   認証アプリで読み取り、表示された 6 桁を入力して登録します。
+2. 2 回目以降 → `/admin/two-factor-auth`（QR なし・6 桁入力のみ）。
+   認証アプリに出ている**現在の 6 桁**を入力します。
+
+> 2 回目以降にコードは「届き」ません。登録済みの認証アプリを開けば常に最新の 6 桁が表示されています。
+
+### 2FA でロックアウトした／管理者を消したいとき
+
+管理者メンテナンス CLI（[`bin/admin.php`](bin/admin.php)）を使います。接続先は `DATABASE_URL` です。
+
+```bash
+composer admin -- list                  # 管理者一覧 (id / login_id / name / 2FA / 有効)
+composer admin -- reset-2fa test-admin  # 2FA 解除（次回ログインで QR を再登録）
+composer admin -- disable  test-admin   # 無効化 (work_id=0 ＝ 管理画面の削除と同じ)
+composer admin -- delete   test-admin   # 行ごと削除
+```
+
+DB をまるごと初期状態へ戻すなら `sql/setup-db.sh "$DATABASE_URL"`（seed 状態に戻り 2FA も消えます）。
+
 ## その他のコマンド
 
 ```bash
-composer run -l
+composer run -l   # 全コマンド一覧
 ```
+
+| コマンド | 内容 |
+|---|---|
+| `composer serve` / `serve:page` | API(8080) / HTML(8081) を起動 |
+| `composer fake` | Fake context（DB 不要）の CLI 実行 |
+| `composer test` | 既定の PHPUnit suite |
+| `composer admin -- <action>` | 管理者メンテナンス（上記） |
 
 SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 [`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) と
@@ -177,7 +234,8 @@ SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 
 ## 外部参照
 
-- [ALPS manual](https://www.app-state-diagram.com/manuals/1.0/ja/index.html)
+- [ALPS — 意味を一箇所に置く（BEAR.Sunday）](https://bearsunday.github.io/learn/ja/alps/index.html) — 本稿が依る「蜂の腰」の論
+- [ALPS manual](https://www.app-state-diagram.com/manuals/1.0/ja/index.html) — ALPS の仕様
 - [app-state-diagram](https://github.com/alps-asd/app-state-diagram)
 - [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube)
 - [Be Framework](https://be-framework.github.io/llms-full.txt)

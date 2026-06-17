@@ -93,7 +93,11 @@ class TwoFactorAuthSet extends ResourceObject
             // password-verified setup challenge exists; otherwise the empty
             // placeholder keeps anonymous GET render fidelity.
             'authKey' => $authKey,
-            'memberName' => '',
+            // Account label for the authenticator entry (the part after
+            // "BeMart:" in the otpauth URI). The password-verified login
+            // identity is the most identifying value here, so it doubles as
+            // the QR-code account name; empty when no setup challenge exists.
+            'memberName' => $challenge?->loginId ?? '',
             'shopName' => 'BeMart',
             'csrfToken' => $this->csrf->token,
             'form' => $form,

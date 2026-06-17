@@ -344,10 +344,14 @@ final class HttpCheckoutEntryFormTest extends TestCase
         ]);
 
         $this->assertSame(400, $rejected['status']);
-        $this->assertStringContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
+        // Transport-schema rejection now renders the HTML error page in the
+        // html context (HtmlThrowableHandler), not the legacy JSON body —
+        // consistent with this class's "do not expose JSON errors" intent.
+        $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
         $this->assertStringContainsString('Invalid input.', $rejected['body']);
         $this->assertStringContainsString('[contactContents]', $rejected['body']);
         $this->assertStringNotContainsString('Internal Server Error', $rejected['body']);
+        $this->assertStringNotContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
     }
 
     private function inputValue(string $html, string $name): string
