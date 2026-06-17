@@ -8,6 +8,7 @@ use BEAR\Dev\Html\HtmlLinkAuditLoggerInterface;
 use BEAR\Dev\Html\LinkHeaderModule;
 use BEAR\Package\Provide\Representation\RouterReverseLinker;
 use BEAR\Resource\ReverseLinkerInterface;
+use BEAR\Sunday\Extension\Error\ThrowableHandlerInterface;
 use Madapaja\TwigModule\TwigModule;
 use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
@@ -17,6 +18,7 @@ use MyVendor\BeMart\Auth\HtmlCartSessionPrefix;
 use MyVendor\BeMart\Auth\HtmlCustomerSessionWriter;
 use MyVendor\BeMart\Auth\CustomerSessionWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Provide\Error\HtmlThrowableHandler;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\HtmlDownloadContentTypePolicy;
 use MyVendor\BeMart\Support\Html\SilentHtmlLinkAuditLogger;
@@ -54,6 +56,9 @@ final class HtmlModule extends AbstractModule
         $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
         $this->bind(AdminLoginFormSubmissionInterface::class)->to(HtmlAdminLoginFormSubmission::class);
         $this->bind(Environment::class)->toProvider(HtmlTwigEnvironmentProvider::class);
+        // Browser users get an HTML error page; the JSON AppThrowableHandler
+        // (AppErrorModule) stays the default for API/HAL contexts.
+        $this->bind(ThrowableHandlerInterface::class)->to(HtmlThrowableHandler::class);
         $this->install(new WebFormModule());
     }
 }

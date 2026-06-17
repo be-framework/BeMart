@@ -136,6 +136,12 @@ final class AdminTwoFactorAuthSetHtmlRenderTest extends TestCase
             '<title>',
             'name="csrfToken"',
             'csrfcsrfToken',
+            // Branding divergence (same intent as the <title> residual):
+            // BeMart's QR-code entry uses `issuer=BeMart` + a
+            // `BeMart:{loginId}` label, so admins never see the upstream
+            // product name ("EC-CUBE") in their authenticator app. Only the
+            // otpauth:// line carries this, so the match stays tight.
+            'otpauth://',
         ] as $family) {
             if (str_contains($line, $family)) {
                 return true;
