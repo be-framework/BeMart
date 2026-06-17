@@ -8,8 +8,7 @@ BeMart は、EC-CUBE 4.3 の実装に埋もれた業務制約を抽出し、
 ALPS / Be Framework / BEAR.Sunday / Ray.MediaQuery SQL / Twig HTML へ整理し、再配置する
 アプリケーション・オーバーホールの実証プロジェクトです。
 
-Symfony 版 EC-CUBE の単なる書き直しではありません。EC-CUBE が持つ業務語彙、
-状態遷移、永続化制約、HTTP affordance、HTML 表現を、実装に埋もれた暗黙の制約から
+Symfony 版 EC-CUBE の単なる書き直しではありません。実装に埋もれた暗黙の制約を、
 読める契約へ変えることが目的です。外から見える振る舞いは残したまま、各要素を分解して
 境界と責任を確かめ、一つずつ組み直す——いわば制約の抽出と整理、再配置です。
 
@@ -29,12 +28,6 @@ BeMart の価値は、EC-CUBE を別の PHP フレームワークへ移したこ
 それらは出口の側の仕事です。
 
 この形の論は [BEAR.Sunday — ALPS（意味を一箇所に置く）](https://bearsunday.github.io/learn/ja/alps/index.html) にあります。
-
-言語やフレームワークは変わります。一方で、「商品を探す」「カートへ入れる」
-「注文を確定する」「受注を管理する」「配送を更新する」といった業務の意味は長く残ります。
-BeMart は、その長寿命な意味を [`alps.json`](alps.json)、Be domain、BEAR Resource、
-Ray.MediaQuery SQL、Twig HTML、workflow evidence へ分解し、同じ契約の複数の投影として
-扱えることを示します。
 
 ## Evidence Snapshot
 
