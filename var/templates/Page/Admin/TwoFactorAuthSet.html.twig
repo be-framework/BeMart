@@ -48,7 +48,7 @@ $(function () {
     $("#qrcode").qrcode({
         size: 200,
         fill: '#000',
-        text: 'otpauth://totp/{{ ('EC-CUBE:' ~ shopName|default('') ~ ' - ' ~ memberName|default(''))|url_encode }}?secret={{ authKey|default('') }}&issuer={{ 'EC-CUBE'|url_encode }}',
+        text: 'otpauth://totp/{{ ('BeMart:' ~ memberName|default(''))|url_encode }}?secret={{ authKey|default('') }}&issuer={{ 'BeMart'|url_encode }}',
         radius: 0,
         quiet: 0,
         mode: 0, // 0: normal , 1: label strip , 2: label box , 3: image strip , 4: image box
