@@ -13,27 +13,33 @@ use ErrorException;
 use Exception;
 use Override;
 use Throwable;
+use Twig\Environment;
 
 use const E_ERROR;
 
 /**
- * Default (JSON) throwable handler. Maps known domain / framework
- * exceptions to an HTTP status via {@see ExceptionStatusMapper} and
- * emits an {@see AppErrorPage} JSON body; unexpected throwables are
- * delegated to the framework {@see ErrorInterface}.
+ * html-context throwable handler.
  *
- * The html context overrides this with {@see HtmlThrowableHandler}, which
- * shares the same {@see ExceptionStatusMapper} but renders HTML.
+ * Known domain / framework exceptions (mapped by {@see ExceptionStatusMapper})
+ * render an HTML error page from {@see self::TEMPLATE} so browser users see
+ * HTML rather than the JSON body {@see AppThrowableHandler} emits. Unexpected
+ * throwables (unmapped → 500) are delegated to the framework
+ * {@see ErrorInterface}, preserving the dev handler's HTML stack trace and
+ * the prod handler's generic page.
  */
-final class AppThrowableHandler implements ThrowableHandlerInterface
+final class HtmlThrowableHandler implements ThrowableHandlerInterface
 {
-    private AppErrorPage|null $errorPage = null;
+    private const TEMPLATE = 'Page/Error.html.twig';
+
     private bool $delegated = false;
+    private int $status = Code::ERROR;
+    private string $html = '';
 
     public function __construct(
         private readonly TransferInterface $responder,
         private readonly ErrorInterface $fallback,
         private readonly ExceptionStatusMapper $mapper,
+        private readonly Environment $twig,
     ) {
     }
 
@@ -49,7 +55,12 @@ final class AppThrowableHandler implements ThrowableHandlerInterface
         }
 
         $this->delegated = false;
-        $this->errorPage = new AppErrorPage($status, ['message' => $this->mapper->message($e, $status)]);
+        $this->status = $status;
+        $this->html = $this->twig->render(self::TEMPLATE, [
+            'code' => $status,
+            'statusText' => $this->mapper->statusText($status),
+            'message' => $this->mapper->message($e, $status),
+        ]);
 
         return $this;
     }
@@ -63,9 +74,7 @@ final class AppThrowableHandler implements ThrowableHandlerInterface
             return;
         }
 
-        ($this->responder)($this->errorPage ?? new AppErrorPage(Code::ERROR, [
-            'message' => $this->mapper->statusText(Code::ERROR),
-        ]), []);
+        ($this->responder)(new HtmlErrorPage($this->status, $this->html), []);
     }
 
     private function asException(Throwable $e): Exception
