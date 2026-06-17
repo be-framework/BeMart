@@ -44,6 +44,16 @@ function main(array $argv): void
         exit($action === '' ? 1 : 0);
     }
 
+    // Validate before any side effect: a bad action or missing loginId must
+    // fail before a DB connection is opened.
+    if (! in_array($action, ['list', 'reset-2fa', 'disable', 'delete'], true)) {
+        fail('不明なアクション: ' . $action);
+    }
+
+    if ($action !== 'list' && $loginId === '') {
+        fail('loginId が必要です。');
+    }
+
     $pdo = connect();
 
     switch ($action) {
@@ -51,16 +61,14 @@ function main(array $argv): void
             listAdmins($pdo);
             break;
         case 'reset-2fa':
-            resetTwoFactor($pdo, requireLoginId($loginId));
+            resetTwoFactor($pdo, $loginId);
             break;
         case 'disable':
-            disableAdmin($pdo, requireLoginId($loginId));
+            disableAdmin($pdo, $loginId);
             break;
         case 'delete':
-            deleteAdmin($pdo, requireLoginId($loginId));
+            deleteAdmin($pdo, $loginId);
             break;
-        default:
-            fail('不明なアクション: ' . $action);
     }
 }
 
@@ -76,13 +84,12 @@ function connect(): PDO
     }
 }
 
-function requireLoginId(string $loginId): string
+function adminExists(PDO $pdo, string $loginId): bool
 {
-    if ($loginId === '') {
-        fail('loginId が必要です。');
-    }
+    $stmt = $pdo->prepare('SELECT 1 FROM dtb_member WHERE login_id = :loginId LIMIT 1');
+    $stmt->execute(['loginId' => $loginId]);
 
-    return $loginId;
+    return (bool) $stmt->fetchColumn();
 }
 
 function listAdmins(PDO $pdo): void
@@ -113,35 +120,47 @@ function listAdmins(PDO $pdo): void
 
 function resetTwoFactor(PDO $pdo, string $loginId): void
 {
+    if (! adminExists($pdo, $loginId)) {
+        notFound($loginId);
+    }
+
     $stmt = $pdo->prepare(
         'UPDATE dtb_member SET two_factor_auth_key = NULL, two_factor_auth_enabled = 0 WHERE login_id = :loginId',
     );
     $stmt->execute(['loginId' => $loginId]);
-    report($stmt->rowCount(), $loginId, '2FAを解除しました（次回ログインでQRを再登録）');
+    // rowCount() is 0 when the admin exists but is already reset; existence is
+    // checked above, so that is "already done", not "not found".
+    $done = $stmt->rowCount() > 0 ? '2FAを解除しました（次回ログインでQRを再登録）' : '既に2FAは未設定です';
+    fwrite(STDOUT, sprintf('%s: %s' . PHP_EOL, $loginId, $done));
 }
 
 function disableAdmin(PDO $pdo, string $loginId): void
 {
+    if (! adminExists($pdo, $loginId)) {
+        notFound($loginId);
+    }
+
     $stmt = $pdo->prepare('UPDATE dtb_member SET work_id = 0, update_date = NOW() WHERE login_id = :loginId');
     $stmt->execute(['loginId' => $loginId]);
-    report($stmt->rowCount(), $loginId, '無効化しました (work_id=0)');
+    fwrite(STDOUT, sprintf('%s: 無効化しました (work_id=0)' . PHP_EOL, $loginId));
 }
 
 function deleteAdmin(PDO $pdo, string $loginId): void
 {
     $stmt = $pdo->prepare('DELETE FROM dtb_member WHERE login_id = :loginId');
     $stmt->execute(['loginId' => $loginId]);
-    report($stmt->rowCount(), $loginId, '削除しました');
-}
-
-function report(int $rows, string $loginId, string $done): void
-{
-    if ($rows === 0) {
-        fwrite(STDERR, sprintf('該当する管理者が見つかりません: %s' . PHP_EOL, $loginId));
-        exit(2);
+    // DELETE affects 0 rows only when nothing matched — unambiguously not found.
+    if ($stmt->rowCount() === 0) {
+        notFound($loginId);
     }
 
-    fwrite(STDOUT, sprintf('%s: %s (%d 件)' . PHP_EOL, $loginId, $done, $rows));
+    fwrite(STDOUT, sprintf('%s: 削除しました' . PHP_EOL, $loginId));
+}
+
+function notFound(string $loginId): never
+{
+    fwrite(STDERR, sprintf('該当する管理者が見つかりません: %s' . PHP_EOL, $loginId));
+    exit(2);
 }
 
 function fail(string $message): never
