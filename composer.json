@@ -133,7 +133,8 @@
     "serve:api": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8080 -t public public/index.php",
     "serve:page": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php",
     "architecture:audit": "python3 scripts/bear_standard_audit.py .",
-    "agent": "php bin/agent.php"
+    "agent": "php bin/agent.php",
+    "admin": "php bin/admin.php"
   },
   "scripts-descriptions": {
     "test": "Run the default PHPUnit suite.",
@@ -168,7 +169,8 @@
     "serve:api": "Serve the API entrypoint on 127.0.0.1:8080.",
     "serve:page": "Serve the page entrypoint on 127.0.0.1:8081.",
     "architecture:audit": "Audit BEAR.Sunday framework-boundary standard drift. This currently reports known debt and is used to guide standardization PRs.",
-    "agent": "Run the BEAR.ToolUse agent demo."
+    "agent": "Run the BEAR.ToolUse agent demo.",
+    "admin": "Admin maintenance CLI (list / reset-2fa / disable / delete) operating on dtb_member via DATABASE_URL."
   },
   "config": {
     "sort-packages": true,

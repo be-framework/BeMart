@@ -143,7 +143,15 @@ README では詳細化しません。背景は [`docs/methodology/`](docs/method
 
 ## 起動
 
-SQL-backed context は [`malt`](https://github.com/koriym/homebrew-malt) と `DATABASE_URL` を使います。
+前提: PHP 8.x / Composer。まず依存をインストールします。
+
+```bash
+composer install
+```
+
+### SQL-backed ローカルサイト
+
+SQL context は [`malt`](https://github.com/koriym/homebrew-malt) と `DATABASE_URL` を使います。
 DB 初期化の詳細は [`sql/README.md`](sql/README.md) を参照してください。
 
 ```bash
@@ -165,11 +173,59 @@ composer serve:page              # http://127.0.0.1:8081 HTML
 
 開発用 DB 接続の基本は `127.0.0.1:3306` の `root` / パスワードなしです。
 
+### 環境変数
+
+| 変数 | 用途 | 例 |
+|---|---|---|
+| `DATABASE_URL` | SQL context（`composer serve` / `serve:page` / SQL テスト）の接続先。**未設定だと SQL context の起動時に例外**になります | `mysql://root@127.0.0.1:3306/eccubedb?charset=utf8mb4` |
+| `APP_CONTEXT` | context の明示切替（任意）。既定は `serve`=`sql-html-app`、`serve:page`=`html-eccube-sql-hal-app` | `html-eccube-sql-hal-app` |
+
+## 管理画面にログインする
+
+入口は **`/admin/login`** です（HTML サーバ例: http://127.0.0.1:8081/admin/login ）。
+`sql/setup-db.sh` が流し込む seed 管理者でログインできます。
+
+| login_id | password |
+|---|---|
+| `test-admin` | `local-dev-admin-password` |
+
+### 2段階認証（TOTP）
+
+EC-CUBE 互換の TOTP（RFC 6238）です。**SMS／メールのようなコード配信はありません**。
+認証アプリ（Google Authenticator など）が 30 秒ごとに生成する 6 桁を入力します。
+
+1. 初回ログイン（2FA 未登録）→ `/admin/two-factor-auth-set` で **QR コードが表示**されます。
+   認証アプリで読み取り、表示された 6 桁を入力して登録します。
+2. 2 回目以降 → `/admin/two-factor-auth`（QR なし・6 桁入力のみ）。
+   認証アプリに出ている**現在の 6 桁**を入力します。
+
+> 2 回目以降にコードは「届き」ません。登録済みの認証アプリを開けば常に最新の 6 桁が表示されています。
+
+### 2FA でロックアウトした／管理者を消したいとき
+
+管理者メンテナンス CLI（[`bin/admin.php`](bin/admin.php)）を使います。接続先は `DATABASE_URL` です。
+
+```bash
+composer admin -- list                  # 管理者一覧 (id / login_id / name / 2FA / 有効)
+composer admin -- reset-2fa test-admin  # 2FA 解除（次回ログインで QR を再登録）
+composer admin -- disable  test-admin   # 無効化 (work_id=0 ＝ 管理画面の削除と同じ)
+composer admin -- delete   test-admin   # 行ごと削除
+```
+
+DB をまるごと初期状態へ戻すなら `sql/setup-db.sh "$DATABASE_URL"`（seed 状態に戻り 2FA も消えます）。
+
 ## その他のコマンド
 
 ```bash
-composer run -l
+composer run -l   # 全コマンド一覧
 ```
+
+| コマンド | 内容 |
+|---|---|
+| `composer serve` / `serve:page` | API(8080) / HTML(8081) を起動 |
+| `composer fake` | Fake context（DB 不要）の CLI 実行 |
+| `composer test` | 既定の PHPUnit suite |
+| `composer admin -- <action>` | 管理者メンテナンス（上記） |
 
 SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 [`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) と
