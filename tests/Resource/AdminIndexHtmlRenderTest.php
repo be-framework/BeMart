@@ -218,9 +218,10 @@ final class AdminIndexHtmlRenderTest extends TestCase
         ]);
         $this->registerEcCubeStubs($twig);
 
-        // Feed EC-CUBE the SAME logically-empty dashboard data as
-        // BeMart's thin-renderer body: no order statuses, zero counts,
-        // empty sales, no recommended plugins.
+        // Feed EC-CUBE the SAME dashboard data as BeMart's rendered body:
+        // empty order/sales/plugin widgets (still placeholders), but the
+        // real ショップ状況 counts from the fake `dashboard_counts` fixture
+        // (products=7, customers=5, nonStock=0) so the diff stays clean.
         return $twig->render('index.twig', [
             'OrderStatuses' => [],
             'Orders' => [],
@@ -228,8 +229,8 @@ final class AdminIndexHtmlRenderTest extends TestCase
             'salesToday' => [],
             'salesYesterday' => [],
             'countNonStockProducts' => 0,
-            'countProducts' => 0,
-            'countCustomers' => 0,
+            'countProducts' => 7,
+            'countCustomers' => 5,
             'recommendedPlugins' => [],
             'is_danger_admin_url' => false,
             'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),

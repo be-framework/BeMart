@@ -1,0 +1,440 @@
+[
+  {
+    "area": "EF05",
+    "item_id": "EF0501-UC01-T01",
+    "title": "マイページ（初期表示）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF05",
+    "item_id": "EF0502-UC01-T01",
+    "title": "マイページ/ご注文履歴",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF05",
+    "item_id": "EF0503-UC01-T01",
+    "title": "マイページ/ご注文履歴詳細",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/cart"
+      }
+    ]
+  },
+  {
+    "area": "EF05",
+    "item_id": "EF0504-UC01-T01",
+    "title": "マイページ/会員情報編集",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF05",
+    "item_id": "EF0506-UC01-T01",
+    "title": "マイページ/お届け先一覧（お届け先が登録されていない場合）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF05",
+    "item_id": "EF0506-UC01-T02",
+    "title": "マイページ/お届け先一覧（お届け先が登録されている場合・変更）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF05",
+    "item_id": "EF0506-UC03-T01",
+    "title": "マイページ/お届け先一覧（お届け先が登録されている場合・削除）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF05",
+    "item_id": "EF0507-UC03-T01",
+    "title": "退会手続き（退会未実施）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF05",
+    "item_id": "EF0507-UC03-T02",
+    "title": "退会手続き（退会実施）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/login"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"email\"]",
+        "value": "login-test@example.com"
+      },
+      {
+        "action": "fill",
+        "sel": "input[name=\"password\"]",
+        "value": "login-test-password-2026"
+      },
+      {
+        "action": "submitFollow",
+        "sel": "form[name=\"login_mypage\"] button[type=\"submit\"]"
+      },
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0601-UC01-T01",
+    "title": "ログイン（正常パターン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0601-UC01-T02",
+    "title": "ログイン（異常パターン・仮会員状態）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0601-UC01-T03",
+    "title": "ログイン（異常パターン・メールアドレス間違い）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0602-UC01-T01",
+    "title": "パスワード再発行",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0603-UC01-T01",
+    "title": "ログアウト",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0604-UC01-T01",
+    "title": "当サイトについて",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0605-UC01-T01",
+    "title": "プライバシーポリシー",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0606-UC01-T01",
+    "title": "特定商取引法に基づく表記",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0607-UC01-T01",
+    "title": "お問い合わせ（正常パターン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0607-UC01-T02",
+    "title": "お問い合わせ（戻るボタン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF06",
+    "item_id": "EF0607-UC01-T03",
+    "title": "お問い合わせ（異常パターン・必須項目入力チェック）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF07",
+    "item_id": "EF0701-UC01-T01",
+    "title": "商品購入（基本税率）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/products"
+      }
+    ]
+  },
+  {
+    "area": "EF07",
+    "item_id": "EF0701-UC01-T02",
+    "title": "商品購入（個別税率）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/products"
+      }
+    ]
+  },
+  {
+    "area": "EF07",
+    "item_id": "EF0701-UC01-T03",
+    "title": "商品購入（複数配送）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/products"
+      }
+    ]
+  }
+]

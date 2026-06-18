@@ -1,0 +1,11 @@
+[
+  { "area": "EF03", "item_id": "EF0301-UC01-T01", "title": "カート（[お買い物を続ける]ボタン押下）", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/" },
+      { "action": "goto", "url": "/products" },
+      { "action": "goto", "url": "/product?productCode=CODE000002" },
+      { "action": "fill", "sel": "input[name=\"quantity\"]", "value": "1" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/cart" }
+    ] }
+]

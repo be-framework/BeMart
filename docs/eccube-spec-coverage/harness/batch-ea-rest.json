@@ -1,0 +1,230 @@
+[
+  {
+    "area": "EA01",
+    "item_id": "EA0101-UC01-T01",
+    "title": "現在の受注状況、お知らせ、売り上げ状況、ショップ状況を表示",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/index"
+      }
+    ]
+  },
+  {
+    "area": "EA02",
+    "item_id": "EA0201-UC01-T01",
+    "title": "パスワード認証機能",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/login"
+      }
+    ]
+  },
+  {
+    "area": "EA09",
+    "item_id": "EA0901-UC03-T01",
+    "title": "出荷編集（正常系）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA09",
+    "item_id": "EA0901-UC03-T02",
+    "title": "出荷編集（異常系）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA09",
+    "item_id": "EA0901-UC03-T03",
+    "title": "お届け先追加",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA09",
+    "item_id": "EA0903-UC04-T01",
+    "title": "出荷CSV登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA09",
+    "item_id": "EA0903-UC04-T02",
+    "title": "出荷CSV登録(異常系)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA09",
+    "item_id": "EA0093-UC04-T02",
+    "title": "出荷CSV雛形ファイルのダウンロード",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/order-list"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC01-T01",
+    "title": "基本税率設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC01-T02",
+    "title": "個別税率設定",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC02-T01",
+    "title": "商品登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC02-T02",
+    "title": "商品登録（個別税率有り）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC02-T03",
+    "title": "商品登録（個別税率有り/規格有り）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC02-T04",
+    "title": "商品CSVのダウンロード",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC02-T05",
+    "title": "商品CSV登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC02-T06",
+    "title": "商品CSV登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC03-T01",
+    "title": "受注登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC03-T02",
+    "title": "受注登録（複数配送）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  },
+  {
+    "area": "EA10",
+    "item_id": "EA1001-UC03-T03",
+    "title": "受注明細の変更による再計算",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/tax-rule"
+      }
+    ]
+  }
+]

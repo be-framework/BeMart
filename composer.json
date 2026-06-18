@@ -116,7 +116,7 @@
     "apidoc:terms": "./vendor/bin/apidoc terms",
     "clean": [
       "./vendor/bin/psalm --clear-cache",
-      "rm -rf .phpunit.cache var/tmp/*/*.php"
+      "rm -rf .phpunit.cache var/tmp/*/di var/tmp/*/cache var/tmp/*/twig var/tmp/*/injector var/tmp/*/*.php"
     ],
     "build": [
       "@clean",
@@ -132,9 +132,12 @@
     "serve": "@serve:api",
     "serve:api": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8080 -t public public/index.php",
     "serve:page": "COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php",
+    "serve:page:dev": "BEMART_DEV_LOGIN=1 COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php",
     "architecture:audit": "python3 scripts/bear_standard_audit.py .",
     "agent": "php bin/agent.php",
-    "admin": "php bin/admin.php"
+    "admin": "php bin/admin.php",
+    "stats": "php bin/stats.php",
+    "db:reset": "sql/reset-dev.sh"
   },
   "scripts-descriptions": {
     "test": "Run the default PHPUnit suite.",
@@ -168,9 +171,12 @@
     "serve": "Serve the API entrypoint.",
     "serve:api": "Serve the API entrypoint on 127.0.0.1:8080.",
     "serve:page": "Serve the page entrypoint on 127.0.0.1:8081.",
+    "serve:page:dev": "Serve the HTML entrypoint with the dev 2FA bypass (BEMART_DEV_LOGIN=1; admin login accepts 123456). Dev only — never prod.",
     "architecture:audit": "Audit BEAR.Sunday framework-boundary standard drift. This currently reports known debt and is used to guide standardization PRs.",
     "agent": "Run the BEAR.ToolUse agent demo.",
-    "admin": "Admin maintenance CLI (list / reset-2fa / disable / delete) operating on dtb_member via DATABASE_URL."
+    "admin": "Admin maintenance CLI (list / reset-2fa / disable / delete) operating on dtb_member via DATABASE_URL.",
+    "stats": "Print the README Evidence Snapshot from live repository counts (--write refreshes README.md).",
+    "db:reset": "Rebuild the dev DB to a deterministic known state (schema + master + fake-derived fixture). Run BEFORE any browser/visual verification so mutating runs don't drift."
   },
   "config": {
     "sort-packages": true,

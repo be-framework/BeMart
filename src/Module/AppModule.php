@@ -149,6 +149,15 @@ final class AppModule extends AbstractAppModule
         // `new Injector(new *Module(...))` without the factory.
         $this->override(new AppMetaModule($this->appMeta));
 
+        // Admin ログ表示 viewer reads this FIXED application-log path. It is
+        // pinned in the module rather than resolved from the per-context
+        // `logDir` — loading this (production-neutral) module IS the context
+        // choice, so the module simply states where its log lives. A prod
+        // context module may override it with the deployment's log location.
+        $this->bind()->annotatedWith('adminLogPath')->toInstance(
+            $this->appMeta->appDir . '/var/log/bemart.json',
+        );
+
         $this->install(
             new JsonSchemaModule(
                 $this->appMeta->appDir . '/var/json_schema',
