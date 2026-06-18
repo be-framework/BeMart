@@ -9,24 +9,41 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminLogForm;
+use Ray\Di\Di\Named;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function array_map;
+use function array_slice;
 use function assert;
+use function explode;
+use function file_get_contents;
+use function is_file;
+use function mb_substr;
+use function rtrim;
 
 /**
  * EC-CUBE ログ表示 — Setting/System Tier-2.
  *
- * Thin GET renderer for `Setting/System/log.twig`. EC-CUBE reads log
- * files from Symfony's log directory; BeMart has no ALPS transition for
- * log inspection, so this resource exposes a stable form and a bounded
- * sample body without adding a file-read mutation surface.
+ * GET renderer for `Setting/System/log.twig`. EC-CUBE tails log files
+ * from Symfony's log directory; BeMart does the same, but reads ONE
+ * FIXED path injected by the module ({@see \MyVendor\BeMart\Module\AppModule}
+ * `adminLogPath`) — never a request-supplied filename — so there is no
+ * path-traversal surface. Admin-only (403 for anonymous). Read-only:
+ * the last {@see LINE_MAX} lines, each truncated to the response-schema
+ * bound; an absent file renders the template's 「ログがありません」.
  */
 class Log extends ResourceObject
 {
+    /** Tail size + per-line cap (the `log` schema bounds each line to 255). */
+    private const int LINE_MAX = 50;
+    private const int LINE_LENGTH = 255;
+
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
+        #[Named('adminLogPath')]
+        private readonly string $logPath,
     ) {
     }
     /** ALPS `goAdminLog` に対応する GET 操作。 */
@@ -44,17 +61,34 @@ class Log extends ResourceObject
 
         $form = $this->formFactory->newInstance(AdminLogForm::class);
         assert($form instanceof AdminLogForm);
-        $form->fillValues('site.log', 50);
+        $form->fillValues('site.log', self::LINE_MAX);
 
         $this->code = Code::OK;
         $this->body = [
             'form' => $form,
-            'log' => [
-                '[2026-05-21T00:00:00+09:00] bemart.INFO: admin log viewer opened',
-                '[2026-05-21T00:00:01+09:00] bemart.INFO: no application log file is bundled',
-            ],
+            'log' => $this->tail(),
         ];
 
         return $this;
+    }
+
+    /**
+     * Last LINE_MAX lines of the module-fixed log file, each truncated to
+     * the schema bound. Empty when the file is absent.
+     *
+     * @return list<string>
+     */
+    private function tail(): array
+    {
+        if (! is_file($this->logPath)) {
+            return [];
+        }
+
+        $lines = explode("\n", rtrim((string) file_get_contents($this->logPath), "\n"));
+
+        return array_map(
+            static fn (string $line): string => mb_substr($line, 0, self::LINE_LENGTH),
+            array_slice($lines, -self::LINE_MAX),
+        );
     }
 }

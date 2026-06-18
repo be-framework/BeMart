@@ -1,0 +1,67 @@
+[
+  { "area": "EF03", "item_id": "EF0305-UC06-T06-deep", "title": "複数配送-更新(UC06-T06) 深堀: clean session", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/product?productCode=CODE000002" },
+      { "action": "fill", "sel": "input[name=\"quantity\"]", "value": "2" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/cart" },
+      { "action": "clickText", "text": "レジに進む" },
+      { "action": "clickText", "text": "ゲスト購入" },
+      { "action": "fill", "sel": "input[name=name01]", "value": "更新" },
+      { "action": "fill", "sel": "input[name=name02]", "value": "深堀" },
+      { "action": "fill", "sel": "input[name=kana01]", "value": "コウシン" },
+      { "action": "fill", "sel": "input[name=kana02]", "value": "フカボリ" },
+      { "action": "fill", "sel": "input[name=postalCode]", "value": "5300001" },
+      { "action": "selectFirst", "sel": "select[name=pref]" },
+      { "action": "fill", "sel": "input[name=addr01]", "value": "大阪市北区" },
+      { "action": "fill", "sel": "input[name=addr02]", "value": "梅田1-1-1" },
+      { "action": "fill", "sel": "input[name=phoneNumber]", "value": "0612345678" },
+      { "action": "fill", "sel": "input[name=email]", "value": "deep06@example.com" },
+      { "action": "fill", "sel": "input[name=email_confirm]", "value": "deep06@example.com" },
+      { "action": "clickText", "text": "次へ" },
+      { "action": "clickText", "text": "注文する" }
+    ] },
+
+  { "area": "EF03", "item_id": "EF0305-UC09-T03-deep", "title": "販売制限(UC09-T03) 深堀: お届け先追加を試行", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/product?productCode=CODE000002" },
+      { "action": "fill", "sel": "input[name=\"quantity\"]", "value": "5" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/cart" },
+      { "action": "clickText", "text": "レジに進む" },
+      { "action": "clickText", "text": "ゲスト購入" },
+      { "action": "fill", "sel": "input[name=name01]", "value": "制限" },
+      { "action": "fill", "sel": "input[name=name02]", "value": "深堀" },
+      { "action": "fill", "sel": "input[name=kana01]", "value": "セイゲン" },
+      { "action": "fill", "sel": "input[name=kana02]", "value": "フカボリ" },
+      { "action": "fill", "sel": "input[name=postalCode]", "value": "5300001" },
+      { "action": "selectFirst", "sel": "select[name=pref]" },
+      { "action": "fill", "sel": "input[name=addr01]", "value": "大阪市北区" },
+      { "action": "fill", "sel": "input[name=addr02]", "value": "梅田1-1-1" },
+      { "action": "fill", "sel": "input[name=phoneNumber]", "value": "0612345678" },
+      { "action": "fill", "sel": "input[name=email]", "value": "deep09@example.com" },
+      { "action": "fill", "sel": "input[name=email_confirm]", "value": "deep09@example.com" },
+      { "action": "clickText", "text": "次へ" },
+      { "action": "clickText", "text": "お届け先を追加" }
+    ] },
+
+  { "area": "EF03", "item_id": "EF0303-UC01-T01-chk", "title": "販売種別不一致 レジ進行確認(UC03-T01深堀)", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/product?productCode=CODE000006" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/product?productCode=CODE000008" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/cart" },
+      { "action": "clickText", "text": "レジに進む" }
+    ] },
+
+  { "area": "EF03", "item_id": "EF0305-UC06-T07-chk", "title": "販売種別不一致 レジ進行確認(UC06-T07深堀)", "auth": "none",
+    "steps": [
+      { "action": "goto", "url": "/product?productCode=CODE000006" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/product?productCode=CODE000008" },
+      { "action": "submitFollow", "sel": "button.add-cart" },
+      { "action": "goto", "url": "/cart" },
+      { "action": "clickText", "text": "レジに進む" }
+    ] }
+]

@@ -1,0 +1,14 @@
+{
+  "name": "bemart-spec-coverage-harness",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Browser harness that performs EC-CUBE 結合試験 operations against BeMart and captures screenshot + DOM + HTTP status evidence per item.",
+  "type": "commonjs",
+  "bin": { "bemart-harness": "run.cjs" },
+  "scripts": {
+    "run": "node run.cjs scenarios.json"
+  },
+  "dependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}
