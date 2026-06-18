@@ -125,11 +125,22 @@ AREA_NAME = {"EF": "フロント (EF)", "EA": "管理 (EA)"}
 
 # ---- join: per item -> row dict ----
 from urllib.parse import quote
+def item_shot(it, route):
+    # Admin: prefer the authenticated route-correct sweep (reliable).
+    a = admin_shot(route)
+    if a:
+        return a
+    # Per-item harness screenshot, named {area}-{item_id}.png.
+    rel = f"evidence-browser/{it['area']}-{it['item_id']}.png"
+    if (HERE / rel).exists():
+        return rel
+    return SHOT.get(it["item_id"][:6])
+
 def row_for(it):
     sid = it["item_id"][:6]
     route = ROUTES.get(sid, "")
     test, status = SCREEN.get(sid, AREA_TEST.get(it["area"], (None, "🟢")))
-    shot = SHOT.get(sid) or admin_shot(route)
+    shot = item_shot(it, route)
     spec = SPEC_BASE + quote(SPEC_FILE[it["area"]])
     return {"id": it["item_id"], "screen": sid, "url": route, "title": it["title"],
             "status": status, "test": test, "shot": shot, "spec": spec, "area": it["area"]}
