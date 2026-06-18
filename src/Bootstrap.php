@@ -10,6 +10,7 @@ use BEAR\Sunday\Extension\Router\RouterInterface;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Module\App;
+use Ray\Di\AbstractModule;
 use Throwable;
 
 use function assert;
@@ -22,17 +23,22 @@ use function putenv;
 final class Bootstrap
 {
     /**
-     * @param non-empty-string $context
-     * @param Globals $globals
-     * @param Server  $server
+     * @param non-empty-string    $context
+     * @param Globals             $globals
+     * @param Server              $server
+     * @param AbstractModule|null $override dev-only DI override (e.g. dev login); MUST be null in prod
      *
      * @return 0|1
      */
-    public function __invoke(string $context, array $globals, array $server): int
+    public function __invoke(string $context, array $globals, array $server, AbstractModule|null $override = null): int
     {
         putenv('APP_CONTEXT=' . $context);
 
-        $app = Injector::getInstance($context)->getInstance(AppInterface::class);
+        $injector = $override !== null
+            ? Injector::getOverrideInstance($context, $override)
+            : Injector::getInstance($context);
+
+        $app = $injector->getInstance(AppInterface::class);
         assert($app instanceof App);
         /** @var array{HTTP_IF_NONE_MATCH?: string} $cacheServer */
         $cacheServer = $server;
@@ -44,7 +50,7 @@ final class Bootstrap
 
         $request = $app->router->match($globals, $server);
         try {
-            $adminSession = Injector::getInstance($context)->getInstance(AdminSession::class);
+            $adminSession = $injector->getInstance(AdminSession::class);
             if ($adminSession instanceof HtmlAdminSessionAdapter) {
                 $adminSession->refresh();
             }

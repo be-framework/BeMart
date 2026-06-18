@@ -1,0 +1,599 @@
+[
+  {
+    "area": "EA03",
+    "item_id": "EA0301-UC01-T01",
+    "title": "商品検索（検索結果1件以上）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0301-UC01-T02",
+    "title": "商品検索（検索結果0件）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0301-UC01-T03",
+    "title": "商品検索（検索エラー）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0301-UC01-T03",
+    "title": "規格確認のポップアップを表示",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0301-UC01-T04",
+    "title": "ポップアップから規格編集画面に遷移",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0301-UC02-T01",
+    "title": "CSVダウンロード（CSVダウンロード）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0301-UC02-T02",
+    "title": "CSVダウンロード（出力項目設定）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0310-UC01-T01",
+    "title": "商品規格の登録（新規作成）（規格が1件以上登録済み）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0310-UC01-T02",
+    "title": "商品規格の登録（新規作成）（規格が0件）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0310-UC02-T01",
+    "title": "商品規格の登録（更新）（規格の変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0310-UC02-T02",
+    "title": "商品規格の登録（更新）（商品規格の変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC05-T01",
+    "title": "商品の確認",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC05-T02",
+    "title": "商品の複製",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC05-T03",
+    "title": "商品の削除",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC05-T04",
+    "title": "商品の廃止",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC05-T04",
+    "title": "商品の一括削除(削除エラー)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      },
+      {
+        "action": "submitFollow"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC01-T01",
+    "title": "商品登録（新規作成）（非公開で登録）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC01-T02",
+    "title": "商品登録（新規作成）（公開で登録）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC01-T03",
+    "title": "商品編集（更新）（商品規格が未登録）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC01-T04",
+    "title": "商品登録（更新）（商品規格を全ての行に複製）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0302-UC01-T05",
+    "title": "商品登録（登録）（タグを商品に追加する）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0303-UC01-T01",
+    "title": "規格登録（規格が1件以上登録済）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0303-UC01-T02",
+    "title": "規格登録（規格が未登録）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0303-UC02-T01",
+    "title": "規格編集",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0303-UC03-T01",
+    "title": "規格削除（分類が未登録の場合のみ可）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0308-UC01-T01",
+    "title": "規格表示順の変更（マウスで変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0304-UC01-T01",
+    "title": "分類登録（分類が1件以上登録済）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0304-UC01-T02",
+    "title": "分類登録（分類が未登録）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0304-UC02-T01",
+    "title": "分類編集",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0304-UC03-T01",
+    "title": "分類削除",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0311-UC01-T01",
+    "title": "分類表示順の変更（マウスで変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0305-UC01-T01",
+    "title": "カテゴリ登録（カテゴリが1件以上登録済）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0305-UC01-T02",
+    "title": "カテゴリ登録（カテゴリが未登録）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0305-UC02-T01",
+    "title": "カテゴリ編集",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0305-UC04-T01",
+    "title": "カテゴリ削除（商品に選択されていない場合のみ可能）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0309-UC01-T01",
+    "title": "カテゴリ表示順の変更（マウスで変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0305-UC04-T01",
+    "title": "CSVダウンロード（CSVダウンロード）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0305-UC04-T02",
+    "title": "CSVダウンロード（出力項目設定）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0305-UC01-T03",
+    "title": "カテゴリ登録（2階層以下）（2階層以下が1件以上登録済/4階層まで登録が可能）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0305-UC01-T04",
+    "title": "カテゴリ登録（2階層以下）（2階層以下が未登録/4階層まで登録が可能）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0306-UC01-T01",
+    "title": "商品CSV登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0306-UC01-T02",
+    "title": "雛形ファイルのダウンロード",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0307-UC01-T01",
+    "title": "カテゴリCSV登録",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0307-UC01-T02",
+    "title": "雛形ファイルのダウンロード",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0308-UC01-T01",
+    "title": "タグ登録（タグが1件以上登録済）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0308-UC01-T02",
+    "title": "タグ登録（タグが未登録）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0308-UC02-T01",
+    "title": "タグ編集",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product/new"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0308-UC04-T01",
+    "title": "タグ削除",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  },
+  {
+    "area": "EA03",
+    "item_id": "EA0309-UC01-T01",
+    "title": "タグ表示順の変更（マウスで変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/product-list"
+      }
+    ]
+  }
+]

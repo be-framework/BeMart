@@ -1,0 +1,434 @@
+[
+  {
+    "area": "EA08",
+    "item_id": "EA0801-UC01-T01",
+    "title": "システム情報（初期表示）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0802-UC01-T01",
+    "title": "メンバー管理（初期表示）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0802-UC01-T02",
+    "title": "メンバー管理（下へ・正常パターン）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0802-UC01-T03",
+    "title": "メンバー管理（上へ正常パターン）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0802-UC01-T04",
+    "title": "メンバー管理（下へ・連続押下）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0802-UC01-T05",
+    "title": "メンバー管理（上へ・連続押下）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0802-UC01-T06",
+    "title": "メンバー削除（システム管理者2名・他ユーザの削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0802-UC01-T07",
+    "title": "メンバー削除（システム管理者2名・自ユーザの削除）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0803-UC01-T01",
+    "title": "メンバー登録（登録実施）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0803-UC01-T02",
+    "title": "メンバー登録（登録未実施）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0803-UC01-T03",
+    "title": "メンバー登録（異常パターン）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0803-UC02-T01",
+    "title": "メンバー編集（編集実施）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0803-UC02-T02",
+    "title": "メンバー編集（編集未実施）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0803-UC02-T03",
+    "title": "メンバー編集（異常パターン）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0804-UC01-T01",
+    "title": "セキュリティ管理（初期表示）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0804-UC01-T02",
+    "title": "セキュリティ管理（管理画面URL変更）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0804-UC01-T03",
+    "title": "セキュリティ管理（IP制限）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0804-UC01-T04",
+    "title": "セキュリティ管理（SSLを強制）",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0805-UC01-T01",
+    "title": "権限管理(登録/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0805-UC01-T02",
+    "title": "権限管理(登録/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0805-UC02-T01",
+    "title": "権限管理(登録/異常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0805-UC02-T02",
+    "title": "権限管理(登録/異常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0805-UC03-T01",
+    "title": "権限管理(追加/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0805-UC03-T02",
+    "title": "権限管理(追加/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0805-UC04-T01",
+    "title": "権限管理(削除/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0806-UC01-T01",
+    "title": "EC-CUBEログ表示(確認)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0806-UC01-T02",
+    "title": "EC-CUBEログ表示(別ファイル確認)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0806-UC02-T01",
+    "title": "EC-CUBEログ表示(件数変更/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0806-UC02-T02",
+    "title": "EC-CUBEログ表示(件数変更/異常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0806-UC02-T03",
+    "title": "EC-CUBEログ表示(件数変更/異常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0806-UC02-T04",
+    "title": "EC-CUBEログ表示(件数変更/異常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0807-UC01-T01",
+    "title": "マスターデーター管理(登録/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0807-UC01-T02",
+    "title": "マスターデーター管理(登録/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0807-UC02-T01",
+    "title": "マスターデーター管理(編集/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0807-UC03-T01",
+    "title": "マスターデーター管理(編集/異常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  },
+  {
+    "area": "EA08",
+    "item_id": "EA0807-UC04-T01",
+    "title": "マスターデーター管理(削除/正常)",
+    "auth": "admin",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/admin/system"
+      }
+    ]
+  }
+]

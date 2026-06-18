@@ -1,0 +1,302 @@
+[
+  {
+    "area": "EF01",
+    "item_id": "EF0101-UC01-T01",
+    "title": "TOPページ（初期表示）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF01",
+    "item_id": "EF0101-UC01-T02",
+    "title": "TOPページ（新着情報・リンク押下）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF01",
+    "item_id": "EF0101-UC02-T01",
+    "title": "TOPページ（カテゴリ検索）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF01",
+    "item_id": "EF0101-UC03-T01",
+    "title": "TOPページ（キーワード検索・全件検索）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF01",
+    "item_id": "EF0101-UC03-T02",
+    "title": "TOPページ（キーワード検索・絞込検索）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0201-UC01-T01",
+    "title": "商品一覧ページ（初期表示）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0201-UC01-T02",
+    "title": "商品一覧ページ（ヘッダー側でないカテゴリのリンク押下）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0201-UC03-T01",
+    "title": "商品一覧ページ（ソート）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0201-UC04-T01",
+    "title": "商品一覧ページ（表示件数）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0201-UC04-T02",
+    "title": "商品一覧ページ（ページング）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC01-T01",
+    "title": "商品詳細（初期表示）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC01-T02",
+    "title": "商品詳細（カテゴリリンク）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC01-T03",
+    "title": "商品詳細（サムネイル画像選択）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC02-T01",
+    "title": "商品詳細（カートに入れる・注文数＜販売制限数＜在庫数 の注文）※規格なし商品に、在庫量/販売制限数を設定",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC02-T02",
+    "title": "商品詳細（カートに入れる・販売制限数＜注文数＜在庫数 の注文）※規格なし商品に、在庫量/販売制限数を設定",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC02-T03",
+    "title": "商品詳細（カートに入れる・販売制限数＜在庫数＜注文数 の注文）※規格なし商品に、在庫量/販売制限数を設定",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC02-T04",
+    "title": "商品詳細（カートに入れる・注文数＜販売制限数＜在庫数 の注文）※商品規格に、在庫量/販売制限数を設定",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC02-T05",
+    "title": "商品詳細（カートに入れる・販売制限数＜注文数＜在庫数 の注文）※商品規格に、在庫量/販売制限数を設定",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC02-T06",
+    "title": "商品詳細（カートに入れる・販売制限数＜在庫数＜注文数 の注文）※商品規格に、在庫量/販売制限数を設定",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF02",
+    "item_id": "EF0202-UC03-T01",
+    "title": "商品詳細（カートに入れる・在庫数＜注文数 の注文）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF04",
+    "item_id": "EF0401-UC01-T01",
+    "title": "会員登録（正常パターン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF04",
+    "item_id": "EF0401-UC01-T02",
+    "title": "会員登録（異常パターン・メールアドレスのユニーク制約チェック）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF04",
+    "item_id": "EF0401-UC01-T04",
+    "title": "会員登録（「同意しない」ボタン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF04",
+    "item_id": "EF0401-UC01-T05",
+    "title": "会員登録（「戻る」ボタン）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  },
+  {
+    "area": "EF04",
+    "item_id": "EF0404-UC01-T01",
+    "title": "会員登録（利用規約）",
+    "auth": "none",
+    "steps": [
+      {
+        "action": "goto",
+        "url": "/"
+      }
+    ]
+  }
+]
