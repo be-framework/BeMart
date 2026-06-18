@@ -136,7 +136,8 @@
     "architecture:audit": "python3 scripts/bear_standard_audit.py .",
     "agent": "php bin/agent.php",
     "admin": "php bin/admin.php",
-    "stats": "php bin/stats.php"
+    "stats": "php bin/stats.php",
+    "db:reset": "sql/reset-dev.sh"
   },
   "scripts-descriptions": {
     "test": "Run the default PHPUnit suite.",
@@ -174,7 +175,8 @@
     "architecture:audit": "Audit BEAR.Sunday framework-boundary standard drift. This currently reports known debt and is used to guide standardization PRs.",
     "agent": "Run the BEAR.ToolUse agent demo.",
     "admin": "Admin maintenance CLI (list / reset-2fa / disable / delete) operating on dtb_member via DATABASE_URL.",
-    "stats": "Print the README Evidence Snapshot from live repository counts (--write refreshes README.md)."
+    "stats": "Print the README Evidence Snapshot from live repository counts (--write refreshes README.md).",
+    "db:reset": "Rebuild the dev DB to a deterministic known state (schema + master + fake-derived fixture). Run BEFORE any browser/visual verification so mutating runs don't drift."
   },
   "config": {
     "sort-packages": true,
