@@ -16,14 +16,16 @@ use Ray\Di\AbstractModule;
 use Ray\Di\Injector;
 
 use function dirname;
+use function mb_strlen;
 
 /**
  * Resource-layer coverage for the admin ログ表示 Tier-2 page.
  *
- * The resource is a thin GET renderer: it exposes a stable
- * {@see AdminLogForm} and a bounded log sample without adding a
- * file-read mutation surface. The AUTHZ guard rejects anonymous admins
- * with 403.
+ * The resource is a GET renderer: it exposes a stable {@see AdminLogForm}
+ * and tails a module-fixed log path (no request-supplied filename, so no
+ * traversal surface). `log` is always a list of strings — real tail lines,
+ * or empty when the bound file is absent. The AUTHZ guard rejects
+ * anonymous admins with 403.
  */
 final class AdminLogResourceTest extends TestCase
 {
@@ -51,7 +53,7 @@ final class AdminLogResourceTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testOnGetReturnsFormAndLogSample(): void
+    public function testOnGetReturnsFormAndLogList(): void
     {
         $this->rebindAdminSession(self::TEST_ADMIN_ID);
 
@@ -59,7 +61,13 @@ final class AdminLogResourceTest extends TestCase
 
         $this->assertSame(Code::OK, $ro->code);
         $this->assertInstanceOf(AdminLogForm::class, $ro->body['form']);
-        $this->assertNotEmpty($ro->body['log']);
+        // Real tail of the module-fixed log path: a list of strings (may be
+        // empty when the bound file is absent), each within the schema bound.
+        $this->assertIsArray($ro->body['log']);
+        foreach ($ro->body['log'] as $line) {
+            $this->assertIsString($line);
+            $this->assertLessThanOrEqual(255, mb_strlen($line));
+        }
     }
 
     public function testOnGetAnonymousAdminReturns403(): void
