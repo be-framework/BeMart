@@ -3,7 +3,7 @@
 import json, re
 from pathlib import Path
 
-BASE = Path("/Users/akihito/git/BeMart/docs/eccube-spec-coverage")
+BASE = Path(__file__).resolve().parent
 items = json.load(open(BASE / "all_items.json"))
 ef03_items = [i for i in items if i["area"] == "EF03"]
 EVD = BASE / "evidence-browser"
@@ -14,7 +14,8 @@ def dom(iid):
 
 def deep_dom(iid):
     p = EVD / f"EF03-{iid}-deep.html" if not iid.endswith("-chk") else EVD / f"EF03-{iid}.html"
-    if p.exists(): return p.read_text(encoding="utf-8")
+    if p.exists():
+        return p.read_text(encoding="utf-8")
     p = EVD / f"EF03-{iid}.html"
     return p.read_text(encoding="utf-8") if p.exists() else ""
 
@@ -159,8 +160,6 @@ for item in ef03_items:
         "verifier_status": None,
         "notes": reason,
     })
-    if not executed:
-        RECORDS[-1]["reason"] = reason
 
 out = BASE / "records/EF03.jsonl"
 with open(out, "w") as f:
