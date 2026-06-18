@@ -135,7 +135,8 @@
     "serve:page:dev": "BEMART_DEV_LOGIN=1 COMPOSER_PROCESS_TIMEOUT=0 php -S 127.0.0.1:8081 -t public public/page.php",
     "architecture:audit": "python3 scripts/bear_standard_audit.py .",
     "agent": "php bin/agent.php",
-    "admin": "php bin/admin.php"
+    "admin": "php bin/admin.php",
+    "stats": "php bin/stats.php"
   },
   "scripts-descriptions": {
     "test": "Run the default PHPUnit suite.",
@@ -172,7 +173,8 @@
     "serve:page:dev": "Serve the HTML entrypoint with the dev 2FA bypass (BEMART_DEV_LOGIN=1; admin login accepts 123456). Dev only — never prod.",
     "architecture:audit": "Audit BEAR.Sunday framework-boundary standard drift. This currently reports known debt and is used to guide standardization PRs.",
     "agent": "Run the BEAR.ToolUse agent demo.",
-    "admin": "Admin maintenance CLI (list / reset-2fa / disable / delete) operating on dtb_member via DATABASE_URL."
+    "admin": "Admin maintenance CLI (list / reset-2fa / disable / delete) operating on dtb_member via DATABASE_URL.",
+    "stats": "Print the README Evidence Snapshot from live repository counts (--write refreshes README.md)."
   },
   "config": {
     "sort-packages": true,
