@@ -51,6 +51,8 @@ Web+DB 完成判定のルールは
 [`docs/web-e2e/repeated-failure-patterns.md`](docs/web-e2e/repeated-failure-patterns.md)、
 EC-CUBE route と ALPS / 実装状態の対応は
 [`docs/eccube-feature-alps-status.html`](docs/eccube-feature-alps-status.html)、
+EC-CUBE 結合試験項目書（17領域 248項目）への実装状況は
+[`docs/eccube-spec-coverage/implementation-status.html`](docs/eccube-spec-coverage/implementation-status.html)（ALPS profile 付き semantic HTML。各行が原典 spec・テスト・スクショに直結）、
 API surface は [`docs/api/`](docs/api/) にあります。
 
 生成された公開・検証成果物は次から直接確認できます。
