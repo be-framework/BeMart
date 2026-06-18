@@ -257,7 +257,8 @@ a {{ color: #1257a8; text-decoration: none; }} a:hover {{ text-decoration: under
 <tr class="statusLegend"><td><span class="status--ok">✅ テスト検証</span></td><td>passing な flow/HTTP テストが実際に動かしている（{n_ok}件）</td></tr>
 <tr class="statusLegend"><td><span class="status--screen">🟢 画面確認</span></td><td>実ルートが解決し画面が描画される（admin sweep 等）。専用の操作テストは未（{n_screen}件）</td></tr>
 </table>
-<p class="selectionNote meta"><strong>スコープ:</strong> 全{len(rows)}試験項目を T 粒度で1行ずつ収録。<strong>未実装はゼロ</strong>（70画面すべて実ルートが解決し描画）。状況は <em>area/flow 粒度</em>で導出（✅＝その領域のワークフローを passing な flow テストが通す。🟢＝画面は描画されるが専用フローテスト未）。URL は <code>src/Resource/Page/**</code> の実ルートに対し機械検証済（推測なし）。各 spec リンクは EC-CUBE 原典、test リンクは BeMart テスト。</p>
+<p class="selectionNote meta"><strong>スコープ:</strong> 全{len(rows)}試験項目を T 粒度で1行ずつ収録。状況は <em>area/flow 粒度</em>で導出（✅＝その領域のワークフローを passing な flow テストが通す。🟢＝画面は描画されるが専用フローテスト未）。URL は <code>src/Resource/Page/**</code> の実ルートに対し機械検証済（推測なし）。各 spec リンクは EC-CUBE 原典、test リンクは BeMart テスト。</p>
+<p class="selectionNote meta"><strong>スクリーンショットの撮り方（透明性）:</strong> 管理画面のショットは<strong>決定的フィクスチャ</strong>（<code>composer db:reset</code>＝<code>be/var/fake/*.json</code> を FK 整合の SQL に実体化）の上で <code>harness/snap.cjs</code> が撮り直す。<strong>200 で実描画した画面のみ</strong>を掲載し、POST/パラメータ必須の操作エンドポイント（受注登録・出荷 CSV 等、GET 画面を持たない）はショットを置かない（誤誘導するショットを残さないため stale を削除）。商品/受注/会員一覧・ダッシュボードはこのフィクスチャの実データ（商品7・会員5・受注7）を写している。</p>
 <nav class="toc">{''.join(toc)}</nav>
 </header>
 <main>
