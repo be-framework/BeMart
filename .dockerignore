@@ -1,0 +1,31 @@
+# Reinstalled inside the image — never copy the host copies
+/vendor/
+/var/tmp/
+/var/log/
+
+# VCS / build / caches
+/.git/
+/.github/
+/build/
+/.phpunit.cache/
+/.phpunit.result.cache
+/.phpcs-cache
+/tests/Http/log/*.log
+
+# Local DB / EC-CUBE source clones (large, not needed in the image)
+/malt/
+/tools/ec-cube-source/
+
+# Editors / OS / secrets
+/.idea/
+/.vscode/
+/.env
+.DS_Store
+*.swp
+*.swo
+
+# Docker / workflow scratch
+/.claude/worktrees/
+Dockerfile
+.dockerignore
+docker-compose.yml

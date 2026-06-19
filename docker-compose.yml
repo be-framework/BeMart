@@ -1,0 +1,84 @@
+# docker-compose.yml — BeMart one-command bring-up (app + MySQL 8.0)
+#
+#   docker compose up --build -d        # start db + api(8080) + page(8081)
+#   docker compose run --rm setup       # load schema + masters + demo catalog (DESTRUCTIVE)
+#   docker compose logs -f api          # tail the API server
+#   docker compose down                 # stop (keep the MySQL volume)
+#   docker compose down -v              # stop + delete the MySQL volume
+#
+# Uses host ports 8080 / 8081 / 3306 — stop `malt` first (it also binds 3306).
+
+x-database-url: &database_url "mysql://root@db:3306/eccubedb?charset=utf8mb4"
+
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+      MYSQL_DATABASE: eccubedb
+    # native auth so the bundled mariadb-client (sql/setup-db.sh) can connect;
+    # utf8mb4 / utf8mb4_bin matches the EC-CUBE 4.3 dump.
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_bin
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  # api / page / setup share one image (bemart:local). The build runs once;
+  # the other services reuse the cached layers and the same tag.
+  api:
+    build: .
+    image: bemart:local
+    environment:
+      DATABASE_URL: *database_url
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    # default CMD: php -S 0.0.0.0:8080 -t public public/index.php
+
+  page:
+    build: .
+    image: bemart:local
+    environment:
+      DATABASE_URL: *database_url
+      # Dev-only 2FA bypass: makes the admin login accept the magic token 123456
+      # (test-admin / local-dev-admin-password). Safe to ship here because
+      # DevLogin also requires the cli-server SAPI (php -S, used just below) and
+      # a non-prod context — it can never activate under php-fpm or a prod-*
+      # context.
+      BEMART_DEV_LOGIN: "1"
+    command: ["php", "-S", "0.0.0.0:8081", "-t", "public", "public/page.php"]
+    ports:
+      - "8081:8081"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # One-shot DB bring-up. DESTRUCTIVE: drops and recreates eccubedb, loads the
+  # EC-CUBE schema + mtb_* masters (setup-db.sh), then the dev/demo catalog —
+  # products, categories, customers — (seed-dev.sh) so the storefront is
+  # immediately browsable. Not started by `up` (profile-gated); run explicitly:
+  #   docker compose run --rm setup
+  setup:
+    build: .
+    image: bemart:local
+    profiles: ["setup"]
+    environment:
+      DATABASE_URL: *database_url
+    command: ["bash", "-c", "sql/setup-db.sh && sql/seed-dev.sh"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  db_data:
