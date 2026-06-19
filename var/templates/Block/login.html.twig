@@ -1,13 +1,36 @@
 {#
-  EC-CUBE default-theme Block/login.twig static anonymous-state port.
+  EC-CUBE default-theme Block/login.twig port.
 
-  BeMart's shared storefront frame does not yet carry customer auth
-  state, so this first slice renders the anonymous EC-CUBE branch.
-  EC-CUBE still exposes the お気に入り shortcut in anonymous state; it
-  will ask for login on the destination side. Keep that link here so the
-  header size/affordances match the reference storefront.
+  Mirrors EC-CUBE's `is_granted('ROLE_USER')` split: an authenticated customer
+  sees マイページ / お気に入り / ログアウト; an anonymous visitor sees
+  新規会員登録 / お気に入り / ログイン. is_logged_in() reads the flat customer
+  session key (see BeMartTwigExtension). Logout is POST + CSRF (BeMart's
+  doLogout), so it is a small form rather than EC-CUBE's GET link.
 #}
 <div class="ec-headerNav">
+{% if is_logged_in() %}
+    <div class="ec-headerNav__item">
+        <a href="/mypage">
+            <i class="ec-headerNav__itemIcon fas fa-user fa-fw"></i>
+            <span class="ec-headerNav__itemLink">マイページ</span>
+        </a>
+    </div>
+    <div class="ec-headerNav__item">
+        <a href="/mypage/favorite-list">
+            <i class="ec-headerNav__itemIcon fas fa-heart fa-fw"></i>
+            <span class="ec-headerNav__itemLink">お気に入り</span>
+        </a>
+    </div>
+    <div class="ec-headerNav__item">
+        <form method="post" action="/logout" style="margin:0;">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
+            <button type="submit" style="background:none;border:none;cursor:pointer;padding:0;color:inherit;font:inherit;">
+                <i class="ec-headerNav__itemIcon fas fa-sign-out-alt fa-fw"></i>
+                <span class="ec-headerNav__itemLink">ログアウト</span>
+            </button>
+        </form>
+    </div>
+{% else %}
     <div class="ec-headerNav__item">
         <a href="/entry">
             <i class="ec-headerNav__itemIcon fas fa-user fa-fw"></i>
@@ -26,4 +49,5 @@
             <span class="ec-headerNav__itemLink">ログイン</span>
         </a>
     </div>
+{% endif %}
 </div>

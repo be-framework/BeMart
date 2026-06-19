@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Module;
 
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Auth\EccubeSharedSessionAdapter;
 use NumberFormatter;
 use Override;
 use Twig\Extension\AbstractExtension;
@@ -67,6 +68,7 @@ final class BeMartTwigExtension extends AbstractExtension
             new TwigFunction('asset', [$this, 'asset']),
             new TwigFunction('csrf_token', [$this, 'csrfToken']),
             new TwigFunction('csrf_token_for_anchor', [$this, 'csrfTokenForAnchor']),
+            new TwigFunction('is_logged_in', [$this, 'isLoggedIn']),
         ];
     }
 
@@ -135,5 +137,23 @@ final class BeMartTwigExtension extends AbstractExtension
     public function csrfTokenForAnchor(string $tokenId = ''): string
     {
         return $this->csrfToken($tokenId);
+    }
+
+    /**
+     * Whether a customer is authenticated in the current session.
+     *
+     * Mirrors EC-CUBE's `is_granted('ROLE_USER')` for the ported storefront
+     * header: reads the flat customer-id session key the html-context session
+     * writer and {@see EccubeSharedSessionAdapter} share. Lets Block/login
+     * render the logged-in affordances (マイページ / ログアウト) instead of
+     * always showing the anonymous ログイン link.
+     *
+     * @SuppressWarnings("PHPMD.Superglobals") Session boundary, like csrfToken().
+     */
+    public function isLoggedIn(): bool
+    {
+        $customerId = $_SESSION[EccubeSharedSessionAdapter::CUSTOMER_ID_KEY] ?? null;
+
+        return is_string($customerId) && $customerId !== '';
     }
 }

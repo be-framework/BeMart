@@ -1,5 +1,8 @@
 {#
-  EC-CUBE default-theme Block/login_sp.twig static anonymous-state port.
+  EC-CUBE default-theme Block/login_sp.twig port.
+
+  Like Block/login.html.twig: is_logged_in() swaps the anonymous
+  新規会員登録 / ログイン for マイページ / ログアウト. Logout is POST + CSRF.
 #}
 <div class="ec-headerLinkArea">
     <div class="ec-headerLink__list">
@@ -9,24 +12,45 @@
             </div>
             <span>カートを見る</span>
         </a>
+{% if is_logged_in() %}
+        <a class="ec-headerLink__item" href="/mypage">
+            <div class="ec-headerLink__icon">
+                <i class="fas fa-user fa-fw"></i>
+            </div>
+            <span>マイページ</span>
+        </a>
+{% else %}
         <a class="ec-headerLink__item" href="/entry">
             <div class="ec-headerLink__icon">
                 <i class="fas fa-user fa-fw"></i>
             </div>
             <span>新規会員登録</span>
         </a>
+{% endif %}
         <a class="ec-headerLink__item" href="/mypage/favorite-list">
             <div class="ec-headerLink__icon">
                 <i class="fas fa-heart fa-fw"></i>
             </div>
             <span>お気に入り</span>
         </a>
+{% if is_logged_in() %}
+        <form method="post" action="/logout" style="margin:0;">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
+            <button type="submit" class="ec-headerLink__item" style="background:none;border:none;cursor:pointer;width:100%;">
+                <div class="ec-headerLink__icon">
+                    <i class="fas fa-sign-out-alt fa-fw"></i>
+                </div>
+                <span>ログアウト</span>
+            </button>
+        </form>
+{% else %}
         <a class="ec-headerLink__item" href="/login">
             <div class="ec-headerLink__icon">
                 <i class="fas fa-lock fa-fw"></i>
             </div>
             <span>ログイン</span>
         </a>
+{% endif %}
         <a class="ec-headerLink__item" href="/">
             <div class="ec-headerLink__icon">
                 <i class="fas fa-home fa-fw"></i>

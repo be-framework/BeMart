@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Module;
 
 use MyVendor\BeMart\Auth\EccubeSharedCsrfTokenAdapter;
+use MyVendor\BeMart\Auth\EccubeSharedSessionAdapter;
 use MyVendor\BeMart\Module\BeMartTwigExtension;
 use PHPUnit\Framework\TestCase;
 
@@ -15,7 +16,10 @@ final class BeMartTwigExtensionTest extends TestCase
 {
     protected function tearDown(): void
     {
-        unset($_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY]);
+        unset(
+            $_SESSION[EccubeSharedCsrfTokenAdapter::SESSION_KEY],
+            $_SESSION[EccubeSharedSessionAdapter::CUSTOMER_ID_KEY],
+        );
     }
 
     public function testExposesCsrfTwigFunctions(): void
@@ -25,6 +29,21 @@ final class BeMartTwigExtensionTest extends TestCase
 
         self::assertContains('csrf_token', $names);
         self::assertContains('csrf_token_for_anchor', $names);
+        self::assertContains('is_logged_in', $names);
+    }
+
+    public function testIsLoggedInReflectsCustomerSession(): void
+    {
+        $extension = new BeMartTwigExtension();
+
+        unset($_SESSION[EccubeSharedSessionAdapter::CUSTOMER_ID_KEY]);
+        self::assertFalse($extension->isLoggedIn());
+
+        $_SESSION[EccubeSharedSessionAdapter::CUSTOMER_ID_KEY] = 'customer-001';
+        self::assertTrue($extension->isLoggedIn());
+
+        $_SESSION[EccubeSharedSessionAdapter::CUSTOMER_ID_KEY] = '';
+        self::assertFalse($extension->isLoggedIn());
     }
 
     public function testCsrfTokenUsesSessionReferenceWhenAvailable(): void
