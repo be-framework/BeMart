@@ -19,14 +19,14 @@ use function in_array;
 use function random_bytes;
 
 /**
- * HTML hypermedia walk of the admin product editor.
+ * HTML hypermedia walk of the admin product editor — driven entirely by the
+ * rendered HTML's data-alps affordances over real HTTP.
  *
- * The Hypermedia suite drives this journey through #[Link] rels; this drives it
- * through the rendered HTML's data-alps affordances over real HTTP — rendering
- * the editor, then following (submitting) the doCreateProduct / doUpdateProduct
- * <form>s exactly as a browser would. It is the journey-level counterpart to the
- * single-step AffordanceProductFormTest, and it is the leg that catches a
- * form whose action/CSRF drift mid-flow (the 405 class).
+ * Navigation follows the `<a data-alps="goProduct">` a browser would click;
+ * writes submit the `<form data-alps="doCreateProduct|doUpdateProduct">` a
+ * browser would submit (with its rendered action + hidden CSRF). It is the
+ * journey-level counterpart to AffordanceProductFormTest, and the leg that
+ * catches a link/form whose target drifts mid-flow (the 405 class).
  */
 final class FlowAdminProductHtmlTest extends AbstractHtmlWorkflowTestCase
 {
@@ -36,11 +36,14 @@ final class FlowAdminProductHtmlTest extends AbstractHtmlWorkflowTestCase
     private const CSRF_TOKEN = 'workflow-product-html-csrf-token';
 
     private static string $productCode;
+    private static string $productName;
     private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
     {
-        self::$productCode = 'wf-html-' . bin2hex(random_bytes(4));
+        $suffix = bin2hex(random_bytes(4));
+        self::$productCode = 'wf-html-' . $suffix;
+        self::$productName = 'HTML Workflow Product ' . $suffix;
         self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
     }
 
@@ -80,7 +83,7 @@ final class FlowAdminProductHtmlTest extends AbstractHtmlWorkflowTestCase
     {
         $created = $this->submit($editor, 'doCreateProduct', [
             'productCode' => self::$productCode,
-            'productName' => 'HTML Workflow Product',
+            'productName' => self::$productName,
             'price02' => '1980',
         ]);
 
@@ -91,25 +94,37 @@ final class FlowAdminProductHtmlTest extends AbstractHtmlWorkflowTestCase
     }
 
     #[Depends('testCreatesProductByFollowingTheRenderedForm')]
-    #[Alps('goProduct')]
-    public function testOpensEditorForCreatedProduct(): ResourceObject
+    #[Alps('goProductList')]
+    public function testListsCreatedProduct(): ResourceObject
     {
-        $editor = $this->resource->get('page://self/admin/product/edit', ['productCode' => self::$productCode]);
+        $list = $this->resource->get('page://self/admin/product-list', ['nameKeyword' => self::$productName]);
 
-        $this->assertSame(Code::OK, $editor->code);
-        $this->assertAffordance($editor, 'doUpdateProduct');
+        $this->assertSame(Code::OK, $list->code);
+        $this->assertStringContainsString(self::$productCode, (string) ($list->view ?? ''));
+        $this->assertAffordance($list, 'goProduct');
+
+        return $list;
+    }
+
+    #[Depends('testListsCreatedProduct')]
+    #[Alps('goProduct')]
+    public function testFollowsEditAffordanceFromList(ResourceObject $list): ResourceObject
+    {
+        $editor = $this->follow($list, 'goProduct');
+
         $this->assertStringContainsString(self::$productCode, (string) ($editor->view ?? ''));
+        $this->assertAffordance($editor, 'doUpdateProduct');
 
         return $editor;
     }
 
-    #[Depends('testOpensEditorForCreatedProduct')]
+    #[Depends('testFollowsEditAffordanceFromList')]
     #[Alps('doUpdateProduct')]
     public function testUpdatesProductByFollowingTheRenderedForm(ResourceObject $editor): void
     {
         $updated = $this->submit($editor, 'doUpdateProduct', [
             'productCode' => self::$productCode,
-            'productName' => 'HTML Workflow Product (updated)',
+            'productName' => self::$productName . ' (updated)',
             'price02' => '2980',
         ]);
 

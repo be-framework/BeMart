@@ -337,7 +337,7 @@
                                             </td>
                                             <td class="align-middle">{{ Product.productCode }}</td>
                                             <td class="align-middle">
-                                                <a href="/admin/product/edit?productCode={{ Product.productCode }}">
+                                                <a href="/admin/product/edit?productCode={{ Product.productCode }}" data-alps="goProduct">
                                                     <img src="{{ asset(Product.imagePath|default('assets/img/common/no_image_product.png'), 'save_image') }}"
                                                          alt="{{ Product.productName }}" style="width: 64px; height: 64px; object-fit: cover;">
                                                 </a>

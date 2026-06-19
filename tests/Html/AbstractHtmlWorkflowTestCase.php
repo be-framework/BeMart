@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Html;
 
 use BEAR\Dev\Http\AbstractWorkflowTest;
+use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 
 use function html_entity_decode;
@@ -20,41 +21,68 @@ use const ENT_QUOTES;
 /**
  * Base for HTML hypermedia workflow tests.
  *
- * The in-process {@see AbstractWorkflowTest} follows #[Link]/HAL rels; an HTTP
- * workflow follows the same rels over the wire. An HTML workflow follows what a
- * browser actually sees: the `data-alps="<transition>"` microformat the rendered
- * <form>s carry (see var/templates + AffordanceContractTest).
+ * The in-process {@see AbstractWorkflowTest} resolves rels from #[Link]/HAL; the
+ * HTTP one resolves them from the Link header. An HTML workflow resolves them
+ * from what a browser actually sees: the `data-alps="<transition>"` microformat
+ * the rendered <a> and <form> elements carry (see var/templates +
+ * AffordanceContractTest). So follow() and linkHref() are overridden to read the
+ * ALPS id off the HTML body — never the Link header.
  *
- * It reuses the HTTP transport (a concrete test returns {@see HttpResource} from
- * newResource()), so navigation (`go*`) keeps the inherited follow() /
- * followLocation() — anchor rel / Link header / Location. {@see submit()} adds
- * the unsafe leg: locate the affordance by its ALPS id, read the action and
- * hidden CSRF token AS RENDERED, and POST that exact form over HTTP — the leg a
- * resource- or header-level test never exercises.
+ *   follow()   — `go*`  : the <a data-alps="…" href> a browser would click (GET)
+ *   linkHref() — target : the href/action of the data-alps element, unresolved
+ *   submit()   — `do*`  : the <form data-alps="…"> a browser would submit (POST),
+ *                         carrying the form's own action (its ?_method=… override
+ *                         drives PUT/DELETE) and rendered hidden CSRF token
+ *
+ * A concrete test returns {@see HttpResource} from newResource(), so the walk
+ * runs over a real HTTP round-trip.
  */
 abstract class AbstractHtmlWorkflowTestCase extends AbstractWorkflowTest
 {
+    /** Follow a safe `go*` affordance: the data-alps anchor a browser would click. */
+    protected function follow(ResourceObject $response, string $rel, array $query = []): ResourceObject
+    {
+        $next = $this->resource->get($this->linkHref($response, $rel), $query);
+        $this->assertSame(Code::OK, $next->code, (string) ($next->view ?? $next->code));
+
+        return $next;
+    }
+
+    /** Resolve a rel to its rendered href/action by the data-alps id — no request. */
+    protected function linkHref(ResourceObject $response, string $rel): string
+    {
+        $view = (string) ($response->view ?? '');
+        $found = preg_match(
+            '/<(?:a|area|form)\b[^>]*\bdata-alps="' . preg_quote($rel, '/') . '"[^>]*>/i',
+            $view,
+            $element,
+        );
+        $this->assertSame(1, $found, sprintf('affordance data-alps="%s" is not rendered', $rel));
+
+        $href = $this->attribute($element[0], 'href');
+        $action = $href === '' ? $this->attribute($element[0], 'action') : $href;
+        $this->assertNotSame('', $action, sprintf('affordance data-alps="%s" has no href/action', $rel));
+
+        return $this->resourceUri($action);
+    }
+
     /**
-     * Submit the rendered affordance carrying data-alps="$alpsId".
-     *
-     * Posts to the form's own action (its `?_method=…` override drives PUT/DELETE
-     * exactly as the browser would) with the form's hidden CSRF token merged in.
+     * Submit the `do*` affordance: the data-alps <form> a browser would submit.
      *
      * @param array<string, mixed> $fields
      */
-    protected function submit(ResourceObject $page, string $alpsId, array $fields = []): ResourceObject
+    protected function submit(ResourceObject $response, string $rel, array $fields = []): ResourceObject
     {
-        $view = (string) ($page->view ?? '');
+        $view = (string) ($response->view ?? '');
         $found = preg_match(
-            '/<form\b[^>]*\bdata-alps="' . preg_quote($alpsId, '/') . '"[^>]*>(.*?)<\/form>/is',
+            '/<form\b[^>]*\bdata-alps="' . preg_quote($rel, '/') . '"[^>]*>(.*?)<\/form>/is',
             $view,
             $form,
         );
-        $this->assertSame(1, $found, sprintf('affordance data-alps="%s" is not rendered', $alpsId));
+        $this->assertSame(1, $found, sprintf('form affordance data-alps="%s" is not rendered', $rel));
 
-        $openTag = (string) preg_replace('/>.*$/s', '>', $form[0]);
-        $action = $this->attribute($openTag, 'action');
-        $this->assertNotSame('', $action, sprintf('affordance "%s" has no action', $alpsId));
+        $action = $this->attribute((string) preg_replace('/>.*$/s', '>', $form[0]), 'action');
+        $this->assertNotSame('', $action, sprintf('form affordance data-alps="%s" has no action', $rel));
 
         $token = $this->hiddenField($form[1], 'csrfToken');
         if ($token !== null) {
@@ -64,13 +92,13 @@ abstract class AbstractHtmlWorkflowTestCase extends AbstractWorkflowTest
         return $this->resource->post($this->resourceUri($action), $fields);
     }
 
-    /** Assert the page renders an affordance (form or anchor) for the ALPS transition. */
-    protected function assertAffordance(ResourceObject $page, string $alpsId): void
+    /** Assert the page renders an affordance (anchor or form) for the ALPS transition. */
+    protected function assertAffordance(ResourceObject $response, string $rel): void
     {
         $this->assertMatchesRegularExpression(
-            '/\bdata-alps="' . preg_quote($alpsId, '/') . '"/i',
-            (string) ($page->view ?? ''),
-            sprintf('affordance data-alps="%s" is not rendered', $alpsId),
+            '/\bdata-alps="' . preg_quote($rel, '/') . '"/i',
+            (string) ($response->view ?? ''),
+            sprintf('affordance data-alps="%s" is not rendered', $rel),
         );
     }
 
