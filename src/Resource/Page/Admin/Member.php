@@ -90,6 +90,7 @@ class Member extends ResourceObject
     #[Alps('goMember')]
     #[JsonSchema(schema: 'get-admin-member.json', params: 'get-admin-member.param.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
+    #[Link(rel: 'doCreateMember', href: 'page://self/admin/member', method: 'post')]
     #[Link(rel: 'doUpdateMember', href: 'page://self/admin/member', method: 'put')]
     #[Link(rel: 'doDeleteMember', href: 'page://self/admin/member', method: 'delete')]
     public function onGet(string|null $loginId = null): static

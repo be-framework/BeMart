@@ -63,7 +63,7 @@
         <div class="ec-registerRole">
             <div class="ec-off1Grid">
                 <div class="ec-off1Grid__cell">
-                    <form method="post" action="/shopping/shipping-edit" class="h-adr">
+                    <form method="post" action="/shopping/shipping-edit" class="h-adr" data-alps="doUpdateShippingAddress">
                         <span class="p-country-name" style="display:none;">Japan</span>
                         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                         <div class="ec-borderedDefs">

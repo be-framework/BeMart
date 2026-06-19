@@ -74,7 +74,8 @@
 
 {% block main %}
     <form name="form1" id="form1" method="post"
-          action="{% if layoutId is defined and layoutId %}/admin/layout/layout?layoutId={{ layoutId }}&_method=put{% else %}/admin/layout/layout{% endif %}">
+          action="{% if layoutId is defined and layoutId %}/admin/layout/layout?layoutId={{ layoutId }}&_method=put{% else %}/admin/layout/layout{% endif %}"
+          data-alps="doUpdateLayout">
         <input type="hidden" id="admin_layout__token" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">

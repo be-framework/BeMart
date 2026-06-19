@@ -283,14 +283,14 @@
                                 <div id="btn_bulk" class="d-none">
                                     <label class="me-2">一括操作</label>
                                     <div class="btn-group me-2" role="group">
-                                        <button data-action="/admin/product-bulk-status" data-product-status="1" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular action-submit" type="button">
+                                        <button data-action="/admin/product-bulk-status" data-product-status="1" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular action-submit" type="button" data-alps="doBulkUpdateProductStatus">
                                             <span>公開</span>
                                         </button>
-                                        <button data-action="/admin/product-bulk-status" data-product-status="2" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular action-submit" type="button">
+                                        <button data-action="/admin/product-bulk-status" data-product-status="2" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular action-submit" type="button" data-alps="doBulkUpdateProductStatus">
                                             <span>非公開</span>
                                         </button>
                                     </div>
-                                    <button data-action="/admin/product-bulk-status" data-product-status="3" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular me-2 action-submit">
+                                    <button data-action="/admin/product-bulk-status" data-product-status="3" token-for-anchor="{{ csrf_token_for_anchor('admin_product_bulk_product_status') }}" class="btn btn-ec-regular me-2 action-submit" data-alps="doBulkUpdateProductStatus">
                                         廃止
                                     </button>
                                     <button type="button" data-bs-toggle="modal" data-bs-target="#bulkDeleteModal" class="btn btn-ec-delete">削除</button>

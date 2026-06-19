@@ -136,7 +136,7 @@ final class EntryHtmlRenderTest extends TestCase
             '<div class="ec-pageHeader">',
             '<div class="ec-off1Grid">',
             'class="ec-off1Grid__cell"',
-            '<form method="post" action="/entry" novalidate class="h-adr">',
+            '<form method="post" action="/entry" novalidate class="h-adr" data-alps="doRegisterCustomer">',
             '<span class="p-country-name"',
             '<div class="ec-borderedDefs">',
             '<div class="ec-halfInput">',

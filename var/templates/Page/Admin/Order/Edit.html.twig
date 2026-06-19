@@ -32,7 +32,7 @@
 {% set isNew = orderNo is empty %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ isNew ? '/admin/order/create' : '/admin/order' }}" id="order_form" name="form1" novalidate>
+    <form role="form" method="post" action="{{ isNew ? '/admin/order/create' : '/admin/order' }}" id="order_form" name="form1" novalidate data-alps="{{ isNew ? '' : 'doUpdateOrder' }}">
         {% if not isNew %}<input type="hidden" name="_method" value="put">{% endif %}
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         {% if not isNew %}<input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">{% endif %}

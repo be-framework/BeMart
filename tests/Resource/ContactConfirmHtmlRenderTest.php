@@ -144,7 +144,7 @@ final class ContactConfirmHtmlRenderTest extends TestCase
             '<h1>お問い合わせ</h1>',
             '<div class="ec-off1Grid">',
             'class="ec-off1Grid__cell"',
-            '<form method="post" action="/contact" class="h-adr">',
+            '<form method="post" action="/contact" class="h-adr" data-alps="doSubmitContact">',
             '<div class="ec-borderedDefs">',
             '<div class="ec-RegisterRole__actions">',
             '<div class="ec-off4Grid">',

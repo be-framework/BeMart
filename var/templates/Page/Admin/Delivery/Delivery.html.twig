@@ -9,7 +9,7 @@
 {% set editing = deliveryId|default('') is not empty %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ editing ? '/admin/delivery/delivery?deliveryId=' ~ deliveryId|url_encode ~ '&_method=put' : '/admin/delivery/delivery-list' }}" id="delivery_edit_form" name="form1" novalidate>
+    <form role="form" method="post" action="{{ editing ? '/admin/delivery/delivery?deliveryId=' ~ deliveryId|url_encode ~ '&_method=put' : '/admin/delivery/delivery-list' }}" id="delivery_edit_form" name="form1" novalidate data-alps="{{ editing ? 'doUpdateDelivery' : '' }}">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <input type="hidden" name="deliveryId" value="{{ deliveryId|default('') }}">
         {% if editing %}

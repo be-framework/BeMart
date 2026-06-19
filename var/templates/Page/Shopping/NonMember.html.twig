@@ -94,7 +94,7 @@
 
     <div class="ec-off1Grid">
         <div class="ec-off1Grid__cell">
-            <form method="post" action="/shopping/non-member" class="h-adr">
+            <form method="post" action="/shopping/non-member" class="h-adr" data-alps="doSubmitNonMember">
             <span class="p-country-name" style="display:none;">Japan</span>
             <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
             <div class="ec-borderedDefs">

@@ -201,7 +201,7 @@
                             規格：{{ classNames|join(' / ') }}
                         </div>
                     {% endif %}
-                    <form action="/cart/item" method="post" id="form1" name="form1">
+                    <form action="/cart/item" method="post" id="form1" name="form1" data-alps="doAddCartItem">
                         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                         <input type="hidden" name="operation" value="add">
                         {% if stockFind %}

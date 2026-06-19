@@ -119,7 +119,7 @@
                             <tbody>
 
                             <tr id="tax_rule_item_new">
-                                <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/tax-rule/tax-rule-list">
+                                <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/tax-rule/tax-rule-list" data-alps="doCreateTaxRule">
                                     <input type="hidden" id="tax_rule__token" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                     <td class="align-middle ps-3"></td>
                                     <td class="align-middle" style="width:230px;">
@@ -200,7 +200,8 @@
                                                                             キャンセル
                                                                         </button>
                                                                         <a class="btn btn-ec-delete" href="/admin/tax-rule/tax-rule?taxRuleId={{ TaxRule.taxRuleId }}&_method=delete"
-                                                                           data-confirm="false">
+                                                                           data-confirm="false"
+                                                                           data-alps="doDeleteTaxRule">
                                                                             削除
                                                                         </a>
                                                                     </div>

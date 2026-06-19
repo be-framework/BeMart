@@ -56,7 +56,7 @@
         </div>
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
-                <form id="form1" method="post" novalidate>
+                <form id="form1" method="post" novalidate data-alps="doResetPassword">
                     <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                     <input type="hidden" name="resetKey" value="{{ resetKey|default('') }}">
                     <div class="ec-borderedDefs">

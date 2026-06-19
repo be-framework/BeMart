@@ -189,7 +189,7 @@
                         <div class="card rounded border-0">
                             <ul class="list-group list-group-flush sortable-container">
                                 <li class="list-group-item">
-                                    <form role="form" class="row" name="form1" id="form1" method="post" action="/admin/class-name/class-name-list">
+                                    <form role="form" class="row" name="form1" id="form1" method="post" action="/admin/class-name/class-name-list" data-alps="doCreateClassName">
                                         <div class="col-auto align-self-center">
                                             <span>規格名</span>
                                             <span class="badge bg-primary ms-1">必須</span>
@@ -240,13 +240,14 @@
                                                     <a class="btn btn-ec-actionIcon"
                                                        data-bs-toggle="modal" data-bs-target="#DeleteModal"
                                                        data-url="/admin/class-name/class-name?classNameId={{ ClassName.classNameId }}&_method=delete"
-                                                       data-message="この操作はあとから取り消すことができません。「{{ ClassName.name }}」を削除してよろしいですか？">
+                                                       data-message="この操作はあとから取り消すことができません。「{{ ClassName.name }}」を削除してよろしいですか？"
+                                                       data-alps="doDeleteClassName">
                                                         <i class="fa fa-close fa-lg text-secondary"></i>
                                                     </a>
                                                 </div>
                                             </div>
                                         </div>
-                                        <form class="row d-none mode-edit" method="post" action="/admin/class-name/class-name?classNameId={{ ClassName.classNameId|url_encode }}&_method=put">
+                                        <form class="row d-none mode-edit" method="post" action="/admin/class-name/class-name?classNameId={{ ClassName.classNameId|url_encode }}&_method=put" data-alps="doUpdateClassName">
                                             <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                             <div class="col-auto align-self-center"><span>規格名</span></div>
                                             <div class="col-auto align-items-center">
