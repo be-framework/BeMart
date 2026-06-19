@@ -67,10 +67,12 @@ for n, i in tag_id.items():
 pid = 0
 pcid = 0
 code_to_pid = {}
+code_to_name = {}
 for p in products:
     pid += 1
     code = p["productCode"]
     code_to_pid[code] = pid
+    code_to_name[code] = p["productName"]
     c = cls_by_code.get(code, {})
     L.append(f"INSERT INTO dtb_product (id, name, product_status_id, description_detail, search_word, note, create_date, update_date, discriminator_type) "
              f"VALUES ({pid}, {sq(p['productName'])}, {sq(p.get('productStatus') or 1)}, {sq(p.get('description'))}, {sq(p.get('searchWord'))}, {sq(p.get('note'))}, {NOW}, {NOW}, 'product');")
@@ -111,8 +113,9 @@ for o in orders:
              f"VALUES ({oid}, {customer_id}, {sq(order_no)}, {status}, {NOW}, '注文', '太郎', {sq(total)}, {NOW}, {NOW}, 'order');")
     for it in items:
         oiid += 1
-        L.append(f"INSERT INTO dtb_order_item (id, order_id, product_id, product_name, price, quantity, discriminator_type) "
-                 f"VALUES ({oiid}, {oid}, {sq(code_to_pid.get(it.get('productCode')))}, {sq(it.get('productCode') or 'item')}, {sq(it.get('price'))}, {sq(it.get('quantity'))}, 'order_item');")
+        icode = it.get("productCode")
+        L.append(f"INSERT INTO dtb_order_item (id, order_id, product_id, product_code, product_name, quantity, price, order_item_type_id, discriminator_type) "
+                 f"VALUES ({oiid}, {oid}, {sq(code_to_pid.get(icode))}, {sq(icode)}, {sq(code_to_name.get(icode) or icode or 'item')}, {sq(it.get('quantity'))}, {sq(it.get('price'))}, 1, 'order_item');")
     L.append(f"INSERT INTO dtb_shipping (id, order_id, name01, name02, create_date, update_date, discriminator_type) "
              f"VALUES ({oid}, {oid}, '注文', '太郎', {NOW}, {NOW}, 'shipping');")
 L.append("SET FOREIGN_KEY_CHECKS=1;")
