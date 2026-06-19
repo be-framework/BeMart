@@ -114,7 +114,10 @@ final class FlowAdminProductHtmlTest extends AbstractHtmlWorkflowTestCase
     {
         $editor = $this->follow($list, 'goProduct');
 
-        $this->assertStringContainsString(self::$productCode, (string) ($editor->view ?? ''));
+        // E2E state check: the editor renders the values we created (assertState
+        // reads the rendered control, the HTML counterpart of bodyValue()).
+        $this->assertState($editor, 'productCode', self::$productCode);
+        $this->assertState($editor, 'productName', self::$productName);
         $this->assertAffordance($editor, 'doUpdateProduct');
 
         return $editor;

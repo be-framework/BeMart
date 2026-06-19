@@ -12,6 +12,7 @@ use function html_entity_decode;
 use function in_array;
 use function preg_match;
 use function preg_match_all;
+use function preg_quote;
 use function preg_split;
 use function sprintf;
 use function str_starts_with;
@@ -99,6 +100,34 @@ abstract class AbstractHtmlWorkflowTestCase extends AbstractWorkflowTest
             $this->affordance((string) ($response->view ?? ''), $rel),
             sprintf('affordance "%s" (class/rel) is not rendered', $rel),
         );
+    }
+
+    /**
+     * Assert the rendered page conveys a descriptor's value — the HTML counterpart
+     * of the JSON workflow's bodyValue(), so an E2E walk can verify state, not just
+     * links. It checks what the page actually shows: a control value
+     * (`<input name="…" value>`) or a class-tagged display (`<… class="…">…<`),
+     * the ALPS HTML representation of a descriptor.
+     */
+    protected function assertState(ResourceObject $response, string $descriptor, string $expected): void
+    {
+        $value = $this->renderedValue((string) ($response->view ?? ''), $descriptor);
+        $this->assertNotNull($value, sprintf('state "%s" is not rendered', $descriptor));
+        $this->assertSame($expected, $value, sprintf('rendered state "%s" drifted', $descriptor));
+    }
+
+    private function renderedValue(string $view, string $descriptor): string|null
+    {
+        $name = preg_quote($descriptor, '/');
+        if (preg_match('/<(?:input|select|textarea)\b[^>]*\bname="' . $name . '"[^>]*\bvalue="([^"]*)"/i', $view, $control) === 1) {
+            return html_entity_decode($control[1], ENT_QUOTES | ENT_HTML5);
+        }
+
+        if (preg_match('/<[^>]*\bclass="[^"]*\b' . $name . '\b[^"]*"[^>]*>([^<]*)</i', $view, $display) === 1) {
+            return trim(html_entity_decode($display[1], ENT_QUOTES | ENT_HTML5));
+        }
+
+        return null;
     }
 
     /** First <a|area|form|button> open tag whose class or rel carries the ALPS token. */
