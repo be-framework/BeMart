@@ -8,7 +8,6 @@ use BEAR\Package\AbstractAppModule;
 use BEAR\Package\Module\AppMetaModule;
 use BEAR\Package\PackageModule;
 use BEAR\Resource\Module\JsonSchemaModule;
-use BEAR\Resource\ResourceObject;
 use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
 use MyVendor\BeMart\Auth\AdminSessionWriterInterface;
@@ -78,8 +77,7 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeSecurityConfigWriter;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
-use MyVendor\BeMart\Annotation\CsrfProtected;
-use MyVendor\BeMart\Interceptor\CsrfProtectedInterceptor;
+use Ray\Csrf\CsrfModule;
 use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
@@ -165,11 +163,13 @@ final class AppModule extends AbstractAppModule
             ),
         );
 
-        $this->bindPriorityInterceptor(
-            $this->matcher->subclassesOf(ResourceObject::class),
-            $this->matcher->annotatedWith(CsrfProtected::class),
-            [CsrfProtectedInterceptor::class],
-        );
+        // CSRF protection via the ray/csrf package. CsrfTokenInterceptor is
+        // armed on every #[CsrfToken] method in all contexts and always
+        // validates; per-context modules bind CsrfTokenInterface to the right
+        // token store (EccubeModule → EC-CUBE adapter; FakeModule → null/fake).
+        // tokenField 'csrfToken' keeps BeMart's existing form field name;
+        // allowedOrigin null leaves #[SameOrigin] unused.
+        $this->install(new CsrfModule(allowedOrigin: null, tokenField: 'csrfToken'));
 
         // Be Framework: BecomingInterface, SemanticLogger, semantic validator,
         // Been provider. Dev/Test contexts override logging with DevLoggingModule;

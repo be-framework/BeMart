@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Order;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminShippingCsvImported;
@@ -35,6 +36,7 @@ class ImportShipping extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -75,15 +77,14 @@ class ImportShipping extends ResourceObject
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goExportShipping', href: 'page://self/admin/order/export-shipping', method: 'get')]
     #[Link(rel: 'goExportCustomer', href: 'page://self/admin/customer-csv')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $csv): static
     {
         $final = ($this->becoming)(new AdminImportShippingCsvInput(csv: $csv));
 
         assert($final instanceof AdminShippingCsvImported);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/order-list';
+        ($this->mutationResponse)($this, Code::OK, '/admin/order-list');
         $this->body = [
             'transitionId' => 'doImportShippingCsv',
             'accepted' => $final->accepted,

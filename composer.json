@@ -5,6 +5,11 @@
   "description": "BeMart — AI-driven EC-CUBE → BEAR.Sunday + Be Framework migration. BEAR.Sunday application layer.",
   "repositories": [
     {
+      "name": "ray-csrf",
+      "type": "vcs",
+      "url": "https://github.com/ray-di/Ray.Csrf"
+    },
+    {
       "type": "vcs",
       "url": "https://github.com/bearsunday/BEAR.DevTools.git"
     },
@@ -21,6 +26,7 @@
     }
   ],
   "require": {
+    "php": "^8.3",
     "be-framework/be": "0.x-dev as 0.1.0",
     "bear/devtools": "dev-abstract-workflow-test-contract",
     "bear/package": "^1.14",
@@ -29,7 +35,7 @@
     "madapaja/twig-module": "^2.7",
     "my-vendor/be-mart-be": "@dev",
     "nyholm/psr7": "^1.8",
-    "php": "^8.3",
+    "ray/csrf": "1.x-dev",
     "ray/di": "^2.18",
     "ray/input-query": "^1.0",
     "ray/media-query": "^1.1",

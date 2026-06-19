@@ -7,8 +7,9 @@ namespace MyVendor\BeMart\Resource\Page\Admin;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function str_starts_with;
@@ -21,6 +22,7 @@ class UnsupportedRoute extends ResourceObject
 {
     public function __construct(
         private readonly AdminSession $adminSession,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
     /** ALPS `goAdminUnsupportedRoute` に対応する GET 操作。 */
@@ -48,7 +50,7 @@ class UnsupportedRoute extends ResourceObject
     /** ALPS `doAdminUnsupportedRoute` に対応する POST 操作。 */
     #[Alps('doAdminUnsupportedRoute')]
     #[JsonSchema(schema: 'post-admin-unsupported-route.json', params: 'post-admin-unsupported-route.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $routeName = '', string|null $returnTo = null): static
     {
         if ($this->adminSession->adminId === null) {
@@ -58,8 +60,9 @@ class UnsupportedRoute extends ResourceObject
             return $this;
         }
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = $this->safeReturnTo($returnTo);
+        // Post/Redirect/Get: a browser follows the safe Location with 303;
+        // JSON/Resource clients keep the no-op body with 200 OK.
+        ($this->mutationResponse)($this, Code::OK, $this->safeReturnTo($returnTo));
         $this->body = [
             'routeName' => $routeName,
             'message' => 'この管理画面操作は現在利用できないため何も変更していません。',

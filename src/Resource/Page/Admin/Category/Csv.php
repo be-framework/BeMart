@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Category;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -71,7 +71,7 @@ class Csv extends ResourceObject
     #[JsonSchema(schema: 'post-admin-category-csv.json', params: 'post-admin-category-csv.param.json')]
     #[Link(rel: 'goCategoryList', href: 'page://self/admin/category/category-list')]
     #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $csv): static
     {
         $final = ($this->becoming)(new ImportCategoryCsvInput(csv: $csv));

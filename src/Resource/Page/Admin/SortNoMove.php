@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -52,7 +52,7 @@ class SortNoMove extends ResourceObject
      */
     #[Alps('doSortNoMove')]
     #[JsonSchema(schema: 'put-admin-sort-no-move.json', params: 'put-admin-sort-no-move.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $masterType,
         string $rowId,

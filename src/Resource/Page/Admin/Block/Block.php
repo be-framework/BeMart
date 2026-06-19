@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Block;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -19,7 +19,7 @@ use MyVendor\BeMart\Be\Input\DeleteBlockInput;
 use MyVendor\BeMart\Be\Input\GetAdminBlockInput;
 use MyVendor\BeMart\Be\Input\UpdateBlockInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminBlockForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -44,7 +44,7 @@ class Block extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
@@ -77,7 +77,7 @@ class Block extends ResourceObject
                 'blockName' => '',
                 'blockFileName' => '',
                 'blockDeletable' => true,
-                'csrfToken' => $this->csrf->token,
+                'csrfToken' => $this->csrf->issue(),
             ];
             $this->body['form'] = $this->editForm($this->body);
 
@@ -94,7 +94,7 @@ class Block extends ResourceObject
             'blockName' => $final->blockName,
             'blockFileName' => $final->blockFileName,
             'blockDeletable' => $final->blockDeletable,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
         $this->body['form'] = $this->editForm($this->body);
 
@@ -124,7 +124,7 @@ class Block extends ResourceObject
     #[Alps('doUpdateBlock')]
     #[JsonSchema(schema: 'put-admin-block-block.json', params: 'put-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $blockId,
         string|null $blockName = null,
@@ -157,7 +157,7 @@ class Block extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-block-block.json', params: 'delete-admin-block-block.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
     #[Link(rel: 'goLayoutList', href: 'page://self/admin/layout/layout-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $blockId): static
     {
         $final = ($this->becoming)(new DeleteBlockInput(blockId: $blockId));

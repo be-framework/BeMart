@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
@@ -53,7 +53,7 @@ class ToggleVisible extends ResourceObject
      */
     #[Alps('doToggleVisible')]
     #[JsonSchema(schema: 'put-admin-toggle-visible.json', params: 'put-admin-toggle-visible.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $masterType,
         string $rowId,

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -58,7 +58,7 @@ class Logout extends ResourceObject
     #[Alps('doLogout')]
     #[JsonSchema(schema: 'post-logout.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(): static
     {
         $final = ($this->becoming)(new LogoutInput());

@@ -10,7 +10,10 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
+use Ray\Csrf\Exception\MissingCsrfTokenException;
+use Ray\Csrf\Http\CompositeRequestToken;
+use Ray\Csrf\Http\RequestTokenInterface;
 use MyVendor\BeMart\Form\AdminPaymentForm;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
@@ -56,7 +59,8 @@ final class AdminPaymentResourceTest extends TestCase
                 if ($this->htmlMutation) {
                     $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
                 }
-                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
+                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
+                $this->bind(RequestTokenInterface::class)->to(CompositeRequestToken::class);
             }
         };
         $base->override($override);
@@ -200,11 +204,10 @@ final class AdminPaymentResourceTest extends TestCase
     public function testDeleteRejectsMissingCsrf(): void
     {
         $id = $this->seed('代金引換');
-        $ro = $this->resource->delete('page://self/admin/payment/payment', [
+        $this->expectException(MissingCsrfTokenException::class);
+        $this->resource->delete('page://self/admin/payment/payment', [
             'paymentId' => $id,
         ]);
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testOnGetNewReturnsBlankForm(): void

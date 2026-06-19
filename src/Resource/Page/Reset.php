@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -90,7 +90,7 @@ class Reset extends ResourceObject
     #[Alps('doResetPassword')]
     #[JsonSchema(schema: 'post-reset.json', params: 'post-reset.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $resetKey, string $password): static
     {
         $final = ($this->becoming)(new ResetPasswordInput(

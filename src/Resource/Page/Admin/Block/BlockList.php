@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Block;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -63,7 +63,7 @@ class BlockList extends ResourceObject
     #[Alps('doCreateBlock')]
     #[JsonSchema(schema: 'post-admin-block-block-list.json', params: 'post-admin-block-block-list.param.json')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $blockName,
         string $blockFileName,

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Entry;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -86,7 +86,7 @@ class Activate extends ResourceObject
     #[Alps('doActivateCustomer')]
     #[JsonSchema(schema: 'post-entry-activate.json', params: 'post-entry-activate.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $secretKey): static
     {
         $final = ($this->becoming)(new ActivateCustomerInput(secretKey: $secretKey));

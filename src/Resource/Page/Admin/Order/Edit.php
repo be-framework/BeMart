@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderFetched;
 use MyVendor\BeMart\Be\Input\GetAdminOrderInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Form\AdminOrderEditForm;
 use Ray\WebFormModule\FormFactory;
@@ -47,7 +47,7 @@ class Edit extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -84,7 +84,7 @@ class Edit extends ResourceObject
                 'orderNo' => '',
                 'order' => null,
                 'items' => [],
-                'csrfToken' => $this->csrf->token,
+                'csrfToken' => $this->csrf->issue(),
             ];
 
             return $this;
@@ -126,7 +126,7 @@ class Edit extends ResourceObject
                 'paymentDate' => $final->paymentDate,
             ],
             'items' => $final->items,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\ClassName;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -45,7 +45,7 @@ class ClassName extends ResourceObject
     #[Alps('doUpdateClassName')]
     #[JsonSchema(schema: 'put-admin-class-name-class-name.json', params: 'put-admin-class-name-class-name.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $classNameId,
         string|null $classNameLabel = null,
@@ -73,7 +73,7 @@ class ClassName extends ResourceObject
     #[Alps('doDeleteClassName')]
     #[JsonSchema(schema: 'delete-admin-class-name-class-name.json', params: 'delete-admin-class-name-class-name.param.json')]
     #[Link(rel: 'goClassNameList', href: 'page://self/admin/class-name/class-name-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $classNameId): static
     {
         $final = ($this->becoming)(new DeleteClassNameInput(classNameId: $classNameId));

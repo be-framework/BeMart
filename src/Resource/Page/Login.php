@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Exception\LoginFailedException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\CustomerAuthenticated;
 use MyVendor\BeMart\Be\Input\LoginInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\LoginForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -67,7 +67,7 @@ class Login extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly CustomerSessionWriterInterface $sessionWriter,
     ) {
@@ -98,7 +98,7 @@ class Login extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/login',
             ],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             // PoC fixture prefill for quick HTML-context verification.
             // See prefilledLoginForm(); deliberately easy to remove.
             'form' => $this->prefilledLoginForm(),
@@ -116,7 +116,7 @@ class Login extends ResourceObject
     #[Alps('doLogin')]
     #[JsonSchema(schema: 'post-login.json', params: 'post-login.param.json')]
     #[Link(rel: 'goMypage', href: 'page://self/mypage')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string|null $email = null, string|null $password = null, string|null $mode = null): static
     {
         $values = [
@@ -232,7 +232,7 @@ class Login extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/login',
             ],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),

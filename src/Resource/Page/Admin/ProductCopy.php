@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\ProductCodeAlreadyInUseException;
@@ -35,6 +36,7 @@ class ProductCopy extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -47,7 +49,7 @@ class ProductCopy extends ResourceObject
     #[JsonSchema(schema: 'post-admin-product-copy.json', params: 'post-admin-product-copy.param.json')]
     #[Link(rel: 'goProduct', href: 'page://self/admin/product', method: 'get')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $productCode,
         string $newProductCode,
@@ -59,8 +61,7 @@ class ProductCopy extends ResourceObject
 
         assert($final instanceof AdminProductCopied);
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/admin/product?productCode=%s', urlencode($final->newProductCode));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/product?productCode=%s', urlencode($final->newProductCode)));
         $this->body = [
             'productCode' => $final->productCode,
             'newProductCode' => $final->newProductCode,

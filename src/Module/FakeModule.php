@@ -23,10 +23,12 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTemplateCompatibility;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Be\Reason\Fake\Service\NullCsrfToken;
+use MyVendor\BeMart\Tests\Fake\Http\NullRequestToken;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Service\CacheClearerInterface;
 use MyVendor\BeMart\Be\Reason\Service\ClassCsvCompatibilityInterface;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
+use Ray\Csrf\Http\RequestTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Be\Reason\Service\MaintenanceModeInterface;
 use MyVendor\BeMart\Be\Reason\Service\MasterDataWriterInterface;
@@ -81,7 +83,8 @@ final class FakeModule extends AbstractAppModule
         $this->bind(AdminSession::class)->toInstance($adminSession);
         $this->bind(NullCsrfToken::class)->toInstance($csrf);
         $this->bind(FakeCsrfToken::class);
-        $this->bind(CsrfToken::class)->toInstance($csrf);
+        $this->bind(CsrfTokenInterface::class)->toInstance($csrf);
+        $this->bind(RequestTokenInterface::class)->to(NullRequestToken::class);
 
         $twoFactorAuth = new FakeTwoFactorAuth();
         $securityConfig = new FakeSecurityConfigWriter();

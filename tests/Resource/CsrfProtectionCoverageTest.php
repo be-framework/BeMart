@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Resource;
 
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
 use PHPUnit\Framework\TestCase;
+use Ray\Csrf\Attribute\CsrfToken;
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;
 use ReflectionClass;
@@ -45,7 +45,7 @@ final class CsrfProtectionCoverageTest extends TestCase
                     continue;
                 }
 
-                if ($method->getAttributes(CsrfProtected::class) === []) {
+                if ($method->getAttributes(CsrfToken::class) === []) {
                     $missing[] = $class . '::' . $methodName;
                 }
             }
@@ -54,7 +54,7 @@ final class CsrfProtectionCoverageTest extends TestCase
         $this->assertSame(
             [],
             $missing,
-            "Mutating Resource methods must declare #[CsrfProtected]:\n" . implode("\n", $missing),
+            "Mutating Resource methods must declare #[CsrfToken]:\n" . implode("\n", $missing),
         );
     }
 

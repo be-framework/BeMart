@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -29,7 +29,7 @@ use MyVendor\BeMart\Be\Input\DeleteMemberInput;
 use MyVendor\BeMart\Be\Input\GetMemberInput;
 use MyVendor\BeMart\Be\Input\UpdateMemberInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminMemberForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -75,7 +75,7 @@ class Member extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
     ) {
@@ -112,7 +112,7 @@ class Member extends ResourceObject
                 'authority' => 0,
                 'work' => 0,
                 'sortNo' => 0,
-                'csrfToken' => $this->csrf->token,
+                'csrfToken' => $this->csrf->issue(),
                 'form' => $form,
             ];
 
@@ -131,7 +131,7 @@ class Member extends ResourceObject
             'authority' => $final->authority,
             'work' => $final->work,
             'sortNo' => $final->sortNo,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an AdminMemberForm pre-filled with the persisted row,
         // for the HTML edit page (var/templates/Page/Admin/Member.html.twig)
@@ -160,7 +160,7 @@ class Member extends ResourceObject
     #[Alps('doCreateMember')]
     #[JsonSchema(schema: 'post-admin-member.json', params: 'post-admin-member.param.json')]
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $loginId,
         string $password,
@@ -252,7 +252,7 @@ class Member extends ResourceObject
     #[Alps('doUpdateMember')]
     #[JsonSchema(schema: 'put-admin-member.json', params: 'put-admin-member.param.json')]
     #[Link(rel: 'goMember', href: 'page://self/admin/member', method: 'get')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $loginId,
         string|null $name = null,
@@ -357,7 +357,7 @@ class Member extends ResourceObject
             'authority' => (int) ($values['authority'] ?? 1),
             'work' => 0,
             'sortNo' => 0,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $form,
@@ -402,7 +402,7 @@ class Member extends ResourceObject
     #[Alps('doDeleteMember')]
     #[JsonSchema(schema: 'delete-admin-member.json', params: 'delete-admin-member.param.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $loginId, string|null $mode = null): static
     {
         $final = ($this->becoming)(new DeleteMemberInput(loginId: $loginId));

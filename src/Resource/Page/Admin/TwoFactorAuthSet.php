@@ -10,7 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
@@ -18,9 +18,10 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthConfigured;
 use MyVendor\BeMart\Be\Input\SetTwoFactorAuthInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -61,7 +62,8 @@ class TwoFactorAuthSet extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
+        private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
 
@@ -99,7 +101,7 @@ class TwoFactorAuthSet extends ResourceObject
             // the QR-code account name; empty when no setup challenge exists.
             'memberName' => $challenge?->loginId ?? '',
             'shopName' => 'BeMart',
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'form' => $form,
         ];
 
@@ -150,7 +152,7 @@ class TwoFactorAuthSet extends ResourceObject
      */
     #[Alps('doSetTwoFactorAuth')]
     #[JsonSchema(schema: 'put-admin-two-factor-auth-set.json', params: 'put-admin-two-factor-auth-set.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     #[Link(rel: 'goTwoFactorAuth', href: 'page://self/admin/two-factor-auth')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPut(string $deviceToken, string|null $loginId = null, string|null $authKey = null): static
@@ -174,13 +176,19 @@ class TwoFactorAuthSet extends ResourceObject
         assert($final instanceof TwoFactorAuthConfigured);
         $this->loginChallenge->completeSetup($challenge);
 
-        $this->code = Code::OK;
+        // Post/Redirect/Get: registering the device completes the login flow,
+        // so a browser form post gets 303 and follows the redirect into the
+        // admin dashboard. JSON/Resource clients keep the confirmation body
+        // with 200 OK. The form-submission port is the browser/resource
+        // switch — always true in HTML context, false for resource clients.
+        $browserForm = ($this->formSubmission)(null);
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doSetTwoFactorAuth',
             'loginId' => $final->loginId,
             'message' => '二要素認証を設定しました。',
         ];
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
 
         return $this;
     }

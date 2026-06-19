@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,7 +21,7 @@ use MyVendor\BeMart\Be\Input\DeletePageInput;
 use MyVendor\BeMart\Be\Input\GetAdminPageInput;
 use MyVendor\BeMart\Be\Input\UpdatePageInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminPageForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -44,7 +44,7 @@ class Page extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
@@ -75,7 +75,7 @@ class Page extends ResourceObject
                 'pageUrl' => null,
                 'pageFileName' => '',
                 'pageEditType' => 1,
-                'csrfToken' => $this->csrf->token,
+                'csrfToken' => $this->csrf->issue(),
             ];
             $form = $this->formFactory->newInstance(AdminPageForm::class);
             assert($form instanceof AdminPageForm);
@@ -96,7 +96,7 @@ class Page extends ResourceObject
             'pageUrl' => $final->pageUrl,
             'pageFileName' => $final->pageFileName,
             'pageEditType' => $final->pageEditType,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an AdminPageForm pre-filled with the persisted row,
         // for the HTML edit page to render via `{{ form.input(...) }}`.
@@ -118,7 +118,7 @@ class Page extends ResourceObject
     #[Alps('doUpdatePage')]
     #[JsonSchema(schema: 'put-admin-page-page.json', params: 'put-admin-page-page.param.json')]
     #[Link(rel: 'goPage', href: 'page://self/admin/page/page')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $pageId,
         string|null $pageName = null,
@@ -154,7 +154,7 @@ class Page extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-page-page.json', params: 'delete-admin-page-page.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
     #[Link(rel: 'goBlockList', href: 'page://self/admin/block/block-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $pageId): static
     {
         $final = ($this->becoming)(new DeletePageInput(pageId: $pageId));

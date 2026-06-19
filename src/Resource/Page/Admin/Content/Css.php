@@ -10,12 +10,12 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\ContentCssUpdated;
 use MyVendor\BeMart\Be\Input\UpdateContentCssInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use MyVendor\BeMart\Form\AdminCssForm;
 use Ray\WebFormModule\FormFactory;
@@ -42,7 +42,7 @@ class Css extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly CustomizeAssetWriterInterface $assetWriter,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -66,7 +66,7 @@ class Css extends ResourceObject
         $this->code = Code::OK;
         $this->body = [
             'form' => $form,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -80,7 +80,7 @@ class Css extends ResourceObject
     #[Alps('doUpdateContentCss')]
     #[JsonSchema(schema: 'put-admin-content-css.json', params: 'put-admin-content-css.param.json')]
     #[Link(rel: 'goContentJs', href: 'page://self/admin/content/js')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(string $css = '', string|null $mode = null): static
     {
         $final = ($this->becoming)(new UpdateContentCssInput(css: $css));

@@ -8,7 +8,10 @@ use BEAR\Resource\Code;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
+use Ray\Csrf\Exception\MissingCsrfTokenException;
+use Ray\Csrf\Http\CompositeRequestToken;
+use Ray\Csrf\Http\RequestTokenInterface;
 use Ray\Di\AbstractModule;
 
 /**
@@ -61,7 +64,8 @@ final class AdminCsvConfigResourceSqlTest extends AbstractResourceSqlTestCase
             {
                 $this->bind(AdminSession::class)
                     ->toInstance(new FakeAdminSession($this->adminId));
-                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
+                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
+                $this->bind(RequestTokenInterface::class)->to(CompositeRequestToken::class);
             }
         };
     }
@@ -135,15 +139,13 @@ final class AdminCsvConfigResourceSqlTest extends AbstractResourceSqlTestCase
     {
         $this->seedCsvTypes();
 
-        $ro = $this->resource->post('page://self/admin/csv-config', [
+        $this->expectException(MissingCsrfTokenException::class);
+        $this->resource->post('page://self/admin/csv-config', [
             'csvType' => 1,
             'columns' => [
                 ['columnName' => 'productCode', 'enabled' => true, 'sortNo' => 1],
             ],
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 
     public function testOnPostWithoutAdminSessionReturns403(): void

@@ -10,7 +10,10 @@ use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
+use Ray\Csrf\Exception\MissingCsrfTokenException;
+use Ray\Csrf\Http\CompositeRequestToken;
+use Ray\Csrf\Http\RequestTokenInterface;
 use MyVendor\BeMart\Module\TestModule;
 use MyVendor\BeMart\Support\Resource\HtmlMutationResponse;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
@@ -64,7 +67,8 @@ final class AdminCategoryResourceTest extends TestCase
                 if ($this->htmlMutation) {
                     $this->bind(MutationResponseInterface::class)->to(HtmlMutationResponse::class);
                 }
-                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
+                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
+                $this->bind(RequestTokenInterface::class)->to(CompositeRequestToken::class);
             }
         };
         $base->override($override);
@@ -110,13 +114,11 @@ final class AdminCategoryResourceTest extends TestCase
 
     public function testCreateRejectsMissingCsrf(): void
     {
-        $ro = $this->resource->post('page://self/admin/category/category-list', [
+        $this->expectException(MissingCsrfTokenException::class);
+        $this->resource->post('page://self/admin/category/category-list', [
             'categoryName' => 'Food',
             'sortNo' => 10,
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testCreateRejectsAnonymousAdmin(): void
@@ -215,13 +217,11 @@ final class AdminCategoryResourceTest extends TestCase
     public function testPutRejectsMissingCsrf(): void
     {
         $id = $this->seed('Food');
-        $ro = $this->resource->put('page://self/admin/category/category', [
+        $this->expectException(MissingCsrfTokenException::class);
+        $this->resource->put('page://self/admin/category/category', [
             'categoryId' => $id,
             'categoryName' => 'X',
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertTrue(str_contains($ro->body['message'], 'CSRF'));
     }
 
     public function testDeleteHappyPath(): void

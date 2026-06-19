@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Smoke;
 
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Service\CustomerSession;
+use MyVendor\BeMart\Tests\Fake\Http\NullRequestToken;
 use Override;
+use Ray\Csrf\CsrfTokenInterface;
+use Ray\Csrf\Http\RequestTokenInterface;
 use Ray\Di\AbstractModule;
 
 final class ResourceSmokeOverrideModule extends AbstractModule
@@ -22,7 +24,8 @@ final class ResourceSmokeOverrideModule extends AbstractModule
     #[Override]
     protected function configure(): void
     {
-        $this->bind(CsrfToken::class)->toInstance(new ResourceSmokeCsrfToken());
+        $this->bind(CsrfTokenInterface::class)->toInstance(new ResourceSmokeCsrfToken());
+        $this->bind(RequestTokenInterface::class)->to(NullRequestToken::class);
         if ($this->admin || $this->customerId === null) {
             return;
         }

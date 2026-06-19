@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -45,7 +45,7 @@ class ProductBulkStatus extends ResourceObject
     #[Alps('doBulkUpdateProductStatus')]
     #[JsonSchema(schema: 'post-admin-product-bulk-status.json', params: 'post-admin-product-bulk-status.param.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         array $productCodes,
         int $productStatus,

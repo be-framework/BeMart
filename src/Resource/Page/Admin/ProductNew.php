@@ -9,7 +9,7 @@ use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 /**
@@ -24,7 +24,7 @@ final class ProductNew extends ResourceObject
 {
     public function __construct(
         private readonly AdminSession $adminSession,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
     ) {
     }
 
@@ -44,7 +44,7 @@ final class ProductNew extends ResourceObject
 
         $this->code = Code::OK;
         $this->body = [
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'productStatusOptions' => [
                 1 => '公開',
                 2 => '非公開',

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -85,7 +85,7 @@ class ForgotPassword extends ResourceObject
     #[Alps('doRequestPasswordReset')]
     #[JsonSchema(schema: 'post-forgot-password.json', params: 'post-forgot-password.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $email): static
     {
         $final = ($this->becoming)(new RequestPasswordResetInput(email: $email));

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -29,7 +29,7 @@ use MyVendor\BeMart\Be\Exception\PrefFormatException;
 use MyVendor\BeMart\Be\Exception\SexFormatException;
 use MyVendor\BeMart\Be\Final\CustomerRegistered;
 use MyVendor\BeMart\Be\Input\RegisterCustomerInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\EntryForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -73,7 +73,7 @@ class Entry extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
     ) {
     }
@@ -154,7 +154,7 @@ class Entry extends ResourceObject
     #[Alps('doRegisterCustomer')]
     #[JsonSchema(schema: 'post-entry.json', params: 'post-entry.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string|null $email = null,
         string|null $password = null,
@@ -533,6 +533,6 @@ class Entry extends ResourceObject
 
     private function csrfTokenForForm(): string
     {
-        return $this->csrf->token;
+        return $this->csrf->issue();
     }
 }

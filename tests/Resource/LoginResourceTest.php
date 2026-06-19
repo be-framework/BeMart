@@ -8,7 +8,10 @@ use BEAR\AppMeta\Meta;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
+use Ray\Csrf\Exception\MissingCsrfTokenException;
+use Ray\Csrf\Http\CompositeRequestToken;
+use Ray\Csrf\Http\RequestTokenInterface;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -26,7 +29,8 @@ final class LoginResourceTest extends TestCase
         $base->override(new class extends AbstractModule {
             protected function configure(): void
             {
-                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
+                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
+                $this->bind(RequestTokenInterface::class)->to(CompositeRequestToken::class);
             }
         });
 
@@ -114,12 +118,10 @@ final class LoginResourceTest extends TestCase
 
     public function testOnPostMissingCsrfReturns403(): void
     {
-        $ro = $this->resource->post('page://self/login', [
+        $this->expectException(MissingCsrfTokenException::class);
+        $this->resource->post('page://self/login', [
             'email' => 'login-test@example.com',
             'password' => 'local-dev-member-password',
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 }

@@ -11,7 +11,7 @@ use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MasterDataUpdated;
 use MyVendor\BeMart\Be\Input\UpdateMasterDataInput;
@@ -47,7 +47,7 @@ class MasterDataEdit extends ResourceObject
     #[Alps('doUpdateMasterData')]
     #[JsonSchema(schema: 'put-admin-master-data-edit.json', params: 'put-admin-master-data-edit.param.json')]
     #[Link(rel: 'goMasterData', href: 'page://self/admin/master-data')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(string $masterType, array $rows = []): static
     {
         $final = ($this->becoming)(new UpdateMasterDataInput(masterType: $masterType, rows: $rows));

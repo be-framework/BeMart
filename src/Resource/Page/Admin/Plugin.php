@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -58,7 +58,7 @@ class Plugin extends ResourceObject
     #[Alps('doUninstallPlugin')]
     #[JsonSchema(schema: 'delete-admin-plugin.json', params: 'delete-admin-plugin.param.json')]
     #[Link(rel: 'goPluginList', href: 'page://self/admin/plugin-list', method: 'get')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $pluginCode): static
     {
         $final = ($this->becoming)(new UninstallPluginInput(pluginCode: $pluginCode));

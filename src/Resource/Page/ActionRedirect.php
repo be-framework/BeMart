@@ -7,7 +7,8 @@ namespace MyVendor\BeMart\Resource\Page;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function str_starts_with;
@@ -22,6 +23,11 @@ use function str_starts_with;
  */
 class ActionRedirect extends ResourceObject
 {
+    public function __construct(
+        private readonly MutationResponseInterface $mutationResponse,
+    ) {
+    }
+
     /** ALPS `goActionRedirect` に対応する GET 操作。 */
     #[Alps('goActionRedirect')]
     #[JsonSchema(schema: 'get-action-redirect.json', params: 'get-action-redirect.param.json')]
@@ -35,7 +41,7 @@ class ActionRedirect extends ResourceObject
     /** ALPS `doActionRedirect` に対応する POST 操作。 */
     #[Alps('doActionRedirect')]
     #[JsonSchema(schema: 'post-action-redirect.json', params: 'post-action-redirect.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string|null $returnTo = null): static
     {
         $this->redirect($returnTo);
@@ -45,8 +51,9 @@ class ActionRedirect extends ResourceObject
 
     private function redirect(string|null $returnTo): void
     {
-        $this->code = Code::OK;
-        $this->headers['Location'] = $this->safeReturnTo($returnTo);
+        // Post/Redirect/Get: a browser follows the safe Location with 303;
+        // JSON/Resource clients keep the acknowledgement body with 200 OK.
+        ($this->mutationResponse)($this, Code::OK, $this->safeReturnTo($returnTo));
         $this->body = ['message' => '操作を受け付けました。'];
     }
 

@@ -8,9 +8,10 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\AdminNotFoundException;
 use MyVendor\BeMart\Be\Exception\InvalidCurrentPasswordException;
 use MyVendor\BeMart\Be\Exception\PasswordConfirmationMismatchException;
@@ -50,6 +51,7 @@ class ChangePassword extends ResourceObject
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -105,7 +107,7 @@ class ChangePassword extends ResourceObject
      */
     #[Alps('doChangePassword')]
     #[JsonSchema(schema: 'post-admin-change-password.json', params: 'post-admin-change-password.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(
         string $currentPassword,
@@ -120,8 +122,7 @@ class ChangePassword extends ResourceObject
 
         assert($final instanceof AdminPasswordChanged);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/change-password';
+        ($this->mutationResponse)($this, Code::OK, '/admin/change-password');
         $this->body = [
             'transitionId' => 'doChangePassword',
             'adminId' => $final->adminId,

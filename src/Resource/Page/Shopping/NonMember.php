@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
@@ -24,7 +24,7 @@ use MyVendor\BeMart\Be\Exception\PostalCodeFormatException;
 use MyVendor\BeMart\Be\Exception\PrefFormatException;
 use MyVendor\BeMart\Be\Final\NonMemberSubmitted;
 use MyVendor\BeMart\Be\Input\SubmitNonMemberInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\NonMemberForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -84,7 +84,7 @@ class NonMember extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
@@ -140,7 +140,7 @@ class NonMember extends ResourceObject
     #[JsonSchema(schema: 'post-shopping-non-member.json', params: 'post-shopping-non-member.param.json')]
     #[Link(rel: 'doConfirmOrder', href: 'page://self/shopping/confirm', method: 'post')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string|null $name01 = null,
         string|null $name02 = null,
@@ -239,7 +239,7 @@ class NonMember extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/shopping/non-member',
             ],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             // Phase 3: NonMemberForm renders the guest-info inputs. JSON
             // contexts ignore it, while the HTML transfer uses it.
             'form' => $form,

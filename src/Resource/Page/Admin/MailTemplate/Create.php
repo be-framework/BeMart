@@ -9,10 +9,11 @@ use BEAR\Resource\Annotation\JsonSchema;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Reason\Entity\MailTemplateEntity;
 use MyVendor\BeMart\Be\Reason\Query\MailTemplateStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 
 use function array_map;
 use function max;
@@ -28,6 +29,7 @@ class Create extends ResourceObject
     public function __construct(
         private readonly AdminSession $adminSession,
         private readonly MailTemplateStorageInterface $mailTemplates,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -39,7 +41,7 @@ class Create extends ResourceObject
     #[Link(rel: 'goMailTemplateList', href: 'page://self/admin/mail-template', method: 'get')]
     #[Link(rel: 'doUpdateMailTemplate', href: 'page://self/admin/mail-template', method: 'post')]
     #[Link(rel: 'doDeleteMailTemplate', href: 'page://self/admin/mail-template', method: 'delete')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $mailTemplateName,
         string $fileName,
@@ -61,8 +63,7 @@ class Create extends ResourceObject
             deletable: 1,
         ));
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = '/admin/mail-template';
+        ($this->mutationResponse)($this, Code::CREATED, '/admin/mail-template');
         $this->body = [
             'mailTemplateId' => $mailTemplateId,
             'mailTemplateName' => $mailTemplateName,

@@ -8,7 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Form\ShoppingShippingEditForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -102,7 +102,7 @@ class ShippingEdit extends ResourceObject
     #[Alps('doUpdateShippingAddress')]
     #[JsonSchema(schema: 'post-shopping-shipping-edit.json', params: 'post-shopping-shipping-edit.param.json')]
     #[Link(rel: 'goShopping', href: 'page://self/shopping')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $name01 = '',
         string $name02 = '',

@@ -10,7 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Be\Exception\TwoFactorAuthFailedException;
@@ -18,8 +18,9 @@ use MyVendor\BeMart\Be\Final\TwoFactorAuthVerified;
 use MyVendor\BeMart\Be\Input\VerifyTwoFactorAuthInput;
 use MyVendor\BeMart\Be\Reason\Query\AdminQueryInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminTwoFactorAuthForm;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
@@ -53,7 +54,8 @@ class TwoFactorAuth extends ResourceObject
         private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
         private readonly AdminSession $adminSession,
         private readonly AdminQueryInterface $adminQuery,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
+        private readonly AdminLoginFormSubmissionInterface $formSubmission,
     ) {
     }
 
@@ -76,7 +78,7 @@ class TwoFactorAuth extends ResourceObject
         $this->body = [
             'transitionId' => 'goAdminTwoFactorAuth',
             'fields' => ['deviceToken', 'csrfToken'],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty AdminTwoFactorAuthForm for the HTML port.
             'form' => $this->formFactory->newInstance(AdminTwoFactorAuthForm::class),
         ];
@@ -124,7 +126,7 @@ class TwoFactorAuth extends ResourceObject
      */
     #[Alps('doVerifyTwoFactorAuth')]
     #[JsonSchema(schema: 'post-admin-two-factor-auth.json', params: 'post-admin-two-factor-auth.param.json')]
-    #[CsrfProtected]
+    #[CsrfToken]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onPost(string $deviceToken, string|null $loginId = null): static
@@ -147,13 +149,19 @@ class TwoFactorAuth extends ResourceObject
         assert($final instanceof TwoFactorAuthVerified);
         $this->loginChallenge->completeVerification($challenge);
 
-        $this->code = Code::OK;
+        // Post/Redirect/Get: a verified code completes the login flow, so a
+        // browser form post gets 303 and follows the redirect into the admin
+        // dashboard. JSON/Resource clients keep the confirmation body with
+        // 200 OK. The form-submission port is the browser/resource switch —
+        // always true in HTML context, false for resource clients.
+        $browserForm = ($this->formSubmission)(null);
         $this->headers['Location'] = '/admin/index';
         $this->body = [
             'transitionId' => 'doVerifyTwoFactorAuth',
             'loginId' => $final->loginId,
             'message' => '二要素認証を確認しました。',
         ];
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
 
         return $this;
     }

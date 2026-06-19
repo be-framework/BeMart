@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Shopping;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -54,7 +54,7 @@ class Checkout extends ResourceObject
      * Phase B Slice 9: the domain parameter arrives from the HTTP request body.
      * `$preOrderId` is a 40-hex-char id that PreOrderId Semantic
      * format-validates. The CSRF boundary token is enforced declaratively by
-     * the CsrfProtected attribute.
+     * the CsrfToken attribute.
      *
      * @psalm-taint-source input $preOrderId
      */
@@ -62,7 +62,7 @@ class Checkout extends ResourceObject
     #[JsonSchema(schema: 'post-shopping-checkout.json', params: 'post-shopping-checkout.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $preOrderId): static
     {
         $final = ($this->becoming)(new CheckoutInput(

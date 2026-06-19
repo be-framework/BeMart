@@ -14,7 +14,7 @@ use MyVendor\BeMart\Be\Final\CartsFetched;
 use MyVendor\BeMart\Be\Input\GetCartsInput;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use BEAR\Resource\Annotation\JsonSchema;
 
 use function array_map;
@@ -33,7 +33,7 @@ class Cart extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly CartSessionPrefixInterface $cartSessionPrefix,
     ) {
     }
@@ -58,7 +58,7 @@ class Cart extends ResourceObject
             'cartCount' => $final->cartCount,
             'totalPrice' => $final->totalPrice,
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'carts' => array_map(
                 static fn (CartEntity $cart): array => [
                     'cartKey' => $cart->cartKey,

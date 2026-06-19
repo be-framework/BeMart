@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\Page;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -68,7 +68,7 @@ class PageList extends ResourceObject
     #[Alps('doCreatePage')]
     #[JsonSchema(schema: 'post-admin-page-page-list.json', params: 'post-admin-page-page-list.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $pageName,
         string $pageUrl,

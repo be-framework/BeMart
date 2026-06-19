@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\EmailAlreadyRegisteredException;
@@ -48,6 +49,7 @@ class CreateCustomer extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -76,7 +78,7 @@ class CreateCustomer extends ResourceObject
     #[Alps('doCreateCustomer')]
     #[JsonSchema(schema: 'post-admin-create-customer.json', params: 'post-admin-create-customer.param.json')]
     #[Link(rel: 'goCustomer', href: 'page://self/admin/customer', method: 'get')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         string $email,
         string $password,
@@ -114,10 +116,9 @@ class CreateCustomer extends ResourceObject
 
         assert($final instanceof AdminCustomerCreated);
 
-        $this->code = Code::CREATED;
         // goCustomer takes #email as its sole descriptor; the admin
         // Customer detail URL is keyed on email accordingly.
-        $this->headers['Location'] = sprintf('/admin/customer?email=%s', urlencode($final->email));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/customer?email=%s', urlencode($final->email)));
         $this->body = [
             'customerId' => $final->customerId,
             'email' => $final->email,

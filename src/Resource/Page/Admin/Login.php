@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -18,7 +18,7 @@ use MyVendor\BeMart\Be\Exception\AdminLoginFailedException;
 use MyVendor\BeMart\Be\Exception\PasswordFormatException;
 use MyVendor\BeMart\Be\Final\AdminAuthenticated;
 use MyVendor\BeMart\Be\Input\AdminLoginInput;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\TwoFactorAuthInterface;
 use MyVendor\BeMart\Form\AdminLoginForm;
 use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
@@ -68,7 +68,7 @@ class Login extends ResourceObject
 
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly TwoFactorAuthInterface $twoFactorAuth,
         private readonly HtmlAdminLoginChallengeAdapter $loginChallenge,
@@ -99,7 +99,7 @@ class Login extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/admin/login',
             ],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             // PoC fixture prefill for quick HTML-context verification.
             // See prefilledLoginForm(); deliberately easy to remove.
             'form' => $this->prefilledLoginForm(),
@@ -118,7 +118,7 @@ class Login extends ResourceObject
     #[Alps('doAdminLogin')]
     #[JsonSchema(schema: 'post-admin-login.json', params: 'post-admin-login.param.json')]
     #[Link(rel: 'goAdminTop', href: 'page://self/admin/index')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string|null $loginId = null, string|null $password = null, string|null $mode = null): static
     {
         $values = [
@@ -174,10 +174,10 @@ class Login extends ResourceObject
         }
 
         // Post/Redirect/Get: a successful password check redirects to the
-        // next login-context 2FA step. JSON clients still read the
-        // authenticated admin proof off the body below, but the trusted
-        // identity used by 2FA is the session-backed challenge above.
-        $this->code = Code::OK;
+        // next login-context 2FA step. Browser form posts get 303 so the
+        // browser actually follows the redirect; JSON/Resource clients keep
+        // the authenticated admin proof on the body below with 200 OK. The
+        // trusted identity used by 2FA is the session-backed challenge above.
         $this->headers['Location'] = $location;
         $this->body = [
             'adminId' => $final->adminId,
@@ -185,6 +185,7 @@ class Login extends ResourceObject
             'name' => $final->name,
             'authority' => $final->authority,
         ];
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
 
         return $this;
     }
@@ -216,7 +217,7 @@ class Login extends ResourceObject
                 'method' => 'POST',
                 'href' => 'page://self/admin/login',
             ],
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),

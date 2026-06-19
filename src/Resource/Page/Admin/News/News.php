@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\News;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -21,7 +21,7 @@ use MyVendor\BeMart\Be\Input\DeleteNewsInput;
 use MyVendor\BeMart\Be\Input\GetAdminNewsInput;
 use MyVendor\BeMart\Be\Input\UpdateNewsInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminNewsForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -48,7 +48,7 @@ class News extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly AdminSession $adminSession,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
@@ -80,7 +80,7 @@ class News extends ResourceObject
                 'newsUrl' => null,
                 'publishDate' => '2026-05-23 00:00:00',
                 'linkMethod' => false,
-                'csrfToken' => $this->csrf->token,
+                'csrfToken' => $this->csrf->issue(),
             ];
             $this->body['form'] = $this->editForm($this->body);
 
@@ -99,7 +99,7 @@ class News extends ResourceObject
             'newsUrl' => $final->newsUrl,
             'publishDate' => $final->publishDate,
             'linkMethod' => $final->linkMethod,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
         // Phase 3: an AdminNewsForm pre-filled with the persisted row,
         // for the HTML edit page to render via `{{ form.input(...) }}`.
@@ -139,7 +139,7 @@ class News extends ResourceObject
     #[Alps('doUpdateNews')]
     #[JsonSchema(schema: 'put-admin-news-news.json', params: 'put-admin-news-news.param.json')]
     #[Link(rel: 'goNews', href: 'page://self/admin/news/news')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $newsId,
         string|null $newsTitle = null,
@@ -180,7 +180,7 @@ class News extends ResourceObject
     #[JsonSchema(schema: 'delete-admin-news-news.json', params: 'delete-admin-news-news.param.json')]
     #[Link(rel: 'goNewsList', href: 'page://self/admin/news/news-list')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onDelete(string $newsId): static
     {
         $final = ($this->becoming)(new DeleteNewsInput(newsId: $newsId));

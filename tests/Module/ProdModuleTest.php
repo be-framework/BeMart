@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Module;
 
 use BEAR\AppMeta\Meta;
-use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use Be\Framework\Becoming;
 use Be\Framework\BecomingInterface;
@@ -17,6 +16,7 @@ use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Injector as AppInjector;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
+use Ray\Csrf\Exception\MissingCsrfTokenException;
 use Ray\Di\Injector;
 
 use function dirname;
@@ -107,12 +107,11 @@ final class ProdModuleTest extends TestCase
         $injector = AppInjector::getInstance('prod-eccube-sql-hal-app');
 
         $resource = $injector->getInstance(ResourceInterface::class);
-        $ro = $resource->post('page://self/shopping/checkout', [
+
+        $this->expectException(MissingCsrfTokenException::class);
+        $resource->post('page://self/shopping/checkout', [
             'preOrderId' => 'aaaa00000000000000000000000000000000aaaa',
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 
     public function testDevContextDoesWriteLogFileOnBecoming(): void

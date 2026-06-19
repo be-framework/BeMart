@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
@@ -16,7 +16,7 @@ use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\CsvConfigUpdated;
 use MyVendor\BeMart\Be\Input\UpdateCsvInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Form\AdminCsvConfigForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
@@ -53,7 +53,7 @@ class CsvConfig extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly AdminSession $adminSession,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
         private readonly MutationResponseInterface $mutationResponse,
     ) {
@@ -85,7 +85,7 @@ class CsvConfig extends ResourceObject
         $this->body = [
             'form' => $form,
             'csvType' => $csvType,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
             'outputColumns' => AdminCsvConfigForm::outputColumns(),
             'notOutputColumns' => AdminCsvConfigForm::notOutputColumns(),
         ];
@@ -111,7 +111,7 @@ class CsvConfig extends ResourceObject
     #[JsonSchema(schema: 'post-admin-csv-config.json', params: 'post-admin-csv-config.param.json')]
     #[Link(rel: 'goTop', href: 'page://self/admin')]
     #[Link(rel: 'goExportProduct', href: 'page://self/admin/product-csv', method: 'get')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         int $csvType,
         array $columns = [],

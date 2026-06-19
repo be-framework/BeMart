@@ -10,7 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\MasterTypeFormatException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\MasterDataSelected;
@@ -89,7 +89,7 @@ class MasterData extends ResourceObject
     #[Alps('doSelectMasterData')]
     #[JsonSchema(schema: 'put-admin-master-data.json', params: 'put-admin-master-data.param.json')]
     #[Link(rel: 'doUpdateMasterData', href: 'page://self/admin/master-data-edit', method: 'put')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(string $masterType = 'tag'): static
     {
         $final = ($this->becoming)(new SelectMasterDataInput(masterType: $masterType));

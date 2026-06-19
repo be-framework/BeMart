@@ -8,14 +8,15 @@ use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\SecuritySettingsUpdated;
 use MyVendor\BeMart\Be\Input\UpdateSecurityInput;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
 use MyVendor\BeMart\Be\Reason\Service\SecurityConfigWriterInterface;
 use MyVendor\BeMart\Form\AdminSecurityForm;
 use Ray\WebFormModule\FormFactory;
@@ -40,7 +41,8 @@ class Security extends ResourceObject
         private readonly FormFactory $formFactory,
         private readonly BecomingInterface $becoming,
         private readonly SecurityConfigWriterInterface $securityConfig,
-        private readonly CsrfToken $csrf,
+        private readonly CsrfTokenInterface $csrf,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -73,7 +75,7 @@ class Security extends ResourceObject
         $this->body = [
             'form' => $form,
             'isSecureRequest' => false,
-            'csrfToken' => $this->csrf->token,
+            'csrfToken' => $this->csrf->issue(),
         ];
 
         return $this;
@@ -97,7 +99,7 @@ class Security extends ResourceObject
     #[Alps('doUpdateSecurity')]
     #[JsonSchema(schema: 'put-admin-security.json', params: 'put-admin-security.param.json')]
     #[Link(rel: 'goTwoFactorAuthSet', href: 'page://self/admin/two-factor-auth-set')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPut(
         string $adminAllowHosts = '',
         string $adminDenyHosts = '',
@@ -115,8 +117,7 @@ class Security extends ResourceObject
 
         assert($final instanceof SecuritySettingsUpdated);
 
-        $this->code = Code::OK;
-        $this->headers['Location'] = '/admin/security';
+        ($this->mutationResponse)($this, Code::OK, '/admin/security');
         $this->body = [
             'transitionId' => 'doUpdateSecurity',
             'trustedHosts' => $final->trustedHosts,

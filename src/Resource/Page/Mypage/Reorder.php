@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Mypage;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
@@ -38,6 +39,7 @@ class Reorder extends ResourceObject
 {
     public function __construct(
         private readonly BecomingInterface $becoming,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -48,15 +50,14 @@ class Reorder extends ResourceObject
     #[Alps('doReorder')]
     #[JsonSchema(schema: 'post-mypage-reorder.json', params: 'post-mypage-reorder.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(string $orderNo): static
     {
         $final = ($this->becoming)(new ReorderInput(orderNo: $orderNo));
 
         assert($final instanceof Reordered);
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = '/cart';
+        ($this->mutationResponse)($this, Code::CREATED, '/cart');
         $this->body = [
             'customerId' => $final->customerId,
             'orderNo' => $final->orderNo,

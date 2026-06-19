@@ -11,7 +11,10 @@ use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
-use MyVendor\BeMart\Be\Reason\Service\CsrfToken;
+use Ray\Csrf\CsrfTokenInterface;
+use Ray\Csrf\Exception\MissingCsrfTokenException;
+use Ray\Csrf\Http\CompositeRequestToken;
+use Ray\Csrf\Http\RequestTokenInterface;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
@@ -30,7 +33,8 @@ final class AdminLoginResourceTest extends TestCase
         $base->override(new class extends AbstractModule {
             protected function configure(): void
             {
-                $this->bind(CsrfToken::class)->to(FakeCsrfToken::class);
+                $this->bind(CsrfTokenInterface::class)->to(FakeCsrfToken::class);
+                $this->bind(RequestTokenInterface::class)->to(CompositeRequestToken::class);
             }
         });
 
@@ -103,13 +107,11 @@ final class AdminLoginResourceTest extends TestCase
 
     public function testOnPostMissingCsrfReturns403(): void
     {
-        $ro = $this->resource->post('page://self/admin/login', [
+        $this->expectException(MissingCsrfTokenException::class);
+        $this->resource->post('page://self/admin/login', [
             'loginId' => 'test-admin',
             'password' => 'local-dev-admin-password',
         ]);
-
-        $this->assertSame(Code::FORBIDDEN, $ro->code);
-        $this->assertStringContainsString('CSRF', $ro->body['message']);
     }
 
     public function testOnPostShortPasswordReturns400(): void

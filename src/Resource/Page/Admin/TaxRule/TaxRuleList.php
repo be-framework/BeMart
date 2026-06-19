@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Resource\Page\Admin\TaxRule;
 
 use BEAR\ApiDoc\Annotation\Alps;
-use MyVendor\BeMart\Annotation\CsrfProtected;
+use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
+use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
@@ -43,6 +44,7 @@ class TaxRuleList extends ResourceObject
     public function __construct(
         private readonly BecomingInterface $becoming,
         private readonly FormFactory $formFactory,
+        private readonly MutationResponseInterface $mutationResponse,
     ) {
     }
 
@@ -83,7 +85,7 @@ class TaxRuleList extends ResourceObject
     #[Alps('doCreateTaxRule')]
     #[JsonSchema(schema: 'post-admin-tax-rule-tax-rule-list.json', params: 'post-admin-tax-rule-tax-rule-list.param.json')]
     #[Link(rel: 'goTaxRuleList', href: 'page://self/admin/tax-rule/tax-rule-list')]
-    #[CsrfProtected]
+    #[CsrfToken]
     public function onPost(
         float $taxRate,
         string $applyDate,
@@ -98,8 +100,7 @@ class TaxRuleList extends ResourceObject
 
         assert($final instanceof TaxRuleCreated);
 
-        $this->code = Code::CREATED;
-        $this->headers['Location'] = sprintf('/admin/tax-rule/tax-rule?taxRuleId=%s', urlencode($final->taxRuleId));
+        ($this->mutationResponse)($this, Code::CREATED, sprintf('/admin/tax-rule/tax-rule?taxRuleId=%s', urlencode($final->taxRuleId)));
         $this->body = [
             'taxRuleId' => $final->taxRuleId,
             'taxRate' => $final->taxRate,
