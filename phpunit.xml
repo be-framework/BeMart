@@ -21,6 +21,9 @@
         <testsuite name="http">
             <directory>tests/Http</directory>
         </testsuite>
+        <testsuite name="html">
+            <directory>tests/Html</directory>
+        </testsuite>
         <testsuite name="smoke">
             <directory>tests/Smoke</directory>
         </testsuite>
