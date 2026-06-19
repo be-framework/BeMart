@@ -77,17 +77,17 @@ $areas = count(array_unique(array_map(static fn ($x) => $x['area'], $items)));
 // Markdown table: the contract (waist) at the top, the Be domain and the
 // implementation/verification layers fanning out below it.
 $rows = [
-    ['契約 — ALPS profile', '1', "全実装の基準となる唯一の契約（{$nDesc} descriptor・{$nTrans} transition）"],
-    ['ドメイン入力 — Be Input', (string) $beIn, '操作の起点（doXxx の意図）'],
-    ['ドメイン出力 — Be Final', (string) $beFi, '確定状態（＝完了の証明）'],
+    ['契約 — ALPS profile', '1', "全実装の基準となる唯一契約（{$nDesc} descriptor・{$nTrans} transition）"],
+    ['ドメイン入力 — Be Input', (string) $beIn, '操作の起点（エンティティ入力）'],
+    ['ドメイン出力 — Be Final', (string) $beFi, '確定状態'],
     ['意味語彙 — Be Semantic', (string) $beSe, '制約付き値オブジェクト'],
     ['ドメイン作用 — Be Reason', (string) $beRe, '注入される問い合わせ／コマンド'],
-    ['中間状態 — Be Being', (string) $beBe, 'becoming の途中相'],
-    ['HTTP リソース — BEAR', (string) $res, 'page:// / app:// の JSON 表現'],
-    ['永続化 — SQL', (string) $sql, ".sql ファイル（{$dbq} #[DbQuery]）"],
+    ['ドメイン中間状態 — Be Being', (string) $beBe, '操作の途中状態'],
+    ['HTTPリソース — BEAR', (string) $res, 'リソースの表現'],
+    ['永続化 — SQL', (string) $sql, "SQLファイル（{$dbq} #[DbQuery]）"],
     ['入出力契約 — JSON Schema', (string) $schema, 'request / response 検証'],
-    ['HTML — Twig', (string) $twig, 'テンプレート'],
-    ['検証 — PHPUnit', (string) $tm, 'test methods（全スイート緑）'],
+    ['HTML — Twig', (string) $twig, 'HTMLテンプレート'],
+    ['検証 — PHPUnit', (string) $tm, 'test methods'],
     ['結合試験 — EC-CUBE', (string) $nItems, "{$areas} 領域 → [implementation-status](https://be-framework.github.io/BeMart/eccube-spec-coverage/implementation-status.html)"],
 ];
 $table = implode("\n", [

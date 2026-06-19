@@ -9,6 +9,7 @@ BeMart の移植中に再利用可能な原則として切り出した文書群�
 
 | 文書 | 内容 |
 |---|---|
+| [`architecture-boundaries.md`](architecture-boundaries.md) | 9 境界（ALPS / Be / Ray.MediaQuery / BEAR / Context-DI ほか）の責務・連携・検証の流れ |
 | [`architecture-audit-baseline.md`](architecture-audit-baseline.md) | BEAR.Sunday境界標準逸脱の監査baseline |
 | [`ai-standardization-retrospective.md`](ai-standardization-retrospective.md) | AI独自実装の失敗履歴と標準回帰の反省 |
 | [`standard-first-rule.md`](standard-first-rule.md) | BEAR.Sunday境界を触る前の標準参照ルール |
