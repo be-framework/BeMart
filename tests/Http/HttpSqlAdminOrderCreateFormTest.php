@@ -149,7 +149,7 @@ final class HttpSqlAdminOrderCreateFormTest extends TestCase
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(201, $created['status'], $created['body']);
+        $this->assertSame(303, $created['status'], $created['body']);
         $location = $created['headers']['Location'] ?? '';
         $this->assertStringStartsWith('/admin/customer?email=', $location);
 
@@ -180,7 +180,7 @@ final class HttpSqlAdminOrderCreateFormTest extends TestCase
             'csrfToken' => self::CSRF_TOKEN,
         ]);
 
-        $this->assertSame(201, $created['status'], $created['body']);
+        $this->assertSame(303, $created['status'], $created['body']);
         $this->assertStringContainsString('productCode=' . $productCode, $created['headers']['Location'] ?? '');
 
         return $productCode;

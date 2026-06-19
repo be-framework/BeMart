@@ -10,6 +10,7 @@ use MyVendor\BeMart\Auth\AdminTwoFactorChallenge;
 use MyVendor\BeMart\Auth\HtmlAdminLoginChallengeAdapter;
 use MyVendor\BeMart\Auth\HtmlAdminSessionAdapter;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeTwoFactorAuth;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\Attributes\PreserveGlobalState;
 use PHPUnit\Framework\Attributes\RunInSeparateProcess;
@@ -100,7 +101,10 @@ final class HtmlAdminSessionAdapterTest extends TestCase
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
-        $this->assertSame(Code::OK, $ro->code);
+        // Browser (HTML context) Post/Redirect/Get: the password step
+        // redirects to the 2FA challenge with 303 so the browser follows it.
+        // (Resource clients keep 200 + body — see AdminLoginResourceTest.)
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertNotSame($sessionIdBeforeLogin, session_id());
         $this->assertSame('/admin/two-factor-auth', $ro->headers['Location']);
         $this->assertArrayNotHasKey(HtmlAdminSessionAdapter::ADMIN_ID_KEY, $_SESSION);
@@ -147,6 +151,55 @@ final class HtmlAdminSessionAdapterTest extends TestCase
         $this->assertSame(Code::SEE_OTHER, $ro->code);
         $this->assertArrayNotHasKey(HtmlAdminSessionAdapter::ADMIN_ID_KEY, $_SESSION);
         $this->assertSame('/admin/login', $ro->headers['Location']);
+    }
+
+    /**
+     * Browser Post/Redirect/Get for first-device 2FA setup: registering the
+     * device completes the login flow and must redirect (303) into the admin
+     * dashboard so the browser follows it. A 200 here leaves the browser
+     * stranded on the setup form (regression guard for the admin-login fix).
+     */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testHtmlContextTwoFactorSetupRedirectsToAdminHome(): void
+    {
+        $this->startActiveSession();
+        $challenge = new HtmlAdminLoginChallengeAdapter();
+        $challenge->startSetup(
+            'ad000000000000000000000000000001',
+            'test-admin',
+            FakeTwoFactorAuth::FIXED_SECRET,
+        );
+
+        $ro = $this->htmlResource()->put('page://self/admin/two-factor-auth-set', [
+            'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/index', $ro->headers['Location']);
+    }
+
+    /**
+     * Browser Post/Redirect/Get for the returning-device 2FA challenge: a
+     * verified code completes the login flow and must redirect (303) into the
+     * admin dashboard. Mirrors the setup case above for subsequent logins.
+     */
+    #[RunInSeparateProcess]
+    #[PreserveGlobalState(false)]
+    public function testHtmlContextTwoFactorChallengeRedirectsToAdminHome(): void
+    {
+        $this->startActiveSession();
+        $challenge = new HtmlAdminLoginChallengeAdapter();
+        $challenge->startVerification('ad000000000000000000000000000001', 'test-admin');
+
+        $ro = $this->htmlResource()->post('page://self/admin/two-factor-auth', [
+            'deviceToken' => FakeTwoFactorAuth::VALID_TOKEN,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/admin/index', $ro->headers['Location']);
     }
 
     private function htmlResource(): ResourceInterface

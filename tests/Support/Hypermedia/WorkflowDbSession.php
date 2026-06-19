@@ -8,7 +8,9 @@ use Aura\Sql\ExtendedPdoInterface;
 use BEAR\Resource\ResourceInterface;
 use Closure;
 use MyVendor\BeMart\Injector;
+use MyVendor\BeMart\Support\Resource\AdminLoginFormSubmissionInterface;
 use MyVendor\BeMart\Support\Resource\ApiMutationResponse;
+use MyVendor\BeMart\Support\Resource\ExplicitAdminLoginFormSubmission;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Override;
 use Ray\Di\AbstractModule;
@@ -40,7 +42,11 @@ final class WorkflowDbSession
             #[Override]
             protected function configure(): void
             {
+                // Keep the in-process workflow a uniform API-client replay: every
+                // mutation — admin login included — answers with an API status and
+                // body, never a browser 303 redirect.
                 $this->bind(MutationResponseInterface::class)->to(ApiMutationResponse::class);
+                $this->bind(AdminLoginFormSubmissionInterface::class)->to(ExplicitAdminLoginFormSubmission::class);
             }
         });
 

@@ -68,7 +68,7 @@ final class HttpSqlAdminSystemFormTest extends TestCase
             'csrfToken' => $this->csrfToken($page['body']),
         ]);
 
-        $this->assertSame(200, $updated['status'], $updated['body']);
+        $this->assertSame(303, $updated['status'], $updated['body']);
         $this->assertSame('/admin/security', $updated['headers']['Location'] ?? null);
 
         $readback = $this->request('GET', '/admin/security');

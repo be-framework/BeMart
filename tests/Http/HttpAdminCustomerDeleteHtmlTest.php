@@ -54,7 +54,7 @@ final class HttpAdminCustomerDeleteHtmlTest extends TestCase
             'addr02' => '1-1',
             'csrfToken' => self::CSRF_TOKEN,
         ]);
-        $this->assertSame(Code::CREATED, $created->code, $created->toString());
+        $this->assertSame(Code::SEE_OTHER, $created->code, $created->toString());
 
         $search = $resource->get('page://self/admin/customer-list', ['emailKeyword' => $email]);
         $this->assertSame(Code::OK, $search->code, $search->toString());
