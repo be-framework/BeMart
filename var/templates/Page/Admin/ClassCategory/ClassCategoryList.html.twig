@@ -206,7 +206,7 @@
                                             <span class="badge bg-primary ms-1">必須</span>
                                         </div>
                                         <div class="col-3 me-2">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                             {{ form.input('classCategoryName')|raw }}
                                         </div>
                                         <div class="col-auto align-self-center"><span>管理名</span></div>
@@ -256,7 +256,7 @@
                                             </div>
                                         </div>
                                         <form class="row d-none mode-edit" method="post" action="/admin/class-category/class-category?classCategoryId={{ ClassCategory.classCategoryId }}&_method=put">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                             <div class="col-3 me-2">
                                                 <input type="text" class="form-control" name="classCategoryName" value="{{ ClassCategory.name }}" data-origin-value="{{ ClassCategory.name }}">
                                             </div>

@@ -83,7 +83,7 @@
 {% block main %}
     <form name="content_block_form" id="content_block_form" method="post"
           action="{% if blockId is defined and blockId %}/admin/block/block?blockId={{ blockId }}&_method=put{% else %}/admin/block/block-list{% endif %}">
-        <input type="hidden" id="block__token" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" id="block__token" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

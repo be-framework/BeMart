@@ -195,7 +195,7 @@
                                             <span class="badge bg-primary ms-1">必須</span>
                                         </div>
                                         <div class="col-3 me-2">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                             {{ form.input('classNameLabel')|raw }}
                                         </div>
                                         <div class="col-auto align-self-center" data-bs-toggle="tooltip" data-bs-placement="top" title="管理者用に別名を登録しておくことができます（例：規格名：サイズ　管理名：サイズ（服）、サイズ（靴）等 ）。フロント画面には表示されません。">
@@ -247,7 +247,7 @@
                                             </div>
                                         </div>
                                         <form class="row d-none mode-edit" method="post" action="/admin/class-name/class-name?classNameId={{ ClassName.classNameId|url_encode }}&_method=put">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                             <div class="col-auto align-self-center"><span>規格名</span></div>
                                             <div class="col-auto align-items-center">
                                                 <input type="text" class="form-control" name="classNameLabel" value="{{ ClassName.name }}" data-origin-value="{{ ClassName.name }}">

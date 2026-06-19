@@ -15,7 +15,7 @@
   EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
    - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
    - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+   - `csrf_token()` hidden input -> `csrfToken|default(csrf_token())`.
 #}
 {% extends 'admin-base.html.twig' %}
 
@@ -25,7 +25,7 @@
 
 {% block main %}
     <form role="form" method="post" action="/admin/order/send-mail?orderNo={{ orderNo }}" id="mail_confirm_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
         <input type="hidden" name="mode" value="complete">
         <div class="c-contentsArea__cols">

@@ -5,7 +5,7 @@
 
 {% block main %}
     <form method="post" action="/admin/category/csv" enctype="multipart/form-data">
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <textarea name="csv" rows="8" cols="80"></textarea>
         <button type="submit">CSV登録</button>
     </form>

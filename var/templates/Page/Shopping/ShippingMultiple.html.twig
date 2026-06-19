@@ -99,7 +99,7 @@ $(function() {
 
     <div class="ec-AddAddress">
         <form id="shipping-multiple-form" method="post" action="/shopping/shipping-multiple">
-            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+            <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
             <div class="ec-AddAddress__info">
                 <p>各商品のお届け先を選択してください。</p>
             </div>

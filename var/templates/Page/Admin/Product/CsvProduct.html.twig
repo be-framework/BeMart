@@ -19,7 +19,7 @@
    - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
    - `form_widget(form.import_file)` -> `form.input('import_file')` —
      the real AdminCsvUploadForm field (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+   - `csrf_token()` hidden input -> `csrfToken|default(csrf_token())`.
 #}
 {% extends 'admin-base.html.twig' %}
 

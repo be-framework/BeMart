@@ -23,7 +23,7 @@
      (`BeMartTwigExtension`).
    - `form_widget(form.code|name|file)` -> `form.input('templateCode'|'templateName'|'file')` — the
      real AdminTemplateAddForm fields (Ray.WebFormModule).
-   - `form_widget(form._token)` (CSRF hidden input) -> `csrfToken|default('')`
+   - `form_widget(form._token)` (CSRF hidden input) -> `csrfToken|default(csrf_token())`
      — EC-CUBE per-request CSRF runtime; enumerated as residual.
 #}
 {% extends 'admin-base.html.twig' %}
@@ -34,7 +34,7 @@
 
 {% block main %}
     <form role="form" method="post" action="/admin/template/template-add" id="template_add_form" enctype="multipart/form-data" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

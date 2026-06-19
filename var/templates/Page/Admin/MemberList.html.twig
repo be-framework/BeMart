@@ -182,7 +182,7 @@
                                                                     <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル
                                                                     </button>
                                                                     <form method="post" action="/admin/member?loginId={{ Member.loginId }}&_method=delete" class="d-inline">
-                                                                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                                                                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                                                         <input type="hidden" name="mode" value="member_form">
                                                                         <button class="btn btn-ec-delete" type="submit" data-confirm="false">
                                                                             削除

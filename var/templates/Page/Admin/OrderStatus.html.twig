@@ -12,7 +12,7 @@
         <div class="c-contentsArea__primaryCol">
             <div class="c-primaryCol">
                 <form id="form" method="post" action="/admin/order-status?_method=put">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                     <div class="card rounded border-0 mb-4">
                         <div class="card-header">
                             <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="受注管理およびマイページで表示される対応状況の設定を行います。名称、色、件数表示の設定が可能です。">

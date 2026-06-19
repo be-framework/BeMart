@@ -17,7 +17,7 @@
    - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
    - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
      AdminOrderPdfForm leaf fields (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+   - `csrf_token()` hidden input -> `csrfToken|default(csrf_token())`.
 #}
 {% extends 'admin-base.html.twig' %}
 
@@ -27,7 +27,7 @@
 
 {% block main %}
     <form role="form" method="post" action="/admin/order/export-order-pdf" id="order_pdf_form" name="form1" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">

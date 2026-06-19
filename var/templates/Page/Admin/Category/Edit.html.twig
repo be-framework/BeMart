@@ -19,7 +19,7 @@
    - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
    - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
      AdminCategoryForm leaf fields (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+   - `csrf_token()` hidden input -> `csrfToken|default(csrf_token())`.
 #}
 {% extends 'admin-base.html.twig' %}
 
@@ -67,7 +67,7 @@
 
         <div class="c-contentsArea__secondaryCol">
             <form role="form" method="post" action="/admin/category/category-list" id="category_form" name="form1" novalidate>
-                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+                <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                 <input type="hidden" name="categoryId" value="{{ categoryId|default('') }}">
                 <div class="card rounded border-0 mb-4">
                     <div class="card-header">

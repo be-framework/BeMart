@@ -120,7 +120,7 @@
 
                             <tr id="tax_rule_item_new">
                                 <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/tax-rule/tax-rule-list">
-                                    <input type="hidden" id="tax_rule__token" name="csrfToken" value="{{ csrfToken|default('') }}">
+                                    <input type="hidden" id="tax_rule__token" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                     <td class="align-middle ps-3"></td>
                                     <td class="align-middle" style="width:230px;">
                                         <div class="input-group">
