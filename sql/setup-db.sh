@@ -122,7 +122,7 @@ command -v mysql >/dev/null 2>&1 || die "mysql client not found on PATH"
 
 # mysql client invocation; password passed via MYSQL_PWD to keep it off argv.
 mysql_run() {
-    MYSQL_PWD="$PASS" mysql -h "$HOST" -P "$PORT" -u "$USER" "$@"
+    MYSQL_PWD="$PASS" mysql --default-character-set=utf8mb4 -h "$HOST" -P "$PORT" -u "$USER" "$@"
 }
 
 echo "setup-db: target  = ${USER}@${HOST}:${PORT}/${DB}"

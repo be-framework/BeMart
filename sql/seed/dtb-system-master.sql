@@ -5,6 +5,12 @@
 -- favorites. They provide the stock admin affordance targets that EC-CUBE
 -- expects to exist in a freshly installed shop.
 
+-- Ensure UTF-8 so Japanese master values (payment method names, admin name, …)
+-- load correctly regardless of the mysql client's default charset — mtb-master.sql
+-- does the same. Without this, a latin1-default client double-encodes them
+-- (e.g. クレジットカード → ã‚¯ãƒ¬ã‚¸ãƒƒãƒˆã‚«ãƒ¼ãƒ‰).
+SET NAMES utf8mb4;
+
 INSERT INTO `dtb_member`
     (`id`, `work_id`, `authority_id`, `creator_id`, `name`, `department`, `login_id`, `password`, `salt`, `sort_no`, `two_factor_auth_key`, `two_factor_auth_enabled`, `create_date`, `update_date`, `login_date`, `discriminator_type`)
 VALUES
