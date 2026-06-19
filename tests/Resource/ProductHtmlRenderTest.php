@@ -154,7 +154,7 @@ final class ProductHtmlRenderTest extends TestCase
             '<div class="ec-productRole__code">',
             // Slice 9: url('product_add_cart', {id}) now resolves through
             // the canonical Resource path to EC-CUBE's real path pattern.
-            '<form action="/cart/item" method="post" id="form1"',
+            '<form class="doAddCartItem" action="/cart/item" method="post" id="form1"',
             '<div class="ec-numberInput">',
             'class="ec-blockBtn--action add-cart"',
             '<div class="ec-modal">',

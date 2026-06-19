@@ -62,7 +62,7 @@
         </div>
         <div class="ec-off1Grid">
             <div class="ec-off1Grid__cell">
-                <form method="post" action="/contact" class="h-adr" data-alps="doSubmitContact">
+                <form method="post" action="/contact" class="h-adr doSubmitContact">
                     <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                     <p>{{ "内容によっては回答をさしあげるのにお時間をいただくこともございます。\nまた、休業日は翌営業日以降の対応となりますのでご了承ください。\n"|nl2br }}</p>
                     <div class="ec-borderedDefs">

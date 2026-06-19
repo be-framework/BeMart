@@ -20,13 +20,15 @@ use function random_bytes;
 
 /**
  * HTML hypermedia walk of the admin product editor — driven entirely by the
- * rendered HTML's data-alps affordances over real HTTP.
+ * rendered HTML's ALPS affordances (class/rel) over real HTTP.
  *
- * Navigation follows the `<a data-alps="goProduct">` a browser would click;
- * writes submit the `<form data-alps="doCreateProduct|doUpdateProduct">` a
- * browser would submit (with its rendered action + hidden CSRF). It is the
- * journey-level counterpart to AffordanceProductFormTest, and the leg that
- * catches a link/form whose target drifts mid-flow (the 405 class).
+ * Following only needs the affordance's link target, not a reconstructed body:
+ * navigation follows the `<a rel="goProduct">` a browser would click; writes
+ * submit the `<form class="doCreateProduct|doUpdateProduct">` a browser would
+ * submit (with its rendered action + hidden CSRF). It asserts the walk is
+ * reachable (status) and the next affordance is present — catching a link/form
+ * whose target drifts mid-flow (the 405 class). State assertions stay with the
+ * JSON resource/contract tests.
  */
 final class FlowAdminProductHtmlTest extends AbstractHtmlWorkflowTestCase
 {

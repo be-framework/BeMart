@@ -160,7 +160,7 @@
                         <div class="card rounded border-0">
                             <ul class="list-group list-group-flush sortable-container">
                                 <li class="list-group-item">
-                                    <form role="form" class="row" method="post" action="/admin/tag/tag-list" data-alps="doCreateTag">
+                                    <form role="form" class="row doCreateTag" method="post" action="/admin/tag/tag-list">
                                         <input type="hidden" id="admin_tag__token" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_tag')) }}">
                                         <div class="col-auto align-items-center">
                                             {{ form.input('tagName')|raw }}
@@ -249,7 +249,7 @@
                                                token-for-anchor="{{ csrf_token_for_anchor('admin_tag_delete') }}"
                                                data-method="delete"
                                                data-confirm="false"
-                                               data-alps="doDeleteTag">
+>
                                                 削除
                                             </a>
                                         </div>

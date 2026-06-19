@@ -152,7 +152,7 @@ final class LoginHtmlRenderTest extends TestCase
             '<div class="ec-pageHeader">',
             '<div class="ec-off2Grid">',
             'class="ec-off2Grid__cell"',
-            '<form name="login_mypage" id="login_mypage"',
+            '<form class="doLogin" name="login_mypage" id="login_mypage"',
             '<div class="ec-login">',
             'class="ec-login__icon"',
             'class="ec-login__input"',

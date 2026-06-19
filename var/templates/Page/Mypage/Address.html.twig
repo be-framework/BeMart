@@ -61,7 +61,7 @@
             {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'delivery', name01: name01|default(''), name02: name02|default('') } %}
         </div>
         <div class="ec-mypageRole">
-            <form method="post" action="{{ addressId ? '/mypage/address?addressId=' ~ addressId ~ '&_method=put' : '/mypage/address-list' }}" novalidate class="h-adr" data-alps="{{ addressId ? 'doUpdateCustomerAddress' : 'doCreateCustomerAddress' }}">
+            <form method="post" action="{{ addressId ? '/mypage/address?addressId=' ~ addressId ~ '&_method=put' : '/mypage/address-list' }}" novalidate class="h-adr {{ addressId ? 'doUpdateCustomerAddress' : 'doCreateCustomerAddress' }}">
                 <div class="ec-editRole">
                     <div class="ec-off1Grid">
                         <div class="ec-off1Grid__cell">

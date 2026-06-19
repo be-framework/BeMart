@@ -146,7 +146,7 @@ final class ContactHtmlRenderTest extends TestCase
             '<div class="ec-pageHeader">',
             '<div class="ec-off1Grid">',
             'class="ec-off1Grid__cell"',
-            '<form method="post" action="/contact" class="h-adr" novalidate data-alps="doSubmitContact">',
+            '<form method="post" action="/contact" class="h-adr doSubmitContact" novalidate>',
             '<span class="p-country-name"',
             '<p class="ec-para-normal">',
             '<div class="ec-borderedDefs">',

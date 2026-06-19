@@ -109,7 +109,7 @@ final class ForgotPasswordHtmlRenderTest extends TestCase
             '<div class="ec-role">',
             '<div class="ec-pageHeader">',
             '<div class="ec-forgotRole">',
-            '<form name="form1" id="form1" method="post"',
+            '<form class="doRequestPasswordReset" name="form1" id="form1" method="post"',
             '<div class="ec-off1Grid">',
             'class="ec-off1Grid__cell"',
             'class="ec-forgotRole__form"',

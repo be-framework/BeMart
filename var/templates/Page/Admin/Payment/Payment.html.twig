@@ -9,7 +9,7 @@
 {% set editing = paymentId|default('') is not empty %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ editing ? '/admin/payment/payment?paymentId=' ~ paymentId|url_encode ~ '&_method=put' : '/admin/payment/payment-list' }}" id="payment_edit_form" name="form1" novalidate data-alps="doUpdatePayment">
+    <form class="doUpdatePayment" role="form" method="post" action="{{ editing ? '/admin/payment/payment?paymentId=' ~ paymentId|url_encode ~ '&_method=put' : '/admin/payment/payment-list' }}" id="payment_edit_form" name="form1" novalidate>
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <input type="hidden" name="paymentId" value="{{ paymentId|default('') }}">
         {% if editing %}

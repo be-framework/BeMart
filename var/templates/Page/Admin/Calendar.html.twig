@@ -70,7 +70,7 @@
                             </thead>
                             <tbody>
                                 <tr id="calendar_item_new">
-                                    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/calendar?operation=create" data-alps="doCreateCalendarHoliday">
+                                    <form name="form1" role="form" class="form-horizontal doCreateCalendarHoliday" id="form1" method="post" action="/admin/calendar?operation=create">
                                         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                         <td class="align-middle ps-3"></td>
                                         <td class="align-middle" style="width:230px;">
@@ -94,7 +94,7 @@
 
                                 {% for Calendar in calendars %}
                                     <tr id="ex-calendar-{{ Calendar.id }}" class="calendar_list_item {{ Calendar.hasError ? 'has-error' }}">
-                                        <form name="edit-form" id="edit-form_{{ Calendar.id }}" method="post" action="/admin/calendar?operation=update" data-alps="doUpdateCalendar">
+                                        <form class="doUpdateCalendar" name="edit-form" id="edit-form_{{ Calendar.id }}" method="post" action="/admin/calendar?operation=update">
                                             <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                             <input type="hidden" value="{{ Calendar.id }}" name="calendarId">
                                             <input type="hidden" value="edit_inline" name="mode">
@@ -148,7 +148,7 @@
                                                                         </div>
                                                                         <div class="modal-footer">
                                                                             <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                                                                            <a class="btn btn-ec-delete" href="/admin/calendar?calendarId={{ Calendar.id }}&_method=delete" data-confirm="false" data-alps="doDeleteCalendarHoliday">削除</a>
+                                                                            <a rel="doDeleteCalendarHoliday" class="btn btn-ec-delete" href="/admin/calendar?calendarId={{ Calendar.id }}&_method=delete" data-confirm="false">削除</a>
                                                                         </div>
                                                                     </div>
                                                                 </div>

@@ -51,7 +51,7 @@
 {% endblock %}
 
 {% block main %}
-    <form name="form1" role="form" class="form-horizontal" id="form1" method="post" action="/admin/mail-template" data-alps="doUpdateMailTemplate">
+    <form name="form1" role="form" class="form-horizontal doUpdateMailTemplate" id="form1" method="post" action="/admin/mail-template">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         {{ form.input('mailTemplateId')|raw }}
         <div class="c-contentsArea__cols">
@@ -185,7 +185,7 @@
                     </div>
                     <div class="modal-footer">
                         <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">キャンセル</button>
-                        <a class="btn btn-ec-delete" href="/admin/mail-template?mailTemplateId={{ Mail.id }}&_method=delete" data-confirm="false" data-alps="doDeleteMailTemplate">削除</a>
+                        <a rel="doDeleteMailTemplate" class="btn btn-ec-delete" href="/admin/mail-template?mailTemplateId={{ Mail.id }}&_method=delete" data-confirm="false">削除</a>
                     </div>
                 </div>
             </div>

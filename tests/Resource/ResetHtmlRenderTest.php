@@ -124,7 +124,7 @@ final class ResetHtmlRenderTest extends TestCase
             '<div class="ec-pageHeader">',
             '<div class="ec-off1Grid">',
             'class="ec-off1Grid__cell"',
-            '<form id="form1" method="post" novalidate data-alps="doResetPassword">',
+            '<form class="doResetPassword" id="form1" method="post" novalidate>',
             '<div class="ec-borderedDefs">',
             '<div class="ec-input">',
             '<div class="ec-registerRole__actions">',

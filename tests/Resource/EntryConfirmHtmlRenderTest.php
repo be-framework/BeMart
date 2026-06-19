@@ -121,7 +121,7 @@ final class EntryConfirmHtmlRenderTest extends TestCase
             '<h1>新規会員登録(確認)</h1>',
             '<div class="ec-off1Grid">',
             'class="ec-off1Grid__cell"',
-            '<form method="post" action="/entry" data-alps="doRegisterCustomer">',
+            '<form class="doRegisterCustomer" method="post" action="/entry">',
             '<div class="ec-borderedDefs">',
             '<div class="ec-registerRole__actions">',
             '<div class="ec-off4Grid">',

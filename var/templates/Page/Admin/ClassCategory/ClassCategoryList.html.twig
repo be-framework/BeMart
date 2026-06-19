@@ -200,7 +200,7 @@
 
                             <ul class="list-group list-group-flush sortable-container">
                                 <li class="list-group-item">
-                                    <form role="form" class="row" name="form1" id="form1" method="post" action="/admin/class-category/class-category-list?classNameId={{ classNameId }}" data-alps="doCreateClassCategory">
+                                    <form role="form" class="row doCreateClassCategory" name="form1" id="form1" method="post" action="/admin/class-category/class-category-list?classNameId={{ classNameId }}">
                                         <div class="col-auto align-self-center">
                                             <span>分類名</span>
                                             <span class="badge bg-primary ms-1">必須</span>
@@ -250,13 +250,13 @@
                                                     <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
                                                        data-url="/admin/class-category/class-category?classCategoryId={{ ClassCategory.classCategoryId }}&_method=delete"
                                                        data-message="この操作はあとから取り消すことができません。「{{ ClassCategory.name }}」を削除してよろしいですか？"
-                                                       data-alps="doDeleteClassCategory">
+>
                                                         <i class="fa fa-close fa-lg text-secondary"></i>
                                                     </a>
                                                 </div>
                                             </div>
                                         </div>
-                                        <form class="row d-none mode-edit" method="post" action="/admin/class-category/class-category?classCategoryId={{ ClassCategory.classCategoryId }}&_method=put" data-alps="doUpdateClassCategory">
+                                        <form class="row d-none mode-edit doUpdateClassCategory" method="post" action="/admin/class-category/class-category?classCategoryId={{ ClassCategory.classCategoryId }}&_method=put">
                                             <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                                             <div class="col-3 me-2">
                                                 <input type="text" class="form-control" name="classCategoryName" value="{{ ClassCategory.name }}" data-origin-value="{{ ClassCategory.name }}">

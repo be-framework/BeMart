@@ -109,7 +109,7 @@
         <!-- アラートメッセージ -->
     </div>
 
-    <form id="shopping-form" method="post" action="/shopping/confirm" data-alps="doConfirmOrder">
+    <form class="doConfirmOrder" id="shopping-form" method="post" action="/shopping/confirm">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <input type="hidden" id="shopping_order_redirect_to" name="redirect_to" value="">
         <input type="hidden" name="preOrderId" value="{{ preOrderId|default('') }}">

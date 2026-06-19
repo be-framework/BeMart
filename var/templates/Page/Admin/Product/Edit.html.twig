@@ -32,7 +32,7 @@
 {% set sub_title = '商品管理' %}
 
 {% block main %}
-    <form role="form" method="post" action="{{ productCode ? '/admin/product?_method=put' : '/admin/product' }}" id="product_form" name="form1" novalidate data-alps="{{ productCode ? 'doUpdateProduct' : 'doCreateProduct' }}">
+    <form class="{{ productCode ? 'doUpdateProduct' : 'doCreateProduct' }}" role="form" method="post" action="{{ productCode ? '/admin/product?_method=put' : '/admin/product' }}" id="product_form" name="form1" novalidate>
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <input type="hidden" name="productCode" value="{{ productCode|default('') }}">
         <div class="c-contentsArea__cols">

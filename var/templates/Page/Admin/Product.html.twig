@@ -22,7 +22,7 @@
                         {{ message|default('指定された商品が見つかりません。') }}
                     </div>
                 {% else %}
-                <form method="post" action="/admin/product?productCode={{ productCode }}&_method=put" id="admin_product_form">
+                <form method="post" action="/admin/product?productCode={{ productCode }}&_method=put" id="admin_product_form" class="doUpdateProduct">
                     <input type="hidden" name="_method" value="put">
                     <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
                     <input type="hidden" name="productCode" value="{{ productCode }}">

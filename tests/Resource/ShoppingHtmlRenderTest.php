@@ -166,7 +166,7 @@ final class ShoppingHtmlRenderTest extends TestCase
             '<h1>ご注文手続き</h1>',
             '<ul class="ec-progress">',
             // Slice 9: url('shopping_confirm') now resolves through canonical Resource path.
-            '<form id="shopping-form" method="post" action="/shopping/confirm" data-alps="doConfirmOrder">',
+            '<form class="doConfirmOrder" id="shopping-form" method="post" action="/shopping/confirm">',
             '<div class="ec-orderRole">',
             '<div class="ec-orderAccount">',
             '<div class="ec-orderDelivery">',

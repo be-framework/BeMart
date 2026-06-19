@@ -42,7 +42,7 @@
 {% endblock %}
 
 {% block main %}
-    <form id="content_js_form" method="post" action="/admin/content/js?_method=put" data-alps="doUpdateContentJs">
+    <form class="doUpdateContentJs" id="content_js_form" method="post" action="/admin/content/js?_method=put">
         <input type="hidden" id="form__token" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <input type="hidden" name="mode" value="content_operation_form">
 
