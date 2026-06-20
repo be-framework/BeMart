@@ -116,8 +116,8 @@ for o in orders:
         icode = it.get("productCode")
         L.append(f"INSERT INTO dtb_order_item (id, order_id, product_id, product_code, product_name, quantity, price, order_item_type_id, discriminator_type) "
                  f"VALUES ({oiid}, {oid}, {sq(code_to_pid.get(icode))}, {sq(icode)}, {sq(code_to_name.get(icode) or icode or 'item')}, {sq(it.get('quantity'))}, {sq(it.get('price'))}, 1, 'order_item');")
-    L.append(f"INSERT INTO dtb_shipping (id, order_id, name01, name02, create_date, update_date, discriminator_type) "
-             f"VALUES ({oid}, {oid}, '注文', '太郎', {NOW}, {NOW}, 'shipping');")
+    L.append(f"INSERT INTO dtb_shipping (id, order_id, name01, name02, postal_code, pref_id, addr01, addr02, phone_number, create_date, update_date, discriminator_type) "
+             f"VALUES ({oid}, {oid}, '注文', '太郎', '1500001', 13, '渋谷区', 'テスト1-1-1', '0312345678', {NOW}, {NOW}, 'shipping');")
 L.append("SET FOREIGN_KEY_CHECKS=1;")
 OUT.write_text("\n".join(L) + "\n", encoding="utf-8")
 print(f"wrote {OUT}  (categories={len(cat_id)} tags={len(tag_id)} products={pid} customers={cid})")
