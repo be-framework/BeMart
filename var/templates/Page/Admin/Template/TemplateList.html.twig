@@ -63,14 +63,14 @@
 {% endblock javascript %}
 
 {% block main %}
-    <form name="form1" id="form1" method="post" action="/admin/template/template-list?_method=put">
+    <form class="doSelectTemplate" name="form1" id="form1" method="post" action="/admin/template/template-list?_method=put">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <input type="hidden" id="form_selected" name="templateId" value="">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">
                     <div class="d-block mb-3">
-                        <a class="btn btn-ec-regular" href="/admin/template/template-add">新規作成</a>
+                        <a class="btn btn-ec-regular" rel="goTemplateInstall" href="/admin/template/template-add">新規作成</a>
                     </div>
                     <div class="card rounded border-0 mb-4">
                         <div class="card-header"><span class="card-title">テンプレート一覧</span></div>

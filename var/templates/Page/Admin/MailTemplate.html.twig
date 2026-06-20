@@ -51,6 +51,29 @@
 {% endblock %}
 
 {% block main %}
+    {% if not Mail.id %}
+    <form name="form-create" class="doCreateMailTemplate" method="post" action="/admin/mail-template/create">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
+        <div class="card rounded border-0 mb-4">
+            <div class="card-header"><span class="card-title">新規テンプレート作成</span></div>
+            <div class="card-body">
+                <div class="row mb-2">
+                    <div class="col-2"><span>テンプレート名</span><span class="badge bg-primary ms-1">必須</span></div>
+                    <div class="col-10"><input type="text" name="mailTemplateName" class="form-control"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-2"><span>ファイル名</span><span class="badge bg-primary ms-1">必須</span></div>
+                    <div class="col-10"><input type="text" name="fileName" class="form-control" placeholder="Mail/example.twig"></div>
+                </div>
+                <div class="row mb-2">
+                    <div class="col-2"><span>件名</span><span class="badge bg-primary ms-1">必須</span></div>
+                    <div class="col-10"><input type="text" name="mailSubject" class="form-control"></div>
+                </div>
+            </div>
+        </div>
+        <button class="btn btn-ec-conversion px-5" type="submit">作成</button>
+    </form>
+    {% endif %}
     <form name="form1" role="form" class="form-horizontal doUpdateMailTemplate" id="form1" method="post" action="/admin/mail-template">
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         {{ form.input('mailTemplateId')|raw }}

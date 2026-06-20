@@ -99,7 +99,7 @@ final class ContactCompleteHtmlRenderTest extends TestCase
             '<div class="ec-off3Grid ec-text-ac">',
             '<p class="ec-reportDescription">',
             '<div class="ec-off4Grid">',
-            'class="ec-blockBtn--cancel"',
+            'class="ec-blockBtn--cancel goTop"',
         ] as $needle) {
             $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
         }
