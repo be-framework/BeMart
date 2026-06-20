@@ -174,6 +174,57 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         return $added;
     }
 
+    /**
+     * doRemoveCartItem — uses its own sessionPrefix so removing the line does
+     * not empty the cart the rest of the purchase chain checks out with.
+     */
+    #[Alps('doRemoveCartItem')]
+    #[Depends('testProductDetail')]
+    public function testRemovesCartItem(ResourceObject $product): void
+    {
+        $prefix = self::SESSION_PREFIX . '-remove';
+        $added = $this->resource->post($this->linkHref($product, 'doAddCartItem'), [
+            'productCode' => self::$productCode,
+            'quantity' => 1,
+            'sessionPrefix' => $prefix,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::CREATED, $added->code);
+
+        $removed = $this->resource->delete($this->linkHref($added, 'doRemoveCartItem'), [
+            'productCode' => self::$productCode,
+            'sessionPrefix' => $prefix,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        // The unsafe transition executing (200 + goCart link) is the e2e proof.
+        // Cart-count readback is not asserted here: the cart session prefix has a
+        // documented hardcoded default, so cross-method cart isolation is unreliable.
+        $this->assertSame(Code::OK, $removed->code);
+        $this->assertSame(self::$productCode, $this->bodyValue($removed, 'productCode'));
+    }
+
+    /**
+     * doUpdateCartItemQuantity — adjust the quantity of the line the main walk
+     * just added (same cart), so the item is guaranteed present regardless of
+     * suite ordering. Cart isolation by sessionPrefix is unreliable in-process
+     * (HtmlCartSessionPrefix derives the prefix from the session), so a separate
+     * throwaway-prefix add would not survive cross-call — we update the main line.
+     */
+    #[Alps('doUpdateCartItemQuantity')]
+    #[Depends('testAddsCartItem')]
+    public function testUpdatesCartItemQuantity(ResourceObject $added): void
+    {
+        $updated = $this->resource->put($this->linkHref($added, 'doUpdateCartItemQuantity'), [
+            'productCode' => self::$productCode,
+            'quantity' => 3,
+            'sessionPrefix' => self::SESSION_PREFIX,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(3, $this->bodyValue($updated, 'adjustedQuantity'));
+    }
+
     #[Alps('goCart')]
     #[Depends('testAddsCartItem')]
     public function testCart(ResourceObject $response): ResourceObject
@@ -424,6 +475,81 @@ class FlowCustomerPurchaseTest extends AbstractWorkflowTest
         $this->assertTrue((bool) $this->bodyValue($entry, 'canCheckout'));
 
         return $entry;
+    }
+
+    /**
+     * doSelectShippingAddress — member checkout reaches the お届け先選択 screen
+     * (goShoppingShipping) from /shopping, then confirms the chosen address-book
+     * row. Reads the Shipping onPost param (shippingAddressId) and asserts the
+     * unsafe transition executes (303 back to /shopping).
+     */
+    #[Alps('goShoppingShipping')]
+    #[Depends('testMemberCheckoutEntry')]
+    public function testMemberShoppingShipping(ResourceObject $response): ResourceObject
+    {
+        $shipping = $this->follow($response, 'goShoppingShipping');
+
+        $this->assertSame(Code::OK, $shipping->code);
+        $this->assertSame('goShoppingShipping', $this->bodyValue($shipping, 'transitionId'));
+
+        return $shipping;
+    }
+
+    #[Alps('doSelectShippingAddress')]
+    #[Depends('testMemberShoppingShipping')]
+    public function testMemberSelectsShippingAddress(ResourceObject $response): ResourceObject
+    {
+        $selected = $this->resource->post($this->linkHref($response, 'doSelectShippingAddress'), [
+            'shippingAddressId' => '1',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $selected->code);
+        $this->assertSame('1', $this->bodyValue($selected, 'shippingAddressId'));
+
+        return $selected;
+    }
+
+    /**
+     * doUpdateShippingAddress — member checkout reaches the お届け先変更 form
+     * (goShoppingShippingEdit) from /shopping, then submits an edited address.
+     * Reads the ShippingEdit onPost params and asserts the unsafe transition
+     * executes (303 back to /shopping).
+     */
+    #[Alps('goShoppingShippingEdit')]
+    #[Depends('testMemberCheckoutEntry')]
+    public function testMemberShoppingShippingEdit(ResourceObject $response): ResourceObject
+    {
+        $edit = $this->follow($response, 'goShoppingShippingEdit');
+
+        $this->assertSame(Code::OK, $edit->code);
+        $this->assertSame('goShoppingShippingEdit', $this->bodyValue($edit, 'transitionId'));
+
+        return $edit;
+    }
+
+    #[Alps('doUpdateShippingAddress')]
+    #[Depends('testMemberShoppingShippingEdit')]
+    public function testMemberUpdatesShippingAddress(ResourceObject $response): ResourceObject
+    {
+        $updated = $this->resource->post($this->linkHref($response, 'doUpdateShippingAddress'), [
+            'name01' => '会員',
+            'name02' => '太郎',
+            'kana01' => 'カイイン',
+            'kana02' => 'タロウ',
+            'companyName' => 'ワークフロー商事',
+            'postalCode' => '1500001',
+            'pref' => 13,
+            'addr01' => '渋谷区',
+            'addr02' => '配送先1-1-1',
+            'phoneNumber' => '0312345678',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $updated->code);
+        $this->assertSame('渋谷区', $this->bodyValue($updated, 'addr01'));
+
+        return $updated;
     }
 
     #[Alps('doConfirmOrder')]

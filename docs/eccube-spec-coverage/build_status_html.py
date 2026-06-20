@@ -177,13 +177,61 @@ profile = {"$schema": "https://alps-io.github.io/schemas/alps.json", "alps": {"v
 
 # ---- HTML ----
 e = html.escape
+GH_BLOB = "https://github.com/be-framework/BeMart/blob/HEAD/"
+# label -> tests/<dir>/ ; the Hypermedia path is the canonical one stored on the row.
+TEST_PROJECTIONS = [("PHP", "Hypermedia"), ("API", "Http"), ("HTML", "Html")]
+def test_links(test):
+    """Emit absolute GitHub blob links for each of the 3 test projections that
+    actually exist on disk. `test` is a tests/Hypermedia/X.php relpath."""
+    stem = Path(test).name  # X.php
+    out = []
+    for label, sub in TEST_PROJECTIONS:
+        rel = f"tests/{sub}/{stem}"
+        if (ROOT / rel).exists():
+            out.append(f'<a class="testLink" href="{e(GH_BLOB + rel)}">{label}</a>')
+    return out
+
 def cell_links(r):
     parts = [f'<a class="specLink" href="{e(r["spec"])}">spec</a>']
     if r["test"]:
-        parts.append(f'<a class="testLink" href="../../{e(r["test"])}">{e(Path(r["test"]).stem)}</a>')
+        parts.extend(test_links(r["test"]))
     if r["shot"]:
         parts.append(f'<a class="evidenceLink" href="{e(r["shot"])}">shot</a>')
     return " · ".join(parts)
+
+# ---- deliberately-skipped operations (generated in parallel; tolerate absence) ----
+def skipped_section():
+    p = HERE / "skipped-operations.json"
+    if not p.exists():
+        return ""
+    try:
+        data = json.loads(p.read_text(encoding="utf-8"))
+    except (ValueError, OSError):
+        return ""
+    # accept either a bare list or {"skipped":[...]} / {"operations":[...]}
+    if isinstance(data, dict):
+        items = data.get("skipped") or data.get("operations") or data.get("items") or []
+    else:
+        items = data
+    if not items:
+        return ""
+    rows_html = []
+    for it in items:
+        op = e(str(it.get("op") or it.get("operation") or it.get("id") or ""))
+        cat = e(str(it.get("category") or it.get("cat") or ""))
+        reason = e(str(it.get("reason") or it.get("note") or ""))
+        rows_html.append(
+            f'<tr class="skippedItem"><td class="skippedOp"><code>{op}</code></td>'
+            f'<td class="skippedCategory">{cat}</td>'
+            f'<td class="skippedReason">{reason}</td></tr>')
+    return (
+        '<section class="skippedSection" id="skipped">'
+        '<h2>意図的スキップ (理由付き)</h2>'
+        '<p class="meta">production コードの新規実装や JS 専用の affordance 等、'
+        '今回のカバレッジから意図的に除外した操作。各行は対象操作・分類・理由を明示する。</p>'
+        '<table><thead><tr><th>操作</th><th>分類</th><th>理由</th></tr></thead><tbody>'
+        + "".join(rows_html) +
+        '</tbody></table></section>')
 
 # group rows: area -> screen -> [rows]
 from collections import OrderedDict
@@ -263,6 +311,7 @@ a {{ color: #1257a8; text-decoration: none; }} a:hover {{ text-decoration: under
 </header>
 <main>
 {''.join(body)}
+{skipped_section()}
 </main>
 <footer class="meta"><p>生成: <code>docs/eccube-spec-coverage/build_status_html.py</code>（再生成可能）。
 入力: <code>all_items.json</code>（原典パース）, <code>src/Resource/Page/**</code>（ルート）, <code>tests/**</code>（根拠）。

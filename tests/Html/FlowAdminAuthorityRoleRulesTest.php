@@ -33,7 +33,7 @@ use function random_bytes;
  *   - None: the Hypermedia test is a 3-step read-then-write-then-verify walk,
  *     and all three steps are HTML-followable via the rendered form affordance.
  */
-final class FlowAdminAuthorityHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminAuthorityRoleRulesTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-authority-html';
 
@@ -107,6 +107,9 @@ final class FlowAdminAuthorityHtmlTest extends AbstractHtmlWorkflowTestCase
             : $this->resource->get('page://self/admin/authority-role');
 
         $this->assertSame(Code::OK, $page->code, (string) ($page->view ?? $page->code));
-        $this->assertStringContainsString(self::$denyUrl, (string) ($page->view ?? ''));
+        // Assert the persisted deny_url is rendered as the rule input's value
+        // (the descriptor's rendered value), not merely present somewhere on the
+        // page — same readback contract as the Http twin.
+        $this->assertStringContainsString('value="' . self::$denyUrl . '"', (string) ($page->view ?? ''));
     }
 }

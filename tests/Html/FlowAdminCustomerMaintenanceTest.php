@@ -54,7 +54,7 @@ use const ENT_QUOTES;
  * Because neither doCreateCustomer nor doDeleteCustomer has a rendered HTML form
  * with an ALPS class, this walk is effectively GET-only after the setup step.
  */
-final class FlowAdminCustomerHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminCustomerMaintenanceTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-customer-html';
 

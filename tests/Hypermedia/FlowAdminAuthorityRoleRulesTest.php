@@ -17,7 +17,7 @@ use function assert;
 use function bin2hex;
 use function random_bytes;
 
-final class FlowAdminAuthorityRoleRulesTest extends AbstractWorkflowTest
+class FlowAdminAuthorityRoleRulesTest extends AbstractWorkflowTest
 {
     public const FLOW_ID = 'flow-admin-authority-role-rules';
 

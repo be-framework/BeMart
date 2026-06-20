@@ -46,7 +46,7 @@ use function random_bytes;
  *     <form class="…">), so step 6 issues it as a direct DELETE for cleanup
  *     rather than a followed affordance.
  */
-final class FlowAdminTemplateHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminTemplateLifecycleTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-template-html';
 

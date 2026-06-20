@@ -40,7 +40,7 @@ use function random_bytes;
  *     checkout) not representable as HTML-form affordances within this walk's scope.
  *   - goMailTemplateList after delete: Skipped because doDeleteMailTemplate itself is skipped.
  */
-final class FlowAdminMailTemplateHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminMailTemplateMaintenanceTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-mail-template-html';
 

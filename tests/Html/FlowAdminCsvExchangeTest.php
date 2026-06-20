@@ -48,7 +48,7 @@ use function random_bytes;
  *   - bodyValue('transitionId'), bodyValue('count'): JSON-only mutation
  *     summary fields; HTML renders state in controls/page text.
  */
-final class FlowAdminCsvHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminCsvExchangeTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-csv-html';
 
@@ -180,7 +180,7 @@ final class FlowAdminCsvHtmlTest extends AbstractHtmlWorkflowTestCase
      * The doDeleteProduct affordance is a JS-modal anchor in the product
      * list (not a <form class="…">), so cleanup uses a direct POST with
      * _method=delete rather than a followed affordance — identical to the
-     * doDeleteTemplate cleanup pattern in FlowAdminTemplateHtmlTest.
+     * doDeleteTemplate cleanup pattern in FlowAdminTemplateLifecycleTest.
      */
     #[Alps('doDeleteProduct')]
     #[Depends('testImportsProductCsvViaUpload')]

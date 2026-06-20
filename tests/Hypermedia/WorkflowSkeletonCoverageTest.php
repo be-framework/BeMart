@@ -47,4 +47,21 @@ final class WorkflowSkeletonCoverageTest extends TestCase
             self::assertTrue($http->isSubclassOf($hypermediaClass), "{$httpClass} must extend {$hypermediaClass}.");
         }
     }
+
+    public function testEveryTrueFlowHasHtmlProjection(): void
+    {
+        self::assertCount(13, self::TRUE_FLOW_CLASSES);
+
+        foreach (self::TRUE_FLOW_CLASSES as $flowId => $className) {
+            // The HTML projection is a standalone walk (it resolves affordances
+            // from rendered class/rel, not HAL), so it does NOT extend the
+            // Hypermedia class — only same-named, in Tests\Html, with a FLOW_ID.
+            $htmlClass = 'MyVendor\\BeMart\\Tests\\Html\\' . $className;
+
+            self::assertTrue(class_exists($htmlClass), "{$flowId} is missing an HTML workflow projection.");
+
+            $html = new ReflectionClass($htmlClass);
+            self::assertTrue($html->hasConstant('FLOW_ID'), "{$htmlClass} must declare FLOW_ID.");
+        }
+    }
 }

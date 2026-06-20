@@ -38,7 +38,7 @@ use function random_bytes;
  *     controls, not a transitionId field
  *   - bodyValue('count')                → JSON-only mutation summary field
  */
-final class FlowAdminMasterDataHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminMasterDataUpdateTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-master-data-html';
 
@@ -144,6 +144,44 @@ final class FlowAdminMasterDataHtmlTest extends AbstractHtmlWorkflowTestCase
             self::$updatedName,
             (string) ($read->view ?? ''),
             'Updated name not found in rendered master-data page after update',
+        );
+    }
+
+    /**
+     * AdminTop -> goOrderStatusList -> doUpdateOrderStatusList (HTML walk).
+     *
+     * Drives the SSOT slice over rendered HTML: the dashboard advertises the
+     * goOrderStatusList anchor (admin-base nav), and the order-status page
+     * renders the doUpdateOrderStatusList <form> whose action ?_method=put
+     * carries the update affordance.
+     */
+    #[Alps('goOrderStatusList')]
+    public function testOpensOrderStatusListFromAdminTop(): ResourceObject
+    {
+        $top = $this->resource->get('page://self/admin/index');
+        $this->assertSame(Code::OK, $top->code, (string) ($top->view ?? $top->code));
+        $this->assertAffordance($top, 'goOrderStatusList');
+
+        $list = $this->follow($top, 'goOrderStatusList');
+        $this->assertAffordance($list, 'doUpdateOrderStatusList');
+
+        return $list;
+    }
+
+    #[Depends('testOpensOrderStatusListFromAdminTop')]
+    #[Alps('doUpdateOrderStatusList')]
+    public function testUpdatesOrderStatusList(ResourceObject $list): void
+    {
+        $updated = $this->submit($list, 'doUpdateOrderStatusList', [
+            'orderStatuses' => [
+                ['name' => 'HTML Status ' . bin2hex(random_bytes(3)), 'color' => '#000000', 'count' => 0],
+            ],
+            'orderStatusRows' => '1',
+        ]);
+
+        $this->assertTrue(
+            in_array($updated->code, [Code::OK, Code::SEE_OTHER], true),
+            'doUpdateOrderStatusList affordance did not succeed: ' . (string) ($updated->view ?? $updated->code),
         );
     }
 }

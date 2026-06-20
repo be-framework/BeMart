@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
+use Aura\Sql\ExtendedPdoInterface;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
@@ -14,6 +15,7 @@ use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
 use function bin2hex;
+use function is_string;
 use function random_bytes;
 use function str_contains;
 
@@ -321,6 +323,21 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
         return $this->follow($response, 'goOrder', ['orderNo' => self::$orderNo]);
     }
 
+    #[Alps('doSendShippingNotifyMail')]
+    #[Depends('testOrder')]
+    public function testSendsShippingNotifyMail(ResourceObject $response): ResourceObject
+    {
+        $sent = $this->resource->post($this->linkHref($response, 'doSendShippingNotifyMail'), [
+            'orderNo' => self::$orderNo,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $sent->code);
+        $this->assertSame(self::$orderNo, $this->bodyValue($sent, 'orderNo'));
+
+        return $sent;
+    }
+
     #[Alps('doUpdateOrder')]
     #[Depends('testOrder')]
     public function testUpdatesOrder(ResourceObject $response): ResourceObject
@@ -481,5 +498,39 @@ class FlowAdminOrderFulfillmentTest extends AbstractWorkflowTest
 
         $this->assertTrue(str_contains($csv, self::$orderNo));
         $this->assertTrue(str_contains($csv, 'TRK-CSV-' . self::$paymentId));
+    }
+
+    /**
+     * doBulkDeleteOrder — independent of the fulfillment chain (it would delete
+     * the order the chain edits). Resolves a real, unique order and removes it
+     * through the OrderList affordance; the session transaction rolls it back.
+     */
+    #[Alps('doBulkDeleteOrder')]
+    public function testBulkDeletesOrder(): void
+    {
+        $db = self::$dbSession->injector()->getInstance(ExtendedPdoInterface::class);
+        assert($db instanceof ExtendedPdoInterface);
+        // Pick a complete, non-cancelled, unique order: exclude STATUS_CANCEL(3)
+        // (bulk-delete skips already-cancelled -> changedCount 0), and require a
+        // loadable shipping row (postal_code present) so OrderQuery::byOrderNo
+        // resolves it rather than returning null for a half-populated stray order.
+        $orderNo = $db->fetchValue(
+            'SELECT o.order_no FROM dtb_order o'
+            . ' WHERE o.order_status_id <> 3'
+            . ' AND EXISTS (SELECT 1 FROM dtb_shipping s WHERE s.order_id = o.id AND s.postal_code IS NOT NULL)'
+            . ' GROUP BY o.order_no HAVING COUNT(*) = 1 ORDER BY o.order_no LIMIT 1',
+        );
+        assert(is_string($orderNo) && $orderNo !== '', 'no unique complete non-cancelled order in eccubedb_test');
+
+        $list = $this->resource->get('page://self/admin/order-list');
+        $this->assertSame(Code::OK, $list->code);
+
+        $deleted = $this->resource->post($this->linkHref($list, 'doBulkDeleteOrder'), [
+            'ids' => [$orderNo],
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(1, $this->bodyValue($deleted, 'changedCount'));
     }
 }

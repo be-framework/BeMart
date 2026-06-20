@@ -404,10 +404,25 @@ class FlowCustomerAccountMaintenanceTest extends AbstractWorkflowTest
 
     #[Alps('MypageWithdrawComplete')]
     #[Depends('testWithdrawsCustomer')]
-    public function testWithdrawComplete(ResourceObject $response): void
+    public function testWithdrawComplete(ResourceObject $response): ResourceObject
     {
         $complete = $this->follow($response, 'goMypageWithdrawComplete');
 
         $this->assertSame(Code::OK, $complete->code);
+
+        return $complete;
+    }
+
+    #[Alps('doLogout')]
+    #[Depends('testWithdrawComplete')]
+    public function testLogsOut(ResourceObject $response): void
+    {
+        $top = $this->follow($response, 'goTop');
+
+        $loggedOut = $this->resource->post($this->linkHref($top, 'doLogout'), [
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $loggedOut->code);
     }
 }

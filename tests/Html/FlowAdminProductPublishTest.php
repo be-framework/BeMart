@@ -30,7 +30,7 @@ use function random_bytes;
  * whose target drifts mid-flow (the 405 class). State assertions stay with the
  * JSON resource/contract tests.
  */
-final class FlowAdminProductHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminProductPublishTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-product-html';
 

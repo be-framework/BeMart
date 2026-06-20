@@ -128,4 +128,44 @@ class FlowAdminMasterDataUpdateTest extends AbstractWorkflowTest
         $this->assertIsArray($rows);
         $this->assertContains(self::$updatedName, array_column($rows, 'name'));
     }
+
+    /**
+     * AdminTop -> goOrderStatusList -> #OrderStatusList.
+     *
+     * SSOT slice: AdminTop now advertises goOrderStatusList, and the
+     * #OrderStatusList state advertises doUpdateOrderStatusList. Drive the
+     * nav transition from the dashboard, then resolve the update affordance
+     * from the order-status representation (no string-literal page:// URI).
+     */
+    #[Alps('goOrderStatusList')]
+    public function testReachesOrderStatusListFromAdminTop(): ResourceObject
+    {
+        $top = $this->resource->get('page://self/admin/index');
+        $this->assertSame(Code::OK, $top->code);
+
+        $list = $this->follow($top, 'goOrderStatusList');
+        $this->assertSame(Code::OK, $list->code);
+
+        return $list;
+    }
+
+    #[Alps('doUpdateOrderStatusList')]
+    #[Depends('testReachesOrderStatusListFromAdminTop')]
+    public function testUpdatesOrderStatusList(ResourceObject $response): void
+    {
+        $href = $this->linkHref($response, 'doUpdateOrderStatusList');
+
+        $updated = $this->resource->put($href, [
+            'orderStatuses' => [
+                ['name' => 'Workflow Status ' . bin2hex(random_bytes(3)), 'color' => '#000000', 'count' => 0],
+            ],
+            'orderStatusRows' => '1',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertContains($updated->code, [Code::OK, Code::SEE_OTHER]);
+        $this->assertSame('doUpdateOrderStatusList', $this->bodyValue($updated, 'transitionId'));
+        $this->assertSame(1, $this->bodyValue($updated, 'count'));
+        $this->assertSame('/admin/order-status', $this->header($updated, 'Location'));
+    }
 }

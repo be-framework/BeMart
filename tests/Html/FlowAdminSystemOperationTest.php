@@ -55,7 +55,7 @@ use function random_bytes;
  *     anchor (not a visible <form class="doDeleteMember">), so submit()
  *     cannot resolve it without JavaScript execution.
  */
-final class FlowAdminSystemHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminSystemOperationTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-system-html';
 

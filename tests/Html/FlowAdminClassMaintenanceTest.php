@@ -46,7 +46,7 @@ use function random_bytes;
  *     Hypermedia (in-process) test. The HTML walk verifies state through the
  *     rendered page text instead.
  */
-final class FlowAdminClassHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminClassMaintenanceTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-class-html';
 

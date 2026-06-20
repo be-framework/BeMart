@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Hypermedia;
 
+use Aura\Sql\ExtendedPdoInterface;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
@@ -14,6 +15,8 @@ use PHPUnit\Framework\Attributes\Depends;
 
 use function assert;
 use function bin2hex;
+use function is_array;
+use function is_string;
 use function random_bytes;
 
 class FlowCustomerRegistrationTest extends AbstractWorkflowTest
@@ -102,6 +105,66 @@ class FlowCustomerRegistrationTest extends AbstractWorkflowTest
     public function testRegistrationComplete(ResourceObject $response): ResourceObject
     {
         return $this->followLocation($response);
+    }
+
+    /**
+     * doActivateCustomer — email-verification (本登録) over the mailed
+     * secretKey link.
+     *
+     * EC-CUBE's mail-auth path registers a provisional (status=1) member
+     * carrying a per-customer secretKey; this BeMart build fixes
+     * registration to status=2 (mail-auth-OFF), so we recreate the
+     * provisional precondition inside the rolled-back session transaction:
+     * the just-registered customer (which already carries a server-side
+     * 32-char secret_key) is demoted to status=1, then promoted back via
+     * the real doActivateCustomer affordance.
+     *
+     * SSOT: GET #EntryActivate (the mailed landing) advertises
+     * #doActivateCustomer; we resolve the POST href via linkHref — never a
+     * page:// string literal.
+     */
+    #[Alps('doActivateCustomer')]
+    #[Depends('testRegistersCustomer')]
+    public function testActivatesCustomer(): void
+    {
+        assert(self::$dbSession instanceof WorkflowDbSession);
+        $db = self::$dbSession->injector()->getInstance(ExtendedPdoInterface::class);
+        assert($db instanceof ExtendedPdoInterface);
+
+        // Resolve the registered customer's server-generated secret_key and
+        // demote them to provisional (status=1) — the mail-auth precondition.
+        $row = $db->fetchOne(
+            'SELECT id, secret_key FROM dtb_customer WHERE email = :email',
+            ['email' => self::$email],
+        );
+        assert(is_array($row) && is_string($row['secret_key']) && $row['secret_key'] !== '');
+        $secretKey = $row['secret_key'];
+
+        $db->perform(
+            'UPDATE dtb_customer SET customer_status_id = 1 WHERE id = :id',
+            ['id' => $row['id']],
+        );
+
+        // GET the mailed landing screen (#EntryActivate), then POST the
+        // advertised #doActivateCustomer affordance with the secretKey.
+        $landing = $this->resource->get('page://self/entry/activate', ['secretKey' => $secretKey]);
+        $this->assertSame(Code::OK, $landing->code);
+
+        $activated = $this->resource->post($this->linkHref($landing, 'doActivateCustomer'), [
+            'secretKey' => $secretKey,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $activated->code);
+        $this->assertSame(2, $this->bodyValue($activated, 'customerStatus'));
+        $this->assertSame(self::$email, $this->bodyValue($activated, 'email'));
+
+        // The customer is now active in storage.
+        $status = $db->fetchValue(
+            'SELECT customer_status_id FROM dtb_customer WHERE id = :id',
+            ['id' => $row['id']],
+        );
+        $this->assertSame(2, (int) $status);
     }
 
     #[Alps('doLogin')]

@@ -58,7 +58,7 @@ use function random_bytes;
  *     navigating from news → trade law requires following untagged nav anchors
  *     across unrelated content sub-sections; omitted to keep this walk focused.
  */
-final class FlowAdminContentHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminContentPublishTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-content-html';
 

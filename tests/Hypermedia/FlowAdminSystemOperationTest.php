@@ -291,6 +291,35 @@ class FlowAdminSystemOperationTest extends AbstractWorkflowTest
         return $verified;
     }
 
+    #[Alps('goChangePassword')]
+    #[Depends('testAdminTop')]
+    public function testChangePasswordForm(ResourceObject $response): ResourceObject
+    {
+        return $this->follow($response, 'goChangePassword');
+    }
+
+    #[Alps('doChangePassword')]
+    #[Depends('testChangePasswordForm')]
+    public function testChangesPassword(ResourceObject $response): ResourceObject
+    {
+        // Session adminId is the freshly-logged-in workflow admin
+        // (testAdminLogsIn set it to the real numeric dtb_member.id), whose
+        // current password is self::ADMIN_PASSWORD. The transaction is rolled
+        // back at class teardown, so this re-hash never escapes the test.
+        $changed = $this->resource->post($this->linkHref($response, 'doChangePassword'), [
+            'currentPassword' => self::ADMIN_PASSWORD,
+            'changePasswordFirst' => 'workflow-changed-password-2026',
+            'changePasswordSecond' => 'workflow-changed-password-2026',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $changed->code);
+        $this->assertSame('doChangePassword', $this->bodyValue($changed, 'transitionId'));
+        $this->assertSame(self::$adminLoginId, $this->bodyValue($changed, 'loginId'));
+
+        return $changed;
+    }
+
     #[Alps('goContentCache')]
     #[Depends('testAdminTop')]
     public function testContentCache(ResourceObject $response): ResourceObject

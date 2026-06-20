@@ -50,7 +50,7 @@ use function str_replace;
  *   - doDeleteCalendarHoliday: rendered as a JS modal `<a rel="doDeleteCalendarHoliday">`,
  *     not a `<form>`. submit() only matches `<form>` affordances.
  */
-final class FlowAdminShopConfigHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminShopConfigurationTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-shop-config-html';
 

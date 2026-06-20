@@ -30,7 +30,7 @@ use function random_bytes;
  *   4. Follow 303 Location      — /entry/complete
  *
  * Steps skipped:
- *   - Post-registration login / mypage: covered by FlowCustomerMypageHtmlTest
+ *   - Post-registration login / mypage: covered by FlowCustomerAccountMaintenanceTest
  *     (seeded customer). Duplicating it here would require a second login
  *     form submission outside the registration affordance graph.
  *
@@ -39,7 +39,7 @@ use function random_bytes;
  * the X-BeMart-Test-Csrf-Token header, and the transaction is rolled
  * back after the class so the test customer is never persisted.
  */
-final class FlowCustomerRegistrationHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowCustomerRegistrationTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-customer-registration-html';
 

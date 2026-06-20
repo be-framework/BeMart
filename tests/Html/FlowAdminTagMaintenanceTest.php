@@ -35,7 +35,7 @@ use function random_bytes;
  *     HTML-followable form affordance for deletion, so it cannot be exercised via submit().
  *     Likewise doSortNo uses an AJAX endpoint — not a rendered form affordance.
  */
-final class FlowAdminTagHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminTagMaintenanceTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-tag-html';
 

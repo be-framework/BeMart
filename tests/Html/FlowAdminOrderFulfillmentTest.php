@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Tests\Html;
 
+use Aura\Sql\ExtendedPdoInterface;
 use BEAR\ApiDoc\Annotation\Alps;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
@@ -15,14 +16,16 @@ use PHPUnit\Framework\Attributes\Depends;
 use function assert;
 use function dirname;
 use function in_array;
+use function is_string;
 
 /**
  * HTML hypermedia walk of the admin order editor — driven entirely by the
  * rendered HTML's ALPS affordances (class/rel) over real HTTP.
  *
- * Uses seeded order `e10074afe811aad27bf44baf8255a9ea` (customer_id=3,
- * status=1/新規受付) which is guaranteed present in eccubedb_test. The walk
- * covers the HTML-followable core of the order fulfillment flow:
+ * Uses a real order resolved from eccubedb_test at runtime (a unique
+ * order_no in status=1/新規受付), so the walk runs against whatever fixture is
+ * loaded (EC-CUBE reference or the dev fixture). The walk covers the
+ * HTML-followable core of the order fulfillment flow:
  *
  *   1. Open the order list — assert it loads.
  *   2. Open the order edit page for the seeded order — assert doUpdateOrder.
@@ -45,29 +48,35 @@ use function in_array;
  *     token in the current templates; navigated directly by URL.
  *   - doCreatePayment / storefront checkout steps (add-cart → non-member →
  *     confirm → checkout): storefront and payment-creation flows are covered
- *     by FlowShoppingConfirmHtmlTest and the Hypermedia suite; the admin order
+ *     by FlowCustomerPurchaseTest and the Hypermedia suite; the admin order
  *     HTML walk scopes to post-order admin operations on a seeded order.
  *   - doImportShippingCsv / goExportOrder / goExportShipping / goExportOrderPdf:
  *     CSV/PDF export is not a rendered HTML form affordance.
  */
-final class FlowAdminOrderHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminOrderFulfillmentTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-order-html';
 
     private const ADMIN_ID = 'ad000000000000000000000000000001';
     private const CSRF_TOKEN = 'workflow-order-html-csrf-token';
 
-    /**
-     * Seeded order present in eccubedb_test (customer_id=3, status=1).
-     * Selected by: SELECT order_no FROM dtb_order WHERE customer_id='3' LIMIT 1
-     */
-    private const SEEDED_ORDER_NO = 'e10074afe811aad27bf44baf8255a9ea';
+    /** Real order_no resolved from eccubedb_test (unique, status=1). */
+    private static string $orderNo = '';
 
     private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
     {
         self::$dbSession = WorkflowDbSession::startForAdmin(self::ADMIN_ID, self::CSRF_TOKEN);
+
+        $db = self::$dbSession->injector()->getInstance(ExtendedPdoInterface::class);
+        assert($db instanceof ExtendedPdoInterface);
+        $orderNo = $db->fetchValue(
+            'SELECT order_no FROM dtb_order WHERE order_status_id = 1'
+            . ' GROUP BY order_no HAVING COUNT(*) = 1 ORDER BY order_no LIMIT 1',
+        );
+        assert(is_string($orderNo) && $orderNo !== '', 'no unique status=1 order in eccubedb_test');
+        self::$orderNo = $orderNo;
     }
 
     public static function tearDownAfterClass(): void
@@ -127,7 +136,7 @@ final class FlowAdminOrderHtmlTest extends AbstractHtmlWorkflowTestCase
     {
         $editor = $this->resource->get(
             'page://self/admin/order/edit',
-            ['orderNo' => self::SEEDED_ORDER_NO],
+            ['orderNo' => self::$orderNo],
         );
 
         $this->assertSame(Code::OK, $editor->code, (string) ($editor->view ?? $editor->code));
@@ -153,7 +162,7 @@ final class FlowAdminOrderHtmlTest extends AbstractHtmlWorkflowTestCase
     {
         $updated = $this->submit($editor, 'doUpdateOrder', [
             '_method' => 'put',
-            'orderNo' => self::SEEDED_ORDER_NO,
+            'orderNo' => self::$orderNo,
             'discount' => 0,
             'charge' => 0,
             'usePoint' => 0,
@@ -182,7 +191,7 @@ final class FlowAdminOrderHtmlTest extends AbstractHtmlWorkflowTestCase
     {
         $shippingEditor = $this->resource->get(
             'page://self/admin/order/shipping-address',
-            ['orderNo' => self::SEEDED_ORDER_NO],
+            ['orderNo' => self::$orderNo],
         );
 
         $this->assertSame(Code::OK, $shippingEditor->code, (string) ($shippingEditor->view ?? $shippingEditor->code));
@@ -207,7 +216,7 @@ final class FlowAdminOrderHtmlTest extends AbstractHtmlWorkflowTestCase
     {
         $updated = $this->submit($shippingEditor, 'doUpdateShippingAddress', [
             '_method' => 'put',
-            'orderNo' => self::SEEDED_ORDER_NO,
+            'orderNo' => self::$orderNo,
             'name01' => '配送',
             'name02' => '太郎',
             'postalCode' => '1500001',
@@ -240,7 +249,7 @@ final class FlowAdminOrderHtmlTest extends AbstractHtmlWorkflowTestCase
     {
         $mailScreen = $this->resource->get(
             'page://self/admin/order/send-mail',
-            ['orderNo' => self::SEEDED_ORDER_NO],
+            ['orderNo' => self::$orderNo],
         );
 
         $this->assertSame(Code::OK, $mailScreen->code, (string) ($mailScreen->view ?? $mailScreen->code));
@@ -260,15 +269,66 @@ final class FlowAdminOrderHtmlTest extends AbstractHtmlWorkflowTestCase
      */
     #[Alps('doSendOrderMail')]
     #[Depends('testOpensSendMailScreen')]
-    public function testSendsOrderMail(ResourceObject $mailScreen): void
+    public function testSendsOrderMail(ResourceObject $mailScreen): ResourceObject
     {
         $sent = $this->submit($mailScreen, 'doSendOrderMail', [
-            'orderNo' => self::SEEDED_ORDER_NO,
+            'orderNo' => self::$orderNo,
         ]);
 
         $this->assertTrue(
             in_array($sent->code, [Code::OK, Code::CREATED, Code::SEE_OTHER], true),
             'doSendOrderMail did not succeed: ' . (string) ($sent->view ?? $sent->code),
+        );
+
+        return $sent;
+    }
+
+    // -------------------------------------------------------------------------
+    // Step 8 — Shipping notify mail: open the confirmation screen
+    // -------------------------------------------------------------------------
+
+    /**
+     * doSendShippingNotifyMail (GET): open the shipping-notification
+     * confirmation screen for the seeded order. Navigated directly — the
+     * order-edit page links here as a plain anchor (no ALPS-class token),
+     * so follow() cannot resolve it. The confirmation page renders the
+     * POST form carrying class="doSendShippingNotifyMail".
+     */
+    #[Alps('doSendShippingNotifyMail')]
+    #[Depends('testSendsOrderMail')]
+    public function testOpensShippingNotifyMailScreen(ResourceObject $sent): ResourceObject
+    {
+        $screen = $this->resource->get(
+            'page://self/admin/order/shipping-notify-mail',
+            ['orderNo' => self::$orderNo],
+        );
+
+        $this->assertSame(Code::OK, $screen->code, (string) ($screen->view ?? $screen->code));
+        $this->assertAffordance($screen, 'doSendShippingNotifyMail');
+
+        return $screen;
+    }
+
+    // -------------------------------------------------------------------------
+    // Step 9 — doSendShippingNotifyMail: submit the confirmation form
+    // -------------------------------------------------------------------------
+
+    /**
+     * doSendShippingNotifyMail (POST): submit the confirmation form
+     * (POST — no _method override). The ShippingNotifyMail resource
+     * returns 200 + JSON body when the notification mail is sent.
+     */
+    #[Alps('doSendShippingNotifyMail')]
+    #[Depends('testOpensShippingNotifyMailScreen')]
+    public function testSendsShippingNotifyMail(ResourceObject $screen): void
+    {
+        $sent = $this->submit($screen, 'doSendShippingNotifyMail', [
+            'orderNo' => self::$orderNo,
+        ]);
+
+        $this->assertTrue(
+            in_array($sent->code, [Code::OK, Code::CREATED, Code::SEE_OTHER], true),
+            'doSendShippingNotifyMail did not succeed: ' . (string) ($sent->view ?? $sent->code),
         );
     }
 }

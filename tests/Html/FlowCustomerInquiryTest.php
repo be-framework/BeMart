@@ -33,7 +33,7 @@ use function in_array;
  * Anonymous (no login). Only WorkflowDbSession::startWithCsrfToken is
  * needed; no customer/admin session is set.
  */
-final class FlowCustomerInquiryHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowCustomerInquiryTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-customer-inquiry-html';
 

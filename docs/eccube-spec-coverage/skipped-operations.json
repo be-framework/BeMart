@@ -1,0 +1,86 @@
+{
+  "$comment": "Machine-readable registry of deliberately-skipped operations. Guarded by tests/Hypermedia/WorkflowSkipRegistryTest.php. An op listed here MUST NOT be exercised by any #[Alps('op')] in tests/Hypermedia/Flow*.php or tests/Html/Flow*.php; every alps.json do* descriptor of type unsafe|idempotent must be EITHER here OR covered by a flow test. When an op gains coverage, remove it here. When a new uncovered op appears, add it here or cover it.",
+  "categories": {
+    "out-of-scope": "EC-CUBE plugin marketplace / runtime feature outside the BeMart migration scope.",
+    "js-only": "Affordance is driven by JS/AJAX/modal/redirect-helper that the no-JS test harness cannot trigger.",
+    "intentionally-forbidden": "Operation is explicitly forbidden as workflow business-state setup by a guard test.",
+    "not-implemented-backlog": "Operation has no resource/implementation yet; tracked as backlog."
+  },
+  "skipped": {
+    "doInstallPlugin": {
+      "category": "out-of-scope",
+      "reason": "プラグインZIPのアップロード/公式ストア取得によるインストール。EC-CUBEのプラグインマーケットプレイス機能であり、BeMart移植スコープ外。",
+      "evidence": [
+        "alps.json descriptor doInstallPlugin (type unsafe, tag feature-admin-plugin)",
+        "no Be resource implements it as a covered flow affordance"
+      ]
+    },
+    "doEnablePlugin": {
+      "category": "out-of-scope",
+      "reason": "プラグイン有効化（container/routes再生成）。プラグインランタイム機能で移植スコープ外。",
+      "evidence": [
+        "alps.json descriptor doEnablePlugin (type idempotent, tag feature-admin-plugin)"
+      ]
+    },
+    "doDisablePlugin": {
+      "category": "out-of-scope",
+      "reason": "プラグイン無効化。プラグインランタイム機能で移植スコープ外。",
+      "evidence": [
+        "alps.json descriptor doDisablePlugin (type idempotent, tag feature-admin-plugin)"
+      ]
+    },
+    "doUninstallPlugin": {
+      "category": "out-of-scope",
+      "reason": "プラグインアンインストール（マイグレーションrollback・ファイル削除）。プラグインランタイム機能で移植スコープ外。",
+      "evidence": [
+        "alps.json descriptor doUninstallPlugin (type idempotent, tag feature-admin-plugin)"
+      ]
+    },
+    "doSortNoMove": {
+      "category": "js-only",
+      "reason": "一覧のsort_no並べ替えはドラッグ&ドロップ/AJAXのインライン操作。no-JSのHTMLハーネスは<form class=\"doSortNoMove\">のサブミットでは再現できない。",
+      "evidence": [
+        "alps.json descriptor doSortNoMove (type idempotent): 一覧で表示順を並べ替える汎用遷移",
+        "rendered as JS-driven inline reorder, not a no-JS form submit"
+      ]
+    },
+    "doToggleVisible": {
+      "category": "js-only",
+      "reason": "一覧行のvisible表示/非表示はインラインのAJAXトグル。no-JSハーネスでは発火できない。",
+      "evidence": [
+        "alps.json descriptor doToggleVisible (type idempotent): 行の表示/非表示をインラインでトグルする汎用操作"
+      ]
+    },
+    "doResendActivationMail": {
+      "category": "js-only",
+      "reason": "会員一覧からの本登録メール再送はモーダル/AJAX確認を伴うインライン操作で、no-JSハーネスのフォームサブミットでは到達できない。",
+      "evidence": [
+        "alps.json descriptor doResendActivationMail (type unsafe, src admin_customer_resend)"
+      ]
+    },
+    "doShoppingRedirectTo": {
+      "category": "js-only",
+      "reason": "注文手続きフォームの入力を保持したままフロー内画面へ遷移するJSリダイレクトヘルパ。no-JSハーネスでは再現できず、実装側にも独立リソースを持たない。",
+      "evidence": [
+        "alps.json descriptor doShoppingRedirectTo (type unsafe, src shopping_redirect_to)",
+        "grep doShoppingRedirectTo over src/ be/src/ var/templates/ -> 0 files"
+      ]
+    },
+    "doCreateOrder": {
+      "category": "intentionally-forbidden",
+      "reason": "管理画面からの手動受注作成。WorkflowBackdoorStateCoverageTest::testOrdersAreCreatedThroughStorefrontCheckout がフロー内のbusiness-state setupとしての使用を明示的に禁止する（受注はstorefront checkout経由で作る）。",
+      "evidence": [
+        "tests/Hypermedia/WorkflowBackdoorStateCoverageTest.php asserts source must not contain 'doCreateOrder'",
+        "alps.json descriptor doCreateOrder (type unsafe, tag feature-admin-order)"
+      ]
+    },
+    "doSelectCartForCheckout": {
+      "category": "not-implemented-backlog",
+      "reason": "販売種別ごとに分かれたカートから購入手続きへ進めるカートを選択する遷移（EC-CUBE cart_buystep）。対応するBe/BEARリソースが未実装。",
+      "evidence": [
+        "alps.json descriptor doSelectCartForCheckout (type idempotent, src cart_buystep)",
+        "grep SelectCartForCheckout over src/ be/src/ -> no resource"
+      ]
+    }
+  }
+}

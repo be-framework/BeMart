@@ -33,7 +33,7 @@ use function random_bytes;
  *   - doDeleteCategory: rendered as a JS token-for-anchor <a> (not a
  *     <form>), which requires JavaScript to submit a DELETE request.
  */
-final class FlowAdminCategoryHtmlTest extends AbstractHtmlWorkflowTestCase
+final class FlowAdminCategoryMaintenanceTest extends AbstractHtmlWorkflowTestCase
 {
     public const FLOW_ID = 'flow-admin-category-html';
 
