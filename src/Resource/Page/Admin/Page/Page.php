@@ -58,6 +58,8 @@ class Page extends ResourceObject
     #[Alps('goPage')]
     #[JsonSchema(schema: 'get-admin-page-page.json', params: 'get-admin-page-page.param.json')]
     #[Link(rel: 'goPageList', href: 'page://self/admin/page/page-list')]
+    #[Link(rel: 'doCreatePage', href: 'page://self/admin/page/page-list', method: 'post')]
+    #[Link(rel: 'doUpdatePage', href: 'page://self/admin/page/page', method: 'put')]
     public function onGet(string|null $pageId = null): static
     {
         if ($pageId === null || $pageId === '') {

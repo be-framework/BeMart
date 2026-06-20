@@ -83,7 +83,8 @@
 {% endblock %}
 
 {% block main %}
-    <form id="content_page_form" method="post"
+    <form method="post" class="{% if pageId is defined and pageId %}doUpdatePage{% else %}doCreatePage{% endif %}"
+          id="content_page_form"
           action="{% if pageId is defined and pageId %}/admin/page/page?pageId={{ pageId }}&_method=put{% else %}/admin/page/page-list{% endif %}">
         <input type="hidden" id="main_edit__token" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
 

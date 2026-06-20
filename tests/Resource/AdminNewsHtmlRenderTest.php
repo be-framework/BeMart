@@ -135,7 +135,7 @@ final class AdminNewsHtmlRenderTest extends TestCase
             '<header class="c-headerBar">',
             '<div class="c-mainNavArea">',
             '<div class="c-contentsArea">',
-            'class="form-horizontal"',
+            'class="form-horizontal doUpdateNews"',
             'class="card rounded border-0 mb-4"',
             'class="ec-cardCollapse collapse show"',
             'class="c-conversionArea"',

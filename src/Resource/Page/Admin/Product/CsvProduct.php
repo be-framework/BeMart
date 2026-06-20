@@ -27,6 +27,7 @@ class CsvProduct extends AbstractCsvUpload
     #[Alps('goExportProduct')]
     #[JsonSchema(schema: 'get-admin-product-csv-product.json')]
     #[Link(rel: 'goProductList', href: 'page://self/admin/product-list')]
+    #[Link(rel: 'doImportProductCsv', href: 'page://self/admin/product-csv', method: 'post')]
     public function onGet(): static
     {
         parent::onGet();

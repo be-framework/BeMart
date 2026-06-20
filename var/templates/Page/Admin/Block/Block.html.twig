@@ -81,7 +81,8 @@
 {% endblock %}
 
 {% block main %}
-    <form name="content_block_form" id="content_block_form" method="post"
+    <form name="content_block_form" method="post" class="{% if blockId is defined and blockId %}doUpdateBlock{% else %}doCreateBlock{% endif %}"
+          id="content_block_form"
           action="{% if blockId is defined and blockId %}/admin/block/block?blockId={{ blockId }}&_method=put{% else %}/admin/block/block-list{% endif %}">
         <input type="hidden" id="block__token" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         <div class="c-contentsArea__cols">
