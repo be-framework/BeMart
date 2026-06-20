@@ -78,6 +78,7 @@ class OrderStatus extends ResourceObject
      */
     #[Alps('doUpdateOrderStatus')]
     #[JsonSchema(schema: 'get-admin-order-status.json')]
+    #[Link(rel: 'doUpdateOrderStatusList', href: 'page://self/admin/order-status', method: 'put')]
     public function onGet(): static
     {
         if ($this->adminSession->adminId === null) {

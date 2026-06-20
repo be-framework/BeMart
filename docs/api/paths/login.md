@@ -70,6 +70,7 @@ _No parameters required_
 |----------|-----|
 | doLogin | [<code>page://self/login</code>](/login.md) |
 | goCustomerRegistration | [<code>page://self/entry</code>](/entry.md) |
+| goForgotPassword | [<code>page://self/forgot-password</code>](/forgot-password.md) |
 | doRequestPasswordReset | [<code>page://self/forgot-password</code>](/forgot-password.md) |
 ## POST
 Phase B Slice 9: every form field is user-controlled input.

@@ -29,7 +29,7 @@ Phase B Slice 9: the domain parameter arrives from the HTTP request body.
 
 `$preOrderId` is a 40-hex-char id that PreOrderId Semantic
 format-validates. The CSRF boundary token is enforced declaratively by
-the CsrfProtected attribute.
+the CsrfToken attribute.
 
 **ALPS**: `doCheckout`
 

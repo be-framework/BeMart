@@ -46,6 +46,8 @@ ALPS `goPage` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | goPageList | [<code>page://self/admin/page/page-list</code>](/admin/page/page-list.md) |
+| doCreatePage | [<code>page://self/admin/page/page-list</code>](/admin/page/page-list.md) |
+| doUpdatePage | [<code>page://self/admin/page/page</code>](/admin/page/page.md) |
 ## PUT
 ALPS `doUpdatePage` に対応する PUT 操作。
 

@@ -55,3 +55,4 @@ _No parameters required_
 | goHelpAgreement | [<code>page://self/help/agreement</code>](/help/agreement.md) |
 | goHelpPrivacy | [<code>page://self/help/privacy</code>](/help/privacy.md) |
 | goHelpTradeLaw | [<code>page://self/help/trade-law</code>](/help/trade-law.md) |
+| doLogout | [<code>page://self/logout</code>](/logout.md) |

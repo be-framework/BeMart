@@ -471,7 +471,7 @@ page scaffolding.</div><div class="method-alps"><a href="../alps.json.html#doReq
 form scaffolding.</div><div class="method-desc">Pure form-info endpoint: no Be Framework, no domain logic.
 Anonymous-accessible (returns 200 regardless of session state).
 `csrfToken` stays `null` — the EventListener mirrors the Symfony
-token into the session for the subsequent POST (same as Login).</div><div class="method-alps"><a href="../alps.json.html#doRequestPasswordReset" class="alps-link">doRequestPasswordReset</a></div></td>
+token into the session for the subsequent POST (same as Login).</div><div class="method-alps"><a href="../alps.json.html#goForgotPassword" class="alps-link">goForgotPassword</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -3347,7 +3347,7 @@ implementations).</div><div class="method-alps"><a href="../alps.json.html#doAdd
   <td rowspan="2" class="path-cell" id="path-entry/activate">/entry/activate</td>
   <td class="method-cell"><span class="ti safe"></span>GET<div class="method-title">EC-CUBE doActivateCustomer landing — the email-verification-complete
 screen. Pure renderer: the body surfaces only the screen shape + the
-outbound `goTop` transition (ALPS `#CustomerActivationComplete`).</div><div class="method-alps"><a href="../alps.json.html#goTop" class="alps-link">goTop</a></div></td>
+outbound `goTop` transition (ALPS `#CustomerActivationComplete`).</div><div class="method-alps"><a href="../alps.json.html#goEntryActivate" class="alps-link">goEntryActivate</a></div></td>
   <td></td>
   <td></td>
   <td></td>
@@ -4080,7 +4080,7 @@ POST.</div><div class="method-alps"><a href="../alps.json.html#goMypageWithdraw"
   <td rowspan="1" class="path-cell" id="path-shopping/checkout">/shopping/checkout</td>
   <td rowspan="1" class="method-cell"><span class="ti unsafe"></span>POST<div class="method-title">Phase B Slice 9: the domain parameter arrives from the HTTP request body.</div><div class="method-desc">`$preOrderId` is a 40-hex-char id that PreOrderId Semantic
 format-validates. The CSRF boundary token is enforced declaratively by
-the CsrfProtected attribute.</div><div class="method-alps"><a href="../alps.json.html#doCheckout" class="alps-link">doCheckout</a></div></td>
+the CsrfToken attribute.</div><div class="method-alps"><a href="../alps.json.html#doCheckout" class="alps-link">doCheckout</a></div></td>
   <td><a href="../alps.json.html#preOrderId" class="param alps-param" title="仮注文ID">preOrderId</a><span class="req">*</span></td>
   <td><span class="badge type-string">string</span></td>
   <td class="param-desc">仮注文ID（入力） - 購入フローの一時セッショントークン（SHA1ハッシュ）。カートと受注を紐づける。予約注文（pre-order）IDではない。チェックアウト開始時に生成、注文確定またはカート破棄で消去 Fake観察文字長 40〜40; 観察値 &#039;deadbeefcafe1234567890abcdef01234567890a&#039;, &#039;deadbeefcafe1234567890abcdef01234567890b&#039;, &#039;aaaa00000000000000000000000000000000aaaa&#039;, &#039;past00000000000000000000000000000000past&#039;, &#039;deadbeefcafe1234567890abcdef01234567890c&#039;, &#039;bbbb00000000000000000000000000000000bbbb&#039;, &#039;cccc00000000000000000000000000000000cccc&#039;, &#039;aceface0000000000000000000000000000a11ce&#039;。</td>
@@ -7484,6 +7484,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doLogout</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/logout</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -7559,6 +7569,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/entry</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goForgotPassword</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/forgot-password</span>
     </div>
   </td>
 </tr>
@@ -8415,6 +8435,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/shopping/confirm</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goShoppingShipping</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping/shipping</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goShoppingShippingEdit</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/shopping/shipping-edit</span>
     </div>
   </td>
 </tr>
@@ -9284,6 +9324,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td><div class="extra-info">
 
     </div></td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doChangePassword</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/change-password</span>
+    </div>
+  </td>
 </tr>
 <tr class="link-row">
   <td class="prop-name"><span class="ti safe"></span>goAdminHome</td>
@@ -10180,6 +10230,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   </td>
 </tr>
 <tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goOrderStatusList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order-status</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti safe"></span>goChangePassword</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/change-password</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doAdminLogout</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
@@ -10798,6 +10868,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateMasterData</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/master-data-edit</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -11041,6 +11121,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/member-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doCreateMember</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/member</span>
     </div>
   </td>
 </tr>
@@ -11650,6 +11740,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doSendShippingNotifyMail</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/shipping-notify-mail</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -11867,6 +11967,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doBulkDeleteOrder</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order/bulk-delete</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -11903,6 +12013,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
       <span class="badge constraint">maxLength: 160</span>
       <span class="badge constraint">pattern: ^[A-Za-z0-9_.:-]*$</span>
     </div></td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateOrderStatusList</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/order-status</span>
+    </div>
+  </td>
 </tr>
 
 </tbody>
@@ -13904,6 +14024,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   </td>
 </tr>
 <tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateCartItemQuantity</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/cart/item</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
   <td class="prop-name"><span class="ti unsafe"></span>doRemoveCartItem</td>
   <td><span class="badge link">link</span></td>
   <td class="param-desc"></td>
@@ -14287,6 +14417,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doActivateCustomer</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/entry/activate</span>
     </div>
   </td>
 </tr>
@@ -18015,6 +18155,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doCreateBlock</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/block/block-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateBlock</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/block/block</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -18276,7 +18436,7 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td class="param-desc">カテゴリ名 - カテゴリの表示名 Fake観察文字長 4〜6; 観察値 &#039;Food&#039;, &#039;Drinks&#039;。</td>
   <td><div class="extra-info">
       <span class="badge constraint">minLength: 0</span>
-      <span class="badge constraint">maxLength: 32</span>
+      <span class="badge constraint">maxLength: 255</span>
       <span class="badge example">example: Food</span>
     </div></td>
 </tr>
@@ -20363,6 +20523,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doCreateNews</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/news/news-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdateNews</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/news/news</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -22078,6 +22258,26 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
     </div>
   </td>
 </tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doCreatePage</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/page/page-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doUpdatePage</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/page/page</span>
+    </div>
+  </td>
+</tr>
 
 </tbody>
 </table>
@@ -22987,6 +23187,16 @@ marks it `unsafe` → POST.</div><div class="method-alps"><a href="../alps.json.
   <td>
     <div class="extra-info">
       <span class="badge href">href: page://self/admin/product-list</span>
+    </div>
+  </td>
+</tr>
+<tr class="link-row">
+  <td class="prop-name"><span class="ti unsafe"></span>doImportProductCsv</td>
+  <td><span class="badge link">link</span></td>
+  <td class="param-desc"></td>
+  <td>
+    <div class="extra-info">
+      <span class="badge href">href: page://self/admin/product-csv</span>
     </div>
   </td>
 </tr>

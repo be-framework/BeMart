@@ -123,7 +123,7 @@
                         <div class="card-body">
                             <p class="mb-2">配送先編集、出荷通知メール、PDF出力、CSV出力はEC-CUBE導線として残し、非画面アクションは安全な未対応説明で止めます。</p>
                             <div class="btn-group" role="group">
-                                <a class="btn btn-ec-regular" href="/admin/order/shipping-notify-mail?orderNo={{ orderNo }}">出荷通知メール</a>
+                                <a class="btn btn-ec-regular doSendShippingNotifyMail" href="/admin/order/shipping-notify-mail?orderNo={{ orderNo }}">出荷通知メール</a>
                                 <a class="btn btn-ec-regular" href="/admin/order/export-order-pdf?orderNos={{ orderNo }}">PDF出力</a>
                                 <a class="btn btn-ec-regular" href="/admin/order/export-order">受注CSV</a>
                             </div>

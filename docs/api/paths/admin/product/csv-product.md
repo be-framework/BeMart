@@ -40,3 +40,4 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | goProductList | [<code>page://self/admin/product-list</code>](/admin/product-list.md) |
+| doImportProductCsv | [<code>page://self/admin/product-csv</code>](/admin/product-csv.md) |

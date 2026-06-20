@@ -22,7 +22,7 @@
         </a>
     </div>
     <div class="ec-headerNav__item">
-        <form method="post" action="/logout" style="margin:0;">
+        <form method="post" action="/logout" style="margin:0;" class="doLogout">
             <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
             <button type="submit" style="background:none;border:none;cursor:pointer;padding:0;color:inherit;font:inherit;">
                 <i class="ec-headerNav__itemIcon fas fa-sign-out-alt fa-fw"></i>

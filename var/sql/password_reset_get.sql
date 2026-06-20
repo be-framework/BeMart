@@ -1,5 +1,5 @@
 SELECT
-  id,
+  CAST(id AS CHAR) AS customer_id,
   reset_key,
   COALESCE(
     reset_expire,

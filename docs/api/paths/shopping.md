@@ -75,4 +75,6 @@ ALPS `goCheckoutEntry` / `goShopping` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | doConfirmOrder | [<code>page://self/shopping/confirm</code>](/shopping/confirm.md) |
+| goShoppingShipping | [<code>page://self/shopping/shipping</code>](/shopping/shipping.md) |
+| goShoppingShippingEdit | [<code>page://self/shopping/shipping-edit</code>](/shopping/shipping-edit.md) |
 | goCart | [<code>page://self/cart</code>](/cart.md) |

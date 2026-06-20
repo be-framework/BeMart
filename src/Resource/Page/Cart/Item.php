@@ -59,6 +59,7 @@ class Item extends ResourceObject
     #[Alps('doAddCartItem')]
     #[JsonSchema(schema: 'post-cart-item.json', params: 'post-cart-item.param.json')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
+    #[Link(rel: 'doUpdateCartItemQuantity', href: 'page://self/cart/item', method: 'put')]
     #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'delete')]
     #[Link(rel: 'goCheckoutEntry', href: 'page://self/shopping')]
     #[CsrfToken]

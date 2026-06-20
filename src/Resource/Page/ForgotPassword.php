@@ -55,7 +55,7 @@ class ForgotPassword extends ResourceObject
      * `csrfToken` stays `null` — the EventListener mirrors the Symfony
      * token into the session for the subsequent POST (same as Login).
      */
-    #[Alps('doRequestPasswordReset')]
+    #[Alps('goForgotPassword')]
     #[JsonSchema(schema: 'get-forgot-password.json')]
     #[Link(rel: 'doRequestPasswordReset', href: 'page://self/forgot-password', method: 'post')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]

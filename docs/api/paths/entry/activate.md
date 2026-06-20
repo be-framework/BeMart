@@ -37,7 +37,7 @@ EC-CUBE doActivateCustomer landing — the email-verification-complete
 screen. Pure renderer: the body surfaces only the screen shape + the
 outbound `goTop` transition (ALPS `#CustomerActivationComplete`).
 
-**ALPS**: `goTop`
+**ALPS**: `goEntryActivate`
 
 
 
@@ -61,6 +61,7 @@ _No parameters required_
 | Relation | URL |
 |----------|-----|
 | goTop | [<code>page://self/</code>](/.md) |
+| doActivateCustomer | [<code>page://self/entry/activate</code>](/entry/activate.md) |
 ## POST
 ALPS `doActivateCustomer` に対応する POST 操作。
 

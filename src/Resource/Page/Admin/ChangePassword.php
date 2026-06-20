@@ -65,6 +65,7 @@ class ChangePassword extends ResourceObject
      */
     #[Alps('doChangePassword')]
     #[JsonSchema(schema: 'get-admin-change-password.json')]
+    #[Link(rel: 'doChangePassword', href: 'page://self/admin/change-password', method: 'post')]
     #[Link(rel: 'goAdminHome', href: 'page://self/admin/index')]
     public function onGet(): static
     {

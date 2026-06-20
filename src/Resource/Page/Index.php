@@ -49,6 +49,7 @@ class Index extends ResourceObject
     #[Link(rel: 'goHelpAgreement', href: 'page://self/help/agreement')]
     #[Link(rel: 'goHelpPrivacy', href: 'page://self/help/privacy')]
     #[Link(rel: 'goHelpTradeLaw', href: 'page://self/help/trade-law')]
+    #[Link(rel: 'doLogout', href: 'page://self/logout', method: 'post')]
     public function onGet(): static
     {
         $this->code = Code::OK;

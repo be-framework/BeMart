@@ -87,6 +87,7 @@ class Login extends ResourceObject
     #[JsonSchema(schema: 'get-login.json')]
     #[Link(rel: 'doLogin', href: 'page://self/login', method: 'post')]
     #[Link(rel: 'goCustomerRegistration', href: 'page://self/entry')]
+    #[Link(rel: 'goForgotPassword', href: 'page://self/forgot-password')]
     #[Link(rel: 'doRequestPasswordReset', href: 'page://self/forgot-password', method: 'post')]
     public function onGet(): static
     {

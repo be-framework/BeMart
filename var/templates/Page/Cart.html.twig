@@ -116,7 +116,7 @@
                             {% for item in cart.items %}
                                 <ul class="ec-cartRow">
                                     <li class="ec-cartRow__delColumn">
-                                        <form method="post" action="/cart/item" class="ec-cartRow__operationForm">
+                                        <form method="post" action="/cart/item" class="ec-cartRow__operationForm doRemoveCartItem">
                                             <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('cart')) }}">
                                             <input type="hidden" name="productCode" value="{{ item.productCode }}">
                                             <input type="hidden" name="operation" value="remove">
@@ -164,7 +164,7 @@
                                                     <span class="ec-cartRow__amountDownButton__icon"><img src="{{ asset('assets/icon/minus.svg') }}" alt="reduce"></span>
                                                 </div>
                                             {% endif %}
-                                            <form method="post" action="/cart/item" class="ec-cartRow__amountUpForm">
+                                            <form method="post" action="/cart/item" class="ec-cartRow__amountUpForm doUpdateCartItemQuantity">
                                                 <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('cart')) }}">
                                                 <input type="hidden" name="productCode" value="{{ item.productCode }}">
                                                 <input type="hidden" name="operation" value="up">

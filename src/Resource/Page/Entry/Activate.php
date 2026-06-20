@@ -60,14 +60,15 @@ class Activate extends ResourceObject
      * screen. Pure renderer: the body surfaces only the screen shape + the
      * outbound `goTop` transition (ALPS `#CustomerActivationComplete`).
      */
-    #[Alps('goTop')]
+    #[Alps('goEntryActivate')]
     #[JsonSchema(schema: 'get-entry-activate.json')]
     #[Link(rel: 'goTop', href: 'page://self/')]
+    #[Link(rel: 'doActivateCustomer', href: 'page://self/entry/activate', method: 'post')]
     public function onGet(): static
     {
         $this->code = Code::OK;
         $this->body = [
-            'transitionId' => 'goCustomerActivationComplete',
+            'transitionId' => 'goEntryActivate',
             'fields' => [],
             'submitTo' => null,
             'staticContent' => [

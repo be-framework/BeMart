@@ -72,6 +72,8 @@ class Shopping extends ResourceObject
     #[Alps('goShopping')]
     #[JsonSchema(schema: 'get-shopping.json', params: 'get-shopping.param.json')]
     #[Link(rel: 'doConfirmOrder', href: 'page://self/shopping/confirm', method: 'post')]
+    #[Link(rel: 'goShoppingShipping', href: 'page://self/shopping/shipping')]
+    #[Link(rel: 'goShoppingShippingEdit', href: 'page://self/shopping/shipping-edit')]
     #[Link(rel: 'goCart', href: 'page://self/cart')]
     public function onGet(string $sessionPrefix = 'session-prefix-1'): static
     {

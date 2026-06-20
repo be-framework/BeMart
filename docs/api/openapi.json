@@ -538,7 +538,7 @@
         },
         "/forgot-password": {
             "get": {
-                "operationId": "doRequestPasswordReset",
+                "operationId": "goForgotPassword",
                 "summary": "EC-CUBE goRequestPasswordReset \u2014 show the password-reset-request\nform scaffolding.",
                 "description": "Pure form-info endpoint: no Be Framework, no domain logic.\nAnonymous-accessible (returns 200 regardless of session state).\n`csrfToken` stays `null` \u2014 the EventListener mirrors the Symfony\ntoken into the session for the subsequent POST (same as Login).",
                 "responses": {
@@ -5131,7 +5131,7 @@
         },
         "/entry/activate": {
             "get": {
-                "operationId": "goTop",
+                "operationId": "goEntryActivate",
                 "summary": "EC-CUBE doActivateCustomer landing \u2014 the email-verification-complete\nscreen. Pure renderer: the body surfaces only the screen shape + the\noutbound `goTop` transition (ALPS `#CustomerActivationComplete`).",
                 "responses": {
                     "200": {
@@ -6237,7 +6237,7 @@
             "post": {
                 "operationId": "doCheckout",
                 "summary": "Phase B Slice 9: the domain parameter arrives from the HTTP request body.",
-                "description": "`$preOrderId` is a 40-hex-char id that PreOrderId Semantic\nformat-validates. The CSRF boundary token is enforced declaratively by\nthe CsrfProtected attribute.",
+                "description": "`$preOrderId` is a 40-hex-char id that PreOrderId Semantic\nformat-validates. The CSRF boundary token is enforced declaratively by\nthe CsrfToken attribute.",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -57811,7 +57811,7 @@
                             "null"
                         ],
                         "minLength": 0,
-                        "maxLength": 32,
+                        "maxLength": 255,
                         "title": "\u30ab\u30c6\u30b4\u30ea\u540d",
                         "description": "\u30ab\u30c6\u30b4\u30ea\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 4\u301c6; \u89b3\u5bdf\u5024 'Food', 'Drinks'\u3002",
                         "example": "Food"
@@ -58636,7 +58636,7 @@
                                         "null"
                                     ],
                                     "minLength": 0,
-                                    "maxLength": 32,
+                                    "maxLength": 255,
                                     "title": "\u30ab\u30c6\u30b4\u30ea\u540d",
                                     "description": "\u30ab\u30c6\u30b4\u30ea\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 4\u301c6; \u89b3\u5bdf\u5024 'Food', 'Drinks'\u3002",
                                     "example": "Food"
@@ -59767,7 +59767,7 @@
                                         "null"
                                     ],
                                     "minLength": 0,
-                                    "maxLength": 32,
+                                    "maxLength": 255,
                                     "title": "\u30ab\u30c6\u30b4\u30ea\u540d",
                                     "description": "\u30ab\u30c6\u30b4\u30ea\u306e\u8868\u793a\u540d Fake\u89b3\u5bdf\u6587\u5b57\u9577 4\u301c6; \u89b3\u5bdf\u5024 'Food', 'Drinks'\u3002",
                                     "example": "Food"

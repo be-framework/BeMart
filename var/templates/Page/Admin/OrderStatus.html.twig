@@ -11,7 +11,7 @@
     <div class="c-contentsArea__cols">
         <div class="c-contentsArea__primaryCol">
             <div class="c-primaryCol">
-                <form id="form" method="post" action="/admin/order-status?_method=put">
+                <form id="form" class="doUpdateOrderStatusList" method="post" action="/admin/order-status?_method=put">
                     <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                     <div class="card rounded border-0 mb-4">
                         <div class="card-header">

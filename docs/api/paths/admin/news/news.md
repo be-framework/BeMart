@@ -51,6 +51,8 @@ ALPS `goNews` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | goNewsList | [<code>page://self/admin/news/news-list</code>](/admin/news/news-list.md) |
+| doCreateNews | [<code>page://self/admin/news/news-list</code>](/admin/news/news-list.md) |
+| doUpdateNews | [<code>page://self/admin/news/news</code>](/admin/news/news.md) |
 ## PUT
 ALPS `doUpdateNews` に対応する PUT 操作。
 

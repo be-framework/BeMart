@@ -60,3 +60,4 @@ discipline as Wave 5 / Wave 6 admin resources.
 |----------|-----|
 | goOrder | [<code>page://self/admin/order</code>](/admin/order.md) |
 | doCreateOrder | [<code>page://self/admin/order/create</code>](/admin/order/create.md) |
+| doBulkDeleteOrder | [<code>page://self/admin/order/bulk-delete</code>](/admin/order/bulk-delete.md) |

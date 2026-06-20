@@ -54,6 +54,8 @@ class Index extends ResourceObject
     #[JsonSchema(schema: 'get-admin-index.json')]
     #[Link(rel: 'goMemberList', href: 'page://self/admin/member-list')]
     #[Link(rel: 'goContentCache', href: 'page://self/admin/content/cache')]
+    #[Link(rel: 'goOrderStatusList', href: 'page://self/admin/order-status')]
+    #[Link(rel: 'goChangePassword', href: 'page://self/admin/change-password')]
     #[Link(rel: 'doAdminLogout', href: 'page://self/admin/logout', method: 'post')]
     #[Link(rel: 'goAdminLogout', href: 'page://self/admin/login', method: 'post')]
     public function onGet(): static

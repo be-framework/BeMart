@@ -277,7 +277,8 @@
           {"href": "#goHelpGuide"},
           {"href": "#goHelpAgreement"},
           {"href": "#goHelpPrivacy"},
-          {"href": "#goHelpTradeLaw"}
+          {"href": "#goHelpTradeLaw"},
+          {"href": "#doLogout"}
         ]
       },
 
@@ -730,7 +731,8 @@
           {"href": "#AdminOrderEditPage"},
           {"href": "#goOrder"},
           {"href": "#goOrderList"},
-          {"href": "#doCreateOrder"}
+          {"href": "#doCreateOrder"},
+          {"href": "#doBulkDeleteOrder"}
         ]
       },
       {"id": "AdminOrderEditPage", "title": "管理受注編集画面","tag": "order flow-manage-order actor-admin src-template src-router page page-admin page-detail page-edit route-ec-cube migration-target feature-admin-order flow-admin-order-fulfillment",
@@ -889,7 +891,14 @@
           {"href": "#email"},
           {"href": "#password"},
           {"href": "#doLogin"},
-          {"href": "#goCustomerRegistration"}
+          {"href": "#goCustomerRegistration"},
+          {"href": "#goForgotPassword"}
+        ]
+      },
+      {"id": "ForgotPassword", "title": "パスワード再発行依頼フォーム","tag": "account src-template",
+        "descriptor": [
+          {"href": "#email"},
+          {"href": "#doRequestPasswordReset"}
         ]
       },
       {"id": "PasswordReset", "title": "パスワードリセット","tag": "account src-template",
@@ -925,7 +934,17 @@
       {"id": "CustomerRegistrationComplete", "title": "会員登録完了","tag": "account src-router src-template flow-customer-registration",
         "doc": {"value": "会員登録完了画面。メール認証有効時は仮登録完了の案内を表示"},
         "descriptor": [
-          {"href": "#goTop"}
+          {"href": "#goTop"},
+          {"href": "#goEntryActivate"}
+        ]
+      },
+
+      {"id": "EntryActivate", "title": "メール認証(本登録)","tag": "account src-router src-template flow-customer-registration",
+        "doc": {"value": "メール認証リンク(/entry/activate?secretKey=...)の着地画面。secretKeyを提示し本会員へ昇格する確認操作を提供"},
+        "descriptor": [
+          {"href": "#secretKey"},
+          {"href": "#doActivateCustomer"},
+          {"href": "#goLogin"}
         ]
       },
 
@@ -1775,7 +1794,7 @@
       {"id": "AdminTop", "title": "管理画面トップ",
         "tag": "admin-system flow-admin-auth actor-admin src-template page page-admin page-dashboard feature-admin-auth flow-admin-system-operation",
         "doc": {"value": "管理画面のダッシュボード。doAdminLogin 成功後の遷移先。受注・会員・商品・各種マスタ管理への入口を提供する。"},
-        "descriptor": [{"href": "#goOrderList"}, {"href": "#goCustomerList"}, {"href": "#goProductList"}, {"href": "#goMemberList"}, {"href": "#goBaseInfo"}, {"href": "#goPaymentList"}, {"href": "#goDeliveryList"}, {"href": "#goTaxRuleList"}, {"href": "#goNewsList"}, {"href": "#goPageList"}, {"href": "#goLayoutList"}, {"href": "#goBlockList"}, {"href": "#goTagList"}, {"href": "#goClassNameList"}, {"href": "#goClassCategoryList"}, {"href": "#goMailTemplateList"}, {"href": "#goLoginHistoryList"}, {"href": "#goPluginList"}, {"href": "#goTemplateList"}, {"href": "#goTradeLawList"}, {"href": "#goContentCache"}, {"href": "#doAdminLogout"}]},
+        "descriptor": [{"href": "#goOrderList"}, {"href": "#goCustomerList"}, {"href": "#goProductList"}, {"href": "#goMemberList"}, {"href": "#goBaseInfo"}, {"href": "#goPaymentList"}, {"href": "#goDeliveryList"}, {"href": "#goTaxRuleList"}, {"href": "#goNewsList"}, {"href": "#goPageList"}, {"href": "#goLayoutList"}, {"href": "#goBlockList"}, {"href": "#goTagList"}, {"href": "#goClassNameList"}, {"href": "#goClassCategoryList"}, {"href": "#goMailTemplateList"}, {"href": "#goLoginHistoryList"}, {"href": "#goPluginList"}, {"href": "#goTemplateList"}, {"href": "#goTradeLawList"}, {"href": "#goContentCache"}, {"href": "#goOrderStatusList"}, {"href": "#goChangePassword"}, {"href": "#doAdminLogout"}]},
       {"id": "doRequestPasswordReset", "title": "パスワードリセットを依頼する", "type": "unsafe", "rt": "#PasswordReset",
         "tag": "account flow-account actor-customer src-router feature-account",
         "doc": {"value": "メールアドレスを受け取り、パスワード再発行用URLを含むメールを送信する。リセットキーには有効期限あり。"},
@@ -2124,7 +2143,8 @@
         "doc": {"value": "営業日カレンダーを表す画面状態。"},
         "descriptor": [{"href": "#goCalendar"}, {"href": "#doCreateCalendarHoliday"}, {"href": "#doUpdateCalendar"}, {"href": "#doDeleteCalendarHoliday"}]},
       {"id": "ChangePassword", "title": "パスワード変更", "tag": "src-template alps-route-gate flow-admin-system-operation",
-        "doc": {"value": "パスワード変更を表す画面状態。"}},
+        "doc": {"value": "パスワード変更を表す画面状態。"},
+        "descriptor": [{"href": "#doChangePassword"}]},
       {"id": "ContentCache", "title": "キャッシュ管理", "tag": "src-template alps-route-gate flow-admin-system-operation",
         "doc": {"value": "キャッシュ管理を表す画面状態。"},
         "descriptor": [{"href": "#doClearCache"}]},
@@ -2151,7 +2171,8 @@
         "doc": {"value": "受注配送先を表す画面状態。"},
         "descriptor": [{"href": "#doUpdateOrderShippingAddress"}, {"href": "#doUpdateTrackingNumber"}]},
       {"id": "OrderStatusList", "title": "対応状況一覧", "tag": "src-template alps-route-gate flow-admin-order-fulfillment",
-        "doc": {"value": "対応状況一覧を表す画面状態。"}},
+        "doc": {"value": "対応状況一覧を表す画面状態。"},
+        "descriptor": [{"href": "#doUpdateOrderStatusList"}]},
       {"id": "PasswordResetRequest", "title": "パスワード再発行依頼", "tag": "src-template alps-route-gate",
         "doc": {"value": "パスワード再発行依頼を表す画面状態。"}},
       {"id": "PasswordResetRequestComplete", "title": "パスワード再発行依頼完了", "tag": "src-template alps-route-gate",
@@ -2292,6 +2313,9 @@
       {"id": "goCustomerRegistrationComplete", "title": "会員登録完了を見る", "type": "safe", "rt": "#CustomerRegistrationComplete",
         "tag": "src-router alps-route-gate flow-customer-registration",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goEntryActivate", "title": "メール認証画面を見る", "type": "safe", "rt": "#EntryActivate",
+        "tag": "src-router alps-route-gate flow-customer-registration",
+        "doc": {"value": "メール認証リンク(/entry/activate?secretKey=...)の着地画面を表示する。"}},
       {"id": "goCustomerRegistrationConfirm", "title": "会員登録確認を見る", "type": "safe", "rt": "#CustomerRegistrationConfirm",
         "tag": "src-router alps-route-gate flow-customer-registration",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
@@ -2336,6 +2360,9 @@
       {"id": "goOrderStatusList", "title": "対応状況一覧を見る", "type": "safe", "rt": "#OrderStatusList",
         "tag": "src-router alps-route-gate flow-admin-order-fulfillment",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},
+      {"id": "goForgotPassword", "title": "パスワード再発行依頼フォームを見る", "type": "safe", "rt": "#ForgotPassword",
+        "tag": "account flow-account actor-customer src-router feature-account",
+        "doc": {"value": "メールアドレスを入力してパスワード再発行を依頼するフォームを表示する。"}},
       {"id": "goPasswordReset", "title": "パスワード再設定を見る", "type": "safe", "rt": "#PasswordReset",
         "tag": "src-router alps-route-gate",
         "doc": {"value": "ユーザーが見る状態または行う操作をALPS上で表す。"}},

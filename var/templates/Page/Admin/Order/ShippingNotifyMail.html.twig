@@ -13,7 +13,7 @@
 {% set sub_title = '受注管理' %}
 
 {% block main %}
-    <form role="form" method="post" action="/admin/order/shipping-notify-mail" id="shipping_notify_mail_form" name="form1" novalidate>
+    <form role="form" method="post" action="/admin/order/shipping-notify-mail" id="shipping_notify_mail_form" name="form1" class="doSendShippingNotifyMail" novalidate>
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_shipping_notify_mail')) }}">
         <input type="hidden" name="orderNo" value="{{ orderNo|default('') }}">
         <div class="c-contentsArea__cols">

@@ -207,14 +207,14 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goProductList), href(goCart), href(goContactForm), href(goCustomerRegistration), href(goLogin), href(goMypage), href(goHelpAbout), href(goHelpGuide), href(goHelpAgreement), href(goHelpPrivacy), href(goHelpTradeLaw) |
+| GET | - | href(goProductList), href(goCart), href(goContactForm), href(goCustomerRegistration), href(goLogin), href(goMypage), href(goHelpAbout), href(goHelpGuide), href(goHelpAgreement), href(goHelpPrivacy), href(goHelpTradeLaw), href(doLogout) |
 
 ### Page/Login
 `/login`
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(doLogin), href(goCustomerRegistration), href(doRequestPasswordReset) |
+| GET | - | href(doLogin), href(goCustomerRegistration), href(goForgotPassword), href(doRequestPasswordReset) |
 | POST | email, password, mode | href(goMypage) |
 
 ### Page/Logout
@@ -258,7 +258,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | sessionPrefix | href(doConfirmOrder), href(goCart) |
+| GET | sessionPrefix | href(doConfirmOrder), href(goShoppingShipping), href(goShoppingShippingEdit), href(goCart) |
 
 ### Page/UnsupportedRoute
 `/unsupported-route`
@@ -306,7 +306,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goAdminHome) |
+| GET | - | href(doChangePassword), href(goAdminHome) |
 | POST | currentPassword*, changePasswordFirst*, changePasswordSecond* | href(goAdminHome) |
 
 ### Page/Admin/CreateCustomer
@@ -371,7 +371,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goMemberList), href(goContentCache), href(doAdminLogout), href(goAdminLogout) |
+| GET | - | href(goMemberList), href(goContentCache), href(goOrderStatusList), href(goChangePassword), href(doAdminLogout), href(goAdminLogout) |
 
 ### Page/Admin/Log
 `/admin/log`
@@ -416,7 +416,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | masterType | href(doSelectMasterData) |
+| GET | masterType | href(doSelectMasterData), href(doUpdateMasterData) |
 | PUT | masterType | href(doUpdateMasterData) |
 
 ### Page/Admin/MasterDataEdit
@@ -431,7 +431,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | loginId | href(goMemberList), href(doUpdateMember), href(doDeleteMember) |
+| GET | loginId | href(goMemberList), href(doCreateMember), href(doUpdateMember), href(doDeleteMember) |
 | POST | loginId*, password*, name*, authority*, passwordConfirm, mode | href(goMember) |
 | PUT | loginId*, name, mode | href(goMember) |
 | DELETE | loginId*, mode | href(goMemberList) |
@@ -448,7 +448,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | orderNo* | href(goOrderList), href(doUpdateOrder), href(doUpdateOrderStatus), href(goOrderShippingAddress) |
+| GET | orderNo* | href(goOrderList), href(doUpdateOrder), href(doUpdateOrderStatus), href(goOrderShippingAddress), href(doSendShippingNotifyMail) |
 | PUT | orderNo*, discount, charge, usePoint | href(goOrder), href(doUpdateOrderStatus) |
 
 ### Page/Admin/OrderList
@@ -456,14 +456,14 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | limit, offset | href(goOrder), href(doCreateOrder) |
+| GET | limit, offset | href(goOrder), href(doCreateOrder), href(doBulkDeleteOrder) |
 
 ### Page/Admin/OrderStatus
 `/admin/order-status`
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | - |
+| GET | - | href(doUpdateOrderStatusList) |
 | PUT | orderStatuses, orderStatusRows | - |
 | POST | orderNo*, orderStatus* | href(goOrder), href(goOrderList), href(goOrderShippingAddress) |
 
@@ -615,7 +615,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| POST | productCode*, quantity, sessionPrefix, operation | href(goCart), href(doRemoveCartItem), href(goCheckoutEntry) |
+| POST | productCode*, quantity, sessionPrefix, operation | href(goCart), href(doUpdateCartItemQuantity), href(doRemoveCartItem), href(goCheckoutEntry) |
 | PUT | productCode*, quantity*, sessionPrefix | href(goCart) |
 | DELETE | productCode*, sessionPrefix | href(goCart) |
 
@@ -638,7 +638,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goTop) |
+| GET | - | href(goTop), href(doActivateCustomer) |
 | POST | secretKey* | href(goLogin) |
 
 ### Page/Entry/Complete
@@ -861,7 +861,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | blockId | href(goBlockList) |
+| GET | blockId | href(goBlockList), href(doCreateBlock), href(doUpdateBlock) |
 | PUT | blockId*, blockName, blockFileName | href(goBlockList) |
 | DELETE | blockId* | href(goBlockList), href(goLayoutList) |
 
@@ -1041,7 +1041,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | newsId | href(goNewsList) |
+| GET | newsId | href(goNewsList), href(doCreateNews), href(doUpdateNews) |
 | PUT | newsId*, newsTitle, newsDescription, newsUrl, publishDate, linkMethod | href(goNews) |
 | DELETE | newsId* | href(goNewsList), href(goPageList) |
 
@@ -1154,7 +1154,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | pageId | href(goPageList) |
+| GET | pageId | href(goPageList), href(doCreatePage), href(doUpdatePage) |
 | PUT | pageId*, pageName, pageUrl, pageFileName | href(goPage) |
 | DELETE | pageId* | href(goPageList), href(goBlockList) |
 
@@ -1211,7 +1211,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | - | href(goProductList) |
+| GET | - | href(goProductList), href(doImportProductCsv) |
 
 ### Page/Admin/Product/Edit
 `/admin/product/edit`
@@ -1516,7 +1516,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 | Delete-admin-template-template-list | delete-admin-template-template-list.json | message, transitionId, templateId |
 | Post-admin-template-template-list | post-admin-template-template-list.json | message, value |
 
-## SQL (160)
+## SQL (161)
 
 | File | Query |
 |------|-------|
@@ -1751,14 +1751,13 @@ FROM
   id, customer_status_id, sex_id, job_id,
   pref_i...` |
 | customer_search.sql | `SELECT
-  id,
-  email,
-  password,
-  name01,
-  name02,
-  kana01,
-  kana02,
-  c...` |
+  c.id,
+  c.email,
+  c.password,
+  c.name01,
+  c.name02,
+  c.kana01,
+ ...` |
 | customer_update.sql | `UPDATE
   dtb_customer
 SET
@@ -1771,6 +1770,12 @@ SET
   password = :passwordHash,
   update_date = NOW()
 W...` |
+| dashboard_counts.sql | `SELECT
+    (
+        SELECT
+            COUNT(*)
+        FROM
+            dtb...` |
 | delivery_next_id.sql | `SELECT
   IFNULL(
     MAX(id),
@@ -1873,12 +1878,10 @@ SET
 WHERE
   r...` |
 | password_reset_get.sql | `SELECT
-  id,
+  CAST(id AS CHAR) AS customer_id,
   reset_key,
   COALESCE(
-    reset_expire,
-    DATE_SUB(
-      N...` |
+    reset_...` |
 | password_reset_put.sql | `UPDATE
   dtb_customer
 SET
@@ -2091,9 +2094,12 @@ FROM
   category_name,
   CAST(parent_category_id A...` |
 | tcategory_list.sql | `SELECT
-  CAST(id AS CHAR) AS id,
-  category_name,
-  CAST(parent_category_id A...` |
+  c.id,
+  c.category_name,
+  c.parent_category_id,
+  c.sort_no
+FROM
+  ...` |
 | tcategory_put.sql | `INSERT INTO dtb_category (
   id, category_name, parent_category_id,
   sort_no...` |

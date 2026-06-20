@@ -51,6 +51,8 @@ The JSON contexts (`app`, `prod`, `test`) ignore `body['form']`.
 | Relation | URL |
 |----------|-----|
 | goBlockList | [<code>page://self/admin/block/block-list</code>](/admin/block/block-list.md) |
+| doCreateBlock | [<code>page://self/admin/block/block-list</code>](/admin/block/block-list.md) |
+| doUpdateBlock | [<code>page://self/admin/block/block</code>](/admin/block/block.md) |
 ## PUT
 ALPS `doUpdateBlock` に対応する PUT 操作。
 

@@ -45,6 +45,11 @@ class Cart extends ResourceObject
     #[Alps('goCart')]
     #[JsonSchema(schema: 'get-cart.json', params: 'get-cart.param.json')]
     #[Link(rel: 'doAddCartItem', href: 'page://self/cart/item', method: 'post')]
+    // The cart line forms POST to /cart/item with operation=up/remove (no _method
+    // override), so the page-level affordance method is post — onPost dispatches to
+    // onPut/onDelete. The REST put/delete links live on Cart/Item for API clients.
+    #[Link(rel: 'doUpdateCartItemQuantity', href: 'page://self/cart/item', method: 'post')]
+    #[Link(rel: 'doRemoveCartItem', href: 'page://self/cart/item', method: 'post')]
     #[Link(rel: 'goCheckoutEntry', href: 'page://self/shopping')]
     public function onGet(string $sessionPrefix = self::DEFAULT_SESSION_PREFIX): static
     {

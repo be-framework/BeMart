@@ -42,6 +42,7 @@ ALPS `goMasterData` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | doSelectMasterData | [<code>page://self/admin/master-data</code>](/admin/master-data.md) |
+| doUpdateMasterData | [<code>page://self/admin/master-data-edit</code>](/admin/master-data-edit.md) |
 ## PUT
 Selects which master to view (doSelectMasterData). ALPS marks it
 `idempotent` → PUT; returns the chosen master's rows.

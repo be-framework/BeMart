@@ -52,6 +52,7 @@ _No parameters required_
 
 | Relation | URL |
 |----------|-----|
+| doChangePassword | [<code>page://self/admin/change-password</code>](/admin/change-password.md) |
 | goAdminHome | [<code>page://self/admin/index</code>](/admin/index.md) |
 ## POST
 Applies the admin's own password change (doChangePassword).

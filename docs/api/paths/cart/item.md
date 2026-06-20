@@ -52,6 +52,7 @@ implementations).
 | Relation | URL |
 |----------|-----|
 | goCart | [<code>page://self/cart</code>](/cart.md) |
+| doUpdateCartItemQuantity | [<code>page://self/cart/item</code>](/cart/item.md) |
 | doRemoveCartItem | [<code>page://self/cart/item</code>](/cart/item.md) |
 | goCheckoutEntry | [<code>page://self/shopping</code>](/shopping.md) |
 ## PUT
