@@ -34,7 +34,7 @@
                 </form>
 
                 {% if rows is not empty %}
-                    <form id="form2" name="form2" method="post" action="/admin/master-data-edit?_method=put">
+                    <form class="doUpdateMasterData" id="form2" name="form2" method="post" action="/admin/master-data-edit?_method=put">
                         <input type="hidden" name="masterType" value="{{ selectedMaster }}">
                         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_master_data')) }}">
                         <div class="card rounded border-0 mb-4">

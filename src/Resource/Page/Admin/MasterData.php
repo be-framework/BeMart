@@ -48,6 +48,7 @@ class MasterData extends ResourceObject
     #[Alps('goMasterData')]
     #[JsonSchema(schema: 'get-admin-master-data.json', params: 'get-admin-master-data.param.json')]
     #[Link(rel: 'doSelectMasterData', href: 'page://self/admin/master-data', method: 'put')]
+    #[Link(rel: 'doUpdateMasterData', href: 'page://self/admin/master-data-edit', method: 'put')]
     public function onGet(string $masterType = 'tag'): static
     {
         if ($this->adminSession->adminId === null) {

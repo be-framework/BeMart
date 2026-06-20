@@ -30,6 +30,7 @@ use function escapeshellarg;
 use function explode;
 use function file_exists;
 use function file_put_contents;
+use function getenv;
 use function html_entity_decode;
 use function http_build_query;
 use function implode;
@@ -108,6 +109,13 @@ final class HttpResource implements ResourceInterface
 
     private function clearCompiledContextCache(string $index): void
     {
+        // Parallel workflow runs share one compiled-context dir; clearing it
+        // mid-run races. With a pre-warmed cache and no template changes, opt out
+        // so concurrent servers reuse it. Normal/CI runs (no env) clear as usual.
+        if (getenv('BEMART_HTTP_KEEP_CACHE') === '1') {
+            return;
+        }
+
         $context = match (true) {
             str_ends_with($index, '/prod-json-index.php') => 'prod-eccube-sql-hal-app',
             str_ends_with($index, '/index.php') => 'html-test-hal-app',
