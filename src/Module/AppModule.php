@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Module;
 use BEAR\Package\AbstractAppModule;
 use BEAR\Package\Module\AppMetaModule;
 use BEAR\Package\PackageModule;
+use BEAR\Resource\JsonSchemaRequestExceptionHandlerInterface;
 use BEAR\Resource\Module\JsonSchemaModule;
 use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use Be\Framework\Module\BeModule;
@@ -78,6 +79,7 @@ use MyVendor\BeMart\Compatibility\Eccube\EccubeTemplateCompatibility;
 use MyVendor\BeMart\Compatibility\Eccube\EccubeTwoFactorAuth;
 use MyVendor\BeMart\Compatibility\Eccube\OrderPdfCompatibilityService;
 use Ray\Csrf\CsrfModule;
+use MyVendor\BeMart\Provide\Error\JsonSchemaRequestExceptionHandler;
 use MyVendor\BeMart\Provide\Transfer\ApiDownloadContentTypePolicy;
 use MyVendor\BeMart\Provide\Transfer\DownloadContentTypePolicyInterface;
 use MyVendor\BeMart\Provide\Transfer\DownloadResponder;
@@ -162,6 +164,11 @@ final class AppModule extends AbstractAppModule
                 $this->appMeta->appDir . '/var/json_validate',
             ),
         );
+        // Surface request (form) validation failures as a field-named 400 rather
+        // than the default null handler's opaque re-throw of the validator's raw
+        // English message (BEAR.Resource #370 request-exception hook).
+        $this->bind(JsonSchemaRequestExceptionHandlerInterface::class)
+            ->to(JsonSchemaRequestExceptionHandler::class);
 
         // CSRF protection via the ray/csrf package. CsrfTokenInterceptor is
         // armed on every #[CsrfToken] method in all contexts and always

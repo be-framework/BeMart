@@ -7,6 +7,7 @@ namespace MyVendor\BeMart\Provide\Error;
 use BEAR\Resource\Code;
 use BEAR\Resource\Exception\BadRequestException;
 use BEAR\Resource\Exception\JsonSchemaException;
+use BEAR\Resource\Exception\JsonSchemaResponseException;
 use Be\Framework\Exception\SemanticVariableException;
 use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use Throwable;
@@ -101,8 +102,19 @@ final class ExceptionStatusMapper
     /** Mapped HTTP status for a throwable, or null when it is unexpected (→ 500). */
     public function status(Throwable $e): int|null
     {
+        if ($e instanceof ValidationException) {
+            return Code::BAD_REQUEST;
+        }
+
         if ($e instanceof SemanticVariableException) {
             return Code::BAD_REQUEST;
+        }
+
+        // A response-schema failure is the server emitting off-schema data —
+        // a 5xx bug, never a client 4xx (per the BEAR.Sunday validation manual).
+        // Checked before the JsonSchemaException parent branch below.
+        if ($e instanceof JsonSchemaResponseException) {
+            return Code::ERROR;
         }
 
         if ($e instanceof JsonSchemaException) {
@@ -136,6 +148,10 @@ final class ExceptionStatusMapper
     /** User-facing (ja) message for a throwable already mapped to $status. */
     public function message(Throwable $e, int $status): string
     {
+        if ($e instanceof ValidationException) {
+            return $e->getMessage();
+        }
+
         if ($e instanceof SemanticVariableException) {
             return $e->getErrors()->getMessages('ja')[0] ?? 'Invalid input.';
         }
@@ -160,6 +176,17 @@ final class ExceptionStatusMapper
         }
 
         return $this->statusText($status);
+    }
+
+    /**
+     * Structured per-field validation errors for a throwable, or `[]` when it
+     * carries none — so a handler can emit a `{ "errors": {...} }` body / list.
+     *
+     * @return array<string, list<string>> field path => messages
+     */
+    public function errors(Throwable $e): array
+    {
+        return $e instanceof ValidationException ? $e->errors : [];
     }
 
     /** Reason phrase for an HTTP status (e.g. 404 → "Not Found"). */

@@ -121,12 +121,16 @@ class Product extends ResourceObject
         string $productCode,
         string $productName,
         int $price02,
-        int|null $stock = null,
+        int|string|null $stock = null,
         int|null $productStatus = null,
         string|null $description = null,
         string|null $searchWord = null,
         string|null $note = null,
     ): static {
+        // HTML forms submit an empty stock field (unlimited) as ''; normalize to
+        // null so the int|null domain input binds. Numeric strings cast to int.
+        $stock = ($stock === '' || $stock === null) ? null : (int) $stock;
+
         $final = ($this->becoming)(new AdminCreateProductInput(
             productCode: $productCode,
             productName: $productName,
@@ -173,12 +177,16 @@ class Product extends ResourceObject
         string $productCode,
         string|null $productName = null,
         int|null $price02 = null,
-        int|null $stock = null,
+        int|string|null $stock = null,
         int|null $productStatus = null,
         string|null $description = null,
         string|null $searchWord = null,
         string|null $note = null,
     ): static {
+        // HTML forms submit an empty stock field (unlimited) as ''; normalize to
+        // null so the int|null domain input binds. Numeric strings cast to int.
+        $stock = ($stock === '' || $stock === null) ? null : (int) $stock;
+
         $final = ($this->becoming)(new AdminUpdateProductInput(
             productCode: $productCode,
             productName: $productName,

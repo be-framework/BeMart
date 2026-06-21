@@ -17,6 +17,7 @@ use function bin2hex;
 use function dirname;
 use function in_array;
 use function random_bytes;
+use function str_repeat;
 
 /**
  * HTML hypermedia walk of the admin product editor — driven entirely by the
@@ -134,5 +135,57 @@ final class FlowAdminProductPublishTest extends AbstractHtmlWorkflowTestCase
         ]);
 
         $this->assertSame(Code::SEE_OTHER, $updated->code, (string) ($updated->view ?? $updated->code));
+    }
+
+    /**
+     * Regression: a real browser submits the rendered edit form including an
+     * EMPTY stock field (unlimited stock renders blank). The transport schema +
+     * resource must accept '' and treat it as null — not 400. The earlier update
+     * test passed only because submit() sent a minimal 3-field set (no stock),
+     * masking the empty-string → int|null binding gap.
+     */
+    #[Depends('testFollowsEditAffordanceFromList')]
+    #[Alps('doUpdateProduct')]
+    public function testUpdateAcceptsEmptyStock(ResourceObject $editor): void
+    {
+        $updated = $this->submit($editor, 'doUpdateProduct', [
+            'productCode' => self::$productCode,
+            'productName' => self::$productName,
+            'price02' => '2980',
+            'stock' => '',
+            'productStatus' => '1',
+            'description' => '',
+            'searchWord' => '',
+            'note' => '',
+        ]);
+
+        $this->assertTrue(
+            in_array($updated->code, [Code::OK, Code::SEE_OTHER], true),
+            'empty stock (unlimited) must be accepted, not 400: ' . (string) ($updated->view ?? $updated->code),
+        );
+    }
+
+    /**
+     * Regression: invalid request input (productName over its 128 maxLength)
+     * must surface a *field-named* 400, not an opaque one. Since bear/resource
+     * 1.33.0 the request-exception handler reads the structured `$e->getErrors()`
+     * and raises a ValidationException; ExceptionStatusMapper names the field by
+     * its Japanese schema title on the error page. Locks the form-validation UX
+     * so it cannot regress to a bare 400 (the failure this whole alignment fixed).
+     */
+    #[Depends('testFollowsEditAffordanceFromList')]
+    #[Alps('doUpdateProduct')]
+    public function testRejectsInvalidInputWithFieldNamedError(ResourceObject $editor): void
+    {
+        $rejected = $this->submit($editor, 'doUpdateProduct', [
+            'productCode' => self::$productCode,
+            'productName' => str_repeat('あ', 200),
+            'price02' => '2980',
+            'stock' => '',
+            'productStatus' => '1',
+        ]);
+
+        $this->assertSame(Code::BAD_REQUEST, $rejected->code, (string) ($rejected->view ?? $rejected->code));
+        $this->assertStringContainsString('商品名（入力）', (string) ($rejected->view ?? ''));
     }
 }

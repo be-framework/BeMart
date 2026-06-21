@@ -40,12 +40,13 @@
     "stock": {
       "type": [
         "integer",
+        "string",
         "null"
       ],
       "title": "在庫数（入力）",
       "description": "物理在庫数。stockUnlimited=trueの場合は無視される。注文確定時に引き当てが行われる Fake観察数値 0〜100; 観察値 '0', '10', '20', '50', '5', '7', '100', '3'; null 9/73。",
       "example": 0,
-      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+      "$comment": "在庫数（入力）は数値の業務値だが、HTMLフォームの空欄は空文字列として届く（在庫無制限=未入力）。Resource/Semantic層の400応答を奪わないためtransport schemaでは文字列入力を許容する。 Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
     "productStatus": {
       "title": "商品ステータス（入力）",

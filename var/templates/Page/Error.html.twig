@@ -23,7 +23,9 @@
     .error { max-width: 32rem; margin: 0 auto; padding: 4rem 1.5rem; text-align: center; }
     .error__code { margin: 0; font-size: 4rem; font-weight: 700; line-height: 1; color: #d1d5db; }
     .error__status { margin: .5rem 0 1rem; font-size: 1.25rem; font-weight: 600; }
-    .error__message { margin: 0 0 2rem; color: #4b5563; }
+    .error__message { margin: 0 0 1rem; color: #4b5563; }
+    .error__fields { list-style: none; margin: 0 0 2rem; padding: 0; color: #b91c1c; font-size: .95rem; }
+    .error__fields li { margin: .25rem 0; }
     .error__home { display: inline-block; padding: .6rem 1.4rem; border-radius: .375rem;
       background: #2563eb; color: #fff; text-decoration: none; }
     .error__home:hover { background: #1d4ed8; }
@@ -34,6 +36,15 @@
     <p class="error__code">{{ code }}</p>
     <h1 class="error__status">{{ statusText }}</h1>
     <p class="error__message">{{ message }}</p>
+    {% if errors is defined and errors is not empty %}
+    <ul class="error__fields">
+      {% for field, messages in errors %}
+        {% for message in messages %}
+      <li>{{ message }}</li>
+        {% endfor %}
+      {% endfor %}
+    </ul>
+    {% endif %}
     <a class="error__home" href="/">トップへ戻る</a>
   </main>
 </body>

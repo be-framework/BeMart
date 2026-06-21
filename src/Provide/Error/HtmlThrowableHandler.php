@@ -60,6 +60,7 @@ final class HtmlThrowableHandler implements ThrowableHandlerInterface
             'code' => $status,
             'statusText' => $this->mapper->statusText($status),
             'message' => $this->mapper->message($e, $status),
+            'errors' => $this->mapper->errors($e),
         ]);
 
         return $this;
