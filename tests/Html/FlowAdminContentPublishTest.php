@@ -117,7 +117,8 @@ final class FlowAdminContentPublishTest extends AbstractHtmlWorkflowTestCase
             'publishDate' => '2027-06-01 00:00:00',
             'newsDescription' => 'Created by flow-admin-content-html ' . self::$suffix . '.',
             'newsUrl' => 'https://example.com/html-content-' . self::$suffix,
-            'linkMethod' => false,
+            // linkMethod omitted: the rendered form's hidden `linkMethod=0` (unchecked
+            // box) is round-tripped by submit(), exactly as a browser would post it.
         ]);
 
         $this->assertTrue(

@@ -85,7 +85,7 @@ final class FlowAdminCategoryMaintenanceTest extends AbstractHtmlWorkflowTestCas
     {
         $created = $this->submit($editor, 'doCreateCategory', [
             'categoryName' => self::$categoryName,
-            'sortNo' => 80,
+            'sortNo' => '80',
         ]);
 
         $this->assertTrue(

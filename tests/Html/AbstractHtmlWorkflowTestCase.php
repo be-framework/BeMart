@@ -8,14 +8,19 @@ use BEAR\Dev\Http\AbstractWorkflowTest;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 
+use function get_debug_type;
 use function html_entity_decode;
 use function in_array;
+use function is_bool;
+use function is_float;
+use function is_int;
 use function preg_match;
 use function preg_match_all;
 use function preg_quote;
 use function preg_split;
 use function sprintf;
 use function str_starts_with;
+use function strtolower;
 use function trim;
 
 use const ENT_HTML5;
@@ -72,6 +77,20 @@ abstract class AbstractHtmlWorkflowTestCase extends AbstractWorkflowTest
      */
     protected function submit(ResourceObject $response, string $rel, array $fields = []): ResourceObject
     {
+        // A browser posts strings (and files, and array-notation `name[]` → PHP
+        // array). Reject a scalar int/float/bool — a value the rendered form
+        // could never carry — so a test cannot get false confidence from one.
+        foreach ($fields as $name => $value) {
+            if (is_int($value) || is_float($value) || is_bool($value)) {
+                $this->fail(sprintf(
+                    'submit() field "%s" must be the string a browser would post '
+                    . '("1", or "" for an unchecked box), not a typed %s',
+                    $name,
+                    get_debug_type($value),
+                ));
+            }
+        }
+
         $view = (string) ($response->view ?? '');
         preg_match_all('/<form\b([^>]*)>(.*?)<\/form>/is', $view, $forms, PREG_SET_ORDER);
         foreach ($forms as $form) {
@@ -82,9 +101,13 @@ abstract class AbstractHtmlWorkflowTestCase extends AbstractWorkflowTest
             $action = $this->attribute($form[1], 'action');
             $this->assertNotSame('', $action, sprintf('form affordance "%s" has no action', $rel));
 
+            // Round-trip the rendered form the way a browser does: every named
+            // control incl empty optionals and the hidden CSRF token. Explicit
+            // $fields win; the rendered ones fill the rest.
+            $fields += $this->extractFormInputs($form[2]);
             $token = $this->hiddenField($form[2], 'csrfToken');
-            if ($token !== null) {
-                $fields += ['csrfToken' => $token];
+            if ($token !== null && ! isset($fields['csrfToken'])) {
+                $fields['csrfToken'] = $token;
             }
 
             return $this->resource->post($this->resourceUri($action), $fields);
@@ -172,6 +195,73 @@ abstract class AbstractHtmlWorkflowTestCase extends AbstractWorkflowTest
         }
 
         return html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5);
+    }
+
+    /**
+     * Every control a browser would submit from this form body: name => value,
+     * with empty optionals as '' — the round-trip a minimal injected field set
+     * masks. Checkbox/radio are included only when checked (a browser omits the
+     * rest); a select yields its selected option's value.
+     *
+     * @return array<string, string>
+     */
+    private function extractFormInputs(string $body): array
+    {
+        $fields = [];
+
+        preg_match_all('/<input\b[^>]*>/i', $body, $inputs);
+        foreach ($inputs[0] as $tag) {
+            $name = $this->attribute($tag, 'name');
+            if ($name === '') {
+                continue;
+            }
+
+            // A browser sends the clicked submit/button only, never every one;
+            // a file input needs a real upload, not a string round-trip.
+            $type = strtolower($this->attribute($tag, 'type'));
+            if (in_array($type, ['submit', 'button', 'image', 'reset', 'file'], true)) {
+                continue;
+            }
+
+            // Checkbox/radio are sent only when checked.
+            if (($type === 'checkbox' || $type === 'radio') && preg_match('/\bchecked\b/i', $tag) !== 1) {
+                continue;
+            }
+
+            $fields[$name] = $this->attribute($tag, 'value');
+        }
+
+        preg_match_all('/<textarea\b([^>]*)>(.*?)<\/textarea>/is', $body, $textareas, PREG_SET_ORDER);
+        foreach ($textareas as $textarea) {
+            $name = $this->attribute($textarea[1], 'name');
+            if ($name !== '') {
+                $fields[$name] = html_entity_decode($textarea[2], ENT_QUOTES | ENT_HTML5);
+            }
+        }
+
+        preg_match_all('/<select\b([^>]*)>(.*?)<\/select>/is', $body, $selects, PREG_SET_ORDER);
+        foreach ($selects as $select) {
+            $name = $this->attribute($select[1], 'name');
+            if ($name !== '') {
+                $fields[$name] = $this->selectedOption($select[2]);
+            }
+        }
+
+        return $fields;
+    }
+
+    /** The selected <option>'s value, else the first option's — the browser default. */
+    private function selectedOption(string $body): string
+    {
+        if (preg_match('/<option\b[^>]*\bselected\b[^>]*\bvalue="([^"]*)"/i', $body, $match) === 1) {
+            return html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5);
+        }
+
+        if (preg_match('/<option\b[^>]*\bvalue="([^"]*)"/i', $body, $match) === 1) {
+            return html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5);
+        }
+
+        return '';
     }
 
     private function resourceUri(string $action): string

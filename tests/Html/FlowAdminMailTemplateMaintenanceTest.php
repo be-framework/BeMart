@@ -155,7 +155,7 @@ final class FlowAdminMailTemplateMaintenanceTest extends AbstractHtmlWorkflowTes
 
         // The HTML form renders mail_subject (not mailSubject) as the input name.
         $updated = $this->submit($edit, 'doUpdateMailTemplate', [
-            'mailTemplateId' => $mailTemplateId,
+            'mailTemplateId' => (string) $mailTemplateId,
             'mail_subject' => self::$updatedSubject,
         ]);
 

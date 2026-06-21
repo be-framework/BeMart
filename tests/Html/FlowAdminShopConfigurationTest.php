@@ -114,7 +114,7 @@ final class FlowAdminShopConfigurationTest extends AbstractHtmlWorkflowTestCase
             'shopNameEng' => 'HTML Shop',
             'companyName' => 'HTML Company',
             'postalCode' => '1500001',
-            'pref' => 13,
+            'pref' => '13',
             'addr01' => '渋谷区',
             'addr02' => 'HTML1-1-' . self::$suffix,
             'phoneNumber' => '0312345678',

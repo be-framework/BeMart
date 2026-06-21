@@ -120,7 +120,7 @@ final class FlowAdminSystemOperationTest extends AbstractHtmlWorkflowTestCase
             'password' => self::MEMBER_PASSWORD,
             'passwordConfirm' => self::MEMBER_PASSWORD,
             'name' => self::$memberName,
-            'authority' => 1,
+            'authority' => '1',
             'mode' => 'member_form',
         ]);
 
@@ -266,7 +266,7 @@ final class FlowAdminSystemOperationTest extends AbstractHtmlWorkflowTestCase
         // template but submit() only auto-injects csrfToken, so we pass
         // `enabled` explicitly.
         $toggled = $this->submit($page, 'doToggleMaintenance', [
-            'enabled' => 0,
+            'enabled' => '0',
             'mode' => 'content_operation_form',
         ]);
 

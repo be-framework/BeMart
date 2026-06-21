@@ -163,9 +163,9 @@ final class FlowAdminOrderFulfillmentTest extends AbstractHtmlWorkflowTestCase
         $updated = $this->submit($editor, 'doUpdateOrder', [
             '_method' => 'put',
             'orderNo' => self::$orderNo,
-            'discount' => 0,
-            'charge' => 0,
-            'usePoint' => 0,
+            'discount' => '0',
+            'charge' => '0',
+            'usePoint' => '0',
         ]);
 
         $this->assertTrue(
@@ -220,7 +220,7 @@ final class FlowAdminOrderFulfillmentTest extends AbstractHtmlWorkflowTestCase
             'name01' => '配送',
             'name02' => '太郎',
             'postalCode' => '1500001',
-            'pref' => 13,
+            'pref' => '13',
             'addr01' => '渋谷区',
             'addr02' => 'ワークフロー1-1-1',
             'phoneNumber' => '0312345678',

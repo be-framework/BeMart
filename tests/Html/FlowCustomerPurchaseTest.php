@@ -261,6 +261,7 @@ final class FlowCustomerPurchaseTest extends AbstractHtmlWorkflowTestCase
             'kana01' => 'ヒカイイン',
             'kana02' => 'タロウ',
             'email' => 'flow-customer-purchase@example.com',
+            'email_confirm' => 'flow-customer-purchase@example.com',
             'phoneNumber' => '0312345678',
             'postalCode' => '1500001',
             'pref' => '13',

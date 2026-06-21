@@ -89,6 +89,10 @@ class CategoryList extends ResourceObject
         int $sortNo,
         string|null $parentId = null,
     ): static {
+        // A top-level category renders parentId='' (the "no parent" option); a
+        // browser posts that empty string, so treat it as null — not a lookup
+        // key that would 404 against a non-existent parent.
+        $parentId = $parentId === '' ? null : $parentId;
         $final = ($this->becoming)(new CreateCategoryInput(
             categoryName: $categoryName,
             sortNo: $sortNo,

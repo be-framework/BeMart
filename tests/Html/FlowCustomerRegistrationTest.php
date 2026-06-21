@@ -115,7 +115,9 @@ final class FlowCustomerRegistrationTest extends AbstractHtmlWorkflowTestCase
     {
         $registered = $this->submit($confirm, 'doRegisterCustomer', [
             'email' => self::$email,
+            'email_confirm' => self::$email,
             'password' => self::PASSWORD,
+            'password_confirm' => self::PASSWORD,
             'name01' => 'テスト',
             'name02' => '太郎',
             'kana01' => 'テスト',
@@ -125,6 +127,7 @@ final class FlowCustomerRegistrationTest extends AbstractHtmlWorkflowTestCase
             'pref' => '13',
             'addr01' => '千代田区',
             'addr02' => '千代田1-1',
+            'user_policy_check' => '1',
             'mode' => 'complete',
         ]);
 
