@@ -169,7 +169,7 @@ BeMart page resources generated from BEAR.Sunday source, ALPS vocabulary, and av
 
 | Method | Parameters | Links |
 |--------|------------|-------|
-| GET | sessionPrefix | href(doAddCartItem), href(goCheckoutEntry) |
+| GET | sessionPrefix | href(doAddCartItem), href(doUpdateCartItemQuantity), href(doRemoveCartItem), href(goCheckoutEntry) |
 
 ### Page/Contact
 `/contact`

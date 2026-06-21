@@ -41,4 +41,6 @@ ALPS `goCart` に対応する GET 操作。
 | Relation | URL |
 |----------|-----|
 | doAddCartItem | [<code>page://self/cart/item</code>](/cart/item.md) |
+| doUpdateCartItemQuantity | [<code>page://self/cart/item</code>](/cart/item.md) |
+| doRemoveCartItem | [<code>page://self/cart/item</code>](/cart/item.md) |
 | goCheckoutEntry | [<code>page://self/shopping</code>](/shopping.md) |
