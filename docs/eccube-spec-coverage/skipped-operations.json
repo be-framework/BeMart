@@ -81,6 +81,25 @@
         "alps.json descriptor doSelectCartForCheckout (type idempotent, src cart_buystep)",
         "grep SelectCartForCheckout over src/ be/src/ -> no resource"
       ]
+    },
+    "doAddMultipleShippingAddress": {
+      "category": "js-only",
+      "reason": "複数配送設定からの新規お届け先追加。お届け先追加(「お届け先を追加する」)ボタンは /shopping 上の data-path JS トリガで、no-JSハーネスは shipping-multiple-edit 画面へ到達できずフォームを送信できない。",
+      "evidence": [
+        "alps.json descriptor doAddMultipleShippingAddress (type unsafe, EC-CUBE ShippingMultipleController::shippingMultipleEdit)",
+        "var/templates/Page/Shopping/ShippingMultipleEdit.html.twig form class doAddMultipleShippingAddress (real submit) reached only via JS data-path",
+        "src/Resource/Page/Shopping/ShippingMultipleEdit.php onPost #[Alps('doAddMultipleShippingAddress')]"
+      ]
+    },
+    "doRegisterProductClass": {
+      "category": "not-implemented-backlog",
+      "reason": "商品規格(SKU)の単一行登録。Resource(onPost) + Be(RegisterProductClassInput→ProductClassRegistered) + Fake/SQL ストレージは実装済みで SSOT-projection orphan は解消したが、DB-backed workflow フロー(FlowAdminProductPublishTest)への組み込みは未了。EC-CUBE は 規格1×規格2 マトリクス全行を登録するのに対し本移植は描画される単一「新規規格」行のみ登録する Grade-C 厳密移植スコープで、マトリクスフロー被覆は backlog。",
+      "evidence": [
+        "alps.json descriptor doRegisterProductClass (type unsafe, EC-CUBE ProductClassController#index POST)",
+        "var/templates/Page/Admin/Product/ProductClass.html.twig form class doRegisterProductClass (real type=submit 登録)",
+        "src/Resource/Page/Admin/Product/ProductClass.php onPost #[Alps('doRegisterProductClass')] wired to Be domain",
+        "tests/Resource/AdminProductClassResourceTest.php testRegisterReturns201 (real write, distinct allocated id)"
+      ]
     }
   }
 }

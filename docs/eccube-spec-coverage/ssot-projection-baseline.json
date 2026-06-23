@@ -1,0 +1,86 @@
+{
+  "$comment": "Acknowledged baseline of current SSOT-projection orphans. Guarded by tests/Hypermedia/SsotProjectionAuditTest.php. The audit walks alps.json <-> src/Resource <-> var/templates in three directions; anything that does not project cleanly MUST appear here with a category, reason and evidence. The test demands an EXACT match: a NEW orphan fails the test (add it here or fix it); a baseline entry that now projects cleanly fails the test (it was fixed -> remove it here). The bug-category entries (naming-mismatch / missing-alps-descriptor / missing-write-handler) are the live punch-list; framework-internal / js-only are permanent-by-design. See docs/eccube-spec-coverage/skipped-operations.json for the sibling op-coverage registry (every do* op is covered by a flow test or skipped there).",
+  "categories": {
+    "framework-internal": "Router/fallback descriptor, not an EC-CUBE domain affordance; legitimately absent from alps.json (ActionRedirect / UnsupportedRoute / EmptyPage).",
+    "naming-mismatch": "BUG: the resource #[Alps('...')] id does not exist in alps.json, but an equivalent descriptor does under a different id. Fix the resource to use the existing alps id.",
+    "missing-alps-descriptor": "BUG: the affordance is referenced by a resource and/or template but has NO descriptor in alps.json (the SSOT). Add the descriptor to alps.json, or collapse the reference onto an existing one.",
+    "missing-write-handler": "BUG: a no-JS write <form> submits to a resource that has no matching write handler (onPost/onPut/onDelete). Submitting it reaches a non-existent method and leaks a raw weaved-class string (the CustomerDeliveryEdit class of bug). Add the handler, repoint the action, or convert the form to GET.",
+    "js-only": "The <form> is driven by JS/AJAX (buttons are type=button + data-action, or a bare <button> wired to data-action); the no-JS harness never submits it, so the onGet-only resource is not actually reached by a real no-JS POST."
+  },
+  "resourceAlps": {
+    "doActionRedirect": {
+      "category": "framework-internal",
+      "reason": "Storefront internal action-redirect dispatch page; not a domain affordance.",
+      "evidence": [
+        "src/Resource/Page/ActionRedirect.php"
+      ]
+    },
+    "doAdminActionRedirect": {
+      "category": "framework-internal",
+      "reason": "Admin internal action-redirect dispatch page; not a domain affordance.",
+      "evidence": [
+        "src/Resource/Page/Admin/ActionRedirect.php"
+      ]
+    },
+    "goActionRedirect": {
+      "category": "framework-internal",
+      "reason": "Storefront action-redirect landing; router internal.",
+      "evidence": [
+        "src/Resource/Page/ActionRedirect.php"
+      ]
+    },
+    "goAdminActionRedirect": {
+      "category": "framework-internal",
+      "reason": "Admin action-redirect landing; router internal.",
+      "evidence": [
+        "src/Resource/Page/Admin/ActionRedirect.php"
+      ]
+    },
+    "doUnsupportedRoute": {
+      "category": "framework-internal",
+      "reason": "Storefront fallback for unmigrated routes; router internal.",
+      "evidence": [
+        "src/Resource/Page/UnsupportedRoute.php"
+      ]
+    },
+    "doAdminUnsupportedRoute": {
+      "category": "framework-internal",
+      "reason": "Admin fallback for unmigrated routes; router internal.",
+      "evidence": [
+        "src/Resource/Page/Admin/UnsupportedRoute.php"
+      ]
+    },
+    "goUnsupportedRoute": {
+      "category": "framework-internal",
+      "reason": "Storefront unsupported-route landing; router internal.",
+      "evidence": [
+        "src/Resource/Page/UnsupportedRoute.php"
+      ]
+    },
+    "goAdminUnsupportedRoute": {
+      "category": "framework-internal",
+      "reason": "Admin unsupported-route landing; router internal.",
+      "evidence": [
+        "src/Resource/Page/Admin/UnsupportedRoute.php"
+      ]
+    },
+    "goAdminEmptyPage": {
+      "category": "framework-internal",
+      "reason": "Admin empty/placeholder page; router internal.",
+      "evidence": [
+        "src/Resource/Page/Admin/EmptyPage.php"
+      ]
+    }
+  },
+  "templateAffordance": {},
+  "writeFormWithoutHandler": {
+    "Page/Admin/ProductList": {
+      "category": "js-only",
+      "reason": "The form_bulk action=\"\" wraps JS bulk operations: the status buttons are type=button + data-action (doBulkUpdateProductStatus), and one bare <button> should also be type=button. No no-JS submit actually reaches ProductList in a real browser flow.",
+      "evidence": [
+        "var/templates/Page/Admin/ProductList.html.twig form id=form_bulk",
+        "buttons use data-action / class action-submit"
+      ]
+    }
+  }
+}
