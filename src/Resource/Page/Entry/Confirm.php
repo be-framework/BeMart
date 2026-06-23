@@ -12,6 +12,8 @@ use MyVendor\BeMart\Form\EntryConfirmForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function assert;
+
 /**
  * EC-CUBE goCustomerRegistrationConfirm — 新規会員登録(確認)
  * (Phase 3 — thin pure renderer).
@@ -55,18 +57,72 @@ class Confirm extends ResourceObject
     }
 
     /**
-     * ALPS `goCustomerRegistrationConfirm` に対応する GET 操作。
-     * @todo Enrichment backlog: thread the submitted registration payload
-     *     into the confirm step so the value cells re-show the entered
-     *     data. Requires a `mode=confirm` POST handler ahead of
-     *     doRegisterCustomer.
+     * EC-CUBE goCustomerRegistrationConfirm — render the registration-confirm
+     * (review) screen.
+     *
+     * The registration values are optional GET params: when the confirm step
+     * is reached from a `mode=confirm` POST (see
+     * {@see \MyVendor\BeMart\Resource\Page\Entry::onPost}), the entered
+     * registration payload is threaded in so the plain-text value cells re-show
+     * the submitted data AND the hidden EntryConfirmForm carriers repopulate,
+     * so the final 会員登録をする submit (`mode=complete`) re-posts the full
+     * payload to doRegisterCustomer. A bare GET (no values) renders the empty
+     * confirm scaffolding — JSON contexts ignore `body['form']`.
      */
     #[Alps('goCustomerRegistrationConfirm')]
     #[JsonSchema(schema: 'get-entry-confirm.json')]
     #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
     #[Link(rel: 'goTop', href: 'page://self/')]
-    public function onGet(): static
-    {
+    public function onGet(
+        string|null $name01 = null,
+        string|null $name02 = null,
+        string|null $kana01 = null,
+        string|null $kana02 = null,
+        string|null $companyName = null,
+        string|null $postalCode = null,
+        string|null $pref = null,
+        string|null $addr01 = null,
+        string|null $addr02 = null,
+        string|null $phoneNumber = null,
+        string|null $email = null,
+        string|null $email_confirm = null,
+        string|null $password = null,
+        string|null $password_confirm = null,
+        string|null $birth = null,
+        string|null $birth_year = null,
+        string|null $birth_month = null,
+        string|null $birth_day = null,
+        string|null $sex = null,
+        string|null $job = null,
+        string|null $user_policy_check = null,
+    ): static {
+        $values = [
+            'name01' => $name01 ?? '',
+            'name02' => $name02 ?? '',
+            'kana01' => $kana01 ?? '',
+            'kana02' => $kana02 ?? '',
+            'companyName' => $companyName ?? '',
+            'postalCode' => $postalCode ?? '',
+            'pref' => $pref ?? '',
+            'addr01' => $addr01 ?? '',
+            'addr02' => $addr02 ?? '',
+            'phoneNumber' => $phoneNumber ?? '',
+            'email' => $email ?? '',
+            'email_confirm' => $email_confirm ?? '',
+            'password' => $password ?? '',
+            'password_confirm' => $password_confirm ?? '',
+            'birth_year' => $birth_year ?? '',
+            'birth_month' => $birth_month ?? '',
+            'birth_day' => $birth_day ?? '',
+            'sex' => $sex ?? '',
+            'job' => $job ?? '',
+            'user_policy_check' => $user_policy_check ?? '',
+        ];
+
+        $form = $this->formFactory->newInstance(EntryConfirmForm::class);
+        assert($form instanceof EntryConfirmForm);
+        $form->fillValues($values);
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goCustomerRegistrationConfirm',
@@ -79,10 +135,25 @@ class Confirm extends ResourceObject
                 'page' => 'entry-confirm',
                 'title' => '新規会員登録(確認)',
             ],
-            // Phase 3: the confirm screen carries the registration payload
-            // as hidden inputs — an EntryConfirmForm (every field `hidden`).
-            // JSON contexts ignore `body['form']`.
-            'form' => $this->formFactory->newInstance(EntryConfirmForm::class),
+            // Plain-text value cells re-show the entered registration data.
+            'name01' => $values['name01'],
+            'name02' => $values['name02'],
+            'kana01' => $values['kana01'],
+            'kana02' => $values['kana02'],
+            'companyName' => $values['companyName'],
+            'postalCode' => $values['postalCode'],
+            'pref' => $values['pref'],
+            'addr01' => $values['addr01'],
+            'addr02' => $values['addr02'],
+            'phoneNumber' => $values['phoneNumber'],
+            'email' => $values['email'],
+            'birth' => $birth ?? '',
+            'sex' => $values['sex'],
+            'job' => $values['job'],
+            // The confirm screen carries the registration payload as hidden
+            // inputs — an EntryConfirmForm (every field `hidden`), repopulated
+            // with the entered values. JSON contexts ignore `body['form']`.
+            'form' => $form,
         ];
 
         return $this;

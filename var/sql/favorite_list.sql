@@ -1,8 +1,8 @@
 SELECT
-  fav.customer_id,
+  CAST(fav.customer_id AS CHAR) AS customer_id,
   pc.product_code,
   p.name AS product_name,
-  pc.price02 AS unit_price,
+  CAST(pc.price02 AS SIGNED) AS unit_price,
   (
     SELECT
       pi.file_name

@@ -44,19 +44,21 @@
     "ruleMin": {
       "type": [
         "integer",
+        "string",
         "null"
       ],
       "title": "下限金額（入力）",
-      "description": "/admin/payment/payment のフォーム文脈で使う下限金額。入力保持、初期値、再表示に必要な補助値。",
+      "description": "/admin/payment/payment のフォーム文脈で使う下限金額。入力保持、初期値、再表示に必要な補助値。ブラウザは未入力の任意金額を空文字列で送るため、transport schema では文字列を許容し Resource 層で null/int へ正規化する。",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
     "ruleMax": {
       "type": [
         "integer",
+        "string",
         "null"
       ],
       "title": "上限金額（入力）",
-      "description": "/admin/payment/payment のフォーム文脈で使う上限金額。入力保持、初期値、再表示に必要な補助値。",
+      "description": "/admin/payment/payment のフォーム文脈で使う上限金額。入力保持、初期値、再表示に必要な補助値。ブラウザは未入力の任意金額を空文字列で送るため、transport schema では文字列を許容し Resource 層で null/int へ正規化する。",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
     "visible": {

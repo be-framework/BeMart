@@ -117,6 +117,146 @@
       "maxLength": 96,
       "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
       "example": "doAddCartItem"
+    },
+    "name01": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "姓",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "name02": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "名",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "kana01": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "セイ",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "kana02": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "メイ",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "companyName": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "会社名",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "postalCode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "郵便番号",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "pref": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "都道府県",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "addr01": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "住所1",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "addr02": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "住所2",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "phoneNumber": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "電話番号",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "email": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "メールアドレス",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "birth": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "生年月日",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "sex": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "性別",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
+    },
+    "job": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "title": "職業",
+      "minLength": 0,
+      "maxLength": 255,
+      "description": "/entry/confirm の確認画面で再表示する登録値。確認ステップで入力値を平文セルに再掲する。"
     }
   },
   "additionalProperties": false,

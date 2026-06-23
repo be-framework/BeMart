@@ -58,6 +58,12 @@ final class HttpSqlAdminOrderStatusFormTest extends TestCase
         $this->assertStringContainsString('action="/admin/order-status?_method=put"', $page['body']);
         $this->assertStringContainsString('name="csrfToken"', $page['body']);
         $this->assertStringContainsString('value="' . self::CSRF_TOKEN . '"', $page['body']);
+        // The display_order_count toggle must render as a SCALAR checkbox a
+        // browser posts as `..._display_order_count=1`; the Aura array form
+        // `name="..._display_order_count[]"` is rejected by the `string|null`
+        // resource boundary with a 400 (regression guard).
+        $this->assertStringContainsString('name="order_status_1_display_order_count" value="1"', $page['body']);
+        $this->assertStringNotContainsString('name="order_status_1_display_order_count[]"', $page['body']);
 
         $response = $this->form('POST', '/admin/order-status?_method=put', [
             'order_status_1_customer_order_status_name' => '注文受付',
@@ -75,6 +81,8 @@ final class HttpSqlAdminOrderStatusFormTest extends TestCase
         $this->assertSame(200, $readback['status'], $readback['body']);
         $this->assertStringContainsString('id="order_status_row_1"', $readback['body']);
         $this->assertStringContainsString('value="新規受付"', $readback['body']);
+        // EC-CUBE admin save feedback on the POST-redirect-GET target.
+        $this->assertStringContainsString('保存しました', $readback['body']);
     }
 
     /** @return array{status: int, headers: array<string, string>, body: string} */

@@ -62,6 +62,12 @@ final class HttpSqlAdminTradeLawFormTest extends TestCase
         $this->assertStringContainsString('action="/admin/trade-law"', $page['body']);
         $this->assertStringContainsString('name="trade_law_1_name"', $page['body']);
         $this->assertStringContainsString('name="trade_law_1_description"', $page['body']);
+        // The displayOrderScreen toggle must render as a SCALAR checkbox a
+        // browser posts as `..._displayOrderScreen=1`; the Aura array form
+        // `name="..._displayOrderScreen[]"` is rejected by the `string|null`
+        // resource boundary with a 400 (regression guard).
+        $this->assertStringContainsString('name="trade_law_1_displayOrderScreen" value="1"', $page['body']);
+        $this->assertStringNotContainsString('name="trade_law_1_displayOrderScreen[]"', $page['body']);
 
         $description = 'BeMart 特商法フォーム回帰';
         $updated = $this->form('POST', '/admin/trade-law', [

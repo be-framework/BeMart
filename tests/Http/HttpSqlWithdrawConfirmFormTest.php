@@ -149,7 +149,7 @@ final class HttpSqlWithdrawConfirmFormTest extends TestCase
         $this->assertSame(200, $entry['status']);
         $csrf = $this->csrfToken($entry['body']);
 
-        $registered = $this->form('POST', '/entry', [
+        $fields = [
             'name01' => '退会',
             'name02' => 'テスト',
             'kana01' => 'タイカイ',
@@ -170,9 +170,16 @@ final class HttpSqlWithdrawConfirmFormTest extends TestCase
             'sex' => '1',
             'job' => '18',
             'user_policy_check' => '1',
-            'mode' => 'confirm',
             'csrfToken' => $csrf,
-        ]);
+        ];
+
+        // EC-CUBE two-step registration: mode=confirm shows the review (200),
+        // mode=complete commits and redirects to /entry/complete.
+        $confirmed = $this->form('POST', '/entry', $fields + ['mode' => 'confirm']);
+        $this->assertSame(200, $confirmed['status'], $confirmed['body']);
+        $confirmCsrf = $this->csrfToken($confirmed['body']);
+
+        $registered = $this->form('POST', '/entry', $fields + ['mode' => 'complete', 'csrfToken' => $confirmCsrf]);
         $this->assertSame(303, $registered['status'], $registered['body']);
         $this->assertSame('/entry/complete', $registered['headers']['Location'] ?? null);
     }

@@ -5,7 +5,8 @@
     "naming-mismatch": "BUG: the resource #[Alps('...')] id does not exist in alps.json, but an equivalent descriptor does under a different id. Fix the resource to use the existing alps id.",
     "missing-alps-descriptor": "BUG: the affordance is referenced by a resource and/or template but has NO descriptor in alps.json (the SSOT). Add the descriptor to alps.json, or collapse the reference onto an existing one.",
     "missing-write-handler": "BUG: a no-JS write <form> submits to a resource that has no matching write handler (onPost/onPut/onDelete). Submitting it reaches a non-existent method and leaks a raw weaved-class string (the CustomerDeliveryEdit class of bug). Add the handler, repoint the action, or convert the form to GET.",
-    "js-only": "The <form> is driven by JS/AJAX (buttons are type=button + data-action, or a bare <button> wired to data-action); the no-JS harness never submits it, so the onGet-only resource is not actually reached by a real no-JS POST."
+    "js-only": "The <form> is driven by JS/AJAX (buttons are type=button + data-action, or a bare <button> wired to data-action); the no-JS harness never submits it, so the onGet-only resource is not actually reached by a real no-JS POST.",
+    "intentional-anonymous-affordance": "A customer-actor affordance that is INTENTIONALLY shown to anonymous visitors (it routes them to /login or /entry, or is a public storefront action). Exempt from the is_logged_in() guard requirement of Contract D."
   },
   "resourceAlps": {
     "doActionRedirect": {
@@ -82,5 +83,6 @@
         "buttons use data-action / class action-submit"
       ]
     }
-  }
+  },
+  "anonymousAffordanceLeak": {}
 }

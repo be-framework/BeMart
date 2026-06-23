@@ -28,9 +28,12 @@ final class AdminTradeLawForm extends AbstractForm
                 ->setAttribs(['id' => $viewPrefix . '_name', 'class' => 'form-control']);
             $this->setField($prefix . '_description', 'textarea')
                 ->setAttribs(['id' => $viewPrefix . '_description', 'class' => 'form-control', 'rows' => '3']);
+            // Scalar (non-array) checkbox: `setOptions()` would render
+            // `name="..._displayOrderScreen[]"` (an array), which the
+            // `string|null` resource boundary rejects with a 400. A scalar
+            // `value=1` checkbox matches the working EntryForm convention.
             $this->setField($prefix . '_displayOrderScreen', 'checkbox')
-                ->setAttribs(['id' => $viewPrefix . '_displayOrderScreen'])
-                ->setOptions(['1' => '']);
+                ->setAttribs(['id' => $viewPrefix . '_displayOrderScreen', 'value' => '1']);
         }
     }
 

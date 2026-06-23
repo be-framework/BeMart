@@ -116,7 +116,12 @@ final class HttpSqlMypageChangeFormTest extends TestCase
         $entryCsrf = $this->csrfToken($entry['body']);
         $email = 'sql-change-' . bin2hex(random_bytes(4)) . '@example.test';
 
-        $registered = $this->form('POST', '/entry', $this->validEntryFields($email, $entryCsrf));
+        // EC-CUBE two-step registration: mode=confirm shows the review (200),
+        // mode=complete commits and redirects to /entry/complete.
+        $confirmed = $this->form('POST', '/entry', $this->validEntryFields($email, $entryCsrf, 'confirm'));
+        $this->assertSame(200, $confirmed['status'], $confirmed['body']);
+        $confirmCsrf = $this->csrfToken($confirmed['body']);
+        $registered = $this->form('POST', '/entry', $this->validEntryFields($email, $confirmCsrf, 'complete'));
         $this->assertSame(303, $registered['status'], $registered['body']);
 
         $login = $this->form('GET', '/login');
@@ -210,7 +215,7 @@ final class HttpSqlMypageChangeFormTest extends TestCase
     }
 
     /** @return array<string, string> */
-    private function validEntryFields(string $email, string $csrfToken): array
+    private function validEntryFields(string $email, string $csrfToken, string $mode = 'confirm'): array
     {
         return [
             'name01' => '山田',
@@ -233,7 +238,7 @@ final class HttpSqlMypageChangeFormTest extends TestCase
             'sex' => '1',
             'job' => '18',
             'user_policy_check' => '1',
-            'mode' => 'confirm',
+            'mode' => $mode,
             'csrfToken' => $csrfToken,
         ];
     }

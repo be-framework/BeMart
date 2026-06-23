@@ -93,10 +93,11 @@ class Address extends ResourceObject
     {
         $customerId = $this->session->customerId;
         if ($customerId === null) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
+            // Anonymous visitor: raise UnauthenticatedException so the html
+            // context redirects to /login (EC-CUBE firewalls customer pages)
+            // and the JSON/HAL context maps it to 401 — rather than dead-ending
+            // a browser visitor on a 401 error page.
+            throw new UnauthenticatedException('この操作を行うにはログインが必要です。');
         }
 
         $form = $this->formFactory->newInstance(AddressForm::class);

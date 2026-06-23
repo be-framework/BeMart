@@ -73,14 +73,16 @@ final class WithdrawResourceTest extends TestCase
         $this->assertSame('アリス', $ro->body['name02']);
     }
 
-    public function testOnGetUnauthenticatedReturns401(): void
+    public function testOnGetUnauthenticatedThrows(): void
     {
         $this->rebindSession(null);
 
-        $ro = $this->resource->get('page://self/mypage/withdraw');
+        // Anonymous GET raises UnauthenticatedException (mapped to 401 by the
+        // JSON/HAL context, and recovered into a 303 -> /login by the html
+        // context) rather than returning a dead-end 401 body. Mirrors onPost.
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthenticatedException::class);
 
-        $this->assertSame(Code::UNAUTHORIZED, $ro->code);
-        $this->assertStringContainsString('ログイン', $ro->body['message']);
+        $this->resource->get('page://self/mypage/withdraw');
     }
 
     public function testOnPostHappyPathReturns200(): void

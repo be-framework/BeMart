@@ -29,9 +29,13 @@ final class AdminPaymentForm extends AbstractForm
             ->setAttribs(['id' => 'payment_rule_min', 'class' => 'form-control']);
         $this->setField('ruleMax', 'text')
             ->setAttribs(['id' => 'payment_rule_max', 'class' => 'form-control']);
+        // Scalar (non-array) checkbox: EC-CUBE's visible toggle posts a single
+        // `1` when checked and nothing when unchecked. `setOptions()` would make
+        // Aura render `name="visible[]"` (an array), which the `?bool $visible`
+        // resource boundary rejects with a 400; a scalar `value=1` checkbox
+        // matches the working EntryForm convention and the resource signature.
         $this->setField('visible', 'checkbox')
-            ->setAttribs(['id' => 'payment_visible'])
-            ->setOptions(['1' => '']);
+            ->setAttribs(['id' => 'payment_visible', 'value' => '1']);
 
         $this->filter->validate('paymentMethodName')->isNotBlank();
     }

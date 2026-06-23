@@ -43,7 +43,10 @@
     "email": {
       "title": "メールアドレス",
       "description": "会員のログインIDを兼ねる。有効会員間で一意 ログインIDを兼ねるメールアドレス。会員登録・ログイン・通知で共通に使う。 Fake観察文字長 15〜58; 観察値 'bob@example.com', 'login-test@example.com', 'alice@example.com', 'carol@example.com', 'provisional@example.com', 'withdrawn-30000000aaaa3333bbbb4444cccc5555@example.invalid'。",
-      "type": "string",
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "email",
       "minLength": 3,
       "maxLength": 254,

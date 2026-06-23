@@ -8,6 +8,7 @@ use BEAR\ApiDoc\Annotation\Alps;
 use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
+use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
@@ -39,6 +40,7 @@ use function array_key_exists;
 use function array_values;
 use function assert;
 use function ctype_digit;
+use function filter_var;
 use function is_int;
 use function is_string;
 use function sprintf;
@@ -75,6 +77,7 @@ class Entry extends ResourceObject
         private readonly BecomingInterface $becoming,
         private readonly CsrfTokenInterface $csrf,
         private readonly FormFactory $formFactory,
+        private readonly ResourceInterface $resource,
     ) {
     }
 
@@ -93,8 +96,51 @@ class Entry extends ResourceObject
     #[JsonSchema(schema: 'get-entry.json')]
     #[Link(rel: 'goCustomerRegistrationConfirm', href: 'page://self/entry/confirm')]
     #[Link(rel: 'doRegisterCustomer', href: 'page://self/entry', method: 'post')]
-    public function onGet(): static
-    {
+    public function onGet(
+        string|null $name01 = null,
+        string|null $name02 = null,
+        string|null $kana01 = null,
+        string|null $kana02 = null,
+        string|null $companyName = null,
+        string|null $postalCode = null,
+        string|null $pref = null,
+        string|null $addr01 = null,
+        string|null $addr02 = null,
+        string|null $phoneNumber = null,
+        string|null $email = null,
+        string|null $birth_year = null,
+        string|null $birth_month = null,
+        string|null $birth_day = null,
+        string|null $sex = null,
+        string|null $job = null,
+        string|null $user_policy_check = null,
+    ): static {
+        $form = $this->formFactory->newInstance(EntryForm::class);
+        assert($form instanceof EntryForm);
+        // When the editable form is re-shown (EC-CUBE `mode=back` 戻る), the
+        // submitted registration values are pre-filled so the customer can edit
+        // them. A plain GET passes no values and renders the empty form. The
+        // values ride on the form object only — the body shape is unchanged.
+        $form->fillValues(array_filter([
+            'name01' => $name01 ?? '',
+            'name02' => $name02 ?? '',
+            'kana01' => $kana01 ?? '',
+            'kana02' => $kana02 ?? '',
+            'companyName' => $companyName ?? '',
+            'postalCode' => $postalCode ?? '',
+            'pref' => $pref ?? '',
+            'addr01' => $addr01 ?? '',
+            'addr02' => $addr02 ?? '',
+            'phoneNumber' => $phoneNumber ?? '',
+            'email' => $email ?? '',
+            'birth_year' => $birth_year ?? '',
+            'birth_month' => $birth_month ?? '',
+            'birth_day' => $birth_day ?? '',
+            'sex' => $sex ?? '',
+            'job' => $job ?? '',
+            'user_policy_check' => $user_policy_check ?? '',
+        ], static fn (string $v): bool => $v !== ''));
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goCustomerRegistration',
@@ -121,9 +167,10 @@ class Entry extends ResourceObject
                 'href' => 'page://self/entry',
             ],
             'csrfToken' => $this->csrfTokenForForm(),
-            // Phase 3: an empty EntryForm for the HTML port to render via
-            // `{{ form.input(...) }}`. JSON contexts ignore it.
-            'form' => $this->formFactory->newInstance(EntryForm::class),
+            // Phase 3: an EntryForm for the HTML port to render via
+            // `{{ form.input(...) }}` (pre-filled on `mode=back`). JSON
+            // contexts ignore it.
+            'form' => $form,
         ];
 
         return $this;
@@ -204,10 +251,26 @@ class Entry extends ResourceObject
         );
 
         $browserForm = $this->isBrowserFormSubmission($values, $mode);
+
+        // EC-CUBE EntryController state machine (mode POST param):
+        //   confirm  -> render the read-only CONFIRM (review) screen, NO create.
+        //   back     -> return to the editable registration form (戻る button).
+        //   complete -> actually create the account + redirect to completion.
+        //   commit   -> alias for complete (BeMart submit-button convention).
+        // A JSON / hypermedia client sends no `mode`: it keeps the collapsed
+        // doRegisterCustomer behaviour (create immediately, 201 + body).
+        if ($browserForm && $mode === 'back') {
+            return $this->reeditForm($values);
+        }
+
         if ($browserForm) {
             $errors = $this->formErrors($values);
             if ($errors !== []) {
                 return $this->rejectForm($values, $errors);
+            }
+
+            if ($mode === 'confirm') {
+                return $this->renderConfirm($values);
             }
         }
 
@@ -366,6 +429,10 @@ class Entry extends ResourceObject
             }
         }
 
+        if ($values['email'] !== '' && filter_var($values['email'], FILTER_VALIDATE_EMAIL) === false) {
+            $errors['email'] = 'メールアドレスの形式が正しくありません。';
+        }
+
         if (array_key_exists('email_confirm', $this->uri->query)) {
             if (trim($values['email_confirm']) === '') {
                 $errors['email_confirm'] = '入力してください。';
@@ -427,6 +494,83 @@ class Entry extends ResourceObject
             'message' => array_values($errors)[0] ?? '入力内容を確認してください。',
             'errors' => $errors,
             'form' => $this->failedForm($values, $errors),
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE `mode=confirm` — render the read-only CONFIRM (review) screen.
+     *
+     * No account is created here (the Becoming chain is NOT run): the entered
+     * registration payload is handed to the Confirm resource, which renders
+     * `Entry/Confirm.html.twig` with the values re-shown as plain text and
+     * carried forward as hidden inputs. The rendered confirm page becomes this
+     * response's view, so the browser sees the review screen at `/entry`
+     * without a redirect (mirrors EC-CUBE EntryController's
+     * `render('Entry/confirm.twig', ...)`). The response body stays
+     * `post-entry.json`-shaped (no customer yet) so the JSON-schema response
+     * contract still holds.
+     *
+     * @param array<string, string> $values
+     */
+    private function renderConfirm(array $values): static
+    {
+        $confirm = $this->resource->get('page://self/entry/confirm', $values);
+
+        $this->code = Code::OK;
+        $this->view = $confirm->toString();
+        $this->headers['Content-Type'] = 'text/html; charset=utf-8';
+        // Schema-satisfying projection only — the real values are re-shown in
+        // the rendered confirm view. Nothing is created at the confirm step.
+        $this->body = [
+            'customerId' => '',
+            // The email passed the format gate in formErrors before confirm
+            // was reached, so it satisfies the `format:email` response floor.
+            'email' => $values['email'],
+            'name01' => $values['name01'],
+            'name02' => $values['name02'],
+            'initialPoint' => 0,
+            'customerStatus' => 1,
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE `mode=back` (戻る) — return to the editable registration form.
+     *
+     * The confirm screen's 戻る button re-posts the registration payload with
+     * `mode=back`; EC-CUBE falls through its switch and re-renders the input
+     * form (`Entry/index.twig`) with the submitted data. Here the entered
+     * values are re-shown in the editable {@see EntryForm}; nothing is created
+     * and no inline error is raised. `back` runs before format validation.
+     *
+     * @param array<string, string> $values
+     */
+    private function reeditForm(array $values): static
+    {
+        // Re-render the editable registration form (Entry::onGet) with the
+        // entered values pre-filled, so the customer can edit and re-confirm.
+        // The rendered input page becomes this response's view; the body stays
+        // `post-entry.json`-shaped (no customer created — nothing committed) so
+        // the response contract holds.
+        $form = $this->resource->get('page://self/entry', $values);
+
+        $this->code = Code::OK;
+        $this->view = $form->toString();
+        $this->headers['Content-Type'] = 'text/html; charset=utf-8';
+        // Schema-satisfying projection only — the editable form (with the real
+        // values) lives in the rendered view. `back` runs before format
+        // validation, so the raw email is not echoed into the `format:email`
+        // body field.
+        $this->body = [
+            'customerId' => '',
+            'email' => null,
+            'name01' => $values['name01'],
+            'name02' => $values['name02'],
+            'initialPoint' => 0,
+            'customerStatus' => 1,
         ];
 
         return $this;

@@ -3,9 +3,12 @@
 
   Mirrors EC-CUBE's `is_granted('ROLE_USER')` split: an authenticated customer
   sees マイページ / お気に入り / ログアウト; an anonymous visitor sees
-  新規会員登録 / お気に入り / ログイン. is_logged_in() reads the flat customer
-  session key (see BeMartTwigExtension). Logout is POST + CSRF (BeMart's
-  doLogout), so it is a small form rather than EC-CUBE's GET link.
+  新規会員登録 / ログイン. お気に入り (goFavoriteList) is tagged actor-customer in
+  alps.json — an auth-only affordance — so it is NOT presented to anonymous
+  visitors (clicking it would only 401). Present affordances consistent with
+  the current state. is_logged_in() reads the flat customer session key (see
+  BeMartTwigExtension). Logout is POST + CSRF (BeMart's doLogout), so it is a
+  small form rather than EC-CUBE's GET link.
 #}
 <div class="ec-headerNav">
 {% if is_logged_in() %}
@@ -35,12 +38,6 @@
         <a href="/entry">
             <i class="ec-headerNav__itemIcon fas fa-user fa-fw"></i>
             <span class="ec-headerNav__itemLink">新規会員登録</span>
-        </a>
-    </div>
-    <div class="ec-headerNav__item">
-        <a href="/mypage/favorite-list">
-            <i class="ec-headerNav__itemIcon fas fa-heart fa-fw"></i>
-            <span class="ec-headerNav__itemLink">お気に入り</span>
         </a>
     </div>
     <div class="ec-headerNav__item">

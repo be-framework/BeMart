@@ -118,17 +118,21 @@ class Payment extends ResourceObject
     public function onPut(
         string $paymentId,
         string|null $paymentMethodName = null,
-        int|null $charge = null,
-        int|null $ruleMin = null,
-        int|null $ruleMax = null,
+        int|string|null $charge = null,
+        int|string|null $ruleMin = null,
+        int|string|null $ruleMax = null,
         bool|null $visible = null,
     ): static {
+        // A browser posts blank optional money fields as empty strings
+        // (`ruleMin=&ruleMax=`). EC-CUBE's IntegerType coerces those to null;
+        // BeMart's `?int` domain boundary would otherwise reject the empty
+        // string with a 400 TypeError, so normalise transport empties here.
         $final = ($this->becoming)(new UpdatePaymentMethodAdminInput(
             paymentId: $paymentId,
             paymentMethodName: $paymentMethodName,
-            charge: $charge,
-            ruleMin: $ruleMin,
-            ruleMax: $ruleMax,
+            charge: $this->toIntOrNull($charge),
+            ruleMin: $this->toIntOrNull($ruleMin),
+            ruleMax: $this->toIntOrNull($ruleMax),
             visible: $visible,
         ));
 
@@ -166,5 +170,15 @@ class Payment extends ResourceObject
         $this->body = ['paymentId' => $final->paymentId];
 
         return $this;
+    }
+
+    /** Coerce a transport money field (`''`, `'300'`, int) to `int|null`. */
+    private function toIntOrNull(int|string|null $value): int|null
+    {
+        if ($value === null || $value === '') {
+            return null;
+        }
+
+        return (int) $value;
     }
 }

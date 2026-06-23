@@ -173,8 +173,11 @@ final class HttpCheckoutEntryFormTest extends TestCase
         $this->assertStringContainsString('サンプル商品 A', $confirm['body']);
         $this->assertStringNotContainsString('確認できる注文内容がありません。', $confirm['body']);
 
+        // The 注文する button must carry the submit mode the browser POSTs;
+        // without it the checkout cannot redirect to the complete page.
+        $this->assertStringContainsString('name="mode" value="complete"', $confirm['body']);
         $checkout = $this->form('POST', '/shopping/checkout', [
-            'mode' => 'checkout',
+            'mode' => 'complete',
             'preOrderId' => $this->inputValue($confirm['body'], 'preOrderId'),
             'csrfToken' => $this->inputValue($confirm['body'], 'csrfToken'),
         ]);
@@ -229,7 +232,7 @@ final class HttpCheckoutEntryFormTest extends TestCase
     {
         $email = 'http-entry-' . str_replace('.', '-', uniqid('', true)) . '@example.test';
 
-        $registered = $this->form('POST', '/entry', [
+        $fields = [
             'name01' => '山田',
             'name02' => '太郎',
             'kana01' => 'ヤマダ',
@@ -250,9 +253,20 @@ final class HttpCheckoutEntryFormTest extends TestCase
             'sex' => '1',
             'job' => '18',
             'user_policy_check' => '1',
-            'mode' => 'confirm',
             'csrfToken' => FakeCsrfToken::TOKEN,
-        ]);
+        ];
+
+        // EC-CUBE EntryController two-step flow: `mode=confirm` renders the
+        // read-only review screen (no account created); `mode=complete` commits
+        // and Post/Redirect/Gets to /entry/complete.
+        $confirmed = $this->form('POST', '/entry', $fields + ['mode' => 'confirm']);
+        $this->assertSame(200, $confirmed['status'], $confirmed['body']);
+        $this->assertArrayNotHasKey('Location', $confirmed['headers']);
+        $this->assertStringContainsString('<h1>新規会員登録(確認)</h1>', $confirmed['body']);
+        $this->assertStringContainsString('会員登録をする', $confirmed['body']);
+        $this->assertStringContainsString('<input type="hidden" name="email" value="' . $email . '"', $confirmed['body']);
+
+        $registered = $this->form('POST', '/entry', $fields + ['mode' => 'complete']);
 
         $this->assertSame(303, $registered['status']);
         $this->assertSame('/entry/complete', $registered['headers']['Location'] ?? null);

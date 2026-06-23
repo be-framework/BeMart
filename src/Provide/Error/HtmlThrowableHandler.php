@@ -11,6 +11,7 @@ use BEAR\Sunday\Extension\Router\RouterMatch as Request;
 use BEAR\Sunday\Extension\Transfer\TransferInterface;
 use ErrorException;
 use Exception;
+use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use Override;
 use Throwable;
 use Twig\Environment;
@@ -30,8 +31,11 @@ use const E_ERROR;
 final class HtmlThrowableHandler implements ThrowableHandlerInterface
 {
     private const TEMPLATE = 'Page/Error.html.twig';
+    private const LOGIN_PATH = '/login';
 
     private bool $delegated = false;
+    private bool $redirect = false;
+    private string $location = '';
     private int $status = Code::ERROR;
     private string $html = '';
 
@@ -46,6 +50,18 @@ final class HtmlThrowableHandler implements ThrowableHandlerInterface
     #[Override]
     public function handle(Throwable $e, Request $request): self
     {
+        // EC-CUBE firewalls customer pages: an anonymous visitor of an
+        // auth-only page (e.g. /mypage) is redirected to the login form,
+        // not shown a dead-end 401 error page. Only the browser context
+        // recovers this way; the JSON/HAL handler keeps the 401 contract.
+        if ($e instanceof UnauthenticatedException) {
+            $this->delegated = false;
+            $this->redirect = true;
+            $this->location = self::LOGIN_PATH;
+
+            return $this;
+        }
+
         $status = $this->mapper->status($e);
         if ($status === null) {
             $this->delegated = true;
@@ -55,6 +71,7 @@ final class HtmlThrowableHandler implements ThrowableHandlerInterface
         }
 
         $this->delegated = false;
+        $this->redirect = false;
         $this->status = $status;
         $this->html = $this->twig->render(self::TEMPLATE, [
             'code' => $status,
@@ -71,6 +88,12 @@ final class HtmlThrowableHandler implements ThrowableHandlerInterface
     {
         if ($this->delegated) {
             $this->fallback->transfer();
+
+            return;
+        }
+
+        if ($this->redirect) {
+            ($this->responder)(new HtmlRedirect($this->location), []);
 
             return;
         }

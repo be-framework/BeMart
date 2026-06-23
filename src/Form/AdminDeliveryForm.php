@@ -23,9 +23,12 @@ final class AdminDeliveryForm extends AbstractForm
     {
         $this->setField('deliveryName', 'text')
             ->setAttribs(['id' => 'delivery_name', 'class' => 'form-control']);
+        // Scalar (non-array) checkbox: `setOptions()` would render
+        // `name="visible[]"` (an array), which the `?bool $visible` resource
+        // boundary rejects with a 400. A scalar `value=1` checkbox matches the
+        // working EntryForm convention and the resource signature.
         $this->setField('visible', 'checkbox')
-            ->setAttribs(['id' => 'delivery_visible'])
-            ->setOptions(['1' => '']);
+            ->setAttribs(['id' => 'delivery_visible', 'value' => '1']);
 
         $this->filter->validate('deliveryName')->isNotBlank();
     }

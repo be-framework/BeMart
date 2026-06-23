@@ -32,9 +32,12 @@ final class AdminProductClassForm extends AbstractForm
             ->setAttribs(['id' => 'product_class_price02', 'class' => 'form-control']);
         $this->setField('stock', 'text')
             ->setAttribs(['id' => 'product_class_stock', 'class' => 'form-control']);
+        // Scalar (non-array) checkbox: `setOptions()` would render
+        // `name="stock_unlimited[]"` (an array), which the `bool $stockUnlimited`
+        // resource boundary rejects with a 400. A scalar `value=1` checkbox
+        // matches the working EntryForm convention and the resource signature.
         $this->setField('stock_unlimited', 'checkbox')
-            ->setAttribs(['id' => 'product_class_stock_unlimited'])
-            ->setOptions(['1' => '']);
+            ->setAttribs(['id' => 'product_class_stock_unlimited', 'value' => '1']);
         $this->setField('product_code', 'text')
             ->setAttribs(['id' => 'product_class_code', 'class' => 'form-control']);
         $this->setField('delivery_fee', 'text')

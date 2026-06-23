@@ -57,6 +57,7 @@ final class SsotProjectionAuditTest extends TestCase
         'missing-alps-descriptor',
         'missing-write-handler',
         'js-only',
+        'intentional-anonymous-affordance',
     ];
 
     private const WRITE_VERBS = ['onPost', 'onPut', 'onDelete', 'onPatch'];
@@ -375,7 +376,7 @@ final class SsotProjectionAuditTest extends TestCase
     public function testBaselineEntriesAreWellFormed(): void
     {
         $baseline = $this->baseline();
-        foreach (['resourceAlps', 'templateAffordance', 'writeFormWithoutHandler'] as $section) {
+        foreach (['resourceAlps', 'templateAffordance', 'writeFormWithoutHandler', 'anonymousAffordanceLeak'] as $section) {
             self::assertArrayHasKey($section, $baseline, "baseline must declare section {$section}.");
             foreach ((array) $baseline[$section] as $key => $entry) {
                 self::assertIsArray($entry, sprintf('%s.%s must be an object.', $section, (string) $key));
@@ -402,5 +403,170 @@ final class SsotProjectionAuditTest extends TestCase
     public function testContractCWriteFormHasHandlerOrIsBaselined(): void
     {
         $this->assertExactBaseline('writeFormWithoutHandler', $this->writeFormsWithoutHandler());
+    }
+
+    // ---- Contract D: anonymous-affordance gating --------------------------
+
+    /**
+     * Auth-only storefront affordances: their target page firewalls anonymous
+     * visitors (EC-CUBE redirects an anonymous `mypage_*` / favorite request
+     * to the login form — see Eccube\Controller\Mypage\* + the `secured_area`
+     * firewall in config/eccube/packages/security.yaml). Presenting one to a
+     * visitor who cannot perform it is the お気に入り→401 class of bug: the
+     * affordance must be hidden behind an is_logged_in() guard (or live inside
+     * a firewalled page template that anonymous never reaches), NEVER shown
+     * bare so that clicking it only 401s.
+     *
+     * Each token is an alps.json `actor-customer` descriptor whose `rt`/path
+     * sits under the firewalled /mypage area (+ the favorite endpoints).
+     * Anonymous-allowed customer tokens (goLogin/doLogin/goCart/goContactForm/
+     * doAddCartItem/…) are deliberately NOT here — they are public.
+     *
+     * @var list<string>
+     */
+    private const AUTH_ONLY_CUSTOMER_TOKENS = [
+        'goMypage',
+        'goMypageChange',
+        'goMypageHistory',
+        'goMypageWithdraw',
+        'goMypageWithdrawConfirm',
+        'goOrderHistory',
+        'goFavoriteList',
+        'goCustomerAddressList',
+        'doAddFavorite',
+        'doRemoveFavorite',
+        'doReorder',
+        'doUpdateCustomer',
+        'doCreateCustomerAddress',
+        'doUpdateCustomerAddress',
+        'doDeleteCustomerAddress',
+        'doWithdrawCustomer',
+    ];
+
+    /**
+     * Firewalled href/action path prefixes: a link/form to one of these is an
+     * auth-only affordance even when its class carries no do/go token (e.g. the
+     * header's plain <a href="/mypage/favorite-list">). Anonymous visitors are
+     * redirected to /login before the target renders.
+     *
+     * @var list<string>
+     */
+    private const FIREWALLED_PATH_PREFIXES = ['/mypage'];
+
+    /**
+     * A template owner is itself auth-firewalled (its resource redirects
+     * anonymous visitors to /login) when it lives under the storefront mypage
+     * area or the admin area. Affordances inside such a template are never
+     * shown to a visitor who cannot perform them, so they are exempt from the
+     * is_logged_in() guard requirement.
+     */
+    private function isFirewalledOwner(string $owner): bool
+    {
+        return str_starts_with($owner, 'Page/Mypage')
+            || str_starts_with($owner, 'Page/Admin');
+    }
+
+    /**
+     * Is the byte offset $pos inside the template source covered by an
+     * is_logged_in() / is_granted() auth guard? Tracks {% if/elseif/else/endif %}
+     * nesting on the comment-stripped source: an affordance is guarded when it
+     * sits in the true-branch of an `if (is_logged_in())` (or admin is_granted)
+     * that has not yet been closed by endif or flipped by its else.
+     */
+    private function authGuardedAt(string $strippedSrc, int $pos): bool
+    {
+        $head = substr($strippedSrc, 0, $pos);
+        /** @var list<bool> $stack each open {% if %} -> is it an auth guard true-branch */
+        $stack = [];
+        if (! preg_match_all('~\{%\s*(if|elseif|else|endif)\b([^%]*)%\}~', $head, $m, PREG_SET_ORDER)) {
+            return false;
+        }
+
+        foreach ($m as $tag) {
+            $kw = $tag[1];
+            $cond = $tag[2] ?? '';
+            $isAuth = str_contains($cond, 'is_logged_in') || str_contains($cond, 'is_granted');
+            if ($kw === 'if') {
+                $stack[] = $isAuth;
+            } elseif ($kw === 'elseif') {
+                // condition continues the same if-block; an auth elseif still guards.
+                if ($stack !== []) {
+                    $stack[count($stack) - 1] = $isAuth;
+                }
+            } elseif ($kw === 'else') {
+                // leaving the auth true-branch into its negative => no longer guarded.
+                if ($stack !== []) {
+                    $stack[count($stack) - 1] = false;
+                }
+            } elseif ($kw === 'endif') {
+                array_pop($stack);
+            }
+        }
+
+        return in_array(true, $stack, true);
+    }
+
+    /**
+     * Walk every storefront template that anonymous visitors can reach and
+     * collect auth-only affordances that are presented WITHOUT an is_logged_in()
+     * guard — the leak this contract exists to catch.
+     *
+     * An affordance is either (a) a do/go token in a <form class>, or (b) a
+     * link/form whose href/action targets a firewalled /mypage path. A login-
+     * routing link (href targets /login or /entry) is never a leak.
+     *
+     * @return list<string> "owner::affordance" leak keys, sorted
+     */
+    private function anonymousAffordanceLeaks(): array
+    {
+        $leaks = [];
+        foreach ($this->twigFilesUnder(self::ROOT . '/var/templates') as $file) {
+            $owner = str_replace([self::ROOT . '/var/templates/', '.html.twig'], '', $file);
+            if ($this->isFirewalledOwner($owner)) {
+                continue;
+            }
+
+            $src = (string) file_get_contents($file);
+            $stripped = (string) preg_replace('~\{#.*?#\}~s', '', $src);
+
+            // (a) auth-only do/go token in a <form class="...">.
+            if (preg_match_all('~<form\b[^>]*\bclass\s*=\s*"([^"]*)"[^>]*>~is', $stripped, $fm, PREG_OFFSET_CAPTURE)) {
+                foreach ($fm[0] as $i => $hit) {
+                    $class = $fm[1][$i][0];
+                    $pos = (int) $hit[1];
+                    preg_match_all('~\b(?:do|go)[A-Z][A-Za-z0-9]*~', $class, $tm);
+                    foreach ($tm[0] as $tok) {
+                        if (in_array($tok, self::AUTH_ONLY_CUSTOMER_TOKENS, true)
+                            && ! $this->authGuardedAt($stripped, $pos)) {
+                            $leaks[$owner . '::' . $tok] = true;
+                        }
+                    }
+                }
+            }
+
+            // (b) link/form whose href/action targets a firewalled /mypage path.
+            if (preg_match_all('~\b(?:href|action)\s*=\s*"([^"]*)"~is', $stripped, $hm, PREG_OFFSET_CAPTURE)) {
+                foreach ($hm[1] as $hit) {
+                    $target = $hit[0];
+                    $pos = (int) $hit[1];
+                    foreach (self::FIREWALLED_PATH_PREFIXES as $prefix) {
+                        if (($target === $prefix || str_starts_with($target, $prefix . '/') || str_starts_with($target, $prefix . '?'))
+                            && ! $this->authGuardedAt($stripped, $pos)) {
+                            $leaks[$owner . '::' . $target] = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        $out = array_keys($leaks);
+        sort($out);
+
+        return $out;
+    }
+
+    public function testContractDAnonymousAffordanceGatedOrIsBaselined(): void
+    {
+        $this->assertExactBaseline('anonymousAffordanceLeak', $this->anonymousAffordanceLeaks());
     }
 }

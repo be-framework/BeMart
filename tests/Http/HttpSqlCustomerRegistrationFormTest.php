@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use Koriym\PhpServer\PhpServer;
+use PDO;
 use PHPUnit\Framework\TestCase;
 
 use function bin2hex;
@@ -12,6 +13,7 @@ use function escapeshellarg;
 use function explode;
 use function http_build_query;
 use function is_string;
+use function parse_url;
 use function preg_match;
 use function preg_split;
 use function random_bytes;
@@ -81,7 +83,23 @@ final class HttpSqlCustomerRegistrationFormTest extends TestCase
         $entryCsrf = $this->csrfToken($entry['body']);
         $email = 'sql-entry-' . bin2hex(random_bytes(4)) . '@example.test';
 
-        $registered = $this->form('POST', '/entry', $this->validEntryFields($email, $entryCsrf));
+        // EC-CUBE EntryController two-step flow: `mode=confirm` renders the
+        // read-only review screen and creates NOTHING; `mode=complete` commits.
+        $confirm = $this->form('POST', '/entry', $this->validEntryFields($email, $entryCsrf, 'confirm'));
+        $this->assertSame(200, $confirm['status'], $confirm['body']);
+        $this->assertArrayNotHasKey('Location', $confirm['headers']);
+        $this->assertStringContainsString('<h1>新規会員登録(確認)</h1>', $confirm['body']);
+        $this->assertStringContainsString('会員登録をする', $confirm['body']);
+        // The review screen carries the entered payload forward as hidden
+        // inputs so the final 会員登録をする submit re-posts everything.
+        $this->assertStringContainsString('<input type="hidden" name="email" value="' . $email . '"', $confirm['body']);
+        // The password is shown MASKED as readable text on the review screen
+        // (EC-CUBE confirm.twig renders ******** for the password cell; the
+        // real value rides only in the hidden carrier for the final commit).
+        $this->assertStringContainsString('********', $confirm['body']);
+
+        $confirmCsrf = $this->csrfToken($confirm['body']);
+        $registered = $this->form('POST', '/entry', $this->validEntryFields($email, $confirmCsrf, 'complete'));
 
         $this->assertSame(303, $registered['status'], $registered['body']);
         $this->assertSame('/entry/complete', $registered['headers']['Location'] ?? null);
@@ -172,8 +190,61 @@ final class HttpSqlCustomerRegistrationFormTest extends TestCase
         return $match[1];
     }
 
+    /**
+     * DEFECT (confirm-step-skip): a `mode=confirm` POST must render the
+     * read-only REVIEW screen and create NOTHING — EC-CUBE EntryController
+     * renders Entry/confirm.twig on `mode=confirm` and only persists on
+     * `mode=complete`. The pre-fix Entry::onPost treated `mode=confirm` as the
+     * commit (303 -> /entry/complete, customer written), so the user never saw
+     * the review and could not go back. This drives the confirm step against
+     * the real eccubedb_test customer table and proves no row is written.
+     */
+    public function testConfirmModeRendersReviewAndDoesNotCreateCustomer(): void
+    {
+        $entry = $this->form('GET', '/entry');
+        $csrf = $this->csrfToken($entry['body']);
+        $email = 'sql-confirm-' . bin2hex(random_bytes(4)) . '@example.test';
+
+        $confirm = $this->form('POST', '/entry', $this->validEntryFields($email, $csrf, 'confirm'));
+
+        // Review screen, NOT a 303 to /entry/complete.
+        $this->assertSame(200, $confirm['status'], $confirm['body']);
+        $this->assertArrayNotHasKey('Location', $confirm['headers']);
+        $this->assertStringContainsString('<h1>新規会員登録(確認)</h1>', $confirm['body']);
+        $this->assertStringContainsString('会員登録をする', $confirm['body']);
+        $this->assertStringContainsString('戻る', $confirm['body']);
+        // Entered values are carried forward as hidden inputs for the commit.
+        $this->assertStringContainsString('<input type="hidden" name="name01" value="山田"', $confirm['body']);
+        $this->assertStringContainsString('<input type="hidden" name="email" value="' . $email . '"', $confirm['body']);
+
+        // PROOF nothing was created: the customer row does not exist yet.
+        $this->assertSame(0, $this->customerCount($email), 'mode=confirm must NOT create the customer');
+    }
+
+    private function customerCount(string $email): int
+    {
+        $databaseUrl = $_SERVER['DATABASE_URL'] ?? null;
+        if (! is_string($databaseUrl) || $databaseUrl === '') {
+            self::markTestSkipped('DATABASE_URL is not set; SQL confirm regression requires the eccubedb_test DB.');
+        }
+
+        $parts = parse_url($databaseUrl);
+        $this->assertIsArray($parts);
+        $dsn = sprintf(
+            'mysql:host=%s;port=%d;dbname=%s;charset=utf8mb4',
+            $parts['host'] ?? '127.0.0.1',
+            (int) ($parts['port'] ?? 3306),
+            trim((string) ($parts['path'] ?? ''), '/'),
+        );
+        $pdo = new PDO($dsn, $parts['user'] ?? 'root', $parts['pass'] ?? '', [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+        $stmt = $pdo->prepare('SELECT COUNT(*) FROM dtb_customer WHERE email = :email');
+        $stmt->execute(['email' => $email]);
+
+        return (int) $stmt->fetchColumn();
+    }
+
     /** @return array<string, string> */
-    private function validEntryFields(string $email, string $csrfToken): array
+    private function validEntryFields(string $email, string $csrfToken, string $mode = 'confirm'): array
     {
         return [
             'name01' => '山田',
@@ -196,7 +267,7 @@ final class HttpSqlCustomerRegistrationFormTest extends TestCase
             'sex' => '1',
             'job' => '18',
             'user_policy_check' => '1',
-            'mode' => 'confirm',
+            'mode' => $mode,
             'csrfToken' => $csrfToken,
         ];
     }

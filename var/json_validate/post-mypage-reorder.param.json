@@ -17,6 +17,19 @@
       "example": "past0000000000000000000000000001",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
     },
+    "sessionPrefix": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 128,
+      "title": "セッション接頭辞（入力）",
+      "description": "再注文先カートのカートキーを構成するセッションスコープの接頭辞。saleTypeId と組み合わせて販売種別ごとのカートを分離する。通常はリクエストボディではなくセッション（CartSessionPrefix）から解決され、既定値にフォールバックする。",
+      "default": "session-prefix-1",
+      "example": "session-prefix-1",
+      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
     "csrfToken": {
       "type": [
         "string",

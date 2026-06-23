@@ -12,6 +12,7 @@ use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
+use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
@@ -48,8 +49,12 @@ class Withdraw extends ResourceObject
      * EC-CUBE goMypageWithdraw — show the withdrawal confirmation page.
      *
      * Pure form-info endpoint: no Be Framework involved, no domain
-     * logic. Authenticated (mirrors Pilot 8 behavior): returns 401
-     * directly from the Resource when no session is present.
+     * logic. Authenticated: an anonymous (or stale-session) visitor
+     * raises {@see UnauthenticatedException}. The html context recovers
+     * this into a 303 -> /login (EC-CUBE firewalls customer pages); the
+     * JSON/HAL context maps it to 401. Returning Code::UNAUTHORIZED
+     * directly would have dead-ended browser visitors on a 401 page
+     * instead of routing them to the login form.
      *
      * Surfaces the current customer's email + name01/name02 so the
      * confirm page can render "退会されるアカウント: name01 name02
@@ -64,10 +69,7 @@ class Withdraw extends ResourceObject
     {
         $customerId = $this->session->customerId;
         if ($customerId === null) {
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
+            throw new UnauthenticatedException('この操作を行うにはログインが必要です。');
         }
 
         $customer = $this->customerQuery->item($customerId);
@@ -75,10 +77,7 @@ class Withdraw extends ResourceObject
             // Stale session: the session points to a customerId that
             // no longer exists in the store (e.g. already withdrawn
             // in another tab). Treat as unauthenticated.
-            $this->code = Code::UNAUTHORIZED;
-            $this->body = ['message' => 'この操作を行うにはログインが必要です。'];
-
-            return $this;
+            throw new UnauthenticatedException('この操作を行うにはログインが必要です。');
         }
 
         $this->code = Code::OK;

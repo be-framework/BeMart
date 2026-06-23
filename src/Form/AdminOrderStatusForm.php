@@ -39,9 +39,12 @@ final class AdminOrderStatusForm extends AbstractForm
                 ->setAttribs(['id' => $viewPrefix . '_name', 'class' => 'form-control']);
             $this->setField($prefix . '_color', 'color')
                 ->setAttribs(['id' => $viewPrefix . '_color', 'class' => 'form-control form-control-color']);
+            // Scalar (non-array) checkbox: `setOptions()` would render
+            // `name="..._display_order_count[]"` (an array), which the
+            // `string|null` resource boundary rejects with a 400. A scalar
+            // `value=1` checkbox matches the working EntryForm convention.
             $this->setField($prefix . '_display_order_count', 'checkbox')
-                ->setAttribs(['id' => $viewPrefix . '_display_order_count'])
-                ->setOptions(['1' => '']);
+                ->setAttribs(['id' => $viewPrefix . '_display_order_count', 'value' => '1']);
         }
 
         $this->fillDefaults();
