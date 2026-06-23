@@ -26,6 +26,7 @@ class FlowAdminCustomerMaintenanceTest extends AbstractWorkflowTest
 
     private static string $email;
     private static string $customerId;
+    private static string $addressId;
     private static WorkflowDbSession|null $dbSession = null;
 
     public static function setUpBeforeClass(): void
@@ -98,8 +99,104 @@ class FlowAdminCustomerMaintenanceTest extends AbstractWorkflowTest
         return $customer;
     }
 
-    #[Alps('goCustomerList')]
+    #[Alps('doUpdateCustomerProfile')]
     #[Depends('testReadsCreatedCustomer')]
+    public function testUpdatesCustomerProfile(ResourceObject $response): ResourceObject
+    {
+        $updated = $this->resource->post($this->linkHref($response, 'doUpdateCustomerProfile'), [
+            'customerId' => self::$customerId,
+            'email' => self::$email,
+            'name01' => '更新',
+            'name02' => '顧客',
+            'phoneNumber' => '0399998888',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$customerId, $this->bodyValue($updated, 'customerId'));
+        $this->assertSame('更新', $this->bodyValue($updated, 'name01'));
+
+        return $updated;
+    }
+
+    #[Alps('doCreateCustomerDeliveryAddress')]
+    #[Depends('testUpdatesCustomerProfile')]
+    public function testAdminCreatesCustomerDeliveryAddress(ResourceObject $response): ResourceObject
+    {
+        $editForm = $this->resource->get('page://self/admin/customer-delivery-edit', [
+            'customerId' => self::$customerId,
+        ]);
+        $this->assertSame(Code::OK, $editForm->code);
+
+        $created = $this->resource->post($this->linkHref($editForm, 'doCreateCustomerDeliveryAddress'), [
+            'customerId' => self::$customerId,
+            'name01' => '配送',
+            'name02' => '先',
+            'postalCode' => '1500001',
+            'pref' => 13,
+            'addr01' => '渋谷区',
+            'addr02' => '神宮前1-1-1',
+            'phoneNumber' => '0312345678',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $created->code);
+        $this->assertSame(self::$customerId, $this->bodyValue($created, 'customerId'));
+        self::$addressId = $this->bodyString($created, 'addressId');
+
+        return $created;
+    }
+
+    #[Alps('doUpdateCustomerDeliveryAddress')]
+    #[Depends('testAdminCreatesCustomerDeliveryAddress')]
+    public function testAdminUpdatesCustomerDeliveryAddress(ResourceObject $response): ResourceObject
+    {
+        $editForm = $this->resource->get('page://self/admin/customer-delivery-edit', [
+            'customerId' => self::$customerId,
+        ]);
+
+        $updated = $this->resource->post($this->linkHref($editForm, 'doUpdateCustomerDeliveryAddress'), [
+            'customerId' => self::$customerId,
+            'addressId' => self::$addressId,
+            'name01' => '更新先',
+            'name02' => '先',
+            'postalCode' => '1500001',
+            'pref' => 13,
+            'addr01' => '渋谷区',
+            'addr02' => '神宮前2-2-2',
+            'phoneNumber' => '0312345678',
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $updated->code);
+        $this->assertSame(self::$addressId, $this->bodyValue($updated, 'addressId'));
+        $this->assertSame('更新先', $this->bodyValue($updated, 'name01'));
+
+        return $updated;
+    }
+
+    #[Alps('doDeleteCustomerDeliveryAddress')]
+    #[Depends('testAdminUpdatesCustomerDeliveryAddress')]
+    public function testAdminDeletesCustomerDeliveryAddress(ResourceObject $response): ResourceObject
+    {
+        $editForm = $this->resource->get('page://self/admin/customer-delivery-edit', [
+            'customerId' => self::$customerId,
+        ]);
+
+        $deleted = $this->resource->delete($this->linkHref($editForm, 'doDeleteCustomerDeliveryAddress'), [
+            'customerId' => self::$customerId,
+            'addressId' => self::$addressId,
+            'csrfToken' => self::CSRF_TOKEN,
+        ]);
+
+        $this->assertSame(Code::OK, $deleted->code);
+        $this->assertSame(self::$addressId, $this->bodyValue($deleted, 'addressId'));
+
+        return $deleted;
+    }
+
+    #[Alps('goCustomerList')]
+    #[Depends('testAdminDeletesCustomerDeliveryAddress')]
     public function testSearchesCreatedCustomer(ResourceObject $response): ResourceObject
     {
         $list = $this->follow($response, 'goCustomerList', ['emailKeyword' => self::$email]);

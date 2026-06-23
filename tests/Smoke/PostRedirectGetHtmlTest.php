@@ -35,9 +35,10 @@ use function str_starts_with;
  * fixture reuses the proven smoke parameters so a green case here is a
  * faithful HTML-context replay of the same call.
  *
- * Contact is the one mode-driven exception: it switches on a non-null
- * `mode` (browser-form marker) instead of the mutation responder, so its
- * fixture passes `mode` to drive the same 303.
+ * Contact is the one mode-driven exception: it runs an EC-CUBE-faithful
+ * mode state machine (confirm renders the review screen; only commit
+ * sends), so its fixture passes `mode=complete` — the commit step that
+ * actually sends and drives the same 303 to /contact/complete.
  */
 final class PostRedirectGetHtmlTest extends TestCase
 {
@@ -168,7 +169,7 @@ final class PostRedirectGetHtmlTest extends TestCase
             'POST page://self/contact' => [
                 'post',
                 'page://self/contact',
-                ['contactName01' => '山田', 'contactName02' => '太郎', 'contactEmail' => 'contact-smoke@example.com', 'contactContents' => 'Smoke inquiry body', 'mode' => 'confirm'],
+                ['contactName01' => '山田', 'contactName02' => '太郎', 'contactEmail' => 'contact-smoke@example.com', 'contactContents' => 'Smoke inquiry body', 'mode' => 'complete'],
                 '/contact/complete?ticketId=',
                 true,
             ],

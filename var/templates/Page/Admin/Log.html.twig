@@ -17,7 +17,7 @@
                     </div>
                 </div>
                 <div class="card-body">
-                    <form name="form1" id="form1" method="post">
+                    <form name="form1" id="form1" method="get" action="/admin/log">
                         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                         <div class="row mb-3">
                             <div class="mb-3 pe-3 col-2">

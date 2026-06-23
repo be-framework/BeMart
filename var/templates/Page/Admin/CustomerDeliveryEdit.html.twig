@@ -8,9 +8,10 @@
 {% set sub_title = '会員管理' %}
 
 {% block main %}
-    <form role="form" method="post" action="" id="form1" name="form1" novalidate>
+    <form role="form" method="post" action="" id="form1" name="form1" class="doUpdateCustomerDeliveryAddress" novalidate>
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
-        <input type="hidden" name="customer_id" value="{{ customerId|default('') }}">
+        <input type="hidden" name="customerId" value="{{ customerId|default('') }}">
+        <input type="hidden" name="addressId" value="{{ addressId|default('') }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

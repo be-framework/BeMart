@@ -36,7 +36,7 @@ $(function () {
 {% endblock %}
 
 {% block main %}
-    <form name="two_factor_auth_form" role="form" id="two_factor_auth_form" method="post" action="" novalidate>
+    <form name="two_factor_auth_form" role="form" id="two_factor_auth_form" class="doSetTwoFactorAuth" method="post" action="" novalidate>
         <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
         {{ form.input('authKey')|raw }}
         <div class="c-contentsArea__cols">

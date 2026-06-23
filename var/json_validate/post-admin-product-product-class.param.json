@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "post-admin-product-product-class.param.json",
+  "title": "POST /admin/product/product-class request parameters",
+  "description": "POST /admin/product/product-class request parameters の request parameter schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。EC-CUBE ProductClassController#index POST に対応する単一規格(SKU)登録。",
+  "type": "object",
+  "properties": {
+    "productCode": {
+      "title": "商品コード",
+      "description": "登録対象の親商品を識別するSKU/品番。フォームの hidden camelCase フィールドから供給される。在庫・カート・受注明細の結合キー。",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "example": "sample-001"
+    },
+    "price02": {
+      "title": "販売価格",
+      "description": "登録する規格(SKU)の販売価格（税抜）。日本円の整数金額。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 999999999,
+      "example": 1200,
+      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "stock": {
+      "title": "在庫数",
+      "description": "登録する規格(SKU)の物理在庫数。stockUnlimited=true の場合は無視される。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2147483647,
+      "default": 0,
+      "example": 10
+    },
+    "stockUnlimited": {
+      "title": "在庫無制限",
+      "description": "在庫を無制限として扱うフラグ。true の場合 stock は NULL として永続化される。",
+      "type": "boolean",
+      "default": false,
+      "example": false
+    },
+    "deliveryFee": {
+      "title": "商品別送料",
+      "description": "登録する規格(SKU)の商品別送料。日本円の整数金額。",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 999999999,
+      "default": 0,
+      "example": 0
+    },
+    "product_code": {
+      "title": "商品コード（規格セル）",
+      "description": "EC-CUBE 商品規格マトリクスの 新規規格 セルが送信する SKU コード入力。単一行ポートでは登録には用いず、親 productCode を権威とする。",
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 64,
+      "example": "sample-001"
+    },
+    "stock_unlimited": {
+      "title": "在庫無制限（規格セル）",
+      "description": "EC-CUBE 商品規格マトリクスの checkbox。チェック時のみ送信される。単一行ポートでは camelCase stockUnlimited を権威とする。",
+      "type": [
+        "string",
+        "boolean",
+        "null"
+      ],
+      "example": "1"
+    },
+    "delivery_fee": {
+      "title": "商品別送料（規格セル）",
+      "description": "EC-CUBE 商品規格マトリクスの送料入力。単一行ポートでは camelCase deliveryFee を権威とする。",
+      "type": [
+        "string",
+        "integer",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 12,
+      "example": "0"
+    }
+  },
+  "additionalProperties": false,
+  "$comment": "Derived from ALPS meaning, AdminProductClassForm leaf fields, and the actual posted shape of var/templates/Page/Admin/Product/ProductClass.html.twig. csrfToken は CsrfToken インターセプタが除去するため宣言しない。Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation.",
+  "required": [
+    "productCode"
+  ]
+}

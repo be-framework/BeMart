@@ -216,6 +216,22 @@
             </div>
         </div>
 
+        {#
+          PORT of EC-CUBE admin `@admin/alert.twig` success banner. EC-CUBE
+          renders the admin flashbag (`app.flashes('eccube.admin.success')`)
+          near the top of the admin frame; after a save the controller pushes
+          `admin.common.save_complete`(保存しました) which appears here on the
+          POST-redirect-GET. BeMart has no Symfony flashbag, so the messages
+          come from the session-backed admin flash store (consume-once).
+        #}
+        {% for message in admin_flashes() %}
+            <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                <i class="fa fa-check fa-lg me-2"></i>
+                <span class="fw-bold">{{ message }}</span>
+                <button class="btn-close" type="button" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+
         {% block main %}{% endblock %}
 
     </div>

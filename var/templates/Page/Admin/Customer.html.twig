@@ -67,11 +67,12 @@
 {% endblock javascript %}
 
 {% block main %}
-    <form name="customer_form" role="form" id="customer_form" method="post" class="h-adr"
+    <form name="customer_form" role="form" id="customer_form" method="post" class="h-adr doUpdateCustomerProfile"
           action="/admin/customer?customerId={{ customerId }}"
           novalidate>
         <span class="p-country-name" style="display:none;">Japan</span>
         <input type="hidden" id="customer__token" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
+        <input type="hidden" name="customerId" value="{{ customerId }}">
         <div class="c-contentsArea__cols">
             <div class="c-contentsArea__primaryCol">
                 <div class="c-primaryCol">

@@ -42,8 +42,8 @@ class FileManager extends ResourceObject
         private readonly FormFactory $formFactory,
     ) {
     }
-    /** ALPS `goAdminContentFileManager` に対応する GET 操作。 */
-    #[Alps('goAdminContentFileManager')]
+    /** ALPS `goContentFileManager` に対応する GET 操作。 */
+    #[Alps('goContentFileManager')]
     #[JsonSchema(schema: 'get-admin-content-file-manager.json')]
 
     public function onGet(): static

@@ -51,8 +51,8 @@ class TemplateAdd extends ResourceObject
     ) {
     }
 
-    /** ALPS `goAdminTemplateTemplateAdd` に対応する GET 操作。 */
-    #[Alps('goAdminTemplateTemplateAdd')]
+    /** ALPS `goTemplateInstall` に対応する GET 操作。 */
+    #[Alps('goTemplateInstall')]
     #[JsonSchema(schema: 'get-admin-template-template-add.json')]
     #[Link(rel: 'goTemplateList', href: 'page://self/admin/template/template-list')]
     #[Link(rel: 'doInstallTemplate', href: 'page://self/admin/template/template-add', method: 'post')]

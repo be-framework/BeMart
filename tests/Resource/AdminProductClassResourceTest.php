@@ -9,6 +9,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
+use MyVendor\BeMart\Be\Reason\Fake\Service\FakeCsrfToken;
 use MyVendor\BeMart\Form\AdminProductClassForm;
 use MyVendor\BeMart\Module\TestModule;
 use PHPUnit\Framework\TestCase;
@@ -83,5 +84,35 @@ final class AdminProductClassResourceTest extends TestCase
 
         $this->assertSame(Code::FORBIDDEN, $ro->code);
         $this->assertStringContainsString('管理者', $ro->body['message']);
+    }
+
+    public function testRegisterReturns201(): void
+    {
+        $ro = $this->resource->post('page://self/admin/product/product-class', [
+            'productCode' => 'admin-active-001',
+            'price02' => 1200,
+            'stock' => 10,
+            'stockUnlimited' => false,
+            'deliveryFee' => 0,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::CREATED, $ro->code);
+        $this->assertSame('admin-active-001', $ro->body['productCode']);
+        // Distinct allocated id (Fake fixture), not a hardcoded 1.
+        $this->assertSame('pc-fake-next', $ro->body['productClassId']);
+    }
+
+    public function testRegisterRejectsAnonymousAdmin(): void
+    {
+        $this->rebindAdminSession(null);
+        $this->expectException(\MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException::class);
+
+        $this->resource->post('page://self/admin/product/product-class', [
+            'productCode' => 'admin-active-001',
+            'price02' => 1200,
+            'stock' => 10,
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
     }
 }

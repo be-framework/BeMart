@@ -1,0 +1,32 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "post-admin-product-product-class.json",
+  "title": "POST /admin/product/product-class response",
+  "description": "POST /admin/product/product-class response の response body schema。商品規格(SKU)登録の結果。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
+  "type": "object",
+  "properties": {
+    "productClassId": {
+      "title": "商品規格ID",
+      "description": "登録された dtb_product_class.id の不透明な文字列ハンドル。BeMart の RegisteredProductClassEntity 層は数値ではなく文字列として保持する。Fake 実装は採番フィクスチャ値を返し、SQL 実装は dtb_product_class.id (int unsigned AUTO_INCREMENT) を文字列化して使用（同インターフェイス・異 ID 形状）。classCategoryId / deliveryId と同じ Fake↔SQL 二重性。",
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "pattern": "^[A-Za-z0-9._:@/-]+$",
+      "example": "pc-fake-next"
+    },
+    "productCode": {
+      "title": "商品コード",
+      "description": "登録した規格(SKU)の親商品を識別するSKU/品番。在庫・カート・受注明細の結合キー。",
+      "type": "string",
+      "minLength": 0,
+      "maxLength": 64,
+      "example": "sample-001"
+    }
+  },
+  "additionalProperties": false,
+  "$comment": "Derived from ALPS meaning, be/var/fake observation, and Resource schema shape.",
+  "required": [
+    "productClassId",
+    "productCode"
+  ]
+}

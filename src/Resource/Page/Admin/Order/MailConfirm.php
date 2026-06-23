@@ -37,10 +37,10 @@ class MailConfirm extends ResourceObject
     }
 
     /**
-     * ALPS `goAdminOrderMailConfirm` に対応する GET 操作。
+     * ALPS `goOrderMailConfirm` に対応する GET 操作。
      * @psalm-taint-source input $orderNo
      */
-    #[Alps('goAdminOrderMailConfirm')]
+    #[Alps('goOrderMailConfirm')]
     #[JsonSchema(schema: 'get-admin-order-mail-confirm.json', params: 'get-admin-order-mail-confirm.param.json')]
     #[Link(rel: 'doSendOrderMail', href: 'page://self/admin/order/send-mail', method: 'post')]
     #[Link(rel: 'goOrderMail', href: 'page://self/admin/order/send-mail', method: 'get')]

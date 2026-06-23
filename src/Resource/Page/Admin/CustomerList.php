@@ -64,12 +64,13 @@ class CustomerList extends ResourceObject
     #[Link(rel: 'doDeleteCustomer', href: 'page://self/admin/delete-customer', method: 'post')]
     #[Link(rel: 'doResendActivationMail', href: 'page://self/admin/customer/resend-activation-mail', method: 'post')]
     public function onGet(
+        string|null $multi = null,
         string|null $nameKeyword = null,
         string|null $emailKeyword = null,
         int $limit = 50,
     ): static {
         $final = ($this->becoming)(new GetCustomerListInput(
-            nameKeyword: $nameKeyword,
+            nameKeyword: $nameKeyword ?? $multi,
             emailKeyword: $emailKeyword,
             limit: $limit,
         ));

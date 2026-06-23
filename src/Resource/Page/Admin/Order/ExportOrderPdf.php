@@ -10,6 +10,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceObject;
 use Be\Framework\BecomingInterface;
 use Be\Framework\Exception\SemanticVariableException;
+use Ray\Csrf\Attribute\CsrfToken;
 use MyVendor\BeMart\Be\Exception\OrderNotFoundException;
 use MyVendor\BeMart\Be\Exception\UnauthorizedAdminAccessException;
 use MyVendor\BeMart\Be\Final\AdminOrderPdfExported;
@@ -57,6 +58,31 @@ class ExportOrderPdf extends ResourceObject
     #[Link(rel: 'goOrderList', href: 'page://self/admin/order-list')]
     #[Link(rel: 'goExportOrder', href: 'page://self/admin/order/export-order', method: 'get')]
     public function onGet(array|string $orderNos = [], string $orderNo = ''): static
+    {
+        return $this->export($orderNos, $orderNo);
+    }
+
+    /**
+     * EC-CUBE admin_order_pdf_download (POST) — the order_pdf.twig options form
+     * submits POST /admin/order/export-order-pdf. Same export pipeline as onGet.
+     *
+     * @param array<int, mixed>|string $orderNos
+     *
+     * @psalm-taint-source input $orderNos
+     * @psalm-taint-source input $orderNo
+     */
+    #[Alps('goExportOrderPdf')]
+    #[JsonSchema(schema: 'get-admin-order-export-order-pdf.json')]
+    #[CsrfToken]
+    public function onPost(array|string $orderNos = [], string $orderNo = ''): static
+    {
+        return $this->export($orderNos, $orderNo);
+    }
+
+    /**
+     * @param array<int, mixed>|string $orderNos
+     */
+    private function export(array|string $orderNos, string $orderNo): static
     {
         $normalizedOrderNos = $this->normalizeOrderNos($orderNos, $orderNo);
         if ($normalizedOrderNos === []) {
