@@ -86,14 +86,20 @@ class ForgotPassword extends ResourceObject
     #[JsonSchema(schema: 'post-forgot-password.json', params: 'post-forgot-password.param.json')]
     #[Link(rel: 'goLogin', href: 'page://self/login')]
     #[CsrfToken]
-    public function onPost(string $email): static
+    public function onPost(string $email, string|null $mode = null): static
     {
+        $browserForm = $mode !== null;
+
         $final = ($this->becoming)(new RequestPasswordResetInput(email: $email));
 
         assert($final instanceof PasswordResetRequested);
 
-        // Uniform 200 / uniform message — no enumeration signal.
-        $this->code = Code::OK;
+        // Post/Redirect/Get: a browser form submit (mode set) follows a 303 to
+        // the completion page so the user sees confirmation. The redirect is
+        // uniform whether or not the email exists, preserving the
+        // anti-enumeration property. JSON / hypermedia clients keep the 200 body.
+        $this->headers['Location'] = '/forgot-complete';
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
         $this->body = [
             'message' => 'リセット手続きのご案内をメールでお送りしました。',
         ];

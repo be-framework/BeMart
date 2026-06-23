@@ -117,6 +117,46 @@
       "maxLength": 96,
       "pattern": "^(go|do)[A-Z][A-Za-z0-9]*$",
       "example": "doAddCartItem"
+    },
+    "contactName01": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 255,
+      "title": "お問い合わせ者の姓",
+      "description": "確認画面で再表示するお問い合わせ者の姓。mode=confirm POST から引き継いだ入力値。"
+    },
+    "contactName02": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 255,
+      "title": "お問い合わせ者の名",
+      "description": "確認画面で再表示するお問い合わせ者の名。mode=confirm POST から引き継いだ入力値。"
+    },
+    "contactEmail": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 254,
+      "title": "お問い合わせ者のメールアドレス",
+      "description": "確認画面で再表示するお問い合わせ者のメールアドレス。mode=confirm POST から引き継いだ入力値。"
+    },
+    "contactContents": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 4000,
+      "title": "お問い合わせ本文",
+      "description": "確認画面で再表示するお問い合わせ本文。mode=confirm POST から引き継いだ入力値。"
     }
   },
   "additionalProperties": false,

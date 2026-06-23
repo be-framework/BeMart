@@ -45,7 +45,13 @@
       {% endfor %}
     </ul>
     {% endif %}
+    {% if code in [400, 409, 422] %}
+    {# Recoverable client error (validation / conflict): send the user BACK to the
+       form so their input is preserved, not to the home page which discards it. #}
+    <a class="error__home" href="/" onclick="history.back(); return false;">前のページへ戻る</a>
+    {% else %}
     <a class="error__home" href="/">トップへ戻る</a>
+    {% endif %}
   </main>
 </body>
 </html>

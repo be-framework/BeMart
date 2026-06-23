@@ -8,6 +8,7 @@ use BEAR\Resource\Code;
 use BEAR\Resource\Exception\BadRequestException;
 use BEAR\Resource\Exception\JsonSchemaException;
 use BEAR\Resource\Exception\JsonSchemaResponseException;
+use BEAR\Resource\Exception\ResourceNotFoundException;
 use Be\Framework\Exception\SemanticVariableException;
 use Be\Framework\SemanticVariable\ValidationMessageHandler;
 use Throwable;
@@ -160,6 +161,14 @@ final class ExceptionStatusMapper
             $message = preg_replace('/; by .+$/', '', $e->getMessage());
 
             return 'Invalid input. ' . ($message ?: 'Request parameters do not match the schema.');
+        }
+
+        // BEAR raises ResourceNotFoundException when no resource matches the
+        // request URI; its message is the internal `page://self/...` URI. That
+        // is an implementation detail that must never reach the browser — show
+        // EC-CUBE's faithful 404 copy instead (exception.error_title_not_found).
+        if ($e instanceof ResourceNotFoundException) {
+            return 'ページがみつかりません。';
         }
 
         if ($e instanceof BadRequestException && $e->getMessage() !== '') {

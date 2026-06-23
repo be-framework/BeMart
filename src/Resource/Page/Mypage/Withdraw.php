@@ -8,11 +8,10 @@ use BEAR\ApiDoc\Annotation\Alps;
 use Ray\Csrf\Attribute\CsrfToken;
 use BEAR\Resource\Annotation\Link;
 use BEAR\Resource\Code;
+use BEAR\Resource\ResourceInterface;
 use BEAR\Resource\ResourceObject;
 use MyVendor\BeMart\Support\Resource\MutationResponseInterface;
 use Be\Framework\BecomingInterface;
-use Be\Framework\Exception\SemanticVariableException;
-use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Final\CustomerWithdrawn;
 use MyVendor\BeMart\Be\Input\WithdrawCustomerInput;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
@@ -41,6 +40,7 @@ class Withdraw extends ResourceObject
         private readonly CustomerSession $session,
         private readonly CustomerQueryInterface $customerQuery,
         private readonly MutationResponseInterface $mutationResponse,
+        private readonly ResourceInterface $resource,
     ) {
     }
 
@@ -101,16 +101,45 @@ class Withdraw extends ResourceObject
 
     /**
      * ALPS `doWithdrawCustomer` に対応する POST 操作。
+     *
+     * EC-CUBE WithdrawController::index state machine (mode POST param):
+     *   confirm  -> render the final "退会手続きを実行してもよろしいでしょ
+     *               うか？" confirmation screen, NO side-effects (the
+     *               account stays ACTIVE — nothing is cleared/replaced/sent).
+     *   complete -> actually withdraw (run the WithdrawCustomerInput chain)
+     *               and 303 to /mypage/withdraw-complete.
+     *
+     * The FIRST warning page (`Page/Mypage/Withdraw.html.twig`, the "退会
+     * 手続きの前にご確認ください" screen) POSTs `mode=confirm`; clicking it
+     * must NOT withdraw — it only advances to the WithdrawConfirm review
+     * page. Only the WithdrawConfirm page's "はい、退会します" button
+     * (`mode=complete`) commits the withdrawal. This mirrors EC-CUBE
+     * exactly and prevents withdrawing from the first warning click.
+     *
+     * A JSON / hypermedia client sends no `mode`: it keeps the collapsed
+     * `doWithdrawCustomer` behaviour (withdraw immediately, 200 + body),
+     * so the Resource/Flow tests that drive the transition directly stay
+     * green.
+     *
      * @psalm-taint-source input $sessionPrefix
      */
     #[Alps('doWithdrawCustomer')]
     #[JsonSchema(schema: 'post-mypage-withdraw.json', params: 'post-mypage-withdraw.param.json')]
+    #[Link(rel: 'goMypageWithdrawConfirm', href: 'page://self/mypage/withdraw-confirm')]
     #[Link(rel: 'goMypageWithdrawComplete', href: 'page://self/mypage/withdraw-complete')]
     #[Link(rel: 'goTop', href: 'page://self/')]
     #[CsrfToken]
     public function onPost(
         string|null $sessionPrefix = null,
+        string|null $mode = null,
     ): static {
+        // EC-CUBE: `mode=confirm` shows the final confirmation screen WITHOUT
+        // performing the withdrawal. The account is left untouched (still
+        // ACTIVE); only the WithdrawConfirm page's `mode=complete` commits.
+        if ($mode === 'confirm') {
+            return $this->renderConfirm();
+        }
+
         $input = $sessionPrefix === null
             ? new WithdrawCustomerInput()
             : new WithdrawCustomerInput(sessionPrefix: $sessionPrefix);
@@ -125,6 +154,45 @@ class Withdraw extends ResourceObject
             'dummyEmail' => $final->dummyEmail,
             'cleared' => $final->cleared,
             'message' => '退会手続きが完了しました。',
+        ];
+
+        return $this;
+    }
+
+    /**
+     * EC-CUBE `mode=confirm` — render the final "退会手続きを実行しても
+     * よろしいでしょうか？" confirmation screen with NO side-effects.
+     *
+     * The withdrawal chain is NOT run here: the customer record stays
+     * ACTIVE, no cart is cleared and no mail is sent. The WithdrawConfirm
+     * resource renders `Page/Mypage/WithdrawConfirm.html.twig` whose "はい、
+     * 退会します" button POSTs `mode=complete` back to this route to actually
+     * withdraw. The rendered confirm page becomes this response's view, so
+     * the browser sees the review screen at `/mypage/withdraw` without a
+     * redirect (mirrors EC-CUBE's `render('Mypage/withdraw_confirm.twig')`).
+     *
+     * The body stays `post-mypage-withdraw.json`-shaped (nothing withdrawn
+     * yet — `cleared=false`, `dummyEmail` echoes the customer's still-current
+     * email so the email-typed field validates) so the response contract
+     * holds; the real user-visible signal lives in the rendered view.
+     */
+    private function renderConfirm(): static
+    {
+        $confirm = $this->resource->get('page://self/mypage/withdraw-confirm');
+
+        $customerId = $this->session->customerId;
+        $customer = $customerId === null ? null : $this->customerQuery->item($customerId);
+
+        $this->code = Code::OK;
+        $this->view = $confirm->toString();
+        $this->headers['Content-Type'] = 'text/html; charset=utf-8';
+        $this->body = [
+            'customerId' => $customer->customerId ?? null,
+            // Schema projection only — nothing withdrawn yet, so the real
+            // address is unchanged. Echo it into the email-typed field so the
+            // response schema (format:email, minLength 3) still validates.
+            'dummyEmail' => $customer->email ?? 'pending@example.test',
+            'cleared' => false,
         ];
 
         return $this;

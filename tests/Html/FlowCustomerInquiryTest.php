@@ -27,8 +27,12 @@ use function in_array;
  * Journey:
  *  1. GET / — index, assert goContactForm affordance
  *  2. GET /contact — contact form, assert doSubmitContact form
- *  3. POST /contact (mode=confirm, fields) — browser submit → 303 → /contact/complete?ticketId=…
- *  4. GET /contact/complete?ticketId=… — complete screen, assert ticketId
+ *  3. POST /contact (mode=confirm, fields) — render the read-only confirm
+ *     (review) screen; nothing is sent yet
+ *  4. POST /contact (mode=complete) from the confirm screen — send + 303 →
+ *     /contact/complete?ticketId=…
+ *  5. GET /contact/complete?ticketId=… — complete screen, assert ticketId
+ *  6. follow goTop back to the index
  *
  * Anonymous (no login). Only WorkflowDbSession::startWithCsrfToken is
  * needed; no customer/admin session is set.
@@ -88,17 +92,17 @@ final class FlowCustomerInquiryTest extends AbstractHtmlWorkflowTestCase
     }
 
     /**
-     * POST /contact with browser mode — expects 303 redirect to /contact/complete.
+     * POST /contact with mode=confirm — renders the read-only CONFIRM page.
      *
-     * The Contact resource detects browser mode when the `mode` param is
-     * non-null (the submit button sends name="mode" value="confirm").
-     * A successful browser submit returns 303 + Location.
+     * EC-CUBE ContactController: mode=confirm renders the review screen, it
+     * does NOT send. The entered inquiry is re-shown read-only AND carried
+     * forward as hidden inputs so the final 送信する can re-post it.
      */
     #[Alps('doSubmitContact')]
     #[Depends('testContactForm')]
-    public function testDoSubmitContact(ResourceObject $contact): ResourceObject
+    public function testDoSubmitContactConfirm(ResourceObject $contact): ResourceObject
     {
-        $submitted = $this->submit($contact, 'doSubmitContact', [
+        $confirm = $this->submit($contact, 'doSubmitContact', [
             'contactName01' => '山田',
             'contactName02' => '花子',
             'contactEmail' => self::CONTACT_EMAIL,
@@ -106,27 +110,48 @@ final class FlowCustomerInquiryTest extends AbstractHtmlWorkflowTestCase
             'mode' => 'confirm',
         ]);
 
+        // The confirm review screen — NOT a redirect to completion, NOT a send.
+        $this->assertSame(Code::OK, $confirm->code, (string) ($confirm->view ?? $confirm->code));
+        $this->assertNull($this->header($confirm, 'Location'));
+        $view = (string) ($confirm->view ?? '');
+        $this->assertStringContainsString('ec-contactConfirmRole', $view);
+        $this->assertStringContainsString('送信する', $view);
+        $this->assertStringContainsString('HTML workflow E2E pilot — お問い合わせ内容です。', $view);
+
+        return $confirm;
+    }
+
+    /**
+     * POST /contact from the confirm screen with mode=complete — actually
+     * sends and 303-redirects to /contact/complete?ticketId=…
+     */
+    #[Alps('doSubmitContact')]
+    #[Depends('testDoSubmitContactConfirm')]
+    public function testDoSubmitContactComplete(ResourceObject $confirm): ResourceObject
+    {
+        $committed = $this->submit($confirm, 'doSubmitContact', ['mode' => 'complete']);
+
         $this->assertTrue(
-            in_array($submitted->code, [Code::OK, Code::CREATED, Code::SEE_OTHER], true),
-            (string) ($submitted->view ?? $submitted->code),
+            in_array($committed->code, [Code::OK, Code::CREATED, Code::SEE_OTHER], true),
+            (string) ($committed->view ?? $committed->code),
         );
 
-        $location = $this->header($submitted, 'Location');
+        $location = $this->header($committed, 'Location');
         if ($location !== null) {
             $this->assertStringContainsString('ticketId', $location);
 
-            return $this->followLocation($submitted, $location);
+            return $this->followLocation($committed, $location);
         }
 
         // If the server already followed the redirect internally and returned
         // the complete page at 200, assert the complete screen rendered.
-        $this->assertStringContainsString('お問い合わせ', (string) ($submitted->view ?? ''));
+        $this->assertStringContainsString('お問い合わせ', (string) ($committed->view ?? ''));
 
-        return $submitted;
+        return $committed;
     }
 
     #[Alps('ContactComplete')]
-    #[Depends('testDoSubmitContact')]
+    #[Depends('testDoSubmitContactComplete')]
     public function testContactComplete(ResourceObject $response): ResourceObject
     {
         $this->assertSame(Code::OK, $response->code, (string) ($response->view ?? $response->code));

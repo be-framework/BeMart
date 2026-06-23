@@ -16,6 +16,18 @@
       "description": "購入フローのカートキーを構成するセッションスコープの接頭辞。saleTypeId と組み合わせて販売種別ごとのカートを分離する。 Fake観察文字長 16〜23; 観察値 'session-prefix-1', 'session-checkout-pilot5'。",
       "example": "session-prefix-1",
       "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
+    "mode": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 16,
+      "title": "退会フォームの送信モード",
+      "description": "EC-CUBE WithdrawController の mode 状態遷移パラメータ。'confirm'=最終確認画面の表示（退会は実行しない）, 'complete'=退会の実行。未指定（JSON/ハイパーメディアクライアント）は退会を即時実行する縮約遷移。",
+      "example": "confirm",
+      "$comment": "Submit-button value; drives the confirm/complete state machine. Transport-level only — business meaning is enforced in the Resource."
     }
   },
   "additionalProperties": false,

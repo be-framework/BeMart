@@ -111,7 +111,7 @@ class ShippingMultipleEdit extends ResourceObject
      * @psalm-taint-source input $addr02
      * @psalm-taint-source input $phoneNumber
      */
-    #[Alps('doUpdateShippingAddress')]
+    #[Alps('doAddMultipleShippingAddress')]
     #[JsonSchema(schema: 'post-shopping-shipping-multiple-edit.json', params: 'post-shopping-shipping-multiple-edit.param.json')]
     #[Link(rel: 'goShoppingShippingMultiple', href: 'page://self/shopping/shipping-multiple')]
     #[CsrfToken]
@@ -130,7 +130,7 @@ class ShippingMultipleEdit extends ResourceObject
         $this->code = Code::SEE_OTHER;
         $this->headers['Location'] = '/shopping/shipping-multiple';
         $this->body = [
-            'transitionId' => 'doUpdateShippingAddress',
+            'transitionId' => 'doAddMultipleShippingAddress',
             'name01' => $name01,
             'name02' => $name02,
             'kana01' => $kana01,

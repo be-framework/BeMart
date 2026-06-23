@@ -5,6 +5,18 @@
   "description": "GET /admin/customer-list request parameters の request parameter schema。ALPSの意味、be/var/fakeの観察値、Resource境界の実形状から導いたSemantic-Ex制約。",
   "type": "object",
   "properties": {
+    "multi": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "minLength": 0,
+      "maxLength": 255,
+      "title": "検索キーワード",
+      "description": "/admin/customer-list の検索フォーム(キーワード)。会員ID・メール・お名前を横断する自由入力。BeMart 移植では名前(name01/name02/companyName)部分一致へ委譲する。",
+      "example": "鈴木",
+      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+    },
     "nameKeyword": {
       "type": [
         "string",

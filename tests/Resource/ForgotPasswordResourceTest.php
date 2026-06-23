@@ -71,4 +71,21 @@ final class ForgotPasswordResourceTest extends TestCase
         ]);
     }
 
+    /**
+     * A REAL browser form submit (the 次へ button carries name="mode") must
+     * Post/Redirect/Get to the completion page so the user sees confirmation.
+     * Previously onPost returned 200 with a body message the template never
+     * rendered, so the user saw the same form with no observable feedback.
+     */
+    public function testBrowserFormSubmitRedirectsToCompletePage(): void
+    {
+        $ro = $this->resource->post('page://self/forgot-password', [
+            'email' => 'alice@example.com',
+            'mode' => 'commit',
+            'csrfToken' => FakeCsrfToken::TOKEN,
+        ]);
+
+        $this->assertSame(Code::SEE_OTHER, $ro->code);
+        $this->assertSame('/forgot-complete', $ro->headers['Location']);
+    }
 }

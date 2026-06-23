@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace MyVendor\BeMart\Module;
 
+use MyVendor\BeMart\Auth\CartSessionPrefixInterface;
+use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use Override;
 use Ray\Di\Di\Named;
 use Ray\Di\ProviderInterface;
@@ -26,9 +28,11 @@ final class HtmlTwigEnvironmentProvider implements ProviderInterface
     public function __construct(
         #[Named('original')]
         private readonly Environment $twig,
+        CartSessionPrefixInterface $cartSessionPrefix,
+        CartQueryInterface $cartQuery,
     ) {
         if (! $twig->hasExtension(BeMartTwigExtension::class)) {
-            $twig->addExtension(new BeMartTwigExtension());
+            $twig->addExtension(new BeMartTwigExtension($cartSessionPrefix, $cartQuery));
         }
     }
 

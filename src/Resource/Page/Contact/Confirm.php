@@ -12,6 +12,8 @@ use MyVendor\BeMart\Form\ContactConfirmForm;
 use Ray\WebFormModule\FormFactory;
 use BEAR\Resource\Annotation\JsonSchema;
 
+use function assert;
+
 /**
  * EC-CUBE goContactConfirm — お問い合わせ(確認)
  * (Phase 3 — thin pure renderer).
@@ -51,17 +53,37 @@ class Confirm extends ResourceObject
     }
 
     /**
-     * ALPS `goContactForm` に対応する GET 操作。
-     * @todo Enrichment backlog: thread the submitted inquiry payload into
-     *     the confirm step so the value cells re-show the entered data.
-     *     Requires a `mode=confirm` POST handler ahead of doSubmitContact.
+     * EC-CUBE goContactConfirm — render the inquiry-confirm (review) screen.
+     *
+     * The four inquiry values are optional GET params: when the confirm
+     * step is reached from a `mode=confirm` POST (see {@see \MyVendor\BeMart\Resource\Page\Contact::onPost}),
+     * the entered inquiry is threaded in so the plain-text value cells
+     * re-show the submitted data AND the hidden ContactConfirmForm carriers
+     * repopulate, so the final 送信する submit re-posts the full inquiry to
+     * doSubmitContact. A bare GET (no values) renders the empty confirm
+     * scaffolding — JSON contexts ignore `body['form']`.
      */
     #[Alps('goContactForm')]
     #[JsonSchema(schema: 'get-contact-confirm.json')]
     #[Link(rel: 'doSubmitContact', href: 'page://self/contact', method: 'post')]
     #[Link(rel: 'goTop', href: 'page://self/')]
-    public function onGet(): static
-    {
+    public function onGet(
+        string|null $contactName01 = null,
+        string|null $contactName02 = null,
+        string|null $contactEmail = null,
+        string|null $contactContents = null,
+    ): static {
+        $values = [
+            'contactName01' => $contactName01 ?? '',
+            'contactName02' => $contactName02 ?? '',
+            'contactEmail' => $contactEmail ?? '',
+            'contactContents' => $contactContents ?? '',
+        ];
+
+        $form = $this->formFactory->newInstance(ContactConfirmForm::class);
+        assert($form instanceof ContactConfirmForm);
+        $form->fillValues($values);
+
         $this->code = Code::OK;
         $this->body = [
             'transitionId' => 'goContactConfirm',
@@ -74,10 +96,15 @@ class Confirm extends ResourceObject
                 'page' => 'contact-confirm',
                 'title' => 'お問い合わせ',
             ],
-            // Phase 3: the confirm screen carries the inquiry payload as
-            // hidden inputs — a ContactConfirmForm (every field `hidden`).
-            // JSON contexts ignore `body['form']`.
-            'form' => $this->formFactory->newInstance(ContactConfirmForm::class),
+            // Plain-text value cells re-show the entered inquiry.
+            'contactName01' => $values['contactName01'],
+            'contactName02' => $values['contactName02'],
+            'contactEmail' => $values['contactEmail'],
+            'contactContents' => $values['contactContents'],
+            // The confirm screen carries the inquiry payload as hidden
+            // inputs — a ContactConfirmForm (every field `hidden`),
+            // repopulated with the entered values. JSON contexts ignore it.
+            'form' => $form,
         ];
 
         return $this;

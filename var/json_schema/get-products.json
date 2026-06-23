@@ -87,8 +87,8 @@
             "string",
             "null"
           ],
-          "pattern": "^[0-9]+$",
-          "minLength": 1,
+          "pattern": "^[0-9]*$",
+          "minLength": 0,
           "maxLength": 10,
           "title": "選択中カテゴリID",
           "description": "/products の検索フォームに再表示する選択中カテゴリID。HTTP query由来の文字列値で、カテゴリ絞り込み条件を保持する。",

@@ -54,12 +54,12 @@
         "string",
         "null"
       ],
-      "pattern": "^[0-9]+$",
-      "minLength": 1,
+      "pattern": "^[0-9]*$",
+      "minLength": 0,
       "maxLength": 10,
       "title": "カテゴリID（検索入力）",
       "description": "/products のカテゴリ絞り込みでHTML query stringとして送られるカテゴリID。Resource境界では文字列で受け取り、カテゴリ名解決に使う。",
-      "$comment": "HTTP query parameterは文字列として届くためtransport schemaではstring|nullを許容する。数値性はpatternで表し、存在しないカテゴリはResource側で未絞り込みまたは0件として扱う。"
+      "$comment": "HTTP query parameterは文字列として届くためtransport schemaではstring|nullを許容する。空文字は「全ての商品」(絞り込みなし)を表すため許可し、数値性はpatternで表す。存在しないカテゴリはResource側で未絞り込みまたは0件として扱う。"
     },
     "pageno": {
       "type": [

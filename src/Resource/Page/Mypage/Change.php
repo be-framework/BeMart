@@ -140,7 +140,10 @@ class Change extends ResourceObject
         int|null $pref = null,
         string|null $addr01 = null,
         string|null $addr02 = null,
+        string|null $mode = null,
     ): static {
+        $browserForm = $mode !== null;
+
         $final = ($this->becoming)(new UpdateCustomerInput(
             email: $email,
             name01: $name01,
@@ -157,7 +160,14 @@ class Change extends ResourceObject
 
         assert($final instanceof CustomerUpdated);
 
-        $this->code = Code::OK;
+        // Post/Redirect/Get (EC-CUBE ChangeController::index): a browser form
+        // submit (mode set) follows a 303 to the change-complete page so the
+        // user sees an observable confirmation. Previously onPost returned 200
+        // and the Change template re-rendered the same edit form, so a
+        // successful profile edit showed no feedback. JSON / hypermedia clients
+        // (no mode) keep the 200 body.
+        $this->headers['Location'] = '/mypage/change-complete';
+        $this->code = $browserForm ? Code::SEE_OTHER : Code::OK;
         $this->body = [
             'customerId' => $final->customerId,
             'email' => $final->email,

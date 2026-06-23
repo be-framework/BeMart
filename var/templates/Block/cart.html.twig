@@ -1,22 +1,28 @@
 {#
-  EC-CUBE default-theme Block/cart.twig static-empty port.
+  EC-CUBE default-theme Block/cart.twig port.
 
-  The frame does not yet receive cart totals, so render the empty-cart
-  display with a real link to the cart page. The full hover mini-cart is
-  a later shared-block enrichment.
+  The header cart navi reflects the LIVE session cart: cart_summary()
+  (BeMartTwigExtension, html context) resolves the current cart-key prefix
+  and sums quantity + price across the session's carts. Badge/price were
+  previously hardcoded to 0, so a cart with items still showed "0" in the
+  header. The full hover mini-cart item list is a later enrichment; the
+  badge, price and empty-state now track the real cart.
 #}
+{% set cart = cart_summary() %}
 <div class="ec-cartNaviWrap">
-    <a class="ec-cartNavi" href="/cart">
+    <a class="ec-cartNavi{% if cart.quantity > 0 %} ec-cartNavi--active{% endif %}" href="/cart">
         <i class="ec-cartNavi__icon fas fa-shopping-cart">
-            <span class="ec-cartNavi__badge">0</span>
+            <span class="ec-cartNavi__badge">{{ cart.quantity }}</span>
         </i>
         <div class="ec-cartNavi__label">
-            <div class="ec-cartNavi__price">{{ 0|price }}</div>
+            <div class="ec-cartNavi__price">{{ cart.price|price }}</div>
         </div>
     </a>
+    {% if cart.quantity == 0 %}
     <div class="ec-cartNaviNull">
         <div class="ec-cartNaviNull__message">
             <p>現在カート内に商品はございません。</p>
         </div>
     </div>
+    {% endif %}
 </div>
