@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Tests\Http;
 
 use Koriym\PhpServer\PhpServer;
+use PDO;
 use PHPUnit\Framework\TestCase;
 
 use function escapeshellarg;
@@ -12,6 +13,8 @@ use function explode;
 use function html_entity_decode;
 use function http_build_query;
 use function is_string;
+use function parse_str;
+use function parse_url;
 use function preg_match;
 use function preg_match_all;
 use function preg_split;
@@ -200,6 +203,16 @@ final class HttpSqlMemberPurchaseToOrderTest extends TestCase
         $this->assertStringContainsString('<h1>ご注文内容のご確認</h1>', $confirm['body']);
         $this->assertStringContainsString('注文する', $confirm['body']);
 
+        // お客様情報 regression: the confirm page MUST show the logged-in
+        // member's real name (dtb_customer id=4 = 鈴木次郎), NOT "- - 様".
+        // The member flow builds no customerSnapshot, so order_register.sql
+        // must copy the customer's name/address into the order; without that
+        // copy the snapshot rebuilt from the order columns is a non-empty bag
+        // of '-', defeating OrderConfirmed's customerFromEntity fallback.
+        $this->assertStringContainsString('鈴木', $confirm['body'], 'confirm page must show member name01 鈴木');
+        $this->assertStringContainsString('次郎', $confirm['body'], 'confirm page must show member name02 次郎');
+        $this->assertStringNotContainsString('- - 様', $confirm['body'], 'confirm お客様情報 must not be the empty "- - 様"');
+
         // The 注文する button MUST carry mode=complete so the browser POST
         // redirects instead of stranding the member on /shopping/checkout.
         $this->assertStringContainsString(
@@ -230,6 +243,55 @@ final class HttpSqlMemberPurchaseToOrderTest extends TestCase
         $this->assertStringContainsString('ご注文完了', $complete['body']);
         $this->assertStringNotContainsString('Service Unavailable', $complete['body']);
         $this->assertStringNotContainsString('Fatal error', $complete['body']);
+
+        // 9. the PERSISTED order row must carry the member's real name, not '-'.
+        $placed = $this->placedOrderName($orderNo);
+        $this->assertSame('鈴木', $placed['name01'], 'persisted dtb_order.name01 must be the member name, not "-"');
+        $this->assertSame('次郎', $placed['name02'], 'persisted dtb_order.name02 must be the member name, not "-"');
+    }
+
+    /**
+     * Query the freshly-placed dtb_order row's name01/name02 straight from the
+     * test DB (DATABASE_URL = the same eccubedb_test the HTTP stack writes to),
+     * proving the persisted order carries the member's real name.
+     *
+     * @return array{name01: string, name02: string}
+     */
+    private function placedOrderName(string $orderNo): array
+    {
+        $databaseUrl = $_ENV['DATABASE_URL'] ?? $_SERVER['DATABASE_URL'] ?? null;
+        if (! is_string($databaseUrl) || $databaseUrl === '') {
+            self::markTestSkipped('DATABASE_URL is not set; member order name regression requires the eccubedb_test DB.');
+        }
+
+        $parts = parse_url($databaseUrl);
+        $this->assertIsArray($parts);
+        $query = [];
+        if (isset($parts['query']) && is_string($parts['query'])) {
+            parse_str($parts['query'], $query);
+        }
+
+        $dsn = sprintf(
+            'mysql:host=%s;port=%d;dbname=%s;charset=%s',
+            $parts['host'] ?? '127.0.0.1',
+            (int) ($parts['port'] ?? 3306),
+            trim((string) ($parts['path'] ?? ''), '/'),
+            is_string($query['charset'] ?? null) ? $query['charset'] : 'utf8mb4',
+        );
+
+        $pdo = new PDO(
+            $dsn,
+            $parts['user'] ?? 'root',
+            $parts['pass'] ?? '',
+            [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION],
+        );
+
+        $stmt = $pdo->prepare('SELECT name01, name02 FROM dtb_order WHERE order_no = :orderNo LIMIT 1');
+        $stmt->execute([':orderNo' => $orderNo]);
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        $this->assertIsArray($row, 'placed order ' . $orderNo . ' not found in dtb_order');
+
+        return ['name01' => (string) $row['name01'], 'name02' => (string) $row['name02']];
     }
 
     /**

@@ -51,6 +51,26 @@ SELECT
       ),
       ''
     ),
+    (
+      SELECT
+        c.name01
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    ),
     '-'
   ),
   COALESCE(
@@ -61,49 +81,201 @@ SELECT
       ),
       ''
     ),
+    (
+      SELECT
+        c.name02
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    ),
     '-'
   ),
-  NULLIF(
-    JSON_VALUE(
-      CAST(:order AS CHAR),
-      '$.customerSnapshot.kana01'
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.kana01'
+      ),
+      ''
     ),
-    ''
+    (
+      SELECT
+        c.kana01
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   ),
-  NULLIF(
-    JSON_VALUE(
-      CAST(:order AS CHAR),
-      '$.customerSnapshot.kana02'
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.kana02'
+      ),
+      ''
     ),
-    ''
+    (
+      SELECT
+        c.kana02
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   ),
-  NULLIF(
-    JSON_VALUE(
-      CAST(:order AS CHAR),
-      '$.customerSnapshot.companyName'
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.companyName'
+      ),
+      ''
     ),
-    ''
+    (
+      SELECT
+        c.company_name
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   ),
-  NULLIF(
-    JSON_VALUE(
-      CAST(:order AS CHAR),
-      '$.customerSnapshot.email'
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.email'
+      ),
+      ''
     ),
-    ''
+    (
+      SELECT
+        c.email
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   ),
-  NULLIF(
-    JSON_VALUE(
-      CAST(:order AS CHAR),
-      '$.customerSnapshot.phoneNumber'
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.phoneNumber'
+      ),
+      ''
     ),
-    ''
+    (
+      SELECT
+        c.phone_number
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   ),
-  NULLIF(
-    JSON_VALUE(
-      CAST(:order AS CHAR),
-      '$.customerSnapshot.postalCode'
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.postalCode'
+      ),
+      ''
     ),
-    ''
+    (
+      SELECT
+        c.postal_code
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   ),
   CASE WHEN JSON_VALUE(
     CAST(:order AS CHAR),
@@ -116,21 +288,84 @@ SELECT
       ) AS UNSIGNED
     )
   ELSE
-    NULL
+    (
+      SELECT
+        c.pref_id
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   END,
-  NULLIF(
-    JSON_VALUE(
-      CAST(:order AS CHAR),
-      '$.customerSnapshot.addr01'
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.addr01'
+      ),
+      ''
     ),
-    ''
+    (
+      SELECT
+        c.addr01
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   ),
-  NULLIF(
-    JSON_VALUE(
-      CAST(:order AS CHAR),
-      '$.customerSnapshot.addr02'
+  COALESCE(
+    NULLIF(
+      JSON_VALUE(
+        CAST(:order AS CHAR),
+        '$.customerSnapshot.addr02'
+      ),
+      ''
     ),
-    ''
+    (
+      SELECT
+        c.addr02
+      FROM
+        dtb_customer c
+      WHERE
+        c.id = CASE WHEN JSON_VALUE(
+          CAST(:order AS CHAR),
+          '$.customerId'
+        ) REGEXP '^[0-9]+$' THEN
+          CAST(
+            JSON_VALUE(
+              CAST(:order AS CHAR),
+              '$.customerId'
+            ) AS UNSIGNED
+          )
+        ELSE
+          NULL
+        END
+    )
   ),
   CAST(
     JSON_VALUE(
