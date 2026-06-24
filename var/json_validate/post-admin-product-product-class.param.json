@@ -15,19 +15,23 @@
     },
     "price02": {
       "title": "販売価格",
-      "description": "登録する規格(SKU)の販売価格（税抜）。日本円の整数金額。",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 999999999,
+      "description": "登録する規格(SKU)の販売価格（税抜）。日本円の整数金額。ブラウザは text input を文字列として送信し、空欄は空文字列で届くため、transport では string/null も受け入れて Resource 境界で int に正規化する。",
+      "type": [
+        "integer",
+        "string",
+        "null"
+      ],
       "example": 1200,
-      "$comment": "Request schema is transport-level; business invalid values are allowed through to Resource/Semantic validation."
+      "$comment": "Request schema is transport-level; a browser posts text inputs as strings and blank fields as empty strings. Business invalid values are allowed through to Resource/Semantic validation."
     },
     "stock": {
       "title": "在庫数",
-      "description": "登録する規格(SKU)の物理在庫数。stockUnlimited=true の場合は無視される。",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 2147483647,
+      "description": "登録する規格(SKU)の物理在庫数。stockUnlimited=true の場合は無視される。ブラウザは文字列として送信し、空欄は空文字列で届く。",
+      "type": [
+        "integer",
+        "string",
+        "null"
+      ],
       "default": 0,
       "example": 10
     },

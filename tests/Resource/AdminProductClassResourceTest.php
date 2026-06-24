@@ -88,12 +88,15 @@ final class AdminProductClassResourceTest extends TestCase
 
     public function testRegisterReturns201(): void
     {
+        // EXACT browser field names: the AdminProductClassForm leaf SKU
+        // (`product_code`) plus snake_case price/stock/unlimited/fee.
         $ro = $this->resource->post('page://self/admin/product/product-class', [
             'productCode' => 'admin-active-001',
+            'product_code' => 'admin-active-001-2',
             'price02' => 1200,
             'stock' => 10,
-            'stockUnlimited' => false,
-            'deliveryFee' => 0,
+            'stock_unlimited' => false,
+            'delivery_fee' => 0,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
 
@@ -112,6 +115,8 @@ final class AdminProductClassResourceTest extends TestCase
             'productCode' => 'admin-active-001',
             'price02' => 1200,
             'stock' => 10,
+            'stock_unlimited' => false,
+            'delivery_fee' => 0,
             'csrfToken' => FakeCsrfToken::TOKEN,
         ]);
     }

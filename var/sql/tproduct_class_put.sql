@@ -12,15 +12,13 @@ SELECT
   ),
   (
     SELECT
-      p.id
+      pc.product_id
     FROM
-      dtb_product AS p
+      dtb_product_class AS pc
     WHERE
-      p.id = CAST(
-        JSON_VALUE(
-          CAST(:productClass AS CHAR),
-          '$.productCode'
-        ) AS UNSIGNED
+      pc.product_code = JSON_VALUE(
+        CAST(:productClass AS CHAR),
+        '$.productCode'
       )
     LIMIT
       1
