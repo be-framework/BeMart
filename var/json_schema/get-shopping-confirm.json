@@ -92,22 +92,25 @@
       "example": 2
     },
     "customer": {
-      "type": [
-        "array",
-        "null",
-        "object"
-      ],
+      "type": "object",
       "title": "会員詳細",
-      "description": "/shopping/confirm のレスポンスで扱う会員詳細。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。",
-      "items": {
-        "type": "string",
-        "title": "会員",
-        "minLength": 0,
-        "maxLength": 255,
-        "description": "/shopping/confirm のレスポンスに含まれる会員。親コレクション `customer` の1行を表し、固定できる業務列はschema propertyで明示する。"
+      "description": "注文確認の宛名・送付先。会員ログイン時は dtb_customer のスナップショット、ゲスト時は非会員フォームの値。氏名とメールは必須、住所・カナ等は未登録なら null。get-shopping-non-member と同じ語彙。",
+      "properties": {
+        "name01": { "type": "string", "title": "姓", "minLength": 1, "maxLength": 255 },
+        "name02": { "type": "string", "title": "名", "minLength": 1, "maxLength": 255 },
+        "kana01": { "type": ["string", "null"], "title": "セイ", "maxLength": 255 },
+        "kana02": { "type": ["string", "null"], "title": "メイ", "maxLength": 255 },
+        "companyName": { "type": ["string", "null"], "title": "会社名", "maxLength": 255 },
+        "email": { "type": "string", "title": "メールアドレス", "maxLength": 254 },
+        "phoneNumber": { "type": ["string", "null"], "title": "電話番号", "maxLength": 13 },
+        "postalCode": { "type": ["string", "null"], "title": "郵便番号", "maxLength": 8 },
+        "pref": { "type": ["integer", "null"], "title": "都道府県ID", "minimum": 0, "maximum": 47 },
+        "addr01": { "type": ["string", "null"], "title": "住所1", "maxLength": 255 },
+        "addr02": { "type": ["string", "null"], "title": "住所2", "maxLength": 255 }
       },
-      "minItems": 0,
-      "$comment": "単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。"
+      "required": ["name01", "name02", "email"],
+      "additionalProperties": false,
+      "$comment": "旧定義は items が裸の string（minLength:0）で name01 等の業務フィールドを1つも固定していなかった（opaque-bag）。会員氏名の欠落が検証を素通りし確認画面に '- - 様' を出した不具合（commit 503a38ee）を機に、宛名・送付先の業務フィールドを property として型付けし、常時存在する氏名・メールを required にした。"
     },
     "deliveryFeeTotal": {
       "title": "送料合計",
