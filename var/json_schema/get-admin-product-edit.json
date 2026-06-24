@@ -12,26 +12,85 @@
         "null"
       ],
       "title": "入力フォーム",
-      "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
-      "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+      "description": "HTMLフォーム描画専用の Ray\\WebFormModule フォームオブジェクト（/admin/product/{id}/edit の商品編集フォーム AdminProductEditForm）。HTML/Twig 層が実際の <input>/<select> を描画するためにのみ body['form'] に注入され、JSONコンテキストは無視する。",
+      "$comment": "意図的に緩い契約：body['form'] は AbstractForm オブジェクト（AdminProductEditForm、HTML の <input>/<select> 描画用）で、クリーンな業務データに serialize されない。業務フィールドを required にすると GET 応答が 500 になる（get-shopping.json で実証済み）。型/items/properties/required は緩いまま維持すること。業務値の検証は request 境界およびフォーム送信先（doCreateProduct 等）が担う。"
     },
     "product": {
       "type": [
-        "array",
-        "null",
-        "object"
+        "object",
+        "null"
       ],
       "title": "商品詳細",
-      "description": "/admin/product/edit のレスポンスで扱う商品詳細。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。",
-      "items": {
-        "type": "string",
-        "title": "商品",
-        "minLength": 0,
-        "maxLength": 255,
-        "description": "/admin/product/edit のレスポンスに含まれる商品。親コレクション `product` の1行を表し、固定できる業務列はschema propertyで明示する。"
+      "description": "/admin/product/edit のレスポンスで扱う商品詳細。productCode 指定時は AdminProductFetched から投影した単一商品オブジェクト、ブランク（新規登録）画面では null。各業務列の型は Final の宣言型に一致する。",
+      "additionalProperties": false,
+      "required": [
+        "productCode",
+        "productName",
+        "price02",
+        "stock",
+        "productStatus",
+        "description",
+        "searchWord",
+        "note"
+      ],
+      "properties": {
+        "productCode": {
+          "$ref": "#/$defs/productCode"
+        },
+        "productName": {
+          "title": "商品名",
+          "description": "管理画面で表示・編集する商品名。AdminProductFetched.productName（非null string）。",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 255,
+          "example": "サンプル商品"
+        },
+        "price02": {
+          "$ref": "#/$defs/price"
+        },
+        "stock": {
+          "title": "在庫数",
+          "description": "現在在庫数。無制限在庫の商品では null。AdminProductFetched.stock（int|null）。",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 2147483647,
+          "example": 100
+        },
+        "productStatus": {
+          "$ref": "#/$defs/productStatus"
+        },
+        "description": {
+          "title": "商品説明",
+          "description": "商品詳細説明文。未設定時は null。AdminProductFetched.description（string|null）。",
+          "type": [
+            "string",
+            "null"
+          ],
+          "example": "商品の説明文です。"
+        },
+        "searchWord": {
+          "title": "検索ワード",
+          "description": "フロント検索でヒットさせる補助キーワード。未設定時は null。AdminProductFetched.searchWord（string|null）。",
+          "type": [
+            "string",
+            "null"
+          ],
+          "example": "セール 新商品"
+        },
+        "note": {
+          "title": "管理用メモ",
+          "description": "管理画面専用の備考。フロントには出さない。未設定時は null。AdminProductFetched.note（string|null）。",
+          "type": [
+            "string",
+            "null"
+          ],
+          "example": "仕入れ先メモ"
+        }
       },
-      "minItems": 0,
-      "$comment": "単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。"
+      "$comment": "productCode 指定時は AdminProductFetched（ProductEntity 投影）から8キー固定のobjectを emit。ブランク登録画面は product=null。型は Final の宣言型に1:1対応。nullable列（stock/description/searchWord/note）は null を許容。"
     },
     "productCode": {
       "title": "商品コード",

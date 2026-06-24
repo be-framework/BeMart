@@ -25,26 +25,48 @@
         "null"
       ],
       "title": "入力フォーム",
-      "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
-      "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+      "description": "HTMLフォーム描画専用の Ray\\WebFormModule フォームオブジェクト（/admin/delivery/delivery の配送業者編集フォーム AdminDeliveryForm）。HTML/Twig 層が実際の <input>/<select> を描画するためにのみ body['form'] に注入され、JSONコンテキストは無視する。",
+      "$comment": "意図的に緩い契約：body['form'] は AbstractForm オブジェクト（AdminDeliveryForm、HTML の <input>/<select> 描画用）で、クリーンな業務データに serialize されない。業務フィールドを required にすると GET 応答が 500 になる（get-shopping.json で実証済み）。型/items/properties/required は緩いまま維持すること。業務値の検証は request 境界およびフォーム送信先（doUpdateDelivery 等）が担う。"
     },
     "delivery": {
       "type": [
-        "array",
-        "null",
-        "object"
+        "object",
+        "null"
       ],
       "title": "配送方法詳細",
-      "description": "/admin/delivery/delivery のレスポンスで扱う配送方法詳細。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。",
-      "items": {
-        "type": "string",
-        "title": "配送方法",
-        "minLength": 0,
-        "maxLength": 255,
-        "description": "/admin/delivery/delivery のレスポンスに含まれる配送方法。親コレクション `delivery` の1行を表し、固定できる業務列はschema propertyで明示する。"
+      "description": "/admin/delivery/delivery の編集レスポンスで扱う配送方法詳細1行。AdminDeliveryListFetched.deliveries の該当行（DeliveryEntity 由来）をそのまま body['delivery'] に載せる。deliveryId が空（新規作成フォーム）または未知IDのGET初期表示では null。既知IDでは {deliveryId, deliveryName, visible} の固定3キーが必ず揃う。",
+      "additionalProperties": false,
+      "required": [
+        "deliveryId",
+        "deliveryName",
+        "visible"
+      ],
+      "properties": {
+        "deliveryId": {
+          "title": "配送方法ID",
+          "description": "dtb_delivery.id の不透明な文字列ハンドル。AdminDeliveryListFetched が DeliveryEntity.deliveryId を文字列として載せる。常に存在し非null。",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:@/-]+$",
+          "example": "del-yamato"
+        },
+        "deliveryName": {
+          "title": "配送方法名",
+          "description": "DeliveryEntity.deliveryName。dtb_delivery の表示名（例: ヤマト宅急便）。常に存在し非null。",
+          "type": "string",
+          "minLength": 0,
+          "maxLength": 255,
+          "example": "ヤマト宅急便"
+        },
+        "visible": {
+          "title": "表示フラグ",
+          "description": "DeliveryEntity.visible。true=チェックアウトで提示、false=ソフト非表示。DeliveryEntity が (bool) キャストして必ず boolean を返す。常に存在し非null。",
+          "type": "boolean",
+          "example": true
+        }
       },
-      "minItems": 0,
-      "$comment": "単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。"
+      "$comment": "単一編集画面では新規作成/未知IDのGET初期表示で null、既知ID取得済み状態で {deliveryId, deliveryName, visible} の固定3キー object。AdminDeliveryListFetched.deliveries の array_map が固定キー集合を生成するため additionalProperties:false。"
     }
   },
   "additionalProperties": false,

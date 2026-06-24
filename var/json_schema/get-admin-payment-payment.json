@@ -12,8 +12,8 @@
         "null"
       ],
       "title": "入力フォーム",
-      "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
-      "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+      "description": "HTMLフォーム描画専用の Ray\\WebFormModule フォームオブジェクト（/admin/payment/payment の支払方法編集フォーム AdminPaymentForm）。HTML/Twig 層が実際の <input>/<select> を描画するためにのみ body['form'] に注入され、JSONコンテキストは無視する。",
+      "$comment": "意図的に緩い契約：body['form'] は AbstractForm オブジェクト（AdminPaymentForm、HTML の <input>/<select> 描画用）で、クリーンな業務データに serialize されない。業務フィールドを required にすると GET 応答が 500 になる（get-shopping.json で実証済み）。型/items/properties/required は緩いまま維持すること。業務値の検証は request 境界およびフォーム送信先（doUpdatePayment 等）が担う。"
     },
     "paymentId": {
       "type": [
@@ -30,21 +30,76 @@
     },
     "payment": {
       "type": [
-        "array",
-        "null",
-        "object"
+        "object",
+        "null"
       ],
       "title": "支払方法詳細",
-      "description": "/admin/payment/payment のレスポンスで扱う支払方法詳細。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。",
-      "items": {
-        "type": "string",
-        "title": "支払方法",
-        "minLength": 0,
-        "maxLength": 255,
-        "description": "/admin/payment/payment のレスポンスに含まれる支払方法。親コレクション `payment` の1行を表し、固定できる業務列はschema propertyで明示する。"
+      "description": "/admin/payment/payment の編集レスポンスで扱う単一の支払方法マスタ行。`paymentId` 未指定の新規作成パスでは null、既知 id の編集時に PaymentMethodAdminEntity 由来の typed object が現れる（AdminPaymentListFetched::$payments の1行）。固定キー集合のため additionalProperties:false。",
+      "additionalProperties": false,
+      "properties": {
+        "paymentId": {
+          "title": "支払方法ID",
+          "description": "dtb_payment.id 由来の不透明文字列ハンドル。PaymentMethodAdminEntity::$paymentId は string（top-level paymentId と異なりこの行内では常に文字列）。Fake は 32桁hex、SQL は整数値の文字列化。",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:@/-]+$",
+          "example": "2"
+        },
+        "paymentMethodName": {
+          "title": "支払方法名",
+          "description": "表示名（例「クレジットカード」）。PaymentMethodAdminEntity::$paymentMethodName は非null string。",
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 255,
+          "example": "クレジットカード"
+        },
+        "charge": {
+          "title": "手数料",
+          "description": "EC-CUBEの商品価格・送料・手数料・売上金額。日本円の整数金額として扱う。PaymentMethodAdminEntity::$charge は非null int (>= 0)。",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 999999999,
+          "example": 300
+        },
+        "ruleMin": {
+          "title": "利用条件（下限）",
+          "description": "注文合計の下限。PaymentMethodAdminEntity::$ruleMin は int|null（null = 下限なし）。",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 999999999,
+          "example": 0
+        },
+        "ruleMax": {
+          "title": "利用条件（上限）",
+          "description": "注文合計の上限。PaymentMethodAdminEntity::$ruleMax は int|null（null = 上限なし）。",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 999999999,
+          "example": 50000
+        },
+        "visible": {
+          "title": "表示フラグ",
+          "description": "true = フロント表示, false = 論理非表示。PaymentMethodAdminEntity::$visible は非null bool（doDeletePayment が反転する soft-delete フラグ）。",
+          "type": "boolean",
+          "example": true
+        }
       },
-      "minItems": 0,
-      "$comment": "単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。"
+      "required": [
+        "paymentId",
+        "paymentMethodName",
+        "charge",
+        "ruleMin",
+        "ruleMax",
+        "visible"
+      ],
+      "$comment": "新規作成（paymentId='')では body['payment'] は null。編集時は AdminPaymentListFetched::$payments の1行（固定6キー）がそのまま入るため additionalProperties:false。ruleMin/ruleMax はキーは常に存在するが値が int|null のため required かつ type に null を許容。"
     }
   },
   "additionalProperties": false,

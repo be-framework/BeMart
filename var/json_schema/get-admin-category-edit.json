@@ -12,8 +12,8 @@
         "null"
       ],
       "title": "入力フォーム",
-      "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
-      "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+      "description": "HTMLフォーム描画専用の Ray\\WebFormModule フォームオブジェクト（/admin/category/category のカテゴリ編集フォーム AdminCategoryForm）。HTML/Twig 層が実際の <input>/<select> を描画するためにのみ body['form'] に注入され、JSONコンテキストは無視する。",
+      "$comment": "意図的に緩い契約：body['form'] は AbstractForm オブジェクト（AdminCategoryForm、HTML の <input>/<select> 描画用）で、クリーンな業務データに serialize されない。業務フィールドを required にすると GET 応答が 500 になる（get-shopping.json で実証済み）。型/items/properties/required は緩いまま維持すること。業務値の検証は request 境界およびフォーム送信先（doCreateCategory 等）が担う。"
     },
     "categories": {
       "type": [
@@ -85,21 +85,58 @@
     },
     "category": {
       "type": [
-        "array",
-        "null",
-        "object"
+        "object",
+        "null"
       ],
       "title": "カテゴリ詳細",
-      "description": "/admin/category/edit のレスポンスで扱うカテゴリ詳細。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。",
-      "items": {
-        "type": "string",
-        "title": "カテゴリ",
-        "minLength": 0,
-        "maxLength": 255,
-        "description": "/admin/category/edit のレスポンスに含まれるカテゴリ。親コレクション `category` の1行を表し、固定できる業務列はschema propertyで明示する。"
+      "description": "/admin/category/edit のレスポンスで扱うカテゴリ詳細。AdminCategoryFetched(Final)が構築する単一カテゴリの編集レコード。新規/未選択パス(categoryId='')ではnull、取得済みパスではcategoryId/categoryName/parentId/sortNoを持つobject。",
+      "properties": {
+        "categoryId": {
+          "type": "string",
+          "title": "カテゴリID",
+          "description": "dtb_category.id の不透明な文字列ハンドル。AdminCategoryFetched::$categoryId（非null）。Fake は 32桁hex、SQL は dtb_category.id を文字列化。",
+          "example": "cat-food",
+          "minLength": 0,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:@/-]*$",
+          "$comment": "BeMart/Fake境界で観察される不透明な文字列ID。DB採番値としての数値演算には使わない。"
+        },
+        "categoryName": {
+          "type": "string",
+          "title": "カテゴリ名",
+          "description": "カテゴリの表示名。AdminCategoryFetched::$categoryName（非null）。Fake観察文字長 4〜6; 観察値 'Food', 'Drinks'。",
+          "example": "Food",
+          "minLength": 0,
+          "maxLength": 255
+        },
+        "parentId": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "title": "親カテゴリID",
+          "description": "親カテゴリの不透明な文字列ハンドル。AdminCategoryFetched::$parentId（string|null、ルートカテゴリはnull）。自己参照FK parent_category_id を表す。",
+          "minLength": 0,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._:@/-]*$",
+          "$comment": "BeMart/Fake境界で観察される不透明な文字列ID。ルートカテゴリはnull。DB採番値としての数値演算には使わない。"
+        },
+        "sortNo": {
+          "type": "integer",
+          "title": "表示順",
+          "description": "一覧における並び順。AdminCategoryFetched::$sortNo（非null int）。Fake観察数値 1〜20。",
+          "minimum": 0,
+          "maximum": 2147483647,
+          "example": 1
+        }
       },
-      "minItems": 0,
-      "$comment": "単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。"
+      "required": [
+        "categoryId",
+        "categoryName",
+        "sortNo"
+      ],
+      "additionalProperties": false,
+      "$comment": "AdminCategoryFetched(Final)由来の固定キーセット。categoryId/categoryName/sortNoは常に非null、parentIdはルートカテゴリでnull。新規/未選択パスでは category 自体が null。"
     },
     "count": {
       "type": [

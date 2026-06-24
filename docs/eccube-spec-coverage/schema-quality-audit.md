@@ -2,6 +2,18 @@
 
 240 本のレスポンススキーマ全件分類に加え、書き込み SQL／ドメイン層の **sentinel-data** スキャンと、テストの **silent-skip** スキャンを統合した負債レポート。緑のまま素通りした契約・テストを洗い出し、優先度つきで是正順を示す。
 
+## 0. 是正ステータス（2026-06-24 完了）
+
+本監査が挙げた負債は全て是正済み。
+
+- **バグクラス（object\|array＋string-items の業務データ袋）= 全7インスタンスを型付き契約化**: storefront `get-shopping-confirm` の `customer`、admin の `get-admin-order.customer` / `get-admin-order-edit.order` / `get-admin-category-edit.category` / `get-admin-delivery-delivery.delivery` / `get-admin-payment-payment.payment` / `get-admin-product-edit.product`。いずれも実 HTTP（guest/member/admin）で 200 を確認し、teeth-probe でランタイム強制（不一致→500）を実証。
+- **render-only ノード 61本（`form`/`searchForm`）= ドキュメント化**: Ray\WebFormModule の AbstractForm オブジェクトで JSON は無視・業務データに serialize されない（型付けは 500）。意図的に緩い契約として description/$comment に明記。
+- **回帰ガード**: `tests/Hypermedia/SchemaContractQualityTest.php` ＋ `docs/eccube-spec-coverage/schema-render-only-baseline.json`（双方向レジストリ・ゲート）。新たな opaque object\|array ノードは「型付き契約化」または「render-only として baseline 登録」を強制。現在データ袋 0・baseline 61。
+- **silent-skip 3本**＝fail-loud 化、**sentinel** ＝ `order_register.sql` 1件に封じ込み済み（[セクション3・4](#3-sentinel-data-スキャンスコープは封じ込み済み)）。
+- 動的 key→label マップ（`orderStatusOptions` / `productStatusOptions`）はバグクラスではない（対象外）。
+
+以降は是正前のスナップショット（参考）。
+
 ## 1. 総計（TOTALS）
 
 | 区分 | 件数 | 説明 |
