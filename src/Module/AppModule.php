@@ -158,6 +158,11 @@ final class AppModule extends AbstractAppModule
             $this->appMeta->appDir . '/var/log/bemart.json',
         );
 
+        // Per-database suffix for the Eccube compatibility services that key
+        // their runtime files by DATABASE_URL — injected (provider, resolved at
+        // graph-build) instead of each service reaching into getenv() itself.
+        $this->bind()->annotatedWith('databaseCacheSuffix')->toProvider(DatabaseCacheSuffixProvider::class);
+
         $this->install(
             new JsonSchemaModule(
                 $this->appMeta->appDir . '/var/json_schema',

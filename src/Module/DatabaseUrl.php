@@ -9,6 +9,7 @@ use RuntimeException;
 use function getenv;
 use function is_string;
 use function ltrim;
+use function md5;
 use function parse_str;
 use function parse_url;
 use function sprintf;
@@ -69,5 +70,19 @@ final readonly class DatabaseUrl
                 constant('P' . 'DO::ATTR_DEFAULT_FETCH_MODE') => constant('P' . 'DO::FETCH_ASSOC'),
             ],
         );
+    }
+
+    /**
+     * A stable per-database suffix for namespacing runtime files so separate
+     * databases don't share state: md5 of DATABASE_URL, or 'default' when it is
+     * unset (e.g. the DB-less fake context). Unlike {@see fromEnvironment()}
+     * this never throws — an absent URL is a valid "no database" case here. The
+     * environment read lives in this one getenv-sanctioned class.
+     */
+    public static function cacheSuffix(): string
+    {
+        $databaseUrl = getenv('DATABASE_URL');
+
+        return is_string($databaseUrl) && $databaseUrl !== '' ? md5($databaseUrl) : 'default';
     }
 }

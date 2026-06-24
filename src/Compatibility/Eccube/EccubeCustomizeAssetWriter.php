@@ -6,18 +6,17 @@ namespace MyVendor\BeMart\Compatibility\Eccube;
 
 use MyVendor\BeMart\Be\Reason\Service\CustomizeAssetWriterInterface;
 use Override;
+use Ray\Di\Di\Named;
 
 use function dirname;
 use function file_get_contents;
 use function file_put_contents;
-use function getenv;
 use function is_array;
 use function is_dir;
 use function is_file;
 use function is_string;
 use function json_decode;
 use function json_encode;
-use function md5;
 use function mkdir;
 
 use const JSON_PRETTY_PRINT;
@@ -37,9 +36,13 @@ final class EccubeCustomizeAssetWriter implements CustomizeAssetWriterInterface
 {
     private readonly string $stateFile;
 
-    public function __construct(string|null $stateFile = null)
-    {
-        $this->stateFile = $stateFile ?? $this->defaultStateFile();
+    public function __construct(
+        #[Named('databaseCacheSuffix')]
+        string $databaseCacheSuffix = 'default',
+        string|null $stateFile = null,
+    ) {
+        $this->stateFile = $stateFile
+            ?? dirname(__DIR__, 3) . '/var/tmp/customize-assets-' . $databaseCacheSuffix . '.json';
     }
 
     #[Override]
@@ -103,13 +106,5 @@ final class EccubeCustomizeAssetWriter implements CustomizeAssetWriterInterface
             $this->stateFile,
             json_encode($state, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) . "\n",
         );
-    }
-
-    private function defaultStateFile(): string
-    {
-        $databaseUrl = getenv('DATABASE_URL');
-        $suffix = $databaseUrl === false || $databaseUrl === '' ? 'default' : md5($databaseUrl);
-
-        return dirname(__DIR__, 3) . '/var/tmp/customize-assets-' . $suffix . '.json';
     }
 }

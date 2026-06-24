@@ -12,7 +12,18 @@
     <file>bin</file>
 
     <rule ref="Generic.PHP.ForbiddenFunctions">
+        <!--
+            getenv() is banned in application code (read the environment through
+            injected values), but it is legitimate at the few seams that run
+            before — or define — the DI container: DatabaseUrl is the single
+            sanctioned environment reader, and page.php/bin/page.php are the
+            composition-root entry scripts that pick the context from
+            APP_CONTEXT before any object graph exists, so there is nothing to
+            inject into.
+        -->
         <exclude-pattern>*/src/Module/DatabaseUrl.php</exclude-pattern>
+        <exclude-pattern>*/public/page.php</exclude-pattern>
+        <exclude-pattern>*/bin/page.php</exclude-pattern>
         <properties>
             <property name="forbiddenFunctions" type="array">
                 <element key="getenv" value="null"/>
