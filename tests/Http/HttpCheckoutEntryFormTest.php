@@ -362,8 +362,11 @@ final class HttpCheckoutEntryFormTest extends TestCase
         // html context (HtmlThrowableHandler), not the legacy JSON body —
         // consistent with this class's "do not expose JSON errors" intent.
         $this->assertStringContainsString('text/html', $rejected['headers']['Content-Type'] ?? '');
-        $this->assertStringContainsString('Invalid input.', $rejected['body']);
-        $this->assertStringContainsString('[contactContents]', $rejected['body']);
+        // A READABLE, field-identified validation message (not a raw JSON dump
+        // and not a stack trace): the rejected お問い合わせ内容 field is named in
+        // plain Japanese on the 400 page.
+        $this->assertStringContainsString('入力内容を確認してください', $rejected['body']);
+        $this->assertStringContainsString('お問い合わせ内容', $rejected['body']);
         $this->assertStringNotContainsString('Internal Server Error', $rejected['body']);
         $this->assertStringNotContainsString('application/json', $rejected['headers']['Content-Type'] ?? '');
     }
