@@ -229,9 +229,13 @@ final class HttpSqlResetPasswordFormTest extends TestCase
 
     private function pdo(): PDO
     {
-        $databaseUrl = $_SERVER['DATABASE_URL'] ?? null;
+        // phpunit.xml sets DATABASE_URL via <env>, which lands in $_ENV/getenv
+        // but NOT $_SERVER — reading $_SERVER alone made this DB assertion skip
+        // silently. Read $_ENV first, and fail-loud (not skip) if it is truly
+        // absent: this SQL regression must run, not quietly pass.
+        $databaseUrl = $_ENV['DATABASE_URL'] ?? $_SERVER['DATABASE_URL'] ?? null;
         if (! is_string($databaseUrl) || $databaseUrl === '') {
-            self::markTestSkipped('DATABASE_URL is not set; SQL reset regression requires the eccubedb_test DB.');
+            self::fail('DATABASE_URL is not set; SQL reset regression requires the eccubedb_test DB to be up.');
         }
 
         $parts = parse_url($databaseUrl);
