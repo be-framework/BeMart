@@ -24,7 +24,7 @@
                 {% else %}
                 <form method="post" action="/admin/product?productCode={{ productCode }}&_method=put" id="admin_product_form" class="doUpdateProduct">
                     <input type="hidden" name="_method" value="put">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken }}">
+                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token()) }}">
                     <input type="hidden" name="productCode" value="{{ productCode }}">
 
                     <div class="card rounded border-0 mb-4">
