@@ -154,21 +154,53 @@
     },
     "customer": {
       "type": [
-        "array",
-        "null",
-        "object"
+        "object",
+        "null"
       ],
       "title": "会員詳細",
-      "description": "/admin/order のレスポンスで扱う会員詳細。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。",
-      "items": {
-        "type": "string",
-        "title": "会員",
-        "minLength": 0,
-        "maxLength": 255,
-        "description": "/admin/order のレスポンスに含まれる会員。親コレクション `customer` の1行を表し、固定できる業務列はschema propertyで明示する。"
+      "description": "受注詳細に表示する注文者サマリ（WHO placed the order）。AdminOrderFetched が CustomerQuery::item で解決した会員、または会員が論理削除済みのとき dtb_order の customerSnapshot から組み立てる。会員が解決できない孤立受注では null。object のときは customerId / email / name01 / name02 の4キーが常に揃う（スナップショット経路では email / customerId が空文字になりうるため minLength は 0、email の $def は使わない）。",
+      "properties": {
+        "customerId": {
+          "type": "string",
+          "title": "会員ID",
+          "description": "dtb_customer.id の不透明な文字列ハンドル。スナップショット経路（会員が論理削除済み）では空文字。",
+          "minLength": 0,
+          "maxLength": 128,
+          "example": "customer-001"
+        },
+        "email": {
+          "type": "string",
+          "title": "メールアドレス",
+          "description": "注文者のメールアドレス。スナップショット経路で未登録なら空文字になりうるため format:email の $def は使わず、空文字を許容する。",
+          "minLength": 0,
+          "maxLength": 254,
+          "example": "alice@example.com"
+        },
+        "name01": {
+          "type": "string",
+          "title": "姓",
+          "description": "注文者の姓。",
+          "minLength": 0,
+          "maxLength": 255,
+          "example": "山田"
+        },
+        "name02": {
+          "type": "string",
+          "title": "名",
+          "description": "注文者の名。",
+          "minLength": 0,
+          "maxLength": 255,
+          "example": "太郎"
+        }
       },
-      "minItems": 0,
-      "$comment": "単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。"
+      "required": [
+        "customerId",
+        "email",
+        "name01",
+        "name02"
+      ],
+      "additionalProperties": false,
+      "$comment": "旧定義は items が裸の string（minLength:0）で customerId/email/name01/name02 を1つも固定していなかった（opaque-bag、type に array まで含んでいた）。AdminOrderFetched::$customer は array{customerId:string,email:string,name01:string,name02:string}|null が唯一の形状なので、object のとき4キーを required + additionalProperties:false で固定し、孤立受注の null を許容する。confirm の commit 604ded47 と同じ class の修正。"
     },
     "customerId": {
       "type": [

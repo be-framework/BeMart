@@ -12,8 +12,8 @@
         "null"
       ],
       "title": "入力フォーム",
-      "description": "Aura/WebForm由来のフォームオブジェクト。フレームワーク内部構造のためschemaでは存在と型のみを契約する。",
-      "$comment": "Aura/WebForm由来の不透明フォーム表現。Resource境界ではフォームの存在とコンテキストだけを契約し、内部構造はフレームワーク境界に委ねるため追加キー制約を置かない。"
+      "description": "HTMLフォーム描画専用の Ray\\WebFormModule フォームオブジェクト（/shopping/non-member の非会員お客様情報フォーム NonMemberForm）。HTML/Twig 層が実際の <input>/<select> を描画するためにのみ body['form'] に注入され、JSONコンテキストは無視する。",
+      "$comment": "意図的に緩い契約：body['form'] は AbstractForm オブジェクト（NonMemberForm、HTML の <input>/<select> 描画用）で、クリーンな業務データに serialize されない。業務フィールドを required にすると GET 応答が 500 になる（get-shopping.json で実証済み）。型/items/properties/required は緩いまま維持すること。業務値の検証は request 境界およびフォーム送信先（doSetNonMember 等）が担う。"
     },
     "fields": {
       "type": [

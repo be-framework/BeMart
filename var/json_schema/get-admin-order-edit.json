@@ -17,21 +17,117 @@
     },
     "order": {
       "type": [
-        "array",
-        "null",
-        "object"
+        "object",
+        "null"
       ],
       "title": "注文詳細",
-      "description": "/admin/order/edit のレスポンスで扱う注文詳細。配列要素はALPS意味とFake観察に基づき、固定できない動的列は例外理由を台帳化する。",
-      "items": {
-        "type": "string",
-        "title": "注文",
-        "minLength": 0,
-        "maxLength": 255,
-        "description": "/admin/order/edit のレスポンスに含まれる注文。親コレクション `order` の1行を表し、固定できる業務列はschema propertyで明示する。"
+      "description": "/admin/order/edit のレスポンスで扱う注文ヘッダ。受注編集（orderNoあり）では AdminOrderFetched 由来の固定キーobjectを、受注登録（空フォーム初期表示）では null を出す。各業務フィールドは FinalizedOrderEntity の非null scalar をそのまま射影する。",
+      "properties": {
+        "orderNo": {
+          "type": "string",
+          "title": "注文番号",
+          "minLength": 0,
+          "maxLength": 64,
+          "description": "顧客向けの注文番号。AdminOrderFetched.orderNo（常時存在・非null）。"
+        },
+        "customerId": {
+          "type": "string",
+          "title": "会員ID",
+          "minLength": 0,
+          "maxLength": 128,
+          "description": "注文者の会員ID。Fakeでは 'customer-001' 形式の不透明文字列。"
+        },
+        "paymentMethodId": {
+          "title": "支払方法ID",
+          "description": "dtb_payment の採番ID。FinalizedOrderEntity.paymentMethodId（int）。",
+          "$ref": "#/$defs/dbId"
+        },
+        "subtotal": {
+          "title": "小計",
+          "description": "明細合計。日本円整数。",
+          "$ref": "#/$defs/price"
+        },
+        "deliveryFeeTotal": {
+          "title": "送料合計",
+          "description": "配送料の合計。日本円整数。",
+          "$ref": "#/$defs/price"
+        },
+        "charge": {
+          "title": "手数料",
+          "description": "決済手数料など。日本円整数。",
+          "$ref": "#/$defs/price"
+        },
+        "discount": {
+          "title": "値引き",
+          "description": "値引き額。日本円整数。",
+          "$ref": "#/$defs/price"
+        },
+        "tax": {
+          "title": "消費税",
+          "description": "税額合計。日本円整数。",
+          "$ref": "#/$defs/price"
+        },
+        "total": {
+          "title": "合計金額",
+          "description": "小計＋送料＋手数料−値引き＋税。日本円整数。",
+          "$ref": "#/$defs/price"
+        },
+        "paymentTotal": {
+          "title": "支払合計",
+          "description": "実際の請求額。ポイント利用後の支払金額。日本円整数。",
+          "$ref": "#/$defs/price"
+        },
+        "addPoint": {
+          "title": "加算ポイント",
+          "description": "この注文で付与されるポイント。非負整数。",
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "usePoint": {
+          "title": "利用ポイント",
+          "description": "この注文で利用されたポイント。非負整数。",
+          "$ref": "#/$defs/nonNegativeInteger"
+        },
+        "orderStatus": {
+          "title": "注文ステータス",
+          "description": "EC-CUBE受注状態ID（1〜9）。FinalizedOrderEntity.orderStatus。",
+          "$ref": "#/$defs/orderStatus"
+        },
+        "orderDate": {
+          "type": "string",
+          "title": "受注日時",
+          "minLength": 0,
+          "maxLength": 32,
+          "description": "受注日時。Fake観察値は 'YYYY-MM-DD HH:MM:SS'（スペース区切り、ISO Tなし）のためformat:date-timeは課さずplain stringで契約する。",
+          "example": "2026-04-01 10:00:00"
+        },
+        "paymentDate": {
+          "type": "string",
+          "title": "入金日時",
+          "minLength": 0,
+          "maxLength": 32,
+          "description": "入金日時。orderDate と同じく 'YYYY-MM-DD HH:MM:SS' 形式のplain string。",
+          "example": "2026-04-01 10:00:00"
+        }
       },
-      "minItems": 0,
-      "$comment": "単一詳細画面では未選択/初期表示に空配列、取得済み状態にobjectが現れる。不透明な詳細構造は既知propertyを優先し、追加キーは互換境界として許容する。"
+      "required": [
+        "orderNo",
+        "customerId",
+        "paymentMethodId",
+        "subtotal",
+        "deliveryFeeTotal",
+        "charge",
+        "discount",
+        "tax",
+        "total",
+        "paymentTotal",
+        "addPoint",
+        "usePoint",
+        "orderStatus",
+        "orderDate",
+        "paymentDate"
+      ],
+      "additionalProperties": false,
+      "$comment": "旧定義は items が裸の string（minLength:0）で orderNo/total/orderStatus 等の業務フィールドを1つも固定しておらず（opaque-bag）、注文ヘッダの欠落・型崩れが response-schema validation を素通りした。Resource (Page/Admin/Order/Edit::onGet) は AdminOrderFetched の15個の非null scalar を固定キーで射影するか、受注登録の初期表示では order 全体を null にする。よって object の場合は15フィールド全て required + additionalProperties:false、null も許容する。get-shopping-confirm の customer 硬化（commit 604ded47）と同クラスの修正。"
     },
     "items": {
       "type": [
