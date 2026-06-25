@@ -123,6 +123,20 @@ final class HttpSqlMypageReorderFlowTest extends TestCase
         // The reordered product line is actually rendered in the live cart.
         $this->assertStringContainsString('ec-cartRow__name', $cart['body']);
         $this->assertStringContainsString('/product?productCode=', $cart['body']);
+
+        // --- THE OTHER HALF: the reorder cart can actually CHECK OUT ---------
+        // A reorder started a NEW cart whose preOrderId was '' (Reordered copied
+        // it verbatim instead of issuing one), so /shopping rendered an empty
+        // preOrderId hidden field and 注文する dead-ended at
+        // "400 — preOrderId は 40 文字の小文字 16 進数文字列で…". /shopping MUST
+        // carry a real 40-hex preOrderId after a reorder.
+        $shopping = $this->form('GET', '/shopping');
+        $this->assertSame(200, $shopping['status'], $shopping['body']);
+        $this->assertSame(
+            1,
+            preg_match('/name="preOrderId" value="([0-9a-f]{40})"/', $shopping['body']),
+            'reorder /shopping must carry a 40-hex preOrderId (was empty → checkout 400): ' . $shopping['body'],
+        );
     }
 
     /**
