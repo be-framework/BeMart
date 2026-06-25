@@ -15,8 +15,10 @@ use Ray\InputQuery\Attribute\Input;
 
 use function array_map;
 use function array_sum;
+use function bin2hex;
 use function count;
 use function min;
+use function random_bytes;
 use function sprintf;
 
 /**
@@ -193,7 +195,11 @@ final readonly class Reordered
             items: $items,
             totalPrice: $totalPrice,
             deliveryFeeTotal: $deliveryFeeTotal,
-            preOrderId: $existing->preOrderId,
+            // A reorder of a fresh session starts a NEW cart whose preOrderId is
+            // '' — issue a real 40-hex one (as CartMerged does) so /shopping and
+            // the confirm form carry a valid id; otherwise 注文する submits an
+            // empty preOrderId and the checkout 400s ("preOrderId は 40 文字…").
+            preOrderId: $existing->preOrderId !== '' ? $existing->preOrderId : bin2hex(random_bytes(20)),
         );
     }
 }
