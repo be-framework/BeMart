@@ -21,7 +21,9 @@ rel 自体の意味は状態に依存させない。例えば `goShopping` を�
 
 ## Shopping
 
-`Shopping` は注文手続き画面である。配送先、支払方法、配送時間帯、注文メッセージを確認・入力し、`doConfirmOrder` へ進む。注文確認後の確定操作が `doCheckout` である。
+`Shopping` は注文手続き画面である。配送先、支払方法、配送方法（配送業者・お届け希望日・配送時間帯）、注文メッセージを確認・入力し、`doConfirmOrder` へ進む。注文確認後の確定操作が `doCheckout` である。
+
+配送方法の選択肢は `deliveryOptions`（選択可能な配送方法の一覧。各要素が `deliveryId` / `deliveryMethodName` / `deliveryFee` と、選べる `deliveryTime` の集合・`deliveryDate` の候補を持つ）として `Shopping` 状態に提示する。これは支払方法（`paymentMethods`）と同型のアフォーダンスであり、`visible` な `dtb_delivery` + `dtb_delivery_time` + `dtb_delivery_fee` から構築して body へ供給し、HTML 層が `配送方法` / `お届け日` / `お届け時間` の `<select>` を描画する。`doConfirmOrder` は選択された `deliveryId` / `deliveryDate` / `deliveryTime` を受理し、`deliveryFeeTotal`（送料）を確定して `ShoppingConfirm` に反映する。`deliveryOptions` が空のとき配送方法は提示できない。
 
 `Shopping` はログイン済み会員、または非会員購入情報の送信などで購入者情報が確定したフローを前提とする。匿名カートから直接 `goShopping` を提示しない。
 
