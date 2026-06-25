@@ -71,6 +71,9 @@ class Confirm extends ResourceObject
      *
      * @psalm-taint-source input $preOrderId
      * @psalm-taint-source input $payment
+     * @psalm-taint-source input $delivery
+     * @psalm-taint-source input $shipping_delivery_date
+     * @psalm-taint-source input $delivery_time
      */
     #[Alps('goShopping')]
     #[JsonSchema(schema: 'get-shopping-confirm.json', params: 'post-shopping-confirm.param.json')]
@@ -80,16 +83,27 @@ class Confirm extends ResourceObject
     public function onPost(
         string $preOrderId,
         int $payment = 2,
+        string $delivery = '',
+        string $shipping_delivery_date = '',
+        string $delivery_time = '',
     ): static {
-        return $this->confirmOrder($preOrderId, $payment);
+        return $this->confirmOrder($preOrderId, $payment, $delivery, $shipping_delivery_date, $delivery_time);
     }
 
-    private function confirmOrder(string $preOrderId, int $paymentMethodId): static
-    {
+    private function confirmOrder(
+        string $preOrderId,
+        int $paymentMethodId,
+        string $deliveryId = '',
+        string $deliveryDate = '',
+        string $deliveryTime = '',
+    ): static {
         try {
             $final = ($this->becoming)(new ConfirmOrderInput(
                 preOrderId: $preOrderId,
                 paymentMethodId: $paymentMethodId,
+                deliveryId: $deliveryId,
+                deliveryDate: $deliveryDate,
+                deliveryTime: $deliveryTime,
             ));
         } catch (SemanticVariableException $e) {
             $this->code = Code::BAD_REQUEST;

@@ -6,7 +6,9 @@ namespace MyVendor\BeMart\Be\Being;
 
 use Be\Framework\Attribute\Be;
 use MyVendor\BeMart\Be\Exception\PreOrderNotFoundException;
+use MyVendor\BeMart\Be\Reason\Entity\DeliveryFeeEntity;
 use MyVendor\BeMart\Be\Reason\Entity\OrderEntity;
+use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderQueryInterface;
 use Ray\Di\Di\Inject;
 use Ray\InputQuery\Attribute\Input;
@@ -22,6 +24,13 @@ use Ray\InputQuery\Attribute\Input;
  * Public surface carries the resolved $order plus the Input scalars so the
  * downstream chain (PurchaseFlowApplied → PaymentVerified → OrderConfirming)
  * can keep them as `#[Input]`.
+ *
+ * Delivery-method selection (alps doConfirmOrder): when the customer picked a
+ * 配送方法 on /shopping, `deliveryId` arrives here. We resolve its base 送料
+ * via {@see DeliveryStorageInterface::baseFee} and rebuild the resolved order
+ * with that deliveryFeeTotal so PurchaseFlowApplied computes totals against
+ * the CHOSEN fee. An empty `deliveryId` keeps the pre-order's persisted fee —
+ * the existing guest/member checkout (no explicit pick) does NOT regress.
  */
 #[Be(PurchaseFlowApplied::class)]
 final readonly class PreOrderResolved
@@ -29,15 +38,42 @@ final readonly class PreOrderResolved
     public OrderEntity $order;
 
     public function __construct(
+        #[Inject] OrderQueryInterface $orderQuery,
+        #[Inject] DeliveryStorageInterface $deliveryStorage,
         #[Input] public string $preOrderId,
         #[Input] public int $paymentMethodId,
-        #[Inject] OrderQueryInterface $orderQuery,
+        #[Input] public string $deliveryId = '',
+        #[Input] public string $deliveryDate = '',
+        #[Input] public string $deliveryTime = '',
     ) {
         $order = $orderQuery->byPreOrderId($preOrderId);
         if (! $order instanceof OrderEntity) {
             throw new PreOrderNotFoundException();
         }
 
-        $this->order = $order;
+        $this->order = $this->applyChosenDeliveryFee($order, $deliveryStorage);
+    }
+
+    private function applyChosenDeliveryFee(
+        OrderEntity $order,
+        DeliveryStorageInterface $deliveryStorage,
+    ): OrderEntity {
+        if ($this->deliveryId === '') {
+            return $order;
+        }
+
+        $fee = $deliveryStorage->baseFee($this->deliveryId);
+        if (! $fee instanceof DeliveryFeeEntity) {
+            return $order;
+        }
+
+        return new OrderEntity(
+            preOrderId: $order->preOrderId,
+            customerId: $order->customerId,
+            paymentMethodId: $order->paymentMethodId,
+            items: $order->items,
+            deliveryFeeTotal: $fee->fee,
+            customerSnapshot: $order->customerSnapshot,
+        );
     }
 }

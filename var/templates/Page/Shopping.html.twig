@@ -148,15 +148,29 @@
                             <div class="ec-selects">
                                 <div class="ec-select">
                                     <label>配送方法</label>
-                                    {{ form.input('delivery')|raw }}
+                                    <select name="delivery">
+                                        {% for option in deliveryOptions|default([]) %}
+                                            <option value="{{ option.deliveryId }}">{{ option.deliveryName }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                                 <div class="ec-select ec-select__delivery">
                                     <label>お届け日</label>
-                                    {{ form.input('shipping_delivery_date')|raw }}
+                                    <select name="shipping_delivery_date">
+                                        <option value="">指定なし</option>
+                                        {% for date in (deliveryOptions|default([])|first).dates|default([]) %}
+                                            <option value="{{ date.value }}">{{ date.label }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                                 <div class="ec-select ec-select__time">
                                     <label>お届け時間</label>
-                                    {{ form.input('delivery_time')|raw }}
+                                    <select name="delivery_time">
+                                        <option value="">指定なし</option>
+                                        {% for time in (deliveryOptions|default([])|first).times|default([]) %}
+                                            <option value="{{ time.value }}">{{ time.label }}</option>
+                                        {% endfor %}
+                                    </select>
                                 </div>
                             </div>
                         </div>

@@ -107,6 +107,7 @@ class Shopping extends ResourceObject
             'totalPrice' => $final->totalPrice,
             'deliveryFeeTotal' => $final->deliveryFeeTotal,
             'paymentMethods' => $final->paymentMethods,
+            'deliveryOptions' => $final->deliveryOptions,
             'canCheckout' => $final->canCheckout,
             'csrfToken' => $this->csrf->issue(),
             // Phase 3: an empty ShoppingOrderForm for the HTML port to

@@ -35,14 +35,28 @@ use MyVendor\BeMart\Be\Being\PreOrderResolved;
 final readonly class ConfirmOrderInput
 {
     /**
-     * Phase B Slice 9: both fields come from the HTTP confirm form.
+     * Phase B Slice 9: preOrderId + paymentMethodId come from the HTTP
+     * confirm form. The doConfirmOrder contract (alps.json) also carries
+     * the delivery-method selection — deliveryId / deliveryDate /
+     * deliveryTime — chosen on /shopping. deliveryId drives the
+     * deliveryFeeTotal fix-up in {@see PreOrderResolved}; an empty
+     * deliveryId keeps the pre-order's persisted fee (guest/member
+     * checkout without an explicit pick does NOT regress). deliveryDate /
+     * deliveryTime are the shipping slot labels, forwarded for the
+     * confirm screen and the persisted shipping snapshot.
      *
      * @psalm-taint-source input $preOrderId
      * @psalm-taint-source input $paymentMethodId
+     * @psalm-taint-source input $deliveryId
+     * @psalm-taint-source input $deliveryDate
+     * @psalm-taint-source input $deliveryTime
      */
     public function __construct(
         public string $preOrderId,
         public int $paymentMethodId,
+        public string $deliveryId = '',
+        public string $deliveryDate = '',
+        public string $deliveryTime = '',
     ) {
     }
 }

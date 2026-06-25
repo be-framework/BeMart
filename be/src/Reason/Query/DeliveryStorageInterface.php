@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace MyVendor\BeMart\Be\Reason\Query;
 
 use MyVendor\BeMart\Be\Reason\Entity\DeliveryEntity;
+use MyVendor\BeMart\Be\Reason\Entity\DeliveryFeeEntity;
+use MyVendor\BeMart\Be\Reason\Entity\DeliveryTimeEntity;
 use Ray\MediaQuery\Annotation\DbQuery;
 
 /**
@@ -39,4 +41,21 @@ interface DeliveryStorageInterface
 
     #[DbQuery('tdelivery_visible')]
     public function setVisible(string $deliveryId, bool $visible): void;
+
+    /**
+     * Visible お届け時間 slots for a delivery method, sorted by sort_no.
+     * Drives the お届け時間 <select> options on the checkout page.
+     *
+     * @return list<DeliveryTimeEntity>
+     */
+    #[DbQuery('tdelivery_times')]
+    public function listTimes(string $deliveryId): array;
+
+    /**
+     * Representative base 送料 for a delivery method — the minimum fee
+     * across prefectures in dtb_delivery_fee. A method with no fee rows
+     * yields fee 0.
+     */
+    #[DbQuery('tdelivery_base_fee')]
+    public function baseFee(string $deliveryId): DeliveryFeeEntity|null;
 }

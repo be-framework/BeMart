@@ -61,10 +61,10 @@
         "null"
       ],
       "title": "配送方法フォーム値",
-      "description": "注文確認フォームで送られる配送方法選択値。現在のBeMart confirmでは既定配送を使い、この値は業務処理に未反映。",
+      "description": "注文確認フォームで選択された配送方法ID（/shopping deliveryOptions の deliveryId）。ConfirmOrderInput.deliveryId に渡り、選択配送の基本送料が deliveryFeeTotal に反映される。空値なら仮注文の既定送料を使う。",
       "minLength": 0,
       "maxLength": 2048,
-      "$comment": "transport boundary: 確認画面生成では現時点で業務処理に使わないHTMLフォーム値。将来配送指定/メッセージ反映を実装する時に意味制約を強化する。"
+      "$comment": "transport boundary: HTMLフォームの配送方法選択値。Resource/Semantic層で業務反映する。"
     },
     "shipping_delivery_date": {
       "type": [
@@ -72,7 +72,7 @@
         "null"
       ],
       "title": "配送希望日フォーム値",
-      "description": "注文確認フォームで送られる配送希望日。現在のBeMart confirmでは業務処理に未反映。",
+      "description": "注文確認フォームで送られる配送希望日（/shopping deliveryOptions の dates value、Y-m-d）。ConfirmOrderInput.deliveryDate に渡る配送指定値。",
       "minLength": 0,
       "maxLength": 2048,
       "$comment": "transport boundary: 確認画面生成では現時点で業務処理に使わないHTMLフォーム値。将来配送指定/メッセージ反映を実装する時に意味制約を強化する。"
@@ -83,7 +83,7 @@
         "null"
       ],
       "title": "配送時間フォーム値",
-      "description": "注文確認フォームで送られる配送時間。現在のBeMart confirmでは業務処理に未反映。",
+      "description": "注文確認フォームで送られる配送時間（/shopping deliveryOptions の times value）。ConfirmOrderInput.deliveryTime に渡る配送指定値。",
       "minLength": 0,
       "maxLength": 2048,
       "$comment": "transport boundary: 確認画面生成では現時点で業務処理に使わないHTMLフォーム値。将来配送指定/メッセージ反映を実装する時に意味制約を強化する。"

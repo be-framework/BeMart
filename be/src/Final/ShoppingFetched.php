@@ -8,9 +8,11 @@ use DateTimeImmutable;
 use MyVendor\BeMart\Be\Exception\UnauthenticatedException;
 use MyVendor\BeMart\Be\Reason\Entity\CartEntity;
 use MyVendor\BeMart\Be\Reason\Entity\CartItemEntity;
+use MyVendor\BeMart\Be\Reason\Entity\DeliveryTimeEntity;
 use MyVendor\BeMart\Be\Reason\Entity\FinalizedOrderEntity;
 use MyVendor\BeMart\Be\Reason\Query\CartQueryInterface;
 use MyVendor\BeMart\Be\Reason\Query\CustomerQueryInterface;
+use MyVendor\BeMart\Be\Reason\Query\DeliveryStorageInterface;
 use MyVendor\BeMart\Be\Reason\Query\OrderCommandInterface;
 use MyVendor\BeMart\Be\Reason\Query\PaymentMethodAdminStorageInterface;
 use MyVendor\BeMart\Be\Reason\Service\PaymentMethodFactoryInterface;
@@ -99,6 +101,20 @@ final readonly class ShoppingFetched
     /** @var list<array{paymentMethodId: int, paymentMethodName: string}> */
     public array $paymentMethods;
 
+    /**
+     * Selectable delivery methods + their times/dates, mirroring
+     * paymentMethods. Drives the 配送方法 / お届け日 / お届け時間 selects.
+     *
+     * @var list<array{
+     *     deliveryId: string,
+     *     deliveryName: string,
+     *     fee: int,
+     *     times: list<array{value: string, label: string}>,
+     *     dates: list<array{value: string, label: string}>
+     * }>
+     */
+    public array $deliveryOptions;
+
     public bool $canCheckout;
 
     public function __construct(
@@ -109,6 +125,7 @@ final readonly class ShoppingFetched
         #[Inject] OrderCommandInterface $orderCommand,
         #[Inject] PaymentMethodAdminStorageInterface $paymentMethodStorage,
         #[Inject] PaymentMethodFactoryInterface $paymentMethodFactory,
+        #[Inject] DeliveryStorageInterface $deliveryStorage,
     ) {
         $sessionCustomerId = $session->customerId;
         if ($sessionCustomerId === null) {
@@ -165,7 +182,66 @@ final readonly class ShoppingFetched
         $this->totalPrice = array_sum(array_map(static fn (CartEntity $c) => $c->totalPrice, $carts));
         $this->deliveryFeeTotal = array_sum(array_map(static fn (CartEntity $c) => $c->deliveryFeeTotal, $carts));
         $this->paymentMethods = $paymentMethods;
+        $this->deliveryOptions = $this->deliveryOptions($deliveryStorage);
         $this->canCheckout = $this->cartCount > 0;
+    }
+
+    /**
+     * @return list<array{
+     *     deliveryId: string,
+     *     deliveryName: string,
+     *     fee: int,
+     *     times: list<array{value: string, label: string}>,
+     *     dates: list<array{value: string, label: string}>
+     * }>
+     */
+    private function deliveryOptions(DeliveryStorageInterface $deliveryStorage): array
+    {
+        $dates = $this->deliveryDateCandidates();
+        $options = [];
+        foreach ($deliveryStorage->list() as $delivery) {
+            if (! $delivery->visible) {
+                continue;
+            }
+
+            $fee = $deliveryStorage->baseFee($delivery->deliveryId);
+            $times = array_map(
+                static fn (DeliveryTimeEntity $time): array => [
+                    'value' => $time->timeId,
+                    'label' => $time->deliveryTime,
+                ],
+                $deliveryStorage->listTimes($delivery->deliveryId),
+            );
+
+            $options[] = [
+                'deliveryId' => $delivery->deliveryId,
+                'deliveryName' => $delivery->deliveryName,
+                'fee' => $fee === null ? 0 : $fee->fee,
+                'times' => $times,
+                'dates' => $dates,
+            ];
+        }
+
+        return $options;
+    }
+
+    /**
+     * ~7 upcoming お届け日 candidates as plain Y-m-d strings. EC-CUBE
+     * offers a lead-time window; we surface the next 7 days from today.
+     *
+     * @return list<array{value: string, label: string}>
+     */
+    private function deliveryDateCandidates(): array
+    {
+        $today = new DateTimeImmutable('today');
+        $dates = [];
+        for ($i = 1; $i <= 7; $i++) {
+            $day = $today->modify('+' . $i . ' day');
+            $value = $day->format('Y-m-d');
+            $dates[] = ['value' => $value, 'label' => $value];
+        }
+
+        return $dates;
     }
 
     /** @return list<array{paymentMethodId: int, paymentMethodName: string}> */

@@ -257,6 +257,90 @@
       },
       "minItems": 0
     },
+    "deliveryOptions": {
+      "type": [
+        "array",
+        "null"
+      ],
+      "title": "配送方法選択肢",
+      "description": "/shopping の配送方法選択肢。各 配送方法 とその お届け時間 / お届け日 候補、基本送料。paymentMethods と同型の選択肢一覧で、HTML/Twig が 配送方法・お届け日・お届け時間 の <select> を描画する。",
+      "items": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "title": "配送方法行",
+        "description": "配送方法1件。deliveryId/deliveryName/fee と times[]/dates[]（value/label）を持つ。",
+        "properties": {
+          "deliveryId": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "配送方法ID",
+            "description": "配送方法マスタID。SQL文脈では dtb_delivery.id の文字列、Fake文脈では del-yamato 等のキー。"
+          },
+          "deliveryName": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 0,
+            "maxLength": 255,
+            "title": "配送方法名",
+            "description": "配送方法の表示名。観察値 'サンプル宅配便', 'ヤマト宅急便', 'ゆうパック'。",
+            "example": "サンプル宅配便"
+          },
+          "fee": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 999999999,
+            "title": "基本送料",
+            "description": "配送方法の代表送料（dtb_delivery_fee の都道府県別最小値）。",
+            "example": 550
+          },
+          "times": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "title": "お届け時間候補",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string" },
+                "label": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 0
+          },
+          "dates": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "title": "お届け日候補",
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": { "type": "string" },
+                "label": { "type": "string" }
+              },
+              "additionalProperties": false
+            },
+            "minItems": 0
+          }
+        },
+        "additionalProperties": false
+      },
+      "minItems": 0
+    },
     "defaultShippingAddress": {
       "type": [
         "object",
