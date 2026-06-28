@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="520" height="124" viewBox="0 0 520 124" role="img" aria-labelledby="title desc">
+  <title id="title">IDEA STORE horizontal logo</title>
+  <desc id="desc">IDEA STORE wordmark with Japanese subtitle.</desc>
+  <rect width="520" height="124" fill="#fffdf8"/>
+  <text x="32" y="58" fill="#29251f" font-family="Helvetica Neue, Arial, sans-serif" font-size="40" letter-spacing="7" font-weight="500">IDEA STORE</text>
+  <text x="34" y="92" fill="#6f675c" font-family="Hiragino Sans, Yu Gothic, sans-serif" font-size="15" letter-spacing="5">イデアストア</text>
+  <line x1="32" y1="104" x2="488" y2="104" stroke="#ded7ca" stroke-width="1"/>
+</svg>
