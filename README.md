@@ -264,5 +264,4 @@ BeMart は EC-CUBE 4.3 の **独立再実装 (independent reimplementation)** �
 ソースコードは一切含みません**。
 
 EC-CUBE は本プロジェクトの出発点となった先行実装であり、参照元として明記します
-（[EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube)）。`tools/ec-cube-source/` に置く
-EC-CUBE のクローンは構造調査・比較テスト専用で、配布物には含まれません（`.gitignore` 済み）。
+（[EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube)）。
