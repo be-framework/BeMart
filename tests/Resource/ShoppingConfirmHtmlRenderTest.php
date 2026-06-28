@@ -158,9 +158,11 @@ final class ShoppingConfirmHtmlRenderTest extends TestCase
         // L1 — page heading identifies the confirm screen
         $this->assertStringContainsString('注文内容の確認', $html, 'confirm heading required');
 
-        // L2 — ALPS transition: checkout form posts to /shopping/checkout
+        // L2 — ALPS transition: checkout form posts to /shopping/checkout.
+        // The action carries ?mode=complete so the browser POST triggers the
+        // PRG redirect to /shopping/complete (Checkout gates on uri->query mode).
         $this->assertStringContainsString('method="post"', $html, 'form method must be POST');
-        $this->assertStringContainsString('action="/shopping/checkout"', $html, 'form action must be /shopping/checkout');
+        $this->assertStringContainsString('action="/shopping/checkout', $html, 'form action must target /shopping/checkout');
 
         // L1 — key hidden fields that drive the checkout becoming chain
         $this->assertStringContainsString('name="preOrderId"', $html, 'preOrderId hidden field required');
