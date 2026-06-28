@@ -128,7 +128,7 @@
         <p class="idea-eyebrow">Your cart is empty</p>
         <h2 class="idea-section-title">カートに商品がありません</h2>
         <p class="idea-muted">気になる商品を見つけてカートに追加してください。</p>
-        <a class="idea-button" href="/products/list">商品を探す</a>
+        <a class="idea-button" href="/products">商品を探す</a>
       </div>
     {% endif %}
 
@@ -152,10 +152,10 @@
     </dl>
     <a class="idea-button idea-button--wide{% if displayCarts|length == 0 %} idea-button--disabled{% endif %}"
        rel="goCheckoutEntry"
-       href="{% if displayCarts|length > 0 %}/shopping{% else %}/products/list{% endif %}">
+       href="{% if displayCarts|length > 0 %}/shopping{% else %}/products{% endif %}">
       {% if displayCarts|length > 0 %}レジに進む{% else %}買い物を続ける{% endif %}
     </a>
-    <a class="idea-link idea-summary-link" href="/products/list">カタログに戻る</a>
+    <a class="idea-link idea-summary-link" href="/products">カタログに戻る</a>
   </aside>
 </section>
 {% endblock %}
