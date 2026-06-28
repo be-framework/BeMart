@@ -39,11 +39,38 @@ final class ProductFactory
             $descriptionDetail,
             $searchWord,
             $note,
-            $imageFileName === null || $imageFileName === '' ? null : 'save_image/' . $imageFileName,
+            $this->resolveImagePath($imageFileName),
             $this->stringList($categoryNamesJson),
             $this->stringList($tagNamesJson),
             $this->stringList($classNamesJson),
         );
+    }
+
+    /**
+     * Resolve a stored image filename to a web path.
+     *
+     * Bare EC-CUBE upload filenames are served from the `save_image/` upload
+     * dir. Values that are already full asset/absolute/remote paths (e.g. the
+     * seeded `assets/idea-store/...` catalog images) are used as-is.
+     */
+    private function resolveImagePath(string|null $imageFileName): string|null
+    {
+        if ($imageFileName === null || $imageFileName === '') {
+            return null;
+        }
+
+        // Already absolute or remote → as-is.
+        if (str_starts_with($imageFileName, '/') || str_starts_with($imageFileName, 'http')) {
+            return $imageFileName;
+        }
+
+        // Full asset paths (the seeded catalog) become root-absolute.
+        if (str_starts_with($imageFileName, 'assets/')) {
+            return '/' . $imageFileName;
+        }
+
+        // Bare EC-CUBE upload filenames are served from the upload dir.
+        return '/save_image/' . $imageFileName;
     }
 
     /** @return list<string> */
