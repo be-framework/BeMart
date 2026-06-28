@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="320" viewBox="0 0 320 320" role="img" aria-labelledby="title desc">
+  <title id="title">IDEA STORE stacked logo</title>
+  <desc id="desc">Stacked IDEA STORE logo.</desc>
+  <rect width="320" height="320" rx="28" fill="#f7f3ea"/>
+  <circle cx="160" cy="104" r="44" fill="none" stroke="#66745f" stroke-width="2"/>
+  <path d="M132 108h56M160 76v56" stroke="#29251f" stroke-width="3" stroke-linecap="round"/>
+  <text x="160" y="198" text-anchor="middle" fill="#29251f" font-family="Helvetica Neue, Arial, sans-serif" font-size="32" letter-spacing="5" font-weight="500">IDEA</text>
+  <text x="160" y="234" text-anchor="middle" fill="#29251f" font-family="Helvetica Neue, Arial, sans-serif" font-size="20" letter-spacing="4">STORE</text>
+  <text x="160" y="268" text-anchor="middle" fill="#6f675c" font-family="Hiragino Sans, Yu Gothic, sans-serif" font-size="13" letter-spacing="4">イデアストア</text>
+</svg>
