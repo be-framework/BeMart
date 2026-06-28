@@ -29,6 +29,9 @@ sql/setup-db.sh "$URL" >/dev/null
 echo "reset-dev: [3/4] loading the dev fixture (utf8mb4) ..."
 "${MYSQL[@]}" < sql/seed/dev-fixture.sql
 
+echo "reset-dev: [3b/4] loading IdeaStore themed catalog (収納/台所/家具… ; skipped if absent) ..."
+DB_HOST="$HOST" DB_PORT="$PORT" DB_USER="$USER" DB_NAME="$DB" php sql/seed/load-idea-catalog.php
+
 echo "reset-dev: [4/4] making the PoC test customer loginnable ..."
 HASH="$(php -r "echo password_hash('login-test-password-2026', PASSWORD_BCRYPT, ['cost' => 12]);")"
 "${MYSQL[@]}" -e "UPDATE dtb_customer SET password='${HASH}' WHERE email='login-test@example.com';"
