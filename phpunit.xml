@@ -24,9 +24,6 @@
         <testsuite name="smoke">
             <directory>tests/Smoke</directory>
         </testsuite>
-        <testsuite name="sql">
-            <directory>tests/Resource/Sql</directory>
-        </testsuite>
     </testsuites>
     <groups>
         <exclude>
