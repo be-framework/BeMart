@@ -99,7 +99,8 @@ Fake は後付けの mock ではなく、最初の契約実装です。SQL 実�
 ドメイン状態遷移を表し、BEAR.Sunday Resource が HTTP / PHP 共通の Resource 境界を作ります。
 Ray.MediaQuery は SQL を interface 境界に閉じ込め、Context / DI が Fake / SQL、HTML / JSON、
 test / prod の実装選択を担います。Fake は最初の契約実装であり、SQL 実装は同じ Resource 契約を
-満たすものとして検証されます。Twig HTML は EC-CUBE の affordance をできるだけ保持し、
+満たすものとして検証されます。Twig HTML は EC-CUBE の markup を引き継がない独自デザイン
+（クリーンルーム実装）で、契約上の affordance（link / form による状態遷移）を描画し、
 workflow test は controller 内部ではなく、link / form を辿って状態遷移を証明します。
 HTTP workflow は同じシナリオを実 HTTP / cookie 境界へ持ち出し、HTML render と Web E2E は
 その遷移が実際の画面 affordance として残っていることを確認します。
@@ -251,3 +252,17 @@ SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
 - [EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube)
 - [Be Framework](https://be-framework.github.io/llms-full.txt)
 - [BEAR.Sunday](https://bearsunday.github.io/llms-full.txt)
+
+## ライセンス
+
+BeMart は [MIT License](LICENSE) で配布されます。
+
+BeMart は EC-CUBE 4.3 の **独立再実装 (independent reimplementation)** です。EC-CUBE の
+セマンティクス（データ語彙と状態遷移）を ALPS プロファイル (`alps.json`) として契約化し、
+その契約から BEAR.Sunday + Be Framework 上に作り直しています。テンプレート・スキーマ・
+ドメインコードはいずれも契約から起こしたクリーンルーム実装で、**EC-CUBE 本体（GPL）の
+ソースコードは一切含みません**。
+
+EC-CUBE は本プロジェクトの出発点となった先行実装であり、参照元として明記します
+（[EC-CUBE 4.3](https://github.com/EC-CUBE/ec-cube)）。`tools/ec-cube-source/` に置く
+EC-CUBE のクローンは構造調査・比較テスト専用で、配布物には含まれません（`.gitignore` 済み）。
