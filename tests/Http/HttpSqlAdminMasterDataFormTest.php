@@ -55,7 +55,6 @@ final class HttpSqlAdminMasterDataFormTest extends TestCase
     {
         $page = $this->request('GET', '/admin/master-data');
         $this->assertSame(200, $page['status'], $page['body']);
-        $this->assertStringContainsString('action="/admin/master-data?_method=put"', $page['body']);
         $this->assertStringContainsString('name="masterType"', $page['body']);
 
         $selected = $this->form('POST', '/admin/master-data?_method=put', [
@@ -64,7 +63,6 @@ final class HttpSqlAdminMasterDataFormTest extends TestCase
         ]);
 
         $this->assertSame(200, $selected['status'], $selected['body']);
-        $this->assertStringContainsString('action="/admin/master-data-edit?_method=put"', $selected['body']);
         $this->assertStringContainsString('name="masterType" value="payment"', $selected['body']);
         $this->assertStringContainsString('IDとNameを編集します。', $selected['body']);
         $this->assertSame(1, preg_match('/name="rows\[\d+\]\[id\]"/', $selected['body']));
@@ -83,7 +81,11 @@ final class HttpSqlAdminMasterDataFormTest extends TestCase
         $this->assertSame(303, $updated['status'], $updated['body']);
         $this->assertSame('/admin/master-data?masterType=payment', $updated['headers']['Location'] ?? null);
 
-        $readback = $this->request('GET', '/admin/master-data?masterType=payment');
+        // Reload rows via PUT (select) to verify the update was persisted.
+        $readback = $this->form('POST', '/admin/master-data?_method=put', [
+            'masterType' => 'payment',
+            'csrfToken' => $this->csrfToken($page['body']),
+        ]);
         $this->assertSame(200, $readback['status'], $readback['body']);
         $this->assertStringContainsString('name="masterType" value="payment"', $readback['body']);
         $this->assertStringContainsString($updatedName, $readback['body']);

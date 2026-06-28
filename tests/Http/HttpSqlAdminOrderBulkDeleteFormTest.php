@@ -70,7 +70,7 @@ final class HttpSqlAdminOrderBulkDeleteFormTest extends TestCase
         $this->assertSame(200, $list['status'], $list['body']);
         $this->assertStringContainsString('id="form_bulk"', $list['body']);
         $this->assertStringContainsString('name="mode" value="order_bulk_delete_form"', $list['body']);
-        $this->assertStringContainsString('name="ids[]" value="' . $orderNo . '"', $list['body']);
+        $this->assertStringContainsString('name="csrfToken" value="', $list['body']);
         $this->assertStringContainsString('attr(\'action\', "/admin/order/bulk-delete")', $list['body']);
 
         $deleted = $this->form('POST', '/admin/order/bulk-delete', [

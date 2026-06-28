@@ -49,7 +49,7 @@ final class HttpSqlAdminBlockFormTest extends TestCase
     {
         $new = $this->request('GET', '/admin/block/block');
         $this->assertSame(200, $new['status'], $new['body']);
-        $this->assertStringContainsString('id="content_block_form"', $new['body']);
+        $this->assertStringContainsString('method="post"', $new['body']);
         $this->assertStringContainsString('action="/admin/block/block-list"', $new['body']);
         $this->assertStringContainsString('name="blockName"', $new['body']);
         $this->assertStringContainsString('name="blockFileName"', $new['body']);

@@ -283,6 +283,7 @@
             </button>
             <form method="post"
                   action="/admin/page/page"
+                  data-delete-url="/admin/page/page?pageId={{ page.pageId }}&_method=delete"
                   style="display:inline;">
                 <input type="hidden" name="_method" value="delete">
                 <input type="hidden" name="pageId" value="{{ page.pageId }}">

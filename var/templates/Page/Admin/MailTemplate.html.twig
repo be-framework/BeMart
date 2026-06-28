@@ -157,6 +157,10 @@ document.addEventListener('DOMContentLoaded', function () {
       メールテンプレート一覧
     </h3>
     <span class="idea-admin-count" style="margin-left:auto;">{{ count }}件</span>
+    <a rel="doCreateMailTemplate" href="/admin/mail-template/create" class="idea-admin-action" style="margin-left:1rem;">
+      <i class="fa fa-plus" aria-hidden="true"></i>
+      新規作成
+    </a>
   </div>
   <div class="idea-admin-panel__body" style="padding:0;">
 
@@ -204,6 +208,41 @@ document.addEventListener('DOMContentLoaded', function () {
     </div>
     {% endif %}
 
+  </div>
+</section>
+
+{# ═══════════════════════════════════════════════════════════════════════
+   Zone 1b — Template-selector navigation form (always visible).
+   Affordances: action="/admin/mail-template", csrfToken, mailTemplateId.
+   Used by HttpSqlAdminMailTemplateFormTest to assert form contract.
+   ═══════════════════════════════════════════════════════════════════════ #}
+<section class="idea-admin-panel" aria-labelledby="section-select" style="margin-top:.75rem;">
+  <div class="idea-admin-panel__head">
+    <h3 id="section-select">
+      <i class="fa fa-list" aria-hidden="true"></i>
+      テンプレート選択
+    </h3>
+  </div>
+  <div class="idea-admin-panel__body">
+    <form
+      id="form1"
+      method="post"
+      action="/admin/mail-template"
+    >
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <div class="idea-admin-field">
+        <div class="idea-admin-field__label">
+          <label for="mail_template">テンプレート</label>
+        </div>
+        <div class="idea-admin-field__input" style="display:flex;gap:.5rem;align-items:flex-start;">
+          {{ form.input('template')|raw }}
+          <button class="idea-admin-action idea-admin-action--primary" type="submit">
+            <i class="fa fa-pen" aria-hidden="true"></i>
+            編集
+          </button>
+        </div>
+      </div>
+    </form>
   </div>
 </section>
 

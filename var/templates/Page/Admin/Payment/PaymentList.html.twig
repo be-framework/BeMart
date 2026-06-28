@@ -115,6 +115,7 @@ tr.is-hidden-payment { opacity: .55; }
     document.querySelector('#payment-table-body').addEventListener('click', function (e) {
         var btn = e.target.closest('[data-delete-url]');
         if (!btn || !deleteDialog) return;
+        e.preventDefault();
         deleteLabel.textContent  = btn.dataset.deleteLabel || '';
         deleteAnchor.href        = btn.dataset.deleteUrl;
         deleteDialog.removeAttribute('hidden');
@@ -139,13 +140,16 @@ tr.is-hidden-payment { opacity: .55; }
     </div>
     <div class="idea-admin-toolbar__actions">
         <a class="idea-admin-action idea-admin-action--primary"
-           href="/admin/payment/payment"
+           href="/admin/payment/payment-list"
            rel="doCreatePayment">
             <i class="fa fa-plus" aria-hidden="true"></i>
             新規登録
         </a>
     </div>
 </div>
+
+{# ── Global navigation affordances ───────────────────────────────── #}
+<a rel="goOrderList" href="/admin/order-list" class="idea-admin-nav-link">受注一覧</a>
 
 {# ── Payment list ─────────────────────────────────────────────────── #}
 {% if count > 0 %}
@@ -228,16 +232,15 @@ tr.is-hidden-payment { opacity: .55; }
                        data-confirm="false">
                         <i class="fa fa-{{ Payment.visible ? 'eye' : 'eye-slash' }}" aria-hidden="true"></i>
                     </a>
-                    <button type="button"
-                            class="idea-admin-icon-btn idea-admin-icon-btn--destructive"
-                            aria-label="削除"
-                            title="削除"
-                            data-delete-url="/admin/payment/payment?paymentId={{ Payment.paymentId }}&amp;_method=delete"
-                            data-delete-label="{{ Payment.paymentMethodName }}"
-                            data-post-action="delete"
-                            data-method="delete">
+                    <a class="idea-admin-icon-btn idea-admin-icon-btn--destructive"
+                       href="/admin/payment/payment?paymentId={{ Payment.paymentId }}&amp;_method=delete"
+                       rel="doDeletePayment"
+                       aria-label="削除"
+                       title="削除"
+                       data-delete-label="{{ Payment.paymentMethodName }}"
+                       data-delete-url="/admin/payment/payment?paymentId={{ Payment.paymentId }}&amp;_method=delete">
                         <i class="fa fa-trash" aria-hidden="true"></i>
-                    </button>
+                    </a>
                 </td>
             </tr>
         {% endfor %}

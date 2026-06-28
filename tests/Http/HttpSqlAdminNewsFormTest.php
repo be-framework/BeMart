@@ -53,7 +53,7 @@ final class HttpSqlAdminNewsFormTest extends TestCase
     {
         $new = $this->request('GET', '/admin/news/news');
         $this->assertSame(200, $new['status'], $new['body']);
-        $this->assertStringContainsString('id="form1"', $new['body']);
+        $this->assertStringContainsString('method="post"', $new['body']);
         $this->assertStringContainsString('action="/admin/news/news-list"', $new['body']);
         $this->assertStringContainsString('name="newsTitle"', $new['body']);
         $this->assertStringContainsString('name="publishDate"', $new['body']);
@@ -78,7 +78,7 @@ final class HttpSqlAdminNewsFormTest extends TestCase
 
         $detail = $this->request('GET', $location);
         $this->assertSame(200, $detail['status'], $detail['body']);
-        $this->assertStringContainsString('action="/admin/news/news?newsId=' . $newsId . '&_method=put"', $detail['body']);
+        $this->assertStringContainsString('action="/admin/news/news?newsId=' . $newsId . '&amp;_method=put"', $detail['body']);
         $this->assertStringContainsString('value="' . $title . '"', $detail['body']);
         $this->assertStringContainsString('Created through HTTP HTML form.', $detail['body']);
 

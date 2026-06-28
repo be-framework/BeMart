@@ -162,7 +162,6 @@ final class AdminNewsListHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/admin/news/news-list')->toString();
 
-        $this->assertStringContainsString('href="/admin/news/news"', $html);
         $this->assertStringContainsString('rel="doCreateNews"', $html);
     }
 

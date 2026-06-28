@@ -175,7 +175,7 @@
       <section class="idea-admin-panel" aria-labelledby="panel-items">
         <div class="idea-admin-panel__head">
           <h3 id="panel-items">商品明細</h3>
-          {% if items is defined and items|length > 0 %}
+          {% if not isNew and items is defined and items|length > 0 %}
           <span class="idea-admin-page-subtitle">{{ items|length }} 件</span>
           {% endif %}
         </div>
@@ -188,10 +188,45 @@
                   <th>商品名</th>
                   <th style="text-align:right;">単価</th>
                   <th style="text-align:center;">数量</th>
-                  <th style="text-align:right;">小計</th>
+                  {% if not isNew %}<th style="text-align:right;">小計</th>{% endif %}
                 </tr>
               </thead>
               <tbody>
+                {% if isNew %}
+                {# --- New order: editable row for first order item --- #}
+                <tr id="order_item_row_0">
+                  <td>
+                    <input type="text"
+                           name="orderItems[0][productCode]"
+                           id="order_item_0_product_code"
+                           class="form-control"
+                           placeholder="商品コード">
+                  </td>
+                  <td>
+                    <input type="text"
+                           name="orderItems[0][productName]"
+                           id="order_item_0_product_name"
+                           class="form-control"
+                           placeholder="商品名">
+                  </td>
+                  <td style="text-align:right;">
+                    <input type="text"
+                           name="orderItems[0][unitPrice]"
+                           id="order_item_0_unit_price"
+                           class="form-control"
+                           placeholder="0"
+                           style="text-align:right;">
+                  </td>
+                  <td style="text-align:center;">
+                    <input type="text"
+                           name="orderItems[0][quantity]"
+                           id="order_item_0_quantity"
+                           class="form-control"
+                           placeholder="1"
+                           style="text-align:center;">
+                  </td>
+                </tr>
+                {% else %}
                 {% for item in items %}
                 <tr>
                   <td style="color:var(--idea-muted);font-size:.82rem;">{{ item.productCode }}</td>
@@ -213,6 +248,7 @@
                   </td>
                 </tr>
                 {% endfor %}
+                {% endif %}
               </tbody>
             </table>
           </div>
@@ -225,6 +261,38 @@
           <h3 id="panel-contact">注文者情報</h3>
         </div>
         <div class="idea-admin-panel__body">
+
+          {% if isNew %}
+          {# New order: customer ID selector and payment method #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_customer_id">会員ID</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              <input type="text"
+                     name="customerId"
+                     id="order_customer_id"
+                     class="form-control"
+                     placeholder="会員ID">
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="order_payment_method_id">支払方法</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              <input type="text"
+                     name="paymentMethodId"
+                     id="order_payment_method_id"
+                     class="form-control"
+                     placeholder="1"
+                     value="1">
+            </div>
+          </div>
+          {% endif %}
 
           <div class="idea-admin-field">
             <div class="idea-admin-field__label">

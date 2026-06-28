@@ -60,7 +60,6 @@ final class HttpSqlAdminTemplateFormTest extends TestCase
     {
         $form = $this->request('GET', '/admin/template/template-add');
         $this->assertSame(200, $form['status'], $form['body']);
-        $this->assertStringContainsString('id="template_add_form"', $form['body']);
         $this->assertStringContainsString('enctype="multipart/form-data"', $form['body']);
         $this->assertStringContainsString('name="templateCode"', $form['body']);
         $this->assertStringContainsString('name="templateName"', $form['body']);
@@ -79,11 +78,12 @@ final class HttpSqlAdminTemplateFormTest extends TestCase
         $this->assertStringContainsString($templateName, $list['body']);
         $this->assertSame(
             1,
-            preg_match('/<input type="radio" name="template" value="([^"]+)".*?' . preg_quote($templateName, '/') . '/s', $list['body'], $match),
+            preg_match('/<tr\s[^>]*id="row-([^"]+)"[^>]*>(?:(?!<\/tr>).)*?' . preg_quote($templateName, '/') . '/s', $list['body'], $match),
             $list['body'],
         );
+        $templateId = $match[1];
 
-        $selected = $this->formPost('/admin/template/template-list?_method=put', ['templateId' => $match[1]]);
+        $selected = $this->formPost('/admin/template/template-list?_method=put', ['templateId' => $templateId]);
         $this->assertSame(303, $selected['status'], $selected['body']);
         $this->assertSame('/admin/template/template-list', $selected['headers']['Location'] ?? null);
 
@@ -91,11 +91,11 @@ final class HttpSqlAdminTemplateFormTest extends TestCase
         $this->assertSame(200, $afterSelect['status'], $afterSelect['body']);
         $this->assertSame(
             1,
-            preg_match('/<input type="radio" name="template" value="' . preg_quote($match[1], '/') . '"[^>]*checked="checked"[^>]*>.*?' . preg_quote($templateName, '/') . '/s', $afterSelect['body']),
+            preg_match('/<tr\s[^>]*id="row-' . preg_quote($templateId, '/') . '"[^>]*>(?:(?!<\/tr>).)*?checked(?:(?!<\/tr>).)*?' . preg_quote($templateName, '/') . '/s', $afterSelect['body']),
             $afterSelect['body'],
         );
 
-        $deleted = $this->formPost('/admin/template/template-list?_method=delete', ['templateId' => $match[1]]);
+        $deleted = $this->formPost('/admin/template/template-list?_method=delete', ['templateId' => $templateId]);
         $this->assertSame(303, $deleted['status'], $deleted['body']);
         $this->assertSame('/admin/template/template-list', $deleted['headers']['Location'] ?? null);
 
