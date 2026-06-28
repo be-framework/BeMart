@@ -20,27 +20,27 @@
 
 {% set defaultTopics = [
   {
-    kicker:   'Gelato selection',
-    title:    'ジェラートを選ぶ',
-    image:    '/assets/idea-store/images/category/real/entry-gelato.png',
-    imageAlt: 'ジェラートカテゴリの特集',
-    href:     '/products?category_id=1',
+    kicker:   'Storage',
+    title:    '収納を整える',
+    image:    '/assets/idea-store/images/category/real/entry-storage.png',
+    imageAlt: '収納カテゴリの特集',
+    href:     '/products?name=' ~ '収納'|url_encode,
     rel:      'goProductList'
   },
   {
-    kicker:   'Ice sandwich',
-    title:    'アイスサンドを楽しむ',
-    image:    '/assets/idea-store/images/category/real/entry-ice-sandwich.png',
-    imageAlt: 'アイスサンドカテゴリの特集',
-    href:     '/products?category_id=5',
+    kicker:   'Kitchen',
+    title:    '台所の道具を選ぶ',
+    image:    '/assets/idea-store/images/category/real/entry-kitchen.png',
+    imageAlt: '台所カテゴリの特集',
+    href:     '/products?name=' ~ '台所'|url_encode,
     rel:      'goProductList'
   },
   {
-    kicker:   'Colourful dessert',
-    title:    '彩のデザートを味わう',
-    image:    '/assets/idea-store/images/category/real/entry-dessert.png',
-    imageAlt: '彩のデザートカテゴリの特集',
-    href:     '/products?category_id=3',
+    kicker:   'Furniture',
+    title:    '家具を住まいに',
+    image:    '/assets/idea-store/images/category/real/entry-furniture.png',
+    imageAlt: '家具カテゴリの特集',
+    href:     '/products?name=' ~ '家具'|url_encode,
     rel:      'goProductList'
   }
 ] %}
