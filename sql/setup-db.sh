@@ -120,8 +120,11 @@ fi
 command -v mysql >/dev/null 2>&1 || die "mysql client not found on PATH"
 
 # mysql client invocation; password passed via MYSQL_PWD to keep it off argv.
+# --default-character-set=utf8mb4 forces the connection charset so schema/seed
+# loads never depend on the client's default (which may be latin1 and would
+# corrupt Japanese data). utf8mb4 is the project default everywhere.
 mysql_run() {
-    MYSQL_PWD="$PASS" mysql -h "$HOST" -P "$PORT" -u "$USER" "$@"
+    MYSQL_PWD="$PASS" mysql --default-character-set=utf8mb4 -h "$HOST" -P "$PORT" -u "$USER" "$@"
 }
 
 echo "setup-db: target  = ${USER}@${HOST}:${PORT}/${DB}"
