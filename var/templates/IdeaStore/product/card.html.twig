@@ -11,7 +11,7 @@
 {% set price = product.price|default(product.price02|default(0)) %}
 {% set stock = product.stock|default(null) %}
 {% set badge = product.badge|default(loop is defined and loop.index <= 3 ? 'NEW' : 'IDEA PICK') %}
-<a class="idea-card idea-product-card" href="/products/detail/{{ code }}">
+<a class="idea-card idea-product-card" href="/product?productCode={{ code|url_encode }}">
   <span class="idea-product-card-media">
     <span class="idea-product-badge">{{ badge }}</span>
     <img src="{{ image }}" alt="{{ name }}"{% if loop is defined and loop.index > 8 %} loading="lazy"{% endif %}>

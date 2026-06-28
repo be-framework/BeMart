@@ -87,8 +87,8 @@ final class ProductsHtmlRenderTest extends TestCase
         $this->assertStringContainsString('idea-price', $html, 'price element must appear');
 
         // Product detail link href comes from #[Link rel="goProduct" href="page://self/product"]
-        // → rendered as /product with productCode query.
-        $this->assertStringContainsString('/products/detail/', $html, 'product detail link must appear');
+        // → rendered as /product with productCode query (Product::onGet(string $productCode)).
+        $this->assertStringContainsString('/product?productCode=', $html, 'product detail link must appear');
 
         // Price must be formatted with yen sign.
         $this->assertMatchesRegularExpression('/¥[\d,]+/', $html, 'formatted price must appear');
@@ -201,14 +201,17 @@ final class ProductsHtmlRenderTest extends TestCase
     }
 
     /**
-     * Category filter links use the category_id query parameter as accepted
-     * by Products::onGet($category_id).
+     * The IdeaStore category-nav chips filter via the `name` keyword param
+     * (Products::onGet($name) → search_word match), consistent with the header
+     * nav. The legacy category_id path used a hardcoded category-name map and
+     * is not how the storefront navigates categories.
      */
-    public function testCategoryFilterLinksUseCategoryIdParam(): void
+    public function testCategoryFilterLinksUseNameKeyword(): void
     {
         $html = $this->resource->get('page://self/products')->toString();
 
-        $this->assertStringContainsString('category_id=', $html, 'category_id filter link must appear');
+        $this->assertStringContainsString('/products?name=', $html, 'category filter chip must appear');
+        $this->assertStringContainsString('台所', $html, 'category label must appear');
     }
 
     // -----------------------------------------------------------------------
