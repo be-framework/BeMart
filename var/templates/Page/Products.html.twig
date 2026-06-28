@@ -27,11 +27,42 @@
 {% set dispNumber = filters.disp_number|default('20') %}
 {% set activeOrderby = filters.orderby|default('') %}
 
+{# Per-category hero copy (the IdeaStore "category landing" experience). When the
+   active keyword matches a category, the catalog shows that category's curated
+   hero instead of a plain search-result heading. #}
+{% set categoryHeroes = {
+  '収納': { eyebrow: 'Storage edit', titleLines: ['しまう場所を、', '暮らしの余白に。'], lead: '玄関、棚、机まわり。出したままでも静かに見える収納の道具を集めました。', image: '/assets/idea-store/images/category/real/entry-storage.png' },
+  '台所': { eyebrow: 'Kitchen tools', titleLines: ['台所の手順を、', '少し静かに。'], lead: '朝の一杯、支度、片づけ。毎日の動きを軽くする器と道具を選びます。', image: '/assets/idea-store/images/category/real/entry-kitchen.png' },
+  '家具': { eyebrow: 'Living with furniture', titleLines: ['小さな部屋にも、', '大きな時間を。'], lead: '椅子、棚、サイドテーブル。部屋の余白をつくる家具と小物の入口です。', image: '/assets/idea-store/images/category/real/entry-furniture.png' },
+  '照明': { eyebrow: 'Lighting edit', titleLines: ['夜をやわらかく、', '読みやすく。'], lead: '読書、食卓、眠る前の時間。光の置き場所から部屋の表情を整えます。', image: '/assets/idea-store/images/category/real/entry-lighting.png' },
+  '布とファブリック': { eyebrow: 'Fabric edit', titleLines: ['触れるものから、', '季節を整える。'], lead: 'リネン、帆布、タオル。肌に触れる素材で、暮らしの温度を変えます。', image: '/assets/idea-store/images/category/real/entry-fabric.png' },
+  'デスク用品': { eyebrow: 'Desk tools', titleLines: ['働く時間に、', '余白をつくる。'], lead: 'ペン、紙、スタンド、トレー。集中するための机まわりを静かに整えます。', image: '/assets/idea-store/images/category/real/entry-desk.png' },
+  '本と雑誌': { eyebrow: 'Reading edit', titleLines: ['読む時間を、', '部屋の景色に。'], lead: '本、雑誌、ブックエンド。読みかけの一冊が似合う場所をつくります。', image: '/assets/idea-store/images/category/real/entry-books.png' },
+  '音楽': { eyebrow: 'Listening edit', titleLines: ['音の居場所を、', '暮らしの中に。'], lead: 'レコード、ブラシ、小さな音の道具。部屋の空気を変える入口です。', image: '/assets/idea-store/images/category/real/entry-music.png' },
+  '工作の道具': { eyebrow: 'Craft tools', titleLines: ['手を動かす時間を、', '整える。'], lead: '工具、紙、布、糸。作る前の机を整え、週末の小さな制作を支えます。', image: '/assets/idea-store/images/category/real/entry-craft.png' },
+  '掃除とケア': { eyebrow: 'Care tools', titleLines: ['手入れの時間も、', '静かな習慣に。'], lead: 'ブラシ、クロス、収納箱。長く使うための日々の手入れを軽くします。', image: '/assets/idea-store/images/category/real/entry-cleaning.png' },
+  'バス・ランドリー': { eyebrow: 'Bath and laundry', titleLines: ['洗う場所に、', '風通しを。'], lead: 'ランドリーバスケット、タオル、洗面まわり。水まわりを軽やかに整えます。', image: '/assets/idea-store/images/category/real/entry-bath.png' },
+  'コーヒーとお茶': { eyebrow: 'Coffee and tea', titleLines: ['一杯の時間を、', '丁寧に。'], lead: 'ドリッパー、茶器、トレー。休む時間の手順を静かに整えます。', image: '/assets/idea-store/images/category/real/entry-coffee.png' },
+  '植物と庭': { eyebrow: 'Plants and garden', titleLines: ['窓辺に、', '小さな緑を。'], lead: '鉢、霧吹き、土まわりの道具。育てる時間を部屋の景色にします。', image: '/assets/idea-store/images/category/real/entry-garden.png' },
+  'ペットと暮らす': { eyebrow: 'Living with pets', titleLines: ['人にも動物にも、', '心地よく。'], lead: 'ボウル台、布もの、収納。暮らしに自然に馴染むペット用品を選びます。', image: '/assets/idea-store/images/category/real/entry-pet.png' },
+  '外遊び': { eyebrow: 'Outdoor edit', titleLines: ['外の時間を、', '身軽に。'], lead: 'ピクニック、散歩、週末の外時間。持ち出しやすく、戻しやすい道具です。', image: '/assets/idea-store/images/category/real/entry-outdoor.png' },
+  '贈る日用品': { eyebrow: 'Gift edit', titleLines: ['気負わず渡せて、', '長く使える。'], lead: '小皿、布、文具。相手の暮らしに静かに残る日用品を集めました。', image: '/assets/idea-store/images/category/real/entry-gift.png' },
+  '器と食卓': { eyebrow: 'Tableware edit', titleLines: ['食卓の余白を、', '器から。'], lead: '皿、カップ、カトラリー。ふだんの食事を少し穏やかにする道具です。', image: '/assets/idea-store/images/category/real/entry-tableware.png' },
+  '文具': { eyebrow: 'Stationery edit', titleLines: ['書く時間を、', '整える。'], lead: '紙、カードスタンド、筆記具。手を動かす時間に集中できる机をつくります。', image: '/assets/idea-store/images/category/real/entry-stationery.png' },
+  'オーディオ小物': { eyebrow: 'Audio objects', titleLines: ['音楽の居場所を、', '小さく整える。'], lead: 'ケーブル、ブラシ、小さな台。聴く前後の所作まで気持ちよく。', image: '/assets/idea-store/images/category/real/entry-audio.png' },
+  '子どもと学び': { eyebrow: 'Kids and learning', titleLines: ['遊びながら、', '考える場所を。'], lead: '積み木、紙、収納。片づけまで含めて、家の中の学びを支えます。', image: '/assets/idea-store/images/category/real/entry-kids.png' }
+} %}
+{% set categoryHero = categoryHeroes[activeKeyword]|default(categoryHeroes[activeCategoryName]|default(null)) %}
+
 {# --- breadcrumb --- #}
 <nav class="idea-container idea-breadcrumb" aria-label="現在地">
   <a href="/" rel="goTop">ホーム</a>
   <span>/</span>
-  {% if activeCategoryName %}
+  {% if categoryHero %}
+    <a href="/products">カタログ</a>
+    <span>/</span>
+    <span>{{ activeKeyword|default(activeCategoryName) }}</span>
+  {% elseif activeCategoryName %}
     <a href="/products">カタログ</a>
     <span>/</span>
     <span>{{ activeCategoryName }}</span>
@@ -45,15 +76,26 @@
 </nav>
 
 {# --- catalog hero / search block --- #}
+{% if categoryHero %}
+<section class="idea-container idea-collection-hero idea-collection-hero--visual" aria-labelledby="idea-catalog-heading">
+  <img class="idea-collection-hero-image" src="{{ categoryHero.image }}" alt="{{ activeKeyword|default(activeCategoryName) }}の暮らしの入口">
+  <div class="idea-collection-hero-copy">
+    <p class="idea-eyebrow">{{ categoryHero.eyebrow }}</p>
+    <h1 id="idea-catalog-heading" class="idea-title idea-title--compact">
+      {% for titleLine in categoryHero.titleLines %}<span class="idea-title-line">{{ titleLine }}</span>{% endfor %}
+    </h1>
+    <p class="idea-muted">{{ categoryHero.lead }}</p>
+    <form class="idea-catalog-search idea-catalog-search--overlay" action="/products" method="get" role="search">
+      <input type="search" name="name" value="{{ activeKeyword }}" placeholder="キーワードで探す" aria-label="商品を検索">
+      <button class="idea-button" type="submit">検索</button>
+    </form>
+  </div>
+</section>
+{% else %}
 <section class="idea-container idea-collection-hero" aria-labelledby="idea-catalog-heading">
   <div>
     <p class="idea-eyebrow">Catalog</p>
-    {% if activeCategoryName %}
-      <h1 id="idea-catalog-heading" class="idea-title idea-title--compact">
-        <span class="idea-title-line">{{ activeCategoryName }}の</span>
-        <span class="idea-title-line">商品を選ぶ。</span>
-      </h1>
-    {% elseif activeKeyword %}
+    {% if activeKeyword %}
       <h1 id="idea-catalog-heading" class="idea-title idea-title--compact">
         <span class="idea-title-line">「{{ activeKeyword }}」</span>
         <span class="idea-title-line">の検索結果</span>
@@ -71,6 +113,7 @@
     <button class="idea-button" type="submit">検索</button>
   </form>
 </section>
+{% endif %}
 
 {# --- toolbar: item count + quick filters + sort --- #}
 <section class="idea-container idea-section idea-catalog-body" aria-label="商品一覧">
