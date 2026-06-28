@@ -124,7 +124,7 @@
       <p class="idea-muted idea-point-notice">この注文で {{ addPoint|number_format }} ポイント獲得予定</p>
     {% endif %}
 
-    <form method="post" action="/shopping/checkout">
+    <form method="post" action="/shopping/checkout?mode=complete">
       <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
       <input type="hidden" name="preOrderId" value="{{ preOrderId|default('') }}">
       <input type="hidden" name="paymentMethodId" value="{{ paymentMethodId|default('') }}">

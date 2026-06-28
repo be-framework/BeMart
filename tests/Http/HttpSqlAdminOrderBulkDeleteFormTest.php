@@ -126,7 +126,7 @@ final class HttpSqlAdminOrderBulkDeleteFormTest extends TestCase
         $confirm = $this->request('GET', $confirmLocation);
         $this->assertSame(200, $confirm['status'], $confirm['body']);
         $this->assertStringContainsString($email, $confirm['body']);
-        $this->assertStringContainsString('action="/shopping/checkout"', $confirm['body']);
+        $this->assertStringContainsString('action="/shopping/checkout', $confirm['body']);
 
         $checkout = $this->form('POST', '/shopping/checkout', [
             'preOrderId' => $this->inputValue($confirm['body'], 'preOrderId'),
