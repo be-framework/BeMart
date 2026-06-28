@@ -1,29 +1,86 @@
 {#
-  EC-CUBE default-theme Block/category.twig static port.
+  BeMart Block/category — カテゴリショーケース（IdeaStore 設計言語）
+
+  用途: ストアフロントに埋め込まれるカテゴリ一覧パネル。extends しない。
+  データ契約:
+    - カテゴリ一覧と category_id → src/Resource/Page/Products.php#categoryName()
+      id=1: ジェラート / id=2: 新入荷 / id=3: 彩のデザート
+      id=4: CUBE     / id=5: アイスサンド / id=6: フルーツ
+    - 遷移先: /products?category_id={id}  (goProductList リンク)
+    - 画像: /assets/idea-store/images/category/real/entry-{slug}.png
+  フォームなし。CSRF 不要。
 #}
-<div class="ec-categoryRole">
-    <div class="ec-role">
-        <div class="ec-secHeading">
-            <span class="ec-secHeading__en">CATEGORY</span>
-            <span class="ec-secHeading__line"></span>
-            <span class="ec-secHeading__ja">カテゴリ</span>
-        </div>
-        <div class="ec-categoryRole__list">
-            <div class="ec-categoryRole__listItem">
-                <a href="/products?category_id=2">
-                    <img src="{{ asset('assets/img/top/fpo_355x150.png') }}">
-                </a>
-            </div>
-            <div class="ec-categoryRole__listItem">
-                <a href="/products?category_id=1">
-                    <img src="{{ asset('assets/img/top/fpo_355x150.png') }}">
-                </a>
-            </div>
-            <div class="ec-categoryRole__listItem">
-                <a href="/products?category_id=5">
-                    <img src="{{ asset('assets/img/top/fpo_355x150.png') }}">
-                </a>
-            </div>
-        </div>
+
+<section class="idea-section idea-section--tight" aria-labelledby="idea-cat-heading">
+  <div class="idea-container">
+    <div class="idea-section-head">
+      <p class="idea-eyebrow">Shop by category</p>
+      <h2 id="idea-cat-heading" class="idea-section-title">カテゴリから選ぶ</h2>
+      <a class="idea-muted idea-view-all" href="/products" rel="goProductList">すべて見る</a>
     </div>
-</div>
+
+    <div class="idea-grid idea-category-grid">
+
+      <a class="idea-card idea-category-card" href="/products?category_id=2">
+        <img src="/assets/idea-store/images/category/real/entry-new-arrivals.png"
+             alt="新入荷カテゴリ" loading="lazy">
+        <span class="idea-card-body">
+          <span class="idea-card-kicker">New arrivals</span>
+          <strong class="idea-card-title">新入荷</strong>
+          <span class="idea-muted">今週届いた新しいもの。</span>
+        </span>
+      </a>
+
+      <a class="idea-card idea-category-card" href="/products?category_id=1">
+        <img src="/assets/idea-store/images/category/real/entry-gelato.png"
+             alt="ジェラートカテゴリ" loading="lazy">
+        <span class="idea-card-body">
+          <span class="idea-card-kicker">Gelato</span>
+          <strong class="idea-card-title">ジェラート</strong>
+          <span class="idea-muted">本格素材のこだわりジェラート。</span>
+        </span>
+      </a>
+
+      <a class="idea-card idea-category-card" href="/products?category_id=3">
+        <img src="/assets/idea-store/images/category/real/entry-dessert.png"
+             alt="彩のデザートカテゴリ" loading="lazy">
+        <span class="idea-card-body">
+          <span class="idea-card-kicker">Colourful dessert</span>
+          <strong class="idea-card-title">彩のデザート</strong>
+          <span class="idea-muted">目でも楽しむ、鮮やかなひと品。</span>
+        </span>
+      </a>
+
+      <a class="idea-card idea-category-card" href="/products?category_id=4">
+        <img src="/assets/idea-store/images/category/real/entry-cube.png"
+             alt="CUBEカテゴリ" loading="lazy">
+        <span class="idea-card-body">
+          <span class="idea-card-kicker">Cube</span>
+          <strong class="idea-card-title">CUBE</strong>
+          <span class="idea-muted">四角いフォルムが揃う定番シリーズ。</span>
+        </span>
+      </a>
+
+      <a class="idea-card idea-category-card" href="/products?category_id=5">
+        <img src="/assets/idea-store/images/category/real/entry-ice-sandwich.png"
+             alt="アイスサンドカテゴリ" loading="lazy">
+        <span class="idea-card-body">
+          <span class="idea-card-kicker">Ice sandwich</span>
+          <strong class="idea-card-title">アイスサンド</strong>
+          <span class="idea-muted">ビスケットと一緒に味わうアイス。</span>
+        </span>
+      </a>
+
+      <a class="idea-card idea-category-card" href="/products?category_id=6">
+        <img src="/assets/idea-store/images/category/real/entry-fruit.png"
+             alt="フルーツカテゴリ" loading="lazy">
+        <span class="idea-card-body">
+          <span class="idea-card-kicker">Fruit</span>
+          <strong class="idea-card-title">フルーツ</strong>
+          <span class="idea-muted">季節のフルーツを生かした一品。</span>
+        </span>
+      </a>
+
+    </div>
+  </div>
+</section>

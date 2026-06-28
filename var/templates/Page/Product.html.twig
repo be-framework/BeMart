@@ -1,251 +1,152 @@
+{% extends 'IdeaStore/layout/base.html.twig' %}
+
 {#
-  BeMart 商品詳細 — EC-CUBE goProduct.
+  BeMart 商品詳細ページ — ALPS goProduct.
 
-  PORT of EC-CUBE 4.3 default-theme `Product/detail.twig`
-  (src/Eccube/Resource/template/default/Product/detail.twig).
+  Data contract (src/Resource/Page/Product.php + var/json_schema/get-product.json):
+    productCode   string        SKU（必須）
+    productName   string|null   商品名（必須）
+    price02       integer|null  販売価格・税抜（必須）
+    stock         integer|null  在庫数（null = 無制限）
+    stockFind     boolean       購入可フラグ（必須）
+    description   string|null   説明文
+    categoryNames string[]      カテゴリ名一覧
+    tagNames      string[]      タグ名一覧
+    classNames    string[]      規格名一覧
+    mainImage     string|null   メイン画像 URI
+    csrfToken     string|null   CSRF トークン
+    form          object|null   AddCartForm（html コンテキストのみ）
 
-  Markup skeleton, `ec-productRole` / `ec-grid2` / `ec-sliderItemRole`
-  / `ec-price` / `ec-numberInput` / `ec-modal` classes and the block
-  structure are kept verbatim from EC-CUBE. The dynamic bindings are
-  rebound to the Product resource body (src/Resource/Page/Product.php):
-    productCode, productName, price02, stock, stockFind, mainImage, form
+  Transitions (#[Link] on Product::onGet):
+    goProductList   GET  page://self/products
+    doAddCartItem   POST page://self/cart/item
+    doAddFavorite   POST page://self/mypage/favorite   (お気に入り追加 — 未実装 MISSING BODY FIELD)
+    doRemoveFavorite DELETE page://self/mypage/favorite (お気に入り削除 — 未実装 MISSING BODY FIELD)
 
-  FORM page (the add-to-cart action). EC-CUBE renders the add-cart
-  quantity input through `AddCartType` + `form_widget(form.quantity)`;
-  BeMart renders it through a real `AddCartForm` (an AbstractForm),
-  exposed by the Product resource as `body.form`:
+  Form fields (src/Form/AddCartForm.php):
+    productCode  hidden   商品コード（Resource 側で seeded）
+    csrfToken    hidden   CSRF トークン（Resource 側で seeded）
+    quantity     number   購入数量（min=1）
 
-    {{ form.input('productCode')|raw }}  <- hidden, seeded w/ productCode
-    {{ form.input('quantity')|raw }}    <- real number <input>, min=1
-
-  Validation authority stays with the Be Framework Becoming chain (the
-  Cart add-item Input) — the form is a field-definition + renderer.
-
-  The `{% block stylesheet %}` (the slick-slider CSS) is ported
-  verbatim — it is static markup with no data binding.
-
-  厳密移植 (Grade-C) SCOPE — BeMart's Product body is the thin
-  projection `productCode / productName / price02 / stock`. EC-CUBE's
-  detail.twig renders much more off the full `Product` entity; those
-  fields are genuinely absent from BeMart's data and are OMITTED (never
-  invented), each enumerated as an explained residual in
-  tests/Resource/ProductHtmlRenderTest.php:
-
-   - `Product.ProductImage` — BeMart does not yet have a product-image
-     table/join. The `item_visual` gallery therefore renders one
-     presentation-side `mainImage` from ProductImageCatalog, falling back
-     to EC-CUBE's `no_image_product` placeholder for image-less fixtures.
-   - `Product.hasProductClass` / `getPrice01*` / `ProductClass` — the
-     規格 (class) price ranges, the `classcategory_id1/2` selects.
-     No ProductClass join in scope; the price renders as the single
-     `price02` value and the class selects do not render.
-   - `Product.Tags` / `Product.ProductCategories` — tag chips and the
-     related-category breadcrumb. No tag / category join in scope.
-   - `Product.description_detail` / `description_list` / `freearea` —
-     the rich product description + free HTML area. No description
-     field in scope.
-   - `Product.code_min` / `code_max` — EC-CUBE shows a code RANGE for
-     class products; BeMart shows the single `productCode`.
-   - `BaseInfo.option_favorite_product` + `is_favorite` — the
-     favorite-product feature flag + per-customer favorite state.
-     BeMart has no BaseInfo / session-favorite aggregation, so the
-     add/remove-favorite control is OMITTED. The `#doAddFavorite` /
-     `#doRemoveFavorite` transitions ARE declared on the Product
-     resource (ALPS remediation f01e1ae); rendering the button needs a
-     Favorite vertical-slice enrichment — flagged as a follow-up.
-   - The `{% block javascript %}` — the slick-slider init, the
-     add-cart AJAX handler, the `eccube.classCategories` payload and
-     the schema.org JSON-LD. EC-CUBE client-side behavior + SEO
-     structured data: it depends on EC-CUBE's bundled `eccube.js` /
-     slick plugin / per-request CSRF / `Product` entity joins that
-     BeMart does not ship. Like the frame's `meta.twig` SEO fragment,
-     it is OMITTED as EC-CUBE-runtime-only and enumerated as residual.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `asset('x')` -> `/x`; `canonical-url route, params)` -> `/{route}?{query}`.
-   - `price` filter -> JPY NumberFormatter.
+  Design language: IdeaStore idea-* CSS vocabulary
+  (var/templates/IdeaStore/*, /Users/akihito/git/IdeaStore/assets/css/idea-store.css)
 #}
-{% extends 'base.html.twig' %}
 
-{% set body_class = 'product_page' %}
-{% set route = 'product' %}
-{% set title = productName %}
+{% block title %}{{ productName }} | IDEA STORE{% endblock %}
 
-{% block stylesheet %}
-    <style>
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="パンくずリスト">
+  <a href="/">ホーム</a><span>/</span><a href="/products/list" rel="goProductList">商品一覧</a><span>/</span><span aria-current="page">{{ productName }}</span>
+</nav>
 
-        .slick-slider {
-            margin-bottom: 30px;
-        }
+<article class="idea-container idea-product-detail idea-product-detail--premium" itemscope itemtype="https://schema.org/Product">
 
-        .slick-dots {
-            position: absolute;
-            bottom: -45px;
-            display: block;
-            width: 100%;
-            padding: 0;
-            list-style: none;
-            text-align: center;
-        }
-
-        .slick-dots li {
-            position: relative;
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin: 0 5px;
-            padding: 0;
-
-            cursor: pointer;
-        }
-
-        .slick-dots li button {
-            font-size: 0;
-            line-height: 0;
-            display: block;
-            width: 20px;
-            height: 20px;
-            padding: 5px;
-            cursor: pointer;
-            color: transparent;
-            border: 0;
-            outline: none;
-            background: transparent;
-        }
-
-        .slick-dots li button:hover,
-        .slick-dots li button:focus {
-            outline: none;
-        }
-
-        .slick-dots li button:hover:before,
-        .slick-dots li button:focus:before {
-            opacity: 1;
-        }
-
-        .slick-dots li button:before {
-            content: " ";
-            line-height: 20px;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 12px;
-            height: 12px;
-            text-align: center;
-            opacity: .25;
-            background-color: black;
-            border-radius: 50%;
-
-        }
-
-        .slick-dots li.slick-active button:before {
-            opacity: .75;
-            background-color: black;
-        }
-
-        .slick-dots li button.thumbnail img {
-            width: 0;
-            height: 0;
-        }
-
-    </style>
-{% endblock %}
-
-{% block main %}
-    <div class="ec-productRole">
-        <div class="ec-grid2">
-            <div class="ec-grid2__cell">
-                <div class="ec-sliderItemRole">
-
-                    <div class="item_visual">
-                        <div class="slide-item"><img src="{{ asset(mainImage|default('assets/img/common/no_image_product.png'), 'save_image') }}" alt="{{ productName }}" width="550" height="550"></div>
-                    </div>
-                    <div class="item_nav">
-                    </div>
-                </div>
-            </div>
-            <div class="ec-grid2__cell">
-                <div class="ec-productRole__profile">
-                    {# 商品名 #}
-                    <div class="ec-productRole__title">
-                        <h2 class="ec-headingTitle">{{ productName }}</h2>
-                    </div>
-                    {# タグ #}
-                    <ul class="ec-productRole__tags">
-                        {% for tagName in tagNames|default([]) %}
-                            <li class="ec-productRole__tag tag_{{ loop.index }}">{{ tagName }}</li>
-                        {% endfor %}
-                    </ul>
-                    {# 販売価格 #}
-                    <div class="ec-productRole__price">
-                        <div class="ec-price">
-                            <span class="ec-price__price">{{ price02|price }}</span>
-                            <span class="ec-price__tax">税込</span>
-                        </div>
-                    </div>
-                    {# 商品コード #}
-                    <div class="ec-productRole__code">
-                        商品コード： <span class="product-code-default">{{ productCode }}</span>
-                    </div>
-                    {% if categoryNames|default([]) is not empty %}
-                        <div class="ec-productRole__category">
-                            カテゴリ：
-                            {% for categoryName in categoryNames %}
-                                <span>{{ categoryName }}</span>{% if not loop.last %} / {% endif %}
-                            {% endfor %}
-                        </div>
-                    {% endif %}
-                    {% if classNames|default([]) is not empty %}
-                        <div class="ec-productRole__class">
-                            規格：{{ classNames|join(' / ') }}
-                        </div>
-                    {% endif %}
-                    <form action="/cart/item" method="post" id="form1" name="form1">
-                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                        <input type="hidden" name="operation" value="add">
-                        {% if stockFind %}
-                            <div class="ec-productRole__actions">
-                                <div class="ec-numberInput"><span>数量</span>
-                                    {{ form.input('quantity')|raw }}
-                                    {{ form.error('quantity') }}
-                                </div>
-                            </div>
-                            <div class="ec-productRole__btn">
-                                <button type="submit" class="ec-blockBtn--action add-cart">
-                                    カートに入れる
-                                </button>
-                            </div>
-                        {% else %}
-                            <div class="ec-productRole__btn">
-                                <button type="button" class="ec-blockBtn--action" disabled="disabled">
-                                    ただいま品切れ中です。
-                                </button>
-                            </div>
-                        {% endif %}
-
-                        {{ form.input('productCode')|raw }}
-                        {{ form.input('csrfToken')|raw }}
-                    </form>
-                    <div class="ec-modal">
-                        <div class="ec-modal-overlay">
-                            <div class="ec-modal-wrap">
-                                <span class="ec-modal-close"><span class="ec-icon"><img src="{{ asset('assets/icon/cross-dark.svg') }}" alt=""/></span></span>
-                                <div id="ec-modal-header" class="text-center">カートに追加しました。</div>
-                                <div class="ec-modal-box">
-                                    <div class="ec-role">
-                                        <span class="ec-inlineBtn--cancel">お買い物を続ける</span>
-                                        <a href="/cart" class="ec-inlineBtn--action">カートへ進む</a>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="ec-productRole__description">
-                        {{ description|default('')|nl2br }}
-                    </div>
-                </div>
-            </div>
-        </div>
+  {# ギャラリーカラム #}
+  <div class="idea-product-gallery">
+    <div class="idea-product-visual">
+      <img
+        src="{{ mainImage|default('/assets/idea-store/images/product/product-01.svg') }}"
+        alt="{{ productName }}"
+        itemprop="image"
+      >
     </div>
+    <div class="idea-product-thumbs" aria-label="商品の使用イメージ">
+      <img src="/assets/idea-store/images/editorial/editorial-01.svg" alt="インテリアのイメージ" loading="lazy">
+      <img src="/assets/idea-store/images/editorial/editorial-02.svg" alt="素材のクローズアップ" loading="lazy">
+      <img src="/assets/idea-store/images/editorial/editorial-04.svg" alt="生活空間での佇まい" loading="lazy">
+    </div>
+  </div>
+
+  {# 購入ボックスカラム #}
+  <div class="idea-product-info idea-product-buybox">
+    {% if categoryNames|default([]) is not empty %}
+      <p class="idea-eyebrow">{{ categoryNames|first }}</p>
+    {% else %}
+      <p class="idea-eyebrow">IDEA STORE</p>
+    {% endif %}
+
+    <h1 class="idea-section-title" itemprop="name">{{ productName }}</h1>
+
+    {% if description %}
+      <p class="idea-lead" itemprop="description">{{ description }}</p>
+    {% endif %}
+
+    <p class="idea-price idea-detail-price" itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+      ¥{{ price02|number_format }}
+      <meta itemprop="priceCurrency" content="JPY">
+      <meta itemprop="price" content="{{ price02 }}">
+    </p>
+
+    {% if tagNames|default([]) is not empty or classNames|default([]) is not empty %}
+      <div class="idea-chip-row">
+        {% for tag in tagNames|default([]) %}
+          <span>{{ tag }}</span>
+        {% endfor %}
+        {% for className in classNames|default([]) %}
+          <span>{{ className }}</span>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {#
+      カート追加フォーム
+      action は src/Resource/Page/Product.php #[Link] の href から確定:
+        doAddCartItem POST page://self/cart/item -> /cart/item
+      フィールド: productCode（hidden）, csrfToken（hidden）, quantity（number）
+    #}
+    <form class="idea-cart-form" action="/cart/item" method="post" rel="doAddCartItem">
+      {{ form.input('csrfToken')|raw }}
+      {{ form.input('productCode')|raw }}
+
+      {% if stockFind %}
+        <label>
+          数量
+          {{ form.input('quantity')|raw }}
+          {% set quantityError = form.error('quantity') %}
+          {% if quantityError %}
+            <span class="idea-muted" role="alert">{{ quantityError }}</span>
+          {% endif %}
+        </label>
+        <button type="submit" class="idea-button">カートに入れる</button>
+      {% else %}
+        <button type="button" class="idea-button" disabled aria-disabled="true">ただいま品切れ中です</button>
+      {% endif %}
+    </form>
+
+    <div class="idea-product-promises">
+      <span>丁寧なものづくり</span>
+      <span>生活編集の視点で選んだアイテム</span>
+      <span>安心の在庫管理</span>
+    </div>
+
+    <dl class="idea-spec-list">
+      <div class="idea-spec-row">
+        <dt>商品コード</dt>
+        <dd itemprop="sku">{{ productCode }}</dd>
+      </div>
+      {% if categoryNames|default([]) is not empty %}
+        <div class="idea-spec-row">
+          <dt>カテゴリ</dt>
+          <dd>{{ categoryNames|join(' / ') }}</dd>
+        </div>
+      {% endif %}
+      {% if tagNames|default([]) is not empty %}
+        <div class="idea-spec-row">
+          <dt>タグ</dt>
+          <dd>{{ tagNames|join(' / ') }}</dd>
+        </div>
+      {% endif %}
+      <div class="idea-spec-row">
+        <dt>在庫状況</dt>
+        <dd>{{ stockFind ? '在庫あり' : '品切れ' }}</dd>
+      </div>
+    </dl>
+  </div>
+</article>
+
+<section class="idea-container idea-section idea-story-panel" aria-labelledby="idea-product-story-title">
+  <p class="idea-eyebrow">About this item</p>
+  <h2 id="idea-product-story-title">日々の手順を、少し丁寧に。</h2>
+  <p>IDEA STORE の商品は、暮らしの中でどう使うかを想像しながら選んでいます。機能だけでなく、手に取る瞬間の感触や、部屋に置いたときの佇まいを大切にしています。</p>
+</section>
 {% endblock %}

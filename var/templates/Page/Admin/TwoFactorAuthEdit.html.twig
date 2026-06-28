@@ -1,111 +1,315 @@
-{#
-  BeMart admin member 2FA edit — EC-CUBE Setting/System/two_factor_auth_edit.twig.
-#}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-setting-system-two-factor-auth-edit' %}
-{% set title = '2段階認証' %}
+{% set route    = 'admin-setting-system-two-factor-auth-edit' %}
+{% set title    = '二要素認証デバイス設定' %}
 {% set sub_title = 'システム設定' %}
-
-{% block javascript %}
-<script>
-$(function () {
-    $("#qrcode").qrcode({
-        size: 200,
-        fill: '#000',
-        text: 'otpauth://totp/{{ ('EC-CUBE:' ~ shopName|default('') ~ ' - ' ~ memberName|default(''))|url_encode }}?secret={{ authKey|default('') }}&issuer={{ 'EC-CUBE'|url_encode }}',
-        radius: 0,
-        quiet: 0,
-        mode: 0,
-        mSize: 0.1,
-        mPosX: 0.5,
-        mPosY: 0.5,
-        label: 'no label',
-        fontname: 'sans',
-        fontcolor: '#000',
-        image: null
-    });
-});
-</script>
-{% endblock %}
 
 {% block stylesheet %}
 <style>
-#qrcode canvas { width: 150px; }
+/* ── page-scoped additions (idea-admin-* naming) ──────────────── */
+
+.idea-admin-2fa-card {
+  max-width: 560px;
+  margin: 0 auto;
+  display: grid;
+  gap: 1rem;
+}
+
+/* QR area */
+.idea-admin-2fa-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .75rem;
+  padding: 1.25rem 0 .5rem;
+}
+.idea-admin-2fa-qr-frame {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 180px;
+  height: 180px;
+  border: 1px solid rgba(205, 191, 170, .55);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+.idea-admin-2fa-qr-frame canvas,
+.idea-admin-2fa-qr-frame img,
+.idea-admin-2fa-qr-frame table {
+  display: block;
+}
+.idea-admin-2fa-qr-empty {
+  color: var(--idea-muted);
+  font-size: .78rem;
+  text-align: center;
+  padding: .5rem;
+}
+.idea-admin-2fa-qr-label {
+  font-size: .76rem;
+  color: var(--idea-muted);
+  text-align: center;
+}
+
+/* Token input — large, centered */
+.idea-admin-2fa-token-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .5rem;
+}
+.idea-admin-2fa-token-input {
+  width: 10rem;
+  min-height: 3rem;
+  font-size: 1.5rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .2em;
+  text-align: center;
+  border: 2px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .97);
+  color: var(--idea-ink);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  padding: .4rem .6rem;
+}
+.idea-admin-2fa-token-input:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 4px rgba(82, 107, 85, .18);
+}
+.idea-admin-2fa-token-hint {
+  font-size: .76rem;
+  color: var(--idea-muted);
+}
+
+/* Step header */
+.idea-admin-2fa-step {
+  display: flex;
+  align-items: center;
+  gap: .5rem;
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--idea-muted);
+  margin-bottom: .15rem;
+}
+.idea-admin-2fa-step__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--idea-surface-soft);
+  border: 1px solid var(--idea-stone);
+  font-size: .7rem;
+  color: var(--idea-muted);
+  font-weight: 800;
+  flex-shrink: 0;
+}
 </style>
 {% endblock %}
 
 {% block main %}
-    <form name="two_factor_auth_form" role="form" id="two_factor_auth_form" method="post" action="" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-        {{ form.input('authKey')|raw }}
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8"><span class="card-title">2段階認証</span></div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#memberInfo" aria-expanded="false" aria-controls="memberInfo">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="memberInfo">
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>QRコード</span>
-                                    </div>
-                                    <div class="col">
-                                        <div id="qrcode"></div>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="認証アプリに表示されたトークンを入力してください。">
-                                            <span>トークン</span>
-                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                            <span class="badge bg-primary ms-1">必須</span>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {{ form.input('deviceToken')|raw }}
-                                            </div>
-                                            {% if form.error('deviceToken') %}
-                                                <span class="invalid-feedback d-block">{{ form.error('deviceToken') }}</span>
-                                            {% endif %}
-                                            {% if message is defined and message %}
-                                                <div class="text-danger mb-3 text-start small">{{ message }}</div>
-                                            {% endif %}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="idea-admin-2fa-card">
+
+  {# ── failure notice (server validation / auth failure) ─────── #}
+  {% if message is defined and message %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert" aria-live="assertive">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ message }}
+  </div>
+  {% endif %}
+
+  <form
+    id="two_factor_auth_edit_form"
+    method="post"
+    action="/admin/two-factor-auth-edit"
+    novalidate
+    aria-label="二要素認証デバイス設定フォーム"
+  >
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    {# hidden TOTP secret — filled by resource; JS reads it for QR URI #}
+    {{ form.input('authKey')|raw }}
+
+    {# ── Step 1: QR code ─────────────────────────────────────── #}
+    <section class="idea-admin-panel" aria-labelledby="2fa-step1-heading">
+      <div class="idea-admin-panel__head">
+        <div class="idea-admin-2fa-step">
+          <span class="idea-admin-2fa-step__num" aria-hidden="true">1</span>
+          <h3 id="2fa-step1-heading" style="margin:0;font-size:.9rem;font-weight:700;letter-spacing:-.01em;">
+            認証アプリで QR コードをスキャン
+          </h3>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem"></div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        <p class="idea-admin-panel__hint" style="margin-top:.25rem;">
+          Google Authenticator / Authy などの TOTP アプリを使用してください。
+        </p>
+      </div>
+      <div class="idea-admin-panel__body">
+        <div class="idea-admin-2fa-qr-wrap">
+          <div class="idea-admin-2fa-qr-frame" id="qr-frame">
+            {% if authKey is defined and authKey %}
+              {# qrcode-generator renders here via JS #}
+            {% else %}
+              <p class="idea-admin-2fa-qr-empty">
+                <i class="fa fa-qrcode fa-2x" aria-hidden="true"></i><br>
+                QR コードを表示できません
+              </p>
+            {% endif %}
+          </div>
+          <p class="idea-admin-2fa-qr-label">
+            スキャンできない場合は以下のキーを手動で入力:<br>
+            <code id="auth-key-text" style="font-size:.78rem;word-break:break-all;">
+              {{ authKey|default('（キーがありません）') }}
+            </code>
+          </p>
+          <dl class="idea-admin-meta__list" style="width:100%;max-width:340px;font-size:.8rem;">
+            <div>
+              <dt>アカウント</dt>
+              <dd id="qr-member-name">{{ memberName|default('') }}</dd>
             </div>
+            <div>
+              <dt>発行者</dt>
+              <dd>{{ shopName|default('BeMart') }}</dd>
+            </div>
+          </dl>
         </div>
-    </form>
+      </div>
+    </section>
+
+    {# ── Step 2: token entry ─────────────────────────────────── #}
+    <section class="idea-admin-panel" aria-labelledby="2fa-step2-heading">
+      <div class="idea-admin-panel__head">
+        <div class="idea-admin-2fa-step">
+          <span class="idea-admin-2fa-step__num" aria-hidden="true">2</span>
+          <h3 id="2fa-step2-heading" style="margin:0;font-size:.9rem;font-weight:700;letter-spacing:-.01em;">
+            認証アプリに表示された 6 桁のコードを入力
+          </h3>
+        </div>
+      </div>
+      <div class="idea-admin-panel__body">
+        <div class="idea-admin-2fa-token-wrap">
+          {#
+            The form renders: <input type="text" id="admin_two_factor_auth_device_token"
+              class="w-100" maxlength="6" style="width:100px;" placeholder="トークン" autofocus>
+            We wrap it and override inline style via JS to integrate with
+            the idea-admin-2fa-token-input appearance.
+          #}
+          {{ form.input('deviceToken')|raw }}
+          {% if form.error('deviceToken') %}
+          <span class="idea-admin-error" role="alert">{{ form.error('deviceToken') }}</span>
+          {% endif %}
+          <p class="idea-admin-2fa-token-hint">
+            <i class="fa fa-clock" aria-hidden="true"></i>
+            コードは 30 秒ごとに更新されます
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </form>
+
+</div>{# /.idea-admin-2fa-card #}
+
+{# ── Fixed bottom toolbar ────────────────────────────────────── #}
+<div class="idea-admin-toolbar" role="toolbar" aria-label="フォーム操作">
+  <div class="idea-admin-toolbar__back">
+    <a href="/admin/index" rel="goAdminHome">
+      <i class="fa fa-angle-left" aria-hidden="true"></i>
+      ホームへ戻る
+    </a>
+  </div>
+  <div class="idea-admin-toolbar__actions">
+    <button
+      type="submit"
+      form="two_factor_auth_edit_form"
+      class="idea-admin-action idea-admin-action--primary"
+    >
+      <i class="fa fa-shield-halved" aria-hidden="true"></i>
+      デバイスを登録
+    </button>
+  </div>
+</div>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── token input: apply idea-admin styles + numeric-only filter ── */
+  var tokenInput = document.getElementById('admin_two_factor_auth_device_token');
+  if (tokenInput) {
+    tokenInput.className        = 'idea-admin-2fa-token-input';
+    tokenInput.removeAttribute('style');
+    tokenInput.inputMode        = 'numeric';
+    tokenInput.pattern          = '[0-9]*';
+    tokenInput.autocomplete     = 'one-time-code';
+
+    tokenInput.addEventListener('input', function () {
+      /* strip non-digits and cap at 6 */
+      var raw = tokenInput.value.replace(/\D/g, '').slice(0, 6);
+      tokenInput.value = raw;
+    });
+  }
+
+  /* ── QR code generation (qrcode-generator, vanilla JS) ────────── */
+  var authKeyEl = document.getElementById('admin_two_factor_auth_auth_key');
+  var authKey   = authKeyEl ? authKeyEl.value.trim() : '';
+
+  if (!authKey) {
+    return; /* no secret → leave placeholder in place */
+  }
+
+  var memberName = (document.getElementById('qr-member-name') || {}).textContent || '';
+  var shopName   = {{ shopName|default('BeMart')|json_encode|raw }};
+  var account    = (shopName + ':' + memberName.trim()).replace(/\s+/g, '_');
+  var otpauthUri = 'otpauth://totp/' +
+    encodeURIComponent(account) +
+    '?secret=' + encodeURIComponent(authKey) +
+    '&issuer=' + encodeURIComponent(shopName);
+
+  /* Inline minimal QR matrix generator (Reed-Solomon not required for
+     short alphanumeric content; we use a module-level CDN script tag
+     injected below rather than bundling a full implementation). */
+  var script   = document.createElement('script');
+  script.src   = 'https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js';
+  script.async = false;
+  script.onload = function () {
+    try {
+      var qr = qrcode(0, 'M');
+      qr.addData(otpauthUri);
+      qr.make();
+
+      var frame = document.getElementById('qr-frame');
+      if (!frame) return;
+      frame.innerHTML = '';
+
+      /* render as <table> (no canvas dependency) */
+      var table = document.createElement('div');
+      table.innerHTML = qr.createTableTag(4, 0);
+      var tbl = table.querySelector('table');
+      if (tbl) {
+        tbl.style.borderSpacing = '0';
+        tbl.style.borderCollapse = 'collapse';
+        tbl.style.display = 'block';
+        tbl.setAttribute('role', 'img');
+        tbl.setAttribute('aria-label', '二要素認証 QR コード');
+        /* ensure cells render as square modules */
+        var cells = tbl.querySelectorAll('td');
+        cells.forEach(function (td) {
+          td.style.padding = '0';
+          td.style.width   = '4px';
+          td.style.height  = '4px';
+        });
+        frame.appendChild(tbl);
+      }
+    } catch (e) {
+      /* fail silently — manual key entry is always available */
+    }
+  };
+  document.head.appendChild(script);
+}());
+</script>
 {% endblock %}

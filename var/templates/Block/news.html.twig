@@ -1,34 +1,77 @@
 {#
-  EC-CUBE default-theme Block/news.twig static one-item port.
+  Block/news.html.twig — ストアフロント新着情報ブロック（インクルード部品、extends なし）
+
+  データ契約:
+    変数 `news`  — array|null。各要素: get-admin-news-news-list.json の item schema
+      newsId          string|null  — 識別子
+      newsTitle       string|null  — 見出し (max 32)
+      publishDate     string|null  — 公開日時 (ISO 8601 / date 文字列)
+      newsDescription string|null  — 本文 (HTML 浄化済み、max 2000)
+      newsUrl         string|null  — 外部リンク URL (設定時は本文の代わりにリンク)
+      linkMethod      bool|null    — true = target="_blank"
+    変数 `count`  — int|null
+
+  遷移: 外部リンク付き項目は newsUrl + linkMethod で生成。
+  フォームなし。CSRF 不要。
+  設計言語: IdeaStore (idea-* クラス / idea-store.css)。
 #}
-<div class="ec-role">
-    <div class="ec-newsRole">
-        <div class="ec-secHeading">
-            <span class="ec-secHeading__en">NEWS</span>
-            <span class="ec-secHeading__line"></span>
-            <span class="ec-secHeading__ja">新着情報</span>
-        </div>
-        <div class="ec-newsRole__news">
-            <div class="ec-newsRole__newsItem">
-                <div class="ec-newsRole__newsHeading">
-                    <div class="ec-newsRole__newsDate">
-                        2018/09/01
-                    </div>
-                    <div class="ec-newsRole__newsColumn">
-                        <div class="ec-newsRole__newsTitle">
-                            サイトオープンいたしました!
-                        </div>
-                        <div class="ec-newsRole__newsClose">
-                            <a class="ec-newsRole__newsCloseBtn">
-                                <i class="fas fa-angle-down"></i>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                <div class="ec-newsRole__newsDescription">
-                    旬の色どりスイーツとこだわりのジェラートをお届けします。
-                </div>
-            </div>
-        </div>
+
+{% set newsItems = news|default([]) %}
+
+<section class="idea-container idea-section idea-section--tight"
+         aria-labelledby="idea-news-heading">
+
+  <div class="idea-section-head">
+    <div>
+      <p class="idea-eyebrow">Latest updates</p>
+      <h2 id="idea-news-heading" class="idea-section-title">新着情報</h2>
     </div>
-</div>
+  </div>
+
+  {% if newsItems is not empty %}
+    <div class="idea-news-list" role="list">
+      {% for item in newsItems %}
+        {% set title       = item.newsTitle|default('')|trim %}
+        {% set date        = item.publishDate|default('')|trim %}
+        {% set description = item.newsDescription|default('')|trim %}
+        {% set url         = item.newsUrl|default(null) %}
+        {% set newWindow   = item.linkMethod|default(false) %}
+
+        {# 日付表示: ISO 8601 → YYYY/MM/DD #}
+        {% set displayDate = date|slice(0, 10)|replace({'-': '/'}) %}
+
+        <article class="idea-news-item" role="listitem">
+
+          <div class="idea-news-item__meta">
+            {% if displayDate %}
+              <time class="idea-news-item__date idea-muted"
+                    datetime="{{ date|slice(0, 10) }}">{{ displayDate }}</time>
+            {% endif %}
+          </div>
+
+          <div class="idea-news-item__body">
+            {% if title %}
+              {% if url %}
+                <p class="idea-news-item__title">
+                  <a class="idea-link"
+                     href="{{ url|e }}"
+                     {% if newWindow %}target="_blank" rel="noopener noreferrer"{% endif %}>{{ title }}</a>
+                </p>
+              {% else %}
+                <p class="idea-news-item__title">{{ title }}</p>
+              {% endif %}
+            {% endif %}
+
+            {% if description %}
+              <div class="idea-news-item__description idea-muted">{{ description|raw }}</div>
+            {% endif %}
+          </div>
+
+        </article>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="idea-muted idea-news-empty">現在、新着情報はありません。</p>
+  {% endif %}
+
+</section>

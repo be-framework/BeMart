@@ -1,62 +1,49 @@
-{#
-  BeMart Help — 特定商取引法に基づく表記 (EC-CUBE goHelpTradeLaw).
+{% extends 'IdeaStore/layout/base.html.twig' %}
 
-  PORT of EC-CUBE 4.3 default-theme `Help/tradelaw.twig`
-  (src/Eccube/Resource/template/default/Help/tradelaw.twig).
+{% block title %}特定商取引法に基づく表記 | IDEA STORE{% endblock %}
 
-  Markup skeleton, `ec-role` / `ec-pageHeader` / `ec-off1Grid` /
-  `ec-borderedDefs` / `ec-label` classes and the `<dl>`/`<dt>`/`<dd>`
-  block structure are kept verbatim from EC-CUBE. The dynamic bindings
-  are rebound to the Help/TradeLaw resource body
-  (src/Resource/Page/Help/TradeLaw.php):
-    staticContent.sections[] { label (tradeLawName),
-                               value (tradeLawDescription) }
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="パンくずリスト">
+  <a href="/">Home</a>
+  <span aria-hidden="true">/</span>
+  <span aria-current="page">特定商取引法に基づく表記</span>
+</nav>
 
-  EC-CUBE's `tradelaw.twig` iterates `tradelaws|filter(t => t.name and
-  t.description)` — the 特定商取引法 disclosure rows (事業者情報、返品ポリシー、
-  送料 ...) edited from the admin TradeLaw screen. BeMart has no TradeLaw
-  aggregation yet (Help/TradeLaw is a Wave 3H pure renderer), so the
-  resource body carries an EMPTY `staticContent.sections` list — exactly
-  EC-CUBE's empty `ec-borderedDefs` skeleton when no tradelaw row has
-  both name and description. The port's `{% for %}` is already the
-  name-and-value filtered shape (the resource only emits complete rows),
-  so it matches EC-CUBE's `|filter(...)` semantics. The populated rows
-  are flagged as a MISSING BODY FIELD follow-up: a TradeLaw aggregation
-  must surface tradeLawName / tradeLawDescription pairs into
-  `staticContent.sections`. Enumerated as residual in
-  tests/Resource/HelpTradeLawHtmlRenderTest.php.
+<section class="idea-container idea-section idea-section--tight" aria-labelledby="idea-tradelaw-title">
+  <header>
+    <p class="idea-eyebrow">Specified Commercial Transactions Act</p>
+    <h1 id="idea-tradelaw-title" class="idea-section-title">
+      {{ staticContent.title|default('特定商取引法に基づく表記') }}
+    </h1>
+  </header>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'front.tradelaw.title'|trans }}` -> the ja literal
-     "特定商取引法に基づく表記". EC-CUBE's `<h1>` carries a leading space
-     before the binding; kept verbatim.
-   - `description|purify` — EC-CUBE HTML-purifies admin-entered prose.
-     The resource body carries already-safe text, so the port renders
-     it directly; the purify pass is an EC-CUBE-runtime concern.
-#}
-{% extends 'base.html.twig' %}
-
-{% set route = 'help-trade-law' %}
-{% set title = '特定商取引法に基づく表記' %}
-
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1> 特定商取引法に基づく表記</h1>
+  {% if staticContent.sections is defined and staticContent.sections|length > 0 %}
+    <dl class="idea-spec-list" id="idea-tradelaw-sections">
+      {% for section in staticContent.sections %}
+        <div class="idea-spec-row">
+          {% if section.title is defined and section.title %}
+            <dt>{{ section.title }}</dt>
+          {% else %}
+            <dt></dt>
+          {% endif %}
+          <dd>
+            {% if section.body is defined and section.body %}
+              {{ section.body|nl2br }}
+            {% elseif section.content is defined and section.content %}
+              {{ section.content|nl2br }}
+            {% endif %}
+          </dd>
         </div>
-        <div class="ec-off1Grid">
-            <div class="ec-off1Grid__cell">
-                <div class="ec-borderedDefs">
-                    {% for section in staticContent.sections %}
-                    <dl>
-                        <dt>
-                            <label class="ec-label">{{ section.label }}</label>
-                        </dt>
-                        <dd>{{ section.value }}</dd>
-                    </dl>
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-    </div>
+      {% endfor %}
+    </dl>
+  {% else %}
+    <p class="idea-muted" id="idea-tradelaw-empty">
+      表記情報は準備中です。
+    </p>
+  {% endif %}
+
+  <div class="idea-actions" style="margin-top:2rem;">
+    <a class="idea-button idea-button--light" href="/" rel="goTop">トップへ戻る</a>
+  </div>
+</section>
 {% endblock %}

@@ -1,26 +1,84 @@
 {#
-  EC-CUBE default-theme Block/topic.twig port.
+  Block/topic.html.twig — 特集ブロック（インクルード部品、extends なし）
+
+  データ契約:
+    変数 `topics` — array|null。各要素:
+      title       string  — 特集タイトル
+      kicker      string  — 上部ラベル（英語表記）
+      image       string  — 画像パス
+      href        string  — 遷移先 URL
+      rel         string  — ALPS 遷移 rel（通常 "goProductList"）
+      imageAlt    string  — img alt テキスト
+
+    変数が未供給の場合はカテゴリベースのデフォルトリストを使用する。
+
+  遷移:
+    goProductList → /products?category_id={id}  (src/Resource/Page/Products.php #[Link])
+  フォームなし。CSRF 不要。
+  設計言語: IdeaStore（idea-* クラス / idea-store.css）。
 #}
-<div class="ec-topicRole">
-    <div class="ec-role">
-        <div class="ec-secHeading">
-            <span class="ec-secHeading__en">TOPICS</span>
-            <span class="ec-secHeading__line"></span>
-            <span class="ec-secHeading__ja">特集</span>
-        </div>
-        <div class="ec-topicRole__list">
-            <div class="ec-topicRole__listItem">
-                <a href="/products?category_id=1">
-                    <img src="{{ asset('assets/img/top/img_bnr01.jpg') }}">
-                </a>
-                <p class="ec-topicRole__listItemTitle">濃厚なのにアイスよりヘルシー!! ジェラート特集</p>
-            </div>
-            <div class="ec-topicRole__listItem">
-                <a href="/products?category_id=5">
-                    <img src="{{ asset('assets/img/top/img_bnr02.jpg') }}">
-                </a>
-                <p class="ec-topicRole__listItemTitle">サクサク食感が魅力!! コーンアイス特集</p>
-            </div>
-        </div>
+
+{% set defaultTopics = [
+  {
+    kicker:   'Gelato selection',
+    title:    'ジェラートを選ぶ',
+    image:    '/assets/idea-store/images/category/real/entry-gelato.png',
+    imageAlt: 'ジェラートカテゴリの特集',
+    href:     '/products?category_id=1',
+    rel:      'goProductList'
+  },
+  {
+    kicker:   'Ice sandwich',
+    title:    'アイスサンドを楽しむ',
+    image:    '/assets/idea-store/images/category/real/entry-ice-sandwich.png',
+    imageAlt: 'アイスサンドカテゴリの特集',
+    href:     '/products?category_id=5',
+    rel:      'goProductList'
+  },
+  {
+    kicker:   'Colourful dessert',
+    title:    '彩のデザートを味わう',
+    image:    '/assets/idea-store/images/category/real/entry-dessert.png',
+    imageAlt: '彩のデザートカテゴリの特集',
+    href:     '/products?category_id=3',
+    rel:      'goProductList'
+  }
+] %}
+
+{% set topicItems = topics|default(defaultTopics) %}
+
+<section class="idea-container idea-section idea-section--tight"
+         aria-labelledby="idea-topic-heading">
+
+  <div class="idea-section-head">
+    <div>
+      <p class="idea-eyebrow">Curated themes</p>
+      <h2 id="idea-topic-heading" class="idea-section-title">特集</h2>
     </div>
-</div>
+    <a class="idea-muted idea-view-all"
+       href="/products"
+       rel="goProductList">商品を見る</a>
+  </div>
+
+  <div class="idea-editorial-cards">
+    {% for item in topicItems %}
+      {% set itemHref  = item.href|default('/products') %}
+      {% set itemRel   = item.rel|default('goProductList') %}
+      {% set itemAlt   = item.imageAlt|default(item.title|default('')) %}
+      {% set itemImage = item.image|default('/assets/idea-store/images/category/real/entry-gelato.png') %}
+      <a href="{{ itemHref }}"
+         rel="{{ itemRel }}">
+        <img src="{{ itemImage }}"
+             alt="{{ itemAlt }}"
+             loading="lazy">
+        <span>
+          {% if item.kicker is defined and item.kicker %}
+            <span class="idea-card-kicker">{{ item.kicker }}</span>
+          {% endif %}
+          {{ item.title|default('') }}
+        </span>
+      </a>
+    {% endfor %}
+  </div>
+
+</section>

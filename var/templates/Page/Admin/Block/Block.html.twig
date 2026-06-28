@@ -1,175 +1,251 @@
-{#
-  BeMart admin Block edit — EC-CUBE goBlock (ブロック登録/編集).
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/block_edit.twig`
-  (src/Eccube/Resource/template/admin/Content/block_edit.twig).
-
-  FORM/CRUD page. Extends the admin frame (`admin-base.html.twig`). The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound.
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
-  Block resource (src/Resource/Page/Admin/Block/Block.php) exposes an
-  {@see \MyVendor\BeMart\Form\AdminBlockForm} as `body['form']`. The
-  inputs render through that real form object:
-    {{ form.input('blockName')|raw }} <- real <input> w/ EC-CUBE id and canonical name
-    {{ form.error('blockName') }}     <- inline Be-domain error, if any
-  `AdminBlockForm::init()` ports the EC-CUBE ids from `BlockType`
-  (block prefix `block`) while posting BeMart's canonical Resource
-  request names (`blockName`, `blockFileName`).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `form_widget(form.id)` / `form_widget(form.DeviceType)` -> hidden
-     bookkeeping inputs EC-CUBE's BlockType carries (the row id + device
-     type). The Block resource body does not carry them as form fields
-     (the AdminBlockForm declares only blockName/blockFileName/block_html); the
-     hidden inputs are omitted. Enumerated as residual.
-   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
-     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
-   - the ACE editor `block_html` source — EC-CUBE's dtb_block tpl was out
-     of the Wave 9 CMS slice, so the editor renders empty (the
-     AdminBlockForm `block_html` field has no persisted value). The
-     `<div id="editor">` shell + hidden textarea are kept.
-   - `deletable` -> renders the editable file_name branch (the new-block
-     case — see the Block resource port header: `onGet` builds the
-     new-block form).
-#}
 {% extends 'admin-base.html.twig' %}
+{#
+  BeMart admin Block edit/create — clean-room rebuild.
+
+  DATA CONTRACT (src/Resource/Page/Admin/Block/Block.php onGet):
+    blockId       string   — empty string for new-block form, row ID for edit
+    blockName     string   — block display name (empty on new)
+    blockFileName string   — twig template file name without .twig extension
+    blockDeletable bool    — false for system blocks that cannot be deleted
+    csrfToken     string   — per-request token
+    form          AdminBlockForm — fields: blockName, blockFileName, block_html
+
+  FORM CONTRACT (src/Form/AdminBlockForm.php):
+    blockName     text  id=block_name
+    blockFileName text  id=block_file_name
+    block_html    textarea  id=block_block_html  disabled (not persisted yet)
+
+  ACTIONS (derived from #[Link] on Block.php):
+    PUT    /admin/block/block?blockId={id}&_method=put  — doUpdateBlock (edit)
+    POST   /admin/block/block-list                      — doCreateBlock (new)
+    DELETE /admin/block/block?blockId={id}&_method=delete — doDeleteBlock
+
+  idea-admin vocabulary used:
+    idea-admin-panel / idea-admin-panel__head / idea-admin-panel__body
+    idea-admin-field / idea-admin-field__label / idea-admin-field__input
+    idea-admin-required
+    idea-admin-error
+    idea-admin-action / idea-admin-action--primary / idea-admin-action--destructive
+    idea-admin-toolbar / idea-admin-toolbar__back / idea-admin-toolbar__actions
+    idea-admin-notice / idea-admin-notice--error
+    idea-admin-dialog / idea-admin-dialog-backdrop (delete confirm)
+#}
 
 {% set route = 'admin-block-block' %}
 {% set title = 'ブロック管理' %}
 {% set sub_title = 'コンテンツ管理' %}
 
-{% block stylesheet %}
-    <style>
-        .ui-resizable-se {
-            right: -3px;
-            bottom: -3px;
-        }
-    </style>
-{% endblock %}
-
 {% block javascript %}
-    <script>
+<script>
+(function () {
+    'use strict';
+
+    /* ── ACE editor setup ────────────────────────────────────────────────── */
+    if (typeof ace !== 'undefined') {
         ace.require('ace/ext/language_tools');
-        var editor = ace.edit('editor');
+        var editor = ace.edit('js-block-editor');
         editor.session.setMode('ace/mode/twig');
         editor.setTheme('ace/theme/tomorrow');
-        editor.setValue('{{ blockHtml|default('')|escape('js') }}');
+        editor.setValue({{ blockHtml|default('')|json_encode|raw }});
         editor.setOptions({
             enableBasicAutocompletion: true,
             enableSnippets: true,
             enableLiveAutocompletion: true,
             showInvisibles: true
         });
+        var editorEl = document.getElementById('js-block-editor');
+        if (editorEl && typeof ResizeObserver !== 'undefined') {
+            new ResizeObserver(function () { editor.resize(); }).observe(editorEl);
+        }
+    }
 
-        $("#editor").resizable({
-            resize: function (event, ui) {
-                editor.resize();
+    /* ── Sync hidden textarea on submit ──────────────────────────────────── */
+    var blockForm = document.getElementById('js-block-form');
+    if (blockForm) {
+        blockForm.addEventListener('submit', function () {
+            var hidden = document.getElementById('block_block_html');
+            if (hidden && typeof editor !== 'undefined') {
+                hidden.value = editor.getValue();
             }
         });
+    }
 
-        $('#content_block_form').on('submit', function(elem) {
-            $('#block_block_html').val(editor.getValue());
-        });
-    </script>
+    /* ── Delete confirmation dialog ──────────────────────────────────────── */
+    var deleteDialog = document.getElementById('js-delete-dialog');
+    var deleteConfirm = deleteDialog ? deleteDialog.querySelector('.js-dialog-confirm') : null;
+
+    document.addEventListener('click', function (e) {
+        var trigger = e.target.closest('[data-delete-trigger]');
+        if (!trigger || !deleteDialog) return;
+        e.preventDefault();
+        deleteDialog.removeAttribute('hidden');
+        if (deleteConfirm) deleteConfirm.focus();
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!deleteDialog) return;
+        if (e.target.closest('.js-dialog-cancel') || e.target === deleteDialog) {
+            deleteDialog.setAttribute('hidden', '');
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (!deleteDialog || deleteDialog.hasAttribute('hidden')) return;
+        if (e.key === 'Escape') deleteDialog.setAttribute('hidden', '');
+    });
+}());
+</script>
 {% endblock %}
 
 {% block main %}
-    <form name="content_block_form" id="content_block_form" method="post"
-          action="{% if blockId is defined and blockId %}/admin/block/block?blockId={{ blockId }}&_method=put{% else %}/admin/block/block-list{% endif %}">
-        <input type="hidden" id="block__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8"><span class="card-title">ブロック設定</span></div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#blockEdit" aria-expanded="false" aria-controls="blockEdit">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="blockEdit">
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="ブロックの管理用名称です。">
-                                            <span>ブロック名</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        {{ form.input('blockName')|raw }}
-                                        {% if form.error('blockName') %}<span class="invalid-feedback d-block">{{ form.error('blockName') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="このブロックの内容を記述したtwigテンプレートファイルの名前です。管理画面ではあとから変更できません。">
-                                            <span>ファイル名</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        <div class="row align-items-center">
-                                            <span class="col-3">{{ form.input('blockFileName')|raw }}</span><span class="col-auto ps-0">.twig</span>
-                                        </div>
-                                        {% if form.error('blockFileName') %}<span class="invalid-feedback d-block">{{ form.error('blockFileName') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="テンプレートファイルを編集します。twigで記述します。">
-                                            <span>コード</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        <div id="editor" style="height: 480px" class="form-control"></div>
-                                        <div class="d-none">
-                                            {{ form.input('block_html')|raw }}
-                                        </div>
-                                        {% if form.error('block_html') %}<span class="invalid-feedback d-block">{{ form.error('block_html') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/block/block-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i><span>ブロック管理</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
 
-    {% if message is defined and message %}
-        <p class="ec-errorMessage">{{ message }}</p>
-    {% endif %}
+{# ── Error notice ────────────────────────────────────────────────────────── #}
+{% if message is defined and message %}
+<div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ message }}
+</div>
+{% endif %}
+
+{# ── Block settings form ─────────────────────────────────────────────────── #}
+<form
+    id="js-block-form"
+    role="form"
+    method="post"
+    action="{% if blockId is defined and blockId %}/admin/block/block?blockId={{ blockId }}&_method=put{% else %}/admin/block/block-list{% endif %}"
+    aria-label="ブロック設定フォーム"
+>
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+    <section class="idea-admin-panel" aria-labelledby="section-block-settings">
+        <div class="idea-admin-panel__head">
+            <h3 id="section-block-settings">ブロック設定</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+            {# ── Block name ──────────────────────────────────────────────── #}
+            <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                    <label for="block_name">ブロック名</label>
+                    <span class="idea-admin-required">必須</span>
+                </div>
+                <div class="idea-admin-field__input">
+                    {{ form.input('blockName')|raw }}
+                    {% if form.error('blockName') %}
+                        <span class="idea-admin-error">{{ form.error('blockName') }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# ── File name ───────────────────────────────────────────────── #}
+            <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                    <label for="block_file_name">ファイル名</label>
+                    <span class="idea-admin-required">必須</span>
+                </div>
+                <div class="idea-admin-field__input">
+                    <div style="display:flex; align-items:center; gap:.5rem;">
+                        {{ form.input('blockFileName')|raw }}
+                        <span style="white-space:nowrap; color:var(--idea-muted); font-size:.88rem;">.twig</span>
+                    </div>
+                    {% if form.error('blockFileName') %}
+                        <span class="idea-admin-error">{{ form.error('blockFileName') }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# ── Template source (ACE editor shell) ──────────────────────── #}
+            <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                    <label for="js-block-editor">コード</label>
+                    <span class="idea-admin-required">必須</span>
+                </div>
+                <div class="idea-admin-field__input">
+                    <div
+                        id="js-block-editor"
+                        style="height:480px; border:1px solid var(--idea-stone); border-radius:var(--idea-admin-radius-input);"
+                        aria-label="Twig テンプレートエディタ"
+                    ></div>
+                    <div style="display:none;">
+                        {{ form.input('block_html')|raw }}
+                    </div>
+                    {% if form.error('block_html') %}
+                        <span class="idea-admin-error">{{ form.error('block_html') }}</span>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    {# ── Sticky action toolbar ────────────────────────────────────────────── #}
+    <div class="idea-admin-toolbar">
+        <div class="idea-admin-toolbar__back">
+            <a href="/admin/block/block-list">
+                <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                ブロック一覧
+            </a>
+        </div>
+        <div class="idea-admin-toolbar__actions">
+            {% if blockId is defined and blockId and blockDeletable is defined and blockDeletable %}
+                <button
+                    class="idea-admin-action idea-admin-action--destructive"
+                    type="button"
+                    data-delete-trigger="true"
+                    aria-label="このブロックを削除"
+                >
+                    <i class="fa fa-trash" aria-hidden="true"></i>
+                    削除
+                </button>
+            {% endif %}
+            <button class="idea-admin-action idea-admin-action--primary" type="submit">
+                <i class="fa fa-save" aria-hidden="true"></i>
+                保存
+            </button>
+        </div>
+    </div>
+</form>
+
+{# ── Delete confirmation dialog ──────────────────────────────────────────── #}
+{% if blockId is defined and blockId and blockDeletable is defined and blockDeletable %}
+<div
+    id="js-delete-dialog"
+    role="dialog"
+    aria-labelledby="js-delete-dialog-title"
+    aria-modal="true"
+    hidden
+    style="
+        position:fixed; inset:0; z-index:200;
+        display:flex; align-items:center; justify-content:center;
+        background:rgba(41,37,31,.45);
+    "
+>
+    <div class="idea-admin-panel" style="max-width:440px; width:92%; padding:0; overflow:hidden;">
+        <div class="idea-admin-panel__head">
+            <h3 id="js-delete-dialog-title" style="color:#a9472e;">
+                <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+                ブロックを削除します
+            </h3>
+        </div>
+        <div class="idea-admin-panel__body">
+            <p style="margin:0;">この操作は取り消せません。「{{ blockName }}」を削除してよろしいですか？</p>
+        </div>
+        <div style="
+            display:flex; justify-content:flex-end; gap:.6rem;
+            padding:.75rem 1rem;
+            border-top:1px solid rgba(205,191,170,.4);
+        ">
+            <button class="idea-admin-action js-dialog-cancel" type="button">キャンセル</button>
+            <a
+                class="idea-admin-action idea-admin-action--destructive js-dialog-confirm"
+                href="/admin/block/block?blockId={{ blockId }}&_method=delete"
+            >
+                <i class="fa fa-trash" aria-hidden="true"></i>
+                削除する
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+
 {% endblock %}

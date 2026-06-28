@@ -8,62 +8,23 @@ use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use MyVendor\BeMart\Be\Reason\Service\AdminSession;
 use MyVendor\BeMart\Be\Reason\Fake\Service\FakeAdminSession;
-use MyVendor\BeMart\Tests\Resource\Admin\AdminJaMessages;
-use MyVendor\BeMart\Tests\Resource\Admin\ShopJaMessages;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
-use Twig\Environment;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
-
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function in_array;
-use function is_dir;
-use function number_format;
-use function preg_replace;
-use function str_contains;
-use function trim;
 
 /**
- * Phase 3 — fidelity check for the admin Delivery-list HTML port (the
- * Setting/Shop section's `Setting/Shop/delivery.twig` DATA/LIST page).
+ * Phase 3 — HTML render check for the admin Delivery-list page (clean-room build).
  *
- * Same residual-diff standard as {@see AdminPaymentListHtmlRenderTest}.
- * The DeliveryStorageInterface starts empty, so the list renders an empty
- * `<ul>` — EC-CUBE is fed the same empty `Deliveries`.
+ * Render-smoke + L1/L2 functional verification against the clean-room
+ * idea-admin-* template. The EC-CUBE reference-clone parity check is
+ * retired to the ec-cube-parity-archived group (markTestSkipped).
+ *
+ * L1 — required fields and list output present in the rendered HTML.
+ * L2 — form action/method/rel and link href/rel contracts verified.
  */
 final class AdminDeliveryListHtmlRenderTest extends TestCase
 {
     private const TEST_ADMIN_ID = 'ad000000000000000000000000000001';
-
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        "'ECCUBE-CSRF-TOKEN': $('meta[name=\"eccube-csrf-token\"]').attr('content')",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>配送方法一覧 店舗設定 - BeMart</title>',
-        '<title>店舗設定 配送方法一覧 - EC-CUBE</title>',
-        // Delivery list rows: BeMart fake seeds render removable rows; the
-        // standalone EC-CUBE fixture stays sparse, so the close icon is a
-        // row-fixture residual.
-        '<i class="fa fa-close fa-lg"></i>',
-    ];
 
     private ResourceInterface $resource;
 
@@ -94,177 +55,168 @@ final class AdminDeliveryListHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testDeliveryListPreservesEcCubeAdminMarkupStructure(): void
+    /**
+     * L1/L2 functional check: idea-admin shell landmarks are present.
+     */
+    public function testDeliveryListRendersIdeaAdminShellLandmarks(): void
     {
         $html = $this->resource->get('page://self/admin/delivery/delivery-list')->toString();
 
         foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-mainNavArea">',
-            '<div class="c-contentsArea">',
-            '<div class="c-pageTitle">',
-            'class="c-primaryCol"',
-            'class="list-group list-group-flush sortable-container"',
-            'id="DeleteModal"',
-            'class="btn btn-ec-regular"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            'class="idea-admin-shell"',
+            'class="idea-admin-topbar"',
+            'class="idea-admin-sidebar"',
+            'class="idea-admin-content"',
+        ] as $landmark) {
+            $this->assertStringContainsString($landmark, $html, "idea-admin shell landmark missing: {$landmark}");
         }
-    }
-
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
-    public function testDeliveryListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
-    {
-        $beMart = $this->resource->get('page://self/admin/delivery/delivery-list')->toString();
-        $ecCube = $this->renderEcCube();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's admin Delivery-list HTML diverged from EC-CUBE's beyond "
-            . "the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        $this->assertLessThanOrEqual(
-            60,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        if (RenderDiffResiduals::isAdminListEnrichment($line)) {
-            return true;
-        }
-
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
-
-        foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'c-headerBar__shopTitle',
-            'c-headerBar__userMenu',
-            'data-bs-content',
-            'last_login',
-            'nav-',
-            'data-bs-toggle="collapse"',
-            'fa-fw',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function renderEcCube(): string
-    {
-        $adminTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/admin';
-        if (! is_dir($adminTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeAdminStubLoader($adminTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        return $twig->render('Setting/Shop/delivery.twig', [
-            'Deliveries' => [],
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => [
-                'locale' => 'ja',
-                'eccube_official_site_url' => 'https://www.ec-cube.net/',
-                'eccube_community_site_url' => 'https://xoo.ps/eccube/',
-                'eccube_document_url' => 'https://doc4.ec-cube.net/',
-                'eccube_manual_url' => 'https://www.ec-cube.net/product/',
-            ],
-            'eccubeNav' => [],
-            'menus' => ['setting', 'shop', 'shop_delivery'],
-            'plugin_assets' => [],
-            'plugin_snippets' => [],
-            'app' => new EcCubeStub([
-                'user' => new EcCubeStub([
-                    'id' => self::TEST_ADMIN_ID,
-                    'name' => '管理者',
-                    'login_date' => '2026-05-20 10:00:00',
-                    'two_factor_auth_enabled' => false,
-                ]),
-                'request' => new EcCubeStub(['_route' => 'admin_setting_shop_delivery']),
-            ]),
-            'subtitle' => '店舗設定',
-            'sub_title' => '店舗設定',
-            'title' => '配送方法一覧',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig): void
-    {
-        $messages = AdminJaMessages::forSection(ShopJaMessages::keys());
-        $trans = static function (string $key, array $params = []) use ($messages): string {
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('price', static fn ($v): string => '￥' . number_format((float) $v)));
-        $twig->addFilter(new TwigFilter('date_sec', static fn ($d): string => (string) $d));
-        $twig->addFilter(new TwigFilter('date_min', static fn ($d): string => (string) $d));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
-        $twig->addFunction(new TwigFunction('class_categories_as_json', static fn (): string => '{}'));
     }
 
     /**
-     * @return list<string>
+     * L2 — create form: action, method, and CSRF field.
      */
-    private function normalize(string $html): array
+    public function testDeliveryListCreateFormContract(): void
     {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
+        $html = $this->resource->get('page://self/admin/delivery/delivery-list')->toString();
+
+        $this->assertStringContainsString(
+            'id="idea-delivery-create-form"',
+            $html,
+            'create form id required',
+        );
+        $this->assertStringContainsString(
+            'action="/admin/delivery/delivery-list"',
+            $html,
+            'create form action must be /admin/delivery/delivery-list',
+        );
+        $this->assertStringContainsString(
+            'method="post"',
+            $html,
+            'create form method must be POST',
+        );
+        $this->assertStringContainsString(
+            'name="csrfToken"',
+            $html,
+            'csrfToken hidden field required',
+        );
+    }
+
+    /**
+     * L1 — required field: deliveryName input bound to the form contract.
+     */
+    public function testDeliveryListRequiredFieldPresent(): void
+    {
+        $html = $this->resource->get('page://self/admin/delivery/delivery-list')->toString();
+
+        $this->assertStringContainsString(
+            'id="delivery_name"',
+            $html,
+            'deliveryName field (id="delivery_name") required',
+        );
+    }
+
+    /**
+     * L2 — per-row edit link: href and rel="goDelivery" contract.
+     *
+     * Fake storage seeds at least one delivery row, so the table renders.
+     */
+    public function testDeliveryListRowEditLinkContract(): void
+    {
+        $ro  = $this->resource->get('page://self/admin/delivery/delivery-list');
+        $html = $ro->toString();
+
+        if (($ro->body['count'] ?? 0) === 0) {
+            $this->markTestSkipped('Fake storage is empty — no rows to verify.');
         }
 
-        return $lines;
+        $this->assertStringContainsString(
+            'href="/admin/delivery/delivery?deliveryId=',
+            $html,
+            'per-row edit link href=/admin/delivery/delivery?deliveryId=… required',
+        );
+        $this->assertStringContainsString(
+            'rel="goDelivery"',
+            $html,
+            'per-row edit link rel="goDelivery" required',
+        );
+    }
+
+    /**
+     * L2 — per-row delete button: data-delete-url and rel="doDeleteDelivery" on form.
+     */
+    public function testDeliveryListRowDeleteAffordanceContract(): void
+    {
+        $ro  = $this->resource->get('page://self/admin/delivery/delivery-list');
+        $html = $ro->toString();
+
+        if (($ro->body['count'] ?? 0) === 0) {
+            $this->markTestSkipped('Fake storage is empty — no rows to verify.');
+        }
+
+        $this->assertStringContainsString(
+            'data-delete-url="/admin/delivery/delivery?deliveryId=',
+            $html,
+            'delete button data-delete-url required',
+        );
+        $this->assertStringContainsString(
+            'rel="doDeleteDelivery"',
+            $html,
+            'delete form rel="doDeleteDelivery" required',
+        );
+    }
+
+    /**
+     * L1 — list table structure: idea-admin-table present when rows exist.
+     */
+    public function testDeliveryListTableRendersRows(): void
+    {
+        $ro  = $this->resource->get('page://self/admin/delivery/delivery-list');
+        $html = $ro->toString();
+
+        if (($ro->body['count'] ?? 0) === 0) {
+            $this->assertStringContainsString(
+                'class="idea-admin-empty"',
+                $html,
+                'empty-state block required when count=0',
+            );
+
+            return;
+        }
+
+        $this->assertStringContainsString(
+            'class="idea-admin-table"',
+            $html,
+            'idea-admin-table required when deliveries exist',
+        );
+
+        foreach ($ro->body['deliveries'] as $row) {
+            $this->assertStringContainsString(
+                $row['deliveryName'],
+                $html,
+                "deliveryName \"{$row['deliveryName']}\" must appear in the list",
+            );
+        }
+    }
+
+    /**
+     * EC-CUBE reference-rendering parity check — retired.
+     *
+     * The clean-room template no longer derives from EC-CUBE DOM; the
+     * reference-diff approach is inapplicable. Archived for historical
+     * traceability.
+     *
+     * @group ec-cube-parity-archived
+     */
+    public function testDeliveryListHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE parity check retired: template is a clean-room idea-admin-* build '
+            . 'and no longer tracks EC-CUBE DOM structure.',
+        );
     }
 }

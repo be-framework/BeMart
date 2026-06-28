@@ -1,108 +1,283 @@
-{#
-  BeMart admin class-name-CSV upload — EC-CUBE admin-theme
-  `Product/csv_class_name.twig`.
-
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Product/csv_class_name.twig`
-  — the ~129-line CSV-upload screen. It extends the admin frame
-  (`admin-base.html.twig`), not the storefront frame.
-
-  Tier-2 port note: EC-CUBE's screen renders a CSV file-upload form,
-  a 雛形 (template-CSV) download link and a format-description table.
-  The Be `doImportProductCsv` write transition is a Phase-A stub, so
-  this port renders the upload shell — the file input, the skeleton
-  link and the format table. The four `csv_*` screens share this
-  structure (see AbstractCsvUpload); only the heading and the table
-  rows differ.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.import_file)` -> `form.input('import_file')` —
-     the real AdminCsvUploadForm field (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
-#}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-product-csv-class-name' %}
-{% set title = csvTitle %}
-{% set sub_title = '商品管理' %}
+{% set route      = 'admin-product-csv-class-name' %}
+{% set title      = csvTitle %}
+{% set sub_title  = '商品管理' %}
+
+{% block stylesheet %}
+<style>
+/* ── Drop zone ──────────────────────────────────────────────────────────── */
+.idea-admin-dropzone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .65rem;
+  padding: 2.25rem 1.5rem;
+  border: 2px dashed var(--idea-stone);
+  border-radius: var(--idea-admin-radius-panel);
+  background: var(--idea-surface-soft);
+  cursor: pointer;
+  transition: border-color .18s, background .18s;
+  text-align: center;
+}
+.idea-admin-dropzone:hover,
+.idea-admin-dropzone.is-drag-over {
+  border-color: var(--idea-olive);
+  background: rgba(82, 107, 85, .06);
+}
+.idea-admin-dropzone__icon {
+  font-size: 2rem;
+  color: var(--idea-stone-2);
+}
+.idea-admin-dropzone.is-drag-over .idea-admin-dropzone__icon {
+  color: var(--idea-olive);
+}
+.idea-admin-dropzone__label {
+  font-size: .9rem;
+  font-weight: 700;
+  color: var(--idea-ink);
+}
+.idea-admin-dropzone__hint {
+  font-size: .78rem;
+  color: var(--idea-muted);
+}
+.idea-admin-dropzone__filename {
+  display: none;
+  align-items: center;
+  gap: .45rem;
+  padding: .35rem .75rem;
+  background: rgba(82, 107, 85, .1);
+  border-radius: 999px;
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--idea-olive);
+}
+.idea-admin-dropzone__filename.is-visible { display: inline-flex; }
+
+/* ── Format table disclosure ────────────────────────────────────────────── */
+.idea-admin-disclosure__toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  font-size: .82rem;
+  font-weight: 700;
+  color: var(--idea-muted);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  transition: color .14s;
+}
+.idea-admin-disclosure__toggle:hover { color: var(--idea-ink); }
+.idea-admin-disclosure__caret { transition: transform .18s; font-size: .72rem; }
+.idea-admin-disclosure__toggle[aria-expanded="true"] .idea-admin-disclosure__caret {
+  transform: rotate(90deg);
+}
+.idea-admin-disclosure__body[hidden] { display: none; }
+
+/* ── Column spec badge ──────────────────────────────────────────────────── */
+.idea-admin-col-optional {
+  display: inline-flex;
+  align-items: center;
+  padding: .06rem .38rem;
+  border-radius: var(--idea-admin-radius-badge);
+  background: rgba(205, 191, 170, .28);
+  color: var(--idea-muted);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  white-space: nowrap;
+}
+</style>
+{% endblock %}
 
 {% block main %}
-    <form role="form" method="post" action="/admin/product/csv-class-name?csv=" id="csv_class_name_form" enctype="multipart/form-data" novalidate>
-        <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('admin_csv_import')) }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
+<form method="post"
+      action="/admin/product/csv-class-name"
+      enctype="multipart/form-data"
+      novalidate
+      aria-label="{{ csvTitle }}">
+  <input type="hidden" name="csrfToken"
+         value="{{ csrfToken|default(csrf_token('admin_csv_import')) }}">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">{{ csvTitle }}</span>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-2">
-                                <div class="col-3"><span>CSVファイル</span></div>
-                                <div class="col">
-                                    {{ form.input('import_file')|raw }}
-                                    {% if form.error('import_file') %}<span class="invalid-feedback d-block">{{ form.error('import_file') }}</span>{% endif %}
-                                </div>
-                            </div>
-                            <div class="row mb-2">
-                                <div class="col-3"></div>
-                                <div class="col">
-                                    <a href="/admin/class-name/class-name-export">雛形ファイルダウンロード</a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+  {# ── Upload panel ──────────────────────────────────────────────────────── #}
+  <div class="idea-admin-panel" style="max-width: 640px; margin-bottom: 1.25rem;">
+    <div class="idea-admin-panel__head">
+      <h3>{{ csvTitle }}</h3>
+      <span class="idea-admin-panel__hint">CSV ファイルを選択してインポート</span>
+    </div>
+    <div class="idea-admin-panel__body">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <span class="card-title">CSVファイルフォーマット</span>
-                        </div>
-                        <div class="card-body p-0">
-                            <table class="table table-sm" id="csv_class_name_format">
-                                <thead>
-                                <tr>
-                                    <th class="border-top-0 pt-2 pb-2 ps-3">項目名</th>
-                                    <th class="border-top-0 pt-2 pb-2 pe-3">説明</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for col in columns %}
-                                    <tr>
-                                        <td class="align-middle ps-3">{{ col.name }}</td>
-                                        <td class="align-middle pe-3">{{ col.description }}</td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
+      {# Drop zone wraps the hidden file input #}
+      <label class="idea-admin-dropzone" id="dropzone-label" for="admin_csv_import_import_file">
+        <span class="idea-admin-dropzone__icon" aria-hidden="true">
+          <i class="fa fa-file-csv"></i>
+        </span>
+        <span class="idea-admin-dropzone__label">ファイルをドロップまたはクリックして選択</span>
+        <span class="idea-admin-dropzone__hint">.csv 形式 · UTF-8 推奨</span>
+        <span class="idea-admin-dropzone__filename" id="dropzone-filename" aria-live="polite">
+          <i class="fa fa-check-circle" aria-hidden="true"></i>
+          <span id="dropzone-filename-text"></span>
+        </span>
+        {# Render the actual file input but visually hide it inside the label #}
+        <span style="position:absolute;opacity:0;pointer-events:none;width:0;height:0;overflow:hidden;">
+          {{ form.input('import_file')|raw }}
+        </span>
+      </label>
 
-                </div>
-            </div>
+      {% if form.error('import_file') %}
+      <p class="idea-admin-error" role="alert">{{ form.error('import_file') }}</p>
+      {% endif %}
+
+      {# Skeleton download — secondary affordance #}
+      <p style="font-size:.82rem; margin:0;">
+        <a class="idea-admin-meta__link"
+           href="/admin/class-name/class-name-export"
+           rel="goExportClassName">
+          <i class="fa fa-download" aria-hidden="true"></i>
+          雛形 CSV をダウンロード
+        </a>
+        <span style="color:var(--idea-muted); margin-left:.5rem;">
+          — 新規作成時のフォーマット確認に使用
+        </span>
+      </p>
+
+      {# ── Format disclosure ─────────────────────────────────────────────── #}
+      <div>
+        <button type="button"
+                class="idea-admin-disclosure__toggle"
+                aria-expanded="false"
+                aria-controls="format-table"
+                id="format-toggle">
+          <i class="fa fa-angle-right idea-admin-disclosure__caret" aria-hidden="true"></i>
+          CSV フォーマット（{{ columns|length }} 列）
+        </button>
+        <div id="format-table"
+             class="idea-admin-disclosure__body"
+             role="region"
+             aria-labelledby="format-toggle"
+             hidden
+             style="margin-top:.75rem;">
+          <div class="idea-admin-table-wrap">
+            <table class="idea-admin-table">
+              <thead>
+                <tr>
+                  <th>列名</th>
+                  <th>説明</th>
+                </tr>
+              </thead>
+              <tbody>
+                {# 規格名ID is optional (新規登録の場合は空) — first row #}
+                {% for col in columns %}
+                  <tr>
+                    <td>
+                      <span style="font-weight:700;">{{ col.name }}</span>
+                      {% if loop.first %}
+                        <span class="idea-admin-col-optional" style="margin-left:.4rem;">省略可</span>
+                      {% else %}
+                        <span class="idea-admin-required" style="margin-left:.4rem;">必須</span>
+                      {% endif %}
+                    </td>
+                    <td style="color:var(--idea-muted);">
+                      {% if col.description %}
+                        {{ col.description }}
+                      {% else %}
+                        —
+                      {% endif %}
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
         </div>
+      </div>
 
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/product-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>商品管理へ戻る</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button type="submit" class="btn btn-ec-conversion px-5">CSVファイルをアップロード</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </form>
+    </div>{# /panel__body #}
+  </div>{# /panel #}
+
+  {# ── Bottom toolbar ────────────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/product-list" rel="goProductList">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        商品管理へ戻る
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button type="submit"
+              class="idea-admin-action idea-admin-action--primary"
+              id="csv-submit-btn"
+              disabled>
+        <i class="fa fa-upload" aria-hidden="true"></i>
+        インポート実行
+      </button>
+    </div>
+  </div>
+
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  var fileInput  = document.getElementById('admin_csv_import_import_file');
+  var dropzone   = document.getElementById('dropzone-label');
+  var filenameEl = document.getElementById('dropzone-filename');
+  var filenameText = document.getElementById('dropzone-filename-text');
+  var submitBtn  = document.getElementById('csv-submit-btn');
+  var toggle     = document.getElementById('format-toggle');
+  var body       = document.getElementById('format-table');
+
+  /* File selection — update UI and enable submit */
+  function onFileChange() {
+    var file = fileInput && fileInput.files && fileInput.files[0];
+    if (file) {
+      filenameText.textContent = file.name;
+      filenameEl.classList.add('is-visible');
+      submitBtn.removeAttribute('disabled');
+    } else {
+      filenameEl.classList.remove('is-visible');
+      submitBtn.setAttribute('disabled', '');
+    }
+  }
+
+  if (fileInput) {
+    fileInput.addEventListener('change', onFileChange);
+  }
+
+  /* Drag-and-drop visual feedback */
+  if (dropzone) {
+    ['dragenter', 'dragover'].forEach(function (evt) {
+      dropzone.addEventListener(evt, function (e) {
+        e.preventDefault();
+        dropzone.classList.add('is-drag-over');
+      });
+    });
+    ['dragleave', 'drop'].forEach(function (evt) {
+      dropzone.addEventListener(evt, function () {
+        dropzone.classList.remove('is-drag-over');
+      });
+    });
+    dropzone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (fileInput && e.dataTransfer && e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        onFileChange();
+      }
+    });
+  }
+
+  /* Format disclosure toggle */
+  if (toggle && body) {
+    toggle.addEventListener('click', function () {
+      var expanded = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!expanded));
+      body.hidden = expanded;
+    });
+  }
+}());
+</script>
 {% endblock %}

@@ -1,65 +1,65 @@
 {#
-  BeMart admin Customer edit — EC-CUBE goCustomer (会員登録/編集).
+  BeMart admin Customer editor — clean-room build.
 
-  PORT of EC-CUBE 4.3 admin-theme `Customer/edit.twig`
-  (src/Eccube/Resource/template/admin/Customer/edit.twig).
+  DATA CONTRACT (src/Resource/Page/Admin/Customer.php onGet):
+    customerId        string
+    email             string
+    name01            string
+    name02            string
+    kana01            string|null
+    kana02            string|null
+    companyName       string|null
+    phoneNumber       string|null
+    postalCode        string|null
+    pref              int|null
+    addr01            string|null
+    addr02            string|null
+    birth             string|null
+    sex               int|null
+    job               int|null
+    customerStatus    int
+    initialPoint      int
+    orders            list<{orderNo, total, paymentTotal, orderDate, orderStatus}>
+    orderCount        int
+    totalSpent        int
+    favorites         list<{productCode, productName, unitPrice}>
+    favoriteCount     int
+    form              AdminCustomerForm (pre-filled from body)
 
-  Customer section, FORM/CRUD page. It extends the admin frame
-  (`admin-base.html.twig`), not the storefront `base.html.twig`. The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound.
+  FORM CONTRACT (src/Form/AdminCustomerForm.php):
+    fields: name01, name02, kana01, kana02, company_name, postal_code,
+            pref (select), addr01, addr02, email, phone_number,
+            plain_password_first, plain_password_second,
+            sex (radio), job (select), birth, point, note (textarea)
 
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
-  the Customer resource (src/Resource/Page/Admin/Customer.php) exposes an
-  AdminCustomerForm as `body['form']`, pre-filled with the persisted
-  profile. The inputs render through that real form object:
+  ACTIONS (derived from resource method routing):
+    POST /admin/customer?customerId=<id>  — save profile
 
-    {{ form.input('name01')|raw }}      <- real <input> w/ id/attrs/value
-    {{ form.error('name01') }}          <- inline Be-domain error, if any
+  Back link: #[Link(rel: 'goCustomerList')] → /admin/customer-list
+  Delivery edit link: /admin/customer-delivery-edit?customerId=<id>
 
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.name.name01)`); Ray.WebFormModule is BeMart's
-  BEAR-idiomatic equivalent. `AdminCustomerForm::init()` ports the field
-  names / ids / attributes from EC-CUBE's `CustomerType` (block prefix
-  `/admin/customer`).
-
-  VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
-  form is a field-definition + renderer.
-
-  EDIT MODE only — BeMart's Customer resource always resolves an existing
-  customer (`onGet(email)`), so EC-CUBE's `{% if Customer.id %}` edit
-  branches are always taken; the new-customer branch is dropped (the
-  admin create flow is the separate CreateCustomer resource).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - `form_widget(form.status)` (公開状態 select in the conversion area)
-     -> EC-CUBE master-data (mtb_customer_status). The Customer body
-     carries `customerStatus` as a bare int with no option set; the
-     status select is OMITTED. Enumerated as residual.
-   - `Customer.CustomerAddresses` (お届け先住所 table) -> the
-     AdminCustomerFetched projection does NOT carry the customer's
-     address book (out of the Wave 5 admin-detail slice). The address
-     card renders the empty-state branch. FLAGGED for enrichment
-     follow-up.
-   - `{% for Order in pagination %}` (注文履歴 table) -> the body's
-     `orders` list. The Wave 5 seed carries an empty order history, so
-     the empty-state branch renders. The `pageMaxis` page-count dropdown
-     + `@admin/pager.twig` are OMITTED (no server-side paging).
-   - `csrf_token_for_anchor()` on the address delete `<a>` -> EC-CUBE
-     per-request CSRF widget. OMITTED.
-   - `{% form_theme %}` and the `auto_render` entity-extension loop ->
-     Symfony form-theme / EC-CUBE entity-extension runtime. Dropped.
+  IdeaStore admin design vocabulary (idea-admin-*):
+    idea-admin-layout       two-column editor shell (main col + side panel)
+    idea-admin-panel        card section
+    idea-admin-panel__head  section header row
+    idea-admin-panel__body  section content area
+    idea-admin-field        label + input row
+    idea-admin-field__label label cell
+    idea-admin-field__input input cell
+    idea-admin-required     required badge
+    idea-admin-error        inline field error
+    idea-admin-toolbar      action bar anchored at the bottom
+    idea-admin-toolbar__back back-nav link
+    idea-admin-toolbar__actions submit group
+    idea-admin-table-wrap / idea-admin-table  data table
+    idea-admin-empty        empty-state block
+    idea-admin-kpi-grid / idea-admin-kpi  summary figures
+    idea-admin-notice       inline alert (error / info)
 #}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-customer' %}
-{% set title = '会員登録' %}
+{% set title = '会員編集' %}
 {% set sub_title = '会員管理' %}
 
 {% block javascript %}
@@ -67,318 +67,409 @@
 {% endblock javascript %}
 
 {% block main %}
-    <form name="customer_form" role="form" id="customer_form" method="post" class="h-adr"
-          action="/admin/customer?customerId={{ customerId }}"
-          novalidate>
-        <span class="p-country-name" style="display:none;">Japan</span>
-        <input type="hidden" id="customer__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8"><span class="card-title">会員情報</span>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#ordererInfo"
-                                       aria-expanded="false" aria-controls="ordererInfo">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="ordererInfo">
-                            <div class="card-body">
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top"
-                                             title="自動的に採番される会員のIDです。">
-                                            <span>会員ID</span>
-                                            <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                    </div>
-                                    <div class="col">
-                                        <p>{{ customerId }}</p>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>お名前</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {{ form.input('name01')|raw }}
-                                            </div>
-                                            <div class="col">
-                                                {{ form.input('name02')|raw }}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col">
-                                                {% if form.error('name01') %}<span class="invalid-feedback d-block">{{ form.error('name01') }}</span>{% endif %}
-                                            </div>
-                                            <div class="col">
-                                                {% if form.error('name02') %}<span class="invalid-feedback d-block">{{ form.error('name02') }}</span>{% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>お名前(カナ)</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col">
-                                                {{ form.input('kana01')|raw }}
-                                            </div>
-                                            <div class="col">
-                                                {{ form.input('kana02')|raw }}
-                                            </div>
-                                        </div>
-                                        <div class="row">
-                                            <div class="col">
-                                                {% if form.error('kana01') %}<span class="invalid-feedback d-block">{{ form.error('kana01') }}</span>{% endif %}
-                                            </div>
-                                            <div class="col">
-                                                {% if form.error('kana02') %}<span class="invalid-feedback d-block">{{ form.error('kana02') }}</span>{% endif %}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>会社名</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('company_name')|raw }}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3"><span>住所</span><span
-                                                class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="mb-3">
-                                            <div class="row justify-content-start">
-                                                <div class="col-auto pe-0 align-self-center"><span>〒</span></div>
-                                                <div class="col-2">
-                                                    {{ form.input('postal_code')|raw }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="mb-3">
-                                            <div class="row justify-content-start">
-                                                <div class="col-auto">
-                                                    {{ form.input('pref')|raw }}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="mb-3">
-                                            {{ form.input('addr01')|raw }}
-                                        </div>
-                                        <div class="mb-3">
-                                            {{ form.input('addr02')|raw }}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>メールアドレス</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('email')|raw }}
-                                        {% if form.error('email') %}<span class="invalid-feedback d-block">{{ form.error('email') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>電話番号</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('phone_number')|raw }}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>パスワード</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('plain_password_first')|raw }}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>パスワード(確認用)</span>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('plain_password_second')|raw }}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>性別</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('sex')|raw }}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>職業</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('job')|raw }}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>誕生日</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('birth')|raw }}
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col-3">
-                                        <span>ポイント</span>
-                                    </div>
-                                    <div class="col">
-                                        {{ form.input('point')|raw }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top"
-                                         title="この会員が登録しているお届け先です。この画面から追加することもできます。">
-                                    <span class="card-title">
-                                        お届け先住所
-                                        <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                    </span>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#delivery" aria-expanded="false"
-                                       aria-controls="delivery">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="delivery">
-                            <div class="card-body">
-                                <div id="address_box" class="data-empty">
-                                    <span>この会員のお届け先がありません</span>
-                                </div>
+{% if message is defined and message %}
+  <p class="idea-admin-notice idea-admin-notice--error" role="alert">{{ message }}</p>
+{% endif %}
 
-                                <div class="d-block text-center">
-                                    <a href="/admin/customer-delivery-edit?customerId={{ customerId }}"
-                                       class="btn btn-ec-regular">お届け先住所を追加</a>
-                                </div>
+<form
+  id="customer_form"
+  role="form"
+  method="post"
+  action="/admin/customer?customerId={{ customerId }}"
+  class="h-adr"
+  novalidate
+>
+  <span class="p-country-name" style="display:none;">Japan</span>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
 
-                            </div>
-                        </div>
-                    </div>
+  {# ── Summary KPIs (read-only) ─────────────────────────────────────────── #}
+  <div class="idea-admin-kpi-grid">
+    <div class="idea-admin-kpi">
+      <div class="idea-admin-kpi__label">会員ID</div>
+      <div class="idea-admin-kpi__value" style="font-size:1.1rem;">{{ customerId }}</div>
+    </div>
+    <div class="idea-admin-kpi">
+      <div class="idea-admin-kpi__label">保有ポイント</div>
+      <div class="idea-admin-kpi__value">{{ initialPoint }}</div>
+    </div>
+    <div class="idea-admin-kpi">
+      <div class="idea-admin-kpi__label">注文件数</div>
+      <div class="idea-admin-kpi__value">{{ orderCount }}</div>
+    </div>
+    <div class="idea-admin-kpi">
+      <div class="idea-admin-kpi__label">累計購入額</div>
+      <div class="idea-admin-kpi__value">{{ totalSpent }}</div>
+    </div>
+    <div class="idea-admin-kpi">
+      <div class="idea-admin-kpi__label">お気に入り</div>
+      <div class="idea-admin-kpi__value">{{ favoriteCount }}</div>
+    </div>
+  </div>
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top"
-                                         title="この会員が注文をした履歴が表示されます。">
-                                    <span class="card-title">
-                                        注文履歴
-                                        <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                    </span>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#orderHistory" aria-expanded="false"
-                                       aria-controls="orderHistory">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="orderHistory">
-                            <div class="card-body">
-                                <div id="history_box" class="data-empty">
-                                <span>
-                                    この会員の購入履歴がありません
-                                </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+  <div class="idea-admin-layout">
 
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8">
-                                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top"
-                                         title="店舗用のメモ欄です。フロント側には表示されません。">
-                                        <span class="card-title">ショップ用メモ欄</span>
-                                        <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#shopMemo" aria-expanded="false"
-                                       aria-controls="shopMemo">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="shopMemo">
-                            <div class="card-body">
-                                {{ form.input('note')|raw }}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    {# ── Primary column ────────────────────────────────────────────────── #}
+    <div class="idea-admin-primary">
+
+      {# Section: 氏名 #}
+      <section class="idea-admin-panel" aria-labelledby="section-name">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-name">氏名</h3>
         </div>
+        <div class="idea-admin-panel__body">
 
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink"
-                               href="/admin/customer-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>会員一覧</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button class="btn btn-ec-conversion px-5"
-                                        type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_name_name01">姓</label>
+              <span class="idea-admin-required">必須</span>
             </div>
-        </div>
-    </form>
+            <div class="idea-admin-field__input">
+              {{ form.input('name01')|raw }}
+              {% if form.error('name01') %}
+                <span class="idea-admin-error">{{ form.error('name01') }}</span>
+              {% endif %}
+            </div>
+          </div>
 
-    {% if message is defined and message %}
-        <p class="ec-errorMessage">{{ message }}</p>
-    {% endif %}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_name_name02">名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('name02')|raw }}
+              {% if form.error('name02') %}
+                <span class="idea-admin-error">{{ form.error('name02') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_kana_kana01">セイ</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('kana01')|raw }}
+              {% if form.error('kana01') %}
+                <span class="idea-admin-error">{{ form.error('kana01') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_kana_kana02">メイ</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('kana02')|raw }}
+              {% if form.error('kana02') %}
+                <span class="idea-admin-error">{{ form.error('kana02') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_company_name">会社名</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('company_name')|raw }}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: 連絡先 #}
+      <section class="idea-admin-panel" aria-labelledby="section-contact">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-contact">連絡先</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_email">メールアドレス</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('email')|raw }}
+              {% if form.error('email') %}
+                <span class="idea-admin-error">{{ form.error('email') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_phone_number">電話番号</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('phone_number')|raw }}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: 住所 #}
+      <section class="idea-admin-panel" aria-labelledby="section-address">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-address">住所</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_postal_code">郵便番号</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('postal_code')|raw }}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_address_pref">都道府県</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('pref')|raw }}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_address_addr01">住所1</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('addr01')|raw }}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_address_addr02">住所2</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('addr02')|raw }}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: パスワード #}
+      <section class="idea-admin-panel" aria-labelledby="section-password">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-password">パスワード変更</h3>
+          <p class="idea-admin-panel__hint">変更する場合のみ入力してください。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_plain_password_first">新パスワード</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('plain_password_first')|raw }}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_plain_password_second">確認用</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('plain_password_second')|raw }}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: 注文履歴 #}
+      <section class="idea-admin-panel" aria-labelledby="section-orders">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-orders">注文履歴</h3>
+        </div>
+        {% if orders is defined and orders|length > 0 %}
+          <div class="idea-admin-table-wrap">
+            <table class="idea-admin-table" id="order-history">
+              <thead>
+                <tr>
+                  <th>注文番号</th>
+                  <th>注文日</th>
+                  <th>合計</th>
+                  <th>決済合計</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for order in orders %}
+                  <tr>
+                    <td>{{ order.orderNo }}</td>
+                    <td>{{ order.orderDate }}</td>
+                    <td>{{ order.total }}</td>
+                    <td>{{ order.paymentTotal }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="idea-admin-panel__body">
+            <div class="idea-admin-empty" id="history_box">
+              <p class="idea-admin-empty__title">注文履歴がありません</p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      {# Section: お気に入り #}
+      <section class="idea-admin-panel" aria-labelledby="section-favorites">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-favorites">お気に入り</h3>
+        </div>
+        {% if favorites is defined and favorites|length > 0 %}
+          <div class="idea-admin-table-wrap">
+            <table class="idea-admin-table" id="favorites-list">
+              <thead>
+                <tr>
+                  <th>商品コード</th>
+                  <th>商品名</th>
+                  <th>単価</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for item in favorites %}
+                  <tr>
+                    <td>{{ item.productCode }}</td>
+                    <td>{{ item.productName }}</td>
+                    <td>{{ item.unitPrice }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="idea-admin-panel__body">
+            <div class="idea-admin-empty">
+              <p class="idea-admin-empty__title">お気に入りがありません</p>
+            </div>
+          </div>
+        {% endif %}
+      </section>
+
+      {# Section: お届け先住所 #}
+      <section class="idea-admin-panel" aria-labelledby="section-delivery">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-delivery">お届け先住所</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <div class="idea-admin-empty" id="address_box">
+            <p class="idea-admin-empty__title">お届け先が登録されていません</p>
+          </div>
+          <div style="text-align:center; margin-top:.75rem;">
+            <a
+              class="idea-admin-action"
+              href="/admin/customer-delivery-edit?customerId={{ customerId }}"
+            >
+              <i class="fa fa-plus" aria-hidden="true"></i>
+              お届け先を追加
+            </a>
+          </div>
+        </div>
+      </section>
+
+      {# Section: 店舗メモ #}
+      <section class="idea-admin-panel" aria-labelledby="section-note">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-note">店舗メモ</h3>
+          <p class="idea-admin-panel__hint">フロントには表示されません。</p>
+        </div>
+        <div class="idea-admin-panel__body">
+          {{ form.input('note')|raw }}
+        </div>
+      </section>
+
+    </div>
+
+    {# ── Side panel ───────────────────────────────────────────────────── #}
+    <aside class="idea-admin-side" aria-label="属性・ポイント">
+
+      {# Section: 属性 #}
+      <section class="idea-admin-panel" aria-labelledby="section-attrs">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-attrs">属性</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label>性別</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('sex')|raw }}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_job">職業</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('job')|raw }}
+            </div>
+          </div>
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_birth">誕生日</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('birth')|raw }}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Section: ポイント #}
+      <section class="idea-admin-panel" aria-labelledby="section-point">
+        <div class="idea-admin-panel__head">
+          <h3 id="section-point">ポイント</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_customer_point">保有ポイント</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('point')|raw }}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </aside>
+
+  </div>
+
+  {# ── Action toolbar ─────────────────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/customer-list">
+        <i class="fa fa-arrow-left" aria-hidden="true"></i>
+        会員一覧
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">保存</button>
+    </div>
+  </div>
+
+</form>
+
 {% endblock %}

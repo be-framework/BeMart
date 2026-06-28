@@ -1,345 +1,205 @@
 {#
-  BeMart admin dashboard — EC-CUBE admin home (管理画面ダッシュボード).
+  BeMart admin dashboard — clean-room build.
 
-  PORT of EC-CUBE 4.3 admin-theme `index.twig`
-  (src/Eccube/Resource/template/admin/index.twig).
+  DATA CONTRACT (src/Resource/Page/Admin/Index.php onGet):
+    countProducts          int        — total product count (real, from DashboardCountsQuery)
+    countCustomers         int        — registered member count (real)
+    countNonStockProducts  int        — out-of-stock product count (real)
+    orderStatuses          array      — [{name, color, count}] — empty until sales projection lands
+    orders                 array      — [{orderNo, orderStatus, orderDate, paymentTotal, total, itemCount}]
+    salesThisMonth         int|null   — aggregate sales this month (empty placeholder)
+    salesToday             int|null   — aggregate sales today (empty placeholder)
+    salesYesterday         int|null   — aggregate sales yesterday (empty placeholder)
+    recommendedPlugins     array      — [{pluginCode, name, version, enabled}] (empty placeholder)
 
-  This is the top-level wave's DATA page (the admin dashboard). It
-  extends the standard admin frame (`admin-base.html.twig`, the port of
-  EC-CUBE's admin `default_frame.twig`). The markup skeleton + `c-*` /
-  Bootstrap classes + the chart-statistics / shop-status / plugin / news
-  cards are kept verbatim from EC-CUBE; only the dynamic bindings are
-  rebound to the Index resource body (src/Resource/Page/Admin/Index.php).
+  LINKS (src/Resource/Page/Admin/Index.php #[Link] annotations):
+    goMemberList      GET  page://self/admin/member-list       → /admin/member-list
+    goContentCache    GET  page://self/admin/content/cache     → /admin/content/cache
+    doAdminLogout     POST page://self/admin/logout
+    goAdminLogout     POST page://self/admin/login
 
-  The Index resource is a THIN RENDERER — see its class doc. EC-CUBE's
-  dashboard aggregates KPIs that have no Be Framework projection (no
-  `goDashboard` ALPS transition, no dashboard Entity), so the resource
-  body carries the widget fields as empty / zero placeholders. The
-  EC-CUBE dashboard skeleton renders verbatim around them; the
-  data-driven cells are enumerated as render-diff residual and recorded
-  as MISSING-BODY-FIELD follow-ups (orderStatuses, orders,
-  salesThisMonth/Today/Yesterday, countNonStockProducts, countProducts,
-  countCustomers, recommendedPlugins).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`
-     (`BeMartTwigExtension`).
-   - `currency_symbol()`  -> the JPY symbol literal `￥`. EC-CUBE's
-     `EccubeExtension::getCurrencySymbol()` resolves the configured
-     currency (`JPY`) to `￥`; inlining the literal is the same
-     lower-noise rebinding as `trans` -> ja literal. It appears only in
-     the chart-tooltip JS.
-   - `amount|price` / `count|number_format` -> the `price` filter is the
-     BeMartTwigExtension JPY formatter; `number_format` is Twig's
-     built-in. With the thin-renderer body the sales values are 0.
-   - `eccube_config.eccube_info_url` (the お知らせ iframe src) -> EC-CUBE
-     runtime config. BeMart has no such config; the iframe `src` is left
-     empty. Enumerated as residual.
-   - the `{% block javascript %}` Chart.js / `$.ajax` block -> EC-CUBE
-     client-side runtime (sales-chart rendering). Kept verbatim (it is
-     part of the ported page); it is inert without the EC-CUBE bundle,
-     same status as the frame's `$.ajaxSetup` script.
+  DESIGN VOCABULARY (public/assets/idea-store/css/idea-admin.css):
+    idea-admin-kpi-grid   — row of summary metric cards
+    idea-admin-kpi        — single metric card
+    idea-admin-kpi__label — metric label text
+    idea-admin-kpi__value — large numeric display
+    idea-admin-kpi__sub   — secondary caption
+    idea-admin-panel      — bordered section card
+    idea-admin-panel__head — panel title row
+    idea-admin-panel__body — panel content area
+    idea-admin-table-wrap — overflow wrapper for tables
+    idea-admin-table      — data table
+    idea-admin-notice     — inline info / warning banner
+    idea-admin-empty      — empty-state placeholder
+    idea-admin-empty__title — empty-state heading
+    idea-admin-action     — primary action button
+    idea-admin-action--primary
 #}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-index' %}
-{% set title = 'ホーム' %}
-{% set sub_title = '' %}
-
-{% block javascript %}
-    <script>
-        $(function() {
-            var options = {
-                layout: {
-                    padding: {
-                        left: 0,
-                        right: 0,
-                        top: 25,
-                        bottom: 0
-                    }
-                },
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(tooltipItem) {
-                                return '￥' + tooltipItem.formattedValue.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    y: {
-                        beginatzero: true,
-                        display: true,
-                        ticks: {
-                            callback: function(value, index, ticks) {
-                                if (Math.floor(value) === value) {
-                                    return '￥' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-
-            var priceBackgroundColor = 'rgba(58, 115, 188, 1)';
-            var priceBorderColor = 'rgba(255, 255, 255, 0)';
-
-            $.ajax({
-                url: '/admin/order-list',
-                type: 'GET',
-                dataType: 'json'
-            }).done(function(datas) {
-
-                for (var i = 0; i < datas.length; i++) {
-                    var data = datas[i];
-
-                    var labels = [];
-                    var prices = [];
-                    var priceBackgroundColors = [];
-                    var priceBorderColors = [];
-                    Object.keys(data).forEach(function(key) {
-                        labels.push(key);
-                        prices.push(data[key].price);
-                        priceBackgroundColors.push(priceBackgroundColor);
-                        priceBorderColors.push(priceBorderColor);
-                    });
-
-                    var ctx = $('#chart-' + i)[0].getContext('2d');
-                    ctx.canvas.height = 100;
-                    var chart = new Chart(ctx, {
-                        type: 'bar',
-                        data: {
-                            labels: labels,
-                            datasets: [
-                                {
-                                    type: 'bar',
-                                    label: '売上金額',
-                                    data: prices,
-                                    backgroundColor: priceBackgroundColors,
-                                    borderColor: priceBorderColors,
-                                    borderWidth: 1,
-                                    yAxisID: 'y'
-                                }
-                            ]
-                        },
-                        options: options
-                    });
-                }
-            }).fail(function(data) {
-            }).always(function() {
-                $('#loading').hide();
-            });
-
-        });
-
-    </script>
-{% endblock javascript %}
+{% set title = 'ダッシュボード' %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="row">
-                    <div class="col-4 mb-4">
-                        <div id="order-status" class="card rounded border-0 h-100">
-                            <div class="card-header">
-                                <a href="/admin/order-list">
-                                    <span class="card-title">注文状況</span>
-                                </a>
-                            </div>
-                            <div class="card-body p-0">
-                                {% for OrderStatus in orderStatuses %}
-                                    <div class="d-block border border-top-0 border-start-0 border-end-0">
-                                        <a href="/admin/order?order_status_id={{ OrderStatus.id }}" class="p-3 d-block">
-                                            <div class="row align-items-center">
-                                                <div class="col align-middle">
-                                                    <span class="align-middle">{{ OrderStatus.name }}</span>
-                                                </div>
-                                                <div class="col-auto text-end align-middle">
-                                                    <span class="h4 align-middle fw-normal text-dark">{{ orders is not empty and orders[OrderStatus.id] is defined ? orders[OrderStatus.id] : 0 }}</span>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                        </div><!-- /#order-status -->
-                    </div>
-                    <div class="col-8 mb-4">
-                        <div id="chart-statistics" class="card rounded border-0 h-100">
-                            <div class="card-header">
-                                <div class="d-inline-block">
-                                    <span class="card-title">売上状況</span>
-                                </div>
-                            </div>
-                            <div class="card-body pt-0">
-                                <div class="row text-center border-bottom mb-3">
-                                    <div class="col-4 py-2 border-end">
-                                        <div class="h3">
-                                            {% set amount = salesThisMonth is empty ? 0 : salesThisMonth.order_amount %}
-                                            {% set count = salesThisMonth is empty ? 0 : salesThisMonth.order_count %}
-                                            {{ amount|price }} / {{ count|number_format }} 件
-                                        </div>
-                                        <small>今月の売上金額 / 売上件数</small>
-                                    </div>
-                                    <div class="col-4 py-2 border-end">
-                                        <div class="h3">
-                                            {% set amount = salesToday is empty ? 0 : salesToday.order_amount %}
-                                            {% set count = salesToday is empty ? 0 : salesToday.order_count %}
-                                            {{ amount|price }} / {{ count|number_format }} 件
-                                        </div>
-                                        <small>今日の売上金額 / 売上件数</small>
-                                    </div>
-                                    <div class="col-4 py-2">
-                                        <div class="h3">
-                                            {% set amount = salesYesterday is empty ? 0 : salesYesterday.order_amount %}
-                                            {% set count = salesYesterday is empty ? 0 : salesYesterday.order_count %}
-                                            {{ amount|price }} / {{ count|number_format }} 件
-                                        </div>
-                                        <small>昨日の売上金額 / 売上件数</small>
-                                    </div>
-                                </div>
-                                <div class="row mb-2">
-                                    <div class="col text-center">
-                                        <div class="btn-group nav d-inline-flex" id="pills-tab" role="tablist">
-                                            <a class="nav-link active btn btn-ec-tab py-2 ps-4 pe-4" id="pills-weekly-tab" data-bs-toggle="pill" href="#pills-weekly" role="tab" aria-controls="pills-weekly" aria-selected="true">
-                                                週間
-                                            </a>
-                                            <a class="nav-link btn btn-ec-tab py-2 ps-4 pe-4" id="pills-monthly-tab" data-bs-toggle="pill" href="#pills-monthly" role="tab" aria-controls="pills-monthly" aria-selected="false">
-                                                月間
-                                            </a>
-                                            <a class="nav-link btn btn-ec-tab py-2 ps-4 pe-4" id="pills-year-tab" data-bs-toggle="pill" href="#pills-year" role="tab" aria-controls="pills-year" aria-selected="false">
-                                                年間
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="row">
-                                    <div class="col">
-                                        <div id="loading" class="text-center pt-5">
-                                            <img src="{{ asset('assets/img/loading.gif', 'admin') }}">
-                                        </div>
-                                        <div class="tab-content" id="pills-tabContent">
-                                            <div class="tab-pane fade show active" id="pills-weekly" role="tabpanel" aria-labelledby="pills-weekly-tab">
-                                                <canvas id="chart-0"></canvas>
-                                            </div>
-                                            <div class="tab-pane fade" id="pills-monthly" role="tabpanel" aria-labelledby="pills-monthly-tab">
-                                                <canvas id="chart-1"></canvas>
-                                            </div>
-                                            <div class="tab-pane fade" id="pills-year" role="tabpanel" aria-labelledby="pills-year-tab">
-                                                <canvas id="chart-2"></canvas>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div><!-- /#chart-statistics -->
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col mb-4">
-                        <div id="shop-statistical" class="card rounded border-0 h-100">
-                            <div class="card-header">
-                                <div class="d-inline-block">
-                                    <span class="card-title">ショップ状況</span>
-                                </div>
-                            </div>
-                            <div class="card-body p-0">
-                                <div class="d-block border border-top-0 border-start-0 border-end-0">
-                                    <a href="/admin/product-list" class="p-3 d-block">
-                                        <div class="row align-items-center">
-                                            <div class="col-2 align-middle text-center">
-                                                <i class="fa fa-inbox fa-2x text-secondary" aria-hidden="true"></i>
-                                            </div>
-                                            <div class="col p-0">
-                                                <span class="align-middle">在庫切れ商品数</span>
-                                            </div>
-                                            <div class="col-auto text-end align-middle">
-                                                <span class="h4 align-middle fw-normal text-dark">{{ countNonStockProducts|number_format }}</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="d-block border border-top-0 border-start-0 border-end-0">
-                                    <a href="/admin/product-list" class="p-3 d-block">
-                                        <div class="row align-items-center">
-                                            <div class="col-2 align-middle text-center">
-                                                <i class="fa fa-cubes fa-2x text-secondary" aria-hidden="true"></i>
-                                            </div>
-                                            <div class="col p-0">
-                                                <span class="align-middle">取扱商品数</span>
-                                            </div>
-                                            <div class="col-auto text-check align-middle">
-                                                <span class="h4 align-middle fw-normal text-dark">{{ countProducts|number_format }}</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                                <div class="d-block border border-top-0 border-start-0 border-end-0">
-                                    <a href="/admin/customer-list" class="p-3 d-block">
-                                        <div class="row align-items-center">
-                                            <div class="col-2 align-middle text-center">
-                                                <i class="fa fa-users fa-2x text-secondary" aria-hidden="true"></i>
-                                            </div>
-                                            <div class="col p-0">
-                                                <span class="align-middle">会員数</span>
-                                            </div>
-                                            <div class="col-auto text-check align-middle">
-                                                <span class="h4 align-middle fw-normal text-dark">{{ countCustomers|number_format }}</span>
-                                            </div>
-                                        </div>
-                                    </a>
-                                </div>
-                            </div>
-                        </div><!-- /#shop-statistical -->
-                    </div>
-                    <div class="col mb-4">
-                        <div id="ec-cube-plugin" class="card rounded border-0 h-100">
-                            <div class="card-header border-bottom-0">
-                                <div class="d-inline-block">
-                                    <span class="card-title">おすすめのプラグイン</span>
-                                </div>
-                            </div>
-                            <div class="card-body py-0" style="max-height: 395px; overflow-y: scroll">
-                                {% for plugin in recommendedPlugins %}
-                                    <div class="row py-3 border border-bottom-0 border-start-0 border-end-0">
-                                        <div class="col-5 col-md-4">
-                                            <a href="#" data-bs-toggle="modal" data-bs-target="#searchPluginModal-{{ plugin.id }}">
-                                                <img src="{{ plugin.image }}" class="w-100" alt="{{ plugin.name }}">
-                                            </a>
-                                        </div>
-                                        <div class="col-7 col-md-8 ps-0">
-                                            <a href="#" data-bs-toggle="modal" data-bs-target="#searchPluginModal-{{ plugin.id }}">{{ plugin.name }}</a>
-                                            <p class="m-0 pt-2">
-                                                {{ plugin.short_description }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                {% endfor %}
-                            </div>
-                            <div class="card-footer">
-                                > <a href="/admin/plugin-list">オーナーズストア</a>
-                            </div>
-                        </div><!-- /#ec-cube-plugin -->
-                    </div>
-                    <div class="col mb-4">
-                        <div id="ec-cube-news" class="card rounded border-0 h-100">
-                            <div class="card-header">
-                                <div class="d-inline-block">
-                                    <span class="card-title">お知らせ</span>
-                                </div>
-                            </div>
-                            <div class="card-body p-0">
-                                <iframe name="information" class="link_list_wrap" src="" style="width:100%; border:0; min-height:390px;"></iframe>
-                            </div>
-                            <div class="card-footer" style="height:43px;box-sizing: border-box;"></div>
-                        </div><!-- /#ec-cube-news -->
-                    </div>
-                </div><!-- /.row -->
-            </div><!-- /.c-primaryCol -->
-        </div><!-- /.c-contentsArea__primaryCol -->
-    </div><!-- /.c-contentsArea__cols -->
+
+{# ── Shop-status KPI row (real counts from DashboardCountsQuery) ───────────── #}
+<div class="idea-admin-kpi-grid" aria-label="ショップ状況">
+
+    <a href="/admin/product-list" class="idea-admin-kpi" aria-label="取扱商品数">
+        <div class="idea-admin-kpi__label">
+            <i class="fa fa-cubes fa-fw" aria-hidden="true"></i>
+            取扱商品数
+        </div>
+        <div class="idea-admin-kpi__value">{{ countProducts|number_format }}</div>
+        <div class="idea-admin-kpi__sub">商品一覧へ</div>
+    </a>
+
+    <a href="/admin/customer-list" class="idea-admin-kpi" aria-label="会員数">
+        <div class="idea-admin-kpi__label">
+            <i class="fa fa-users fa-fw" aria-hidden="true"></i>
+            会員数
+        </div>
+        <div class="idea-admin-kpi__value">{{ countCustomers|number_format }}</div>
+        <div class="idea-admin-kpi__sub">会員一覧へ</div>
+    </a>
+
+    <a href="/admin/product-list" class="idea-admin-kpi{% if countNonStockProducts > 0 %} idea-admin-kpi--negative{% endif %}" aria-label="在庫切れ商品数">
+        <div class="idea-admin-kpi__label">
+            <i class="fa fa-inbox fa-fw" aria-hidden="true"></i>
+            在庫切れ商品数
+        </div>
+        <div class="idea-admin-kpi__value">{{ countNonStockProducts|number_format }}</div>
+        <div class="idea-admin-kpi__sub">商品一覧へ</div>
+    </a>
+
+</div>{# /.idea-admin-kpi-grid #}
+
+{# ── Sales summary KPI row (placeholder — no sales projection yet) ─────────── #}
+<div class="idea-admin-kpi-grid" aria-label="売上状況">
+
+    <div class="idea-admin-kpi">
+        <div class="idea-admin-kpi__label">今月の売上</div>
+        <div class="idea-admin-kpi__value">
+            {% if salesThisMonth is not null %}
+                {{ salesThisMonth|number_format }}円
+            {% else %}
+                ——
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="idea-admin-kpi">
+        <div class="idea-admin-kpi__label">本日の売上</div>
+        <div class="idea-admin-kpi__value">
+            {% if salesToday is not null %}
+                {{ salesToday|number_format }}円
+            {% else %}
+                ——
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="idea-admin-kpi">
+        <div class="idea-admin-kpi__label">昨日の売上</div>
+        <div class="idea-admin-kpi__value">
+            {% if salesYesterday is not null %}
+                {{ salesYesterday|number_format }}円
+            {% else %}
+                ——
+            {% endif %}
+        </div>
+    </div>
+
+</div>{# /.idea-admin-kpi-grid #}
+
+{# ── Order-status table (placeholder — no order aggregate projection yet) ───── #}
+<section class="idea-admin-panel" aria-labelledby="panel-order-status">
+    <div class="idea-admin-panel__head">
+        <h3 id="panel-order-status">
+            <i class="fa fa-shopping-cart fa-fw" aria-hidden="true"></i>
+            注文状況
+        </h3>
+        <a href="/admin/order-list" class="idea-admin-action idea-admin-action--primary">
+            受注一覧へ
+        </a>
+    </div>
+    <div class="idea-admin-panel__body">
+        {% if orderStatuses is not empty %}
+            <div class="idea-admin-table-wrap">
+                <table class="idea-admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">ステータス</th>
+                            <th scope="col">件数</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for status in orderStatuses %}
+                            <tr>
+                                <td>{{ status.name }}</td>
+                                <td>{{ status.count|number_format }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="idea-admin-empty">
+                <i class="fa fa-inbox fa-2x" aria-hidden="true"></i>
+                <span class="idea-admin-empty__title">集計データがありません</span>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+{# ── Plugin panel (placeholder — no plugin projection yet) ────────────────── #}
+<section class="idea-admin-panel" aria-labelledby="panel-plugins" style="margin-top:1.5rem">
+    <div class="idea-admin-panel__head">
+        <h3 id="panel-plugins">
+            <i class="fa fa-plug fa-fw" aria-hidden="true"></i>
+            インストール済みプラグイン
+        </h3>
+        <a href="/admin/plugin-list" class="idea-admin-action idea-admin-action--primary">
+            プラグイン一覧へ
+        </a>
+    </div>
+    <div class="idea-admin-panel__body">
+        {% if recommendedPlugins is not empty %}
+            <div class="idea-admin-table-wrap">
+                <table class="idea-admin-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">プラグインコード</th>
+                            <th scope="col">名称</th>
+                            <th scope="col">バージョン</th>
+                            <th scope="col">状態</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for plugin in recommendedPlugins %}
+                            <tr>
+                                <td>{{ plugin.pluginCode }}</td>
+                                <td>{{ plugin.name }}</td>
+                                <td>{{ plugin.version }}</td>
+                                <td>
+                                    {% if plugin.enabled %}
+                                        <span class="idea-admin-badge idea-admin-badge--public">有効</span>
+                                    {% else %}
+                                        <span class="idea-admin-badge idea-admin-badge--private">無効</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <div class="idea-admin-empty">
+                <i class="fa fa-plug fa-2x" aria-hidden="true"></i>
+                <span class="idea-admin-empty__title">プラグインはありません</span>
+            </div>
+        {% endif %}
+    </div>
+</section>
 
 {% endblock %}

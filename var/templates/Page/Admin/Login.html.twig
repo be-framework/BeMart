@@ -1,85 +1,258 @@
-{#
-  BeMart admin login page — EC-CUBE doAdminLogin (管理者ログイン).
-
-  PORT of EC-CUBE 4.3 admin-theme `login.twig`
-  (src/Eccube/Resource/template/admin/login.twig).
-
-  This is the top-level wave's login-context FORM page. It extends the
-  admin LOGIN frame (`admin-login-base.html.twig`, the port of EC-CUBE's
-  `login_frame.twig`) — NOT the standard `admin-base.html.twig` (which
-  has the sidebar + header bar). EC-CUBE's login page likewise extends
-  `@admin/login_frame.twig`. The markup skeleton + Bootstrap classes are
-  kept verbatim from EC-CUBE; only the dynamic bindings are rebound.
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
-  the admin Login resource (src/Resource/Page/Admin/Login.php) exposes an
-  {@see \MyVendor\BeMart\Form\AdminLoginForm} as `body['form']`. The
-  inputs render through that real form object:
-
-    {{ form.input('loginId')|raw }}    <- real <input> w/ id/attrs/value
-    {{ form.input('password')|raw }}    <- real password <input>
-
-  EC-CUBE renders the same inputs through the Symfony FormView
-  (`form_widget(form.loginId)`); Ray.WebFormModule is BeMart's
-  BEAR-idiomatic equivalent. `AdminLoginForm::init()` ports the field
-  names / ids / attributes from EC-CUBE's `LoginType` (block prefix
-  `/admin/login`) + the template's per-widget `attr` overrides.
-
-  VALIDATION AUTHORITY STAYS WITH the Be Framework Becoming chain — the
-  form is a field-definition + renderer. On a domain rejection the admin
-  Login resource exposes `body.message` and re-fills the form.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - canonical form action -> `/admin/login`.
-   - `csrf_token('authenticate')` -> EC-CUBE per-request CSRF widget.
-     BeMart's CSRF is the CsrfToken (Slice 8); the hidden
-     `_csrf_token` input is kept (structure) with the body's `csrfToken`
-     (null in the html context — the EventListener mirrors the live token
-     in). EC-CUBE-runtime only — enumerated as residual.
-   - `error.messageKey|trans(...)` -> EC-CUBE's Symfony auth-error
-     object. BeMart surfaces the domain rejection through `body.message`,
-     rendered in the same `text-danger` block.
-   - `"now"|date("Y")` in the copyright line -> the current year; the
-     port inlines the EC-CUBE-equivalent literal.
-#}
 {% extends 'admin-login-base.html.twig' %}
 
-{% set title = 'ログイン' %}
+{% set title = '管理者ログイン' %}
+
+{% block stylesheet %}
+<style>
+/* ─── Login card ──────────────────────────────────────────────────────────── */
+
+.idea-admin-login-card {
+  background: var(--idea-surface);
+  border: 1px solid rgba(205, 191, 170, .55);
+  border-radius: var(--idea-admin-radius-panel);
+  box-shadow: var(--idea-shadow-float);
+  overflow: hidden;
+}
+
+.idea-admin-login-card__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .45rem;
+  padding: 2rem 2rem 1.25rem;
+  background: var(--idea-surface-soft);
+  border-bottom: 1px solid rgba(205, 191, 170, .4);
+  text-align: center;
+}
+
+.idea-admin-login-card__brand {
+  font-family: var(--idea-font-serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  color: var(--idea-ink);
+  text-decoration: none;
+}
+
+.idea-admin-login-card__subtitle {
+  font-size: .75rem;
+  color: var(--idea-muted);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.idea-admin-login-card__body {
+  padding: 1.75rem 2rem 2rem;
+  display: grid;
+  gap: 1rem;
+}
+
+/* ─── Input group (label stacked above input) ─────────────────────────────── */
+
+.idea-admin-login-group {
+  display: grid;
+  gap: .35rem;
+}
+
+.idea-admin-login-group label {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--idea-muted);
+  letter-spacing: .03em;
+}
+
+.idea-admin-login-group input {
+  width: 100%;
+  min-height: 2.6rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .92rem;
+  padding: .5rem .8rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.idea-admin-login-group input:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .18);
+}
+
+.idea-admin-login-group input[aria-invalid="true"] {
+  border-color: #c06f4f;
+  box-shadow: 0 0 0 3px rgba(192, 111, 79, .14);
+}
+
+/* ─── Password toggle wrapper ─────────────────────────────────────────────── */
+
+.idea-admin-login-pw {
+  position: relative;
+  display: grid;
+}
+
+.idea-admin-login-pw input {
+  padding-right: 2.8rem;
+}
+
+.idea-admin-login-pw__toggle {
+  position: absolute;
+  right: .65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--idea-muted);
+  cursor: pointer;
+  padding: .25rem;
+  line-height: 1;
+  font-size: .88rem;
+  transition: color .14s;
+}
+
+.idea-admin-login-pw__toggle:hover { color: var(--idea-ink); }
+
+/* ─── Alert strip (inline error) ─────────────────────────────────────────── */
+
+.idea-admin-login-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+  padding: .65rem .8rem;
+  border-radius: var(--idea-admin-radius-input);
+  border: 1px solid rgba(169, 71, 46, .28);
+  background: rgba(169, 71, 46, .07);
+  color: #a9472e;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+/* ─── Submit button (full-width primary) ─────────────────────────────────── */
+
+.idea-admin-login-submit {
+  width: 100%;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  background: var(--idea-olive);
+  border: 1px solid var(--idea-olive);
+  border-radius: var(--idea-admin-radius-button);
+  color: var(--idea-surface);
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(82, 107, 85, .22);
+  transition: background .15s, border-color .15s, box-shadow .15s;
+  margin-top: .25rem;
+}
+
+.idea-admin-login-submit:hover {
+  background: var(--idea-focus);
+  border-color: var(--idea-focus);
+}
+
+.idea-admin-login-submit:active {
+  box-shadow: none;
+  transform: translateY(1px);
+}
+
+/* ─── Footer copyright ────────────────────────────────────────────────────── */
+
+.idea-admin-login-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: .72rem;
+  color: var(--idea-muted);
+}
+</style>
+{% endblock %}
 
 {% block main %}
 
-    <div class="container" style="margin-top: 150px;">
-        <div class="row">
-            <div class="col-12 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
-                <div class="text-center p-5 bg-white">
-                    <form name="form1" id="form1" method="post" action="/admin/login">
-                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                        <p><img src="{{ asset('assets/img/logo2.png', 'admin') }}" alt="BeMart" width="106"></p>
-                        <div class="mb-3">
-                            {{ form.input('loginId')|raw }}
-                        </div>
-                        <div class="mb-3">
-                            {{ form.input('password')|raw }}
-                        </div>
-                        {% if message is defined and message %}
-                            <div class="mb-3">
-                                <span class="text-danger">{{ message }}</span>
-                            </div>
-                        {% endif %}
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-primary btn-lg w-100">ログイン</button>
-                        </div>
-                        <input type="hidden" name="mode" value="login">
-                    </form>
-                </div>
-            </div>
-            <div class="col-12">
-                <p class="text-center mt-3">
-                    <small>Copyright &copy; 2026 BeMart. All Rights Reserved.</small>
-                </p>
-            </div>
-        </div>
-    </div>
+<article class="idea-admin-login-card" role="main">
 
+  <header class="idea-admin-login-card__head">
+    <span class="idea-admin-login-card__brand">BeMart</span>
+    <span class="idea-admin-login-card__subtitle">管理画面</span>
+  </header>
+
+  <div class="idea-admin-login-card__body">
+
+    {% if message is defined and message %}
+    <div class="idea-admin-login-alert" role="alert" aria-live="assertive">
+      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      <span>{{ message }}</span>
+    </div>
+    {% endif %}
+
+    <form method="post" action="/admin/login" novalidate>
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="mode" value="login">
+
+      <div style="display: grid; gap: 1rem;">
+
+        <div class="idea-admin-login-group">
+          <label for="loginId">ログインID</label>
+          {{ form.input('loginId')|raw }}
+          {% if form.error('loginId') %}
+          <span class="idea-admin-error" role="alert">{{ form.error('loginId') }}</span>
+          {% endif %}
+        </div>
+
+        <div class="idea-admin-login-group">
+          <label for="admin_login_password">パスワード</label>
+          <div class="idea-admin-login-pw">
+            {{ form.input('password')|raw }}
+            <button type="button" class="idea-admin-login-pw__toggle"
+                    aria-label="パスワードを表示/非表示"
+                    data-pw-toggle="admin_login_password">
+              <i class="fa fa-eye" aria-hidden="true"></i>
+            </button>
+          </div>
+          {% if form.error('password') %}
+          <span class="idea-admin-error" role="alert">{{ form.error('password') }}</span>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="idea-admin-login-submit">
+          <i class="fa fa-sign-in-alt" aria-hidden="true"></i>
+          ログイン
+        </button>
+
+      </div>
+    </form>
+
+  </div>
+
+</article>
+
+<p class="idea-admin-login-footer">&copy; 2026 BeMart</p>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  document.querySelectorAll('[data-pw-toggle]').forEach(function (btn) {
+    var targetId = btn.getAttribute('data-pw-toggle');
+    var input = document.getElementById(targetId);
+    if (!input) return;
+    btn.addEventListener('click', function () {
+      var isPassword = input.getAttribute('type') === 'password';
+      input.setAttribute('type', isPassword ? 'text' : 'password');
+      var icon = btn.querySelector('i');
+      if (icon) {
+        icon.className = isPassword ? 'fa fa-eye-slash' : 'fa fa-eye';
+      }
+    });
+  });
+}());
+</script>
 {% endblock %}

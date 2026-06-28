@@ -137,7 +137,7 @@ For each storage migration batch (e.g. one Reason interface family):
    - Missing top-level descriptor → add as `src-entity`
    - Inline child needed at top-level → promote
    - New atomic fields needed → add field descriptors
-2. **Schema check** — confirm in `sql/schema/ec-cube-4.3-mysql-mysqldump.sql`:
+2. **Schema check** — confirm in `sql/schema/bemart-schema.sql`:
    - Column names + types
    - FK constraints (especially to empty `mtb_*` tables — nullable defaults are usually safe; document where you defaulted to NULL because the master table is empty in the structure-only dump)
    - UNIQUE indexes (or their absence — record `customer_id + product_code` cases as "app-level guard required")

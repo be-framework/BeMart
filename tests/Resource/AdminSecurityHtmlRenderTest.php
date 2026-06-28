@@ -13,13 +13,14 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
 /**
- * Phase 3 — HTML render check for the admin セキュリティ管理 Tier-2 page.
+ * Phase 3 — HTML render check for the admin セキュリティ設定 page.
  *
- * Render-smoke standard: the page renders a full admin-frame HTML
- * document through {@see HtmlModule} with the security-config form body
- * supplied by {@see \MyVendor\BeMart\Resource\Page\Admin\Security}. The
- * EC-CUBE residual-diff fidelity check is a follow-up gated on the
- * EC-CUBE 4.3 reference clone (`tools/ec-cube-source/`).
+ * Render-smoke standard: the page renders a full admin-frame HTML document
+ * through {@see HtmlModule} driven by
+ * {@see \MyVendor\BeMart\Resource\Page\Admin\Security}.
+ *
+ * L1 — required fields are present in the output.
+ * L2 — form action / method contract and link hrefs are correct.
  */
 final class AdminSecurityHtmlRenderTest extends TestCase
 {
@@ -54,24 +55,84 @@ final class AdminSecurityHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testSecurityPreservesEcCubeAdminMarkupStructure(): void
+    public function testAdminShellFrameIsPresent(): void
     {
         $html = $this->resource->get('page://self/admin/security')->toString();
 
         foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-contentsArea">',
-            'id="networkConfig"',
-            'id="adminIpConfig"',
-            'セキュリティ管理',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            'class="idea-admin-shell"',
+            'class="idea-admin-content"',
+            'class="idea-admin-sidebar"',
+        ] as $landmark) {
+            $this->assertStringContainsString($landmark, $html, "idea-admin frame landmark missing: {$landmark}");
         }
+    }
+
+    /** L1 — all required fields appear in the rendered output. */
+    public function testRequiredFieldInputsAreRendered(): void
+    {
+        $html = $this->resource->get('page://self/admin/security')->toString();
+
+        foreach ([
+            'admin_security_admin_route_dir',
+            'admin_security_trusted_hosts',
+        ] as $fieldId) {
+            $this->assertStringContainsString($fieldId, $html, "required field missing: {$fieldId}");
+        }
+    }
+
+    /** L1 — all non-required fields appear in the rendered output. */
+    public function testOptionalFieldInputsAreRendered(): void
+    {
+        $html = $this->resource->get('page://self/admin/security')->toString();
+
+        foreach ([
+            'admin_security_admin_allow_hosts',
+            'admin_security_admin_deny_hosts',
+            'admin_security_front_allow_hosts',
+            'admin_security_front_deny_hosts',
+            'admin_security_force_ssl',
+        ] as $fieldId) {
+            $this->assertStringContainsString($fieldId, $html, "optional field missing: {$fieldId}");
+        }
+    }
+
+    /** L2 — form action and tunnelled method are correct (PUT via ?_method). */
+    public function testFormActionAndMethod(): void
+    {
+        $html = $this->resource->get('page://self/admin/security')->toString();
+
+        $this->assertStringContainsString('action="/admin/security?_method=put"', $html);
+        $this->assertStringContainsString('method="post"', $html);
+    }
+
+    /** L2 — CSRF token hidden field is present. */
+    public function testCsrfTokenFieldIsPresent(): void
+    {
+        $html = $this->resource->get('page://self/admin/security')->toString();
+
+        $this->assertStringContainsString('name="csrfToken"', $html);
+    }
+
+    /**
+     * EC-CUBE markup parity tests archived.
+     *
+     * These tests asserted the presence of EC-CUBE / Bootstrap derived
+     * landmarks (c-container, c-headerBar, c-contentsArea, etc.) that were
+     * intentionally removed during the cleanroom rebuild.
+     *
+     * @group ec-cube-parity-archived
+     */
+    public function testEcCubeMarkupParityArchived(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE parity assertions retired: cleanroom rebuild uses idea-admin-* frame. '
+            . 'Re-enable only if a deliberate regression to EC-CUBE markup is required.',
+        );
     }
 }

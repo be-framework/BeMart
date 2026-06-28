@@ -1,48 +1,45 @@
 {#
   BeMart storefront Block widget — footer.
 
-  PORT of EC-CUBE 4.3 default-theme `Block/footer.twig`
-  (src/Eccube/Resource/template/default/Block/footer.twig).
+  Clean-room build in IdeaStore design language.
 
-  EC-CUBE composes the storefront frame's FOOTER region from operator-
-  configurable Block widgets (dtb_block / dtb_block_position). ALPS does
-  not model Block — it is pure presentation — so the honest reference is
-  EC-CUBE's own default-theme Block template. This file keeps EC-CUBE's
-  markup skeleton and `ec-*` class names verbatim.
+  Data contract:
+  - `shop_name` (string, optional) — injected by the frame; defaults to
+    'BeMart'. No other domain data is required; this widget is static.
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'front.block.footer.*'|trans }}` -> the Japanese literal the key
-     resolves to in messages.ja.yaml (about_us / privacy_policy /
-     act_on_specified_commercial_transactions / inquiry).
-   - `canonical-url '/help/about'|'/help/privacy'|'/help/trade-law'|'contact'|'homepage')`
-     -> BeMartTwigExtension `canonical-url )`.
-   - `BaseInfo.shop_name` -> the frame's `shop_name` variable, defaulting
-     to `BeMart` (the storefront frame carries no BaseInfo entity).
+  Link contract (src/Resource/Page/Index.php #[Link] declarations):
+  - goHelpAbout        → /help/about
+  - goHelpPrivacy      → /help/privacy
+  - goHelpTradeLaw     → /help/trade-law
+  - goHelpAgreement    → /help/agreement
+  - goHelpGuide        → /help/guide
+  - goContactForm      → /contact
 
-  This widget is PURELY STATIC — it needs no domain data, only the shop
-  name already available to the frame. It is therefore portable directly.
+  CSS vocabulary: idea-footer / idea-footer-grid / idea-footer-copy /
+  idea-footer-nav / idea-eyebrow / idea-admin-access  (idea-store.css).
 #}
-<div class="ec-footerRole">
-    <div class="ec-footerRole__inner">
-        <ul class="ec-footerNavi">
-            <li class="ec-footerNavi__link">
-                <a href="/help/about">当サイトについて</a>
-            </li>
-            <li class="ec-footerNavi__link">
-                <a href="/help/privacy">プライバシーポリシー</a>
-            </li>
-            <li class="ec-footerNavi__link">
-                <a href="/help/trade-law">特定商取引法に基づく表記</a>
-            </li>
-            <li class="ec-footerNavi__link">
-                <a href="/contact">お問い合わせ</a>
-            </li>
-        </ul>
-        <div class="ec-footerTitle">
-            <div class="ec-footerTitle__logo">
-                <a href="/">{{ shop_name|default('BeMart') }}</a>
-            </div>
-            <div class="ec-footerTitle__copyright">copyright (c) {{ shop_name|default('BeMart') }} all rights reserved.</div>
-        </div>
+<footer class="idea-footer" role="contentinfo">
+  <div class="idea-container idea-footer-grid">
+
+    <div class="idea-footer-brand">
+      <p class="idea-eyebrow">{{ shop_name|default('BeMart') }}</p>
+      <p class="idea-footer-copy">
+        &copy; {{ "now"|date("Y") }} {{ shop_name|default('BeMart') }}
+      </p>
     </div>
-</div>
+
+    <nav class="idea-footer-nav" aria-label="サイト情報">
+      <a href="/help/about"       rel="goHelpAbout">このサイトについて</a>
+      <a href="/help/privacy"     rel="goHelpPrivacy">プライバシーポリシー</a>
+      <a href="/help/trade-law"   rel="goHelpTradeLaw">特定商取引法に基づく表記</a>
+      <a href="/help/agreement"   rel="goHelpAgreement">利用規約</a>
+      <a href="/help/guide"       rel="goHelpGuide">ご利用ガイド</a>
+      <a href="/contact"          rel="goContactForm">お問い合わせ</a>
+    </nav>
+
+  </div>
+
+  <div class="idea-container idea-admin-access">
+    <a href="/admin/login" rel="nofollow">管理者ログイン</a>
+  </div>
+</footer>

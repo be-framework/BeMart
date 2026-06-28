@@ -36,25 +36,21 @@ use function str_contains;
 use function trim;
 
 /**
- * Phase 3 — fidelity check for the admin Member-edit HTML port (the
- * Setting/System section's FORM/CRUD page).
+ * Phase 3 — idea-admin clean-room Member editor: HTML render verification.
  *
- * Same standard as the admin pilot {@see AdminNewsHtmlRenderTest}: EC-CUBE
- * renders the member inputs through the Symfony FormView
- * (`form_widget(form.name)`); BeMart renders them through a real
- * Ray.WebFormModule {@see AdminMemberForm} exposed as `body.form`. This
- * test renders EC-CUBE's `form_widget(form.<field>)` calls through the
- * SAME `AdminMemberForm` instance, pre-filled with the same persisted
- * member, so the inputs are byte-identical on both sides and diff to
- * ZERO — the form-widget residual family is eliminated.
+ * Verifies the admin Member-edit page rendered by
+ * var/templates/Page/Admin/Member.html.twig (idea-admin-* frame, no
+ * EC-CUBE / Bootstrap / c-* classes). Checks:
  *
- * Honest, not circular: `AdminMemberForm::init()` is itself a PORT of
- * EC-CUBE's `MemberType` + `member_edit.twig`'s `form_widget` calls.
+ *   L0 – shell frame: idea-admin-shell / idea-admin-content landmarks
+ *   L1 – required field markup: name, loginId (new), password/passwordConfirm (new)
+ *        and authority select rendered by the real AdminMemberForm
+ *   L2 – form action/method semantics and back-link href/rel
+ *   L3 – edit-mode vs create-mode branching
  *
- * The page extends `admin-base.html.twig`, served via
- * {@see EcCubeAdminStubLoader}. The Member resource requires an
- * authenticated admin, so the html context's `AdminSession` is
- * rebound to a seeded admin id.
+ * The EC-CUBE markup-parity diff test is retired to the
+ * ec-cube-parity-archived group; the template is no longer a port of
+ * EC-CUBE's member_edit.twig DOM — it is a clean-room build.
  */
 final class AdminMemberHtmlRenderTest extends TestCase
 {
@@ -62,36 +58,6 @@ final class AdminMemberHtmlRenderTest extends TestCase
 
     /** The pre-seeded admin in be/var/fake/admins.json. */
     private const SEED_LOGIN_ID = 'test-admin';
-
-    /**
-     * EC-CUBE lines with no BeMart counterpart and vice versa. The form
-     * inputs are rendered by a real AdminMemberForm on BOTH sides so they
-     * diff to zero; the residual is the admin-frame baseline plus the
-     * form `csrfToken` hidden input and the omitted `Authority` / `Work`
-     * master-data controls.
-     *
-     * @var list<string>
-     */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        "'ECCUBE-CSRF-TOKEN': $('meta[name=\"eccube-csrf-token\"]').attr('content')",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>メンバー登録 システム設定 - BeMart</title>',
-        '<title>システム設定 メンバー登録 - EC-CUBE</title>',
-        // Form: EC-CUBE's `csrfToken` hidden CSRF input is rendered by the
-        // Symfony FormView; BeMart's port keeps the hidden input
-        // (structure) with an empty value — the html context has no
-        // per-request CSRF widget.
-        '<input type="hidden" id="member_csrfToken" name="csrfToken" value="">',
-    ];
 
     private ResourceInterface $resource;
 
@@ -112,6 +78,8 @@ final class AdminMemberHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    // ── L0: shell frame ──────────────────────────────────────────────────
+
     public function testMemberEditRendersAsHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/admin/member', [
@@ -124,31 +92,28 @@ final class AdminMemberHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testMemberEditPreservesEcCubeAdminMarkupStructure(): void
+    public function testMemberEditRendersIdeaAdminShellLandmarks(): void
     {
         $html = $this->resource->get('page://self/admin/member', [
             'loginId' => self::SEED_LOGIN_ID,
         ])->toString();
 
         foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-mainNavArea">',
-            '<div class="c-contentsArea">',
-            'id="member_form"',
-            'class="card rounded border-0 mb-4"',
-            'class="collapse show ec-cardCollapse"',
-            'class="c-conversionArea"',
-            'class="btn btn-ec-conversion px-5"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            'class="idea-admin-shell"',
+            'class="idea-admin-content"',
+            'class="idea-admin-topbar"',
+            'class="idea-admin-sidebar"',
+        ] as $landmark) {
+            $this->assertStringContainsString($landmark, $html, "shell landmark missing: {$landmark}");
         }
     }
+
+    // ── L1: required field markup ─────────────────────────────────────────
 
     /**
      * The form inputs are rendered by a real AdminMemberForm: the page
@@ -162,93 +127,98 @@ final class AdminMemberHtmlRenderTest extends TestCase
         ])->toString();
 
         $this->assertStringContainsString('id="admin_member_name"', $html);
-        $this->assertStringContainsString('id="admin_member_loginId"', $html);
         // The seed admin's profile is repopulated from the resource body.
         $this->assertStringContainsString('value="テスト管理者"', $html);
-        $this->assertStringContainsString('value="test-admin"', $html);
     }
+
+    public function testMemberNewRendersLoginIdAndPasswordFields(): void
+    {
+        $html = $this->resource->get('page://self/admin/member')->toString();
+
+        $this->assertStringContainsString('id="admin_member_loginId"', $html);
+        $this->assertStringContainsString('id="admin_member_password"', $html);
+        $this->assertStringContainsString('id="admin_member_passwordConfirm"', $html);
+        $this->assertStringContainsString('id="admin_member_authority"', $html);
+    }
+
+    public function testMemberNewDoesNotRenderPasswordFieldsInEditMode(): void
+    {
+        $html = $this->resource->get('page://self/admin/member', [
+            'loginId' => self::SEED_LOGIN_ID,
+        ])->toString();
+
+        // Password inputs are create-only.
+        $this->assertStringNotContainsString('id="admin_member_password"', $html);
+        $this->assertStringNotContainsString('id="admin_member_passwordConfirm"', $html);
+    }
+
+    // ── L2: form action / method + navigation links ───────────────────────
+
+    public function testMemberNewFormActionIsCreateEndpoint(): void
+    {
+        $html = $this->resource->get('page://self/admin/member')->toString();
+
+        $this->assertStringContainsString('action="/admin/member"', $html);
+        $this->assertStringContainsString('method="post"', $html);
+        $this->assertStringContainsString('name="mode" value="member_form"', $html);
+    }
+
+    public function testMemberEditFormActionIsUpdateEndpoint(): void
+    {
+        $html = $this->resource->get('page://self/admin/member', [
+            'loginId' => self::SEED_LOGIN_ID,
+        ])->toString();
+
+        $this->assertStringContainsString('action="/admin/member?_method=put"', $html);
+        $this->assertStringContainsString('method="post"', $html);
+        $this->assertStringContainsString('name="mode" value="member_form"', $html);
+    }
+
+    public function testMemberEditDeleteFormActionContainsLoginId(): void
+    {
+        $html = $this->resource->get('page://self/admin/member', [
+            'loginId' => self::SEED_LOGIN_ID,
+        ])->toString();
+
+        // The delete affordance form targets the delete endpoint with loginId.
+        $this->assertStringContainsString('_method=delete', $html);
+        $this->assertStringContainsString('loginId=', $html);
+    }
+
+    public function testMemberEditBackLinkPointsToMemberList(): void
+    {
+        $html = $this->resource->get('page://self/admin/member', [
+            'loginId' => self::SEED_LOGIN_ID,
+        ])->toString();
+
+        $this->assertStringContainsString('href="/admin/member-list"', $html);
+    }
+
+    // ── L3: create vs edit branching ─────────────────────────────────────
 
     public function testMemberListDeleteFormIsBrowserVisibleAffordance(): void
     {
         $html = $this->resource->get('page://self/admin/member-list')->toString();
 
-        $this->assertStringContainsString('<div id="form1" data-form-name="form1">', $html);
-        $this->assertStringNotContainsString('<form name="form1" id="form1"', $html);
         $this->assertStringContainsString('action="/admin/member?loginId=', $html);
         $this->assertStringContainsString('_method=delete', $html);
         $this->assertStringContainsString('name="mode" value="member_form"', $html);
     }
 
+    // ── Archived: EC-CUBE markup-parity diff ──────────────────────────────
+
     /**
-     * The honesty test: diff BeMart's rendered admin Member-edit page
-     * against EC-CUBE's own rendering. Every difference must be in the
-     * residual allowlist or a residual family.
+     * This test compared BeMart's Member-edit HTML line-by-line against
+     * EC-CUBE 4.3's member_edit.twig rendering. The template is now a
+     * clean-room build in idea-admin-* vocabulary; it no longer mirrors
+     * EC-CUBE's DOM, so the parity diff is not meaningful.
+     *
+     * Retired to ec-cube-parity-archived group. The EC-CUBE reference clone
+     * check is left in place so the test is skipped gracefully if the clone
+     * is not present.
      */
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-parity-archived')]
     public function testMemberEditHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
-    {
-        $beMart = $this->resource->get('page://self/admin/member', [
-            'loginId' => self::SEED_LOGIN_ID,
-        ])->toString();
-        $ecCube = $this->renderEcCube();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's admin Member-edit HTML diverged from EC-CUBE's "
-            . "beyond the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        $this->assertLessThanOrEqual(
-            40,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
-
-        foreach ([
-            // EC-CUBE-runtime <head> furniture.
-            'eccube-csrf-token',
-            '<title>',
-            'c-headerBar__shopTitle',
-            'c-headerBar__userMenu',
-            'data-bs-content',
-            'last_login',
-            'nav-',
-            'fa-fw',
-            // Form: EC-CUBE's hidden `csrfToken` CSRF input.
-            'name="csrfToken"',
-            'csrfcsrfToken',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function renderEcCube(): string
     {
         $adminTemplates = dirname(__DIR__, 2)
             . '/tools/ec-cube-source/src/Eccube/Resource/template/admin';
@@ -256,133 +226,9 @@ final class AdminMemberHtmlRenderTest extends TestCase
             $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
         }
 
-        $twig = new Environment(new EcCubeAdminStubLoader($adminTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-
-        // FORM-PAGE recipe: EC-CUBE's `form_widget(form.<field>)` calls
-        // render through BeMart's real AdminMemberForm — pre-filled with
-        // the SAME seed admin as BeMart's html-context body — so the
-        // inputs are byte-identical to BeMart's port.
-        $beMart = $this->resource->get('page://self/admin/member', [
-            'loginId' => self::SEED_LOGIN_ID,
-        ]);
-        $form = (new FormFactory())->newInstance(AdminMemberForm::class);
-        if ($form instanceof AdminMemberForm) {
-            $form->fillValues($beMart->body);
-        }
-
-        $this->registerEcCubeStubs($twig, $form);
-
-        return $twig->render('Setting/System/member_edit.twig', [
-            // `form`'s children are the (possibly nested) field NAMES; the
-            // stubbed form_widget renders each leaf through the form.
-            // `Authority` / `Work` are EC-CUBE master-data selects — the
-            // MemberFetched projection carries them only as bare ints, so
-            // AdminMemberForm omits them; they render empty on both sides.
-            'form' => new EcCubeStub([
-                'csrfToken' => 'csrfToken',
-                'name' => 'name',
-                'department' => 'department',
-                'loginId' => 'loginId',
-                'plain_password' => new EcCubeStub([
-                    'first' => 'plain_password_first',
-                    'second' => 'plain_password_second',
-                ]),
-                'Authority' => 'Authority',
-                'Work' => 'Work',
-                'two_factor_auth_enabled' => 'two_factor_auth_enabled',
-            ], []),
-            'BaseInfo' => new EcCubeStub(['shop_name' => 'EC-CUBE']),
-            'eccube_config' => [
-                'locale' => 'ja',
-                'eccube_official_site_url' => 'https://www.ec-cube.net/',
-                'eccube_community_site_url' => 'https://xoo.ps/eccube/',
-                'eccube_document_url' => 'https://doc4.ec-cube.net/',
-                'eccube_manual_url' => 'https://www.ec-cube.net/product/',
-            ],
-            'eccubeNav' => [],
-            'menus' => ['setting', 'system', 'member'],
-            'plugin_assets' => [],
-            'plugin_snippets' => [],
-            'app' => new EcCubeStub([
-                'user' => new EcCubeStub([
-                    'name' => '管理者',
-                    'login_date' => '2026-05-20 10:00:00',
-                    'two_factor_auth_enabled' => false,
-                ]),
-                'request' => new EcCubeStub(['_route' => 'admin_setting_system_member_edit']),
-            ]),
-            'subtitle' => 'システム設定',
-            'sub_title' => 'システム設定',
-            'title' => 'メンバー登録',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig, AdminMemberForm|null $form): void
-    {
-        $messages = AdminJaMessages::forSection(SystemJaMessages::keys());
-        $trans = static function (string $key, array $params = []) use ($messages): string {
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('date_sec', static fn ($d): string => (string) $d));
-        $twig->addFilter(new TwigFilter('date_min', static fn ($d): string => (string) $d));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('active_menus', static fn (): array => ['', '', '']));
-
-        // EC-CUBE's `form_widget(form.<field>)` renders through BeMart's
-        // real AdminMemberForm so the inputs are byte-identical to
-        // BeMart's port. `csrfToken`, `Authority` and `Work` are NOT
-        // declared by AdminMemberForm (CSRF is EC-CUBE-runtime;
-        // Authority/Work need a master-data option set out of the Wave 8
-        // slice) — they render empty here, mirroring BeMart's port.
-        $formFields = [
-            'name', 'department', 'loginId',
-            'plain_password_first', 'plain_password_second',
-            'two_factor_auth_enabled',
-        ];
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []) use ($form, $formFields): Markup {
-            if ($form instanceof AdminMemberForm && is_string($field) && in_array($field, $formFields, true)) {
-                return new Markup($form->input($field), 'UTF-8');
-            }
-
-            return new Markup('', 'UTF-8');
-        }));
-        $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_row', static fn ($f = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('form_rest', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('has_errors', static fn (...$f): bool => false));
-    }
-
-    /**
-     * @return list<string>
-     */
-    private function normalize(string $html): array
-    {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
+        $this->markTestSkipped(
+            'Member.html.twig is now a clean-room idea-admin-* build; '
+            . 'EC-CUBE markup-parity diff is retired to ec-cube-parity-archived.',
+        );
     }
 }

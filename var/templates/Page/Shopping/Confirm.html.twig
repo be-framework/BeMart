@@ -1,175 +1,139 @@
-{#
-  BeMart Shopping confirm page — EC-CUBE goShoppingConfirm.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}注文内容の確認 | {{ shop_name|default('BeMart') }}{% endblock %}
 
-  PORT of EC-CUBE 4.3 default-theme `Shopping/confirm.twig`
-  (src/Eccube/Resource/template/default/Shopping/confirm.twig).
+{% block content %}
+{% set c = customer|default({}) %}
 
-  DATA page (+ a checkout submit form/button) — see
-  var/templates/README.md. Markup skeleton, the `ec-role` /
-  `ec-cartRole` / `ec-progress` / `ec-orderRole` / `ec-orderAccount` /
-  `ec-orderDelivery` / `ec-orderPayment` / `ec-orderConfirm` /
-  `ec-totalBox` classes and the block structure are kept verbatim from
-  EC-CUBE.
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="/cart">Cart</a><span>/</span><a href="/shopping">Checkout</a><span>/</span><span>確認</span>
+</nav>
 
-  Phase 3 ENRICHMENT — the Confirm resource
-  (src/Resource/Page/Shopping/Confirm.php) now drives the doConfirmOrder
-  Be Becoming chain (ConfirmOrderInput → … → OrderConfirmed) instead of
-  being a thin pure renderer. The body carries the full confirm-screen
-  projection the dynamic bindings are rebound to:
-    customer { name01, name02, kana01, kana02, companyName, email,
-               phoneNumber, postalCode, pref, addr01, addr02 },
-    items[] { productCode, productName, quantity, unitPrice, totalPrice },
-    paymentMethodName,
-    subtotal, deliveryFeeTotal, charge, discount, tax, total,
-    paymentTotal, addPoint, usePoint, csrfToken
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-confirm-title">
+  <div>
+    <p class="idea-eyebrow">Order review</p>
+    <h1 id="idea-confirm-title" class="idea-title idea-title--compact">注文内容の確認</h1>
+    <p class="idea-muted">以下の内容でよろしければ「注文を確定する」を押してください。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>{{ c.name01|default('') }} {{ c.name02|default('') }} 様</span>
+    <strong>¥{{ paymentTotal|default(0)|number_format }}</strong>
+    <small>{{ c.email|default('') }}</small>
+  </div>
+</section>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `is_granted('ROLE_USER')` — EC-CUBE auth-state runtime. The
-     customer-info progress step renders for anonymous purchases only;
-     BeMart's html context has no auth state, so the step is OMITTED
-     (the member-checkout path) and the step numbering advances
-     accordingly — identical to EC-CUBE's member-checkout output.
-   - `form._token` — Symfony CSRF widget; kept as the hidden `_token`
-     input bound to the body's `csrfToken` (null in the html context —
-     the EventListener mirrors the live token in).
-   - `price` / `number_format` filters — BeMartTwigExtension JPY filter.
-   - the prefecture is rendered as the `customer.pref` master id (the
-     CustomerEntity carries the integer FK, not the resolved name —
-     there is no pref-master service in the Be domain); the render-diff
-     test feeds EC-CUBE the same integer so the line diffs to zero.
-   - `is_reduced_tax_rate(...)` / per-tax-rate breakdown — EC-CUBE
-     runtime helpers; the reduced-tax-rate mark and the per-rate总额
-     rows are gated behind data the body does not carry (BeMart's
-     PurchaseFlow folds tax into a single `tax` total), so they are
-     OMITTED and recorded as residuals in the render test.
-#}
-{% extends 'base.html.twig' %}
+<section class="idea-container idea-checkout-progress" aria-label="購入ステップ">
+  <span><b>1</b>カート</span>
+  <span><b>2</b>ご注文手続き</span>
+  <span class="is-active"><b>3</b>内容確認</span>
+  <span><b>4</b>完了</span>
+</section>
 
-{% set route = 'shopping-confirm' %}
-{% set title = 'ご注文内容のご確認' %}
+<div class="idea-container idea-checkout-layout">
 
-{% block main %}
+  <div class="idea-checkout-main">
 
-<div class="ec-role">
-    <div class="ec-pageHeader">
-        <h1>ご注文内容のご確認</h1>
-    </div>
-</div>
-
-<div class="ec-cartRole">
-    <div class="ec-cartRole__progress">
-        <ul class="ec-progress">
-            {% set step = 1 %}
-            <li class="ec-progress__item">
-                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                </div>
-                <div class="ec-progress__label">カートの商品
-                </div>
-            </li>
-            <li class="ec-progress__item">
-                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                </div>
-                <div class="ec-progress__label">ご注文手続き
-                </div>
-            </li>
-            <li class="ec-progress__item is-complete">
-                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                </div>
-                <div class="ec-progress__label">ご注文内容確認
-                </div>
-            </li>
-            <li class="ec-progress__item">
-                <div class="ec-progress__number">{{ step }}{% set step = step + 1 %}
-                </div>
-                <div class="ec-progress__label">完了
-                </div>
-            </li>
-        </ul>
-    </div>
-</div>
-
-    <form id="shopping-form" method="post" action="/shopping/checkout">
-    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('shopping_checkout')) }}">
-    <input type="hidden" name="preOrderId" value="{{ preOrderId }}">
-    <div class="ec-orderRole">
-        <div class="ec-orderRole__detail">
-            <div class="ec-orderAccount">
-                <div class="ec-rectHeading">
-                    <h2>お客様情報</h2>
-                </div>
-                <div class="ec-orderAccount__account">
-                    <p class="ec-halfInput">{{ customer.name01 }} {{ customer.name02 }} 様</p>
-                    <p class="ec-halfInput">{{ customer.kana01 }} {{ customer.kana02 }}</p>
-                    <p class="ec-input">{{ customer.companyName }}</p>
-                    <p class="ec-zipInput">〒{{ customer.postalCode }}</p>
-                    <p class="ec-input">{{ customer.pref }}{{ customer.addr01 }}{{ customer.addr02 }}</p>
-                    <p class="ec-telInput">{{ customer.phoneNumber }}</p>
-                    <p class="ec-input">{{ customer.email }}</p>
-                </div>
-            </div>
-            <div class="ec-orderDelivery">
-                <div class="ec-rectHeading">
-                    <h2>配送情報</h2>
-                </div>
-                <div class="ec-orderDelivery__item">
-                    <ul class="ec-borderedList">
-                        {% for orderItem in items %}
-                        <li>
-                            <div class="ec-imageGrid">
-                                <div class="ec-imageGrid__content">
-                                    <p>{{ orderItem.productName }}</p>
-                                    <p>{{ orderItem.unitPrice|price }} × {{ orderItem.quantity|number_format }}<span>小計：{{ orderItem.totalPrice|price }}</span></p>
-                                </div>
-                            </div>
-                        </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-                <div class="ec-orderDelivery__address">
-                    <p>{{ customer.name01 }} {{ customer.name02 }} ({{ customer.kana01 }} {{ customer.kana02 }}) 様</p>
-                    <p>〒{{ customer.postalCode }} {{ customer.pref }}{{ customer.addr01 }}{{ customer.addr02 }}</p>
-                    <p>{{ customer.phoneNumber }}</p>
-                </div>
-            </div>
-            <div class="ec-orderPayment">
-                <div class="ec-rectHeading">
-                    <h2>お支払方法</h2>
-                </div>
-                <div class="ec-blockRadio">
-                    {{ paymentMethodName }}({{ charge|price }})
-                </div>
-            </div>
-            <div class="ec-orderConfirm">
-                <div class="ec-rectHeading">
-                    <h2>お問い合わせ</h2>
-                </div>
-                <div class="ec-input">
-                </div>
-            </div>
+    {# ── お客様情報 ─────────────────────────────── #}
+    <section class="idea-checkout-panel">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Customer</p>
+          <h2 class="idea-section-title">お客様情報</h2>
         </div>
-        <div class="ec-orderRole__summary">
-            <div class="ec-totalBox">
-                <dl class="ec-totalBox__spec">
-                    <dt>小計</dt>
-                    <dd class="ec-totalBox__specTotal">{{ subtotal|price }}</dd>
-                </dl>
-                <dl class="ec-totalBox__spec">
-                    <dt>手数料</dt>
-                    <dd>{{ charge|price }}</dd>
-                </dl>
-                <dl class="ec-totalBox__spec">
-                    <dt>送料</dt>
-                    <dd>{{ deliveryFeeTotal|price }}</dd>
-                </dl>
-                <div class="ec-totalBox__total">合計<span class="ec-totalBox__price">{{ total|price }}</span><span class="ec-totalBox__taxLabel">税込</span></div>
-                <div class="ec-totalBox__paymentTotal">お支払い合計<span class="ec-totalBox__price">{{ paymentTotal|price }}</span><span class="ec-totalBox__taxLabel">税込</span></div>
-                <div class="ec-totalBox__btn">
-                    <button type="submit" class="ec-blockBtn--action">注文する</button>
-                    <a href="/shopping" class="ec-blockBtn--cancel">ご注文手続きに戻る</a>
-                </div>
-            </div>
+        <a class="idea-link" href="/mypage/change">変更</a>
+      </div>
+      <div class="idea-info-list">
+        <p><strong>{{ c.name01|default('') }} {{ c.name02|default('') }} 様</strong></p>
+        {% if c.kana01 is defined and c.kana01 is not empty %}
+          <p class="idea-muted">{{ c.kana01 }} {{ c.kana02|default('') }}</p>
+        {% endif %}
+        {% if c.companyName is defined and c.companyName is not empty %}
+          <p>{{ c.companyName }}</p>
+        {% endif %}
+        <p>{{ c.email|default('') }}</p>
+        {% if c.postalCode is defined and c.postalCode is not empty %}
+          <p>〒{{ c.postalCode }} {{ c.addr01|default('') }} {{ c.addr02|default('') }}</p>
+        {% endif %}
+        {% if c.phoneNumber is defined and c.phoneNumber is not empty %}
+          <p>{{ c.phoneNumber }}</p>
+        {% endif %}
+      </div>
+    </section>
+
+    {# ── 注文商品 ────────────────────────────────── #}
+    <section class="idea-checkout-panel">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Items</p>
+          <h2 class="idea-section-title">ご注文商品</h2>
         </div>
-    </div>
-</form>
+        <a class="idea-link" href="/shopping">内容を変更</a>
+      </div>
+      <div class="idea-item-list">
+        {% for item in items|default([]) %}
+          <div class="idea-item-row">
+            <div class="idea-item-info">
+              <p class="idea-item-name">{{ item.productName|default(item.productCode) }}</p>
+              <p class="idea-muted">商品コード: {{ item.productCode }}</p>
+            </div>
+            <div class="idea-item-qty">
+              <span>× {{ item.quantity|number_format }}</span>
+              <span class="idea-item-price">¥{{ item.unitPrice|number_format }}</span>
+              <strong class="idea-item-subtotal">¥{{ item.totalPrice|number_format }}</strong>
+            </div>
+          </div>
+        {% else %}
+          <p class="idea-muted">商品情報を取得できませんでした。</p>
+        {% endfor %}
+      </div>
+    </section>
+
+    {# ── お支払い方法 ────────────────────────────── #}
+    <section class="idea-checkout-panel">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Payment</p>
+          <h2 class="idea-section-title">お支払い方法</h2>
+        </div>
+      </div>
+      <p class="idea-selected-value">{{ paymentMethodName|default('') }}</p>
+    </section>
+
+  </div>{# /.idea-checkout-main #}
+
+  {# ── 金額サマリー + 注文確定フォーム ──────────── #}
+  <aside class="idea-summary-panel">
+    <p class="idea-eyebrow">Order summary</p>
+
+    <dl class="idea-price-breakdown">
+      <div><dt>小計</dt><dd>¥{{ subtotal|default(0)|number_format }}</dd></div>
+      <div><dt>送料</dt><dd>¥{{ deliveryFeeTotal|default(0)|number_format }}</dd></div>
+      {% if charge|default(0) > 0 %}
+        <div><dt>手数料</dt><dd>¥{{ charge|number_format }}</dd></div>
+      {% endif %}
+      {% if discount|default(0) > 0 %}
+        <div><dt>割引</dt><dd>−¥{{ discount|number_format }}</dd></div>
+      {% endif %}
+      {% if usePoint|default(0) > 0 %}
+        <div><dt>ポイント利用</dt><dd>−{{ usePoint|number_format }} pt</dd></div>
+      {% endif %}
+      <div><dt>消費税</dt><dd>¥{{ tax|default(0)|number_format }}</dd></div>
+      <div class="idea-summary-total"><dt>合計</dt><dd>¥{{ paymentTotal|default(0)|number_format }}</dd></div>
+    </dl>
+
+    {% if addPoint|default(0) > 0 %}
+      <p class="idea-muted idea-point-notice">この注文で {{ addPoint|number_format }} ポイント獲得予定</p>
+    {% endif %}
+
+    <form method="post" action="/shopping/checkout">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      <input type="hidden" name="preOrderId" value="{{ preOrderId|default('') }}">
+      <input type="hidden" name="paymentMethodId" value="{{ paymentMethodId|default('') }}">
+      <button class="idea-button idea-button--wide" type="submit">注文を確定する</button>
+    </form>
+
+    <a class="idea-link idea-summary-link" href="/shopping">ご注文手続きに戻る</a>
+  </aside>
+
+</div>{# /.idea-checkout-layout #}
+
 {% endblock %}

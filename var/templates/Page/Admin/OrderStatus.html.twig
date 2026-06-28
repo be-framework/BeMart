@@ -1,94 +1,428 @@
 {#
-  BeMart admin Order status settings — EC-CUBE Setting/Shop/order_status.twig.
+  BeMart admin 受注対応状況設定 — idea-admin clean-room build.
+
+  DATA CONTRACT (src/Resource/Page/Admin/OrderStatus.php onGet):
+
+    GET /admin/order-status
+      form           AdminOrderStatusForm   — per-row fields keyed by {prefix}
+      orderStatuses  list<{id, nameKey, customerNameKey, colorKey, displayOrderCountKey}>
+      csrfToken      string
+
+  FORM FIELDS per row (src/Form/AdminOrderStatusForm.php):
+    {prefix}_customer_order_status_name  text    — label shown in Mypage / customer-facing
+    {prefix}_name                        text    — label shown in admin order management
+    {prefix}_color                       color   — hex colour swatch
+    {prefix}_display_order_count         checkbox — show order-count badge in admin dashboard
+
+  PREFIX formula: "order_status_{id}"  (e.g. order_status_1, order_status_6, …)
+
+  STATUS IDs (DEFAULT_ROWS):
+    1  新規受付   #437ec4  displayOrderCount=true
+    6  入金済み   #5cb85c  displayOrderCount=true
+    4  対応中     #f0ad4e  displayOrderCount=true
+    5  発送済み   #5bc0de  displayOrderCount=true
+    3  キャンセル #d9534f  displayOrderCount=false
+
+  ACTION:
+    PUT /admin/order-status (doUpdateOrderStatusList) — _method=PUT, csrfToken hidden
+
+  LINKS (POST doUpdateOrderStatus — per-order, not used on this settings page):
+    goOrder              page://self/admin/order
+    goOrderList          page://self/admin/order-list
+    goOrderShippingAddress page://self/admin/order/shipping-address
+
+  idea-admin vocabulary used:
+    idea-admin-shell            app shell landmark (in base)
+    idea-admin-content          main content area (in base)
+    idea-admin-page-header      page title bar (in base)
+    idea-admin-panel            section card
+    idea-admin-panel__head      section heading strip
+    idea-admin-panel__body      section content
+    idea-admin-table-wrap       scrollable table container
+    idea-admin-table            data grid
+    idea-admin-field__input     input cell + error slot
+    idea-admin-error            inline validation message
+    idea-admin-notice           page-level alert strip
+    idea-admin-action           button / link affordance
+    idea-admin-action--primary  primary CTA
+    idea-admin-toolbar          fixed bottom action bar
+    idea-admin-toolbar__back    back-nav
+    idea-admin-toolbar__actions submit cluster
+    idea-admin-badge            semantic chip
+    idea-admin-order-status-*   (local) per-page additions
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-order-status' %}
-{% set title = '受注対応状況設定' %}
-{% set sub_title = '店舗設定' %}
+{% set route     = 'admin-order-status' %}
+{% set title     = '受注対応状況設定' %}
+{% set sub_title = '受注管理 / 対応状況' %}
+
+{% block stylesheet %}
+<style>
+/* ── Color preview swatch beside picker ────────────────────────── */
+.idea-admin-order-status-color-wrap {
+  display: flex;
+  align-items: center;
+  gap: .55rem;
+}
+.idea-admin-order-status-swatch {
+  display: inline-block;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 4px;
+  border: 1px solid rgba(205, 191, 170, .55);
+  flex: 0 0 auto;
+  pointer-events: none;
+  transition: background-color .15s;
+}
+/* color input — narrow, native picker */
+.idea-admin-order-status-color-wrap input[type="color"] {
+  width: 2.6rem;
+  height: 2.1rem;
+  padding: .15rem .2rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* ── Checkbox cell — centred, large tap target ──────────────────── */
+.idea-admin-order-status-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.idea-admin-order-status-check input[type="checkbox"] {
+  accent-color: var(--idea-olive);
+  width: 1.1rem;
+  height: 1.1rem;
+  cursor: pointer;
+}
+
+/* ── Admin name input — compact inside table cell ───────────────── */
+.idea-admin-order-status-input {
+  width: 100%;
+  min-height: 2rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .86rem;
+  padding: .32rem .6rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.idea-admin-order-status-input:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+
+/* ── Status ID chip ─────────────────────────────────────────────── */
+.idea-admin-order-status-id {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border-radius: 50%;
+  background: var(--idea-surface-soft);
+  border: 1px solid rgba(205, 191, 170, .5);
+  font-size: .75rem;
+  font-weight: 800;
+  color: var(--idea-muted);
+  font-variant-numeric: tabular-nums;
+  flex: 0 0 auto;
+}
+
+/* ── Live colour dot in the ID cell ────────────────────────────── */
+.idea-admin-order-status-dot {
+  display: inline-block;
+  width: .55rem;
+  height: .55rem;
+  border-radius: 50%;
+  margin-left: .35rem;
+  transition: background-color .15s;
+  vertical-align: middle;
+}
+
+/* ── Table column sizing ────────────────────────────────────────── */
+.idea-admin-table .col-id    { width: 4rem;  text-align: center; }
+.idea-admin-table .col-mypage{ width: 30%; }
+.idea-admin-table .col-admin { width: 30%; }
+.idea-admin-table .col-color { width: 7rem; text-align: center; }
+.idea-admin-table .col-count { width: 5rem; text-align: center; }
+</style>
+{% endblock %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <form id="form" method="post" action="/admin/order-status?_method=put">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="受注管理およびマイページで表示される対応状況の設定を行います。名称、色、件数表示の設定が可能です。">
-                                <span>受注対応状況</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                            </div>
-                        </div>
-                        <div class="card-body p-0">
-                            <table class="table table-sm">
-                                <thead>
-                                <tr>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">ID</th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="対応状況の名称を設定できます。ここで設定した名称は会員ログイン後のマイページで表示されます。">
-                                            <span>名称(マイページ)</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                    </th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">名称(受注管理)</th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="受注管理の対応状況の色を設定できます。">
-                                            <span>色</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                    </th>
-                                    <th class="border-top-0 pt-2 pb-2 text-center">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="受注管理の対応状況ごとの受注件数の表示・非表示を設定できます。">
-                                            <span>件数表示</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                    </th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                {% for OrderStatus in orderStatuses %}
-                                    <tr id="order_status_row_{{ OrderStatus.id }}">
-                                        <td class="align-middle text-center">{{ OrderStatus.id }}</td>
-                                        <td class="align-middle">
-                                            {{ form.input(OrderStatus.customerNameKey)|raw }}
-                                            {% if form.error(OrderStatus.customerNameKey) %}{{ form.error(OrderStatus.customerNameKey) }}{% endif %}
-                                        </td>
-                                        <td class="align-middle">
-                                            {{ form.input(OrderStatus.nameKey)|raw }}
-                                            {% if form.error(OrderStatus.nameKey) %}{{ form.error(OrderStatus.nameKey) }}{% endif %}
-                                        </td>
-                                        <td class="align-middle">
-                                            <div class="input-group">
-                                                {{ form.input(OrderStatus.colorKey)|raw }}
-                                            </div>
-                                            {% if form.error(OrderStatus.colorKey) %}{{ form.error(OrderStatus.colorKey) }}{% endif %}
-                                        </td>
-                                        <td class="align-middle text-center">
-                                            {{ form.input(OrderStatus.displayOrderCountKey)|raw }}
-                                            {% if form.error(OrderStatus.displayOrderCountKey) %}{{ form.error(OrderStatus.displayOrderCountKey) }}{% endif %}
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
 
-                    <div class="c-conversionArea">
-                        <div class="c-conversionArea__container">
-                            <div class="row justify-content-between align-items-center">
-                                <div class="col-6">
-                                    <div class="c-conversionArea__leftBlockItem"></div>
-                                </div>
-                                <div class="col-6">
-                                    <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                                        <div class="col-auto">
-                                            <button class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
+{# ── Page-level success notice (shown after PUT redirect back) ── #}
+{% if message is defined and message %}
+<div class="idea-admin-notice" role="status" aria-live="polite">
+  <i class="fa fa-check-circle" aria-hidden="true"></i>
+  {{ message }}
+</div>
+{% endif %}
+
+<form
+  id="order_status_form"
+  method="post"
+  action="/admin/order-status"
+  role="form"
+  novalidate
+  aria-label="受注対応状況設定"
+>
+  <input type="hidden" name="_method" value="PUT">
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
+  {# ── Status label editor ─────────────────────────────────────── #}
+  <section class="idea-admin-panel" aria-labelledby="section-statuses">
+
+    <div class="idea-admin-panel__head">
+      <h3 id="section-statuses">
+        <i class="fa fa-tags fa-fw" aria-hidden="true"></i>
+        対応状況ラベル
+        <span class="idea-admin-count">{{ orderStatuses|default([])|length }} 件</span>
+      </h3>
+      <p class="idea-admin-panel__hint">
+        管理画面・マイページに表示されるラベル・色・件数表示を設定します。
+      </p>
     </div>
+
+    {% if orderStatuses is defined and orderStatuses|length > 0 %}
+    <div class="idea-admin-table-wrap">
+      <table
+        class="idea-admin-table"
+        id="order-status-table"
+        aria-label="受注対応状況一覧"
+      >
+        <thead>
+          <tr>
+            <th scope="col" class="col-id">ID</th>
+            <th scope="col" class="col-mypage">
+              マイページ表示名
+              <span style="display:block;font-weight:400;font-size:.7rem;color:var(--idea-muted);letter-spacing:0;text-transform:none">
+                顧客に見える名称
+              </span>
+            </th>
+            <th scope="col" class="col-admin">
+              管理画面表示名
+              <span style="display:block;font-weight:400;font-size:.7rem;color:var(--idea-muted);letter-spacing:0;text-transform:none">
+                受注管理内での名称
+              </span>
+            </th>
+            <th scope="col" class="col-color">カラー</th>
+            <th scope="col" class="col-count">
+              件数表示
+              <span style="display:block;font-weight:400;font-size:.7rem;color:var(--idea-muted);letter-spacing:0;text-transform:none">
+                ダッシュボード
+              </span>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for status in orderStatuses %}
+          <tr id="order_status_row_{{ status.id }}" data-status-id="{{ status.id }}">
+
+            {# ID column with live-colour dot #}
+            <td class="col-id">
+              <div style="display:flex;align-items:center;justify-content:center;gap:.3rem">
+                <span
+                  class="idea-admin-order-status-id"
+                  aria-label="ステータスID {{ status.id }}"
+                >{{ status.id }}</span>
+                <span
+                  class="idea-admin-order-status-dot"
+                  id="dot_{{ status.id }}"
+                  aria-hidden="true"
+                ></span>
+              </div>
+            </td>
+
+            {# マイページ表示名 #}
+            <td class="col-mypage">
+              {% if form is not null %}
+                {{ form.input(status.customerNameKey)|raw }}
+                {% if form.error(status.customerNameKey) %}
+                <span class="idea-admin-error" role="alert">
+                  {{ form.error(status.customerNameKey) }}
+                </span>
+                {% endif %}
+              {% endif %}
+            </td>
+
+            {# 管理画面表示名 #}
+            <td class="col-admin">
+              {% if form is not null %}
+                {{ form.input(status.nameKey)|raw }}
+                {% if form.error(status.nameKey) %}
+                <span class="idea-admin-error" role="alert">
+                  {{ form.error(status.nameKey) }}
+                </span>
+                {% endif %}
+              {% endif %}
+            </td>
+
+            {# カラーピッカー + スウォッチ #}
+            <td class="col-color">
+              <div class="idea-admin-order-status-color-wrap" style="justify-content:center">
+                {% if form is not null %}
+                  {{ form.input(status.colorKey)|raw }}
+                {% endif %}
+                <span
+                  class="idea-admin-order-status-swatch"
+                  id="swatch_{{ status.id }}"
+                  aria-hidden="true"
+                ></span>
+              </div>
+              {% if form is not null and form.error(status.colorKey) %}
+              <span class="idea-admin-error" role="alert">
+                {{ form.error(status.colorKey) }}
+              </span>
+              {% endif %}
+            </td>
+
+            {# 件数表示チェックボックス #}
+            <td class="col-count">
+              <div class="idea-admin-order-status-check">
+                {% if form is not null %}
+                  {{ form.input(status.displayOrderCountKey)|raw }}
+                {% endif %}
+              </div>
+              {% if form is not null and form.error(status.displayOrderCountKey) %}
+              <span class="idea-admin-error" role="alert">
+                {{ form.error(status.displayOrderCountKey) }}
+              </span>
+              {% endif %}
+            </td>
+
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    {% else %}
+    <div class="idea-admin-empty">
+      <i class="fa fa-inbox fa-2x" aria-hidden="true"></i>
+      <span class="idea-admin-empty__title">ステータスがありません</span>
+    </div>
+    {% endif %}
+
+  </section>
+
+  {# ── Guidance panel ──────────────────────────────────────────── #}
+  <section
+    class="idea-admin-panel"
+    style="margin-top:1rem"
+    aria-labelledby="section-guide"
+  >
+    <div class="idea-admin-panel__head">
+      <h3 id="section-guide">
+        <i class="fa fa-info-circle fa-fw" aria-hidden="true"></i>
+        ご利用ガイド
+      </h3>
+    </div>
+    <div class="idea-admin-panel__body">
+      <dl class="idea-admin-spec-list">
+
+        <div class="idea-admin-spec-row">
+          <dt>マイページ表示名</dt>
+          <dd>
+            ログイン会員のマイページ注文履歴に表示される名称です。
+            短くわかりやすい名称を推奨します。
+          </dd>
+        </div>
+
+        <div class="idea-admin-spec-row">
+          <dt>管理画面表示名</dt>
+          <dd>
+            受注一覧・受注詳細画面で管理者に表示される名称です。
+            マイページ表示名と異なる名称を設定できます。
+          </dd>
+        </div>
+
+        <div class="idea-admin-spec-row">
+          <dt>カラー</dt>
+          <dd>
+            受注一覧の対応状況バッジ色として使われます。
+            右側のスウォッチでリアルタイムにプレビューできます。
+          </dd>
+        </div>
+
+        <div class="idea-admin-spec-row">
+          <dt>件数表示</dt>
+          <dd>
+            チェックを入れると、管理ダッシュボードの対応状況ごとの
+            受注件数サマリーに該当ステータスが表示されます。
+          </dd>
+        </div>
+
+      </dl>
+    </div>
+  </section>
+
+  {# ── Fixed bottom toolbar ────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="ページ操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/order-list">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        受注一覧へ
+      </a>
+    </div>
+    <div class="idea-admin-toolbar__actions">
+      <button
+        type="submit"
+        class="idea-admin-action idea-admin-action--primary"
+      >
+        <i class="fa fa-save fa-fw" aria-hidden="true"></i>
+        設定を保存
+      </button>
+    </div>
+  </div>
+
+</form>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /*
+    Live colour preview: sync each row's color picker value to
+    (a) the swatch span next to the picker
+    (b) the dot in the ID column
+    Works by scanning for input[type="color"] within each tr[data-status-id].
+  */
+
+  var table = document.getElementById('order-status-table');
+  if (!table) { return; }
+
+  table.querySelectorAll('tr[data-status-id]').forEach(function (row) {
+    var id      = row.getAttribute('data-status-id');
+    var picker  = row.querySelector('input[type="color"]');
+    var swatch  = document.getElementById('swatch_' + id);
+    var dot     = document.getElementById('dot_' + id);
+
+    if (!picker) { return; }
+
+    function applyColor(hex) {
+      if (swatch) { swatch.style.backgroundColor = hex; }
+      if (dot)    { dot.style.backgroundColor    = hex; }
+    }
+
+    /* Initialise from current value */
+    applyColor(picker.value || '#cccccc');
+
+    /* Update on change */
+    picker.addEventListener('input', function () {
+      applyColor(picker.value);
+    });
+  });
+
+}());
+</script>
 {% endblock %}

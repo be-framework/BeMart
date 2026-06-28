@@ -1,117 +1,380 @@
 {#
-  BeMart admin category editor — EC-CUBE admin-theme `Product/category.twig`.
+  BeMart admin カテゴリ編集 — idea-admin clean-room build.
 
-  PORT of EC-CUBE 4.3 `src/Eccube/Resource/template/admin/Product/category.twig`
-  — the ~359-line category tree-list + inline add/edit screen. It
-  extends the admin frame (`admin-base.html.twig`), not the storefront
-  frame.
+  DATA CONTRACT (src/Resource/Page/Admin/Category/Edit.php onGet):
+    form        AdminCategoryForm  — pre-filled; fields: name (required), parent_id, sort_no
+    categoryId  string             — empty = new, non-empty = edit
+    category    array|null         — {categoryId, categoryName, parentId, sortNo} when editing
+    categories  array              — flat list of {categoryId, categoryName, parentId, sortNo}
+    count       int                — total category count
+    csrfToken   string             — CSRF token
 
-  Tier-2 port note: EC-CUBE's screen renders the recursive category
-  tree (with per-row drag-drop sort, move-up/down and child-add
-  affordances) alongside an inline add/edit form. The Be projection
-  ({@see \MyVendor\BeMart\Be\Final\AdminCategoryListFetched}) carries a
-  flat category list, so the port renders the list as a flat table and
-  the add/edit form. The recursive tree nesting + the drag-drop sort JS
-  are EC-CUBE-runtime fragments dropped as enumerated residuals.
+  ACTIONS (derived from #[Link] on Edit / CategoryList / Category resources):
+    POST   /admin/category/category-list            — doCreateCategory (new)
+    PUT    /admin/category/category?_method=put     — doUpdateCategory (edit)
+    DELETE /admin/category/category?categoryId=…&_method=delete — doDeleteCategory (edit)
 
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.<field>)` -> `form.input('<field>')` — the real
-     AdminCategoryForm leaf fields (Ray.WebFormModule).
-   - `csrf_token()` hidden input -> `csrfToken|default('')`.
+  FORM FIELDS:
+    name       text  required
+    parent_id  text  optional (parent category ID)
+    sort_no    text  optional (display order)
+
+  idea-admin vocabulary used:
+    idea-admin-layout         two-column shell (primary list + side editor)
+    idea-admin-panel          section card
+    idea-admin-panel__head    section header
+    idea-admin-panel__body    section content
+    idea-admin-field          label + input row
+    idea-admin-field__label   label cell
+    idea-admin-field__input   input cell
+    idea-admin-required       required badge
+    idea-admin-error          inline validation message
+    idea-admin-notice         page-level alert strip
+    idea-admin-toolbar        fixed action bar at bottom
+    idea-admin-toolbar__back  back-nav link
+    idea-admin-toolbar__actions  submit + delete cluster
+    idea-admin-table-wrap     scrollable table wrapper
+    idea-admin-table          data table
+    idea-admin-action         button / link affordance
+    idea-admin-empty          empty-state placeholder
+    idea-admin-badge          status chip
+    idea-admin-spec-list      read-only metadata rows
+    idea-admin-spec-row       single metadata row
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-category-category-list' %}
-{% set title = categoryId ? 'カテゴリ編集' : 'カテゴリ登録' %}
+{% set isEdit = categoryId is defined and categoryId is not empty %}
+{% set route = 'admin-category-edit' %}
+{% set title = isEdit ? 'カテゴリ編集' : 'カテゴリ登録' %}
 {% set sub_title = '商品管理' %}
 
+{% block stylesheet %}
+<style>
+/* ── page-local additions (idea-admin-* namespace) ── */
+.idea-admin-category-row-link {
+  display: inline-flex;
+  align-items: center;
+  gap: .3rem;
+  color: var(--idea-olive);
+  font-size: .82rem;
+  font-weight: 700;
+  text-decoration: none;
+  border-bottom: 1px solid rgba(82, 107, 85, .3);
+  transition: border-color .14s;
+}
+.idea-admin-category-row-link:hover { border-color: var(--idea-olive); }
+.idea-admin-category-row--active { background: rgba(82, 107, 85, .07) !important; }
+.idea-admin-category-depth { color: var(--idea-muted); font-size: .78rem; }
+</style>
+{% endblock %}
+
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <span class="card-title">カテゴリ一覧</span>
-                    </div>
-                    <div class="card-body p-0">
-                        <table class="table table-sm" id="category_table">
-                            <thead>
-                            <tr>
-                                <th class="border-top-0 pt-2 pb-2 ps-3">カテゴリ名</th>
-                                <th class="border-top-0 pt-2 pb-2 text-center">表示順</th>
-                                <th class="border-top-0 pt-2 pb-2 pe-3">&nbsp;</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for cat in categories %}
-                                <tr>
-                                    <td class="align-middle ps-3">{{ cat.categoryName }}</td>
-                                    <td class="align-middle text-center">{{ cat.sortNo }}</td>
-                                    <td class="align-middle pe-3">
-                                        <a href="/admin/category/category-list?categoryId={{ cat.categoryId }}">編集</a>
-                                    </td>
-                                </tr>
-                            {% else %}
-                                <tr>
-                                    <td class="align-middle text-center text-muted" colspan="3">カテゴリは登録されていません</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+{# ── Mutation form (wraps the side editor panel only) ──────────────── #}
+<form
+  id="category_form"
+  role="form"
+  method="post"
+  action="{{ isEdit ? '/admin/category/category?_method=put' : '/admin/category/category-list' }}"
+  novalidate
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+  {% if isEdit %}
+  <input type="hidden" name="categoryId" value="{{ categoryId }}">
+  {% endif %}
+
+  {# ── Flash / validation notice (form-level error surfaced by resource) #}
+  {% if formError is defined and formError %}
+  <div class="idea-admin-notice idea-admin-notice--error" role="alert">
+    <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+    {{ formError }}
+  </div>
+  {% endif %}
+
+  <div class="idea-admin-layout">
+
+    {# ══════════════════════════════════════════════════════════════════
+       Primary column — category list
+    ══════════════════════════════════════════════════════════════════ #}
+    <div class="idea-admin-primary">
+
+      <section class="idea-admin-panel" aria-labelledby="panel-list-head">
+        <div class="idea-admin-panel__head">
+          <h3 id="panel-list-head">
+            <i class="fa fa-sitemap fa-fw" aria-hidden="true"></i>
+            カテゴリ一覧
+          </h3>
+          <span class="idea-admin-page-subtitle">{{ count|default(0) }} 件</span>
         </div>
 
-        <div class="c-contentsArea__secondaryCol">
-            <form role="form" method="post" action="/admin/category/category-list" id="category_form" name="form1" novalidate>
-                <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                <input type="hidden" name="categoryId" value="{{ categoryId|default('') }}">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <span class="card-title">{{ categoryId ? 'カテゴリ編集' : 'カテゴリ登録' }}</span>
-                    </div>
-                    <div class="card-body">
-                        <div class="row mb-2">
-                            <div class="col-4"><span>カテゴリ名</span><span class="badge bg-primary ms-1">必須</span></div>
-                            <div class="col">
-                                {{ form.input('name')|raw }}
-                                {% if form.error('name') %}<span class="invalid-feedback d-block">{{ form.error('name') }}</span>{% endif %}
-                            </div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-4"><span>親カテゴリID</span></div>
-                            <div class="col">{{ form.input('parent_id')|raw }}</div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-4"><span>表示順</span></div>
-                            <div class="col">{{ form.input('sort_no')|raw }}</div>
-                        </div>
-                        <div class="row">
-                            <div class="col text-end">
-                                <button type="submit" class="btn btn-ec-conversion px-5">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
+        {% if categories is not empty %}
+        <div class="idea-admin-table-wrap">
+          <table class="idea-admin-table" id="category_table">
+            <thead>
+              <tr>
+                <th>カテゴリ名</th>
+                <th>親カテゴリ</th>
+                <th style="width:6rem;text-align:right">表示順</th>
+                <th style="width:5rem"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cat in categories %}
+              <tr class="{{ cat.categoryId == categoryId ? 'idea-admin-category-row--active' : '' }}">
+                <td>
+                  {% if cat.parentId %}
+                  <span class="idea-admin-category-depth" aria-hidden="true">└ </span>
+                  {% endif %}
+                  <span>{{ cat.categoryName }}</span>
+                </td>
+                <td>
+                  {% if cat.parentId %}
+                  <code style="font-size:.78rem;color:var(--idea-muted)">{{ cat.parentId }}</code>
+                  {% else %}
+                  <span style="color:var(--idea-muted);font-size:.78rem">—</span>
+                  {% endif %}
+                </td>
+                <td style="text-align:right">{{ cat.sortNo }}</td>
+                <td style="text-align:right">
+                  <a
+                    class="idea-admin-category-row-link"
+                    href="/admin/category/edit?categoryId={{ cat.categoryId|url_encode }}"
+                    aria-label="{{ cat.categoryName }} を編集"
+                  >
+                    <i class="fa fa-pencil-alt" aria-hidden="true"></i>
+                    編集
+                  </a>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
         </div>
-    </div>
+        {% else %}
+        <div class="idea-admin-empty">
+          <i class="fa fa-folder-open fa-2x" aria-hidden="true"></i>
+          <p class="idea-admin-empty__title">カテゴリが未登録です</p>
+          <p>右側のフォームから最初のカテゴリを登録してください。</p>
+        </div>
+        {% endif %}
 
-    <div class="c-conversionArea">
-        <div class="c-conversionArea__container">
-            <div class="row justify-content-between align-items-center">
-                <div class="col-6">
-                    <div class="c-conversionArea__leftBlockItem">
-                        <a class="c-baseLink" href="/admin/product-list">
-                            <i class="fa fa-backward" aria-hidden="true"></i>
-                            <span>商品管理へ戻る</span>
-                        </a>
-                    </div>
-                </div>
-            </div>
+      </section>
+
+    </div>{# /idea-admin-primary #}
+
+    {# ══════════════════════════════════════════════════════════════════
+       Side panel — add / edit form
+    ══════════════════════════════════════════════════════════════════ #}
+    <aside class="idea-admin-side" aria-label="{{ isEdit ? 'カテゴリ編集' : 'カテゴリ登録' }}">
+
+      <section class="idea-admin-panel" aria-labelledby="panel-form-head">
+        <div class="idea-admin-panel__head">
+          <h3 id="panel-form-head">
+            <i class="{{ isEdit ? 'fa fa-edit' : 'fa fa-plus-circle' }} fa-fw" aria-hidden="true"></i>
+            {{ isEdit ? 'カテゴリ編集' : 'カテゴリ登録' }}
+          </h3>
         </div>
+        <div class="idea-admin-panel__body">
+
+          {# カテゴリ名 — required #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_category_name">カテゴリ名</label>
+              <span class="idea-admin-required">必須</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('name')|raw }}
+              {% if form.error('name') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('name') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+          {# 親カテゴリID — optional; populated from list-row click via JS #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_category_parent_id">親カテゴリ</label>
+              <span style="font-size:.72rem;color:var(--idea-muted)">任意</span>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('parent_id')|raw }}
+              {% if form.error('parent_id') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('parent_id') }}</span>
+              {% endif %}
+              <span style="font-size:.74rem;color:var(--idea-muted)">
+                親カテゴリの ID を入力してください（ルートは空欄）
+              </span>
+            </div>
+          </div>
+
+          {# 表示順 — optional #}
+          <div class="idea-admin-field">
+            <div class="idea-admin-field__label">
+              <label for="admin_category_sort_no">表示順</label>
+            </div>
+            <div class="idea-admin-field__input">
+              {{ form.input('sort_no')|raw }}
+              {% if form.error('sort_no') %}
+              <span class="idea-admin-error" role="alert">{{ form.error('sort_no') }}</span>
+              {% endif %}
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      {# Read-only metadata panel (edit mode) #}
+      {% if isEdit and category %}
+      <section class="idea-admin-panel" aria-labelledby="panel-meta-head">
+        <div class="idea-admin-panel__head">
+          <h3 id="panel-meta-head">詳細情報</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+          <dl class="idea-admin-spec-list">
+            <div class="idea-admin-spec-row">
+              <dt>カテゴリ ID</dt>
+              <dd><code style="font-size:.8rem">{{ category.categoryId }}</code></dd>
+            </div>
+            {% if category.parentId %}
+            <div class="idea-admin-spec-row">
+              <dt>親 ID</dt>
+              <dd><code style="font-size:.8rem">{{ category.parentId }}</code></dd>
+            </div>
+            {% endif %}
+            <div class="idea-admin-spec-row">
+              <dt>表示順</dt>
+              <dd>{{ category.sortNo }}</dd>
+            </div>
+          </dl>
+        </div>
+      </section>
+      {% endif %}
+
+    </aside>{# /idea-admin-side #}
+
+  </div>{# /idea-admin-layout #}
+
+  {# ── Fixed action toolbar ──────────────────────────────────────── #}
+  <div class="idea-admin-toolbar" role="navigation" aria-label="フォーム操作">
+    <div class="idea-admin-toolbar__back">
+      <a href="/admin/category/category-list">
+        <i class="fa fa-backward" aria-hidden="true"></i>
+        カテゴリ一覧に戻る
+      </a>
     </div>
+    <div class="idea-admin-toolbar__actions">
+      {% if isEdit %}
+      <button
+        class="idea-admin-action idea-admin-action--destructive"
+        type="button"
+        id="btn-delete"
+        aria-haspopup="dialog"
+      >
+        <i class="fa fa-trash" aria-hidden="true"></i>
+        削除
+      </button>
+      {% endif %}
+      <button class="idea-admin-action idea-admin-action--primary" type="submit">
+        <i class="fa fa-save" aria-hidden="true"></i>
+        {{ isEdit ? '保存' : '登録' }}
+      </button>
+    </div>
+  </div>
+
+</form>{# /category_form #}
+
+{# ── Delete confirmation dialog (edit mode) ────────────────────── #}
+{% if isEdit %}
+<div
+  class="idea-admin-dialog-backdrop"
+  id="delete-dialog"
+  hidden
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="delete-dialog-title"
+>
+  <div class="idea-admin-dialog">
+    <div class="idea-admin-dialog__head">
+      <h2 class="idea-admin-dialog__title" id="delete-dialog-title">
+        <i class="fa fa-exclamation-triangle" aria-hidden="true"></i>
+        カテゴリを削除しますか？
+      </h2>
+      <button
+        class="idea-admin-icon-btn"
+        type="button"
+        id="btn-delete-cancel"
+        aria-label="閉じる"
+      >
+        <i class="fa fa-times" aria-hidden="true"></i>
+      </button>
+    </div>
+    <div class="idea-admin-dialog__body">
+      <p>「{{ category.categoryName|default(categoryId) }}」を削除します。この操作は元に戻せません。</p>
+    </div>
+    <div class="idea-admin-dialog__foot">
+      <button class="idea-admin-action" type="button" id="btn-delete-cancel-2">キャンセル</button>
+      <button
+        class="idea-admin-action idea-admin-action--destructive"
+        type="button"
+        id="btn-delete-confirm"
+      >
+        <i class="fa fa-trash" aria-hidden="true"></i>
+        削除する
+      </button>
+    </div>
+  </div>
+</div>
+
+{# Hidden DELETE form — separate so method routing is clean #}
+<form
+  id="category-delete-form"
+  method="post"
+  action="/admin/category/category?categoryId={{ categoryId|url_encode }}&amp;_method=delete"
+  aria-hidden="true"
+>
+  <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+</form>
+{% endif %}
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* Delete dialog */
+  var openBtn   = document.getElementById('btn-delete');
+  var backdrop  = document.getElementById('delete-dialog');
+  var cancelBtns = [
+    document.getElementById('btn-delete-cancel'),
+    document.getElementById('btn-delete-cancel-2'),
+  ];
+  var confirmBtn = document.getElementById('btn-delete-confirm');
+  var deleteForm = document.getElementById('category-delete-form');
+
+  function openDialog() {
+    if (!backdrop) return;
+    backdrop.hidden = false;
+    backdrop.focus();
+  }
+
+  function closeDialog() {
+    if (!backdrop) return;
+    backdrop.hidden = true;
+    if (openBtn) openBtn.focus();
+  }
+
+  if (openBtn) { openBtn.addEventListener('click', openDialog); }
+  cancelBtns.forEach(function (btn) {
+    if (btn) btn.addEventListener('click', closeDialog);
+  });
+  if (confirmBtn && deleteForm) {
+    confirmBtn.addEventListener('click', function () { deleteForm.submit(); });
+  }
+  if (backdrop) {
+    backdrop.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape') closeDialog();
+    });
+  }
+}());
+</script>
 {% endblock %}

@@ -7,66 +7,21 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use PHPUnit\Framework\TestCase;
-use Twig\Environment;
-use Twig\Markup;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function in_array;
-use function is_dir;
-use function preg_replace;
-use function str_contains;
-use function str_replace;
-use function trim;
-
 /**
- * Phase 3 — fidelity check for the Shopping shipping-multiple
- * (goShoppingShippingMultiple) HTML port.
+ * IdeaStore cleanroom render test — Shopping shipping-multiple
+ * (goShoppingShippingMultiple).
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * The template was cleanroom-rebuilt in IdeaStore design language (idea-*
+ * classes). EC-CUBE parity assertions are retired below.
  *
- * `Shopping/shipping_multiple.twig` is a DATA page — the
- * multi-destination split UI. The ShippingMultiple resource
- * (src/Resource/Page/Shopping/ShippingMultiple.php) is a Wave 3H pure
- * renderer with empty `cartItems` / `addresses` lists (the cart-item ×
- * address allocation is a Wave-future TODO). This test feeds EC-CUBE's
- * shipping_multiple.twig empty `OrderItems`, so both sides render the
- * empty `ec-AddAddress` skeleton. The `{% block javascript %}` (the
- * add-row / delete-row jQuery) is ported VERBATIM, so it diffs to ZERO.
- * The residual is the genuinely EC-CUBE-runtime-only `<head>` frame
- * material + the empty CSRF hidden value.
+ * L1 — required fields and data output present in the rendered HTML.
+ * L2 — form action/method and link href/rel semantics match the resource
+ *      contract declared via #[Link] in ShippingMultiple.php.
  */
 final class ShoppingShippingMultipleHtmlRenderTest extends TestCase
 {
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>BeMart / お届け先の複数指定</title>',
-        '<title>EC-CUBE / お届け先の複数指定</title>',
-        '<meta name="author" content="">',
-        // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="csrfToken" value="">',
-    ];
-
     private ResourceInterface $resource;
 
     protected function setUp(): void
@@ -75,188 +30,127 @@ final class ShoppingShippingMultipleHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testShippingMultipleRendersAsHtmlDocument(): void
+    // ── L1: 必須フィールド / データ出力 ────────────────────────────────────
+
+    /** ページが正常な HTML ドキュメントとしてレンダリングされる。 */
+    public function testRendersAsHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/shopping/shipping-multiple');
 
         $this->assertSame(Code::OK, $ro->code);
 
         $html = $ro->toString();
-
+        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
         $this->assertStringContainsString('</body>', $html);
-
-        $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testShippingMultiplePreservesEcCubeMarkupStructure(): void
+    /** ページタイトルに日本語タイトルが含まれる。 */
+    public function testTitleContainsJaLabel(): void
+    {
+        $html = $this->resource->get('page://self/shopping/shipping-multiple')->toString();
+        $this->assertStringContainsString('複数配送先', $html);
+        $this->assertStringContainsString('IDEA STORE', $html);
+    }
+
+    /** IdeaStore の idea-* クラスで骨格が組まれている。 */
+    public function testUsesIdeaStoreClasses(): void
     {
         $html = $this->resource->get('page://self/shopping/shipping-multiple')->toString();
 
         foreach ([
-            '<h1>お届け先の複数指定</h1>',
-            '<div class="ec-AddAddress">',
-            'class="ec-AddAddress__info"',
-            'class="ec-AddAddress__new"',
-            'class="ec-AddAddress__actions"',
-            'class="ec-blockBtn--action"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
+            'idea-container',
+            'idea-checkout-hero',
+            'idea-checkout-progress',
+            'idea-button',
+            'idea-eyebrow',
+        ] as $class) {
+            $this->assertStringContainsString($class, $html, "IdeaStore class missing: {$class}");
         }
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
-    public function testShippingMultipleHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    /** EC-CUBE 固有クラスが含まれていない（cleanroom 確認）。 */
+    public function testNoEcCubeClasses(): void
     {
-        $beMart = $this->resource->get('page://self/shopping/shipping-multiple')->toString();
-        $ecCube = $this->renderEcCube();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's Shopping shipping-multiple HTML diverged from "
-            . "EC-CUBE's beyond the residual allowlist. Unexplained diff "
-            . "lines:\n  " . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
-        );
-
-        $this->assertLessThan(
-            14,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
+        $html = $this->resource->get('page://self/shopping/shipping-multiple')->toString();
 
         foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
+            'ec-AddAddress',
+            'ec-blockBtn',
+            'ec-role',
+            'ec-pageHeader',
+        ] as $ecClass) {
+            $this->assertStringNotContainsString($ecClass, $html, "EC-CUBE class found: {$ecClass}");
         }
-
-        return false;
     }
 
-    private function renderEcCube(): string
+    /**
+     * cartItems が空のとき「配送対象の商品がありません」フォールバックを表示する。
+     * Resource の Wave-future 状態（cartItems = []）に対応。
+     */
+    public function testEmptyCartItemsShowsFallback(): void
     {
-        $ecCubeTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
-        if (! is_dir($ecCubeTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeStubLoader($ecCubeTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        return $twig->render('Shopping/shipping_multiple.twig', [
-            // Empty OrderItems — both sides render the empty
-            // ec-AddAddress skeleton, exactly the pure-renderer port.
-            'OrderItems' => [],
-            'compItemQuantities' => [],
-            'errors' => [],
-            'form' => new EcCubeStub([
-                'csrfToken' => '_csrfToken__',
-                'shipping_multiple' => [],
-            ]),
-            'eccube_config' => ['locale' => 'ja'],
-            'Page' => new EcCubeStub([
-                'meta_tags' => '', 'description' => '', 'author' => '',
-                'keyword' => '', 'meta_robots' => '',
-            ]),
-            'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
-                'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
-                'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
-                'ColumnNum' => 1,
-            ]),
-            'app' => new EcCubeStub(['session' => new EcCubeStub([
-                'flashbag' => new EcCubeFlashBag(),
-            ]), 'request' => new EcCubeStub(['_route' => 'shopping_shipping_multiple'])]),
-            'subtitle' => 'お届け先の複数指定',
-            'title' => 'お届け先の複数指定',
-        ]);
+        $html = $this->resource->get('page://self/shopping/shipping-multiple')->toString();
+        // cartItems が空 → フォールバックセクションが表示される
+        $this->assertStringContainsString('配送対象の商品がありません', $html);
     }
 
-    private function registerEcCubeStubs(Environment $twig): void
+    // ── L2: form action/method・リンク href/rel ─────────────────────────────
+
+    /**
+     * 「新規お届け先を追加する」リンクが /shopping/shipping-multiple-edit を
+     * 指している（rel=goShoppingShippingMultipleEdit）。
+     */
+    public function testAddNewAddressLinkHref(): void
     {
-        $trans = static function (string $key, array $params = []): string {
-            $messages = EcCubeStub::jaMessages();
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('nl2br', static fn ($s): string => nl2br((string) $s), ['is_safe' => ['html']]));
-        $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
-        $twig->addFilter(new TwigFilter('price', static function ($n): string {
-            $f = new \NumberFormatter('ja_JP', \NumberFormatter::CURRENCY);
-
-            return (string) $f->formatCurrency((float) ($n ?? 0), 'JPY');
-        }));
-        $twig->addFilter(new TwigFilter('no_image_product', static fn ($s): string => $s ? (string) $s : 'assets/img/common/no_image_product.png'));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []): Markup {
-            if ($field === '_csrfToken__') {
-                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
-            }
-
-            return new Markup('', 'UTF-8');
-        }));
-        $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('has_errors', static fn (...$f): bool => false));
+        $html = $this->resource->get('page://self/shopping/shipping-multiple')->toString();
+        $this->assertStringContainsString('href="/shopping/shipping-multiple-edit"', $html);
+        $this->assertStringContainsString('rel="goShoppingShippingMultipleEdit"', $html);
     }
 
-    /** @return list<string> */
-    private function normalize(string $html): array
+    /**
+     * 戻るリンクが /shopping を指している
+     * （rel=goShopping — ShippingMultiple::onGet の #[Link]）。
+     */
+    public function testBackToShoppingLinkHref(): void
     {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
+        $html = $this->resource->get('page://self/shopping/shipping-multiple')->toString();
+        $this->assertStringContainsString('href="/shopping"', $html);
+    }
 
-        return $lines;
+    /**
+     * CSRF hidden input のフィールド名が csrfToken であることを確認する。
+     *
+     * 現在 Resource は Wave-future 状態（cartItems = []）のため配送割当フォームが
+     * 描画されず、CSRF フィールドも出力されない。
+     * このテストはテンプレートの直接参照でフィールド名契約を検証する。
+     */
+    public function testCsrfFieldNameContract(): void
+    {
+        $template = (string) file_get_contents(
+            dirname(__DIR__, 2) . '/var/templates/Page/Shopping/ShippingMultiple.html.twig',
+        );
+        // テンプレート内の hidden CSRF フィールドのフィールド名が csrfToken であること
+        $this->assertStringContainsString('name="csrfToken"', $template);
+        // フォームの POST action が Resource の onPost と一致すること
+        $this->assertStringContainsString('action="/shopping/shipping-multiple"', $template);
+        $this->assertStringContainsString('method="post"', $template);
+    }
+
+    // ── EC-CUBE parity — archived ────────────────────────────────────────────
+
+    /**
+     * EC-CUBE 4.3 reference 描画との突合せテスト（クリーンルーム再構築により引退）。
+     *
+     * @group ec-cube-parity-archived
+     */
+    public function testShippingMultipleHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
+    {
+        $this->markTestSkipped(
+            'EC-CUBE parity check retired: template was cleanroom-rebuilt in IdeaStore '
+            . 'design language. Functional and semantic coverage is provided by the '
+            . 'L1/L2 tests in this class.',
+        );
     }
 }
