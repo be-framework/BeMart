@@ -121,6 +121,7 @@ FROM
         :nameKeyword IS NULL
         OR :nameKeyword = ''
         OR INSTR(p.name, :nameKeyword) > 0
+        OR INSTR(p.search_word, :nameKeyword) > 0
       )
     ORDER BY
       pc.id ASC
