@@ -104,16 +104,20 @@ try {
     return;
 }
 
-// ── 4. MariaDB gate ──────────────────────────────────────────────────────────
-// The SQL suite targets MariaDB 10.11. MySQL 8.x / 9.x have JSON_VALUE and
-// hydration differences that cause mass failures. Skip cleanly on non-MariaDB.
+// ── 4. Server-version gate ───────────────────────────────────────────────────
+// The SQL suite runs on MySQL 8.0+ or MariaDB 10.11+. bemart-schema.sql is
+// plain MySQL/MariaDB-compatible SQL and var/sql/*.sql uses only functions
+// available on both (JSON_VALUE via CAST, JSON_TABLE, GROUP_CONCAT ... ORDER BY).
+// Skip cleanly on older servers (e.g. MySQL 5.x) that lack them.
 
 $versionRow = $pdo->query('SELECT VERSION() AS v')->fetch();
-$serverVersion = $versionRow['v'] ?? '';
+$serverVersion = (string) ($versionRow['v'] ?? '');
 
-if (stripos($serverVersion, 'mariadb') === false) {
+$isMariaDb = stripos($serverVersion, 'mariadb') !== false;
+$isMysql8Plus = (bool) preg_match('/^(8|9|1\d)\./', $serverVersion);
+if (! $isMariaDb && ! $isMysql8Plus) {
     $skip(sprintf(
-        'current server is %s, SQL suite targets MariaDB — SQL suite disabled',
+        'current server is %s, SQL suite requires MySQL 8.0+ or MariaDB — SQL suite disabled',
         $serverVersion,
     ));
     return;

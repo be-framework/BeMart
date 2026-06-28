@@ -6,7 +6,7 @@ BeMart is a **demonstration project**: [`alps.json`](alps.json) is the canonical
 ## Build, Test, and Development Commands
 The implementation is a Composer project; ALPS artifacts are validated separately.
 
-- `vendor/bin/phpunit` runs the test suites (Resource / SQL / HTML render / HTTP hypermedia). SQL suites need a local MariaDB prepared from `sql/`.
+- `vendor/bin/phpunit` runs the test suites (Resource / SQL / HTML render / HTTP hypermedia). SQL suites need a local MySQL 8.0 (or MariaDB) prepared from `sql/`.
 - `vendor/bin/psalm` runs static analysis + taint tracking.
 - `composer fake -- get '/products/list'` / `composer page -- get '/'` run serverless requests.
 - `asd --validate alps.json` validates the ALPS profile before review or commit.
@@ -14,8 +14,8 @@ The implementation is a Composer project; ALPS artifacts are validated separatel
 
 ## Local Database
 
-- On this machine, use MariaDB as `root` with no password.
-- Default SQL test URL: `mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14`.
+- On this machine, use MySQL 8.0 (via `malt`) as `root` with no password.
+- Default SQL test URL: `mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=8.0.0`.
 - Prepare the schema/master data with `sql/setup-db.sh "$DATABASE_URL"` before SQL-backed HTTP or Web+DB runs.
 
 ## Coding Style & Naming Conventions

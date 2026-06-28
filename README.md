@@ -240,7 +240,7 @@ composer run -l   # 全コマンド一覧
 | `composer test` | 既定の PHPUnit suite |
 | `composer admin -- <action>` | 管理者メンテナンス（上記） |
 
-SQL テストは `DATABASE_URL` と MariaDB 環境に依存します。詳細は
+SQL テストは `DATABASE_URL` と MySQL 8.0 環境に依存します。詳細は
 [`docs/complete-replacement-residuals.md`](docs/complete-replacement-residuals.md) と
 [`docs/migration-status.md`](docs/migration-status.md) を参照してください。
 

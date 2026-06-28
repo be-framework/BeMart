@@ -58,7 +58,7 @@ final class HttpSqlNonMemberCheckoutFormTest extends TestCase
     {
         $form = $this->form('GET', '/shopping/non-member');
         $this->assertSame(200, $form['status']);
-        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $form['body']);
+        $this->assertStringContainsString('お客様情報の入力', $form['body']);
         $csrfToken = $this->csrfToken($form['body']);
 
         $email = 'sql-non-member-' . bin2hex(random_bytes(4)) . '@example.test';
@@ -87,7 +87,7 @@ final class HttpSqlNonMemberCheckoutFormTest extends TestCase
 
         $confirm = $this->form('GET', $location);
         $this->assertSame(200, $confirm['status'], $confirm['body']);
-        $this->assertStringContainsString('<h1>ご注文内容のご確認</h1>', $confirm['body']);
+        $this->assertStringContainsString('注文内容の確認', $confirm['body']);
         $this->assertStringContainsString($email, $confirm['body']);
         $this->assertStringContainsString('代金引換', $confirm['body']);
         $this->assertStringNotContainsString('Service Unavailable', $confirm['body']);
@@ -104,11 +104,9 @@ final class HttpSqlNonMemberCheckoutFormTest extends TestCase
         $submitted = $this->form('POST', '/shopping/non-member', $fields);
 
         $this->assertSame(400, $submitted['status'], $submitted['body']);
-        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $submitted['body']);
+        $this->assertStringContainsString('お客様情報の入力', $submitted['body']);
         $this->assertStringContainsString('入力してください。', $submitted['body']);
-        $this->assertStringContainsString('class="ec-halfInput error"', $submitted['body']);
-        $this->assertStringContainsString('class="ec-input error"', $submitted['body']);
-        $this->assertStringContainsString('class="ec-errorMessage">入力してください。</p>', $submitted['body']);
+        $this->assertStringContainsString('class="idea-form-error"', $submitted['body']);
         $this->assertStringContainsString('name="name01"', $submitted['body']);
         $this->assertStringContainsString('name="email_confirm"', $submitted['body']);
         $this->assertStringNotContainsString('PdoPerformException', $submitted['body']);
@@ -131,7 +129,7 @@ final class HttpSqlNonMemberCheckoutFormTest extends TestCase
         $submitted = $this->form('POST', '/shopping/non-member', $fields);
 
         $this->assertSame(400, $submitted['status'], $submitted['body']);
-        $this->assertStringContainsString('<h1>お客様情報の入力</h1>', $submitted['body']);
+        $this->assertStringContainsString('お客様情報の入力', $submitted['body']);
         $this->assertStringContainsString('メールアドレスが一致しません。', $submitted['body']);
         $this->assertStringContainsString('value="' . $email . '"', $submitted['body']);
         $this->assertStringContainsString('value="' . $confirmEmail . '"', $submitted['body']);

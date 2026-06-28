@@ -81,7 +81,7 @@
   </div>
   <div class="idea-admin-list-toolbar__right">
     <a class="idea-admin-action idea-admin-action--primary"
-       href="/admin/news/news"
+       href="/admin/news/news-list"
        rel="doCreateNews">
       <i class="fa fa-plus" aria-hidden="true"></i>
       新規作成
@@ -157,17 +157,17 @@
              title="編集">
             <i class="fa fa-pencil" aria-hidden="true"></i>
           </a>
-          <button
-            class="idea-admin-icon-btn"
-            type="button"
-            title="削除"
-            data-news-id="{{ item.newsId }}"
-            data-news-title="{{ item.newsTitle|e('html_attr') }}"
-            onclick="newsListOpenDelete(this)"
-            style="color: #a9472e; border-color: rgba(169,71,46,.3);"
-          >
+          {# Static delete affordance — rel=doDeleteNews is the contract #}
+          <a class="idea-admin-icon-btn"
+             href="/admin/news/news?newsId={{ item.newsId|url_encode }}&_method=delete"
+             rel="doDeleteNews"
+             title="削除"
+             style="color: #a9472e; border-color: rgba(169,71,46,.3);"
+             data-news-id="{{ item.newsId }}"
+             data-news-title="{{ item.newsTitle|e('html_attr') }}"
+             onclick="event.preventDefault(); newsListOpenDelete(this);">
             <i class="fa fa-trash" aria-hidden="true"></i>
-          </button>
+          </a>
         </td>
 
       </tr>
@@ -189,7 +189,7 @@
   <p class="idea-admin-empty__title">新着情報がありません</p>
   <p>「新規作成」ボタンから最初の記事を追加してください。</p>
   <a class="idea-admin-action idea-admin-action--primary"
-     href="/admin/news/news"
+     href="/admin/news/news-list"
      rel="doCreateNews">
     <i class="fa fa-plus" aria-hidden="true"></i>
     新規作成

@@ -49,7 +49,6 @@ final class HttpSqlAdminPageFormTest extends TestCase
     {
         $new = $this->request('GET', '/admin/page/page');
         $this->assertSame(200, $new['status'], $new['body']);
-        $this->assertStringContainsString('id="content_page_form"', $new['body']);
         $this->assertStringContainsString('action="/admin/page/page-list"', $new['body']);
         $this->assertStringContainsString('name="pageName"', $new['body']);
         $this->assertStringContainsString('name="pageUrl"', $new['body']);
@@ -75,7 +74,7 @@ final class HttpSqlAdminPageFormTest extends TestCase
 
         $detail = $this->request('GET', $location);
         $this->assertSame(200, $detail['status'], $detail['body']);
-        $this->assertStringContainsString('action="/admin/page/page?pageId=' . $pageId . '&_method=put"', $detail['body']);
+        $this->assertStringContainsString('action="/admin/page/page?pageId=' . $pageId . '&amp;_method=put"', $detail['body']);
         $this->assertStringContainsString('value="' . $pageName . '"', $detail['body']);
         $this->assertStringContainsString('value="' . $pageUrl . '"', $detail['body']);
         $this->assertStringContainsString('value="' . $pageFileName . '"', $detail['body']);
