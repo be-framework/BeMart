@@ -16,10 +16,9 @@ declare(strict_types=1);
  *   php sql/seed/load-idea-catalog.php [limit]
  */
 
-// IdeaStore generated catalog dir. Override with IDEA_DATA_DIR; defaults to the
-// sibling IdeaStore checkout. If absent, the caller should skip (the storefront
-// just keeps whatever generic fixture is loaded).
-$ideaDir = getenv('IDEA_DATA_DIR') ?: (dirname(__DIR__, 2) . '/../IdeaStore/data/generated');
+// IdeaStore generated catalog dir. Defaults to the in-repo copy under
+// sql/seed/idea-catalog/ (self-contained). Override with IDEA_DATA_DIR.
+$ideaDir = getenv('IDEA_DATA_DIR') ?: (__DIR__ . '/idea-catalog/generated');
 $limit = isset($argv[1]) ? (int) $argv[1] : 0; // 0 = all
 
 if (! is_file($ideaDir . '/products.jsonl')) {
