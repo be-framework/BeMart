@@ -1,197 +1,250 @@
 {#
-  BeMart order-history detail — EC-CUBE goMypageHistory.
+  BeMart — 注文履歴詳細 (goMypageHistory)
 
-  PORT of EC-CUBE 4.3 default-theme `Mypage/history.twig`
-  (src/Eccube/Resource/template/default/Mypage/history.twig).
+  IdeaStore 設計言語で構築したクリーンルームページ。
+  構築の入力:
+    (a) src/Resource/Page/Mypage/History.php — GET onGet(orderNo)
+        #[Link(rel:'doReorder', href:'page://self/mypage/reorder', method:'post')]
+        #[Link(rel:'goMypage', href:'page://self/mypage')]
+    (b) be/src/Final/MypageHistoryFetched.php — データ形状
+    (c) var/json_schema/get-mypage-history.json — スキーマ定義
+    (d) IdeaStore 設計言語 — idea-* クラス語彙
 
-  Markup skeleton, `ec-orderRole` / `ec-orderRole__detail` /
-  `ec-orderOrder` / `ec-definitions` / `ec-orderDelivery` /
-  `ec-orderPayment` / `ec-orderConfirm` / `ec-orderMails` /
-  `ec-orderRole__summary` / `ec-totalBox` classes and the block
-  structure are kept verbatim from EC-CUBE. Only the dynamic bindings
-  are rebound to the History resource body
-  (src/Resource/Page/Mypage/History.php).
-
-  Phase 3 ENRICHMENT — the MypageHistoryFetched projection was widened
-  (be/src/Final/MypageHistoryFetched.php) from a thin header to the FULL
-  order-history detail. The body now carries:
-    orderNo, message, paymentMethod, subtotal, deliveryFeeTotal, charge,
-    discount, tax, total, paymentTotal, addPoint, usePoint, orderStatus,
-    orderDate, paymentDate,
-    shippings[] {
-      name01, name02, kana01, kana02, postalCode, prefName, addr01,
-      addr02, phoneNumber, deliveryName, deliveryDate, deliveryTime,
-      items[] { productCode, productName, quantity, unitPrice }
-    },
+  ボディフィールド（Resource 層から確定）:
+    orderNo, message, paymentMethod,
+    subtotal, deliveryFeeTotal, charge, discount, tax, total, paymentTotal,
+    addPoint, usePoint, orderStatus, orderDate, paymentDate,
+    shippings[] { name01, name02, kana01, kana02, postalCode, prefName,
+                  addr01, addr02, phoneNumber, deliveryName, deliveryDate,
+                  deliveryTime, items[] { productCode, productName,
+                  quantity, unitPrice } },
     mailHistories[] { sendDate, mailSubject, mailBody }
 
-  The previously-missing sections — per-Shipping address blocks,
-  PaymentMethod, the order message and MailHistories — are now wired to
-  the present body fields. The render-diff residual shrinks from ~40 to
-  the ~12-line EC-CUBE-runtime-only baseline (the <title> pair + the
-  <head> csrf/ajax <script> block).
-
-  Mypage/navi.twig -> the shared partial `Page/Mypage/navi.html.twig`.
-
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}` -> the ja literal from messages.ja.yaml.
-   - `BaseInfo.option_mypage_order_status_display` / `isOptionPoint` —
-     store options; the render-diff stub sets them truthy so both sides
-     emit the order-status / point rows.
-   - `price` filter -> JPY NumberFormatter (BeMartTwigExtension).
-   - per-item product THUMBNAIL — EC-CUBE renders the no-image
-     placeholder when `orderItem.product is null`; BeMart's
-     OrderHistoryItemEntity carries no Product entity, so every row
-     renders the same `no_image_product` placeholder (matching EC-CUBE's
-     null-product branch verbatim).
+  遷移:
+    doReorder  POST /mypage/reorder  csrfToken + orderNo
+    goMypage   GET  /mypage
 #}
-{% extends 'base.html.twig' %}
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}注文履歴詳細 | IDEA STORE{% endblock %}
+{% block content %}
 
-{% set body_class = 'mypage' %}
-{% set route = 'mypage-history' %}
-{% set title = 'マイページ' %}
+{# --- orderStatus の表示ラベル --- #}
+{% set statusLabels = {
+  1: '新規受付',
+  3: '注文取消',
+  4: '対応中',
+  5: '発送済み',
+  6: '入金済み',
+  7: '決済処理中',
+  8: '購入処理中',
+  9: '返品'
+} %}
+{% set statusLabel = statusLabels[orderStatus] ?? orderStatus %}
 
-{% block main %}
-    <div class="ec-layoutRole__main">
-        <div class="ec-mypageRole">
-            <div class="ec-pageHeader">
-                <h1>マイページ/ご注文履歴詳細</h1>
-            </div>
-            {% include 'Page/Mypage/navi.html.twig' with { mypageno: 'index', name01: name01|default(''), name02: name02|default('') } %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span>
+  <a href="/mypage">マイページ</a><span>/</span>
+  <span>注文履歴詳細</span>
+</nav>
+
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-history-title">
+  <div>
+    <p class="idea-eyebrow">Order detail</p>
+    <h1 id="idea-history-title" class="idea-title idea-title--compact">注文履歴詳細</h1>
+    <p class="idea-muted">注文番号 {{ orderNo }} の詳細です。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>{{ statusLabel }}</span>
+    <strong>¥{{ total|default(0)|number_format }}</strong>
+    <small>{{ orderDate }}</small>
+  </div>
+</section>
+
+<section class="idea-container idea-section idea-checkout-layout">
+
+  {# === 左カラム: 注文情報 === #}
+  <div class="idea-checkout-main">
+
+    {# --- 注文概要 --- #}
+    <article class="idea-checkout-panel">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Order info</p>
+          <h2 class="idea-section-title">注文情報</h2>
+        </div>
+      </div>
+      <dl class="idea-spec-list">
+        <div class="idea-spec-row">
+          <dt>注文日時</dt>
+          <dd>{{ orderDate }}</dd>
+        </div>
+        <div class="idea-spec-row">
+          <dt>注文番号</dt>
+          <dd>{{ orderNo }}</dd>
+        </div>
+        <div class="idea-spec-row">
+          <dt>注文状況</dt>
+          <dd>{{ statusLabel }}</dd>
+        </div>
+        {% if paymentDate %}
+          <div class="idea-spec-row">
+            <dt>入金日</dt>
+            <dd>{{ paymentDate }}</dd>
+          </div>
+        {% endif %}
+        <div class="idea-spec-row">
+          <dt>使用ポイント</dt>
+          <dd>{{ usePoint|number_format }} pt</dd>
+        </div>
+        <div class="idea-spec-row">
+          <dt>付与ポイント</dt>
+          <dd>{{ addPoint|number_format }} pt</dd>
+        </div>
+      </dl>
+    </article>
+
+    {# --- 配送情報 --- #}
+    {% for shipping in shippings %}
+      <article class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Delivery{% if shippings|length > 1 %} {{ loop.index }}{% endif %}</p>
+            <h2 class="idea-section-title">配送先{% if shippings|length > 1 %}（{{ loop.index }}）{% endif %}</h2>
+          </div>
         </div>
 
-        <div class="ec-orderRole">
-            <div class="ec-orderRole__detail">
-                <div class="ec-orderOrder">
-                    <div class="ec-definitions">
-                        <dt>ご注文日時</dt>
-                        <dd>{{ orderDate }}</dd>
-                    </div>
-                    <div class="ec-definitions">
-                        <dt>ご注文番号</dt>
-                        <dd>{{ orderNo }}</dd>
-                    </div>
-                    <div class="ec-definitions">
-                        <dt>ご注文状況</dt>
-                        <dd>{{ orderStatus }}</dd>
-                    </div>
-                    <div class="ec-definitions">
-                        <dt>ご利用ポイント</dt>
-                        <dd>{{ usePoint|number_format }} pt</dd>
-                    </div>
-                    <div class="ec-definitions">
-                        <dt>加算ポイント</dt>
-                        <dd>{{ addPoint|number_format }} pt</dd>
-                    </div>
-                </div>
-                <div class="ec-orderDelivery">
-                    <div class="ec-rectHeading">
-                        <h2>配送情報</h2>
-                    </div>
-                    {% for shipping in shippings %}
-                        <div class="ec-orderDelivery__title">お届け先{% if shippings|length > 1 %}({{ loop.index }}){% endif %}</div>
-                        {% for orderItem in shipping.items %}
-                            <div class="ec-orderDelivery__item">
-                                <div class="ec-imageGrid">
-                                    <div class="ec-imageGrid__img">
-                                        <img src="{{ asset('assets/img/common/no_image_product.png', 'save_image') }}"/>
-                                    </div>
-                                    <div class="ec-imageGrid__content">
-                                        <p>
-                                            {{ orderItem.productName }}
-                                            ×{{ orderItem.quantity }} </p>
-                                        <p>{{ orderItem.unitPrice|price }}
-                                            × {{ orderItem.quantity|number_format }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        {% endfor %}
-                        <p></p>
-                        <div class="ec-orderDelivery__address">
-                            <p>{{ shipping.name01 }}&nbsp;{{ shipping.name02 }}&nbsp;
-                                ({{ shipping.kana01 }}&nbsp;{{ shipping.kana02 }})</p>
-                            <p>〒{{ shipping.postalCode }} {{ shipping.prefName }}{{ shipping.addr01 }}{{ shipping.addr02 }}</p>
-                            <p>{{ shipping.phoneNumber }}</p>
-                        </div>
-                        <div class="ec-definitions--soft">
-                            <dt>配送方法 :</dt>
-                            <dd>{{ shipping.deliveryName }}</dd>
-                        </div>
-                        <div class="ec-definitions--soft">
-                            <dt>お届け日 :</dt>
-                            <dd>{{ shipping.deliveryDate|default('指定なし') }}</dd>
-                        </div>
-                        <div class="ec-definitions--soft">
-                            <dt>お届け時間 :</dt>
-                            <dd>{{ shipping.deliveryTime|default('指定なし') }}</dd>
-                        </div>
-                    {% endfor %}
-                </div>
-                <div class="ec-orderPayment">
-                    <div class="ec-rectHeading">
-                        <h2>お支払い情報</h2>
-                    </div>
-                    <p>お支払い方法 : {{ paymentMethod }}</p>
-                </div>
-                <div class="ec-orderConfirm">
-                    <div class="ec-rectHeading">
-                        <h2>お問い合わせ</h2>
-                    </div>
-                    <p>{{ message|default('記載なし')|nl2br }}</p>
-                </div>
-                <div class="ec-orderMails">
-                    <div class="ec-rectHeading">
-                        <h2>メール配信履歴一覧</h2>
-                    </div>
-                    {% for mailHistory in mailHistories %}
-                        <div class="ec-orderMail">
-                            <div class="ec-orderMail__time">{{ mailHistory.sendDate }}</div>
-                            <div class="ec-orderMail__link"><a>{{ mailHistory.mailSubject }}</a></div>
-                            <div class="ec-orderMail__body">{{ mailHistory.mailBody|nl2br }}<p class="ec-orderMail__close"><a>閉じる</a></p></div>
-                        </div>
-                    {% else %}
-                        <p class="ec-reportDescription">メール履歴はありません。</p>
-                    {% endfor %}
-                </div>
+        {# 商品明細 #}
+        <div class="idea-cart-list">
+          {% for item in shipping.items %}
+            <div class="idea-cart-item">
+              <div class="idea-cart-item__image">
+                <img src="/assets/idea-store/images/product/no-image.svg" alt="{{ item.productName }}">
+              </div>
+              <div class="idea-cart-item__body">
+                <p class="idea-card-kicker">{{ item.productCode }}</p>
+                <h3>{{ item.productName }}</h3>
+                <p class="idea-cart-item__price">¥{{ item.unitPrice|number_format }} × {{ item.quantity|number_format }}</p>
+              </div>
+              <div class="idea-cart-item__controls">
+                <strong>¥{{ (item.unitPrice * item.quantity)|number_format }}</strong>
+              </div>
             </div>
-            <div class="ec-orderRole__summary">
-                <div class="ec-totalBox">
-                    <dl class="ec-totalBox__spec">
-                        <dt>小計</dt>
-                        <dd>{{ subtotal|price }}</dd>
-                    </dl>
-                    <dl class="ec-totalBox__spec">
-                        <dt>手数料</dt>
-                        <dd>{{ charge|price }}</dd>
-                    </dl>
-                    <dl class="ec-totalBox__spec">
-                        <dt>送料</dt>
-                        <dd>{{ deliveryFeeTotal|price }}</dd>
-                    </dl>
-                    {% if discount < 0 %}
-                    <dl class="ec-totalBox__spec">
-                        <dt>値引き</dt>
-                        <dd>{{ discount|price }}</dd>
-                    </dl>
-                    {% endif %}
-                    <div class="ec-totalBox__total">合計<span
-                                class="ec-totalBox__price">{{ total|price }}</span><span
-                                class="ec-totalBox__taxLabel">税込</span></div>
-                    <div class="ec-totalBox__paymentTotal">合計<span
-                                class="ec-totalBox__price">{{ paymentTotal|price }}</span><span
-                                class="ec-totalBox__taxLabel">税込</span></div>
-                </div>
-            </div>
+          {% endfor %}
         </div>
-        <div class="ec-role ec-orderRole">
-            <div class="ec-orderRole__detail">
-                <form method="post" action="/mypage/reorder" class="d-inline">
-                    <input type="hidden" name="csrfToken" value="{{ csrfToken|default(csrf_token('mypage_reorder')) }}">
-                    <input type="hidden" name="orderNo" value="{{ orderNo }}">
-                    <button type="submit" class="ec-inlineBtn ec-font-bold">再注文する</button>
-                </form>
-                <a href="/mypage" class="ec-inlineBtn ec-font-bold">戻る</a>
-            </div>
+
+        {# お届け先住所 #}
+        <div class="idea-info-list" style="margin-top:1rem;">
+          <p><strong>{{ shipping.name01 }} {{ shipping.name02 }} 様</strong>
+            {% if shipping.kana01 or shipping.kana02 %}
+              <span class="idea-muted">（{{ shipping.kana01 }} {{ shipping.kana02 }}）</span>
+            {% endif %}
+          </p>
+          <p>〒{{ shipping.postalCode }} {{ shipping.prefName }}{{ shipping.addr01 }}{{ shipping.addr02 }}</p>
+          <p>{{ shipping.phoneNumber }}</p>
         </div>
+
+        <dl class="idea-spec-list" style="margin-top:.75rem;">
+          <div class="idea-spec-row">
+            <dt>配送方法</dt>
+            <dd>{{ shipping.deliveryName }}</dd>
+          </div>
+          <div class="idea-spec-row">
+            <dt>お届け希望日</dt>
+            <dd>{{ shipping.deliveryDate|default('指定なし') }}</dd>
+          </div>
+          <div class="idea-spec-row">
+            <dt>お届け時間帯</dt>
+            <dd>{{ shipping.deliveryTime|default('指定なし') }}</dd>
+          </div>
+        </dl>
+      </article>
+    {% endfor %}
+
+    {# --- お支払い情報 --- #}
+    <article class="idea-checkout-panel">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Payment</p>
+          <h2 class="idea-section-title">お支払い情報</h2>
+        </div>
+      </div>
+      <div class="idea-info-list">
+        <p><strong>{{ paymentMethod }}</strong></p>
+      </div>
+    </article>
+
+    {# --- 注文時メッセージ --- #}
+    {% if message %}
+      <article class="idea-checkout-panel">
+        <div class="idea-panel-head">
+          <div>
+            <p class="idea-eyebrow">Message</p>
+            <h2 class="idea-section-title">注文時のメッセージ</h2>
+          </div>
+        </div>
+        <div class="idea-info-list">
+          <p>{{ message|nl2br }}</p>
+        </div>
+      </article>
+    {% endif %}
+
+    {# --- メール配信履歴 --- #}
+    <article class="idea-checkout-panel">
+      <div class="idea-panel-head">
+        <div>
+          <p class="idea-eyebrow">Mail history</p>
+          <h2 class="idea-section-title">メール配信履歴</h2>
+        </div>
+      </div>
+      {% if mailHistories|length > 0 %}
+        <div class="idea-cart-list">
+          {% for mail in mailHistories %}
+            <details class="idea-cart-item idea-mail-row">
+              <summary>
+                <span class="idea-muted" style="font-size:.82rem;">{{ mail.sendDate }}</span>
+                <strong style="margin-left:.75rem;">{{ mail.mailSubject }}</strong>
+              </summary>
+              <p class="idea-muted" style="margin:.75rem 0 0;white-space:pre-line;">{{ mail.mailBody }}</p>
+            </details>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p class="idea-muted">メール配信履歴はありません。</p>
+      {% endif %}
+    </article>
+
+    {# --- アクション --- #}
+    <div class="idea-actions" style="margin-top:.5rem;">
+      <form method="post" action="/mypage/reorder">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+        <input type="hidden" name="orderNo" value="{{ orderNo }}">
+        <button class="idea-button" type="submit">この注文を再注文する</button>
+      </form>
+      <a class="idea-button idea-button--light" href="/mypage">マイページに戻る</a>
     </div>
+
+  </div>
+
+  {# === 右カラム: 金額サマリー === #}
+  <aside class="idea-summary-panel" aria-label="金額内訳">
+    <p class="idea-eyebrow">Amount summary</p>
+    <dl>
+      <div><dt>商品小計</dt><dd>¥{{ subtotal|default(0)|number_format }}</dd></div>
+      <div><dt>送料</dt><dd>¥{{ deliveryFeeTotal|default(0)|number_format }}</dd></div>
+      {% if charge|default(0) > 0 %}
+        <div><dt>決済手数料</dt><dd>¥{{ charge|number_format }}</dd></div>
+      {% endif %}
+      {% if discount|default(0) > 0 %}
+        <div><dt>値引き</dt><dd>−¥{{ discount|number_format }}</dd></div>
+      {% endif %}
+      <div><dt>消費税</dt><dd>¥{{ tax|default(0)|number_format }}</dd></div>
+      <div class="idea-summary-total"><dt>合計（税込）</dt><dd>¥{{ total|default(0)|number_format }}</dd></div>
+      {% if paymentTotal|default(0) != total|default(0) %}
+        <div class="idea-summary-total"><dt>支払合計</dt><dd>¥{{ paymentTotal|number_format }}</dd></div>
+      {% endif %}
+    </dl>
+    <a class="idea-link idea-summary-link" href="/mypage">注文履歴一覧へ</a>
+  </aside>
+
+</section>
 {% endblock %}

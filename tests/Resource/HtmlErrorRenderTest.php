@@ -22,6 +22,12 @@ use Twig\Environment;
  * {@see \MyVendor\BeMart\Provide\Error\AppThrowableHandler} emits for
  * API/HAL contexts. Covers the HtmlModule override wiring, the rendered
  * error page for a mapped status, and delegation of unexpected throwables.
+ *
+ * Semantic verification levels:
+ *   L1 — required fields: HTTP status code, statusText, and error message are
+ *         present in the rendered output.
+ *   L2 — navigation: a link back to the top page (href="/") is rendered so
+ *         users can recover without the back button.
  */
 final class HtmlErrorRenderTest extends TestCase
 {
@@ -60,8 +66,16 @@ final class HtmlErrorRenderTest extends TestCase
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
 
         $html = (string) $ro->view;
+
+        // L1: page structure and required fields
         $this->assertStringContainsString('<!doctype html>', $html);
-        $this->assertStringContainsString('入力が不正です。', $html);
+        $this->assertStringContainsString('400', $html);           // HTTP status code displayed
+        $this->assertStringContainsString('Bad Request', $html);   // statusText
+        $this->assertStringContainsString('入力が不正です。', $html);  // error message
+
+        // L2: recovery navigation — top page link must be present
+        $this->assertStringContainsString('href="/"', $html);
+
         $this->assertFalse($this->fallback->transferred);
     }
 

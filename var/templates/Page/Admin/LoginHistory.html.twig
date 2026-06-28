@@ -1,176 +1,88 @@
-{#
-  BeMart admin Login-history list — EC-CUBE goLoginHistoryList (ログイン履歴).
-
-  PORT of EC-CUBE 4.3 admin-theme `Setting/System/login_history.twig`
-  (src/Eccube/Resource/template/admin/Setting/System/login_history.twig).
-
-  Setting/System section, DATA/LIST page. It extends the admin frame
-  (`admin-base.html.twig`), not the storefront `base.html.twig`. The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound to the LoginHistory
-  resource body (src/Resource/Page/Admin/LoginHistory.php — body carries
-  `count` + `entries`, a list of {timestamp, loginId, success, clientIp}).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-path route, params)` -> deterministic `/{route}?{query}`.
-   - The search-form card is ported as STATIC STRUCTURE: EC-CUBE renders
-     the multi-keyword / IP / date-range / status filter through Symfony
-     `form_widget(searchForm.*)`; the BeMart LoginHistory resource is a
-     plain read endpoint (`onGet(limit)` — no server-side search), so
-     each `form_widget` / `form_errors` call is OMITTED, leaving the
-     surrounding `c-outsideBlock` markup. The omitted inputs are
-     EC-CUBE-search-runtime — enumerated as residuals. FLAGGED: a future
-     wave that adds a LoginHistory search resource + `<Name>Form` can
-     restore the inputs.
-   - `searchForm._token` -> EC-CUBE per-request CSRF widget. Omitted.
-   - `{% for LoginHistory in pagination %}` -> the resource body's
-     `entries` list. EC-CUBE's `pagination` is a KnpPaginator object;
-     BeMart's list endpoint returns the full collection (no server-side
-     paging in scope), so the `pageMaxis` page-count <select> options
-     and the `@admin/pager.twig` block render empty. Enumerated as
-     residuals.
-   - `LoginHistory.id` -> the LoginHistoryListFetched projection does not
-     surface a row id (the fake log keys by timestamp). The ID column
-     cell renders empty. FLAGGED missing-body-field.
-   - `LoginHistory.user_name` -> rebound to `entry.loginId`.
-   - `LoginHistory.client_ip` -> rebound to `entry.clientIp`.
-   - `LoginHistory.create_date|date_format` -> rebound to
-     `entry.timestamp`; the body stores it as an ISO-8601 string already.
-   - `LoginHistory.Status` (mtb_login_history_status master object) ->
-     the projection carries `success` as a bare bool; the badge renders
-     成功 / 失敗 from it, keeping EC-CUBE's `badge-ec-blue` /
-     `badge-ec-red` class. The `Status.id == constant(...)` master-data
-     check is EC-CUBE-runtime — enumerated as residual.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-setting-system-login-history' %}
 {% set title = 'ログイン履歴' %}
 {% set sub_title = 'システム設定' %}
 
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/LoginHistory.php onGet):
+    entries   list<{timestamp: string, loginId: string, success: bool, clientIp: string}>
+    count     int   — total rows returned
+
+  QUERY PARAM:
+    limit     int (default 50) — result cap; passed as GET param, no CSRF required
+
+  LINKS (#[Link] on resource):
+    goSecurity    GET  /admin/security
+    goMemberList  GET  /admin/member-list
+
+  Design vocabulary: idea-admin-* (public/assets/idea-store/css/idea-admin.css)
+    idea-admin-list-toolbar   result count toolbar
+    idea-admin-table-wrap     overflow wrapper
+    idea-admin-table          data grid
+    idea-admin-badge          success/failure chip
+    idea-admin-empty          zero-result state
+    idea-admin-action         navigation link button
+#}
+
 {% block main %}
-<form name="search_form" id="search_form" method="post" action="">
-    <div class="c-outsideBlock">
-        <div class="c-outsideBlock__contents">
-            <div class="row justify-content-start">
-                <div class="col-6">
-                    <div class="mb-2">
-                        <label class="col-form-label" data-bs-toggle="tooltip" data-bs-placement="top" title="情報を入力して一覧の絞り込み検索ができます。より詳細な条件を指定するには［詳細検索］を開いてください。">ログインID・IPアドレス<i class="fa fa-question-circle fa-lg ms-1"></i></label>
-                    </div>
-                    <div class="d-inline-block mb-3 collapsed" data-bs-toggle="collapse" href="#searchDetail" aria-expanded="false" aria-controls="searchDetail"><a><i class="fa fw-bold me-1 fa-plus-square-o"></i><span class="fw-bold">詳細検索</span></a></div>
-                </div>
-            </div>
-        </div>
-        <div class="c-subContents ec-collapse collapse" id="searchDetail">
-            <div class="row mb-2">
-                <div class="col">
-                    <div>
-                        <label>ログインID</label>
-                    </div>
-                </div>
-                <div class="col">
-                    <div>
-                        <label>IPアドレス</label>
-                    </div>
-                </div>
-            </div>
 
-            <div class="row mb-2">
-                <div class="col">
-                    <div>
-                        <label>ログイン試行日</label>
-                        <div class="row align-items-center">
-                            <div class="col">
-                            </div>
-                            <div class="col-auto text-center"><span>〜</span></div>
-                            <div class="col">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div>
-                        <label>ステータス</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="c-outsideBlock__contents mb-5">
-        <button type="submit" class="btn btn-ec-conversion px-5">検索</button>
-        {% if count is defined and count %}
-            <span class="fw-bold ms-2">検索結果：{{ count }}件が該当しました</span>
-        {% endif %}
-    </div>
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                {% if entries is not empty %}
-                    <div class="row justify-content-between mb-2">
-                        <div class="col-6"></div>
+{# ── Result toolbar ── #}
+<div class="idea-admin-list-toolbar">
+  <div class="idea-admin-list-toolbar__left">
+    <span class="idea-admin-count">{{ count }} 件</span>
+  </div>
+  <div class="idea-admin-list-toolbar__right">
+    <a class="idea-admin-action" href="/admin/security" rel="goSecurity">
+      <i class="fa fa-shield fa-fw" aria-hidden="true"></i>
+      セキュリティ設定
+    </a>
+    <a class="idea-admin-action" href="/admin/member-list" rel="goMemberList">
+      <i class="fa fa-users fa-fw" aria-hidden="true"></i>
+      メンバー管理
+    </a>
+  </div>
+</div>
 
-                        <div class="col-5 text-end">
-                            {#Dropdown page count#}
-                            <div class="d-inline-block me-2">
-                                <select class="form-select" onchange="location = this.value;">
-                                </select>
-                            </div>
-                            <div class="d-inline-block">
-                                <div class="btn-group" role="group"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-body p-0">
-                            <table class="table">
-                                <thead>
-                                    <tr>
-                                        <th class="border-top-0 pt-2 pb-3 ps-3">ID</th>
-                                        <th class="border-top-0 pt-2 pb-3">ログインID</th>
-                                        <th class="border-top-0 pt-2 pb-3 ps-3">IPアドレス</th>
-                                        <th class="border-top-0 pt-2 pb-3">ログイン試行日</th>
-                                        <th class="border-top-0 pt-2 pb-3">ステータス</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                {% for LoginHistory in entries %}
-                                    <tr>
-                                        <td class="align-middle ps-3">
-                                        </td>
-                                        <td class="align-middle">
-                                            {{ LoginHistory.loginId }}
-                                        </td>
-                                        <td class="align-middle">
-                                            {{ LoginHistory.clientIp }}
-                                        </td>
-                                        <td class="align-middle">
-                                            {{ LoginHistory.timestamp }}
-                                        </td>
-                                        <td class="align-middle">
-                                            <span class="badge {% if LoginHistory.success %}badge-ec-blue{% else %}badge-ec-red{% endif %}">
-                                                {{ LoginHistory.success ? '成功' : '失敗' }}
-                                            </span>
-                                        </td>
-                                    </tr>
-                                {% endfor %}
-                                </tbody>
-                            </table>
-                            <div class="row justify-content-md-center mb-4">
-                            </div>
-                        </div>
-                    </div>
-                {% else %}
-                    <div class="card rounded border-0">
-                        <div class="card-body p-4">
-                            <div class="text-center text-muted mb-4 h5">検索条件に合致するデータが見つかりませんでした</div>
-                            <div class="text-center text-muted">検索条件を変えて、再度検索をお試しください</div>
-                            <div class="text-center text-muted">[詳細検索]も試してみましょう</div>
-                        </div>
-                    </div>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</form>
+{# ── Login-history grid / empty state ── #}
+{% if entries is not empty %}
+
+  <div class="idea-admin-table-wrap">
+    <table class="idea-admin-table" aria-label="ログイン履歴一覧">
+      <thead>
+        <tr>
+          <th scope="col">ログインID</th>
+          <th scope="col">IPアドレス</th>
+          <th scope="col">試行日時</th>
+          <th scope="col">結果</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for entry in entries %}
+        <tr>
+          <td>{{ entry.loginId }}</td>
+          <td>{{ entry.clientIp }}</td>
+          <td>{{ entry.timestamp }}</td>
+          <td>
+            {% if entry.success %}
+              <span class="idea-admin-badge idea-admin-badge--public">成功</span>
+            {% else %}
+              <span class="idea-admin-badge idea-admin-badge--discontinued">失敗</span>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+{% else %}
+
+  <div class="idea-admin-empty" role="status">
+    <i class="fa fa-history fa-2x" aria-hidden="true"></i>
+    <p class="idea-admin-empty__title">ログイン履歴がありません</p>
+  </div>
+
+{% endif %}
+
 {% endblock %}

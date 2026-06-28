@@ -1,49 +1,3 @@
-{#
-  BeMart admin ClassCategory list — EC-CUBE goClassCategoryList (規格分類管理).
-
-  PORT of EC-CUBE 4.3 admin-theme `Product/class_category.twig`
-  (src/Eccube/Resource/template/admin/Product/class_category.twig).
-
-  Product section, LIST + inline-FORM page. It extends the admin frame
-  (`admin-base.html.twig`). The markup skeleton + `c-*` / `ec-*` /
-  Bootstrap classes are kept verbatim from EC-CUBE; only the dynamic
-  bindings are rebound to the ClassCategoryList resource body
-  (src/Resource/Page/Admin/ClassCategory/ClassCategoryList.php — body
-  carries `classNameId`, `classCategories` (a list of {classCategoryId,
-  classNameId, name}), `count` and an AdminClassCategoryForm exposed as
-  `form`).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route, params)` -> deterministic `/{route}?{query}`.
-   - `form_widget(form.name)` / `form.backend_name` ->
-     `form.input('name')` / `form.input('backend_name')` — the real
-     AdminClassCategoryForm inline-create inputs (Ray.WebFormModule).
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget; the
-     hidden `_token` input is kept with an empty value (residual).
-   - `{% for ClassCategory in ClassCategories %}` -> the body's
-     `classCategories` list. `ClassCategory.id` / `.name` -> the
-     projection keys `classCategoryId` / `name`.
-   - `ClassName` header card (`ClassName.name` / `ClassName.backend_name`)
-     -> the ClassCategoryList resource carries only the parent
-     `classNameId`, NOT the parent ClassName's name / backend label
-     (Wave 7 slice). The header card renders the id but the name /
-     backend cells render empty. FLAGGED for enrichment follow-up.
-   - `ClassCategory.backend_name`, `ClassCategory.sortNo`,
-     `ClassCategory.visible` -> the AdminClassCategoryListFetched
-     projection carries only `classCategoryId` / `classNameId` / `name`;
-     the backend label, sort_no and visible flag are NOT projected
-     (Wave 7 shallow-list slice). The backend label / `data-sort-no` /
-     the visible-toggle state render empty / default. FLAGGED for
-     enrichment follow-up.
-   - per-row `forms[ClassCategory.id]` inline-EDIT form -> the per-row
-     edit is `doUpdateClassCategory` at a sibling resource; the list
-     resource carries no per-row form. The `mode-edit` collapse panel
-     keeps EC-CUBE's structure but renders plain `<input>`s. Enumerated
-     as residual.
-   - `csrf_token_for_anchor()` -> EC-CUBE per-request CSRF widget;
-     OMITTED.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-class-category-class-category-list' %}
@@ -51,276 +5,411 @@
 {% set sub_title = '商品管理' %}
 
 {% block stylesheet %}
-    <style type="text/css">
-        .list-group-item:hover {
-            z-index: inherit;
-        }
-    </style>
+<style>
+/* ── Drag handle ── */
+.idea-admin-drag-handle {
+    cursor: grab;
+    color: var(--idea-muted);
+    padding: .25rem .4rem;
+    touch-action: none;
+    line-height: 1;
+}
+.idea-admin-drag-handle:active { cursor: grabbing; }
+
+/* ── Category row ── */
+.idea-admin-cat-row {
+    display: grid;
+    grid-template-columns: 1.8rem 1fr auto;
+    align-items: center;
+    gap: .6rem;
+    padding: .55rem .75rem;
+    border-bottom: 1px solid rgba(205, 191, 170, .3);
+}
+.idea-admin-cat-row:last-child { border-bottom: none; }
+.idea-admin-cat-row.is-dragging {
+    opacity: .5;
+    background: rgba(245, 237, 224, .6);
+}
+.idea-admin-cat-row.is-over { outline: 2px dashed var(--idea-olive); outline-offset: -2px; }
+
+/* ── Inline edit mode ── */
+.idea-admin-cat-view,
+.idea-admin-cat-edit { display: contents; }
+.idea-admin-cat-edit { display: none; }
+.idea-admin-cat-row.is-editing .idea-admin-cat-view { display: none; }
+.idea-admin-cat-row.is-editing .idea-admin-cat-edit { display: contents; }
+
+.idea-admin-cat-name { font-size: .93rem; }
+.idea-admin-cat-actions { display: flex; gap: .3rem; align-items: center; white-space: nowrap; }
+
+.idea-admin-inline-input {
+    border: 1px solid var(--idea-stone);
+    border-radius: var(--idea-admin-radius-input);
+    padding: .28rem .55rem;
+    font: inherit;
+    font-size: .88rem;
+    color: var(--idea-ink);
+    background: rgba(255, 253, 248, .97);
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+    min-width: 0;
+    width: 100%;
+}
+.idea-admin-inline-input:focus {
+    border-color: var(--idea-olive);
+    box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+
+.idea-admin-action--sm {
+    padding: .28rem .7rem;
+    font-size: .8rem;
+}
+
+/* ── Delete dialog ── */
+#idea-delete-dialog {
+    border: none;
+    background: transparent;
+    padding: 0;
+}
+#idea-delete-dialog::backdrop { background: rgba(41, 37, 31, .45); }
+
+/* ── Sort order indicator (hidden, updated by JS) ── */
+.idea-admin-cat-order-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.35rem;
+    height: 1.35rem;
+    border-radius: 999px;
+    background: rgba(205, 191, 170, .25);
+    color: var(--idea-muted);
+    font-size: .72rem;
+    font-weight: 700;
+}
+</style>
 {% endblock stylesheet %}
-{% block javascript %}
-    <script type="text/javascript">
-        $(function() {
-            // 初期表示時のsort noを保持.
-            var oldSortNos = [];
-            var sortable = $('.sortable-item');
-            sortable.each(function() {
-                oldSortNos.push(this.dataset.sortNo);
-            });
-            oldSortNos.sort(function(a, b) {
-                return a - b;
-            }).reverse();
-            // 並び替え後にsort noを更新
-            var updateSortNo = function() {
-                var newSortNos = {};
-                var i = 0;
-                $('.sortable-item').each(function() {
-                    newSortNos[this.dataset.id] = oldSortNos[i];
-                    i++;
-                });
-                $.ajax({
-                    url: '/admin/sort-no-move?masterType=classCategory&_method=put',
-                    type: 'POST',
-                    data: newSortNos
-                }).always(function() {
-                    $(".modal-backdrop").remove();
-                });
-            };
-            // 最初と最後の↑↓を再描画
-            var redrawDisableAllows = function() {
-                var items = $('.sortable-item');
-                items.find('a').removeClass('disabled');
-                items.first().find('a.action-up').addClass('disabled');
-                items.last().find('a.action-down').addClass('disabled');
-            };
-            // オーバレイ後, 表示順の更新を行う
-            var moveSortNo = function() {
-                $('body').append($('<div class="modal-backdrop show"></div>'));
-                updateSortNo();
-                redrawDisableAllows();
-            };
-            // Drag and Drop
-            $('.sortable-container').sortable({
-                items: '> .sortable-item',
-                cursor: 'move',
-                update: function(e, ui) {
-                    moveSortNo();
-                }
-            });
-            // Up
-            sortable.on('click', 'a.action-up', function(e) {
-                e.preventDefault();
-                var current = $(this).parents('li');
-                if (current.prev().hasClass('sortable-item')) {
-                    current.prev().before(current);
-                    moveSortNo();
-                }
-            });
-            // Down
-            sortable.on('click', 'a.action-down', function(e) {
-                e.preventDefault();
-                var current = $(this).parents('li');
-                if (current.next().hasClass('sortable-item')) {
-                    current.next().after(current);
-                    moveSortNo();
-                }
-            });
-
-            sortable.on('click', 'a.action-edit', function(e) {
-                e.preventDefault();
-                var current = $(this).parents('li');
-                current.find('.mode-view').addClass('d-none');
-                current.find('.mode-edit').removeClass('d-none');
-            });
-            sortable.on('click', 'button.action-edit-cancel', function(e) {
-                location.href = "/admin/class-category/class-category-list?classNameId={{ classNameId }}";
-            });
-            sortable.find('.is-invalid').each(function(e) {
-                var current = $(this).parents('li');
-                current.find('.mode-view').addClass('d-none');
-                current.find('.mode-edit').removeClass('d-none');
-            });
-
-            // 削除モーダルのhrefとmessageの変更
-            $('#DeleteModal').on('shown.bs.modal', function(event) {
-                var target = $(event.relatedTarget);
-                // hrefの変更
-                $(this).find('[data-post-action="delete"]').attr('href', target.data('url'));
-
-                // messageの変更
-                $(this).find('p.modal-message').text(target.data('message'));
-            });
-
-        });
-    </script>
-{% endblock %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col"><span class="card-title">規格名</span></div>
-                        </div>
-                    </div>
-                    <div id="ex-class_category" class="card-body">
-                        <div class="row mb-2">
-                            <div class="col-auto"><span>規格名</span></div>
-                            <div class="col-auto"><span></span></div>
-                        </div>
-                        <div class="row mb-2">
-                            <div class="col-auto"><span>管理名</span></div>
-                            <div class="col-auto"><span></span></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="c-outsideBlock">
-                    <div class="c-outsideBlock__contents mb-2">
-                        <div class="row">
-                            <div class="col-12 text-right">
-                                <div class="btn-group" role="group">
-                                    <a class="btn btn-ec-regular" href="/admin/class-category/class-category-export?classNameId={{ classNameId }}">
-                                        <i class="fa fa-cloud-download mr-1 text-secondary"></i>
-                                        <span>CSVダウンロード</span>
-                                    </a>
-                                    <a class="btn btn-ec-regular" href="/admin/csv-config">
-                                        <i class="fa fa-cog mr-1 text-secondary"></i>
-                                        <span>CSV出力項目設定</span>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header"><span class="card-title">規格分類</span></div>
-                    <div id="ex-class_category-edit" class="card-body p-0">
-                        <div class="card rounded border-0">
 
-                            <ul class="list-group list-group-flush sortable-container">
-                                <li class="list-group-item">
-                                    <form role="form" class="row" name="form1" id="form1" method="post" action="/admin/class-category/class-category-list?classNameId={{ classNameId }}">
-                                        <div class="col-auto align-self-center">
-                                            <span>分類名</span>
-                                            <span class="badge bg-primary ms-1">必須</span>
-                                        </div>
-                                        <div class="col-3 me-2">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                                            {{ form.input('classCategoryName')|raw }}
-                                        </div>
-                                        <div class="col-auto align-self-center"><span>管理名</span></div>
-                                        <div class="col-3">
-                                            <input type="text" id="admin_class_category_backend_name" class="form-control" value="" disabled>
-                                        </div>
-                                        <div class="col-auto">
-                                            <button class="btn btn-ec-regular" type="submit">新規作成</button>
-                                        </div>
-                                    </form>
-                                </li>
-                                <li class="list-group-item">
-                                    <div class="row">
-                                        <div class="col-auto"><strong>&nbsp;</strong></div>
-                                        <div class="col-auto"><strong>ID</strong></div>
-                                        <div class="col-1"><strong>規格分類</strong></div>
-                                    </div>
-                                </li>
-                                {% for ClassCategory in classCategories %}
-                                    <li id="ex-class_category-{{ ClassCategory.classCategoryId }}" class="list-group-item sortable-item" data-classname-id="{{ ClassCategory.classNameId }}" data-id="{{ ClassCategory.classCategoryId }}" data-sort-no="">
-                                        <div class="row justify-content-around mode-view">
-                                            <div class="col-auto d-flex align-items-center"><i class="fa fa-bars text-ec-gray"></i></div>
-                                            <div class="col-auto d-flex align-items-center">{{ ClassCategory.classCategoryId }}</div>
-                                            <div class="col d-flex align-items-center">{{ ClassCategory.name }} ［管理名：］</div>
-                                            <div class="col-auto text-end">
-                                                <a class="btn btn-ec-actionIcon me-2 action-up {% if loop.first %}disabled{% endif %}" href="" data-bs-toggle="tooltip" data-bs-placement="top" title="上へ">
-                                                    <i class="fa fa-arrow-up fa-lg text-secondary"></i>
-                                                </a>
-                                                <a class="btn btn-ec-actionIcon me-2 action-down {% if loop.last %}disabled{% endif %}" href="" data-bs-toggle="tooltip" data-bs-placement="top" title="下へ">
-                                                    <i class="fa fa-arrow-down fa-lg text-secondary"></i>
-                                                </a>
-                                                <a class="btn btn-ec-actionIcon me-2 action-edit" href="" data-bs-toggle="tooltip" data-bs-placement="top" title="編集">
-                                                    <i class="fa fa-pencil fa-lg text-secondary"></i>
-                                                </a>
-                                                <a class="btn btn-ec-actionIcon me-2 action-visible" href="/admin/toggle-visible?masterType=classCategory&class_name_id={{ ClassCategory.classNameId }}&rowId={{ ClassCategory.classCategoryId }}&_method=put"
-                                                   data-bs-toggle="tooltip" data-bs-placement="top" title="非表示中 | 表示にする"
-                                                   data-confirm="false">
-                                                    <i class="fa fa-toggle-off fa-lg text-secondary" aria-hidden="true"></i>
-                                                </a>
-                                                <div class="d-inline-block me-2" data-bs-toggle="tooltip" data-bs-placement="top" title="削除">
-                                                    <a class="btn btn-ec-actionIcon" data-bs-toggle="modal" data-bs-target="#DeleteModal"
-                                                       data-url="/admin/class-category/class-category?classCategoryId={{ ClassCategory.classCategoryId }}&_method=delete"
-                                                       data-message="この操作はあとから取り消すことができません。「{{ ClassCategory.name }}」を削除してよろしいですか？">
-                                                        <i class="fa fa-close fa-lg text-secondary"></i>
-                                                    </a>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <form class="row d-none mode-edit" method="post" action="/admin/class-category/class-category?classCategoryId={{ ClassCategory.classCategoryId }}&_method=put">
-                                            <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                                            <div class="col-3 me-2">
-                                                <input type="text" class="form-control" name="classCategoryName" value="{{ ClassCategory.name }}" data-origin-value="{{ ClassCategory.name }}">
-                                            </div>
-                                            <div class="col-auto align-self-center"><span>管理名</span></div>
-                                            <div class="col-auto align-items-center">
-                                                <input type="text" class="form-control" value="" data-origin-value="" disabled>
-                                            </div>
-                                            <div class="col-auto align-items-center">
-                                                <button class="btn btn-ec-conversion" type="submit">決定</button>
-                                            </div>
-                                            <div class="col-auto align-items-center">
-                                                <button class="btn btn-ec-sub action-edit-cancel" type="button">キャンセル</button>
-                                            </div>
-                                        </form>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                            <!-- 削除モーダル -->
-                            <div class="modal fade" id="DeleteModal" tabindex="-1" role="dialog"
-                                 aria-labelledby="DeleteModal" aria-hidden="true">
-                                <div class="modal-dialog" role="document">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title fw-bold">
-                                                削除します
-                                            </h5>
-                                            <button class="btn-close" type="button" data-bs-dismiss="modal" aria-label="Close">
+{# ── Toolbar: count + back link + CSV ── #}
+<div class="idea-admin-list-toolbar">
+    <div class="idea-admin-list-toolbar__left">
+        <a class="idea-admin-text-btn"
+           href="/admin/class-name/class-name-list"
+           rel="goClassNameList">
+            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+            規格一覧へ戻る
+        </a>
+        {% if classNameId %}
+            <span class="idea-admin-count" style="margin-left:.75rem;">{{ count }}件</span>
+        {% else %}
+            <span class="idea-admin-count" style="margin-left:.75rem;">全 {{ count }}件</span>
+        {% endif %}
+    </div>
+    <div class="idea-admin-list-toolbar__right">
+        <a class="idea-admin-action"
+           href="/admin/class-category/class-category-export{% if classNameId %}?classNameId={{ classNameId|url_encode }}{% endif %}">
+            <i class="fa fa-download" aria-hidden="true"></i>
+            CSV出力
+        </a>
+        <a class="idea-admin-action" href="/admin/csv-config">
+            <i class="fa fa-cog" aria-hidden="true"></i>
+            CSV設定
+        </a>
+    </div>
+</div>
 
-                                            </button>
-                                        </div>
-                                        <div class="modal-body text-start">
-                                            <p class="text-start modal-message"><!-- jsでメッセージを挿入 --></p>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button class="btn btn-ec-sub" type="button" data-bs-dismiss="modal">
-                                                キャンセル
-                                            </button>
-                                            <a class="btn btn-ec-delete" href="#"
-                                               data-confirm="false">
-                                                削除
-                                            </a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <p>項目の順番はドラッグ＆ドロップでも変更可能です。</p>
+{# ── Axis context panel (shown only when scoped to a classNameId) ── #}
+{% if classNameId %}
+<div class="idea-admin-panel" style="margin-bottom:1.25rem;">
+    <div class="idea-admin-panel__body">
+        <dl class="idea-admin-spec-list">
+            <div class="idea-admin-spec-row">
+                <dt>規格 ID</dt>
+                <dd>{{ classNameId }}</dd>
             </div>
-        </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/class-name/class-name-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i><span>規格管理</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6"></div>
+        </dl>
+    </div>
+</div>
+{% endif %}
+
+{# ── Create form ── #}
+<div class="idea-admin-panel" style="margin-bottom:1.25rem;">
+    <div class="idea-admin-panel__head">
+        <h3>
+            <i class="fa fa-plus-circle" aria-hidden="true"></i>
+            新しい規格分類を追加
+        </h3>
+    </div>
+    <div class="idea-admin-panel__body">
+        <form id="idea-create-form"
+              method="post"
+              action="/admin/class-category/class-category-list">
+            {% if classNameId %}
+                <input type="hidden" name="classNameId" value="{{ classNameId }}">
+            {% endif %}
+            <div class="idea-admin-field">
+                <div class="idea-admin-field__label">
+                    <label for="admin_class_category_name">
+                        分類名
+                        <span class="idea-admin-required">必須</span>
+                    </label>
+                </div>
+                <div class="idea-admin-field__input">
+                    {{ form.input('classCategoryName')|raw }}
+                    <span class="idea-admin-error">{{ form.error('classCategoryName')|raw }}</span>
                 </div>
             </div>
+            <div style="display:flex;justify-content:flex-end;margin-top:.75rem;">
+                <button class="idea-admin-action idea-admin-action--primary" type="submit">
+                    <i class="fa fa-plus" aria-hidden="true"></i>
+                    登録
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# ── Category list ── #}
+{% if classCategories is not empty %}
+<div class="idea-admin-panel">
+    <div class="idea-admin-panel__head">
+        <h3>規格分類一覧</h3>
+        <span class="idea-admin-panel__hint">
+            <i class="fa fa-arrows-v" aria-hidden="true"></i>
+            行をドラッグして順序を変更できます
+        </span>
+    </div>
+    <div class="idea-admin-panel__body" style="padding:0;">
+        <div id="idea-cat-list" aria-label="規格分類リスト" role="list">
+            {% for cat in classCategories %}
+            <div class="idea-admin-cat-row"
+                 id="cat-row-{{ cat.classCategoryId }}"
+                 data-class-category-id="{{ cat.classCategoryId }}"
+                 data-class-name-id="{{ cat.classNameId }}"
+                 data-name="{{ cat.name }}"
+                 draggable="true"
+                 role="listitem">
+
+                {# -- view mode -- #}
+                <div class="idea-admin-cat-view">
+                    <span class="idea-admin-drag-handle" aria-label="並び替え">
+                        <i class="fa fa-bars" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <div class="idea-admin-cat-view">
+                    <span class="idea-admin-cat-name">{{ cat.name }}</span>
+                </div>
+                <div class="idea-admin-cat-view idea-admin-cat-actions">
+                    <button class="idea-admin-icon-btn js-edit-open"
+                            type="button"
+                            data-cat-id="{{ cat.classCategoryId }}"
+                            aria-label="名前を編集">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </button>
+                    <button class="idea-admin-icon-btn js-delete-open"
+                            type="button"
+                            data-cat-id="{{ cat.classCategoryId }}"
+                            data-cat-name="{{ cat.name }}"
+                            aria-label="削除">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+                {# -- edit mode (toggled by JS) -- #}
+                <div class="idea-admin-cat-edit">
+                    {# placeholder for drag handle column — keeps grid alignment #}
+                    <span></span>
+                </div>
+                <div class="idea-admin-cat-edit" style="grid-column: 2 / -1;">
+                    <form class="idea-admin-inline-edit-form"
+                          method="post"
+                          action="/admin/class-category/class-category?classCategoryId={{ cat.classCategoryId|url_encode }}&amp;_method=put"
+                          style="display:flex;gap:.5rem;align-items:center;">
+                        <input class="idea-admin-inline-input"
+                               type="text"
+                               name="classCategoryName"
+                               value="{{ cat.name }}"
+                               aria-label="分類名"
+                               required>
+                        <button class="idea-admin-action idea-admin-action--primary idea-admin-action--sm"
+                                type="submit">確定</button>
+                        <button class="idea-admin-action idea-admin-action--sm js-edit-cancel"
+                                type="button"
+                                data-cat-id="{{ cat.classCategoryId }}">キャンセル</button>
+                    </form>
+                </div>
+
+            </div>
+            {% endfor %}
         </div>
     </div>
-{% endblock %}
+</div>
+{% else %}
+<div class="idea-admin-empty">
+    <span class="idea-admin-empty__title">規格分類がまだありません</span>
+    <span>上のフォームから最初の分類を追加してください。</span>
+</div>
+{% endif %}
+
+{# ── Delete confirmation dialog ── #}
+<dialog id="idea-delete-dialog" aria-labelledby="idea-delete-title">
+    <div class="idea-admin-panel" style="min-width:20rem;max-width:28rem;">
+        <div class="idea-admin-panel__head">
+            <h3 id="idea-delete-title">規格分類の削除</h3>
+        </div>
+        <div class="idea-admin-panel__body">
+            <p id="idea-delete-message"></p>
+        </div>
+        <div style="display:flex;justify-content:flex-end;gap:.65rem;padding:.75rem 1rem;border-top:1px solid rgba(205,191,170,.4);">
+            <button class="idea-admin-action" id="idea-delete-cancel" type="button">キャンセル</button>
+            <form id="idea-delete-form" method="post" action="" style="margin:0;">
+                <button class="idea-admin-action idea-admin-action--destructive" type="submit">削除する</button>
+            </form>
+        </div>
+    </div>
+</dialog>
+
+{% endblock main %}
+
+{% block javascript %}
+<script>
+(function () {
+    'use strict';
+
+    /* ────────────────────────────────────────────────
+       Inline edit toggle
+    ──────────────────────────────────────────────── */
+    function rowById(catId) {
+        return document.getElementById('cat-row-' + catId);
+    }
+
+    function openEdit(catId) {
+        var row = rowById(catId);
+        if (!row) { return; }
+        row.classList.add('is-editing');
+        var input = row.querySelector('.idea-admin-inline-input');
+        if (input) { input.focus(); input.select(); }
+    }
+
+    function closeEdit(catId) {
+        var row = rowById(catId);
+        if (!row) { return; }
+        row.classList.remove('is-editing');
+    }
+
+    document.querySelectorAll('.js-edit-open').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            openEdit(btn.dataset.catId);
+        });
+    });
+
+    document.querySelectorAll('.js-edit-cancel').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            closeEdit(btn.dataset.catId);
+        });
+    });
+
+    /* ────────────────────────────────────────────────
+       Delete dialog
+    ──────────────────────────────────────────────── */
+    var dialog       = document.getElementById('idea-delete-dialog');
+    var deleteForm   = document.getElementById('idea-delete-form');
+    var deleteMsg    = document.getElementById('idea-delete-message');
+    var deleteCancel = document.getElementById('idea-delete-cancel');
+
+    document.querySelectorAll('.js-delete-open').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+            var catId   = btn.dataset.catId;
+            var catName = btn.dataset.catName;
+            deleteMsg.textContent = '「' + catName + '」を削除します。この操作は取り消せません。';
+            deleteForm.action = '/admin/class-category/class-category'
+                + '?classCategoryId=' + encodeURIComponent(catId)
+                + '&_method=delete';
+            dialog.showModal();
+        });
+    });
+
+    if (deleteCancel) {
+        deleteCancel.addEventListener('click', function () { dialog.close(); });
+    }
+
+    /* ────────────────────────────────────────────────
+       Drag-and-drop reorder (native HTML5)
+       Visual-only at Phase 3 — no sort-no persistence
+       endpoint is wired in BeMart yet.
+    ──────────────────────────────────────────────── */
+    var list = document.getElementById('idea-cat-list');
+    if (!list) { return; }
+
+    var dragging = null;
+
+    list.addEventListener('dragstart', function (e) {
+        var row = e.target.closest('.idea-admin-cat-row');
+        if (!row) { return; }
+        dragging = row;
+        row.classList.add('is-dragging');
+        e.dataTransfer.effectAllowed = 'move';
+    });
+
+    list.addEventListener('dragend', function () {
+        if (dragging) { dragging.classList.remove('is-dragging'); }
+        list.querySelectorAll('.is-over').forEach(function (el) {
+            el.classList.remove('is-over');
+        });
+        dragging = null;
+    });
+
+    list.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        var target = e.target.closest('.idea-admin-cat-row');
+        if (!target || target === dragging) { return; }
+        list.querySelectorAll('.is-over').forEach(function (el) {
+            el.classList.remove('is-over');
+        });
+        target.classList.add('is-over');
+    });
+
+    list.addEventListener('drop', function (e) {
+        e.preventDefault();
+        var target = e.target.closest('.idea-admin-cat-row');
+        if (!target || target === dragging || !dragging) { return; }
+        target.classList.remove('is-over');
+
+        var rows   = Array.from(list.querySelectorAll('.idea-admin-cat-row'));
+        var fromIdx = rows.indexOf(dragging);
+        var toIdx   = rows.indexOf(target);
+
+        if (fromIdx < toIdx) {
+            target.after(dragging);
+        } else {
+            target.before(dragging);
+        }
+    });
+
+    /* ── Keyboard reorder (↑ / ↓ on drag handle) ── */
+    list.addEventListener('keydown', function (e) {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') { return; }
+        var handle = e.target.closest('.idea-admin-drag-handle');
+        if (!handle) { return; }
+        e.preventDefault();
+        var row  = handle.closest('.idea-admin-cat-row');
+        if (!row) { return; }
+        if (e.key === 'ArrowUp' && row.previousElementSibling) {
+            row.previousElementSibling.before(row);
+            handle.focus();
+        } else if (e.key === 'ArrowDown' && row.nextElementSibling) {
+            row.nextElementSibling.after(row);
+            handle.focus();
+        }
+    });
+
+    /* Make drag handles keyboard-focusable */
+    list.querySelectorAll('.idea-admin-drag-handle').forEach(function (h) {
+        h.setAttribute('tabindex', '0');
+        h.setAttribute('role', 'button');
+    });
+}());
+</script>
+{% endblock javascript %}

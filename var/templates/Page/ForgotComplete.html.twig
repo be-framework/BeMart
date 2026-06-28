@@ -1,45 +1,40 @@
-{#
-  BeMart Password-reset-mail-sent page — EC-CUBE goForgotComplete.
+{% extends 'IdeaStore/layout/base.html.twig' %}
+{% block title %}パスワード再発行メール送信完了 | IDEA STORE{% endblock %}
 
-  PORT of EC-CUBE 4.3 default-theme `Forgot/complete.twig`
-  (src/Eccube/Resource/template/default/Forgot/complete.twig).
+{% block content %}
+<nav class="idea-container idea-breadcrumb" aria-label="breadcrumb">
+  <a href="/">Home</a><span>/</span><a href="{{ _links.goLogin.href|default('/login') }}" rel="goLogin">ログイン</a><span>/</span><span>メール送信完了</span>
+</nav>
 
-  DATA page (no form) — the data-page recipe (see var/templates/
-  README.md). EC-CUBE shows this static confirmation after a successful
-  `doRequestPasswordReset`. Markup skeleton, `ec-role` / `ec-pageHeader`
-  / `ec-forgetCompleteRole` / `ec-off3Grid` / `ec-text-ac` /
-  `ec-reportHeading` / `ec-reportDescription` classes are kept verbatim
-  from EC-CUBE.
+<section class="idea-container idea-checkout-hero" aria-labelledby="idea-forgot-complete-title">
+  <div>
+    <p class="idea-eyebrow">Password reset</p>
+    <h1 id="idea-forgot-complete-title" class="idea-title idea-title--compact">パスワード再発行メールを送信しました</h1>
+    <p class="idea-muted">ご登録のメールアドレス宛にメールをお送りしました。</p>
+  </div>
+  <div class="idea-checkout-status">
+    <span>Reset request</span>
+    <strong>Sent</strong>
+    <small>メールをご確認ください</small>
+  </div>
+</section>
 
-  EC-CUBE-ism rebinding (see var/templates/README.md):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml. The
-     `front.forgot.complete_message__body` value is a multi-line YAML
-     literal; EC-CUBE prints it raw (the template has no `nl2br`), so
-     the port substitutes the literal text verbatim.
-#}
-{% extends 'base.html.twig' %}
-
-{% set body_class = 'other_page' %}
-{% set route = 'forgot-complete' %}
-{% set title = 'パスワードの再発行(メール送信)' %}
-
-{% block main %}
-    <div class="ec-role">
-        <div class="ec-pageHeader">
-            <h1>パスワードの再発行(メール送信)</h1>
-        </div>
+<div class="idea-container idea-section">
+  <div class="idea-checkout-panel" role="status" aria-live="polite">
+    <div class="idea-panel-head">
+      <div>
+        <p class="idea-eyebrow">Next step</p>
+        <h2 class="idea-section-title">メールの内容をご確認ください</h2>
+      </div>
     </div>
-    <div class="ec-forgetCompleteRole">
-        <div class="ec-off3Grid ec-text-ac">
-            <div class="ec-off3Grid__cell">
-                <div class="ec-reportHeading">
-                    <h2>パスワード再発行メールの送信が完了しました。</h2>
-                </div>
-                <p class="ec-reportDescription">ご登録メールアドレスにパスワードを再発行するためのメールを送信いたしました。
-メールの内容をご確認いただきますよう、お願いいたします。
-※メールが届かない場合はメールアドレスをご確認の上、再度お試しください。
-</p>
-            </div>
-        </div>
+
+    <p>ご登録のメールアドレスにパスワードを再発行するためのメールをお送りしました。メールの内容をご確認のうえ、パスワードの再設定手続きをお進めください。</p>
+    <p class="idea-muted">メールが届かない場合は、ご登録のメールアドレスが正しいかご確認のうえ、再度お試しください。迷惑メールフォルダもあわせてご確認ください。</p>
+
+    <div class="idea-form-actions" style="margin-top:2rem;">
+      <a class="idea-button" href="{{ _links.goLogin.href|default('/login') }}" rel="goLogin">ログインページへ</a>
+      <a class="idea-link" href="{{ _links.goTop.href|default('/') }}" rel="goTop">トップページへ戻る</a>
     </div>
+  </div>
+</div>
 {% endblock %}

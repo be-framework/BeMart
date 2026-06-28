@@ -63,7 +63,7 @@ export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&s
 composer test:sql -- --colors=never
 ```
 
-MariaDB reachable の場合は `be/tests/Sql/bootstrap.php` が `eccubedb_test` を drop/create し、`sql/schema/ec-cube-4.3-mysql-mysqldump.sql` を読み込む。
+MariaDB reachable の場合は `be/tests/Sql/bootstrap.php` が `eccubedb_test` を drop/create し、`sql/schema/bemart-schema.sql` を読み込む。
 
 ## 今後の注意
 

@@ -1,72 +1,218 @@
-{#
-  BeMart admin System info — EC-CUBE Setting/System/system.twig.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-setting-system-system' %}
 {% set title = 'システム情報' %}
-{% set sub_title = 'システム設定' %}
+{% set sub_title = '設定' %}
+
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/System.php onGet):
+    info            list<{title: string, value: string}>|null
+                    — runtime environment rows: PHP Version, PHP SAPI, OS, Server, Application
+    phpinfoEnabled  boolean — render phpinfo embed when true
+
+  LINKS (#[Link]):
+    doAdminLogout   POST page://self/admin/logout
+
+  No form fields; page is read-only (GET only).
+  Design vocabulary: idea-admin-* (public/assets/idea-store/css/idea-admin.css).
+  Page-local extensions namespaced idea-admin-system-*.
+#}
+
+{% block stylesheet %}
+<style>
+/* ── System page local extensions (idea-admin-system-* namespace) ──── */
+
+/* KPI grid override — tighter on this page */
+.idea-admin-system-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+/* Spec table for the full info list */
+.idea-admin-system-spec {
+  width: 100%;
+  border-collapse: collapse;
+}
+.idea-admin-system-spec th,
+.idea-admin-system-spec td {
+  text-align: left;
+  padding: .7rem 1rem;
+  border-bottom: 1px solid rgba(205, 191, 170, .3);
+  vertical-align: top;
+}
+.idea-admin-system-spec th {
+  width: 30%;
+  font-weight: 700;
+  color: var(--idea-muted);
+  font-size: .85rem;
+  white-space: nowrap;
+}
+.idea-admin-system-spec td {
+  font-size: .9rem;
+  word-break: break-all;
+  font-family: "SF Mono", "Cascadia Code", ui-monospace, monospace;
+  font-size: .82rem;
+}
+.idea-admin-system-spec tr:last-child th,
+.idea-admin-system-spec tr:last-child td {
+  border-bottom: none;
+}
+.idea-admin-system-spec tr:hover td,
+.idea-admin-system-spec tr:hover th {
+  background: rgba(245, 237, 224, .4);
+}
+
+/* phpinfo embed */
+.idea-admin-system-phpinfo-frame {
+  width: 100%;
+  height: 520px;
+  border: none;
+  display: block;
+}
+
+/* Copy feedback */
+.idea-admin-system-copied {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  font-size: .78rem;
+  color: var(--idea-olive);
+  opacity: 0;
+  transition: opacity .2s;
+  pointer-events: none;
+}
+.idea-admin-system-copied.is-visible { opacity: 1; }
+</style>
+{% endblock %}
 
 {% block main %}
-    <div class="c-contentsArea__cols">
-        <div class="c-contentsArea__primaryCol">
-            <div class="c-primaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-8" id="server_info_box__header">
-                                <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="このEC-CUBEに関係しているシステム環境の情報を表示しています。">
-                                    <span class="card-title ">システム情報</span>
-                                    <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                </div>
-                            </div>
-                            <div class="col-4 text-end">
-                                <a data-bs-toggle="collapse" href="#systemInfo" aria-expanded="false" aria-controls="systemInfo">
-                                    <i class="fa fa-angle-up fa-lg"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="collapse show ec-cardCollapse" id="systemInfo">
-                        <div class="card-body" id="server_info_box__body_inner">
-                            {% for item in info %}
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <span>{{ item.title }}</span>
-                                    </div>
-                                    <div class="col">
-                                        <div class="row">
-                                            <div class="col" id="server_info_box__value--{{ loop.index }}">
-                                                {{ item.value }}
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            {% if phpinfoEnabled %}
-            <div class="c-primaryCol">
-                <div class="card rounded border-0 mb-4">
-                    <div class="card-header">
-                        <div class="row">
-                            <div class="col-8" id="php_info_box__header">
-                                <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="PHP情報を表示します。">
-                                    <span class="card-title">PHP情報</span>
-                                    <i class="fa fa-question-circle fa-lg ms-1"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="php_info_box__frame">
-                        <iframe name="php_info" src="/admin/system" height="500" frameborder="0" style="width: 100%;"></iframe>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+{#
+  ── Highlighted KPI strip: the 3 most operationally relevant values ──────
+  PHP Version / OS / Application are surfaced prominently at the top.
+  The full list follows in a spec table below.
+#}
+{% if info is not empty %}
+  {% set kpi_keys = ['PHP Version', 'OS', 'Application'] %}
+  <div class="idea-admin-system-kpi-grid" role="region" aria-label="主要環境情報">
+    {% for item in info %}
+      {% if item.title in kpi_keys %}
+        <div class="idea-admin-kpi">
+          <div class="idea-admin-kpi__label">{{ item.title }}</div>
+          <div class="idea-admin-kpi__value" style="font-size:1.15rem">{{ item.value }}</div>
         </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}
+
+{# ── Full spec list ─────────────────────────────────────────────────────── #}
+<section class="idea-admin-panel" aria-labelledby="system-info-heading">
+  <div class="idea-admin-panel__head">
+    <h3 id="system-info-heading">
+      <i class="fa fa-server fa-fw" aria-hidden="true"></i>
+      実行環境
+    </h3>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:.5rem">
+      <span class="idea-admin-system-copied" id="copy-feedback" aria-live="polite">
+        <i class="fa fa-check" aria-hidden="true"></i>
+        コピーしました
+      </span>
+      <button type="button" class="idea-admin-action" id="copy-btn"
+              aria-label="実行環境情報をクリップボードにコピー">
+        <i class="fa fa-clipboard fa-fw" aria-hidden="true"></i>
+        コピー
+      </button>
     </div>
+  </div>
+
+  <div class="idea-admin-panel__body" style="padding:0">
+    {% if info is not empty %}
+      <table class="idea-admin-system-spec" id="system-spec-table">
+        <caption class="visually-hidden">実行環境情報</caption>
+        <thead>
+          <tr>
+            <th scope="col">項目</th>
+            <th scope="col">値</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in info %}
+            <tr>
+              <th scope="row">{{ item.title }}</th>
+              <td>{{ item.value }}</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div class="idea-admin-empty" role="status">
+        <i class="fa fa-circle-info fa-2x" aria-hidden="true"></i>
+        <p class="idea-admin-empty__title">環境情報を取得できませんでした</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{# ── phpinfo embed — shown only when explicitly enabled ─────────────────── #}
+{% if phpinfoEnabled %}
+  <section class="idea-admin-panel" aria-labelledby="phpinfo-heading" style="margin-top:1.25rem">
+    <div class="idea-admin-panel__head">
+      <h3 id="phpinfo-heading">
+        <i class="fa fa-elephant fa-fw" aria-hidden="true"></i>
+        PHP 詳細情報
+      </h3>
+      <span class="idea-admin-badge" style="margin-left:.5rem">phpinfo</span>
+    </div>
+    <div class="idea-admin-panel__body" style="padding:0">
+      <iframe class="idea-admin-system-phpinfo-frame"
+              src="/admin/system?_phpinfo=1"
+              title="PHP 詳細情報"
+              sandbox="allow-same-origin"></iframe>
+    </div>
+  </section>
+{% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Copy table to clipboard ──────────────────────────────────────────── */
+  var copyBtn = document.getElementById('copy-btn');
+  var feedback = document.getElementById('copy-feedback');
+  var table = document.getElementById('system-spec-table');
+
+  if (!copyBtn || !table) { return; }
+
+  function buildText() {
+    var rows = table.querySelectorAll('tbody tr');
+    return Array.from(rows).map(function (tr) {
+      var cells = tr.querySelectorAll('th, td');
+      return Array.from(cells).map(function (c) {
+        return c.textContent.trim();
+      }).join('\t');
+    }).join('\n');
+  }
+
+  if (navigator.clipboard) {
+    copyBtn.addEventListener('click', function () {
+      navigator.clipboard.writeText(buildText()).then(function () {
+        if (feedback) {
+          feedback.classList.add('is-visible');
+          setTimeout(function () {
+            feedback.classList.remove('is-visible');
+          }, 2000);
+        }
+      });
+    });
+  } else {
+    copyBtn.hidden = true;
+  }
+}());
+</script>
 {% endblock %}

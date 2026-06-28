@@ -7,71 +7,31 @@ namespace MyVendor\BeMart\Tests\Resource;
 use BEAR\Resource\Code;
 use BEAR\Resource\ResourceInterface;
 use PHPUnit\Framework\TestCase;
-use Twig\Environment;
-use Twig\Markup;
-use Twig\TwigFilter;
-use Twig\TwigFunction;
 use MyVendor\BeMart\Tests\Support\HtmlTestInjector;
 
-use function array_diff;
-use function array_filter;
-use function array_values;
-use function count;
-use function dirname;
-use function explode;
-use function http_build_query;
-use function implode;
-use function in_array;
-use function is_dir;
-use function nl2br;
-use function number_format;
-use function preg_replace;
 use function str_contains;
-use function str_replace;
-use function trim;
 
 /**
- * Phase 3 — fidelity check for the Mypage withdrawal final-confirmation
- * (goMypageWithdrawConfirm) HTML port.
+ * HTML render tests for the WithdrawConfirm page (goMypageWithdrawConfirm).
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * Verifies the IdeaStore clean-room implementation of the withdrawal
+ * final-confirmation screen at page://self/mypage/withdraw-confirm.
  *
- * `Mypage/withdraw_confirm.twig` is the SECOND withdrawal screen — the
- * "退会手続きを実行してもよろしいでしょうか？" final confirmation. It is
- * a CONFIRM page: only a CSRF hidden token + a cancel link + an execute
- * button, no editable `<input>` fields, so no AbstractForm is involved.
- * The WithdrawConfirm resource
- * (src/Resource/Page/Mypage/WithdrawConfirm.php) is a thin pure renderer
- * (a NEW resource — BeMart's Withdraw::onPost performs the withdrawal
- * directly, no MypageWithdrawConfirm SCREEN resource ever existed). The
- * page includes the shared Mypage navi; this test feeds EC-CUBE's
- * navi.twig the matching BaseInfo flags + an empty `app.user` name so
- * both navi blocks render identically. The residual is the genuinely
- * EC-CUBE-runtime-only `<head>` frame material + the empty CSRF hidden
- * value.
+ * L1 — required fields and data output:
+ *   - HTTP 200 with Content-Type text/html; charset=utf-8
+ *   - Valid HTML document shell (doctype, lang=ja, body close)
+ *   - IdeaStore layout landmarks present
+ *   - Title block contains the Japanese page title
+ *   - csrfToken hidden input rendered (value may be empty in test context)
+ *
+ * L2 — form action/method and link href/rel:
+ *   - POST form action targets /mypage/withdraw  (doWithdrawCustomer)
+ *   - Cancel link href targets /mypage            (goMypage)
+ *   - Account nav contains link to /mypage/withdraw marked active
+ *   - Breadcrumb includes /mypage and /mypage/withdraw
  */
 final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
 {
-    /** @var list<string> */
-    private const RESIDUAL_ALLOWLIST = [
-        // --- frame: EC-CUBE-runtime-only <head> nodes (shared) ----------
-        '<meta name="eccube-csrf-token" content="">',
-        '<script>',
-        '$(function() {',
-        '$.ajaxSetup({',
-        "'headers': {",
-        '}',
-        '});',
-        '});',
-        '</script>',
-        '<title>BeMart / マイページ</title>',
-        '<title>EC-CUBE / マイページ</title>',
-        '<meta name="author" content="">',
-        // --- form: CSRF hidden input ------------------------------------
-        '<input type="hidden" name="csrfToken" value="">',
-    ];
-
     private ResourceInterface $resource;
 
     protected function setUp(): void
@@ -80,6 +40,7 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
+    /** L1: page renders as a valid HTML document with HTTP 200. */
     public function testWithdrawConfirmPageRendersAsHtmlDocument(): void
     {
         $ro = $this->resource->get('page://self/mypage/withdraw-confirm');
@@ -90,184 +51,80 @@ final class MypageWithdrawConfirmHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
         $this->assertStringContainsString('</body>', $html);
-
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testWithdrawConfirmPagePreservesEcCubeMarkupStructure(): void
+    /** L1: IdeaStore layout shell and page title are present. */
+    public function testWithdrawConfirmPageHasIdeaStoreLayout(): void
     {
         $html = $this->resource->get('page://self/mypage/withdraw-confirm')->toString();
 
-        foreach ([
-            '<div class="ec-mypageRole">',
-            '<h1>マイページ/退会手続き</h1>',
-            '<div class="ec-navlistRole">',
-            '<div class="ec-withdrawConfirmRole">',
-            'class="ec-withdrawConfirmRole__title"',
-            'class="ec-withdrawConfirmRole__description"',
-            'class="ec-withdrawConfirmRole__cancel ec-blockBtn--cancel"',
-            'value="complete"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        $this->assertStringContainsString('class="idea-store"', $html);
+        $this->assertStringContainsString('IDEA STORE', $html);
+        $this->assertStringContainsString('退会手続き', $html);
     }
 
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    /** L1: CSRF hidden input is present with the correct field name. */
+    public function testWithdrawConfirmPageHasCsrfTokenField(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-confirm')->toString();
+
+        $this->assertStringContainsString('name="csrfToken"', $html);
+        $this->assertTrue(
+            str_contains($html, 'type="hidden"'),
+            'csrfToken must be a hidden input',
+        );
+    }
+
+    /** L2: Submit form targets /mypage/withdraw with method POST (doWithdrawCustomer). */
+    public function testWithdrawConfirmFormActionAndMethod(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-confirm')->toString();
+
+        $this->assertStringContainsString('method="post"', $html);
+        $this->assertStringContainsString('action="/mypage/withdraw"', $html);
+    }
+
+    /** L2: Cancel link points to /mypage (goMypage). */
+    public function testWithdrawConfirmCancelLinkHref(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-confirm')->toString();
+
+        $this->assertStringContainsString('href="/mypage"', $html);
+    }
+
+    /** L2: Account navigation includes the withdraw entry as the active item. */
+    public function testWithdrawConfirmAccountNavActiveEntry(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-confirm')->toString();
+
+        $this->assertStringContainsString('href="/mypage/withdraw"', $html);
+        $this->assertStringContainsString('is-active', $html);
+    }
+
+    /** L2: Breadcrumb includes /mypage and /mypage/withdraw links. */
+    public function testWithdrawConfirmBreadcrumb(): void
+    {
+        $html = $this->resource->get('page://self/mypage/withdraw-confirm')->toString();
+
+        $this->assertStringContainsString('href="/mypage"', $html);
+        $this->assertStringContainsString('href="/mypage/withdraw"', $html);
+        $this->assertStringContainsString('idea-breadcrumb', $html);
+    }
+
+    /**
+     * EC-CUBE parity comparison — archived.
+     *
+     * The template is now a clean-room IdeaStore implementation;
+     * pixel-level parity with EC-CUBE's default theme no longer applies.
+     *
+     * @group ec-cube-parity-archived
+     */
     public function testWithdrawConfirmHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
-        $beMart = $this->resource->get('page://self/mypage/withdraw-confirm')->toString();
-        $ecCube = $this->renderEcCube();
-
-        $beMartLines = $this->normalize($beMart);
-        $ecCubeLines = $this->normalize($ecCube);
-
-        $onlyInEcCube = array_values(array_diff($ecCubeLines, $beMartLines));
-        $onlyInBeMart = array_values(array_diff($beMartLines, $ecCubeLines));
-
-        $unexplained = array_values(array_filter(
-            [...$onlyInEcCube, ...$onlyInBeMart],
-            static fn (string $line): bool => ! self::isResidual($line),
-        ));
-
-        $this->assertSame(
-            [],
-            $unexplained,
-            "BeMart's mypage withdraw-confirm HTML diverged from EC-CUBE's "
-            . "beyond the residual allowlist. Unexplained diff lines:\n  "
-            . implode("\n  ", $unexplained)
-            . "\n\n(only-in-EC-CUBE: " . count($onlyInEcCube)
-            . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
+        $this->markTestSkipped(
+            'EC-CUBE parity check retired: template rebuilt in IdeaStore design language.',
         );
-
-        $this->assertLessThanOrEqual(
-            14,
-            count($onlyInEcCube) + count($onlyInBeMart),
-            'residual diff unexpectedly large — port may have drifted',
-        );
-    }
-
-    private static function isResidual(string $line): bool
-    {
-        if (in_array($line, self::RESIDUAL_ALLOWLIST, true)) {
-            return true;
-        }
-
-        foreach ([
-            'eccube-csrf-token',
-            '<title>',
-            'meta name="author"',
-        ] as $family) {
-            if (str_contains($line, $family)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private function renderEcCube(): string
-    {
-        $ecCubeTemplates = dirname(__DIR__, 2)
-            . '/tools/ec-cube-source/src/Eccube/Resource/template/default';
-        if (! is_dir($ecCubeTemplates)) {
-            $this->markTestSkipped('EC-CUBE 4.3 reference clone not present.');
-        }
-
-        $twig = new Environment(new EcCubeStubLoader($ecCubeTemplates), [
-            'autoescape' => 'html',
-            'strict_variables' => false,
-        ]);
-        $this->registerEcCubeStubs($twig);
-
-        return $twig->render('Mypage/withdraw_confirm.twig', [
-            'form' => new EcCubeStub(['csrfToken' => '_csrfToken__']),
-            'BaseInfo' => new EcCubeStub([
-                'shop_name' => 'EC-CUBE',
-                'option_favorite_product' => true,
-                'option_point' => false,
-            ]),
-            'eccube_config' => ['locale' => 'ja'],
-            'Page' => new EcCubeStub([
-                'meta_tags' => '', 'description' => '', 'author' => '',
-                'keyword' => '', 'meta_robots' => '',
-            ]),
-            'Layout' => new EcCubeStub([
-                'Head' => null, 'BodyAfter' => null, 'Header' => [new EcCubeStub(['file_name' => 'logo'])],
-                'ContentsTop' => null, 'SideLeft' => null, 'SideRight' => null,
-                'MainTop' => null, 'MainBottom' => null, 'ContentsBottom' => null,
-                'Footer' => [new EcCubeStub(['file_name' => 'footer'])], 'Drawer' => [0 => 'x'], 'CloseBodyBefore' => null,
-                'ColumnNum' => 1,
-            ]),
-            'app' => new EcCubeStub([
-                'session' => new EcCubeStub([
-                    'flashbag' => new EcCubeFlashBag(),
-                ]),
-                'request' => new EcCubeStub(['_route' => 'mypage_withdraw_confirm']),
-                // WithdrawConfirm does not carry the customer name; the
-                // navi welcome renders without one — fed empty.
-                'user' => new EcCubeStub(['name01' => '', 'name02' => '', 'point' => 0]),
-            ]),
-            'subtitle' => 'マイページ',
-            'title' => 'マイページ',
-        ]);
-    }
-
-    private function registerEcCubeStubs(Environment $twig): void
-    {
-        $trans = static function (string $key, array $params = []): string {
-            $messages = EcCubeStub::jaMessages();
-            $text = $messages[$key] ?? $key;
-            foreach ($params as $name => $value) {
-                $text = str_replace($name, (string) $value, $text);
-            }
-
-            return $text;
-        };
-        $twig->addFilter(new TwigFilter('trans', $trans));
-        $twig->addFilter(new TwigFilter('nl2br', static fn ($s): string => nl2br((string) $s), ['is_safe' => ['html']]));
-        $twig->addFilter(new TwigFilter('number_format', static fn ($n): string => number_format((float) $n)));
-        $twig->addFilter(new TwigFilter('price', static function ($n): string {
-            $f = new \NumberFormatter('ja_JP', \NumberFormatter::CURRENCY);
-
-            return (string) $f->formatCurrency((float) ($n ?? 0), 'JPY');
-        }));
-
-        $twig->addFunction(new TwigFunction('trans', $trans));
-        $twig->addFunction(new TwigFunction('is_granted', static fn (): bool => false));
-        EcCubeAssetStub::register($twig);
-        EcCubeRouteStub::register($twig);
-        $twig->addFunction(new TwigFunction('csrfcsrfToken', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('csrfcsrfToken_for_anchor', static fn (): string => ''));
-        $twig->addFunction(new TwigFunction('constant', static fn (string $n): string => $n));
-        $twig->addFunction(new TwigFunction('template_from_string', static fn (string $s): string => $s));
-        // The single `form_widget(form.csrfToken)` — the Symfony CSRF widget;
-        // the port authors the same hidden `csrfToken` input plainly.
-        $twig->addFunction(new TwigFunction('form_widget', static function ($field = '', $opts = []): Markup {
-            if ($field === '_csrfToken__') {
-                return new Markup('<input type="hidden" name="csrfToken" value="">', 'UTF-8');
-            }
-
-            return new Markup('', 'UTF-8');
-        }));
-        $twig->addFunction(new TwigFunction('form_errors', static fn ($f = ''): string => ''));
-        $twig->addFunction(new TwigFunction('form_label', static fn ($f = '', $l = '', $o = []): string => ''));
-        $twig->addFunction(new TwigFunction('has_errors', static fn (...$f): bool => false));
-    }
-
-    /** @return list<string> */
-    private function normalize(string $html): array
-    {
-        $collapsed = (string) preg_replace('/[ \t]+/', ' ', $html);
-        $lines = [];
-        foreach (explode("\n", $collapsed) as $line) {
-            $line = trim($line);
-            if ($line !== '') {
-                $lines[] = $line;
-            }
-        }
-
-        return $lines;
     }
 }

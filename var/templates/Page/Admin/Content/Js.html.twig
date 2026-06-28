@@ -1,108 +1,149 @@
 {#
-  BeMart admin カスタマイズJavaScript編集 — EC-CUBE goJs.
-
-  PORT of EC-CUBE 4.3 admin-theme `Content/js.twig`
-  (src/Eccube/Resource/template/admin/Content/js.twig).
-
-  FORM/CRUD page. Extends the admin frame (`admin-base.html.twig`). The
-  markup skeleton + `c-*` / `ec-*` / Bootstrap classes are kept verbatim
-  from EC-CUBE; only the dynamic bindings are rebound. This is the
-  clone-from-one twin of `Css.html.twig` (EC-CUBE's css.twig / js.twig
-  share an identical structure).
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md): the
-  Js resource (src/Resource/Page/Admin/Content/Js.php — a thin HTML
-  renderer, see its port header) exposes an
-  {@see \MyVendor\BeMart\Form\AdminJsForm} as `body['form']`. The JS
-  textarea renders through that real form object:
-    {{ form.input('js')|raw }}      <- real <textarea> w/ id `form_js`
-  `AdminJsForm::init()` ports the field name / id from EC-CUBE's inline
-  `JsController` form (block prefix `form`).
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - `canonical-url route)`         -> deterministic `/{route}` (BeMartTwigExtension).
-   - `form_widget(form._token)` -> BeMart `csrfToken` hidden input.
-   - the ACE editor shell is kept; the hidden textarea carries the
-     EC-CUBE-compatible customize asset boundary readback.
+  BeMart admin — カスタマイズ JavaScript 編集
+  Resource: page://self/admin/content/js (GET + PUT)
+  Form:     AdminJsForm  (field: js / id: form_js)
+  Action:   POST /admin/content/js?_method=put
+            Fields: js, mode=content_operation_form, csrfToken
+  Design:   idea-admin-* vocabulary. No EC-CUBE / Bootstrap / jQuery.
 #}
 {% extends 'admin-base.html.twig' %}
 
-{% set route = 'admin-content-js' %}
-{% set title = 'JavaScript管理' %}
+{% set route     = 'admin-content-js' %}
+{% set title     = 'JavaScript 編集' %}
 {% set sub_title = 'コンテンツ管理' %}
 
 {% block stylesheet %}
-    <style>
-        .ui-resizable-se {
-            right: -3px;
-            bottom: -3px;
-        }
-    </style>
+<style>
+/* ── page-scoped additions (idea-admin-* naming) ── */
+.idea-admin-js-editor-wrap {
+  position: relative;
+}
+.idea-admin-js-editor-wrap textarea {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  font-size: .84rem;
+  line-height: 1.6;
+  min-height: 540px;
+  resize: vertical;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  tab-size: 2;
+}
+.idea-admin-js-char-count {
+  font-size: .74rem;
+  color: var(--idea-muted);
+  font-variant-numeric: tabular-nums;
+  margin-left: auto;
+}
+.idea-admin-js-saved-indicator {
+  display: none;
+  align-items: center;
+  gap: .3rem;
+  font-size: .76rem;
+  font-weight: 700;
+  color: var(--idea-olive);
+}
+.idea-admin-js-saved-indicator.is-visible {
+  display: inline-flex;
+}
+</style>
 {% endblock %}
 
 {% block main %}
-    <form id="content_js_form" method="post" action="/admin/content/js?_method=put">
-        <input type="hidden" id="form__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-        <input type="hidden" name="mode" value="content_operation_form">
+<form id="js-edit-form"
+      method="post"
+      action="/admin/content/js?_method=put">
 
-        <div class="c-contentsArea__cols">
-            <div class="c-contentsArea__primaryCol">
-                <div class="c-primaryCol">
-                    <!-- ページ設定 -->
-                    <div class="card rounded border-0 mb-4">
-                        <div class="card-header">
-                            <div class="row">
-                                <div class="col-8"><span class="card-title">JavaScript設定</span></div>
-                                <div class="col-4 text-end">
-                                    <a data-bs-toggle="collapse" href="#pageDetail" aria-expanded="false" aria-controls="pageDetail">
-                                        <i class="fa fa-angle-up fa-lg"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="collapse show ec-cardCollapse" id="pageDetail">
-                            <div class="card-body">
-                                <!-- コード -->
-                                <div class="row mb-2">
-                                    <div class="col-2">
-                                        <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="カスタマイズ用JavaScriptファイルを編集します。JavaScriptで記述します。">
-                                            <span>コード</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                                        </div>
-                                        <span class="badge bg-primary ms-1">必須</span>
-                                    </div>
-                                    <div class="col-10">
-                                        <div id="editor" style="height: 480px" class="form-control"></div>
-                                        <div style="display: none">{{ form.input('js')|raw }}</div>
-                                        {% if form.error('js') %}<span class="invalid-feedback d-block">{{ form.error('js') }}</span>{% endif %}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+    <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+    <input type="hidden" name="mode"      value="content_operation_form">
+
+    {# ── info notice ────────────────────────────────────────────────────── #}
+    <div class="idea-admin-notice idea-admin-notice--info" role="note">
+        <i class="fa fa-circle-info fa-fw" aria-hidden="true"></i>
+        ここで保存した JavaScript はストアフロントの全ページに読み込まれます。
+        構文エラーがないことを確認してから保存してください。
+    </div>
+
+    {# ── editor panel ────────────────────────────────────────────────────── #}
+    <div class="idea-admin-panel idea-admin-js-editor-wrap">
+
+        <div class="idea-admin-panel__head">
+            <h3><i class="fa fa-code fa-fw" aria-hidden="true"></i> カスタマイズ JavaScript</h3>
+            <span class="idea-admin-panel__hint">customize.js に書き出されます</span>
+            <span class="idea-admin-js-char-count" id="js-char-count" aria-live="polite"></span>
+            <span class="idea-admin-js-saved-indicator" id="js-saved-indicator" aria-live="polite">
+                <i class="fa fa-check-circle fa-fw" aria-hidden="true"></i>保存済み
+            </span>
+        </div>
+
+        <div class="idea-admin-panel__body">
+            <div class="idea-admin-field__input">
+                {{ form.input('js')|raw }}
+                {% if form.error('js') %}
+                    <span class="idea-admin-error" role="alert">{{ form.error('js') }}</span>
+                {% endif %}
             </div>
         </div>
-        <div class="c-conversionArea">
-            <div class="c-conversionArea__container">
-                <div class="row justify-content-between align-items-center">
-                    <div class="col-6">
-                        <div class="c-conversionArea__leftBlockItem">
-                            <a class="c-baseLink" href="/admin/page/page-list">
-                                <i class="fa fa-backward" aria-hidden="true"></i>
-                                <span>JavaScript管理</span>
-                            </a>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div id="ex-conversion-action" class="row align-items-center justify-content-end">
-                            <div class="col-auto">
-                                <button id="save-button" class="btn btn-ec-conversion px-5" type="submit">登録</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    </div>
+
+    {# ── fixed bottom toolbar ─────────────────────────────────────────────── #}
+    <div class="idea-admin-toolbar" role="toolbar" aria-label="ページ操作">
+        <div class="idea-admin-toolbar__back">
+            <a href="/admin/content/css">
+                <i class="fa fa-arrow-left fa-fw" aria-hidden="true"></i>CSS 管理へ
+            </a>
         </div>
-    </form>
+        <div class="idea-admin-toolbar__actions">
+            <button type="submit"
+                    id="js-save-btn"
+                    class="idea-admin-action idea-admin-action--primary">
+                <i class="fa fa-floppy-disk fa-fw" aria-hidden="true"></i>
+                保存
+            </button>
+        </div>
+    </div>
+
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+    'use strict';
+
+    var ta      = document.getElementById('form_js');
+    var counter = document.getElementById('js-char-count');
+    var saved   = document.getElementById('js-saved-indicator');
+    var form    = document.getElementById('js-edit-form');
+
+    function updateCount() {
+        if (!ta || !counter) { return; }
+        var n = ta.value.length;
+        counter.textContent = n.toLocaleString('ja-JP') + ' 文字';
+    }
+
+    if (ta) {
+        updateCount();
+        ta.addEventListener('input', function () {
+            updateCount();
+            if (saved) { saved.classList.remove('is-visible'); }
+        });
+    }
+
+    /* Mark "saved" state on successful redirect-back (URL unchanged = fresh GET). */
+    if (saved && window.location.search === '') {
+        var marker = sessionStorage.getItem('bemart-js-saved');
+        if (marker === '1') {
+            sessionStorage.removeItem('bemart-js-saved');
+            saved.classList.add('is-visible');
+        }
+    }
+
+    if (form) {
+        form.addEventListener('submit', function () {
+            sessionStorage.setItem('bemart-js-saved', '1');
+        });
+    }
+}());
+</script>
 {% endblock %}

@@ -1,107 +1,591 @@
-{#
-  BeMart admin 2段階認証 デバイス登録 — EC-CUBE admin two_factor_auth_set.
-
-  PORT of EC-CUBE 4.3 admin-theme `two_factor_auth_set.twig`
-  (src/Eccube/Resource/template/admin/two_factor_auth_set.twig).
-
-  This is a top-level wave login-context FORM page. It extends the admin
-  LOGIN frame (`admin-login-base.html.twig`, the port of EC-CUBE's
-  `login_frame.twig`) — EC-CUBE's `two_factor_auth_set.twig` likewise
-  `{% extends '@admin/login_frame.twig' %}`. The markup skeleton +
-  Bootstrap classes are kept verbatim; only the dynamic bindings are
-  rebound to the TwoFactorAuthSet resource body
-  (src/Resource/Page/Admin/TwoFactorAuthSet.php).
-
-  FORM-PAGE recipe (Ray.WebFormModule — see var/templates/README.md):
-  the resource exposes an
-  {@see \MyVendor\BeMart\Form\AdminTwoFactorAuthForm} as `body['form']`.
-  The inputs render through that real form object:
-
-    {{ form.input('authKey')|raw }}       <- hidden TOTP secret input
-    {{ form.input('deviceToken')|raw }}
-
-  EC-CUBE-ism rebinding (see var/templates/README.md, "Admin pages"):
-   - `{{ 'key'|trans }}`  -> the ja literal from messages.ja.yaml.
-   - canonical form action -> `/admin/two-factor-auth-set`.
-   - `form_widget(form._token)` -> EC-CUBE per-request CSRF widget. The
-     hidden `_token` input is kept (structure) with an empty value;
-     EC-CUBE-runtime only — enumerated as residual.
-   - the `{% block javascript %}` QR-code block uses `auth_key`,
-     `BaseInfo.shop_name` and `Member.name` to build the `otpauth://`
-     URI. BeMart's thin-renderer resource has no Be 2FA projection (the
-     be/ domain layer is frozen for this wave), so those are exposed as
-     `authKey` / `shopName` / `memberName` body placeholders (empty
-     until a Be `doSetupTwoFactorAuth` transition lands — flagged as a
-     MISSING-BODY-FIELD follow-up in the resource doc). The JS block is
-     kept verbatim around them; it is inert without the EC-CUBE bundle,
-     same status as the frame's runtime scripts.
-   - `{% if error %}` / `form_errors(...)` -> render nothing for the
-     pristine form, exactly as EC-CUBE.
-#}
 {% extends 'admin-login-base.html.twig' %}
 
-{% set title = '2段階認証' %}
+{% set title = '認証デバイス登録' %}
 
-{% block javascript %}
-<script>
-$(function () {
-    $("#qrcode").qrcode({
-        size: 200,
-        fill: '#000',
-        text: 'otpauth://totp/{{ ('BeMart:' ~ memberName|default(''))|url_encode }}?secret={{ authKey|default('') }}&issuer={{ 'BeMart'|url_encode }}',
-        radius: 0,
-        quiet: 0,
-        mode: 0, // 0: normal , 1: label strip , 2: label box , 3: image strip , 4: image box
-        mSize: 0.1,
-        mPosX: 0.5,
-        mPosY: 0.5,
-        label: 'no label',
-        fontname: 'sans',
-        fontcolor: '#000',
-        image: null
-    });
-});
-</script>
+{% block stylesheet %}
+<style>
+/* ─── 2FA setup card (extends login-card vocabulary) ─────────────────────── */
+
+.idea-admin-2fa-setup-card {
+  background: var(--idea-surface);
+  border: 1px solid rgba(205, 191, 170, .55);
+  border-radius: var(--idea-admin-radius-panel);
+  box-shadow: var(--idea-shadow-float);
+  overflow: hidden;
+  width: 100%;
+}
+
+.idea-admin-2fa-setup-card__head {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .35rem;
+  padding: 1.5rem 2rem 1.1rem;
+  background: var(--idea-surface-soft);
+  border-bottom: 1px solid rgba(205, 191, 170, .4);
+  text-align: center;
+}
+
+.idea-admin-2fa-setup-card__brand {
+  font-family: var(--idea-font-serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  color: var(--idea-ink);
+  text-decoration: none;
+}
+
+.idea-admin-2fa-setup-card__subtitle {
+  font-size: .72rem;
+  color: var(--idea-muted);
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.idea-admin-2fa-setup-card__body {
+  padding: 1.5rem 2rem 2rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* ─── Numbered step list ─────────────────────────────────────────────────── */
+
+.idea-admin-2fa-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: .5rem;
+}
+
+.idea-admin-2fa-step {
+  display: flex;
+  align-items: flex-start;
+  gap: .65rem;
+  font-size: .82rem;
+  color: var(--idea-ink);
+  line-height: 1.5;
+}
+
+.idea-admin-2fa-step__num {
+  flex: 0 0 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  background: var(--idea-olive);
+  color: var(--idea-surface);
+  font-size: .7rem;
+  font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: .08rem;
+}
+
+/* ─── QR code area ───────────────────────────────────────────────────────── */
+
+.idea-admin-2fa-qr-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .55rem;
+}
+
+.idea-admin-2fa-qr-frame {
+  width: 168px;
+  height: 168px;
+  border: 1px solid rgba(205, 191, 170, .55);
+  border-radius: var(--idea-admin-radius-input);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.idea-admin-2fa-qr-frame canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.idea-admin-2fa-qr-placeholder {
+  color: rgba(163, 153, 138, .5);
+  font-size: 2.5rem;
+}
+
+.idea-admin-2fa-qr-caption {
+  font-size: .73rem;
+  color: var(--idea-muted);
+  text-align: center;
+  line-height: 1.55;
+}
+
+/* ─── Token input group ──────────────────────────────────────────────────── */
+
+.idea-admin-2fa-group {
+  display: grid;
+  gap: .35rem;
+}
+
+.idea-admin-2fa-group label {
+  font-size: .8rem;
+  font-weight: 700;
+  color: var(--idea-muted);
+  letter-spacing: .03em;
+}
+
+.idea-admin-2fa-group input[type="text"] {
+  width: 100%;
+  min-height: 3rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: 1.45rem;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: .22em;
+  text-align: center;
+  padding: .4rem .6rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+
+.idea-admin-2fa-group input[type="text"]:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .18);
+}
+
+.idea-admin-2fa-group input[type="text"][aria-invalid="true"] {
+  border-color: #c06f4f;
+  box-shadow: 0 0 0 3px rgba(192, 111, 79, .14);
+}
+
+/* ─── Alert strip ────────────────────────────────────────────────────────── */
+
+.idea-admin-2fa-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: .55rem;
+  padding: .65rem .8rem;
+  border-radius: var(--idea-admin-radius-input);
+  border: 1px solid rgba(169, 71, 46, .28);
+  background: rgba(169, 71, 46, .07);
+  color: #a9472e;
+  font-size: .82rem;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+/* ─── Submit button ───────────────────────────────────────────────────────── */
+
+.idea-admin-2fa-submit {
+  width: 100%;
+  min-height: 2.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: .45rem;
+  background: var(--idea-olive);
+  border: 1px solid var(--idea-olive);
+  border-radius: var(--idea-admin-radius-button);
+  color: var(--idea-surface);
+  font: inherit;
+  font-size: .92rem;
+  font-weight: 700;
+  letter-spacing: .02em;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(82, 107, 85, .22);
+  transition: background .15s, border-color .15s, box-shadow .15s;
+}
+
+.idea-admin-2fa-submit:hover {
+  background: var(--idea-focus);
+  border-color: var(--idea-focus);
+}
+
+.idea-admin-2fa-submit:active {
+  box-shadow: none;
+  transform: translateY(1px);
+}
+
+/* ─── Footer ─────────────────────────────────────────────────────────────── */
+
+.idea-admin-2fa-footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: .45rem;
+  margin-top: 1.25rem;
+  font-size: .75rem;
+  color: var(--idea-muted);
+  text-align: center;
+}
+
+.idea-admin-2fa-footer a {
+  color: var(--idea-muted);
+  font-weight: 700;
+  text-decoration: underline;
+  transition: color .14s;
+}
+
+.idea-admin-2fa-footer a:hover { color: var(--idea-ink); }
+</style>
 {% endblock %}
 
 {% block main %}
-        <style>
-        #qrcode canvas { width: 150px; }
-        </style>
-    <div class="container" style="margin-top: 150px;">
-        <div class="row">
-            <div class="col-12 col-md-6 offset-md-3 col-lg-4 offset-lg-4">
-                <div class="text-center p-5 bg-white">
-                    <form name="form1" id="form1" method="post" action="/admin/two-factor-auth-set?_method=put">
-                        <input type="hidden" id="admin_two_factor_auth__token" name="csrfToken" value="{{ csrfToken|default('') }}">
-                        {{ form.input('authKey')|raw }}
-                        <h5 class="mb-3">2段階認証</h5>
-                        <p class="mb-3 text-start">QRコードを2段階認証用スマートフォンアプリで読み込み、表示された6桁の数字を入力してください。</p>
-                        <div id="qrcode" class="mb-3"></div>
-                        {% if message is defined and message %}
-                            <div class="text-danger mb-3 text-start small">{{ message }}</div>
-                        {% endif %}
-                        <div class="row">
-                            <div class="col-12">
-                                <div class="mb-3 d-flex justify-content-center">
-                                    {{ form.input('deviceToken')|raw }}
-                                </div>
-                                <p class="mb-3 text-start">{% if form.error('deviceToken') %}<span class="invalid-feedback d-block">{{ form.error('deviceToken') }}</span>{% endif %}</p>
-                            </div>
-                            <div class="col-12">
-                                <button type="submit" class="btn btn-primary w-100">登録</button>
-                            </div>
-                        </div>
 
-                    </form>
-                </div>
-            </div>
-            <div class="col-12">
-                <p class="text-center mt-3">
-                    <small>Copyright &copy; 2026 BeMart. All Rights Reserved.</small>
-                </p>
-            </div>
-        </div>
+<article class="idea-admin-2fa-setup-card" role="main" aria-label="認証デバイス登録">
+
+  <header class="idea-admin-2fa-setup-card__head">
+    <span class="idea-admin-2fa-setup-card__brand">{{ shopName|default('BeMart') }}</span>
+    <span class="idea-admin-2fa-setup-card__subtitle">認証デバイス登録</span>
+  </header>
+
+  <div class="idea-admin-2fa-setup-card__body">
+
+    {% if message is defined and message %}
+    <div class="idea-admin-2fa-alert" role="alert" aria-live="assertive">
+      <i class="fa fa-exclamation-circle" aria-hidden="true"></i>
+      <span>{{ message }}</span>
     </div>
+    {% endif %}
 
+    <form method="post" action="/admin/two-factor-auth-set?_method=put" novalidate
+          aria-label="認証コード登録フォーム" rel="doSetTwoFactorAuth">
+      <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+      {# hidden authKey — server-generated TOTP secret bound to pending setup challenge #}
+      {{ form.input('authKey')|raw }}
+
+      <div style="display: grid; gap: 1.25rem;">
+
+        {# ── Setup instructions ── #}
+        <ol class="idea-admin-2fa-steps" aria-label="設定手順">
+          <li class="idea-admin-2fa-step">
+            <span class="idea-admin-2fa-step__num" aria-hidden="true">1</span>
+            <span>Google Authenticator などの認証アプリをスマートフォンにインストールします。</span>
+          </li>
+          <li class="idea-admin-2fa-step">
+            <span class="idea-admin-2fa-step__num" aria-hidden="true">2</span>
+            <span>アプリを起動して QR コードを読み取ります。</span>
+          </li>
+          <li class="idea-admin-2fa-step">
+            <span class="idea-admin-2fa-step__num" aria-hidden="true">3</span>
+            <span>アプリに表示された <strong>6 桁のコード</strong>を入力して登録を完了します。</span>
+          </li>
+        </ol>
+
+        {# ── QR code canvas ── #}
+        <div class="idea-admin-2fa-qr-wrap">
+          <div class="idea-admin-2fa-qr-frame" id="idea-2fa-qr-frame" aria-label="QR コード" role="img">
+            <span class="idea-admin-2fa-qr-placeholder" aria-hidden="true" id="idea-2fa-qr-placeholder">
+              <i class="fa fa-qrcode"></i>
+            </span>
+            <canvas id="idea-2fa-qr-canvas" width="160" height="160" hidden
+                    aria-label="認証アプリで読み取る QR コード"></canvas>
+          </div>
+          <p class="idea-admin-2fa-qr-caption">
+            QR コードが読めない場合は手動で<br>
+            シークレットキーを入力してください。
+          </p>
+        </div>
+
+        {# ── 6-digit TOTP input ── #}
+        <div class="idea-admin-2fa-group">
+          <label for="admin_two_factor_auth_device_token">認証コード</label>
+          {{ form.input('deviceToken')|raw }}
+          {% if form.error('deviceToken') %}
+          <span class="idea-admin-error" role="alert">{{ form.error('deviceToken') }}</span>
+          {% endif %}
+        </div>
+
+        <button type="submit" class="idea-admin-2fa-submit">
+          <i class="fa fa-shield-alt" aria-hidden="true"></i>
+          デバイスを登録する
+        </button>
+
+      </div>
+    </form>
+
+  </div>
+
+</article>
+
+<footer class="idea-admin-2fa-footer">
+  <a href="/admin/login" rel="goAdminLogin">
+    <i class="fa fa-arrow-left" aria-hidden="true"></i>
+    ログイン画面に戻る
+  </a>
+  <span>&copy; 2026 {{ shopName|default('BeMart') }}</span>
+</footer>
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+/* ── Admin 2FA device-setup: QR render + UX ─────────────────────────────── *
+ * Vanilla JS only. No jQuery, no Bootstrap, no EC-CUBE bundles.             *
+ * Produces an otpauth:// URI and renders it as a QR code on a <canvas>.    *
+ * Self-contained byte-mode QR generator for versions 1-10 (EC level M).    *
+ * ─────────────────────────────────────────────────────────────────────── */
+(function () {
+  'use strict';
+
+  var authKey    = {{ authKey|default('')|json_encode|raw }};
+  var memberName = {{ memberName|default('')|json_encode|raw }};
+  var shopName   = {{ shopName|default('BeMart')|json_encode|raw }};
+
+  var canvas      = document.getElementById('idea-2fa-qr-canvas');
+  var placeholder = document.getElementById('idea-2fa-qr-placeholder');
+  var tokenInput  = document.getElementById('admin_two_factor_auth_device_token');
+
+  /* ── 1. UX: digits-only filter + autofocus ────────────────────────────── */
+  if (tokenInput) {
+    tokenInput.addEventListener('input', function () {
+      var v = this.value.replace(/\D/g, '').slice(0, 6);
+      if (v !== this.value) { this.value = v; }
+    });
+    if (authKey) { tokenInput.focus(); }
+  }
+
+  if (!authKey || !canvas) { return; }
+
+  var otpUri = 'otpauth://totp/'
+    + encodeURIComponent(shopName + ':' + (memberName || shopName))
+    + '?secret=' + encodeURIComponent(authKey)
+    + '&issuer=' + encodeURIComponent(shopName);
+
+  /* ── 2. Inline QR encoder (byte mode, EC-M, versions 1-10) ───────────── */
+
+  /* GF(256) */
+  var EXP = new Uint8Array(512), LOG = new Uint8Array(256);
+  (function () {
+    var x = 1;
+    for (var i = 0; i < 255; i++) {
+      EXP[i] = x; LOG[x] = i;
+      x = x << 1; if (x & 0x100) { x ^= 0x11d; }
+    }
+    for (var j = 255; j < 512; j++) { EXP[j] = EXP[j - 255]; }
+  }());
+
+  function gfMul(a, b) {
+    return (a && b) ? EXP[(LOG[a] + LOG[b]) % 255] : 0;
+  }
+
+  function rsGen(n) {
+    var g = [1];
+    for (var i = 0; i < n; i++) {
+      var e = EXP[i], ng = new Array(g.length + 1).fill(0);
+      for (var j = 0; j < g.length; j++) { ng[j] ^= g[j]; ng[j+1] ^= gfMul(g[j], e); }
+      g = ng;
+    }
+    return g;
+  }
+
+  function rsEncode(data, n) {
+    var gen = rsGen(n), msg = data.concat(new Array(n).fill(0));
+    for (var i = 0; i < data.length; i++) {
+      var c = msg[i];
+      if (c) { for (var j = 0; j < gen.length; j++) { msg[i+j] ^= gfMul(gen[j], c); } }
+    }
+    return msg.slice(data.length);
+  }
+
+  /* Capacity table: [version, totalCW, ecPerBlock, blocks, dataCW] (EC-M) */
+  var VTAB = [
+    [1,26,10,1,16],[2,44,16,1,28],[3,70,26,1,44],[4,100,18,2,64],
+    [5,134,24,2,86],[6,172,16,4,108],[7,196,18,4,124],[8,242,22,4,154],
+    [9,292,22,5,182],[10,346,26,5,216],
+  ];
+
+  function pickVer(len) {
+    for (var i = 0; i < VTAB.length; i++) { if (VTAB[i][4] >= len + 4) { return VTAB[i]; } }
+    return null;
+  }
+
+  function strToBytes(s) {
+    if (typeof TextEncoder !== 'undefined') { return Array.from(new TextEncoder().encode(s)); }
+    var b = [];
+    for (var i = 0; i < s.length; i++) {
+      var c = s.charCodeAt(i);
+      if (c < 0x80) { b.push(c); }
+      else if (c < 0x800) { b.push(0xc0|(c>>6), 0x80|(c&0x3f)); }
+      else { b.push(0xe0|(c>>12), 0x80|((c>>6)&0x3f), 0x80|(c&0x3f)); }
+    }
+    return b;
+  }
+
+  function encodeCW(bytes, ver) {
+    var cap = ver[4], bits = [];
+    function pb(v, n) { for (var k=n-1;k>=0;k--) { bits.push((v>>k)&1); } }
+    pb(4,4); pb(bytes.length,8);
+    for (var i=0;i<bytes.length;i++) { pb(bytes[i],8); }
+    var rem = cap*8-bits.length;
+    for (var t=0;t<Math.min(4,rem);t++) { bits.push(0); }
+    while (bits.length%8) { bits.push(0); }
+    var pi=0, pads=[0xec,0x11];
+    while (bits.length<cap*8) { pb(pads[pi++&1],8); }
+    var cw=[];
+    for (var b=0;b<cap;b++) { var v=0; for (var k=0;k<8;k++) { v=(v<<1)|bits[b*8+k]; } cw.push(v); }
+    return cw;
+  }
+
+  function interleave(dataCW, ver) {
+    var ecN=ver[2], blks=ver[3], total=ver[4];
+    var baseLen=Math.floor(total/blks), extra=total%blks;
+    var dBlocks=[], ecBlocks=[], off=0;
+    for (var b=0;b<blks;b++) {
+      var len=baseLen+(b>=blks-extra?1:0);
+      var blk=dataCW.slice(off,off+len); dBlocks.push(blk); ecBlocks.push(rsEncode(blk,ecN)); off+=len;
+    }
+    var out=[], maxL=dBlocks[dBlocks.length-1].length;
+    for (var c=0;c<maxL;c++) { for (var db=0;db<blks;db++) { if (c<dBlocks[db].length) { out.push(dBlocks[db][c]); } } }
+    for (var e=0;e<ecN;e++) { for (var eb=0;eb<blks;eb++) { out.push(ecBlocks[eb][e]); } }
+    return out;
+  }
+
+  function mkMatrix(n) { var m=[]; for(var r=0;r<n;r++){m.push(new Uint8Array(n));} return m; }
+  function setFn(m,r,c,v) { m[r][c]=(v&1)|2; }
+  function setD(m,r,c,v)  { if(!(m[r][c]&2)){m[r][c]=v&1;} }
+
+  function finder(m,r,c) {
+    for (var dy=-1;dy<=7;dy++) { for (var dx=-1;dx<=7;dx++) {
+      var rr=r+dy,cc=c+dx; if(rr<0||cc<0||rr>=m.length||cc>=m.length){continue;}
+      var dark=(dy>=0&&dy<=6&&(dx===0||dx===6))||(dx>=0&&dx<=6&&(dy===0||dy===6))||(dy>=2&&dy<=4&&dx>=2&&dx<=4);
+      setFn(m,rr,cc,dark?1:0);
+    }}
+  }
+
+  function align(m,r,c) {
+    for (var dy=-2;dy<=2;dy++) { for (var dx=-2;dx<=2;dx++) {
+      var dark=(dy===-2||dy===2||dx===-2||dx===2)||(dy===0&&dx===0);
+      setFn(m,r+dy,c+dx,dark?1:0);
+    }}
+  }
+
+  var APOS=[[],[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,28,46],[6,32,50]];
+
+  function buildFunc(m,ver) {
+    var n=m.length;
+    finder(m,0,0); finder(m,0,n-7); finder(m,n-7,0);
+    var ap=APOS[ver]||[];
+    for (var ai=0;ai<ap.length;ai++) { for (var aj=0;aj<ap.length;aj++) { if(!(m[ap[ai]][ap[aj]]&2)){align(m,ap[ai],ap[aj]);} } }
+    for (var i=8;i<n-8;i++) { setFn(m,6,i,i%2?0:1); setFn(m,i,6,i%2?0:1); }
+    setFn(m,(ver*4)+9,8,1); // dark module
+    // reserve format info
+    for (var f=0;f<=8;f++) { if(!(m[8][f]&2)){setFn(m,8,f,0);} if(!(m[f][8]&2)){setFn(m,f,8,0);} }
+    for (var g=0;g<8;g++) { setFn(m,8,n-1-g,0); setFn(m,n-1-g,8,0); }
+  }
+
+  function placeData(m,cws) {
+    var n=m.length, bidx=0, total=cws.length*8, col=n-1;
+    while (col>0) {
+      if(col===6){col--;}
+      var up=((((n-1-col)/2)|0)%2===0);
+      for (var row=0;row<n;row++) {
+        var r=up?(n-1-row):row;
+        for (var dc=0;dc<=1;dc++) {
+          var c=col-dc; if(m[r][c]&2){continue;}
+          var bit=0;
+          if(bidx<total){var cw=cws[bidx>>3];bit=(cw>>(7-(bidx&7)))&1;bidx++;}
+          setD(m,r,c,bit);
+        }
+      }
+      col-=2;
+    }
+  }
+
+  var MASKS=[
+    function(r,c){return(r+c)%2===0;},
+    function(r)  {return r%2===0;},
+    function(r,c){return c%3===0;},
+    function(r,c){return(r+c)%3===0;},
+    function(r,c){return(Math.floor(r/2)+Math.floor(c/3))%2===0;},
+    function(r,c){return(r*c)%2+(r*c)%3===0;},
+    function(r,c){return((r*c)%2+(r*c)%3)%2===0;},
+    function(r,c){return((r+c)%2+(r*c)%3)%2===0;},
+  ];
+
+  /* Pre-computed format info words for EC-M + masks 0-7 (ISO 18004 Table C.1) */
+  var FMTBITS=[0x5412,0x5125,0x5e7c,0x5b4b,0x45f9,0x40ce,0x4f97,0x4aa0];
+
+  function fmtInfo(m,mi) {
+    var n=m.length, bits=FMTBITS[mi], seq=[];
+    for (var f=0;f<15;f++) { seq.push((bits>>f)&1); }
+    var hPos=[0,1,2,3,4,5,7,8];
+    for (var h=0;h<8;h++) { m[8][hPos[h]]=seq[h]|2; }
+    m[8][8]=seq[8]|2;
+    var vPos=[7,5,4,3,2,1,0];
+    for (var v=0;v<7;v++) { m[vPos[v]][8]=seq[9+v]|2; }
+    for (var tr=0;tr<8;tr++) { m[8][n-1-tr]=seq[7-tr]|2; }
+    for (var bl=0;bl<7;bl++) { m[n-7+bl][8]=seq[8+bl]|2; }
+  }
+
+  function penalty(m) {
+    var n=m.length, p=0;
+    for (var r=0;r<n;r++) {
+      for (var run=0,prev=-1,c=0;c<n;c++) {
+        var v=m[r][c]&1;
+        if(v===prev){run++;if(run===5){p+=3;}else if(run>5){p++;}}else{run=1;prev=v;}
+      }
+    }
+    for (var c2=0;c2<n;c2++) {
+      for (var run2=0,prev2=-1,r2=0;r2<n;r2++) {
+        var v2=m[r2][c2]&1;
+        if(v2===prev2){run2++;if(run2===5){p+=3;}else if(run2>5){p++;}}else{run2=1;prev2=v2;}
+      }
+    }
+    for (var rr=0;rr<n-1;rr++) {
+      for (var cc=0;cc<n-1;cc++) {
+        var a=m[rr][cc]&1,b=m[rr][cc+1]&1,c3=m[rr+1][cc]&1,d=m[rr+1][cc+1]&1;
+        if(a===b&&b===c3&&c3===d){p+=3;}
+      }
+    }
+    return p;
+  }
+
+  function chooseMask(m) {
+    var save=m.map(function(row){return row.slice();}), best=-1, bestP=Infinity;
+    for (var mi=0;mi<8;mi++) {
+      for (var r=0;r<m.length;r++){for(var c=0;c<m.length;c++){m[r][c]=save[r][c];}}
+      for (var r2=0;r2<m.length;r2++){for(var c2=0;c2<m.length;c2++){if(!(m[r2][c2]&2)){m[r2][c2]^=MASKS[mi](r2,c2)?1:0;}}}
+      fmtInfo(m,mi);
+      var p=penalty(m); if(p<bestP){bestP=p;best=mi;}
+    }
+    for (var r3=0;r3<m.length;r3++){for(var c3=0;c3<m.length;c3++){m[r3][c3]=save[r3][c3];}}
+    for (var r4=0;r4<m.length;r4++){for(var c4=0;c4<m.length;c4++){if(!(m[r4][c4]&2)){m[r4][c4]^=MASKS[best](r4,c4)?1:0;}}}
+    fmtInfo(m,best);
+  }
+
+  function qrMatrix(text) {
+    var bytes=strToBytes(text), ver=pickVer(bytes.length);
+    if(!ver){return null;}
+    var n=ver[0]*4+17, m=mkMatrix(n);
+    buildFunc(m,ver[0]);
+    placeData(m,interleave(encodeCW(bytes,ver),ver));
+    chooseMask(m);
+    return m;
+  }
+
+  /* ── 3. Render ────────────────────────────────────────────────────────── */
+  var mat = qrMatrix(otpUri);
+  if (mat) {
+    var n   = mat.length;
+    var sz  = canvas.width;
+    var cell = Math.floor(sz / (n + 8));
+    if (cell < 1) { cell = 1; }
+    var margin = Math.floor((sz - n * cell) / 2);
+    var ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, sz, sz);
+    ctx.fillStyle = '#000000';
+    for (var r = 0; r < n; r++) {
+      for (var c = 0; c < n; c++) {
+        if (mat[r][c] & 1) { ctx.fillRect(margin + c*cell, margin + r*cell, cell, cell); }
+      }
+    }
+    canvas.hidden = false;
+    if (placeholder) { placeholder.hidden = true; }
+  }
+}());
+</script>
 {% endblock %}

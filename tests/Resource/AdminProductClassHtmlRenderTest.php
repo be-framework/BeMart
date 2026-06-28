@@ -13,15 +13,16 @@ use PHPUnit\Framework\TestCase;
 use Ray\Di\AbstractModule;
 
 /**
- * Phase 3 — HTML render check for the admin 商品規格 Product Tier-2 page.
+ * Phase 3 — HTML render check for the admin Product Variant (SKU) editor.
  *
- * Render-smoke standard: the page renders a full admin-frame HTML
- * document through {@see HtmlModule} with the body shape supplied by
- * {@see \MyVendor\BeMart\Resource\Page\Admin\Product\ProductClass}. The
- * blank "新規規格" editor is exercised — it renders with empty Fake
- * storage, so the smoke test needs no seed. The EC-CUBE residual-diff
- * fidelity check is a follow-up gated on the EC-CUBE 4.3 reference
- * clone (`tools/ec-cube-source/`).
+ * L1: required data output (productCode context, form fields)
+ * L2: action contract (form action/method, navigation link href/rel)
+ * Frame: idea-admin-shell / idea-admin-content landmarks from admin-base.html.twig
+ *
+ * EC-CUBE markup-parity assertions have been removed — the template is
+ * a clean-room idea-admin-* design and does not mirror EC-CUBE DOM structure.
+ * If EC-CUBE visual fidelity tests are needed in future, annotate them with
+ * @group ec-cube-parity-archived and call markTestSkipped().
  */
 final class AdminProductClassHtmlRenderTest extends TestCase
 {
@@ -46,34 +47,92 @@ final class AdminProductClassHtmlRenderTest extends TestCase
         $this->resource = $injector->getInstance(ResourceInterface::class);
     }
 
-    public function testProductClassRendersAsHtmlDocument(): void
+    /** L0: resource returns 200 with text/html content type */
+    public function testRendersOkWithHtmlContentType(): void
     {
         $ro = $this->resource->get('page://self/admin/product/product-class');
 
         $this->assertSame(Code::OK, $ro->code);
-
-        $html = $ro->toString();
-
-        $this->assertStringContainsString('<!doctype html>', $html);
-        $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="c-container">', $html);
-        $this->assertStringContainsString('</body>', $html);
-
+        $ro->toString();
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testProductClassPreservesEcCubeAdminMarkupStructure(): void
+    /** L0: admin-base.html.twig frame landmarks are present */
+    public function testFrameLandmarksPresent(): void
     {
         $html = $this->resource->get('page://self/admin/product/product-class')->toString();
 
-        foreach ([
-            '<header class="c-headerBar">',
-            '<div class="c-contentsArea">',
-            'id="product_class_form"',
-            'id="product_class_table"',
-            '規格一覧',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        $this->assertStringContainsString('<!doctype html>', $html);
+        $this->assertStringContainsString('<html lang="ja">', $html);
+        // idea-admin-shell wraps the entire admin layout (topbar + sidebar + content)
+        $this->assertStringContainsString('class="idea-admin-shell"', $html);
+        // idea-admin-content is the main content landmark
+        $this->assertStringContainsString('class="idea-admin-content"', $html);
+        $this->assertStringContainsString('</body>', $html);
+    }
+
+    /**
+     * L1: form fields derived from AdminProductClassForm must be rendered.
+     * Fields: price02 (required), stock, stock_unlimited, product_code, delivery_fee.
+     */
+    public function testRequiredFormFieldsAreRendered(): void
+    {
+        $html = $this->resource->get('page://self/admin/product/product-class')->toString();
+
+        $this->assertStringContainsString('id="product_class_price02"', $html, 'price02 field missing');
+        $this->assertStringContainsString('id="product_class_stock"', $html, 'stock field missing');
+        $this->assertStringContainsString('id="product_class_stock_unlimited"', $html, 'stock_unlimited checkbox missing');
+        $this->assertStringContainsString('id="product_class_code"', $html, 'product_code field missing');
+        $this->assertStringContainsString('id="product_class_delivery_fee"', $html, 'delivery_fee field missing');
+    }
+
+    /**
+     * L2: form action contract — the add-variant form must POST to the
+     * correct endpoint as defined by the resource routing convention.
+     */
+    public function testFormActionAndMethod(): void
+    {
+        $html = $this->resource->get('page://self/admin/product/product-class')->toString();
+
+        $this->assertStringContainsString('action="/admin/product/product-class"', $html, 'form action missing');
+        $this->assertStringContainsString('method="post"', $html, 'form method missing');
+        $this->assertStringContainsString('id="idea-product-class-form"', $html, 'form id missing');
+    }
+
+    /**
+     * L2: navigation link contract — toolbar must carry goProductList href and rel.
+     */
+    public function testProductListNavLinkPresent(): void
+    {
+        $html = $this->resource->get('page://self/admin/product/product-class')->toString();
+
+        $this->assertStringContainsString('href="/admin/product-list"', $html, 'goProductList href missing');
+        $this->assertStringContainsString('rel="goProductList"', $html, 'goProductList rel missing');
+    }
+
+    /**
+     * L2: with productCode query param, goProduct back-link href and rel must appear.
+     */
+    public function testProductEditBackLinkWithProductCode(): void
+    {
+        $html = $this->resource
+            ->get('page://self/admin/product/product-class', ['productCode' => 'sample-001'])
+            ->toString();
+
+        $this->assertStringContainsString('/admin/product/edit', $html, 'goProduct href missing');
+        $this->assertStringContainsString('rel="goProduct"', $html, 'goProduct rel missing');
+        $this->assertStringContainsString('sample-001', $html, 'productCode context missing from page');
+    }
+
+    /**
+     * L1: when classes array is empty the empty-state element must be present.
+     * Renders with blank Fake storage, so no seed is needed.
+     */
+    public function testEmptyStateRenderedWhenNoClasses(): void
+    {
+        $html = $this->resource->get('page://self/admin/product/product-class')->toString();
+
+        // The resource initialises classes as [] in onGet, so the empty branch fires.
+        $this->assertStringContainsString('idea-admin-empty', $html, 'empty-state element missing');
     }
 }

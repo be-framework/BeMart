@@ -1,305 +1,338 @@
 <script>
-    $(function() {
-        var updater;
-        // モーダルの表示を制御
-        $('#bulkSendMail, .confirmationModal').on('click', function (e) {
-            var modal = $('#sentUpdateModal');
-            var bootstrapModal = new bootstrap.Modal(modal.get(0));
-            bootstrapModal.show();
-            var eventTarget = $(e.currentTarget);
-            var type = eventTarget.data('type');
-            switch (type) {
-                case 'mail':
-                    updater = eventTarget.data('bulk-update') ? new BulkSendMail(modal, eventTarget) : new SimpleSendMail(modal, eventTarget);
-                    $('#notificationMail').attr('type', 'hidden');
-                    $('.notificationMail').hide();
-                    $('#viewEmail').removeClass('collapsed').addClass('collapsed');
-                    ;
-                    break;
-                default:
-                case 'status':
-                    updater = new SimpleStatusUpdate(modal, eventTarget); // bulk-update is always false
-                    $('#notificationMail').attr('type', 'checkbox');
-                    $('.notificationMail').show();
-                    $('#viewEmail').removeClass('collapsed').addClass('collapsed');
-            }
-            $.ajax(updater.getPreviewUrl()).done(function (res) {
-                $('#viewEmail').html(res);
-            });
-            $('.modal-title', modal).text(updater.modalTitle);
-            $('.modal-body > p.modal-message', modal).text(updater.modalMessage);
-            $('#bulkChange')
-                .attr({
-                    'data-bulk-update': eventTarget.data('bulk-update'),
-                    'data-type': eventTarget.data('type'),
-                    'data-update-status-url': eventTarget.data('update-status-url'),
-                    'data-notify-mail-url': eventTarget.data('notify-mail-url'),
-                    'data-update-status-id': eventTarget.data('update-status-id')
-                })
-                .text(updater.modalButton);
-        });
-        // プログレスバーの表示を制御
-        $('#bulkChange, .progressModal').on('click', function (e) {
-            //alert(1119);
-            var eventTarget = $(e.currentTarget);
-            var type = eventTarget.data('type');
-            if (type == 'status' && eventTarget.data('bulk-update') && $('#option_bulk_status').val() === '') {
-                alert('対応状況を選択してください');
-                return;
-            }
-            var modal = $('#sentUpdateModal');
-            var bootstrapModal = new bootstrap.Modal(modal.get(0));
-            bootstrapModal.show();
-            switch (type) {
-                case 'mail':
-                    updater = eventTarget.data('bulk-update') ? new BulkSendMail(modal, eventTarget) : new SimpleSendMail(modal, eventTarget);
-                    break;
-                default:
-                case 'status':
-                    if (eventTarget.data('bulk-update')) {
-                        updater = new BulkStatusUpdate(modal, eventTarget);
-                    } else {
-                        updater = new SimpleStatusUpdate(modal, eventTarget);
-                    }
-            }
-            $('.modal-title', modal).text(updater.modalTitle);
-            $('.modal-body > p.modal-message', modal).text("処理中...");
-            $('button', modal).hide();
-            $('#bulk-options').hide();
-            $('.progress', modal).show();
-            updater.totalCount = updater.getTotalCount();
-            var progress = new $.Deferred();
-            progress.progress(function () {
-                updater.progress(this, progress);
-            }).fail(function () {
-                updater.fail(this);
-            }).always(function () {
-                updater.always(this);
-            });
-            updater.getPromises(progress);
-        });
+(function () {
+    'use strict';
 
+    // ── Utility ─────────────────────────────────────────────────────────────
+
+    /**
+     * @param {string} selector
+     * @param {Element|Document} [ctx]
+     * @returns {Element|null}
+     */
+    function qs(selector, ctx) {
+        return (ctx || document).querySelector(selector);
+    }
+
+    /**
+     * @param {string} selector
+     * @param {Element|Document} [ctx]
+     * @returns {NodeList}
+     */
+    function qsa(selector, ctx) {
+        return (ctx || document).querySelectorAll(selector);
+    }
+
+    /** @returns {string} */
+    function getCsrfToken() {
+        var field = qs('#form-bulk input[name="csrfToken"]');
+        return field ? field.value : '';
+    }
+
+    /**
+     * POST via fetch. Returns a Promise resolving with the JSON body.
+     * @param {string} url
+     * @param {Object} data
+     * @returns {Promise<any>}
+     */
+    function postJson(url, data) {
+        var params = new URLSearchParams();
+        Object.keys(data).forEach(function (k) {
+            if (data[k] !== undefined && data[k] !== null) {
+                params.append(k, data[k]);
+            }
+        });
+        return fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params.toString()
+        }).then(function (res) {
+            if (!res.ok) {
+                return Promise.reject(new Error('HTTP ' + res.status));
+            }
+            return res.json().catch(function () { return {}; });
+        });
+    }
+
+    // ── Dialog (native <dialog>) ─────────────────────────────────────────────
+
+    var dialog = qs('#idea-admin-confirmation-dialog');
+    if (!dialog) { return; }
+
+    var dialogTitle   = qs('.idea-admin-dialog__title', dialog);
+    var dialogMessage = qs('.idea-admin-dialog__message', dialog);
+    var dialogActions = qs('.idea-admin-dialog__actions', dialog);
+    var dialogProgress = qs('.idea-admin-dialog__progress', dialog);
+    var progressBar   = qs('.idea-admin-progress__bar', dialog);
+    var errorList     = qs('.idea-admin-dialog__errors', dialog);
+    var mailPreview   = qs('.idea-admin-dialog__mail-preview', dialog);
+    var notificationMailRow = qs('.idea-admin-dialog__notification-row', dialog);
+    var confirmBtn    = qs('[data-action="confirm"]', dialog);
+    var cancelBtn     = qs('[data-action="cancel"]', dialog);
+
+    /**
+     * Reset the dialog to its initial state before showing.
+     * @param {string} title
+     * @param {string} message
+     * @param {string} buttonLabel
+     */
+    function openDialog(title, message, buttonLabel) {
+        if (dialogTitle)   { dialogTitle.textContent = title; }
+        if (dialogMessage) { dialogMessage.textContent = message; }
+        if (confirmBtn)    { confirmBtn.textContent = buttonLabel; }
+        if (dialogProgress) { dialogProgress.hidden = true; }
+        if (dialogActions)  { dialogActions.hidden = false; }
+        if (errorList)      { errorList.innerHTML = ''; errorList.hidden = true; }
+        if (progressBar)    { progressBar.style.width = '0%'; }
+        if (mailPreview)    { mailPreview.innerHTML = ''; mailPreview.hidden = true; }
+        dialog.showModal();
+    }
+
+    function closeDialog() {
+        dialog.close();
+    }
+
+    if (cancelBtn) {
+        cancelBtn.addEventListener('click', closeDialog);
+    }
+
+    dialog.addEventListener('click', function (e) {
+        // close on backdrop click (click on dialog element itself)
+        if (e.target === dialog) { closeDialog(); }
     });
 
-    /*
-     * Super class
-     */
-    function ConfirmationModal(modal) {
-        this.modal = modal;
-        this.mailCount = 0;
-        this.currentCount = 0;
-        this.totalCount = 0;
+    // ── Progress helpers ─────────────────────────────────────────────────────
+
+    var currentCount = 0;
+    var totalCount   = 0;
+
+    function startProgress(total) {
+        currentCount = 0;
+        totalCount   = total;
+        if (dialogProgress) { dialogProgress.hidden = false; }
+        if (dialogActions)  { dialogActions.hidden = true; }
+        if (progressBar)    { progressBar.style.width = '0%'; }
     }
-    ConfirmationModal.prototype = {
-        modalTitle: "出荷済に更新します",
-        modalMessage: "出荷情報を出荷済みにします。同時におこなう操作を選択してから［実行］ボタンを押してください。この操作は取り消すことができません。ご注意ください。",
-        modalButton: "実行",
-        getPreviewUrl: function () {
-            return null;
-        },
-        getTotalCount: function () {
-            return 1;
-        },
-        progress: function (result, progress) {
-            $('.progress-bar', this.modal).css('width', (++this.currentCount / this.totalCount * 100) + '%');
-            if (result['message']) {
-                $('<li><span class="badge bg-warning">NOTICE</span> </li>')
-                    .append($('<span></span>').text(result['message']))
-                    .appendTo('#bulkErrors');
-            }
-            if (this.currentCount >= this.totalCount) {
-                progress.resolve();
-            }
-        },
-        fail: function (result) {
-            $('<li><span class="badge bg-danger">ERROR</span> </li>')
-                .append($('<span></span>').text("システムエラーが発生しました"))
-                .appendTo('#bulkErrors');
-        },
-        always: function (result) {
-            $('.progress', this.modal).hide();
-            $('.modal-body > p.modal-message', this.modal).text("完了しました。");
-            $('#bulkChangeComplete').show();
-        },
-        getPromises: function (progress, url, data) {
-            if (data == undefined) {
-                data = {
-                    'notificationMail': $('input#notificationMail:checked').val(),
-                    'csrfToken': $('#form_bulk input[name="csrfToken"]').val()
-                };
-            }
-            return $.ajax({
-                'url': url,
-                'type': 'POST',
-                'data': data
+
+    function advanceProgress(result) {
+        currentCount++;
+        if (progressBar) {
+            progressBar.style.width = (currentCount / totalCount * 100).toFixed(1) + '%';
+        }
+        if (result && result.message && errorList) {
+            var li = document.createElement('li');
+            li.className = 'idea-admin-dialog__error-item idea-admin-dialog__error-item--notice';
+            li.textContent = result.message;
+            errorList.appendChild(li);
+            errorList.hidden = false;
+        }
+    }
+
+    function failProgress() {
+        if (!errorList) { return; }
+        var li = document.createElement('li');
+        li.className = 'idea-admin-dialog__error-item idea-admin-dialog__error-item--error';
+        li.textContent = 'システムエラーが発生しました';
+        errorList.appendChild(li);
+        errorList.hidden = false;
+    }
+
+    function finishProgress(message) {
+        if (dialogProgress) { dialogProgress.hidden = true; }
+        if (dialogActions)  { dialogActions.hidden = false; }
+        if (confirmBtn)     { confirmBtn.hidden = true; }
+        if (dialogMessage)  { dialogMessage.textContent = message || '完了しました。'; }
+    }
+
+    // ── Status update (single order) ─────────────────────────────────────────
+
+    /**
+     * @param {Element} trigger  — the clicked button/link with data-* attrs
+     */
+    function initSimpleStatusUpdate(trigger) {
+        var updateUrl  = trigger.dataset.updateStatusUrl;
+        var statusId   = trigger.dataset.updateStatusId;
+        var previewUrl = trigger.dataset.previewNotifyMailUrl;
+
+        if (notificationMailRow) { notificationMailRow.hidden = false; }
+
+        if (previewUrl && mailPreview) {
+            fetch(previewUrl)
+                .then(function (r) { return r.text(); })
+                .then(function (html) {
+                    mailPreview.innerHTML = html;
+                    mailPreview.hidden = false;
+                })
+                .catch(function () {});
+        }
+
+        openDialog(
+            '対応状況を変更します',
+            '対応状況を変更します。同時に行う操作を選択してから［実行］ボタンを押してください。この操作は取り消すことができません。',
+            '実行'
+        );
+
+        confirmBtn.onclick = function () {
+            var notifyMail = qs('input#notification-mail:checked');
+            startProgress(1);
+            var mailCount = 0;
+
+            postJson(updateUrl, {
+                orderStatus: statusId,
+                notificationMail: notifyMail ? notifyMail.value : undefined,
+                csrfToken: getCsrfToken()
             })
-                .fail(function () {
-                    progress.reject();
-                    ConfirmationModal.prototype.fail.call(this);
+                .then(function (result) {
+                    if (result && result.mail) { mailCount++; }
+                    advanceProgress(result);
+                    var suffix = mailCount > 0 ? mailCount + '件のメールを送信しました。' : '';
+                    finishProgress('完了しました。' + suffix);
                 })
-                .always(function (data) {
-                    progress.notifyWith(data);
+                .catch(function () {
+                    failProgress();
+                    finishProgress('エラーが発生しました。');
                 });
-        }
-    };
-    /*
-     * ステータス一括更新
-     */
-    function BulkStatusUpdate(modal, eventTarget) {
-        ConfirmationModal.call(this, modal);
-        this.eventTarget = eventTarget;
+        };
     }
-    // extend super class
-    BulkStatusUpdate.prototype = Object.create(ConfirmationModal.prototype, {
-        constructor: {
-            value: ConfirmationModal
-        },
-        modalTitle: {
-            value: "対応状況の変更"
-        },
-        getTotalCount: {
-            value: function () {
-                return $('input[data-id]:checked').length;
-            }
-        },
-        getPromises: {
-            value: function (progress) {
-                var statuses = [];
-                $('input[data-id]:checked').each(function () {
-                    statuses.push({
-                        'url': $(this).data('update-status-url'),
-                        'data': {
-                            'orderStatus': $('#option_bulk_status').val(),
-                            'csrfToken': $('#form_bulk input[name="csrfToken"]').val()
-                        }
-                    });
-                });
-                // ポイントや在庫の加算・減算は非同期で実行できないため、同期処理で実行
-                var callback = function () {
-                    var status = statuses.shift();
-                    var url = status.url;
-                    var data = status.data;
 
-                    ConfirmationModal.prototype.getPromises.call(this, progress, url, data)
-                        .done(function () {
-                            if (statuses.length) {
-                                callback();
-                            }
-                        })
-                }
-                callback();
-            }
+    // ── Status update (bulk) ─────────────────────────────────────────────────
+
+    function initBulkStatusUpdate() {
+        var bulkStatusSelect = qs('#option-bulk-status');
+        if (!bulkStatusSelect || bulkStatusSelect.value === '') {
+            alert('対応状況を選択してください');
+            return false;
         }
-    });
-    /*
-     * ステータス個別更新
-     */
-    function SimpleStatusUpdate(modal, eventTarget) {
-        ConfirmationModal.call(this, modal);
-        this.eventTarget = eventTarget;
-        this.notifierCompleteMessage = '';
-    }
-    // extend super class
-    SimpleStatusUpdate.prototype = Object.create(ConfirmationModal.prototype, {
-        constructor: {
-            value: ConfirmationModal
-        },
-        getPreviewUrl: {
-            value: function () {
-                return this.eventTarget.data('preview-notify-mail-url');
-            }
-        },
-        progress: {
-            value: function (result, progress) {
-                if (result.mail) {
-                    this.mailCount++;
-                    this.notifierCompleteMessage = '%count%件のメールを送信しました。'.replace(/%count%/, this.mailCount);
-                }
-                ConfirmationModal.prototype.progress.call(this, result, progress);
-            }
-        },
-        always: {
-            value: function (result) {
-                ConfirmationModal.prototype.always.call(this, result);
-                $('.modal-body > p.modal-message', this.modal).text("完了しました。" + this.notifierCompleteMessage);
-            }
-        },
-        getPromises: {
-            value: function (progress) {
-                var url = this.eventTarget.data('update-status-url');
-                var data = {
-                    'orderStatus': this.eventTarget.data('update-status-id'),
-                    'notificationMail': $('input#notificationMail:checked').val(),
-                    'csrfToken': $('#form_bulk input[name="csrfToken"]').val()
-                };
-                return ConfirmationModal.prototype.getPromises.call(this, progress, url, data);
-            }
-        }
-    });
-    /*
-     * メール一括送信
-     */
-    function BulkSendMail(modal) {
-        SimpleStatusUpdate.call(this, modal);
-    }
-    // extend BulkUpdate
-    BulkSendMail.prototype = Object.create(SimpleStatusUpdate.prototype, {
-        constructor: {
-            value: SimpleStatusUpdate
-        },
-        modalTitle: {
-            value: "出荷お知らせメールを送信します"
-        },
-        modalMessage: {
-            value: "出荷お知らせメールを送信します。メールの文面を確認してから［送信］ボタンを押してください。この操作は取り消すことができません。ご注意ください。"
-        },
-        modalButton: {
-            value: "送信"
-        },
-        getPreviewUrl: {
-            value: function () {
-                return $('input[data-preview-notify-mail-url]:checked').data('preview-notify-mail-url');
-            }
-        },
-        getTotalCount: {
-            value: function () {
-                return $('input[data-preview-notify-mail-url]:checked').length;
-            }
-        },
-        getPromises: {
-            value: function (progress) {
-                return $('input[data-notify-mail-url]:checked').map(function () {
-                    var url = $(this).data('notify-mail-url');
-                    return ConfirmationModal.prototype.getPromises.call(this, progress, url);
+
+        if (notificationMailRow) { notificationMailRow.hidden = true; }
+
+        openDialog(
+            '対応状況の変更',
+            '選択した受注の対応状況を一括変更します。この操作は取り消すことができません。',
+            '実行'
+        );
+
+        var targets = Array.from(qsa('input[data-id]:checked'));
+        confirmBtn.onclick = function () {
+            startProgress(targets.length);
+            var chain = Promise.resolve();
+            targets.forEach(function (input) {
+                chain = chain.then(function () {
+                    return postJson(input.dataset.updateStatusUrl, {
+                        orderStatus: bulkStatusSelect.value,
+                        csrfToken: getCsrfToken()
+                    })
+                        .then(function (result) { advanceProgress(result); })
+                        .catch(function () { failProgress(); });
                 });
-            }
-        }
-    });
-    /*
-     * 個別メール送信
-     */
-    function SimpleSendMail(modal, relatedTarget) {
-        SimpleStatusUpdate.call(this, modal, relatedTarget);
+            });
+            chain.then(function () { finishProgress(); });
+        };
+        return true;
     }
-    // extends SimpleUpdate
-    SimpleSendMail.prototype = Object.create(SimpleStatusUpdate.prototype, {
-        constructor: {
-            value: SimpleStatusUpdate
-        },
-        modalTitle: {
-            value: "出荷お知らせメールを送信します"
-        },
-        modalMessage: {
-            value: "出荷お知らせメールを送信します。メールの文面を確認してから［送信］ボタンを押してください。この操作は取り消すことができません。ご注意ください。"
-        },
-        modalButton: {
-            value: "送信"
-        },
-        getPromises: {
-            value: function (progress) {
-                var url = this.eventTarget.data('notify-mail-url');
-                return ConfirmationModal.prototype.getPromises.call(this, progress, url);
+
+    // ── Mail send (single) ────────────────────────────────────────────────────
+
+    function initSimpleSendMail(trigger) {
+        var notifyUrl  = trigger.dataset.notifyMailUrl;
+        var previewUrl = trigger.dataset.previewNotifyMailUrl;
+
+        if (notificationMailRow) { notificationMailRow.hidden = true; }
+
+        if (previewUrl && mailPreview) {
+            fetch(previewUrl)
+                .then(function (r) { return r.text(); })
+                .then(function (html) {
+                    mailPreview.innerHTML = html;
+                    mailPreview.hidden = false;
+                })
+                .catch(function () {});
+        }
+
+        openDialog(
+            '出荷お知らせメールを送信します',
+            '出荷お知らせメールを送信します。メールの文面を確認してから［送信］ボタンを押してください。この操作は取り消すことができません。',
+            '送信'
+        );
+
+        confirmBtn.onclick = function () {
+            startProgress(1);
+            postJson(notifyUrl, { csrfToken: getCsrfToken() })
+                .then(function (result) {
+                    advanceProgress(result);
+                    finishProgress('完了しました。');
+                })
+                .catch(function () {
+                    failProgress();
+                    finishProgress('エラーが発生しました。');
+                });
+        };
+    }
+
+    // ── Mail send (bulk) ─────────────────────────────────────────────────────
+
+    function initBulkSendMail() {
+        var targets = Array.from(qsa('input[data-preview-notify-mail-url]:checked'));
+        if (!targets.length) { return false; }
+
+        if (notificationMailRow) { notificationMailRow.hidden = true; }
+
+        var firstPreviewUrl = targets[0].dataset.previewNotifyMailUrl;
+        if (firstPreviewUrl && mailPreview) {
+            fetch(firstPreviewUrl)
+                .then(function (r) { return r.text(); })
+                .then(function (html) {
+                    mailPreview.innerHTML = html;
+                    mailPreview.hidden = false;
+                })
+                .catch(function () {});
+        }
+
+        openDialog(
+            '出荷お知らせメールを送信します',
+            '出荷お知らせメールを送信します。メールの文面を確認してから［送信］ボタンを押してください。この操作は取り消すことができません。',
+            '送信'
+        );
+
+        confirmBtn.onclick = function () {
+            var mailTargets = Array.from(qsa('input[data-notify-mail-url]:checked'));
+            startProgress(mailTargets.length || 1);
+            var chain = Promise.resolve();
+            mailTargets.forEach(function (input) {
+                chain = chain.then(function () {
+                    return postJson(input.dataset.notifyMailUrl, { csrfToken: getCsrfToken() })
+                        .then(function (result) { advanceProgress(result); })
+                        .catch(function () { failProgress(); });
+                });
+            });
+            chain.then(function () { finishProgress(); });
+        };
+        return true;
+    }
+
+    // ── Event delegation ─────────────────────────────────────────────────────
+
+    document.addEventListener('click', function (e) {
+        var trigger = e.target.closest('[data-modal-type]');
+        if (!trigger) { return; }
+        e.preventDefault();
+
+        var modalType    = trigger.dataset.modalType;    // 'status' | 'mail'
+        var isBulk       = trigger.dataset.bulkUpdate === 'true';
+
+        if (modalType === 'status') {
+            if (isBulk) {
+                initBulkStatusUpdate();
+            } else {
+                initSimpleStatusUpdate(trigger);
+            }
+        } else if (modalType === 'mail') {
+            if (isBulk) {
+                initBulkSendMail();
+            } else {
+                initSimpleSendMail(trigger);
             }
         }
     });
+
+}());
 </script>

@@ -31,35 +31,22 @@ use function str_contains;
 use function trim;
 
 /**
- * Phase 3 — fidelity check for the Reset (goResetPassword) HTML port.
+ * Functional HTML render test for Reset (doResetPassword).
  *
- * Same standard as {@see CartHtmlRenderTest}: BeMart's storefront
- * templates are PORTS of EC-CUBE 4.3's default-theme Twig.
+ * The template was rebuilt from scratch in the IdeaStore design language
+ * (var/templates/Page/Reset.html.twig); it no longer carries EC-CUBE markup.
+ * The EC-CUBE parity comparison test is archived below.
  *
- * EC-CUBE's `Forgot/reset.twig` is a FORM page. This port follows the
- * Ray.WebFormModule form-page recipe (see var/templates/README.md): the
- * Reset resource exposes a real {@see ResetForm} (an AbstractForm) as
- * `body.form`, the port renders the inputs via `{{ form.input(...) }}`,
- * and this test renders EC-CUBE's `form_widget` / `form_label` calls
- * through the SAME `ResetForm` instance so the widgets diff to ZERO.
- *
- * Two BeMart-side-only residual lines are expected and explained:
- *   - the `resetKey` hidden input — EC-CUBE carries the reset key in the
- *     URL / session, BeMart carries it in a hidden form field (the
- *     ResetForm is keyed by `resetKey`, see Reset::onGet);
- *   - the empty `csrfToken` CSRF hidden value.
- *
- * MISSING-FIELD NOTE — EC-CUBE's `PasswordResetType` has a `email`
- * field; BeMart's `ResetPasswordInput` models `resetKey` + `password`,
- * not email. The `email` input is rendered for fidelity (ResetForm
- * declares it as a renderer field) but the field is flagged as a
- * missing-body-field residual; not enriched in this template wave.
+ * L1 checks: required fields present in the rendered output.
+ * L2 checks: form action / method match the Resource #[Link] contract
+ *   (page://self/reset, POST), the resetKey hidden field is carried, and
+ *   the login link (rel=goLogin) is present.
  */
 final class ResetHtmlRenderTest extends TestCase
 {
     /**
-     * EC-CUBE / BeMart lines with no counterpart on the other side. Each
-     * entry is a whitespace-collapsed line; the comment states WHY it is
+     * EC-CUBE lines with no BeMart counterpart and vice versa. Each entry
+     * is a whitespace-collapsed line; the comment states WHY it is
      * acceptable.
      *
      * @var list<string>
@@ -109,55 +96,61 @@ final class ResetHtmlRenderTest extends TestCase
 
         $this->assertStringContainsString('<!doctype html>', $html);
         $this->assertStringContainsString('<html lang="ja">', $html);
-        $this->assertStringContainsString('<div class="ec-layoutRole">', $html);
+        $this->assertStringContainsString('<main>', $html);
         $this->assertStringContainsString('</body>', $html);
 
         $this->assertSame('text/html; charset=utf-8', $ro->headers['Content-Type']);
     }
 
-    public function testResetPagePreservesEcCubeMarkupStructure(): void
+    /**
+     * L1/L2 functional check: the reset form exposes the required ALPS
+     * data-contract fields, the correct action/method transition, and the
+     * login link matches the Resource #[Link] rel=goLogin contract.
+     */
+    public function testResetPagePreservesSemanticStructure(): void
     {
         $html = $this->resource->get('page://self/reset')->toString();
 
-        foreach ([
-            '<div class="ec-registerRole">',
-            '<div class="ec-pageHeader">',
-            '<div class="ec-off1Grid">',
-            'class="ec-off1Grid__cell"',
-            '<form id="form1" method="post" novalidate>',
-            '<div class="ec-borderedDefs">',
-            '<div class="ec-input">',
-            '<div class="ec-registerRole__actions">',
-            '<div class="ec-off4Grid">',
-            'class="ec-blockBtn--action"',
-        ] as $needle) {
-            $this->assertStringContainsString($needle, $html, "ported markup missing: {$needle}");
-        }
+        // L2 — ALPS doResetPassword transition: form posts to /reset
+        $this->assertStringContainsString('method="post"', $html, 'form method must be POST');
+        $this->assertStringContainsString('action="/reset"', $html, 'form action must be /reset');
+
+        // L2 — goLogin link present (Resource #[Link] rel=goLogin, href=page://self/login)
+        $this->assertStringContainsString('href="/login"', $html, 'goLogin link to /login required');
+        $this->assertStringContainsString('rel="goLogin"', $html, 'goLogin rel attribute required');
+
+        // L2 — submit button present
+        $this->assertStringContainsString('type="submit"', $html, 'submit button required');
     }
 
     /**
-     * The password inputs are rendered by a real form library.
+     * L1 — all required form fields are rendered by the real ResetForm.
      */
     public function testResetPageRendersRealFormInputs(): void
     {
         $html = $this->resource->get('page://self/reset')->toString();
 
-        $this->assertStringContainsString('name="email"', $html);
-        $this->assertStringContainsString('name="password"', $html);
-        $this->assertStringContainsString('type="password"', $html);
-        $this->assertStringContainsString('name="password_confirm"', $html);
-        // resetKey carried in a hidden field for the POST.
-        $this->assertStringContainsString('name="resetKey"', $html);
+        // L1 — email renderer field (ResetForm declares it for display fidelity)
+        $this->assertStringContainsString('name="email"', $html, 'email input required');
+
+        // L1 — password fields (ResetPasswordInput contract fields)
+        $this->assertStringContainsString('name="password"', $html, 'password input required');
+        $this->assertStringContainsString('type="password"', $html, 'password input type must be password');
+        $this->assertStringContainsString('name="password_confirm"', $html, 'password_confirm input required');
+
+        // L1 — resetKey carried in a hidden field for the POST
+        $this->assertStringContainsString('name="resetKey"', $html, 'resetKey hidden input required');
     }
 
     /**
-     * The honesty test: diff BeMart's rendered reset page against
-     * EC-CUBE's own rendering. Every difference must be in the residual
-     * allowlist.
+     * EC-CUBE markup parity test — archived; superseded by functional checks
+     * (license cleanup). The template was rebuilt in the IdeaStore design
+     * language and no longer shares EC-CUBE DOM structure.
      */
-    #[\PHPUnit\Framework\Attributes\Group('ec-cube-reference')]
+    #[\PHPUnit\Framework\Attributes\Group('ec-cube-parity-archived')]
     public function testResetHtmlMatchesEcCubeRenderingWithinResidualAllowlist(): void
     {
+        $this->markTestSkipped('EC-CUBE markup parity retired; superseded by functional checks (license cleanup).');
         $beMart = $this->resource->get('page://self/reset')->toString();
         $ecCube = $this->renderEcCubeReset();
 
@@ -182,10 +175,6 @@ final class ResetHtmlRenderTest extends TestCase
             . ', only-in-BeMart: ' . count($onlyInBeMart) . ')',
         );
 
-        // With the inputs + labels rendered by a real ResetForm / ported
-        // `form_label` on both sides, the residual is the shared <head>
-        // frame material + the empty CSRF hidden value + the BeMart-only
-        // resetKey hidden input — no form-widget residual at all.
         $this->assertLessThanOrEqual(
             14,
             count($onlyInEcCube) + count($onlyInBeMart),

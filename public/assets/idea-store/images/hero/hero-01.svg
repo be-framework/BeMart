@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820" role="img" aria-labelledby="title desc">
+  <title id="title">IDEA STORE HERO 01</title>
+  <desc id="desc">Original quiet lifestyle illustration for IDEA STORE.</desc>
+  <rect width="1200" height="820" fill="#f7f3ea"/>
+  <circle cx="97" cy="109" r="160" fill="#ded7ca" opacity="0.65"/>
+  <rect x="97" y="109" width="360" height="220" rx="28" fill="#fffdf8" stroke="#a98258" stroke-opacity="0.16"/>
+  <rect x="145" y="153" width="96" height="132" rx="10" fill="#66745f" opacity="0.86"/>
+  <rect x="265" y="177" width="142" height="28" rx="14" fill="#a98258" opacity="0.82"/>
+  <rect x="265" y="223" width="106" height="22" rx="11" fill="#ded7ca" opacity="0.95"/>
+  <path d="M125 357 C 227 317, 347 409, 485 357" fill="none" stroke="#66745f" stroke-width="10" stroke-linecap="round" opacity="0.7"/>
+  <text x="1128" y="764" text-anchor="end" fill="#a98258" font-family="Helvetica Neue, Arial, sans-serif" font-size="26" letter-spacing="4">IDEA STORE</text>
+</svg>

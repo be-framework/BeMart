@@ -1,52 +1,256 @@
-{#
-  BeMart admin Log display — EC-CUBE Setting/System/log.twig.
-#}
 {% extends 'admin-base.html.twig' %}
 
 {% set route = 'admin-setting-system-log' %}
-{% set title = 'ログ表示' %}
+{% set title = 'ログビューア' %}
 {% set sub_title = 'システム設定' %}
 
+{#
+  DATA CONTRACT (src/Resource/Page/Admin/Log.php onGet):
+    log    list<string>|null  — tail of the fixed log file (≤50 lines, ≤255 chars each).
+                               Empty array when the file does not exist yet.
+    form   object             — Aura/WebForm; fields:
+                                 files      select — {"site.log","bemart.json"}
+                                 line_max   text   — integer, default 50; validated not-blank
+
+  ACTION: GET /admin/log — query params files + line_max reload the log tail.
+  No CSRF required (read-only GET).
+
+  DESIGN VOCABULARY: idea-admin-* (public/assets/idea-store/css/idea-admin.css).
+  Extra classes for this page are namespaced idea-admin-log-* and defined
+  in block stylesheet below.
+#}
+
+{% block stylesheet %}
+<style>
+/* ── Log-viewer page-local extensions (idea-admin-log-* namespace) ─── */
+.idea-admin-log-filter {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  flex-wrap: wrap;
+}
+.idea-admin-log-filter__select,
+.idea-admin-log-filter__input {
+  height: 2.4rem;
+  border: 1px solid var(--idea-stone);
+  border-radius: var(--idea-admin-radius-input);
+  background: rgba(255, 253, 248, .95);
+  color: var(--idea-ink);
+  font: inherit;
+  font-size: .88rem;
+  padding: 0 .7rem;
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+}
+.idea-admin-log-filter__input { width: 5rem; }
+.idea-admin-log-filter__select:focus,
+.idea-admin-log-filter__input:focus {
+  border-color: var(--idea-olive);
+  box-shadow: 0 0 0 3px rgba(82, 107, 85, .15);
+}
+.idea-admin-log-filter__unit {
+  font-size: .84rem;
+  color: var(--idea-muted);
+  white-space: nowrap;
+}
+
+/* Log output panel */
+.idea-admin-log-pre {
+  margin: 0;
+  font-family: "SF Mono", "Cascadia Code", "Fira Code", ui-monospace, monospace;
+  font-size: .78rem;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-all;
+  overflow-x: auto;
+  padding: 0;
+  background: transparent;
+  color: var(--idea-ink);
+}
+.idea-admin-log-pre__body {
+  display: grid;
+  gap: 0;
+}
+.idea-admin-log-line {
+  display: grid;
+  grid-template-columns: 2.8rem 1fr;
+  border-bottom: 1px solid rgba(205, 191, 170, .14);
+  padding: .1rem 0;
+}
+.idea-admin-log-line:last-child { border-bottom: none; }
+.idea-admin-log-line__no {
+  color: var(--idea-stone-2);
+  user-select: none;
+  text-align: right;
+  padding-right: .75rem;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+.idea-admin-log-line__text { word-break: break-all; }
+
+/* Level colour highlights */
+.idea-admin-log-line--error  { background: rgba(169, 71, 46, .05); }
+.idea-admin-log-line--error  .idea-admin-log-line__text { color: #a9472e; }
+.idea-admin-log-line--warn   { background: rgba(169, 130, 46, .05); }
+.idea-admin-log-line--warn   .idea-admin-log-line__text { color: #7d5a1c; }
+.idea-admin-log-line--debug  .idea-admin-log-line__text { color: var(--idea-muted); }
+.idea-admin-log-line--info   .idea-admin-log-line__text { color: var(--idea-blue); }
+
+/* Log toolbar (top-of-code-block: copy + line count) */
+.idea-admin-log-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .5rem;
+  flex-wrap: wrap;
+  padding: .45rem .75rem;
+  background: var(--idea-surface-soft);
+  border-bottom: 1px solid rgba(205, 191, 170, .35);
+  font-size: .76rem;
+  color: var(--idea-muted);
+}
+.idea-admin-log-meta__count { font-weight: 700; }
+</style>
+{% endblock %}
+
 {% block main %}
-    <div class="c-outsideBlock">
-        <div class="c-outsideBlock__contents">
-            <div class="card rounded border-0 mb-4">
-                <div class="card-header">
-                    <div class="d-inline-block" data-bs-toggle="tooltip" data-bs-placement="top" title="アクセスやエラー状況などのログを確認できます。">
-                        <span class="card-title">ログ表示</span><i class="fa fa-question-circle fa-lg ms-1"></i>
-                    </div>
-                </div>
-                <div class="card-body">
-                    <form name="form1" id="form1" method="post">
-                        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
-                        <div class="row mb-3">
-                            <div class="mb-3 pe-3 col-2">
-                                {{ form.input('files')|raw }}
-                            </div>
-                            <div class="row mb-3 pe-3 col-auto align-items-center">
-                                <span class="col-auto">{{ form.input('line_max')|raw }}</span>
-                                <span class="col-auto ps-0">行</span>
-                            </div>
-                            <div class="mb-3 pe-3 col-auto">
-                                <button type="submit" class="btn btn-ec-conversion">読み込む</button>
-                            </div>
-                            <div class="mb-3 pe-3 col-auto">
-                                <button type="submit" name="download" class="btn btn-ec-regular">ダウンロード</button>
-                            </div>
-                            {% if form.error('line_max') %}
-                                <span class="col-auto">{{ form.error('line_max') }}</span>
-                            {% endif %}
-                        </div>
-                    </form>
-                    <div>
-<textarea class="form-control" rows="20" wrap="off" readonly>
-{% for line in log %}
-    {{ line }}
-{% endfor %}
-</textarea>
-                    </div>
-                </div>
-            </div>
-        </div>
+
+{# ── Filter panel ──────────────────────────────────────────────────────── #}
+<section class="idea-admin-panel" aria-labelledby="log-filter-heading" style="margin-bottom:1.25rem">
+  <div class="idea-admin-panel__head">
+    <h3 id="log-filter-heading">
+      <i class="fa fa-sliders fa-fw" aria-hidden="true"></i>
+      表示設定
+    </h3>
+  </div>
+  <div class="idea-admin-panel__body" style="padding:.75rem 1rem">
+    <form method="get" action="/admin/log" aria-label="ログフィルター">
+      <div class="idea-admin-log-filter">
+
+        <label for="log-files-select" class="idea-admin-log-filter__unit">ファイル</label>
+        {{ form.input('files')|raw }}
+
+        <label for="log-line-max-input" class="idea-admin-log-filter__unit">最大</label>
+        {{ form.input('line_max')|raw }}
+        <span class="idea-admin-log-filter__unit">行</span>
+
+        <button type="submit" class="idea-admin-action idea-admin-action--primary">
+          <i class="fa fa-refresh fa-fw" aria-hidden="true"></i>
+          適用
+        </button>
+
+        {# Validation error (line_max only field with validate rule) #}
+        {% if form.error('line_max') %}
+          <span class="idea-admin-error" role="alert">{{ form.error('line_max')|raw }}</span>
+        {% endif %}
+
+      </div>
+    </form>
+  </div>
+</section>
+
+{# ── Log output ────────────────────────────────────────────────────────── #}
+{% if log is not empty %}
+
+  <section class="idea-admin-panel" aria-labelledby="log-output-heading">
+    <div class="idea-admin-log-meta">
+      <span id="log-output-heading" class="idea-admin-log-meta__count">
+        <i class="fa fa-file-text-o fa-fw" aria-hidden="true"></i>
+        {{ log|length }} 行表示
+      </span>
+      <button type="button" class="idea-admin-action" id="log-copy-btn" aria-label="ログをクリップボードにコピー">
+        <i class="fa fa-clipboard fa-fw" aria-hidden="true"></i>
+        コピー
+      </button>
     </div>
+
+    <div class="idea-admin-panel__body" style="padding:0;overflow:hidden">
+      <pre class="idea-admin-log-pre" id="log-output"><div class="idea-admin-log-pre__body" id="log-lines">
+{% for line in log %}
+<div class="idea-admin-log-line" data-line="{{ loop.index }}">
+  <span class="idea-admin-log-line__no" aria-hidden="true">{{ loop.index }}</span>
+  <span class="idea-admin-log-line__text">{{ line|e }}</span>
+</div>
+{% endfor %}
+</div></pre>
+    </div>
+  </section>
+
+{% else %}
+
+  <div class="idea-admin-empty" role="status">
+    <i class="fa fa-file-o fa-2x" aria-hidden="true"></i>
+    <p class="idea-admin-empty__title">ログがありません</p>
+    <p style="font-size:.84rem">ログファイルが存在しないか、まだ何も記録されていません。</p>
+  </div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block javascript %}
+<script>
+(function () {
+  'use strict';
+
+  /* ── Level-based line colouring ─────────────────────────────────────── */
+  var LEVEL_MAP = [
+    [/\.(ERROR|CRITICAL|EMERGENCY|ALERT)\b/i, 'idea-admin-log-line--error'],
+    [/\.WARNING\b/i,                           'idea-admin-log-line--warn'],
+    [/\.INFO\b/i,                              'idea-admin-log-line--info'],
+    [/\.DEBUG\b/i,                             'idea-admin-log-line--debug'],
+  ];
+
+  document.querySelectorAll('.idea-admin-log-line').forEach(function (row) {
+    var text = row.querySelector('.idea-admin-log-line__text');
+    if (!text) { return; }
+    for (var i = 0; i < LEVEL_MAP.length; i++) {
+      if (LEVEL_MAP[i][0].test(text.textContent)) {
+        row.classList.add(LEVEL_MAP[i][1]);
+        break;
+      }
+    }
+  });
+
+  /* ── Scroll to the last line on load ────────────────────────────────── */
+  var last = document.querySelector('.idea-admin-log-line:last-child');
+  if (last) {
+    last.scrollIntoView({ block: 'nearest' });
+  }
+
+  /* ── Copy-all button ─────────────────────────────────────────────────── */
+  var copyBtn = document.getElementById('log-copy-btn');
+  if (copyBtn && navigator.clipboard) {
+    copyBtn.addEventListener('click', function () {
+      var lines = document.querySelectorAll('.idea-admin-log-line__text');
+      var text = Array.from(lines).map(function (el) {
+        return el.textContent;
+      }).join('\n');
+
+      navigator.clipboard.writeText(text).then(function () {
+        var icon = copyBtn.querySelector('.fa');
+        if (icon) {
+          icon.className = 'fa fa-check fa-fw';
+          setTimeout(function () {
+            icon.className = 'fa fa-clipboard fa-fw';
+          }, 1800);
+        }
+      });
+    });
+  } else if (copyBtn) {
+    /* Clipboard API not available — hide the button gracefully */
+    copyBtn.hidden = true;
+  }
+
+  /* ── Apply idea-admin-log-filter__* styles to rendered form inputs ───
+     (form.input() renders raw HTML; the CSS classes are scoped here) */
+  var filterForm = document.querySelector('form[action="/admin/log"]');
+  if (filterForm) {
+    var sel = filterForm.querySelector('select');
+    if (sel) { sel.className = 'idea-admin-log-filter__select'; }
+    var inp = filterForm.querySelector('input[type="text"]');
+    if (inp) { inp.className = 'idea-admin-log-filter__input'; }
+  }
+}());
+</script>
 {% endblock %}
