@@ -12,4 +12,11 @@ reviews:
     - "!var/json_validate/**"
     - "!var/sql/**"
     - "!**/*.html"
+    # license-cleanup PR is 466 files; CodeRabbit caps review at 150 and skipped.
+    # `!**/*.html` above does not match the 138 `.html.twig` clean-room reskins, and
+    # the 105 mechanical `*HtmlRenderTest` add no review value. Excluding both keeps
+    # the reviewable set ~69 files (the PHP/SQL/Form surface). Relax post-merge if
+    # template/escaping review is wanted on future PRs.
+    - "!var/templates/**"
+    - "!tests/Resource/**"
     - "!composer.lock"
