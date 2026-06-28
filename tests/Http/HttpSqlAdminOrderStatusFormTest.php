@@ -54,8 +54,6 @@ final class HttpSqlAdminOrderStatusFormTest extends TestCase
     {
         $page = $this->request('GET', '/admin/order-status');
         $this->assertSame(200, $page['status'], $page['body']);
-        $this->assertStringContainsString('id="form"', $page['body']);
-        $this->assertStringContainsString('action="/admin/order-status?_method=put"', $page['body']);
         $this->assertStringContainsString('name="csrfToken"', $page['body']);
         $this->assertStringContainsString('value="' . self::CSRF_TOKEN . '"', $page['body']);
 

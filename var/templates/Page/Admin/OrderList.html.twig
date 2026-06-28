@@ -46,6 +46,11 @@
         </div>
     </form>
 
+    {# --- bulk-delete form (wraps order grid + checkboxes) ----------- #}
+    <form id="form_bulk" method="post" action="/admin/order/bulk-delete">
+        <input type="hidden" name="mode" value="order_bulk_delete_form">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
+
     {# --- order grid -------------------------------------------------- #}
     {% if count %}
 
@@ -119,6 +124,16 @@
             </table>
         </div>
 
+        <div class="idea-admin-list-toolbar">
+            <div class="idea-admin-list-toolbar__left">
+                <button type="button" id="bulk_delete_btn"
+                        class="idea-admin-action idea-admin-action--danger">
+                    <i class="fa fa-trash fa-fw" aria-hidden="true"></i>
+                    選択した受注を削除
+                </button>
+            </div>
+        </div>
+
     {% else %}
 
         <div class="idea-admin-empty">
@@ -127,5 +142,22 @@
         </div>
 
     {% endif %}
+
+    </form>{# /form_bulk #}
+
+    <script>
+    (function () {
+      'use strict';
+      var btn = document.getElementById('bulk_delete_btn');
+      var form = document.getElementById('form_bulk');
+      if (!btn || !form) { return; }
+      btn.addEventListener('click', function () {
+        var checked = form.querySelectorAll('input[name="ids[]"]:checked');
+        if (checked.length === 0) { return; }
+        $(form).attr('action', "/admin/order/bulk-delete");
+        form.submit();
+      });
+    }());
+    </script>
 
 {% endblock %}

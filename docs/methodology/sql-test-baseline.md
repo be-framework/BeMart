@@ -10,23 +10,29 @@ title: "SQL Test Baseline"
 
 ## 目的
 
-BeMart の SQL suite がどの DB を前提にしているかを明確にし、MySQL と MariaDB の挙動差による誤判定を避ける。
+BeMart の SQL suite がどの DB を前提にしているかを明確にし、誤判定を避ける。
 
 ## 結論
 
-SQL suite の baseline は **MariaDB**。
-`phpunit.xml` の `DATABASE_URL` も `serverVersion=mariadb-10.11.14` を前提としている。
-ローカルに MySQL 8/9 しかない場合、SQL suite は実行せず skip する。
+SQL suite の baseline は **MySQL 8.0**。
+`phpunit.xml` の `DATABASE_URL` は `serverVersion=8.0.0` を前提としており、CI も `mysql:8.0` コンテナで動く。
+`malt.json` が起動する MySQL 8.0 がそのまま利用できる。
 
 ## 背景
 
-ローカル環境で MySQL 8.0.45 / 9.6 を使って SQL suite を実行すると、主に次の差異で大量失敗する。
+かつて `bootstrap.php` が「MariaDB でなければ skip」するゲートを持っていた時期があった。
+これは初期の実装時に MariaDB を baseline としていた名残であり、SQL はすでに
+`GROUP_CONCAT(JSON_OBJECT(... ) ORDER BY ...)` ベースに書き直されており、
+MySQL 8.0 でも正常に動作する。ゲートは 2026-06-28 の `license-cleanup` ブランチで
+MySQL 8.0+ / MariaDB 両対応のチェックへ緩和済み。
 
-- `JSON_VALUE` の引数型判定が MariaDB baseline と合わない。
-- JSON 文字列を受け取る SQL が MySQL では `Invalid data type for JSON data` になる。
-- DB から返る int と Entity constructor の string semantic の hydration 差異が表面化する。
+旧来の大量 skip の原因だった差異:
 
-この失敗は HTML route / CSRF / fake suite の失敗ではなく、SQL baseline DB の不一致である。
+- `JSON_VALUE` の引数型判定の差
+- JSON 文字列を受け取る SQL の Invalid data type
+- int / string hydration の差
+
+これらは DC2Type 時代の旧 SQL に由来する誤りであり、現在の `var/sql/*.sql` では修正済み。
 
 ## 現在の挙動
 
@@ -34,40 +40,24 @@ SQL suite の baseline は **MariaDB**。
 
 - `DATABASE_URL` が未設定なら skip marker を設定する。
 - `DATABASE_URL` に接続できなければ skip marker を設定する。
-- 接続先が MariaDB でなければ skip marker を設定する。
-- MariaDB に接続できた場合のみ schema を load し、SQL tests を実行する。
-- MariaDB 到達後の schema load 失敗は smoke failure として失敗させる。
+- MySQL 8.0+ または MariaDB に接続できた場合のみ schema を load し、SQL tests を実行する。
+- schema load 失敗は smoke failure として失敗させる。
 
-## 検証 baseline
+## ローカルでの実行
 
-2026-06-04 のローカル環境では Malt が MySQL 8.0.46 を起動するため、次の結果が正しい。
+`malt.json` が起動する MySQL 8.0 をそのまま使う。
 
 ```bash
+malt start
 source <(malt env)
+export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=8.0.0'
+sql/setup-db.sh "$DATABASE_URL"
 /opt/homebrew/opt/php@8.5/bin/php vendor/bin/phpunit --testsuite sql --colors=never
 ```
 
-結果:
+`be/tests/Sql/bootstrap.php` が `eccubedb_test` を drop/create し、`sql/schema/bemart-schema.sql` を読み込む。
 
-- Tests: 754
-- Assertions: 0
-- Skipped: 754
-- 理由: current server is MySQL 8.0.46, SQL suite targets MariaDB
+## 注意
 
-## MariaDB で実行する場合
-
-MariaDB を用意し、`DATABASE_URL` を MariaDB に向ける。
-
-```bash
-export DATABASE_URL='mysql://root@127.0.0.1:3306/eccubedb_test?charset=utf8mb4&serverVersion=mariadb-10.11.14'
-composer test:sql -- --colors=never
-```
-
-MariaDB reachable の場合は `be/tests/Sql/bootstrap.php` が `eccubedb_test` を drop/create し、`sql/schema/bemart-schema.sql` を読み込む。
-
-## 今後の注意
-
-- MySQL で SQL suite を直す方向に寄せない。対象 baseline は MariaDB。
-- MySQL 対応を行う場合は別計画に分ける。
 - SQL の新規境界は Ray.MediaQuery の `#[DbQuery]` interface + `var/sql/*.sql` を使う。
-- fake / HTML / HTTP の green と SQL/MariaDB green は分けて評価する。
+- fake / HTML / HTTP の green と SQL green は分けて評価する。

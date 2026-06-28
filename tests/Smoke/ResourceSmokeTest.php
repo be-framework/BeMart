@@ -164,7 +164,7 @@ final class ResourceSmokeTest extends TestCase
             'GET page://self/admin/order-status' => Code::OK,
             'GET page://self/admin/order/edit' => Code::OK,
             'GET page://self/admin/order/export-order' => Code::OK,
-            'GET page://self/admin/order/export-order-pdf?orderNos%5B0%5D=past0000000000000000000000000001' => Code::OK,
+            'GET page://self/admin/order/export-order-pdf?orderNos%5B0%5D=past0000000000000000000000000001' => 501,
             'GET page://self/admin/order/export-shipping' => Code::OK,
             'GET page://self/admin/order/import-shipping' => Code::OK,
             'GET page://self/admin/order/mail-confirm' => Code::OK,

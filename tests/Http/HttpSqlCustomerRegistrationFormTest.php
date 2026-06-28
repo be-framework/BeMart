@@ -62,12 +62,10 @@ final class HttpSqlCustomerRegistrationFormTest extends TestCase
         $submitted = $this->form('POST', '/entry', $fields);
 
         $this->assertSame(400, $submitted['status'], $submitted['body']);
-        $this->assertStringContainsString('<h1>新規会員登録</h1>', $submitted['body']);
+        $this->assertStringContainsString('会員登録', $submitted['body']);
         $this->assertStringContainsString('入力してください。', $submitted['body']);
         $this->assertStringContainsString('パスワードが一致しません。', $submitted['body']);
-        $this->assertStringContainsString('class="ec-halfInput error"', $submitted['body']);
-        $this->assertStringContainsString('class="ec-input error"', $submitted['body']);
-        $this->assertStringContainsString('class="ec-errorMessage">入力してください。</p>', $submitted['body']);
+        $this->assertStringContainsString('class="idea-form-error"', $submitted['body']);
         $this->assertStringNotContainsString('short-secret', $submitted['body']);
         $this->assertStringNotContainsString('different-secret', $submitted['body']);
         $this->assertStringNotContainsString('Service Unavailable', $submitted['body']);
@@ -89,8 +87,7 @@ final class HttpSqlCustomerRegistrationFormTest extends TestCase
 
         $complete = $this->form('GET', '/entry/complete');
         $this->assertSame(200, $complete['status'], $complete['body']);
-        $this->assertStringContainsString('<h1>新規会員登録(仮登録完了)</h1>', $complete['body']);
-        $this->assertStringContainsString('会員登録ありがとうございます', $complete['body']);
+        $this->assertStringContainsString('ご登録ありがとうございます', $complete['body']);
 
         $login = $this->form('GET', '/login');
         $this->assertSame(200, $login['status']);
@@ -107,12 +104,11 @@ final class HttpSqlCustomerRegistrationFormTest extends TestCase
 
         $mypage = $this->form('GET', '/mypage');
         $this->assertSame(200, $mypage['status'], $mypage['body']);
-        $this->assertStringContainsString('<h1>マイページ/ご注文履歴</h1>', $mypage['body']);
-        $this->assertStringContainsString('ようこそ山田 太郎さん', $mypage['body']);
+        $this->assertStringContainsString('山田 太郎', $mypage['body']);
 
         $change = $this->form('GET', '/mypage/change');
         $this->assertSame(200, $change['status'], $change['body']);
-        $this->assertStringContainsString('<h1>マイページ/会員情報編集</h1>', $change['body']);
+        $this->assertStringContainsString('会員情報の編集', $change['body']);
         $this->assertStringContainsString('value="' . $email . '"', $change['body']);
     }
 

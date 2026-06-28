@@ -9,6 +9,7 @@
     customers        list<{customerId, email, name01, name02, customerStatus, postalCode}>
     count            int    — total rows returned
     filters          {nameKeyword: string|null, emailKeyword: string|null}
+    csrfToken        string — CSRF token for doDeleteCustomer POST
     searchForm       AdminCustomerSearchForm — field: multi (free-text keyword)
 
   ACTIONS (derived from resource #[Link] annotations):
@@ -153,7 +154,7 @@
       </thead>
       <tbody>
         {% for customer in customers %}
-        <tr id="customer-{{ customer.customerId }}">
+        <tr id="ex-customer-{{ customer.customerId }}">
 
           <td>{{ customer.customerId }}</td>
 
@@ -219,6 +220,7 @@
       >キャンセル</button>
       <form method="post" action="/admin/delete-customer" style="display:contents;">
         <input type="hidden" name="customerId" value="{{ customer.customerId }}">
+        <input type="hidden" name="csrfToken" value="{{ csrfToken|default('') }}">
         <button class="idea-admin-action idea-admin-action--destructive" type="submit">
           削除
         </button>

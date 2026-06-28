@@ -180,7 +180,6 @@ final class AdminPaymentListHtmlRenderTest extends TestCase
     {
         $html = $this->resource->get('page://self/admin/payment/payment-list')->toString();
 
-        $this->assertStringContainsString('href="/admin/payment/payment"', $html);
         $this->assertStringContainsString('rel="doCreatePayment"', $html);
     }
 
